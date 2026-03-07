@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Financial | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px;background:#f0f2f5;color:#212529}
+    :root{--navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;--muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;--bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;}
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sidebar{width:208px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-section{padding:4px 12px 10px;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.62);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:rgba(255,255,255,.06)}
+    .nav-item.active{background:rgba(157,171,226,.18);color:#fff;border-left-color:var(--red);font-weight:600}
+    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .nav-divider{margin:10px 16px;border-top:1px solid rgba(255,255,255,.08)}
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:58px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
+    .topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+    .page-body{flex:1;overflow-y:auto;padding:24px}
+    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+    .sep{color:var(--border)}
+    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* SUBNAV */
+    .subnav{display:flex;border-bottom:2px solid var(--border);background:var(--card);padding:0 16px;margin-bottom:20px;overflow-x:auto}
+    .subnav-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* STAT ROW */
+    .stat-row{display:flex;gap:14px;margin-bottom:20px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;box-shadow:0 1px 8px rgba(0,37,122,.05)}
+    .stat-card .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .stat-card .val{font-size:22px;font-weight:900;letter-spacing:-.5px}
+    .stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* FILTER ROW */
+    .filter-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px}
+    .filter-left{display:flex;gap:8px;align-items:center}
+    .inp{height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .btn-primary{height:34px;padding:0 16px;border-radius:6px;background:var(--navy);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    /* TABLE */
+    .tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06)}
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:9px 14px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08)}
+    th:last-child{border-right:none}
+    td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sb-section">Navigation</div>
+    <div class="nav-item"><span class="icon">⊞</span> My Workspace</div>
+    <div class="nav-item"><span class="icon">▦</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">◎</span> Clients</div>
+    <div class="nav-item"><span class="icon">⬡</span> Departments</div>
+    <div class="nav-item"><span class="icon">⚙</span> Repairs</div>
+    <div class="nav-item"><span class="icon">▣</span> Inventory</div>
+    <div class="nav-item"><span class="icon">⬆</span> Suppliers</div>
+    <div class="nav-item"><span class="icon">◉</span> Scopes</div>
+    <div class="nav-item"><span class="icon">⬟</span> Scope Model</div>
+    <div class="nav-item"><span class="icon">✦</span> Repair Items</div>
+    <div class="nav-item"><span class="icon">⚙</span> Instruments</div>
+    <div class="nav-item"><span class="icon">▤</span> Contracts</div>
+    <div class="nav-item"><span class="icon">◈</span> Acquisitions</div>
+    <div class="nav-item"><span class="icon">▥</span> Carts</div>
+    <div class="nav-item"><span class="icon">↺</span> Loaners</div>
+    <div class="nav-item"><span class="icon">⬡</span> Onsite Services</div>
+    <div class="nav-item"><span class="icon">◇</span> Product Sale</div>
+    <div class="nav-item"><span class="icon">✓</span> Quality</div>
+    <div class="nav-item active"><span class="icon">◈</span> Financial</div>
+    <div class="nav-item"><span class="icon">▦</span> Reports/Extracts</div>
+    <div class="nav-item"><span class="icon">⚙</span> Administration</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="icon">→</span> Sign Out</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left"><div class="topbar-avatar">JB</div><span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span></div>
+      <div class="topbar-center"><div class="topbar-title">Total Scope, Inc.</div><div class="topbar-sub">The Leader in Medical Device Repair</div></div>
+      <div class="topbar-right">Service Location <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select></div>
+    </header>
+
+    <div class="page-body">
+      <div class="breadcrumb"><span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Financial</span></div>
+
+      <!-- SUBNAV -->
+      <div class="subnav">
+        <div class="subnav-tab active">Outstanding Invoices</div>
+        <div class="subnav-tab">Drafts</div>
+        <div class="subnav-tab">Clients on Hold</div>
+        <div class="subnav-tab">Revenue Distribution</div>
+        <div class="subnav-tab">GL Accounts</div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="lbl">Total A/R</div>
+          <div class="val" style="color:var(--navy)">$29,200</div>
+          <div class="sub">Open invoices</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Overdue</div>
+          <div class="val" style="color:var(--red)">$11,050</div>
+          <div class="sub">Past due date</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Avg Aging</div>
+          <div class="val" style="color:var(--amber)">28 days</div>
+          <div class="sub">Open invoices</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Paid MTD</div>
+          <div class="val" style="color:var(--green)">$13,580</div>
+          <div class="sub">Feb 2026</div>
+        </div>
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-row">
+        <div class="filter-left">
+          <input class="inp" placeholder="Search invoices…" style="width:260px"/>
+          <select class="inp" style="width:150px;cursor:pointer">
+            <option value="">All Statuses</option>
+            <option>Unpaid</option><option>Partial</option><option>Overdue</option><option>Paid</option>
+          </select>
+          <select class="inp" style="width:180px;cursor:pointer">
+            <option value="">All Clients</option>
+            <option>88th Medical Group</option>
+            <option>Tift Regional Medical Center</option>
+            <option>Nashville General Hospital</option>
+            <option>West Side GI Center</option>
+          </select>
+        </div>
+        <button class="btn-primary">+ New Invoice</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Client</th>
+              <th style="text-align:right">Amount</th>
+              <th>Issued</th>
+              <th>Due Date</th>
+              <th style="text-align:right">Aging</th>
+              <th>Status</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--blue);font-weight:600">INV-2026-0284</td>
+              <td>88th Medical Group</td>
+              <td style="text-align:right;font-weight:700;color:var(--navy)">$2,840.00</td>
+              <td style="color:var(--muted)">02/25/2026</td>
+              <td>03/25/2026</td>
+              <td style="text-align:right;color:var(--muted)">9d</td>
+              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--blue);font-weight:600">INV-2026-0271</td>
+              <td>Tift Regional Medical Center</td>
+              <td style="text-align:right;font-weight:700;color:var(--navy)">$5,120.00</td>
+              <td style="color:var(--muted)">02/18/2026</td>
+              <td>03/18/2026</td>
+              <td style="text-align:right;color:var(--muted)">16d</td>
+              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--blue);font-weight:600">INV-2026-0258</td>
+              <td>Nashville General Hospital</td>
+              <td style="text-align:right;font-weight:700;color:var(--navy)">$3,650.00</td>
+              <td style="color:var(--muted)">02/10/2026</td>
+              <td>03/10/2026</td>
+              <td style="text-align:right;color:var(--amber);font-weight:600">24d</td>
+              <td><span class="badge" style="background:#FFFBEB;color:var(--amber)">Partial</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr style="background:#FEF9F9">
+              <td style="color:var(--blue);font-weight:600">INV-2026-0241</td>
+              <td>West Side GI Center</td>
+              <td style="text-align:right;font-weight:700;color:var(--red)">$9,300.00</td>
+              <td style="color:var(--muted)">01/31/2026</td>
+              <td style="color:var(--red);font-weight:600">03/01/2026</td>
+              <td style="text-align:right;color:var(--red);font-weight:700">34d</td>
+              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--blue);font-weight:600">INV-2026-0229</td>
+              <td>Northside Hospital</td>
+              <td style="text-align:right;font-weight:700;color:var(--green)">$4,480.00</td>
+              <td style="color:var(--muted)">01/22/2026</td>
+              <td style="color:var(--muted)">02/21/2026</td>
+              <td style="text-align:right;color:var(--muted)">43d</td>
+              <td><span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--blue);font-weight:600">INV-2026-0215</td>
+              <td>Metro Health Hospital</td>
+              <td style="text-align:right;font-weight:700;color:var(--green)">$2,100.00</td>
+              <td style="color:var(--muted)">01/15/2026</td>
+              <td style="color:var(--muted)">02/14/2026</td>
+              <td style="text-align:right;color:var(--muted)">50d</td>
+              <td><span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+            <tr style="background:#FEF9F9">
+              <td style="color:var(--blue);font-weight:600">INV-2026-0198</td>
+              <td>Shreveport Endoscopy Center</td>
+              <td style="text-align:right;font-weight:700;color:var(--red)">$1,750.00</td>
+              <td style="color:var(--muted)">01/08/2026</td>
+              <td style="color:var(--red);font-weight:600">02/07/2026</td>
+              <td style="text-align:right;color:var(--red);font-weight:700">57d</td>
+              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span></td>
+              <td style="text-align:right"><button style="font-size:11px;color:var(--blue);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:3px 10px;cursor:pointer;font-family:inherit">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

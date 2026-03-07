@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Departments | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px;background:#f0f2f5;color:#212529}
+    :root{--navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;--muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;--bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;}
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sidebar{width:208px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-section{padding:4px 12px 10px;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.62);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:rgba(255,255,255,.06)}
+    .nav-item.active{background:rgba(157,171,226,.18);color:#fff;border-left-color:var(--red);font-weight:600}
+    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .nav-divider{margin:10px 16px;border-top:1px solid rgba(255,255,255,.08)}
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:58px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}.topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+    .page-body{flex:1;overflow-y:auto;background:#f0f2f5}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:12px 28px;background:#fff;border-bottom:1px solid var(--border);flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:7px;font-size:12.5px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
+    .btn-icon{width:36px;height:36px;padding:0;border-radius:7px;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border-dk);background:#fff;font-family:inherit}
+    .btn-navy{background:var(--navy);color:#fff;font-weight:600}
+    .btn-outline{background:#fff;border:1.5px solid var(--border-dk);color:var(--label)}
+    .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
+    .divider{width:1px;height:24px;background:var(--border);margin:0 4px}
+    .sel-bar-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .sel{height:36px;border:1.5px solid var(--border-dk);border-radius:7px;padding:0 10px;font-size:12.5px;font-family:inherit;color:var(--text);background:#fff;cursor:pointer;outline:none;transition:border-color .15s}
+    .sel:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--steel)}
+
+    /* TABS */
+    .tab-bar{display:flex;padding:0 28px;background:#fff;border-bottom:2px solid var(--border);overflow-x:auto}
+    .tab{padding:10px 16px;font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}
+    .tab:hover{color:var(--navy)}
+    .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* CONTENT */
+    .tab-content{padding:24px 28px;display:none}
+    .tab-content.show{display:flex;gap:20px}
+    .tab-content.show-block{display:block;padding:24px 28px}
+
+    /* LAYOUT */
+    .col-left{flex:1.3;min-width:0;display:flex;flex-direction:column;gap:14px}
+    .col-right{width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
+    .panel{border-radius:10px;border:1px solid var(--border-dk);overflow:hidden;box-shadow:0 1px 6px rgba(0,37,122,.05)}
+    .panel-head{background:#E9EFF9;padding:9px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border)}
+    .panel-body{background:#fff;padding:16px}
+    .fg{display:grid;gap:10px 14px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:1fr 1fr 1fr}
+    .span2{grid-column:span 2}
+    .ff{display:flex;flex-direction:column;gap:4px}
+    .ff label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .req{color:var(--red)}
+    .inp{height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    textarea.inp{height:100px;padding:8px 10px;resize:none;line-height:1.5}
+    select.inp{cursor:pointer}
+
+    /* CHECKBOXES */
+    .cb-section{padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+    .cb-section-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .cb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+    .cb-item{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;color:var(--label)}
+    .cb-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--navy)}
+
+    /* TABLE */
+    .tbl-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 8px rgba(0,37,122,.06)}
+    .tbl-head{background:#E9EFF9;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .tbl-title{font-size:13px;font-weight:700;color:var(--navy)}
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:9px 16px;text-align:left;white-space:nowrap}
+    td{padding:10px 16px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .badge{display:inline-flex;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+    .b-active{background:#F0FDF4;color:var(--green)}
+    .edit-btn{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue);border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+    .empty-state .ico{font-size:36px;margin-bottom:10px;opacity:.3}
+
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sb-section">Navigation</div>
+    <div class="nav-item"><span class="icon">⊞</span> My Workspace</div>
+    <div class="nav-item"><span class="icon">▦</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">◎</span> Clients</div>
+    <div class="nav-item active"><span class="icon">⬡</span> Departments</div>
+    <div class="nav-item"><span class="icon">⚙</span> Repairs</div>
+    <div class="nav-item"><span class="icon">▣</span> Inventory</div>
+    <div class="nav-item"><span class="icon">⬆</span> Suppliers</div>
+    <div class="nav-item"><span class="icon">◉</span> Scopes</div>
+    <div class="nav-item"><span class="icon">⬟</span> Scope Model</div>
+    <div class="nav-item"><span class="icon">✦</span> Repair Items</div>
+    <div class="nav-item"><span class="icon">⚙</span> Instruments</div>
+    <div class="nav-item"><span class="icon">▤</span> Contracts</div>
+    <div class="nav-item"><span class="icon">◈</span> Acquisitions</div>
+    <div class="nav-item"><span class="icon">▥</span> Carts</div>
+    <div class="nav-item"><span class="icon">↺</span> Loaners</div>
+    <div class="nav-item"><span class="icon">⬡</span> Onsite Services</div>
+    <div class="nav-item"><span class="icon">◇</span> Product Sale</div>
+    <div class="nav-item"><span class="icon">✓</span> Quality</div>
+    <div class="nav-item"><span class="icon">◈</span> Financial</div>
+    <div class="nav-item"><span class="icon">▦</span> Reports/Extracts</div>
+    <div class="nav-item"><span class="icon">⚙</span> Administration</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="icon">→</span> Sign Out</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left"><div class="topbar-avatar">JB</div><span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span></div>
+      <div class="topbar-center"><div class="topbar-title">Total Scope, Inc.</div><div class="topbar-sub">The Leader in Medical Device Repair</div></div>
+      <div class="topbar-right">Service Location <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select></div>
+    </header>
+
+    <div class="page-body">
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="btn-icon">📄</div>
+        <div class="btn-icon">💾</div>
+        <div class="divider"></div>
+        <span class="sel-bar-label">Client :</span>
+        <select class="sel" style="min-width:240px">
+          <option>88th Medical Group</option>
+          <option>Tift Regional Medical Center</option>
+          <option>Nashville General Hospital</option>
+        </select>
+        <span class="sel-bar-label" style="margin-left:6px">Department :</span>
+        <select class="sel" style="min-width:220px">
+          <option>Biomedical Engineering</option>
+          <option>Vaibhav Test</option>
+        </select>
+        <span class="id-badge">#5001</span>
+        <div style="flex:1"></div>
+        <button class="btn btn-danger">🗑 Delete Dept</button>
+      </div>
+
+      <!-- TABS — matching real 9 sub-tabs -->
+      <div class="tab-bar">
+        <div class="tab active" onclick="showDeptTab('main',this)">Main</div>
+        <div class="tab" onclick="showDeptTab('addresses',this)">Addresses</div>
+        <div class="tab" onclick="showDeptTab('scopes',this)">Scopes</div>
+        <div class="tab" onclick="showDeptTab('gpos',this)">GPO's</div>
+        <div class="tab" onclick="showDeptTab('scopetypes',this)">Scope Types</div>
+        <div class="tab" onclick="showDeptTab('subgroups',this)">Sub Groups</div>
+        <div class="tab" onclick="showDeptTab('contacts',this)">Contacts</div>
+        <div class="tab" onclick="showDeptTab('documents',this)">Documents</div>
+        <div class="tab" onclick="showDeptTab('maxcharges',this)">Model Max Charges</div>
+      </div>
+
+      <!-- ══ MAIN TAB ══ -->
+      <div id="dtab-main" class="tab-content show">
+        <div class="col-left">
+          <div class="panel">
+            <div class="panel-head">Department Info</div>
+            <div class="panel-body">
+              <div class="fg g2">
+                <div class="ff span2">
+                  <label>Name <span class="req">*</span></label>
+                  <input class="inp" value="Biomedical Engineering"/>
+                </div>
+                <div class="ff">
+                  <label>Customer Since</label>
+                  <input class="inp" value="06/09/2021"/>
+                </div>
+                <div class="ff" style="justify-content:flex-end">
+                  <label>&nbsp;</label>
+                  <label class="cb-item" style="padding-top:6px"><input type="checkbox" checked/> Active</label>
+                </div>
+                <div class="ff span2">
+                  <label>Sales Rep <span class="req">*</span></label>
+                  <select class="inp"><option>Brandi Cook</option><option>Joseph Brassell</option><option>Rob Mancini</option></select>
+                </div>
+                <div class="ff span2">
+                  <label>Additional CS</label>
+                  <select class="inp"><option>Aesculap Inc.</option><option>None</option></select>
+                </div>
+                <div class="ff span2">
+                  <label>National Acct</label>
+                  <select class="inp"><option>1Chirag</option><option>None</option></select>
+                </div>
+                <div class="ff span2">
+                  <label>Pricing Category <span class="req">*</span></label>
+                  <select class="inp"><option>GSA 2014 (Joint)</option><option>Standard</option><option>Federal</option><option>VA</option></select>
+                </div>
+                <div class="ff span2">
+                  <label>Reporting Group</label>
+                  <select class="inp"><option>GSA</option><option>Standard</option><option>Federal</option></select>
+                </div>
+                <div class="ff">
+                  <label>Default Shipping</label>
+                  <input class="inp" value="$77.77"/>
+                </div>
+                <div class="ff">
+                  <label>Shipping Carrier</label>
+                  <select class="inp"><option>UPS</option><option>FedEx</option><option>USPS</option></select>
+                </div>
+                <div class="ff">
+                  <label>Discount %</label>
+                  <input class="inp" value="77.77%"/>
+                </div>
+                <div class="ff">
+                  <label>Markup %</label>
+                  <input class="inp" value="77.77%"/>
+                </div>
+                <div class="ff span2">
+                  <label class="cb-item"><input type="checkbox" checked/> Acquisitions Dept</label>
+                </div>
+              </div>
+
+              <!-- Options Checkboxes -->
+              <div class="cb-section">
+                <div class="cb-section-label">Options</div>
+                <div class="cb-grid">
+                  <label class="cb-item"><input type="checkbox"/> Show Consumption On Req</label>
+                  <label class="cb-item"><input type="checkbox" checked/> Enforce Scope Type Filtering</label>
+                  <label class="cb-item"><input type="checkbox"/> Show Product ID</label>
+                  <label class="cb-item"><input type="checkbox"/> Show UA Or NWT</label>
+                  <label class="cb-item"><input type="checkbox" checked/> Show Itemized Descriptions</label>
+                  <label class="cb-item"><input type="checkbox"/> Open Credit Memo</label>
+                  <label class="cb-item"><input type="checkbox"/> Email New Repairs</label>
+                  <label class="cb-item"><input type="checkbox"/> Member Board Of Advisors</label>
+                  <label class="cb-item"><input type="checkbox"/> Tracking # Required</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-right">
+          <div class="panel">
+            <div class="panel-head">Profile</div>
+            <div class="panel-body">
+              <div class="fg" style="gap:10px">
+                <div class="ff">
+                  <label>Cleaning System</label>
+                  <select class="inp"><option>Evotech</option><option>Medivator</option><option>Olympus OER-Pro</option></select>
+                </div>
+                <div class="ff">
+                  <label>Chemical Germicide</label>
+                  <select class="inp"><option>Cidex OPA</option><option>Glutaraldehyde</option><option>Peracetic Acid</option></select>
+                </div>
+                <div class="ff">
+                  <label>Manufacturer</label>
+                  <select class="inp"><option>Olympus</option><option>Fujifilm</option><option>Pentax</option><option>Storz</option></select>
+                </div>
+                <div class="ff">
+                  <label>Competition</label>
+                  <select class="inp"><option>IMS</option><option>Healthmark</option><option>Medline</option><option>None</option></select>
+                </div>
+                <div class="fg g2" style="gap:10px">
+                  <div class="ff">
+                    <label># of Procedures</label>
+                    <input class="inp" value="777"/>
+                  </div>
+                  <div class="ff">
+                    <label>Bed Size</label>
+                    <input class="inp" value="777"/>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Type</label>
+                  <select class="inp"><option>Large</option><option>Medium</option><option>Small</option><option>Critical Access</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">Notes</div>
+            <div class="panel-body">
+              <textarea class="inp">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ADDRESSES TAB ══ -->
+      <div id="dtab-addresses" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Addresses</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Label</th><th>Address</th><th>City</th><th>State</th><th>Zip</th><th>Default</th><th style="width:70px"></th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600">Shipping</td><td>4881 Sugar Maple Drive</td><td>Coosada</td><td>AL</td><td>36020</td><td>✓</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td style="font-weight:600">Billing</td><td>Wright Patterson AFB, Bldg 830123</td><td>Dayton</td><td>OH</td><td>45433</td><td></td><td><button class="edit-btn">✏ Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ SCOPES TAB ══ -->
+      <div id="dtab-scopes" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Scopes</span></div>
+          <table>
+            <thead><tr><th>Scope</th><th>Serial #</th><th>Manufacturer</th><th>Model</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--blue);font-weight:600">722681756576000266555</td><td>2007037</td><td>Olympus</td><td>ENF GP</td><td><span class="badge b-active">Active</span></td></tr>
+              <tr><td style="color:var(--blue);font-weight:600">722681756576000266556</td><td>2515171</td><td>Olympus</td><td>GIF H180</td><td><span class="badge b-active">Active</span></td></tr>
+              <tr><td style="color:var(--blue);font-weight:600">722681756576000266557</td><td>3015882</td><td>Olympus</td><td>CF H185</td><td><span class="badge b-active">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ GPO'S TAB ══ -->
+      <div id="dtab-gpos" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">GPO's</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>GPO</th><th>Contract #</th><th>Effective Date</th><th>Expiration</th><th style="width:70px"></th></tr></thead>
+            <tbody><tr><td colspan="5" class="empty-state"><div class="ico">📋</div>No GPO's on record</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ SCOPE TYPES TAB ══ -->
+      <div id="dtab-scopetypes" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Scope Types</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Scope Type</th><th>Manufacturer</th><th>Max Charge</th><th style="width:70px"></th></tr></thead>
+            <tbody>
+              <tr><td>ENF GP</td><td>Olympus</td><td>$485.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td>GIF H180</td><td>Olympus</td><td>$620.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td>CF H185</td><td>Olympus</td><td>$580.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ SUB GROUPS TAB ══ -->
+      <div id="dtab-subgroups" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Sub Groups</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Sub Group</th><th>Contact</th><th>Status</th><th style="width:70px"></th></tr></thead>
+            <tbody><tr><td colspan="4" class="empty-state"><div class="ico">👥</div>No sub groups defined</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ CONTACTS TAB ══ -->
+      <div id="dtab-contacts" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Contacts</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Contact</th><th>Phone</th><th>Fax</th><th>Email</th><th>Status</th><th style="width:70px"></th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600">Donna Sebesky</td><td>+1 (589) 499-4465</td><td>(324) 347-7444</td><td>test@test.com</td><td><span class="badge b-active">Active</span></td><td><button class="edit-btn">✏ Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ DOCUMENTS TAB ══ -->
+      <div id="dtab-documents" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Documents</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Document Name</th><th>Type</th><th>Uploaded</th><th style="width:100px"></th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--blue);font-weight:600">Paperwork</td>
+                <td>General</td>
+                <td style="color:var(--muted)">03/01/2024</td>
+                <td style="display:flex;gap:6px"><button class="edit-btn">View</button><button class="edit-btn" style="color:var(--red);background:#FEF2F2;border-color:#FECACA">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ MODEL MAX CHARGES TAB ══ -->
+      <div id="dtab-maxcharges" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head"><span class="tbl-title">Model Max Charges</span><button class="btn btn-navy">+ Add</button></div>
+          <table>
+            <thead><tr><th>Scope Model</th><th>Manufacturer</th><th style="text-align:right">Max Charge</th><th style="width:70px"></th></tr></thead>
+            <tbody>
+              <tr><td>ENF GP</td><td>Olympus</td><td style="text-align:right;font-weight:700;color:var(--navy)">$485.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td>GIF H180</td><td>Olympus</td><td style="text-align:right;font-weight:700;color:var(--navy)">$620.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td>CF H185L</td><td>Olympus</td><td style="text-align:right;font-weight:700;color:var(--navy)">$580.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+              <tr><td>BF-UC180F</td><td>Olympus</td><td style="text-align:right;font-weight:700;color:var(--navy)">$895.00</td><td><button class="edit-btn">✏ Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function showDeptTab(name,el){
+  ['main','addresses','scopes','gpos','scopetypes','subgroups','contacts','documents','maxcharges'].forEach(t=>{
+    const el2=document.getElementById('dtab-'+t);
+    if(el2)el2.style.display='none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tab=document.getElementById('dtab-'+name);
+  if(tab)tab.style.display=(name==='main')?'flex':'block';
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

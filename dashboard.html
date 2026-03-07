@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dashboard | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px;background:#f0f2f5;color:#212529}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
+      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
+      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;
+    }
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sidebar{width:208px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-section{padding:4px 12px 10px;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.62);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:rgba(255,255,255,.06)}
+    .nav-item.active{background:rgba(157,171,226,.18);color:#fff;border-left-color:var(--red);font-weight:600}
+    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .nav-divider{margin:10px 16px;border-top:1px solid rgba(255,255,255,.08)}
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:58px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
+    .topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px;letter-spacing:.3px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+    .page-body{flex:1;overflow-y:auto;padding:24px}
+    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+    .sep{color:var(--border)}
+    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* SUBNAV */
+    .subnav{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--card);padding:0 16px;margin-bottom:20px;overflow-x:auto;flex-shrink:0}
+    .subnav-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* STAT CARDS */
+    .stat-row-3{display:flex;gap:14px;margin-bottom:20px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;box-shadow:0 1px 8px rgba(0,37,122,.05)}
+    .stat-card .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .stat-card .val{font-size:26px;font-weight:900;letter-spacing:-.5px}
+    .stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* CONTENT LAYOUT */
+    .dash-layout{display:flex;gap:20px}
+    .dash-main{flex:2;min-width:0}
+    .dash-side{flex:1;min-width:240px;max-width:320px}
+
+    /* CARD */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06);margin-bottom:16px}
+    .card-head{padding:12px 20px;border-bottom:1px solid var(--border);background:#E9EFF9;display:flex;align-items:center;justify-content:space-between}
+    .card-head .title{font-size:13px;font-weight:700;color:var(--navy)}
+    .card-body{padding:16px 20px}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:9px 14px;text-align:left;white-space:nowrap}
+    td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+    .b-inrepair{background:#FFFBEB;color:var(--amber)}
+    .b-shipped{background:#EFF6FF;color:var(--blue)}
+    .b-complete{background:#F0F4F7;color:var(--steel)}
+    .b-quoted{background:#EEF2FA;color:var(--navy)}
+    .b-invoiced{background:#F3F4F6;color:var(--muted)}
+
+    /* ALERT CARDS */
+    .alert-item{padding:10px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);border-left:3px solid transparent;margin-bottom:8px}
+    .alert-item.high{border-left-color:var(--red);background:#FEF9F9}
+    .alert-item.med{border-left-color:var(--amber);background:#FFFDF7}
+    .alert-id{font-size:11px;font-weight:700;color:var(--navy)}
+    .alert-desc{font-size:12px;color:var(--text);margin:3px 0}
+    .alert-meta{font-size:11px;color:var(--muted)}
+
+    /* LOANER */
+    .loaner-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+    .loaner-model{font-size:12.5px;font-weight:600;color:var(--text)}
+    .loaner-client{font-size:11px;color:var(--muted)}
+    .loaner-due{font-size:11px;margin-top:2px}
+    .due-overdue{color:var(--red);font-weight:600}
+
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:#f0f2f5}
+    ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sb-section">Navigation</div>
+    <div class="nav-item"><span class="icon">⊞</span> My Workspace</div>
+    <div class="nav-item active"><span class="icon">▦</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">◎</span> Clients</div>
+    <div class="nav-item"><span class="icon">⬡</span> Departments</div>
+    <div class="nav-item"><span class="icon">⚙</span> Repairs</div>
+    <div class="nav-item"><span class="icon">▣</span> Inventory</div>
+    <div class="nav-item"><span class="icon">⬆</span> Suppliers</div>
+    <div class="nav-item"><span class="icon">◉</span> Scopes</div>
+    <div class="nav-item"><span class="icon">⬟</span> Scope Model</div>
+    <div class="nav-item"><span class="icon">✦</span> Repair Items</div>
+    <div class="nav-item"><span class="icon">⚙</span> Instruments</div>
+    <div class="nav-item"><span class="icon">▤</span> Contracts</div>
+    <div class="nav-item"><span class="icon">◈</span> Acquisitions</div>
+    <div class="nav-item"><span class="icon">▥</span> Carts</div>
+    <div class="nav-item"><span class="icon">↺</span> Loaners</div>
+    <div class="nav-item"><span class="icon">⬡</span> Onsite Services</div>
+    <div class="nav-item"><span class="icon">◇</span> Product Sale</div>
+    <div class="nav-item"><span class="icon">✓</span> Quality</div>
+    <div class="nav-item"><span class="icon">◈</span> Financial</div>
+    <div class="nav-item"><span class="icon">▦</span> Reports/Extracts</div>
+    <div class="nav-item"><span class="icon">⚙</span> Administration</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="icon">→</span> Sign Out</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+      </div>
+      <div class="topbar-center">
+        <div class="topbar-title">Total Scope, Inc.</div>
+        <div class="topbar-sub">The Leader in Medical Device Repair</div>
+      </div>
+      <div class="topbar-right">
+        Service Location
+        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="breadcrumb">
+        <span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Dashboard</span>
+      </div>
+
+      <!-- SUBNAV TABS -->
+      <div class="subnav">
+        <div class="subnav-tab active">Overview</div>
+        <div class="subnav-tab">Scopes</div>
+        <div class="subnav-tab">Tasks</div>
+        <div class="subnav-tab">Loaners</div>
+        <div class="subnav-tab">Emails</div>
+        <div class="subnav-tab">Shipping Status</div>
+        <div class="subnav-tab">Inventory</div>
+        <div class="subnav-tab">Acquisitions</div>
+        <div class="subnav-tab">Repair Metrics</div>
+        <div class="subnav-tab">Turn Around Times</div>
+        <div class="subnav-tab">Flags</div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stat-row-3">
+        <div class="stat-card">
+          <div class="lbl">Active Repairs</div>
+          <div class="val" style="color:var(--amber)">12</div>
+          <div class="sub">4 due this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Open Invoices</div>
+          <div class="val" style="color:var(--red)">$31,240</div>
+          <div class="sub">3 overdue</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Loaners Out</div>
+          <div class="val" style="color:var(--amber)">4</div>
+          <div class="sub">2 overdue</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">MTD Revenue</div>
+          <div class="val" style="color:var(--green)">$84,600</div>
+          <div class="sub">↑ 11% vs Feb</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Active Clients</div>
+          <div class="val">10</div>
+          <div class="sub">All locations</div>
+        </div>
+      </div>
+
+      <!-- MAIN LAYOUT -->
+      <div class="dash-layout">
+        <div class="dash-main">
+          <div class="card">
+            <div class="card-head">
+              <span class="title">Recent Repairs</span>
+              <a href="#" style="font-size:12px;color:var(--blue);text-decoration:none">View all →</a>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Client</th>
+                    <th>Scope</th>
+                    <th>Issue</th>
+                    <th>Date</th>
+                    <th>Tech</th>
+                    <th>Status</th>
+                    <th style="text-align:right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004421</td><td>Tift Regional Medical Center</td><td style="color:var(--muted)">Olympus GIF-H190</td><td style="font-size:12px">Fluid invasion — distal end</td><td style="color:var(--muted)">02/18/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-inrepair">In Repair</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$485.00</td></tr>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004398</td><td>Nashville General Hospital</td><td style="color:var(--muted)">Olympus CF-H185L</td><td style="font-size:12px">Angulation cable failure</td><td style="color:var(--muted)">02/14/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-shipped">Shipped</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$620.00</td></tr>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004355</td><td>West Side GI Center</td><td style="color:var(--muted)">Pentax EC-3890LK</td><td style="font-size:12px">Bending rubber tear at tip</td><td style="color:var(--muted)">02/10/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-complete">Complete</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$310.00</td></tr>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004312</td><td>Metro Health Hospital</td><td style="color:var(--muted)">Olympus BF-UC180F</td><td style="font-size:12px">CCD chip — no image</td><td style="color:var(--muted)">02/06/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-quoted">Quoted</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$895.00</td></tr>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004287</td><td>88th Medical Group</td><td style="color:var(--muted)">Olympus CF-HQ190L</td><td style="font-size:12px">Insertion tube kink damage</td><td style="color:var(--muted)">02/03/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-inrepair">In Repair</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$480.00</td></tr>
+                  <tr><td style="color:var(--blue);font-weight:600">NI26004244</td><td>Northside Hospital</td><td style="color:var(--muted)">Fujifilm EG-760Z</td><td style="font-size:12px">Universal cord leak</td><td style="color:var(--muted)">01/28/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-shipped">Shipped</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$640.00</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-side">
+          <div class="card">
+            <div class="card-head"><span class="title">Quality Alerts</span><span style="background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 open</span></div>
+            <div class="card-body">
+              <div class="alert-item high">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-041</span><span class="badge" style="background:#FEF2F2;color:var(--red)">High</span></div>
+                <div class="alert-desc">Scope returned with residual fluid post-repair</div>
+                <div class="alert-meta">Tift Regional · Rob Mancini</div>
+              </div>
+              <div class="alert-item high">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-029</span><span class="badge" style="background:#FEF2F2;color:var(--red)">High</span></div>
+                <div class="alert-desc">Avoidable damage pattern — 3 events in 90 days</div>
+                <div class="alert-meta">Theda Oaks · Joseph Brassell</div>
+              </div>
+              <div class="alert-item med">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-022</span><span class="badge" style="background:#FFFBEB;color:var(--amber)">Medium</span></div>
+                <div class="alert-desc">CCD chip delivery delay — BF-UC180F platform</div>
+                <div class="alert-meta">ChipTech Medical · Debbie Hightower</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="title">Loaners Out</span></div>
+            <div class="card-body">
+              <div class="loaner-item">
+                <div>
+                  <div class="loaner-model">Olympus GIF-H190</div>
+                  <div class="loaner-client">Tift Regional Medical Center</div>
+                  <div class="loaner-due">Due 03/04/2026</div>
+                </div>
+                <span class="badge" style="background:#EFF6FF;color:var(--blue)">Out</span>
+              </div>
+              <div class="loaner-item" style="background:#FEF9F9;border-color:#FECACA">
+                <div>
+                  <div class="loaner-model">Olympus CF-H185L</div>
+                  <div class="loaner-client">Nashville General Hospital</div>
+                  <div class="loaner-due due-overdue">⚠ Overdue — due 02/28/2026</div>
+                </div>
+                <span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>
+              </div>
+              <div class="loaner-item" style="background:#FEF9F9;border-color:#FECACA">
+                <div>
+                  <div class="loaner-model">Olympus GIF-Q165</div>
+                  <div class="loaner-client">Metro Health Hospital</div>
+                  <div class="loaner-due due-overdue">⚠ Overdue — due 02/20/2026</div>
+                </div>
+                <span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

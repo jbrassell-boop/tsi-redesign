@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>My Workspace | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px;background:#f0f2f5;color:#212529}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;
+      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;
+      --bg:#E8EDF5;--card:#FFFFFF;--sidebar-w:208px;--header-h:58px;
+    }
+    .shell{display:flex;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-section{padding:4px 12px 10px;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.62);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:rgba(255,255,255,.06)}
+    .nav-item.active{background:rgba(157,171,226,.18);color:#fff;border-left-color:var(--red);font-weight:600}
+    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .nav-divider{margin:10px 16px;border-top:1px solid rgba(255,255,255,.08)}
+
+    /* HEADER */
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:var(--header-h);background:linear-gradient(120deg,var(--navy) 0%,#44697D 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
+    .topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center;gap:1px}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px;letter-spacing:.3px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+
+    /* PAGE */
+    .page-body{flex:1;overflow-y:auto;padding:24px}
+    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+    .breadcrumb .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+    .breadcrumb .sep{color:var(--border)}
+    .breadcrumb .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* LAYOUT */
+    .workspace-layout{display:flex;gap:20px}
+    .workspace-main{flex:1.8;min-width:0}
+    .workspace-side{flex:1;min-width:0}
+
+    /* CARD */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06);margin-bottom:16px}
+    .card-head{padding:12px 20px;border-bottom:1px solid var(--border);background:#E9EFF9;display:flex;align-items:center;justify-content:space-between}
+    .card-head .title{font-size:13px;font-weight:700;color:var(--navy)}
+    .card-body{padding:20px}
+
+    /* TASKS */
+    .task-item{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;border-left:3px solid transparent;margin-bottom:8px;transition:all .12s}
+    .task-item.high{border-left-color:var(--red);background:#FEF9F9}
+    .task-item.medium{border-left-color:var(--amber);background:#FFFDF7}
+    .task-item.done{opacity:.5;background:transparent;border-color:transparent}
+    .task-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px}
+    .task-check.checked{background:var(--green);border-color:var(--green);color:#fff;font-size:10px}
+    .task-text{font-size:13px;color:var(--text);line-height:1.4;flex:1}
+    .task-text.done{text-decoration:line-through;color:var(--muted)}
+    .task-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .task-due{font-size:11px;color:var(--muted)}
+    .badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+    .b-high{background:#FEF2F2;color:var(--red)}
+    .b-med{background:#FFFBEB;color:var(--amber)}
+    .section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+    /* STATS */
+    .stat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:background .12s}
+    .stat-row:hover{background:#d8e3f2}
+    .stat-row .stat-left{display:flex;align-items:center;gap:10px}
+    .stat-row .stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .stat-row .stat-label{font-size:12.5px;color:var(--label)}
+    .stat-row .stat-val{font-size:16px;font-weight:800;color:var(--navy)}
+    .stat-row.alert .stat-val{color:var(--red)}
+    .stat-row.warn .stat-val{color:var(--amber)}
+    .stat-row.good .stat-val{color:var(--green)}
+
+    /* QUICK EMAILS */
+    .email-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+    .email-item:hover{background:var(--bg)}
+    .email-item:last-child{border-bottom:none}
+    .email-from{font-size:12.5px;font-weight:600;color:var(--text)}
+    .email-subject{font-size:12px;color:var(--label);margin-top:2px}
+    .email-time{font-size:11px;color:var(--muted)}
+    .unread .email-from{color:var(--navy)}
+    .unread-dot{display:inline-block;width:7px;height:7px;background:var(--blue);border-radius:50%;margin-right:6px}
+
+    /* ADD TASK */
+    .add-task-row{display:flex;gap:8px;margin-bottom:20px}
+    .add-task-row input{flex:1;height:36px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px;font-family:inherit;outline:none;color:var(--text)}
+    .add-task-row input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .add-task-row select{height:36px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none;background:#fff;cursor:pointer}
+    .add-task-row button{height:36px;padding:0 16px;background:var(--navy);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#f1f1f1}
+    ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-section">Navigation</div>
+    <div class="nav-item active"><span class="icon">⊞</span> My Workspace</div>
+    <div class="nav-item"><span class="icon">▦</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">◎</span> Clients</div>
+    <div class="nav-item"><span class="icon">⬡</span> Departments</div>
+    <div class="nav-item"><span class="icon">⚙</span> Repairs</div>
+    <div class="nav-item"><span class="icon">▣</span> Inventory</div>
+    <div class="nav-item"><span class="icon">⬆</span> Suppliers</div>
+    <div class="nav-item"><span class="icon">◉</span> Scopes</div>
+    <div class="nav-item"><span class="icon">⬟</span> Scope Model</div>
+    <div class="nav-item"><span class="icon">✦</span> Repair Items</div>
+    <div class="nav-item"><span class="icon">⚙</span> Instruments</div>
+    <div class="nav-item"><span class="icon">▤</span> Contracts</div>
+    <div class="nav-item"><span class="icon">◈</span> Acquisitions</div>
+    <div class="nav-item"><span class="icon">▥</span> Carts</div>
+    <div class="nav-item"><span class="icon">↺</span> Loaners</div>
+    <div class="nav-item"><span class="icon">⬡</span> Onsite Services</div>
+    <div class="nav-item"><span class="icon">◇</span> Product Sale</div>
+    <div class="nav-item"><span class="icon">✓</span> Quality</div>
+    <div class="nav-item"><span class="icon">◈</span> Financial</div>
+    <div class="nav-item"><span class="icon">▦</span> Reports/Extracts</div>
+    <div class="nav-item"><span class="icon">⚙</span> Administration</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="icon">⊙</span> Change Password</div>
+    <div class="nav-item"><span class="icon">→</span> Sign Out</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+      </div>
+      <div class="topbar-center">
+        <div class="topbar-title">Total Scope, Inc.</div>
+        <div class="topbar-sub">The Leader in Medical Device Repair</div>
+      </div>
+      <div class="topbar-right">
+        Service Location
+        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="breadcrumb">
+        <span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">My Workspace</span>
+      </div>
+
+      <div class="workspace-layout">
+
+        <!-- LEFT: Tasks -->
+        <div class="workspace-main">
+          <div class="card">
+            <div class="card-head">
+              <span class="title">My Tasks — <span style="color:#B71234">5 open</span></span>
+              <span style="font-size:11px;color:#8896AA">Today: Sat, Mar 7, 2026</span>
+            </div>
+            <div class="card-body">
+
+              <!-- Add task -->
+              <div class="add-task-row">
+                <input type="text" placeholder="Add a new task…"/>
+                <select><option>High</option><option selected>Medium</option><option>Low</option></select>
+                <input type="date" style="height:36px;border:1.5px solid #DDE3EE;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/>
+                <button>+ Add</button>
+              </div>
+
+              <!-- Overdue -->
+              <div class="section-label" style="color:#B71234;border-bottom-color:#FECACA">🔴 Overdue</div>
+              <div class="task-item high">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">Recover NI26004421 loaner from LN-002 — overdue</div>
+                  <div class="task-meta"><span class="task-due">Due 03/06/2026</span><span class="badge b-high">High</span></div>
+                </div>
+              </div>
+
+              <!-- Due today -->
+              <div class="section-label" style="color:#D97706;border-bottom-color:#FDE68A">🟡 Due Today</div>
+              <div class="task-item high">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">QC review: Tift Regional complaint QC-2026-041</div>
+                  <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-high">High</span></div>
+                </div>
+              </div>
+              <div class="task-item medium">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">Invoice Shreveport Endoscopy — OS-2026-003</div>
+                  <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-med">Medium</span></div>
+                </div>
+              </div>
+
+              <!-- Upcoming -->
+              <div class="section-label">📋 Upcoming</div>
+              <div class="task-item high">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">Follow up: Nashville General — contract renewal signature</div>
+                  <div class="task-meta"><span class="task-due">Due 03/08/2026</span><span class="badge b-high">High</span></div>
+                </div>
+              </div>
+              <div class="task-item medium">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">Request CCD chip ETA from ChipTech — BF-UC180F</div>
+                  <div class="task-meta"><span class="task-due">Due 03/09/2026</span><span class="badge b-med">Medium</span></div>
+                </div>
+              </div>
+              <div class="task-item high">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">Price increase letter — West Calcasieu Cameron</div>
+                  <div class="task-meta"><span class="task-due">Due 03/10/2026</span><span class="badge b-high">High</span></div>
+                </div>
+              </div>
+              <div class="task-item medium">
+                <div class="task-check">☐</div>
+                <div style="flex:1">
+                  <div class="task-text">DVMSS: VISN 4 BPA post-mortem debrief notes</div>
+                  <div class="task-meta"><span class="task-due">Due 03/12/2026</span><span class="badge b-med">Medium</span></div>
+                </div>
+              </div>
+
+              <!-- Done -->
+              <div class="section-label">✅ Completed</div>
+              <div class="task-item done" style="display:flex;align-items:center;gap:12px;padding:8px 16px">
+                <div class="task-check checked">✓</div>
+                <div class="task-text done">Update West Side GI capitation dashboard</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Stats + Recent Emails -->
+        <div class="workspace-side">
+
+          <!-- Quick Stats -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-head"><span class="title">Quick Stats</span></div>
+            <div style="padding:14px 16px">
+              <div class="stat-row alert">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FEF2F2">🔧</div>
+                  <span class="stat-label">Repairs In Progress</span>
+                </div>
+                <span class="stat-val">12</span>
+              </div>
+              <div class="stat-row warn">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FFFBEB">↺</div>
+                  <span class="stat-label">Overdue Loaners</span>
+                </div>
+                <span class="stat-val">2</span>
+              </div>
+              <div class="stat-row warn">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FFFBEB">▤</div>
+                  <span class="stat-label">Contracts Up for Renewal</span>
+                </div>
+                <span class="stat-val">3</span>
+              </div>
+              <div class="stat-row alert">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FEF2F2">✓</div>
+                  <span class="stat-label">Open QC Events</span>
+                </div>
+                <span class="stat-val">3</span>
+              </div>
+              <div class="stat-row" style="border-color:var(--border)">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#E8EDF5">◈</div>
+                  <span class="stat-label">Pending Invoices</span>
+                </div>
+                <span class="stat-val" style="font-size:15px">$31,240</span>
+              </div>
+              <div class="stat-row good">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#F0FDF4">📈</div>
+                  <span class="stat-label">Revenue MTD</span>
+                </div>
+                <span class="stat-val" style="font-size:15px">$84,600</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Emails / Notifications -->
+          <div class="card">
+            <div class="card-head">
+              <span class="title">Recent Notifications</span>
+              <span style="background:#B71234;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 new</span>
+            </div>
+            <div>
+              <div class="email-item unread">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="email-from"><span class="unread-dot"></span>Tift Regional Medical Center</span>
+                  <span class="email-time">9:41 AM</span>
+                </div>
+                <div class="email-subject">RE: Scope return — NI26004421 fluid invasion repair</div>
+              </div>
+              <div class="email-item unread">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="email-from"><span class="unread-dot"></span>QC System Alert</span>
+                  <span class="email-time">8:15 AM</span>
+                </div>
+                <div class="email-subject">New complaint logged: QC-2026-041 — High Priority</div>
+              </div>
+              <div class="email-item unread">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="email-from"><span class="unread-dot"></span>ChipTech Medical</span>
+                  <span class="email-time">Yesterday</span>
+                </div>
+                <div class="email-subject">BF-UC180F CCD chip order update — backordered 3 weeks</div>
+              </div>
+              <div class="email-item">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="email-from">Nashville General Hospital</span>
+                  <span class="email-time">Mar 6</span>
+                </div>
+                <div class="email-subject">Contract renewal — awaiting signature by COB Fri</div>
+              </div>
+              <div class="email-item">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="email-from">Brandi Cook</span>
+                  <span class="email-time">Mar 6</span>
+                </div>
+                <div class="email-subject">88th Medical Group — PO updated for Q2</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
