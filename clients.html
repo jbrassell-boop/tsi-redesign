@@ -519,6 +519,7 @@
                 <th>Contact</th>
                 <th>Title / Role</th>
                 <th>Phone Number</th>
+                <th>Fax Number</th>
                 <th>Email</th>
                 <th>Status</th>
                 <th style="width:70px">Action</th>
@@ -529,6 +530,7 @@
                 <td style="font-weight:600">Karen Whitfield</td>
                 <td style="color:var(--muted)">Biomedical Director</td>
                 <td>+1 (937) 257-7650</td>
+                <td>(937) 257-7700</td>
                 <td>k.whitfield@wpafb.af.mil</td>
                 <td><span class="badge b-active">Active</span></td>
                 <td><button class="edit-btn" onclick="openEditContact(this)">✏ Edit</button></td>
@@ -537,6 +539,7 @@
                 <td style="font-weight:600">Sgt. Marcus Tatum</td>
                 <td style="color:var(--muted)">Dept. Coordinator</td>
                 <td>+1 (937) 257-1100</td>
+                <td>(937) 257-1109</td>
                 <td>m.tatum@wpafb.af.mil</td>
                 <td><span class="badge b-active">Active</span></td>
                 <td><button class="edit-btn" onclick="openEditContact(this)">✏ Edit</button></td>
@@ -545,6 +548,7 @@
                 <td style="font-weight:600">Lisa Orozco</td>
                 <td style="color:var(--muted)">Accounts Payable</td>
                 <td>+1 (937) 257-8823</td>
+                <td>(937) 257-8800</td>
                 <td>l.orozco@wpafb.af.mil</td>
                 <td><span class="badge b-active">Active</span></td>
                 <td><button class="edit-btn" onclick="openEditContact(this)">✏ Edit</button></td>
@@ -553,6 +557,7 @@
                 <td style="font-weight:600">Col. James Hendrick</td>
                 <td style="color:var(--muted)">Chief, Medical Logistics</td>
                 <td>+1 (937) 257-4400</td>
+                <td>(937) 257-4401</td>
                 <td>j.hendrick@wpafb.af.mil</td>
                 <td><span class="badge b-inactive">Inactive</span></td>
                 <td><button class="edit-btn" onclick="openEditContact(this)">✏ Edit</button></td>
@@ -905,24 +910,28 @@
     </div>
     <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px">
       <div class="fg g2" style="gap:8px 12px">
-        <div class="ff span2">
-          <label>Full Name <span class="req">*</span></label>
-          <input id="ct-name" class="inp" placeholder="e.g. Karen Whitfield"/>
+        <div class="ff">
+          <label>First Name <span class="req">*</span></label>
+          <input id="ct-firstname" class="inp" placeholder="First"/>
+        </div>
+        <div class="ff">
+          <label>Last Name <span class="req">*</span></label>
+          <input id="ct-lastname" class="inp" placeholder="Last"/>
         </div>
         <div class="ff span2">
           <label>Title / Role</label>
           <input id="ct-title" class="inp" placeholder="e.g. Biomedical Director, Accounts Payable"/>
         </div>
         <div class="ff">
-          <label>Phone</label>
+          <label>Phone Number</label>
           <input id="ct-phone" class="inp" placeholder="+1 (___) ___-____"/>
         </div>
         <div class="ff">
-          <label>Fax</label>
+          <label>Fax Number</label>
           <input id="ct-fax" class="inp" placeholder="(___) ___-____"/>
         </div>
         <div class="ff span2">
-          <label>Email</label>
+          <label>Email Address</label>
           <input id="ct-email" class="inp" type="email" placeholder="name@facility.org"/>
         </div>
       </div>
@@ -1405,7 +1414,8 @@ let _editContactRow = null;
 function openAddContact() {
   _editContactRow = null;
   document.getElementById('contact-modal-title').textContent = 'Add Contact';
-  document.getElementById('ct-name').value = '';
+  document.getElementById('ct-firstname').value = '';
+  document.getElementById('ct-lastname').value = '';
   document.getElementById('ct-title').value = '';
   document.getElementById('ct-phone').value = '';
   document.getElementById('ct-fax').value = '';
@@ -1417,21 +1427,26 @@ function openAddContact() {
 function openEditContact(btn) {
   _editContactRow = btn.closest('tr');
   const cells = _editContactRow.querySelectorAll('td');
+  const nameParts = cells[0].textContent.trim().split(' ');
   document.getElementById('contact-modal-title').textContent = 'Edit Contact';
-  document.getElementById('ct-name').value = cells[0].textContent.trim();
+  document.getElementById('ct-firstname').value = nameParts[0] || '';
+  document.getElementById('ct-lastname').value = nameParts.slice(1).join(' ') || '';
   document.getElementById('ct-title').value = cells[1].textContent.trim();
   document.getElementById('ct-phone').value = cells[2].textContent.trim();
-  document.getElementById('ct-fax').value = '';
-  document.getElementById('ct-email').value = cells[3].textContent.trim();
-  document.getElementById('ct-active').checked = cells[4].querySelector('.b-active') !== null;
+  document.getElementById('ct-fax').value = cells[3].textContent.trim();
+  document.getElementById('ct-email').value = cells[4].textContent.trim();
+  document.getElementById('ct-active').checked = cells[5].querySelector('.b-active') !== null;
   document.getElementById('contactModal').classList.add('open');
 }
 
 function saveContact() {
-  const name = document.getElementById('ct-name').value.trim();
-  if(!name) { showToast('Full name is required.', 'error'); document.getElementById('ct-name').focus(); return; }
-  const title = document.getElementById('ct-title').value.trim();
+  const first = document.getElementById('ct-firstname').value.trim();
+  const last = document.getElementById('ct-lastname').value.trim();
+  if(!first || !last) { showToast('First and last name are required.', 'error'); document.getElementById('ct-firstname').focus(); return; }
+  const name = first + ' ' + last;
+  const title = document.getElementById('ct-title').value.trim() || '—';
   const phone = document.getElementById('ct-phone').value.trim() || '—';
+  const fax = document.getElementById('ct-fax').value.trim() || '—';
   const email = document.getElementById('ct-email').value.trim() || '—';
   const active = document.getElementById('ct-active').checked;
   const badgeHtml = active
@@ -1441,10 +1456,11 @@ function saveContact() {
   if(_editContactRow) {
     const cells = _editContactRow.querySelectorAll('td');
     cells[0].innerHTML = `<span style="font-weight:600">${name}</span>`;
-    cells[1].innerHTML = `<span style="color:var(--muted)">${title || '—'}</span>`;
+    cells[1].innerHTML = `<span style="color:var(--muted)">${title}</span>`;
     cells[2].textContent = phone;
-    cells[3].textContent = email;
-    cells[4].innerHTML = badgeHtml;
+    cells[3].textContent = fax;
+    cells[4].textContent = email;
+    cells[5].innerHTML = badgeHtml;
     showToast('Contact updated.', 'success');
   } else {
     const tbody = document.getElementById('contacts-tbody');
@@ -1453,8 +1469,9 @@ function saveContact() {
     if(rowCount % 2 !== 0) tr.style.background = 'var(--row-alt)';
     tr.innerHTML = `
       <td style="font-weight:600">${name}</td>
-      <td style="color:var(--muted)">${title || '—'}</td>
+      <td style="color:var(--muted)">${title}</td>
       <td>${phone}</td>
+      <td>${fax}</td>
       <td>${email}</td>
       <td>${badgeHtml}</td>
       <td><button class="edit-btn" onclick="openEditContact(this)">✏ Edit</button></td>`;
