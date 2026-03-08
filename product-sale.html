@@ -88,7 +88,7 @@
     .workspace { display:flex; flex:1; overflow:hidden; }
 
     /* ── ORDER COLUMN ── */
-    .order-col { display:flex; flex-direction:column; flex:0 0 56%; min-width:0; border-right:2px solid var(--border-dk); overflow:hidden; }
+    .order-col { display:flex; flex-direction:column; flex:0 0 56%; min-width:0; border-left:2px solid var(--border-dk); overflow:hidden; }
     .col-hd { display:flex; align-items:center; justify-content:space-between; padding:6px 12px; background:var(--navy); color:#fff; flex-shrink:0; gap:8px; }
     .col-title { font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; white-space:nowrap; }
     .col-meta { font-size:10.5px; color:rgba(255,255,255,.65); white-space:nowrap; }
@@ -124,7 +124,7 @@
     .sum-total-val { font-size:20px; font-weight:700; color:#fff; margin-top:1px; letter-spacing:-.5px; }
 
     /* ── PICKER COLUMN ── */
-    .picker-col { display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden; }
+    .picker-col { display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden; border-right:2px solid var(--border-dk); }
     .picker-hd { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:6px 10px; background:var(--navy); flex-shrink:0; }
     .picker-controls { display:flex; align-items:center; gap:5px; }
     .psearch-wrap { position:relative; display:flex; align-items:center; }
@@ -143,15 +143,24 @@
     .pt th { background:#1a3a70; color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; overflow:hidden; border-right:1px solid rgba(255,255,255,.1); }
     .pt th:last-child { border-right:none; }
     .pt td { padding:5px 8px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-    .pt-group td { background:#eef1f8; font-size:10px; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:.6px; padding:4px 10px; border-bottom:1px solid var(--border-dk); cursor:pointer; user-select:none; }
-    .pt-group:hover td { background:#e4e9f5; }
-    .pt-group .pg-arrow { font-size:9px; margin-right:5px; display:inline-block; transition:transform .15s; }
-    .pt-child { cursor:pointer; transition:background .1s; }
-    .pt-child:nth-child(odd) { background:#fff; }
-    .pt-child:nth-child(even) { background:var(--row-alt); }
-    .pt-child:hover { background:#cfe3f7 !important; }
-    .pt-name { font-weight:600; color:var(--text); }
-    .pt-model { color:var(--label); }
+    /* Category separator rows */
+    .pt-grp td { background:#1e3f78; color:#b8ccee; font-size:9.5px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; padding:4px 10px; border-bottom:1px solid rgba(255,255,255,.1); }
+    /* Parent item rows — click to expand sizes */
+    .pt-item { cursor:pointer; }
+    .pt-item td { background:#f8faff; }
+    .pt-item:hover td { background:#eaf0fb !important; }
+    .pt-item.pt-open td { background:#DDE6F5; border-bottom-color:var(--blue); }
+    .pi-arrow { color:var(--blue); font-size:10px; text-align:center; font-weight:700; }
+    .pt-item.pt-open .pi-arrow { color:var(--navy); }
+    .pi-name { font-weight:700; color:var(--text); }
+    .pi-cat { color:var(--muted); font-size:10px; }
+    .pi-count { color:var(--muted); font-size:10px; text-align:right; }
+    /* Variant rows — shown when parent expanded */
+    .pt-var { cursor:pointer; }
+    .pt-var td { background:#fff; border-left:3px solid var(--blue); font-size:11px; }
+    .pt-var:nth-child(even) td { background:var(--row-alt); }
+    .pt-var:hover td { background:#cfe3f7 !important; }
+    .pv-name { padding-left:18px !important; font-weight:600; color:var(--text); }
     .pt-price { font-weight:700; color:var(--navy); text-align:right; white-space:nowrap; }
     .stk-a { background:#eafaf1; color:#1a7f4b; border:1px solid #a3d9b1; padding:1px 6px; border-radius:8px; font-size:9.5px; font-weight:700; white-space:nowrap; display:inline-block; }
     .stk-l { background:#fff3cd; color:#8a6200; border:1px solid #f0c040; padding:1px 6px; border-radius:8px; font-size:9.5px; font-weight:700; white-space:nowrap; display:inline-block; }
@@ -360,7 +369,317 @@
       <!-- DUAL PANEL WORKSPACE -->
       <div class="workspace">
 
-        <!-- ── LEFT: ORDER LINES ── -->
+        <!-- ── LEFT: INVENTORY PICKER ── -->
+        <div class="picker-col">
+
+          <div class="picker-hd">
+            <span class="col-title">Inventory — select item, then pick size</span>
+            <div class="picker-controls">
+              <div class="psearch-wrap">
+                <span class="psearch-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                <input class="psearch" placeholder="Search items..." />
+              </div>
+              <select class="psel">
+                <option>All Categories</option>
+                <option>IT Assembly</option>
+                <option>Angulation</option>
+                <option>Imaging/Optics</option>
+                <option>Accessories</option>
+                <option>Carts</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="picker-scroll">
+            <table class="pt">
+              <colgroup>
+                <col style="width:20px" />
+                <col style="width:auto" />
+                <col style="width:80px" />
+                <col style="width:70px" />
+                <col style="width:76px" />
+                <col style="width:42px" />
+                <col style="width:56px" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Item Name</th>
+                  <th>Model Fit</th>
+                  <th style="text-align:center;">Stock</th>
+                  <th style="text-align:right;">Price</th>
+                  <th style="text-align:center;">Qty</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- ── INSERTION TUBE ASSEMBLIES ── -->
+                <tr class="pt-grp"><td colspan="7">Insertion Tube Assemblies</td></tr>
+
+                <tr class="pt-item" data-item="it-assy" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">IT ASSEMBLY</td>
+                  <td colspan="3" class="pi-cat">Insertion tube, standard &amp; mini</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="it-assy" style="display:none">
+                  <td></td><td class="pv-name">LD/SD — Large Diameter</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 / GIF-190</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,250.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="it-assy" style="display:none">
+                  <td></td><td class="pv-name">MINI — Small Diameter</td>
+                  <td style="color:var(--label);font-size:10.5px;">PCF-H190 / EG-H185</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,100.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <!-- ── ANGULATION COMPONENTS ── -->
+                <tr class="pt-grp"><td colspan="7">Angulation Components</td></tr>
+
+                <tr class="pt-item" data-item="ang-assy" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">ANGULATION ASSEMBLY</td>
+                  <td colspan="3" class="pi-cat">4-way mechanism, complete</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="ang-assy" style="display:none">
+                  <td></td><td class="pv-name">GIF-H180</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$980.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="ang-assy" style="display:none">
+                  <td></td><td class="pv-name">GIF-H190</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H190 / GIF-190</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$960.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="ang-cable" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">ANGULATION CABLE ADJUSTER</td>
+                  <td colspan="3" class="pi-cat">Cable tension adjuster kit</td>
+                  <td colspan="2" class="pi-count">1 size</td>
+                </tr>
+                <tr class="pt-var" data-parent="ang-cable" style="display:none">
+                  <td></td><td class="pv-name">Universal Kit</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$145.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="bend-rubber" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">BENDING RUBBER</td>
+                  <td colspan="3" class="pi-cat">Distal bending section rubber</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="bend-rubber" style="display:none">
+                  <td></td><td class="pv-name">Standard — H180/H185</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 / H185</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$875.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="bend-rubber" style="display:none">
+                  <td></td><td class="pv-name">Mini — PCF Series</td>
+                  <td style="color:var(--label);font-size:10.5px;">PCF-H190</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$720.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <!-- ── IMAGING / OPTICS ── -->
+                <tr class="pt-grp"><td colspan="7">Imaging / Optics</td></tr>
+
+                <tr class="pt-item" data-item="ccd" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">CCD CHIP ASSEMBLY</td>
+                  <td colspan="3" class="pi-cat">HD imaging sensor, OEM spec</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="ccd" style="display:none">
+                  <td></td><td class="pv-name">HD — H180</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 HD</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$240.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="ccd" style="display:none">
+                  <td></td><td class="pv-name">Standard — H180</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 Std</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$185.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="achromat" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">ACHROMAT LENS</td>
+                  <td colspan="3" class="pi-cat">Objective achromatic doublet</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="achromat" style="display:none">
+                  <td></td><td class="pv-name">GIF-H180</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF-H180</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$315.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="achromat" style="display:none">
+                  <td></td><td class="pv-name">CF-Q180</td>
+                  <td style="color:var(--label);font-size:10.5px;">CF-Q180</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$295.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="light-guide" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">LIGHT GUIDE BUNDLE</td>
+                  <td colspan="3" class="pi-cat">Fiber optic bundle</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="light-guide" style="display:none">
+                  <td></td><td class="pv-name">3.5mm — Standard</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal 3.5mm</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$390.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="light-guide" style="display:none">
+                  <td></td><td class="pv-name">2.8mm — Mini</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal 2.8mm</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$340.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <!-- ── ACCESSORIES & HARDWARE ── -->
+                <tr class="pt-grp"><td colspan="7">Accessories &amp; Hardware</td></tr>
+
+                <tr class="pt-item" data-item="aw-nozzle" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">AIR WATER NOZZLES</td>
+                  <td colspan="3" class="pi-cat">Replacement nozzle set</td>
+                  <td colspan="2" class="pi-count">2 options</td>
+                </tr>
+                <tr class="pt-var" data-parent="aw-nozzle" style="display:none">
+                  <td></td><td class="pv-name">10-Pack</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF / PCF / CF</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$62.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="aw-nozzle" style="display:none">
+                  <td></td><td class="pv-name">5-Pack</td>
+                  <td style="color:var(--label);font-size:10.5px;">GIF / PCF / CF</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$35.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="cord-seal" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">UNIVERSAL CORD SEAL</td>
+                  <td colspan="3" class="pi-cat">Waterproof cord seal kit</td>
+                  <td colspan="2" class="pi-count">1 size</td>
+                </tr>
+                <tr class="pt-var" data-parent="cord-seal" style="display:none">
+                  <td></td><td class="pv-name">Standard</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$28.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="wb-connector" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">WATER BOTTLE CONNECTOR</td>
+                  <td colspan="3" class="pi-cat">Irrigation bottle connector cap</td>
+                  <td colspan="2" class="pi-count">1 size</td>
+                </tr>
+                <tr class="pt-var" data-parent="wb-connector" style="display:none">
+                  <td></td><td class="pv-name">Olympus OEM</td>
+                  <td style="color:var(--label);font-size:10.5px;">Olympus OEM</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$19.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+                <tr class="pt-item" data-item="tip-hood" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">DISTAL TIP HOOD</td>
+                  <td colspan="3" class="pi-cat">Soft distal attachment cap</td>
+                  <td colspan="2" class="pi-count" style="color:var(--red);">Out of Stock</td>
+                </tr>
+                <tr class="pt-var" data-parent="tip-hood" style="display:none">
+                  <td></td><td class="pv-name">10-Pack — PCF-H190</td>
+                  <td style="color:var(--label);font-size:10.5px;">PCF-H190 / H180</td>
+                  <td style="text-align:center;"><span class="stk-o">Out of Stock</span></td>
+                  <td class="pt-price">$48.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" disabled onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add-dis" disabled>+ Add</button></td>
+                </tr>
+
+                <!-- ── CARTS & EQUIPMENT ── -->
+                <tr class="pt-grp"><td colspan="7">Carts &amp; Equipment</td></tr>
+
+                <tr class="pt-item" data-item="scope-cart" onclick="selectItem(this)">
+                  <td class="pi-arrow">▶</td>
+                  <td class="pi-name">SCOPE CART</td>
+                  <td colspan="3" class="pi-cat">Stainless mobile storage cart</td>
+                  <td colspan="2" class="pi-count">2 sizes</td>
+                </tr>
+                <tr class="pt-var" data-parent="scope-cart" style="display:none">
+                  <td></td><td class="pv-name">Standard — 4-Shelf</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,850.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr class="pt-var" data-parent="scope-cart" style="display:none">
+                  <td></td><td class="pv-name">Compact — 2-Shelf</td>
+                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,250.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+        </div><!-- /.picker-col -->
+
+        <!-- ── RIGHT: ORDER LINES ── -->
         <div class="order-col">
 
           <div class="col-hd">
@@ -453,8 +772,7 @@
 
         </div><!-- /.order-col -->
 
-        <!-- ── RIGHT: INVENTORY PICKER ── -->
-        <div class="picker-col">
+        <!-- old picker removed --><div style="display:none">
 
           <div class="picker-hd">
             <span class="col-title">Inventory — click a row to add</span>
@@ -642,7 +960,7 @@
             </table>
           </div>
 
-        </div><!-- /.picker-col -->
+        </div><!-- hidden old picker removed -->
 
       </div><!-- /.workspace -->
 
@@ -650,15 +968,23 @@
   </div><!-- /.main -->
 </div><!-- /.shell -->
 <script>
-  function toggleGroup(groupRow) {
-    const arrow = groupRow.querySelector('.pg-arrow');
-    let next = groupRow.nextElementSibling;
-    let collapsed = arrow.textContent === '▶';
-    while (next && next.classList.contains('pt-child')) {
-      next.style.display = collapsed ? '' : 'none';
-      next = next.nextElementSibling;
+  function selectItem(row) {
+    const itemId = row.dataset.item;
+    const isOpen = row.classList.contains('pt-open');
+    // Close all open items
+    document.querySelectorAll('.pt-item.pt-open').forEach(r => {
+      r.classList.remove('pt-open');
+      r.querySelector('.pi-arrow').textContent = '▶';
+    });
+    document.querySelectorAll('.pt-var').forEach(r => r.style.display = 'none');
+    // If it was closed, open this one
+    if (!isOpen) {
+      row.classList.add('pt-open');
+      row.querySelector('.pi-arrow').textContent = '▼';
+      const variants = document.querySelectorAll(`.pt-var[data-parent="${itemId}"]`);
+      variants.forEach(r => r.style.display = '');
+      if (variants.length) variants[0].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    arrow.textContent = collapsed ? '▼' : '▶';
   }
 </script>
 </body>
