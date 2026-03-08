@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dashboard — Tasks | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;background:#f0f2f5;color:#212529}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
+      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
+      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#F2F5FB;--hover:#D8E6FF;
+    }
+    .shell{display:flex;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
+    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden}
+    .sidebar-brand{padding:12px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .brand-logo{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .brand-logo svg{width:18px;height:18px}
+    .brand-text .t1{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3}
+    .brand-text .t2{font-size:9.5px;color:var(--muted);margin-top:1px}
+    .nav-group{padding:6px 0;flex:1}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:6px 12px;margin:1px 5px;cursor:pointer;color:var(--label);font-size:11.5px;font-weight:500;transition:all .12s;border-left:3px solid transparent;white-space:nowrap;border-radius:6px}
+    .nav-item:hover{background:var(--bg);color:var(--navy)}
+    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:600}
+    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+    .nav-item.active svg{opacity:1}
+    .sidebar-footer{padding:8px 12px;border-top:1px solid var(--border);color:var(--muted);font-size:9.5px}
+
+    /* MAIN */
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:48px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:12.5px}
+    .topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:17px;letter-spacing:.3px}
+    .topbar-sub{color:#9DABE2;font-size:9px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:30px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:11.5px;cursor:pointer;outline:none;font-family:inherit}
+
+    /* PAGE BODY */
+    .page-body{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+    /* STAT STRIP */
+    .stat-strip{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);padding:0;flex-shrink:0;overflow-x:auto}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .1s;min-width:0}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.alert{background:#FEF9F9}
+    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .stat-chip .s-data{min-width:0}
+    .stat-chip .s-val{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .stat-chip .s-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-red{color:var(--red)}.s-amber{color:var(--amber)}.s-green{color:var(--green)}.s-navy{color:var(--navy)}
+
+    /* SUBNAV */
+    .subnav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:2px solid var(--border);padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.on{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.on):hover{background:var(--bg);color:var(--navy)}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk)}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .toolbar-actions{display:flex;gap:4px}
+    .tb-btn{height:30px;padding:0 10px;border:1px solid var(--border-dk);border-radius:6px;font-size:11px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--label);display:flex;align-items:center;gap:4px;font-weight:500}
+    .tb-btn:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+
+    /* DATA TABLE */
+    .table-wrap{flex:1;overflow:auto;position:relative}
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th:last-child{border-right:none}
+    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:var(--hover)}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .p-urgent{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+    .p-high{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .p-normal{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .p-low{background:#F5F5F5;color:#616161;border:1px solid #BDBDBD}
+    .ts-notstarted{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
+    .ts-inprocess{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .ts-fulfilled{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .ts-closed{background:#F5F5F5;color:#616161;border:1px solid #BDBDBD}
+    .ts-declined{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+    .ts-sent{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
+    .ts-unable{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+
+    /* ACTION BUTTONS */
+    .task-action{width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all .1s}
+    .task-action:hover{background:var(--bg);color:var(--navy)}
+    .task-action.danger:hover{color:var(--red);background:#FEF2F2}
+    .task-action svg{width:14px;height:14px}
+
+    /* FOOTER */
+    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .record-info{font-size:11px;color:var(--muted)}
+    .record-info strong{color:var(--text)}
+
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#f0f2f5}
+    ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+
+    /* DRAWER PANEL */
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+    .drawer-overlay.open{opacity:1;pointer-events:auto}
+    .drawer{position:fixed;top:0;right:0;width:420px;height:100vh;background:var(--card);z-index:51;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+    .drawer.open{transform:translateX(0)}
+    .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:#E9EFF9;flex-shrink:0}
+    .drawer-header h3{font-size:14px;font-weight:700;color:var(--navy);margin:0}
+    .drawer-close{width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;transition:all .1s}
+    .drawer-close:hover{background:var(--bg);color:var(--navy)}
+    .drawer-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+    .field{display:flex;flex-direction:column;gap:3px}
+    .field label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .field input,.field select,.field textarea{height:32px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);outline:none;background:var(--card)}
+    .field textarea{height:80px;padding:8px 10px;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--red);box-shadow:0 0 0 3px rgba(183,18,52,.08)}
+    .field .field-error{font-size:10px;color:var(--red);font-weight:500;display:none}
+    .field.invalid .field-error{display:block}
+    .field-row{display:flex;gap:12px}
+    .field-row .field{flex:1}
+    .drawer-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0}
+    .btn-cancel{height:32px;padding:0 16px;border:1px solid var(--border-dk);border-radius:6px;background:var(--card);font-size:12px;font-family:inherit;color:var(--label);cursor:pointer;font-weight:500}
+    .btn-cancel:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .btn-save{height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600}
+    .btn-save:hover{background:#1A3F8F}
+    /* Loaner line items sub-grid */
+    .loaner-lines{display:flex;flex-direction:column;gap:6px}
+    .loaner-line{display:flex;align-items:center;gap:6px}
+    .loaner-line input{flex:1}
+    .loaner-line input:last-of-type{width:60px;flex:none;text-align:center}
+    .loaner-line .remove-line{width:24px;height:24px;border:none;background:transparent;cursor:pointer;color:var(--muted);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .loaner-line .remove-line:hover{color:var(--red);background:#FEF2F2}
+    .add-line-btn{font-size:11px;color:var(--blue);cursor:pointer;font-weight:500;background:none;border:none;font-family:inherit;padding:4px 0;text-align:left}
+    .add-line-btn:hover{color:var(--navy);text-decoration:underline}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+      </div>
+      <div class="topbar-center">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" stroke="rgba(255,255,255,.5)" stroke-width="2.5"/>
+            <ellipse cx="50" cy="50" rx="22" ry="46" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+            <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+            <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+            <path d="M50 16 L56 44 L50 50 L44 44 Z" fill="white" opacity=".95"/>
+            <path d="M50 84 L44 56 L50 50 L56 56 Z" fill="rgba(255,255,255,.45)"/>
+            <path d="M84 50 L56 56 L50 50 L56 44 Z" fill="rgba(255,255,255,.7)"/>
+            <path d="M16 50 L44 44 L50 50 L44 56 Z" fill="rgba(255,255,255,.45)"/>
+            <circle cx="50" cy="50" r="4" fill="white"/>
+          </svg>
+          <div>
+            <div class="topbar-title">Total Scope, Inc.</div>
+            <div class="topbar-sub">The Leader in Medical Device Repair</div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        Service Location
+        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip alert">
+          <div class="s-icon" style="background:#FEF2F2">🔧</div>
+          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFFBEB">⏳</div>
+          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">⚙</div>
+          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
+        </div>
+        <div class="stat-chip alert">
+          <div class="s-icon" style="background:#FEF2F2">⚠</div>
+          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9">✓</div>
+          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFFBEB">↺</div>
+          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#F3E8FD">📦</div>
+          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+        </div>
+      </div>
+
+      <!-- SUB-NAV TABS -->
+      <div class="subnav">
+        <a class="subnav-tab" href="dashboard.html">Scopes</a>
+        <a class="subnav-tab active" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
+        <a class="subnav-tab" href="#">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
+        <a class="subnav-tab" href="#">Emails</a>
+        <a class="subnav-tab" href="#">Shipping Status</a>
+        <a class="subnav-tab" href="#">Inventory</a>
+        <a class="subnav-tab" href="#">Acquisitions</a>
+        <a class="subnav-tab" href="#">Searches</a>
+        <a class="subnav-tab" href="#">Repair Metrics</a>
+        <a class="subnav-tab" href="#">Turn Around Times</a>
+        <a class="subnav-tab" href="#">Flags</a>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <span class="filter-label">Priority</span>
+          <div class="seg-group" id="taskPriorityFilter">
+            <button class="seg-btn on">All</button>
+            <button class="seg-btn">Urgent</button>
+            <button class="seg-btn">High</button>
+            <button class="seg-btn">Normal</button>
+            <button class="seg-btn">Low</button>
+          </div>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Status</span>
+          <div class="seg-group" id="taskStatusFilter">
+            <button class="seg-btn on">All</button>
+            <button class="seg-btn">Open</button>
+            <button class="seg-btn">Closed</button>
+          </div>
+        </div>
+        <div class="toolbar-search">
+          <input class="search-input" id="taskSearch" type="text" placeholder="Search tasks…"/>
+        </div>
+        <div class="toolbar-actions">
+          <button class="tb-btn" onclick="openAddTask()">+ Add Task</button>
+        </div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:85px">Date</th>
+              <th>Client</th>
+              <th>Department</th>
+              <th>Type</th>
+              <th style="width:60px;text-align:center">Priority</th>
+              <th>Status</th>
+              <th>Requested Models</th>
+              <th>Notes</th>
+              <th style="width:60px;text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTbody"></tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="taskRecordInfo">Loading…</div>
+        <div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- TASK DRAWER -->
+<div class="drawer" id="taskDrawer">
+  <div class="drawer-header">
+    <h3 id="drawerTitle">Add Task</h3>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="taskId" value=""/>
+    <div class="field-row">
+      <div class="field" id="fClient">
+        <label>Client</label>
+        <input type="text" id="taskClient" placeholder="Client name…"/>
+        <span class="field-error">Client is required</span>
+      </div>
+      <div class="field">
+        <label>Department</label>
+        <input type="text" id="taskDept" placeholder="Department…"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field" id="fType">
+        <label>Type</label>
+        <select id="taskType">
+          <option value="">Select type…</option>
+          <option>Loaner Request</option>
+          <option>Loaner Wait List</option>
+          <option>Miscellaneous</option>
+          <option>No Loaner - expedite</option>
+          <option>Pick Up Request</option>
+          <option>Repair Approved</option>
+          <option>Requisition</option>
+          <option>Starter Kit Request</option>
+        </select>
+        <span class="field-error">Type is required</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Priority</label>
+        <select id="taskPriority">
+          <option>Normal</option>
+          <option>Urgent</option>
+          <option>High</option>
+          <option>Low</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="taskStatus">
+          <option>Not Started</option>
+          <option>In Process</option>
+          <option>Customer Scope Sent</option>
+          <option>Request Fulfilled</option>
+          <option>Closed Duplicate</option>
+          <option>Unable to Fulfill</option>
+          <option>Request Declined</option>
+          <option>Not Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="fModels">
+      <label>Requested Models (Loaners)</label>
+      <span class="field-error">At least one model is required for loaner requests</span>
+      <div class="loaner-lines" id="loanerLines">
+        <div class="loaner-line">
+          <input type="text" placeholder="Model (e.g. GIF-H190)"/>
+          <input type="number" value="1" min="1" placeholder="Qty"/>
+          <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>
+        </div>
+      </div>
+      <button class="add-line-btn" onclick="addLoanerLine()">+ Add another model</button>
+    </div>
+    <div class="field">
+      <label>Customer Message</label>
+      <textarea id="taskCustomerMsg" placeholder="Message from the client…"></textarea>
+    </div>
+    <div class="field">
+      <label>Task Notes</label>
+      <textarea id="taskNotes" placeholder="Internal notes…"></textarea>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
+    <button class="btn-save" onclick="saveTask()">Save Task</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  TASKS DATA
+// ═══════════════════════════════════════════════════════
+const TASKS = [
+  {id:1,date:'03/07/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',type:'Loaner Request',priority:'Urgent',status:'Not Started',models:'GIF-H190, CF-H185L',notes:'Need loaner ASAP — both scopes in repair. Patient backlog building.'},
+  {id:2,date:'03/06/2026',client:'Nashville General Hospital',dept:'GI Lab',type:'Repair Approved',priority:'High',status:'In Process',models:'',notes:'PO received. Begin repair on CF-H185L immediately.'},
+  {id:3,date:'03/05/2026',client:'Metro Health Hospital',dept:'Sterile Processing',type:'Loaner Request',priority:'High',status:'Not Started',models:'BF-UC180F',notes:'CCD repair on hold — client needs loaner while waiting for parts.'},
+  {id:4,date:'03/04/2026',client:'88th Medical Group',dept:'Biomedical Engineering',type:'Pick Up Request',priority:'Normal',status:'In Process',models:'',notes:'FedEx pickup scheduled for 03/09. Label printed.'},
+  {id:5,date:'03/03/2026',client:'West Side GI Center',dept:'Endoscopy',type:'Loaner Request',priority:'Normal',status:'Request Fulfilled',models:'EC-3890LK',notes:'Loaner shipped 03/04. Tracking: 7892-5510-0088.'},
+  {id:6,date:'03/02/2026',client:'Acadiana Endoscopy Center',dept:'Ambulatory Surgery',type:'Loaner Wait List',priority:'Normal',status:'Not Started',models:'GIF-H185',notes:'No loaners available. Added to wait list — next available.'},
+  {id:7,date:'03/01/2026',client:'Tampa Minimally Invasive',dept:'Endoscopy',type:'Requisition',priority:'High',status:'In Process',models:'',notes:'Parts requisition for GIF-Q165 major rebuild. Ordered from Olympus.'},
+  {id:8,date:'02/28/2026',client:'Mountain View Regional',dept:'Operating Room',type:'No Loaner - expedite',priority:'Urgent',status:'Not Started',models:'GIF-H190',notes:'Client declined loaner — wants expedited repair instead. HOT list item.'},
+  {id:9,date:'02/26/2026',client:'Bhatti GI Consultants, PA',dept:'Office',type:'Miscellaneous',priority:'Low',status:'Closed Duplicate',models:'',notes:'Duplicate of earlier follow-up task. Closed.'},
+  {id:10,date:'02/24/2026',client:'A.I.duPont Children Hospital',dept:'Endoscopy',type:'Loaner Request',priority:'High',status:'Request Fulfilled',models:'GIF-XP190N',notes:'Loaner delivered 02/25. Return expected when repair complete.'},
+  {id:11,date:'02/20/2026',client:'Phoebe Putney Memorial',dept:'Surgery',type:'Loaner Wait List',priority:'Low',status:'Not Completed',models:'GIF-Q165',notes:'Client cancelled loaner request — purchased backup scope.'},
+  {id:12,date:'02/15/2026',client:'CaroMont Regional Medical',dept:'Operating Room',type:'Loaner Wait List',priority:'Normal',status:'Not Completed',models:'GIF-H190',notes:'Quote dispute unresolved. Task on hold pending Joseph review.'},
+];
+
+// ═══════════════════════════════════════════════════════
+//  STATE & HELPERS
+// ═══════════════════════════════════════════════════════
+let taskFilterPriority = 'All';
+let taskFilterStatus = 'All';
+let taskSearchTerm = '';
+
+const OPEN_STATUSES = ['Not Started','In Process','Customer Scope Sent'];
+const CLOSED_STATUSES = ['Request Fulfilled','Closed Duplicate','Unable to Fulfill','Request Declined','Not Completed'];
+
+function taskPriorityClass(p) {
+  if (/urgent/i.test(p)) return 'p-urgent';
+  if (/high/i.test(p)) return 'p-high';
+  if (/normal/i.test(p)) return 'p-normal';
+  return 'p-low';
+}
+
+function taskStatusClass(s) {
+  if (/not started/i.test(s)) return 'ts-notstarted';
+  if (/in process/i.test(s)) return 'ts-inprocess';
+  if (/fulfilled/i.test(s)) return 'ts-fulfilled';
+  if (/closed|not completed/i.test(s)) return 'ts-closed';
+  if (/declined|unable/i.test(s)) return 'ts-declined';
+  if (/sent/i.test(s)) return 'ts-sent';
+  return 'ts-notstarted';
+}
+
+// ═══════════════════════════════════════════════════════
+//  FILTERING & RENDER
+// ═══════════════════════════════════════════════════════
+function getFilteredTasks() {
+  let list = [...TASKS];
+  if (taskFilterPriority !== 'All') list = list.filter(t => t.priority === taskFilterPriority);
+  if (taskFilterStatus === 'Open') list = list.filter(t => OPEN_STATUSES.includes(t.status));
+  else if (taskFilterStatus === 'Closed') list = list.filter(t => CLOSED_STATUSES.includes(t.status));
+  if (taskSearchTerm) {
+    const q = taskSearchTerm.toLowerCase();
+    list = list.filter(t =>
+      t.client.toLowerCase().includes(q) || t.dept.toLowerCase().includes(q) ||
+      t.type.toLowerCase().includes(q) || t.notes.toLowerCase().includes(q) ||
+      t.models.toLowerCase().includes(q) || t.status.toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function renderTasks() {
+  const filtered = getFilteredTasks();
+  const tbody = document.getElementById('tasksTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No tasks found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(t => `<tr>
+      <td style="white-space:nowrap">${t.date}</td>
+      <td style="font-weight:500">${t.client}</td>
+      <td style="color:var(--muted)">${t.dept}</td>
+      <td>${t.type}</td>
+      <td style="text-align:center"><span class="badge ${taskPriorityClass(t.priority)}">${t.priority}</span></td>
+      <td><span class="badge ${taskStatusClass(t.status)}">${t.status}</span></td>
+      <td style="font-size:10.5px;color:var(--label)">${t.models || '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:10.5px;color:var(--label);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.notes.replace(/"/g,'&quot;')}">${t.notes}</td>
+      <td style="text-align:center">
+        <button class="task-action" title="Edit" onclick="openEditTask(${t.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="task-action danger" title="Delete" onclick="deleteTask(${t.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </td>
+    </tr>`).join('');
+  }
+  const openCount = filtered.filter(t => OPEN_STATUSES.includes(t.status)).length;
+  document.getElementById('taskRecordInfo').innerHTML = `<strong>${filtered.length}</strong> task${filtered.length!==1?'s':''} · <strong>${openCount}</strong> open`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  DRAWER — Add / Edit Task
+// ═══════════════════════════════════════════════════════
+const drawer = document.getElementById('taskDrawer');
+const overlay = document.getElementById('drawerOverlay');
+
+function openDrawer() {
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  // Clear validation
+  document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+overlay.addEventListener('click', closeDrawer);
+
+function resetDrawerForm() {
+  document.getElementById('taskId').value = '';
+  document.getElementById('taskClient').value = '';
+  document.getElementById('taskDept').value = '';
+  document.getElementById('taskType').value = '';
+  document.getElementById('taskPriority').value = 'Normal';
+  document.getElementById('taskStatus').value = 'Not Started';
+  document.getElementById('taskCustomerMsg').value = '';
+  document.getElementById('taskNotes').value = '';
+  // Reset loaner lines to one empty row
+  document.getElementById('loanerLines').innerHTML = `<div class="loaner-line">
+    <input type="text" placeholder="Model (e.g. GIF-H190)"/>
+    <input type="number" value="1" min="1" placeholder="Qty"/>
+    <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>
+  </div>`;
+}
+
+function openAddTask() {
+  resetDrawerForm();
+  document.getElementById('drawerTitle').textContent = 'Add Task';
+  openDrawer();
+  document.getElementById('taskClient').focus();
+}
+
+function openEditTask(id) {
+  const task = TASKS.find(t => t.id === id);
+  if (!task) return;
+  resetDrawerForm();
+  document.getElementById('drawerTitle').textContent = 'Edit Task';
+  document.getElementById('taskId').value = task.id;
+  document.getElementById('taskClient').value = task.client;
+  document.getElementById('taskDept').value = task.dept;
+  document.getElementById('taskType').value = task.type;
+  document.getElementById('taskPriority').value = task.priority;
+  document.getElementById('taskStatus').value = task.status;
+  document.getElementById('taskNotes').value = task.notes || '';
+  document.getElementById('taskCustomerMsg').value = task.customerMsg || '';
+  // Populate loaner lines from models string
+  const linesContainer = document.getElementById('loanerLines');
+  if (task.models) {
+    const models = task.models.split(',').map(m => m.trim()).filter(Boolean);
+    linesContainer.innerHTML = models.map(m => `<div class="loaner-line">
+      <input type="text" value="${m.replace(/"/g,'&quot;')}" placeholder="Model (e.g. GIF-H190)"/>
+      <input type="number" value="1" min="1" placeholder="Qty"/>
+      <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>
+    </div>`).join('');
+  }
+  openDrawer();
+}
+
+function addLoanerLine() {
+  const container = document.getElementById('loanerLines');
+  const div = document.createElement('div');
+  div.className = 'loaner-line';
+  div.innerHTML = `<input type="text" placeholder="Model (e.g. GIF-H190)"/>
+    <input type="number" value="1" min="1" placeholder="Qty"/>
+    <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>`;
+  container.appendChild(div);
+  div.querySelector('input').focus();
+}
+
+function removeLoanerLine(btn) {
+  const container = document.getElementById('loanerLines');
+  if (container.children.length > 1) {
+    btn.closest('.loaner-line').remove();
+  } else {
+    // Last line — just clear it
+    const inputs = btn.closest('.loaner-line').querySelectorAll('input');
+    inputs[0].value = '';
+    inputs[1].value = '1';
+  }
+}
+
+function saveTask() {
+  // Validate
+  let valid = true;
+  const client = document.getElementById('taskClient').value.trim();
+  const type = document.getElementById('taskType').value;
+  document.getElementById('fClient').classList.toggle('invalid', !client);
+  document.getElementById('fType').classList.toggle('invalid', !type);
+  if (!client || !type) { valid = false; }
+
+  // Check if loaner type needs at least one model
+  const isLoanerType = /loaner/i.test(type);
+  const lines = document.getElementById('loanerLines').querySelectorAll('.loaner-line');
+  const models = [];
+  lines.forEach(line => {
+    const model = line.querySelector('input[type="text"]').value.trim();
+    if (model) models.push(model);
+  });
+  if (isLoanerType && models.length === 0) {
+    document.getElementById('fModels').classList.add('invalid');
+    valid = false;
+  } else {
+    document.getElementById('fModels').classList.remove('invalid');
+  }
+
+  if (!valid) return;
+
+  const taskData = {
+    client,
+    dept: document.getElementById('taskDept').value.trim(),
+    type,
+    priority: document.getElementById('taskPriority').value,
+    status: document.getElementById('taskStatus').value,
+    models: models.join(', '),
+    customerMsg: document.getElementById('taskCustomerMsg').value.trim(),
+    notes: document.getElementById('taskNotes').value.trim(),
+  };
+
+  const editId = document.getElementById('taskId').value;
+  if (editId) {
+    // Update existing
+    const task = TASKS.find(t => t.id === parseInt(editId));
+    if (task) Object.assign(task, taskData);
+  } else {
+    // Add new
+    const maxId = TASKS.reduce((max, t) => Math.max(max, t.id), 0);
+    const today = new Date();
+    const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' + String(today.getDate()).padStart(2,'0') + '/' + today.getFullYear();
+    TASKS.unshift({ id: maxId + 1, date: dateStr, ...taskData });
+  }
+
+  closeDrawer();
+  renderTasks();
+}
+
+function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  const idx = TASKS.findIndex(t => t.id === id);
+  if (idx >= 0) { TASKS.splice(idx, 1); renderTasks(); }
+}
+
+// Keyboard: Escape closes drawer
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+});
+
+// ═══════════════════════════════════════════════════════
+//  FILTER WIRING
+// ═══════════════════════════════════════════════════════
+document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    taskFilterPriority = btn.textContent.trim();
+    renderTasks();
+  });
+});
+document.getElementById('taskStatusFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('taskStatusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    taskFilterStatus = btn.textContent.trim();
+    renderTasks();
+  });
+});
+document.getElementById('taskSearch').addEventListener('input', function() {
+  taskSearchTerm = this.value.trim();
+  renderTasks();
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+renderTasks();
+</script>
+</body>
+</html>

@@ -4,177 +4,182 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Sale — TSI Redesign Mockup</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Inter', Arial, sans-serif; font-size: 12px; background: #f0f2f5; color: #212529; }
+    html, body { height: 100%; font-family: 'Inter', Arial, sans-serif; font-size: 12px; background: #f0f2f5; color: #212529; overflow: hidden; }
 
     :root {
-      --navy:#00257A; --blue:#2E74B5; --red:#B71234; --green:#16A34A; --amber:#D97706; --steel:#44697D;
-      --muted:#8896AA; --label:#4A5568; --text:#1A202C; --border:#DDE3EE; --border-dk:#B8C8E0;
-      --bg:#E8EDF5; --card:#FFFFFF; --row-alt:#E6EEFB;
-      --sidebar-w:208px;
+      --navy: #00257A;
+      --blue: #2E74B5;
+      --red: #B71234;
+      --green: #16A34A;
+      --amber: #D97706;
+      --steel: #44697D;
+      --muted: #8896AA;
+      --label: #4A5568;
+      --text: #1A202C;
+      --border: #DDE3EE;
+      --border-dk: #B8C8E0;
+      --bg: #E8EDF5;
+      --card: #FFFFFF;
+      --row-alt: #E6EEFB;
+      
+      --sidebar-w: 208px;
     }
 
     /* ── SHELL ── */
-    .shell { display:flex; height:100vh; overflow:hidden; }
+    .shell { display: flex; height: 100vh; overflow: hidden; width: 100vw; }
 
-    /* ── SIDEBAR ── */
-    .sidebar { width:var(--sidebar-w); background:#fff; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; overflow-x:hidden; }
-    .sidebar-brand { padding:12px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-    .brand-logo { width:34px; height:34px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .brand-logo svg { width:18px; height:18px; }
-    .brand-text .t1 { font-size:11.5px; font-weight:700; color:var(--navy); line-height:1.3; }
-    .brand-text .t2 { font-size:9.5px; color:var(--muted); margin-top:1px; }
-    .nav-group { padding:6px 0; flex:1; }
-    .nav-item { display:flex; align-items:center; gap:9px; padding:6px 12px; margin:1px 5px; cursor:pointer; color:var(--label); font-size:11.5px; font-weight:500; transition:all .12s; border-left:3px solid transparent; white-space:nowrap; border-radius:6px; }
-    .nav-item:hover { background:var(--bg); color:var(--navy); }
-    .nav-item.active { background:#DDE6F5; color:var(--navy); border-left-color:var(--navy); font-weight:600; }
-    .nav-item svg { width:14px; height:14px; flex-shrink:0; opacity:.7; }
-    .nav-item.active svg { opacity:1; }
-    .sidebar-footer { padding:8px 12px; border-top:1px solid var(--border); color:var(--muted); font-size:9.5px; }
+    /* ── SIDEBAR (Expanded to match clients.html) ── */
+    .sidebar { width: var(--sidebar-w); background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-brand { padding: 12px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 34px; height: 34px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color:#fff; }
+    .brand-logo svg { width: 18px; height: 18px; }
+    .brand-text .t1 { font-size: 11.5px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+    .brand-text .t2 { font-size: 9.5px; color: var(--muted); margin-top: 1px; }
+    .nav-group { padding: 6px 0; flex: 1; }
+    .sidebar-footer { padding: 8px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 9.5px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 14px; margin: 1px 6px; border-radius: 7px; cursor: pointer; color: var(--label); font-size: 11.5px; font-weight: 500; border-left: 3px solid transparent; transition: all .15s; user-select: none; }
+    .nav-item:hover { background: var(--bg); color: var(--navy); }
+    .nav-item.active { background: #DDE6F5; color: var(--navy); border-left-color: var(--navy); font-weight: 700; }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: .7; }
+    .nav-item.active svg { opacity: 1; }
 
-    /* ── MAIN ── */
-    .main { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+    /* ── MAIN AREA ── */
+    .main { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
 
     /* ── TOPBAR ── */
-    .topbar { height:50px; background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%); display:flex; align-items:center; justify-content:space-between; padding:0 18px; flex-shrink:0; box-shadow:0 2px 10px rgba(0,37,122,.18); }
-    .topbar-logo { font-size:14px; font-weight:700; color:#fff; }
-    .topbar-logo span { font-size:10.5px; font-weight:400; color:rgba(255,255,255,.6); display:block; }
-    .topbar-right { display:flex; align-items:center; gap:12px; }
-    .topbar-user { color:rgba(255,255,255,.85); font-size:11.5px; }
-    .svc-loc { display:flex; align-items:center; gap:6px; color:rgba(255,255,255,.75); font-size:11.5px; }
-    .svc-loc select { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:4px; padding:3px 7px; font-size:11.5px; }
+    .topbar { height: 48px; background: linear-gradient(120deg, var(--navy) 0%, var(--steel) 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,37,122,.18); }
+    .topbar-center { display: flex; flex-direction: column; align-items: center; }
+    .topbar-title { color: #fff; font-weight: 900; font-size: 19px; letter-spacing: .3px; }
+    .topbar-sub { color: #9DABE2; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,.7); font-size: 12px; }
+    .topbar-right select { background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.3); color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; height: 30px; outline: none; }
 
-    /* ── TOOLBAR ── */
-    .toolbar { display:flex; align-items:center; gap:4px; padding:6px 12px; background:#DDE6F5; border-bottom:1px solid var(--border-dk); flex-shrink:0; flex-wrap:wrap; }
-    .tbtn { display:inline-flex; align-items:center; gap:4px; height:26px; padding:0 9px; border-radius:3px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid transparent; font-family:inherit; transition:all .12s; white-space:nowrap; }
-    .tbtn svg { width:11px; height:11px; }
-    .tbtn-primary { background:var(--blue); color:#fff; border-color:var(--blue); }
-    .tbtn-primary:hover { background:var(--navy); border-color:var(--navy); }
-    .tbtn-secondary { background:#fff; color:var(--text); border-color:var(--border-dk); }
-    .tbtn-secondary:hover { background:var(--bg); }
-    .tbtn-danger { background:#fff; color:var(--red); border-color:#e0a0a0; }
-    .tbtn-danger:hover { background:#fdf0f0; }
-    .tb-sep { width:1px; height:18px; background:var(--border-dk); margin:0 2px; }
+    /* ── ACTION BAR ── */
+    .action-bar { padding: 9px 24px 8px; background: #DDE6F5; border-bottom: 1px solid var(--border-dk); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .ab-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; color: var(--navy); text-transform:uppercase; letter-spacing:0.5px;}
+    .ab-left .sep { color: var(--muted); font-weight: 400; }
+    .ab-badge { background: #fff; border: 1px solid var(--border-dk); padding: 4px 10px; border-radius: 6px; font-size: 12px; color: var(--navy); font-weight: 700; }
+    
+    .ab-right { display: flex; align-items: center; gap: 8px; }
+    .btn { height: 30px; padding: 0 13px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1.5px solid var(--border-dk); background: #fff; color: var(--label); cursor: pointer; transition: all 0.12s; font-family: inherit; }
+    .btn:hover { background: var(--bg); color: var(--navy); border-color: var(--navy); }
+    .btn svg { width: 14px; height: 14px; }
+    
+    .btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .btn-primary:hover { background: #001c5c; border-color: #001c5c; color: #fff; }
+    
+    .btn-group { display: flex; }
+    .btn-group .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .btn-group .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; padding: 0 8px; }
 
-    /* ── PAGE ── */
-    .page { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+    /* ── HEADER GRID (Client details) ── */
+    .header-grid-wrapper { background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .header-grid { display: flex; padding: 12px 24px; gap: 20px; align-items: flex-start; overflow-x: auto; }
+    .hg-item { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 140px; }
+    .hg-label { font-size: 9.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Input styling matched perfectly to clients.html */
+    .fi { width: 100%; height: 25px; border: 1.5px solid var(--border-dk); border-radius: 5px; padding: 0 8px; font-size: 12px; font-family: inherit; color: var(--text); background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; }
+    .fi:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,37,122,.08); }
+    select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 24px; cursor: pointer; line-height: 25px; }
 
-    /* ── ORDER HEADER ── */
-    .ohdr { background:#fff; border-bottom:2px solid var(--border-dk); flex-shrink:0; padding:8px 14px 10px; }
-    .orow { display:grid; gap:7px; margin-bottom:7px; align-items:end; }
-    .orow:last-child { margin-bottom:0; }
-    .orow-1 { grid-template-columns: 2.4fr 1.8fr 120px 40px; }
-    .orow-2 { grid-template-columns: repeat(6, 1fr); }
-    .orow-3 { grid-template-columns: 1.1fr 1.3fr 1fr 0.9fr 2fr; }
-    .fl { display:block; font-size:9.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
-    .fl .req { color:var(--red); }
-    .fi { height:27px; border:1px solid var(--border-dk); border-radius:3px; padding:0 7px; font-size:11px; font-family:inherit; color:var(--text); background:#fff; outline:none; width:100%; transition:border-color .15s; }
-    .fi:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(46,116,181,.12); }
-    .fi-ro { background:#f4f6fb; color:var(--muted); cursor:default; }
-    .fi-chk { display:flex; align-items:center; justify-content:center; height:27px; }
-    .fi-chk input { width:15px; height:15px; accent-color:var(--blue); cursor:pointer; }
-    .ohdr-divider { height:1px; background:var(--border); margin:8px 0; }
+    textarea.fi { height: 42px; padding: 6px; resize: none; min-height: 42px; line-height: 1.3; }
 
-    /* ── STATUS BADGE ── */
-    .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
-    .badge-draft { background:#f0f0f0; color:#666; border:1px solid #ddd; }
-    .badge-open  { background:#e8f4fd; color:var(--blue); border:1px solid #b3d4f0; }
-    .badge-inv   { background:#eafaf1; color:var(--green); border:1px solid #a3d9b1; }
+    /* ── TABS ── */
+    .tabs-wrapper { display: flex; padding: 0 24px; background: #DDE6F5; border-bottom: 2px solid var(--border-dk); margin-top: 8px; flex-shrink: 0; }
+    .tab { padding: 8px 18px; font-size: 12.5px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; user-select: none; }
+    .tab:hover { color: var(--navy); }
+    .tab.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 700; }
+    
+    .tab-content { display: none; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
+    .tab-content.active { display: flex; }
 
-    /* ── WORKSPACE (dual panel) ── */
-    .workspace { display:flex; flex:1; overflow:hidden; }
+    /* ── WORKSPACE ── */
+    .workspace { display: flex; flex: 1; padding: 10px 16px; gap: 12px; overflow: hidden; background: #f0f2f5; }
 
-    /* ── ORDER COLUMN ── */
-    .order-col { display:flex; flex-direction:column; flex:0 0 56%; min-width:0; border-left:2px solid var(--border-dk); overflow:hidden; }
-    .col-hd { display:flex; align-items:center; justify-content:space-between; padding:6px 12px; background:#E9EFF9; color:var(--navy); flex-shrink:0; gap:8px; border-bottom:1px solid var(--border-dk); }
-    .col-title { font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; white-space:nowrap; color:var(--navy); }
-    .col-meta { font-size:10.5px; color:var(--muted); white-space:nowrap; }
-    .col-meta strong { color:var(--navy); font-weight:600; }
-    .order-scroll { flex:1; overflow-y:auto; }
+    /* Card Panels */
+    .card { background: #fff; border-radius: 8px; border: 1px solid var(--border-dk); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 4px rgba(0,37,122,.05); }
+    .card-hd { padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 10.5px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .8px; background: #E9EFF9; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .card-body { padding: 12px 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; background: #fff; }
 
-    /* ── ORDER TABLE ── */
-    .ot { width:100%; border-collapse:collapse; }
-    .ot thead { position:sticky; top:0; z-index:2; }
-    .ot th { background:var(--navy); color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.1); }
-    .ot th:last-child { border-right:none; }
-    .ot td { padding:4px 7px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; color:var(--text); }
-    .ot tbody tr:nth-child(even) { background:var(--row-alt); }
-    .ot tbody tr:hover:not(.ot-addrow) { background:#dce8f7; }
-    .ot td .eti { width:100%; height:24px; border:1px solid transparent; border-radius:3px; padding:0 5px; font-size:11px; font-family:inherit; background:transparent; outline:none; color:var(--text); }
-    .ot td .eti:focus { border-color:var(--blue); background:#fff; }
-    .ot-addrow td { border-bottom:none; border-top:1px dashed var(--border-dk); }
-    .add-line-btn { display:inline-flex; align-items:center; gap:5px; color:var(--blue); font-size:11px; font-weight:600; cursor:pointer; border:none; background:none; font-family:inherit; padding:6px 4px; }
-    .add-line-btn:hover { color:var(--navy); }
-    .del-row { cursor:pointer; color:var(--red); font-size:16px; line-height:1; opacity:.5; transition:opacity .12s; }
-    .del-row:hover { opacity:1; }
+    /* ── LEFT COLUMN ── */
+    .col-left { width: 300px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; min-height: 0; }
+    
+    /* Contact Form Grid (Bigger) */
+    .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; align-content: start; }
+    .cg-full { grid-column: 1 / -1; }
+    .cg-item { display: flex; flex-direction: column; gap: 2px; }
+    
+    /* Card structural overrides for Address Tab equal height matching */
+    #tab-address { align-items: stretch; }
+    #tab-address .col-left { flex: 1; display: flex; flex-direction: column; min-width: 250px; max-width: 400px; }
+    #tab-address .card { flex: 1; margin-bottom: 0px; }
 
-    /* ── ORDER SUMMARY FOOTER ── */
-    .order-footer { border-top:2px solid var(--border-dk); background:#f6f9ff; flex-shrink:0; display:flex; align-items:stretch; }
-    .sum-fields { flex:1; display:flex; flex-direction:column; padding:7px 12px; justify-content:center; gap:4px; }
-    .sum-row { display:flex; align-items:center; justify-content:space-between; font-size:11px; }
-    .sum-lbl { color:var(--muted); font-weight:500; }
-    .sum-input { height:22px; border:1px solid var(--border-dk); border-radius:3px; padding:0 6px; font-size:11px; font-family:inherit; text-align:right; outline:none; background:#fff; width:76px; }
-    .sum-input:focus { border-color:var(--blue); }
-    .sum-sub { color:var(--label); font-weight:600; }
-    .sum-total-box { background:var(--navy); min-width:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 18px; flex-shrink:0; }
-    .sum-total-lbl { font-size:9px; font-weight:700; color:rgba(255,255,255,.65); text-transform:uppercase; letter-spacing:.8px; }
-    .sum-total-val { font-size:20px; font-weight:700; color:#fff; margin-top:1px; letter-spacing:-.5px; }
+    /* Item Search Section */
+    .is-card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .is-top { padding: 4px 10px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; flex-shrink: 0; background: #fff; }
+    .is-top .fi { flex: 1; height: 22px; font-size: 11px; }
+    .is-body { flex: 1; display: flex; overflow: hidden; }
+    
+    /* Dual pane in search */
+    .is-cats { width: 110px; background: #F7F9FC; border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+    .cat-item { padding: 6px 8px; font-size: 11px; color: var(--label); border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+    .cat-item:hover { background: var(--border); }
+    .cat-item.active { background: #fff; border-left: 3px solid var(--navy); font-weight: 700; color: var(--navy); }
+    .cat-sub { font-size: 9px; color: var(--muted); margin-top: 1px; font-weight: 400; }
+    
+    .is-items { flex: 1; background: #fff; overflow-y: auto; }
+    .is-item { padding: 6px 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; transition: background .1s; }
+    .is-item:hover { background: var(--bg); }
+    .isi-name { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .isi-lot { font-size: 9px; color: var(--muted); margin-top: 1px; }
+    .isi-price-box { text-align: right; }
+    .isi-price { font-size: 11px; font-weight: 700; color: var(--navy); }
+    .isi-stock { font-size: 9px; color: var(--green); margin-top: 1px; font-weight:600;}
 
-    /* ── PICKER COLUMN ── */
-    .picker-col { display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden; border-right:2px solid var(--border-dk); }
-    .picker-hd { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:6px 10px; background:#E9EFF9; flex-shrink:0; color:var(--navy); border-bottom:1px solid var(--border-dk); }
-    .picker-controls { display:flex; align-items:center; gap:5px; }
-    .psearch-wrap { position:relative; display:flex; align-items:center; }
-    .psearch-icon { position:absolute; left:7px; pointer-events:none; }
-    .psearch-icon svg { width:11px; height:11px; color:var(--muted); }
-    .psearch { height:26px; border:1px solid var(--border-dk); border-radius:3px; padding:0 7px 0 24px; font-size:11px; font-family:inherit; background:#fff; color:var(--text); outline:none; width:150px; transition:all .15s; }
-    .psearch::placeholder { color:var(--muted); }
-    .psearch:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(46,116,181,.1); width:180px; }
-    .psel { height:26px; border:1px solid var(--border-dk); border-radius:3px; padding:0 6px; font-size:11px; font-family:inherit; background:#fff; color:var(--text); cursor:pointer; outline:none; }
-    .picker-scroll { flex:1; overflow-y:auto; overflow-x:hidden; }
+    /* ── RIGHT COLUMN ── */
+    .col-right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .line-items-card { flex: 1; display: flex; flex-direction: column; }
+    
+    .table-wrapper { flex: 1; overflow: auto; background: #fff; }
+    .lt { width: 100%; border-collapse: collapse; min-width: 600px; text-align: left; }
+    .lt th { background: var(--navy); color: #fff; font-size: 11px; font-weight: 700; padding: 9px 16px; border-right: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+    .lt th:last-child { border-right: none; }
+    .lt td { padding: 10px 16px; font-size: 12.5px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .lt tbody tr:nth-child(even) { background: var(--row-alt); }
+    .lt tbody tr:hover { background: #D8E6FF; cursor: pointer; }
+    
+    /* Style inputs inside table softly */
+    .lt-input { width: 100%; background: transparent; border: 1.5px solid transparent; border-radius: 4px; padding: 4px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; transition: all .15s; }
+    .lt-input:hover { border-color: var(--border-dk); background: #fff; }
+    .lt-input:focus { border-color: var(--navy); background: #fff; box-shadow: 0 0 0 3px rgba(0,37,122,.08); }
+    .lt-input.num { text-align: right; }
+    .lt-input.ctr { text-align: center; }
+    
+    /* Dynamic Empty State for Table */
+    .empty-rows { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 12.5px; padding: 40px; }
+    .empty-rows svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5; }
+    
+    /* Footer Totals inside card */
+    .li-footer { border-top: 1px solid var(--border); background: #F7F9FC; padding: 12px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 32px; flex-shrink: 0; }
+    .lif-item { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--label); font-weight: 600; }
+    .lif-val { font-weight: 700; color: var(--text); width: 60px; text-align: right; }
+    .lif-total { font-size: 14px; font-weight: 800; color: var(--navy); display: flex; align-items: center; gap: 12px; }
+    .lif-total .lif-val { font-size: 18px; width: auto; min-width: 80px; }
+    
+    .del-btn { color: var(--muted); cursor: pointer; transition: color .15s; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+    .del-btn:hover { color: var(--red); background: #FEF2F2; }
 
-    /* ── PICKER TABLE ── */
-    .pt { width:100%; border-collapse:collapse; table-layout:fixed; }
-    .pt thead { position:sticky; top:0; z-index:2; }
-    .pt th { background:var(--navy); color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; overflow:hidden; border-right:1px solid rgba(255,255,255,.1); }
-    .pt th:last-child { border-right:none; }
-    .pt td { padding:5px 8px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-    /* Category separator rows */
-    .pt-grp td { background:#1e3f78; color:#b8ccee; font-size:9.5px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; padding:4px 10px; border-bottom:1px solid rgba(255,255,255,.1); }
-    /* Parent item rows — click to expand sizes */
-    .pt-item { cursor:pointer; }
-    .pt-item td { background:#f8faff; }
-    .pt-item:hover td { background:#eaf0fb !important; }
-    .pt-item.pt-open td { background:#DDE6F5; border-bottom-color:var(--blue); }
-    .pi-arrow { color:var(--blue); font-size:10px; text-align:center; font-weight:700; }
-    .pt-item.pt-open .pi-arrow { color:var(--navy); }
-    .pi-name { font-weight:700; color:var(--text); }
-    .pi-cat { color:var(--muted); font-size:10px; }
-    .pi-count { color:var(--muted); font-size:10px; text-align:right; }
-    /* Variant rows — shown when parent expanded */
-    .pt-var { cursor:pointer; }
-    .pt-var td { background:#fff; border-left:3px solid var(--blue); font-size:11px; }
-    .pt-var:nth-child(even) td { background:var(--row-alt); }
-    .pt-var:hover td { background:#cfe3f7 !important; }
-    .pv-name { padding-left:18px !important; font-weight:600; color:var(--text); }
-    .pt-price { font-weight:700; color:var(--navy); text-align:right; white-space:nowrap; }
-    .stk-a { background:#eafaf1; color:#1a7f4b; border:1px solid #a3d9b1; padding:1px 6px; border-radius:8px; font-size:9.5px; font-weight:700; white-space:nowrap; display:inline-block; }
-    .stk-l { background:#fff3cd; color:#8a6200; border:1px solid #f0c040; padding:1px 6px; border-radius:8px; font-size:9.5px; font-weight:700; white-space:nowrap; display:inline-block; }
-    .stk-o { background:#fde8e8; color:#b71234; border:1px solid #f0b0b0; padding:1px 6px; border-radius:8px; font-size:9.5px; font-weight:700; white-space:nowrap; display:inline-block; }
-    .pt-qty { height:24px; border:1px solid var(--border-dk); border-radius:3px; padding:0 4px; font-size:11px; width:40px; text-align:center; font-family:inherit; outline:none; background:#fff; }
-    .pt-qty:focus { border-color:var(--blue); }
-    .pt-add { height:24px; padding:0 10px; border-radius:3px; background:var(--blue); color:#fff; border:none; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:background .12s; }
-    .pt-add:hover { background:var(--navy); }
-    .pt-add-dis { height:24px; padding:0 10px; border-radius:3px; background:#bbb; color:#fff; border:none; font-size:10.5px; font-weight:700; cursor:not-allowed; font-family:inherit; white-space:nowrap; }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-track { background:#f0f2f5; }
-    ::-webkit-scrollbar-thumb { background:#c0c8d8; border-radius:3px; }
-    ::-webkit-scrollbar-thumb:hover { background:#a0aabf; }
+    /* AUTO-SAVE INDICATOR */
+    .save-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:#A7F3D0;opacity:0.8;font-weight:500;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);animation:pulse-save 4s infinite}
+    @keyframes pulse-save{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}
+    .save-indicator svg{width:12px;height:12px}
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f0f2f5; }
+    ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -184,7 +189,7 @@
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
       <div class="brand-text">
         <div class="t1">Total Scope, Inc.</div>
@@ -203,12 +208,8 @@
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
       <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
     </div>
-    <div class="sidebar-footer">© 2026 Total Scope, Inc.</div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
 
   <!-- MAIN -->
@@ -216,586 +217,670 @@
 
     <!-- TOPBAR -->
     <header class="topbar">
-      <div class="topbar-logo">
-        Total Scope, Inc.
-        <span>The Leader in Medical Device Repair</span>
+      <div></div>
+      <div class="topbar-center">
+        <div class="topbar-title">Total Scope, Inc.</div>
+        <div class="topbar-sub">The Leader in Medical Device Repair</div>
       </div>
-      <div class="topbar-right">
-        <div class="topbar-user">Welcome, Joseph Brassell</div>
-        <div class="svc-loc">
-          Service Location:
-          <select><option>Upper Chichester</option><option>Nashville</option></select>
+      <div class="topbar-right" style="gap: 16px;">
+        <div class="save-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Saved just now
         </div>
+        <span style="opacity:0.5; margin: 0 4px;">|</span>
+        Service Location 
+        <select class="svc-select" style="height:30px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:11.5px;cursor:pointer;outline:none;font-family:inherit;"><option>Upper Chichester</option><option>Nashville</option></select>
       </div>
     </header>
 
-    <!-- PAGE -->
-    <div class="page">
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <div class="ab-left">
+        <span>TSI</span> <span class="sep">|</span> <span>Product Sale</span>
+        <span class="ab-badge">#PS26055001</span>
+      </div>
+      <div class="ab-right">
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search</button>
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
+        <button class="btn btn-primary" onclick="alert('Order #PS26055001 has been finalized and submitted successfully!')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Finalize Order</button>
+      </div>
+    </div>
 
-      <!-- TOOLBAR -->
-      <div class="toolbar">
-        <button class="tbtn tbtn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search
-        </button>
-        <div class="tb-sep"></div>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>Quote
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Approve
-        </button>
-        <button class="tbtn tbtn-danger">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Void
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Invoice
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Pick List
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Copy
-        </button>
-        <div class="tb-sep"></div>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,17 2,12 6,7"/><polyline points="18,17 22,12 18,7"/><line x1="2" y1="12" x2="22" y2="12"/></svg>Email
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print
-        </button>
-        <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h6v13H7v-4"/></svg>Packing List
-        </button>
-        <div class="tb-sep"></div>
-        <button class="tbtn tbtn-danger" style="margin-left:auto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete
-        </button>
+    <!-- HEADER GRID -->
+    <div class="header-grid-wrapper">
+      <div class="header-grid">
+        <div class="hg-item" style="flex:1.5;">
+          <span class="hg-label">Client *</span>
+          <select class="fi" id="hdrClient">
+            <option value="" disabled selected>-- Select Client --</option>
+            <option>88th Medical Group</option>
+            <option>A.I.duPont Children Hospital</option>
+            <option>Mercy Health</option>
+            <option>Nashville General Hospital</option>
+            <option>Tift Regional Medical Center</option>
+          </select>
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Department *</span>
+          <select class="fi" id="hdrDept">
+            <option value="" disabled selected>-- Select Dept --</option>
+            <option>Biomedical Engineering</option>
+            <option>Central Sterile</option>
+            <option>Endoscopy</option>
+            <option>GI Lab</option>
+            <option>Surgery</option>
+          </select>
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Sales Rep *</span>
+          <select class="fi"><option>Brandi Cook</option><option>John Doe</option></select>
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Price List</span>
+          <select class="fi"><option>-- none --</option><option>Tier 1 Pricing</option></select>
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Quote Date</span>
+          <input type="date" class="fi" />
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Order Date</span>
+          <input type="date" class="fi" id="hdrOrderDate" />
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Work Order #</span>
+          <input type="text" class="fi" id="hdrWoNum" value="NEW" readonly style="background:var(--gray-50); color:var(--gray-500);"/>
+        </div>
+        <div class="hg-item">
+          <span class="hg-label">Work Order Date</span>
+          <input type="date" class="fi" id="hdrWoDate" />
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-wrapper">
+      <div class="tab active" onclick="showTab('main', this)">Main</div>
+      <div class="tab" onclick="showTab('address', this)">Address</div>
+      <div class="tab">Documents</div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+      
+      <!-- MAIN TAB CONTENT -->
+      <div id="tab-main" class="tab-content active" style="flex-direction: row; width: 100%;">
+        
+        <!-- LEFT COLUMN -->
+        <div class="col-left">
+          <!-- Item Search Card -->
+          <div class="card is-card">
+            <div class="card-hd">
+              <span>Item Search</span>
+              <span style="color:var(--gray-400); cursor:pointer; font-weight:500; text-transform:none; font-size:10px;">× clear selection</span>
+            </div>
+            <div class="is-top">
+              <input type="text" class="fi" placeholder="Search items..." oninput="searchItems(this.value)" />
+              <select class="fi" style="max-width: 100px;"><option>All Sizes</option></select>
+            </div>
+            <div class="is-body">
+              <!-- Categories pane -->
+              <div class="is-cats" id="catListPane">
+                 <!-- injected by JS -->
+              </div>
+              <!-- Items pane -->
+              <div class="is-items" id="itemListPane">
+                 <!-- injected by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-right">
+          <div class="card line-items-card">
+            <div class="card-hd">Line Items</div>
+            <div class="table-wrapper" style="position:relative;">
+              <table class="lt">
+                <colgroup>
+                  <col style="width:250px;" />
+                  <col style="width:200px;" />
+                  <col style="width:120px;" />
+                  <col style="width:60px;" />
+                  <col style="width:100px;" />
+                  <col style="width:100px;" />
+                  <col style="width:30px;" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Description 2</th>
+                    <th>Lot #</th>
+                    <th style="text-align:center;">Qty</th>
+                    <th style="text-align:right;">Unit Price</th>
+                    <th style="text-align:right;">Total</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="lineItemsBody">
+                  <!-- Empty state shown by default in UI but we inject dynamic rows via JS -->
+                </tbody>
+              </table>
+              
+              <div class="empty-rows" id="emptyStateContainer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <div style="font-weight:600; color:var(--gray-600); margin-bottom:4px;">No items on this order yet</div>
+                <div>Click any item in the search panels to add it</div>
+              </div>
+            </div>
+            
+            <div class="li-footer">
+              <div class="lif-item">
+                <span>Shipping</span>
+                <span class="lif-val">$ <span id="valShipping">0.00</span></span>
+              </div>
+              <div class="lif-item">
+                <span>Tax</span>
+                <span class="lif-val">$ <span id="valTax">0.00</span></span>
+              </div>
+              <div class="lif-total">
+                <span>Order Total</span>
+                <span class="lif-val" id="valTotal">$0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#tab-main -->
+
+      <!-- ADDRESS TAB CONTENT -->
+      <div id="tab-address" class="tab-content" style="flex-direction: row; width: 100%; overflow-x: auto; gap: 16px;">
+        
+        <div class="col-left">
+          <!-- Contact Card -->
+          <div class="card">
+            <div class="card-hd">Contact</div>
+            <div class="card-body contact-form">
+              <div class="cg-item cg-full">
+                <span class="hg-label">Name</span>
+                <input type="text" class="fi" placeholder="Contact name" />
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Phone</span>
+                <input type="tel" class="fi" placeholder="+1 Phone" />
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Email</span>
+                <input type="email" class="fi" placeholder="Email" />
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Fax</span>
+                <input type="tel" class="fi" placeholder="+1 Fax" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Purchase Order</span>
+                <input type="text" class="fi" placeholder="PO Number" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Note</span>
+                <textarea class="fi" style="height: 60px;" placeholder="Order notes..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-left">
+          <!-- Shipping Address -->
+          <div class="card">
+            <div class="card-hd">Shipping Address</div>
+            <div class="card-body contact-form">
+              <div class="cg-item cg-full">
+                <span class="hg-label">Address 1</span>
+                <input type="text" class="fi" id="shipAdd1" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Address 2</span>
+                <input type="text" class="fi" id="shipAdd2" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">City</span>
+                <input type="text" class="fi" id="shipCity" />
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">State</span>
+                <select class="fi" id="shipState">
+                  <option value="PA">PA</option>
+                  <option value="TN">TN</option>
+                  <option value="OH">OH</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                </select>
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Zip Code</span>
+                <input type="text" class="fi" id="shipZip" />
+              </div>
+              
+              <!-- Additional Shipping Fields -->
+              <div class="cg-item">
+                <span class="hg-label">Ship Via</span>
+                <select class="fi"><option>UPS Ground</option><option>FedEx Overnight</option></select>
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Account #</span>
+                <input type="text" class="fi" placeholder="Acct..." />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Delivery Instructions</span>
+                <input type="text" class="fi" placeholder="e.g. leave at back door..." />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-left">
+          <!-- Billing Address -->
+          <div class="card">
+            <div class="card-hd">Billing Address <span style="font-size:9px; text-transform:none; font-weight:400; color:var(--muted);"><input type="checkbox" id="chkSameAsShipping" style="vertical-align:middle; margin-right:4px;"> Same as Shipping</span></div>
+            <div class="card-body contact-form">
+              <div class="cg-item cg-full">
+                <span class="hg-label">Address 1</span>
+                <input type="text" class="fi" id="billAdd1" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Address 2</span>
+                <input type="text" class="fi" id="billAdd2" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">City</span>
+                <input type="text" class="fi" id="billCity" />
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">State</span>
+                <select class="fi" id="billState">
+                  <option value="PA">PA</option>
+                  <option value="TN">TN</option>
+                  <option value="OH">OH</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                </select>
+              </div>
+              <div class="cg-item">
+                <span class="hg-label">Zip Code</span>
+                <input type="text" class="fi" id="billZip" />
+              </div>
+              <div class="cg-item cg-full">
+                <span class="hg-label">Billing Email</span>
+                <input type="email" class="fi" placeholder="Email for invoices..." />
+              </div>
+              
+               <!-- Additional Billing Fields -->
+               <div class="cg-item">
+                <span class="hg-label">Terms</span>
+                <select class="fi"><option>Net 30</option><option>Due on Receipt</option></select>
+              </div>
+               <div class="cg-item">
+                <span class="hg-label">Tax Exempt #</span>
+                <input type="text" class="fi" placeholder="Tax ID..." />
+              </div>
+            </div>
+          </div>
+        </div>
+        
       </div>
 
-      <!-- ORDER HEADER -->
-      <div class="ohdr">
-
-        <!-- Row 1: Client / Dept / Invoice# / Inv'd -->
-        <div class="orow orow-1">
-          <div>
-            <label class="fl">Client <span class="req">*</span></label>
-            <select class="fi">
-              <option>88th Medical Group</option>
-              <option>BayCare Surgery Center</option>
-              <option>Jefferson Health</option>
-            </select>
-          </div>
-          <div>
-            <label class="fl">Department <span class="req">*</span></label>
-            <select class="fi">
-              <option>Biomedical Engineering</option>
-              <option>Sterile Processing</option>
-              <option>Endoscopy Suite</option>
-            </select>
-          </div>
-          <div>
-            <label class="fl">Invoice #</label>
-            <input class="fi fi-ro" value="NI26066001" readonly />
-          </div>
-          <div>
-            <label class="fl" style="text-align:center;">Inv'd</label>
-            <div class="fi-chk"><input type="checkbox" /></div>
-          </div>
-        </div>
-
-        <!-- Row 2: Sales Rep / Price List / Dates -->
-        <div class="orow orow-2">
-          <div>
-            <label class="fl">Sales Rep <span class="req">*</span></label>
-            <select class="fi"><option>Brandi Cook</option><option>Mike Torres</option></select>
-          </div>
-          <div>
-            <label class="fl">Price List</label>
-            <select class="fi"><option>— Select —</option><option>GSA 2024</option><option>Standard</option></select>
-          </div>
-          <div>
-            <label class="fl">Order Date</label>
-            <input type="date" class="fi" value="2026-03-07" />
-          </div>
-          <div>
-            <label class="fl">Quote Date</label>
-            <input type="date" class="fi" />
-          </div>
-          <div>
-            <label class="fl">Approval Date</label>
-            <input type="date" class="fi" />
-          </div>
-          <div>
-            <label class="fl">Invoice Date</label>
-            <input type="date" class="fi" />
-          </div>
-        </div>
-
-        <div class="ohdr-divider"></div>
-
-        <!-- Row 3: Contact details + Notes inline -->
-        <div class="orow orow-3">
-          <div>
-            <label class="fl">Contact Name</label>
-            <select class="fi"><option>— Select —</option><option>Sarah Mitchell</option><option>James Park</option></select>
-          </div>
-          <div>
-            <label class="fl">Email</label>
-            <input class="fi" placeholder="contact@hospital.org" />
-          </div>
-          <div>
-            <label class="fl">Phone</label>
-            <input class="fi" placeholder="+1 (___) ___-____" />
-          </div>
-          <div>
-            <label class="fl">Purchase Order #</label>
-            <input class="fi" placeholder="PO-XXXXXX" />
-          </div>
-          <div>
-            <label class="fl">Order Notes</label>
-            <input class="fi" placeholder="Internal notes about this order..." />
-          </div>
-        </div>
-
-      </div><!-- /.ohdr -->
-
-      <!-- DUAL PANEL WORKSPACE -->
-      <div class="workspace">
-
-        <!-- ── LEFT: INVENTORY PICKER ── -->
-        <div class="picker-col">
-
-          <div class="picker-hd">
-            <span class="col-title">Inventory — select item, then pick size</span>
-            <div class="picker-controls">
-              <div class="psearch-wrap">
-                <span class="psearch-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-                <input class="psearch" placeholder="Search items..." />
-              </div>
-              <select class="psel">
-                <option>All Categories</option>
-                <option>IT Assembly</option>
-                <option>Angulation</option>
-                <option>Imaging/Optics</option>
-                <option>Accessories</option>
-                <option>Carts</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="picker-scroll">
-            <table class="pt">
-              <colgroup>
-                <col style="width:20px" />
-                <col style="width:auto" />
-                <col style="width:80px" />
-                <col style="width:70px" />
-                <col style="width:76px" />
-                <col style="width:42px" />
-                <col style="width:56px" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Item Name</th>
-                  <th>Model Fit</th>
-                  <th style="text-align:center;">Stock</th>
-                  <th style="text-align:right;">Price</th>
-                  <th style="text-align:center;">Qty</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-
-                <!-- ── INSERTION TUBE ASSEMBLIES ── -->
-                <tr class="pt-grp"><td colspan="7">Insertion Tube Assemblies</td></tr>
-
-                <tr class="pt-item" data-item="it-assy" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">IT ASSEMBLY</td>
-                  <td colspan="3" class="pi-cat">Insertion tube, standard &amp; mini</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="it-assy" style="display:none">
-                  <td></td><td class="pv-name">LD/SD — Large Diameter</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 / GIF-190</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,250.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="it-assy" style="display:none">
-                  <td></td><td class="pv-name">MINI — Small Diameter</td>
-                  <td style="color:var(--label);font-size:10.5px;">PCF-H190 / EG-H185</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,100.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- ── ANGULATION COMPONENTS ── -->
-                <tr class="pt-grp"><td colspan="7">Angulation Components</td></tr>
-
-                <tr class="pt-item" data-item="ang-assy" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">ANGULATION ASSEMBLY</td>
-                  <td colspan="3" class="pi-cat">4-way mechanism, complete</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="ang-assy" style="display:none">
-                  <td></td><td class="pv-name">GIF-H180</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$980.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="ang-assy" style="display:none">
-                  <td></td><td class="pv-name">GIF-H190</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H190 / GIF-190</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$960.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="ang-cable" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">ANGULATION CABLE ADJUSTER</td>
-                  <td colspan="3" class="pi-cat">Cable tension adjuster kit</td>
-                  <td colspan="2" class="pi-count">1 size</td>
-                </tr>
-                <tr class="pt-var" data-parent="ang-cable" style="display:none">
-                  <td></td><td class="pv-name">Universal Kit</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$145.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="bend-rubber" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">BENDING RUBBER</td>
-                  <td colspan="3" class="pi-cat">Distal bending section rubber</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="bend-rubber" style="display:none">
-                  <td></td><td class="pv-name">Standard — H180/H185</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 / H185</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$875.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="bend-rubber" style="display:none">
-                  <td></td><td class="pv-name">Mini — PCF Series</td>
-                  <td style="color:var(--label);font-size:10.5px;">PCF-H190</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$720.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- ── IMAGING / OPTICS ── -->
-                <tr class="pt-grp"><td colspan="7">Imaging / Optics</td></tr>
-
-                <tr class="pt-item" data-item="ccd" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">CCD CHIP ASSEMBLY</td>
-                  <td colspan="3" class="pi-cat">HD imaging sensor, OEM spec</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="ccd" style="display:none">
-                  <td></td><td class="pv-name">HD — H180</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 HD</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$240.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="ccd" style="display:none">
-                  <td></td><td class="pv-name">Standard — H180</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180 Std</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$185.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="achromat" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">ACHROMAT LENS</td>
-                  <td colspan="3" class="pi-cat">Objective achromatic doublet</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="achromat" style="display:none">
-                  <td></td><td class="pv-name">GIF-H180</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF-H180</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$315.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="achromat" style="display:none">
-                  <td></td><td class="pv-name">CF-Q180</td>
-                  <td style="color:var(--label);font-size:10.5px;">CF-Q180</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$295.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="light-guide" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">LIGHT GUIDE BUNDLE</td>
-                  <td colspan="3" class="pi-cat">Fiber optic bundle</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="light-guide" style="display:none">
-                  <td></td><td class="pv-name">3.5mm — Standard</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal 3.5mm</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$390.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="light-guide" style="display:none">
-                  <td></td><td class="pv-name">2.8mm — Mini</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal 2.8mm</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$340.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- ── ACCESSORIES & HARDWARE ── -->
-                <tr class="pt-grp"><td colspan="7">Accessories &amp; Hardware</td></tr>
-
-                <tr class="pt-item" data-item="aw-nozzle" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">AIR WATER NOZZLES</td>
-                  <td colspan="3" class="pi-cat">Replacement nozzle set</td>
-                  <td colspan="2" class="pi-count">2 options</td>
-                </tr>
-                <tr class="pt-var" data-parent="aw-nozzle" style="display:none">
-                  <td></td><td class="pv-name">10-Pack</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF / PCF / CF</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$62.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="aw-nozzle" style="display:none">
-                  <td></td><td class="pv-name">5-Pack</td>
-                  <td style="color:var(--label);font-size:10.5px;">GIF / PCF / CF</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$35.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="cord-seal" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">UNIVERSAL CORD SEAL</td>
-                  <td colspan="3" class="pi-cat">Waterproof cord seal kit</td>
-                  <td colspan="2" class="pi-count">1 size</td>
-                </tr>
-                <tr class="pt-var" data-parent="cord-seal" style="display:none">
-                  <td></td><td class="pv-name">Standard</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$28.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="wb-connector" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">WATER BOTTLE CONNECTOR</td>
-                  <td colspan="3" class="pi-cat">Irrigation bottle connector cap</td>
-                  <td colspan="2" class="pi-count">1 size</td>
-                </tr>
-                <tr class="pt-var" data-parent="wb-connector" style="display:none">
-                  <td></td><td class="pv-name">Olympus OEM</td>
-                  <td style="color:var(--label);font-size:10.5px;">Olympus OEM</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$19.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <tr class="pt-item" data-item="tip-hood" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">DISTAL TIP HOOD</td>
-                  <td colspan="3" class="pi-cat">Soft distal attachment cap</td>
-                  <td colspan="2" class="pi-count" style="color:var(--red);">Out of Stock</td>
-                </tr>
-                <tr class="pt-var" data-parent="tip-hood" style="display:none">
-                  <td></td><td class="pv-name">10-Pack — PCF-H190</td>
-                  <td style="color:var(--label);font-size:10.5px;">PCF-H190 / H180</td>
-                  <td style="text-align:center;"><span class="stk-o">Out of Stock</span></td>
-                  <td class="pt-price">$48.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" disabled onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add-dis" disabled>+ Add</button></td>
-                </tr>
-
-                <!-- ── CARTS & EQUIPMENT ── -->
-                <tr class="pt-grp"><td colspan="7">Carts &amp; Equipment</td></tr>
-
-                <tr class="pt-item" data-item="scope-cart" onclick="selectItem(this)">
-                  <td class="pi-arrow">▶</td>
-                  <td class="pi-name">SCOPE CART</td>
-                  <td colspan="3" class="pi-cat">Stainless mobile storage cart</td>
-                  <td colspan="2" class="pi-count">2 sizes</td>
-                </tr>
-                <tr class="pt-var" data-parent="scope-cart" style="display:none">
-                  <td></td><td class="pv-name">Standard — 4-Shelf</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,850.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-var" data-parent="scope-cart" style="display:none">
-                  <td></td><td class="pv-name">Compact — 2-Shelf</td>
-                  <td style="color:var(--label);font-size:10.5px;">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,250.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-              </tbody>
-            </table>
-          </div>
-
-        </div><!-- /.picker-col -->
-
-        <!-- ── RIGHT: ORDER LINES ── -->
-        <div class="order-col">
-
-          <div class="col-hd">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span class="col-title">Order Lines</span>
-              <span class="badge badge-draft">Draft</span>
-            </div>
-            <span class="col-meta">3 items &nbsp;·&nbsp; <strong>$4,575.00</strong></span>
-          </div>
-
-          <div class="order-scroll">
-            <table class="ot">
-              <thead>
-                <tr>
-                  <th style="width:30px;text-align:center;">#</th>
-                  <th>Description</th>
-                  <th style="width:120px;">Description 2</th>
-                  <th style="width:88px;">Lot #</th>
-                  <th style="width:50px;text-align:center;">Qty</th>
-                  <th style="width:86px;text-align:right;">Unit Price</th>
-                  <th style="width:86px;text-align:right;">Total</th>
-                  <th style="width:30px;"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="text-align:center;color:var(--muted);font-size:11px;">1</td>
-                  <td><input class="eti" value="Olympus GIF-H180 Insertion Tube" /></td>
-                  <td><input class="eti" placeholder="Optional" /></td>
-                  <td><input class="eti" placeholder="Lot #" /></td>
-                  <td><input class="eti" value="2" style="text-align:center;" /></td>
-                  <td><input class="eti" value="$1,250.00" style="text-align:right;" /></td>
-                  <td style="text-align:right;font-weight:700;color:var(--navy);">$2,500.00</td>
-                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
-                </tr>
-                <tr>
-                  <td style="text-align:center;color:var(--muted);font-size:11px;">2</td>
-                  <td><input class="eti" value="Bending Rubber — GIF-H180" /></td>
-                  <td><input class="eti" placeholder="Optional" /></td>
-                  <td><input class="eti" placeholder="Lot #" /></td>
-                  <td><input class="eti" value="1" style="text-align:center;" /></td>
-                  <td><input class="eti" value="$875.00" style="text-align:right;" /></td>
-                  <td style="text-align:right;font-weight:700;color:var(--navy);">$875.00</td>
-                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
-                </tr>
-                <tr>
-                  <td style="text-align:center;color:var(--muted);font-size:11px;">3</td>
-                  <td><input class="eti" value="CCD Chip Assembly" /></td>
-                  <td><input class="eti" placeholder="Optional" /></td>
-                  <td><input class="eti" placeholder="Lot #" /></td>
-                  <td><input class="eti" value="5" style="text-align:center;" /></td>
-                  <td><input class="eti" value="$240.00" style="text-align:right;" /></td>
-                  <td style="text-align:right;font-weight:700;color:var(--navy);">$1,200.00</td>
-                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
-                </tr>
-                <tr class="ot-addrow">
-                  <td></td>
-                  <td colspan="7">
-                    <button class="add-line-btn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      Add line item
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- ORDER SUMMARY FOOTER -->
-          <div class="order-footer">
-            <div class="sum-fields">
-              <div class="sum-row">
-                <span class="sum-lbl">Subtotal</span>
-                <span class="sum-sub">$4,575.00</span>
-              </div>
-              <div class="sum-row">
-                <span class="sum-lbl">Shipping</span>
-                <input class="sum-input" value="$0.00" />
-              </div>
-              <div class="sum-row">
-                <span class="sum-lbl">Tax</span>
-                <input class="sum-input" value="$0.00" />
-              </div>
-            </div>
-            <div class="sum-total-box">
-              <div class="sum-total-lbl">Order Total</div>
-              <div class="sum-total-val">$4,575.00</div>
-            </div>
-          </div>
-
-        </div><!-- /.order-col -->
-
-
-      </div><!-- /.workspace -->
-
-    </div><!-- /.page -->
+    </div><!-- /.workspace -->
   </div><!-- /.main -->
 </div><!-- /.shell -->
+
 <script>
-  function selectItem(row) {
-    const itemId = row.dataset.item;
-    const isOpen = row.classList.contains('pt-open');
-    // Close all open items
-    document.querySelectorAll('.pt-item.pt-open').forEach(r => {
-      r.classList.remove('pt-open');
-      r.querySelector('.pi-arrow').textContent = '▶';
+const INVENTORY_CATS = [
+  "Clamps",
+  "Curettes",
+  "Elevators",
+  "Forceps",
+  "General Instruments",
+  "Hooks",
+  "Knives & Blades",
+  "Needle Holders",
+  "Rongeurs",
+  "Retractors",
+  "Scissors",
+  "Speculums",
+  "Tubes & Cannulas"
+];
+
+const INVENTORY_DB = [
+  // Clamps
+  { sku: "18555", name: "BACKHAUS TOWEL CLAMP 3 1/2 in", lot: "Lot: 18555", price: 8.60, category: "Clamps", stock: 12 },
+  { sku: "19383", name: "DEBAKEY BULLDOG CLAMP 3 in", lot: "Lot: 19383", price: 188.48, category: "Clamps", stock: 5 },
+  { sku: "19729", name: "GEMINI CLAMP 7 in", lot: "Lot: 19729", price: 32.00, category: "Clamps", stock: 8 },
+  { sku: "21371", name: "SATINSKY VENA CAVA CLAMP LARGE", lot: "Lot: 21371", price: 358.74, category: "Clamps", stock: 2 },
+  
+  // Curettes
+  { sku: "18594", name: "BARNHILL ADENOID CUR 1", lot: "Lot: 18594", price: 76.47, category: "Curettes", stock: 4 },
+  { sku: "20216", name: "KARLIN CERVICAL MICRO CURETTE FORWARD", lot: "Lot: 20216", price: 168.94, category: "Curettes", stock: 3 },
+  { sku: "21467", name: "SIMS UTERINE CURETTE", lot: "Lot: 21467", price: 51.97, category: "Curettes", stock: 9 },
+  
+  // Elevators
+  { sku: "19688", name: "FREER ELEVATOR 7 1/2 in", lot: "Lot: 19688", price: 16.89, category: "Elevators", stock: 15 },
+  { sku: "20380", name: "KEY ELEVATOR 7 1/2 in", lot: "Lot: 20380", price: 40.77, category: "Elevators", stock: 6 },
+  
+  // Forceps
+  { sku: "18449", name: "ADSON DRESSING FORCEP", lot: "Lot: 18449", price: 4.05, category: "Forceps", stock: 30 },
+  { sku: "18471", name: "ADSON TISSUE FORCEP", lot: "Lot: 18471", price: 9.60, category: "Forceps", stock: 25 },
+  { sku: "18489", name: "ALLIS TISSUE FORCEPS", lot: "Lot: 18489", price: 9.35, category: "Forceps", stock: 20 },
+  { sku: "18894", name: "CASTROVIEJO SUTURE FORCEP .3MM", lot: "Lot: 18894", price: 172.00, category: "Forceps", stock: 4 },
+  { sku: "19429", name: "DEBAKEY THORACIC TISSUE FORCEPS", lot: "Lot: 19429", price: 32.99, category: "Forceps", stock: 14 },
+  { sku: "19876", name: "HALSTED MOSQUITO FORCEP 5 in", lot: "Lot: 19876", price: 9.90, category: "Forceps", stock: 40 },
+  { sku: "20327", name: "KELLY ARTERY FORCEP 5 1/2 in", lot: "Lot: 20327", price: 8.96, category: "Forceps", stock: 35 },
+  
+  // Hooks
+  { sku: "19685", name: "FREER DOUBLE HOOK 6 in", lot: "Lot: 19685", price: 20.15, category: "Hooks", stock: 11 },
+  { sku: "20187", name: "JOSEPH DOUBLE PRONG HOOK", lot: "Lot: 20187", price: 12.45, category: "Hooks", stock: 8 },
+  
+  // Knives & Blades
+  { sku: "20404", name: "KNIFE HANDLE #3 5 in", lot: "Lot: 20404", price: 1.85, category: "Knives & Blades", stock: 50 },
+  { sku: "20407", name: "KNIFE HANDLE #4 STANDARD 5 1/4 in", lot: "Lot: 20407", price: 3.80, category: "Knives & Blades", stock: 45 },
+  { sku: "22163", name: "NUCLEUS KNIFE 5 in", lot: "Lot: 22163", price: 19.60, category: "Knives & Blades", stock: 7 },
+  
+  // Needle Holders
+  { sku: "18944", name: "CASTROVIEJO NEEDLE HOLDER 8 1/2 in", lot: "Lot: 18944", price: 296.75, category: "Needle Holders", stock: 3 },
+  { sku: "19254", name: "CRILE WOOD NEEDLE HOLDER 6 in", lot: "Lot: 19254", price: 38.40, category: "Needle Holders", stock: 18 },
+  { sku: "20670", name: "MAYO-HEGAR NEEDLE HOLDER 6 in", lot: "Lot: 20670", price: 34.40, category: "Needle Holders", stock: 22 },
+  
+  // Retractors
+  { sku: "18570", name: "BALFOUR ABDOMINAL RETRACTOR", lot: "Lot: 18570", price: 611.15, category: "Retractors", stock: 2 },
+  { sku: "19361", name: "DEAVER RETRACTOR GRIP HANDLE", lot: "Lot: 19361", price: 31.16, category: "Retractors", stock: 10 },
+  { sku: "21427", name: "SENN RETRACTOR Sharp", lot: "Lot: 21427", price: 8.15, category: "Retractors", stock: 15 },
+  { sku: "21843", name: "WEITLANER RETRACTOR 4 1/4 in", lot: "Lot: 21843", price: 37.55, category: "Retractors", stock: 7 },
+  
+  // Rongeurs
+  { sku: "18640", name: "BEYER BONE RONGEUR 7 1/8 in", lot: "Lot: 18640", price: 186.52, category: "Rongeurs", stock: 4 },
+  { sku: "19097", name: "CLASSIC KERRISON CERVICAL RONGEUR", lot: "Lot: 19097", price: 525.00, category: "Rongeurs", stock: 1 },
+  { sku: "20504", name: "LEMPERT BONE RONGEUR 6 1/2 in", lot: "Lot: 20504", price: 103.24, category: "Rongeurs", stock: 5 },
+  
+  // Scissors
+  { sku: "20121", name: "IRIS SCISSOR CURVED 4 1/8 in", lot: "Lot: 20121", price: 7.84, category: "Scissors", stock: 25 },
+  { sku: "20642", name: "MAYO SCISSOR Curved 6 3/4 in", lot: "Lot: 20642", price: 6.50, category: "Scissors", stock: 30 },
+  { sku: "20768", name: "METZENBAUM DISSECTING SCISSOR 5 3/4 in", lot: "Lot: 20768", price: 15.30, category: "Scissors", stock: 18 },
+  { sku: "21671", name: "STEVENS TENOTOMY SCISSORS Curved", lot: "Lot: 21671", price: 25.40, category: "Scissors", stock: 8 },
+  
+  // Speculums
+  { sku: "21023", name: "PEDERSON VAGINAL SPECULUM", lot: "Lot: 21023", price: 30.04, category: "Speculums", stock: 12 },
+  { sku: "22181", name: "GRAVES VAGINAL SPECULUM", lot: "Lot: 22181", price: 85.05, category: "Speculums", stock: 6 },
+  
+  // Tubes & Cannulas
+  { sku: "18606", name: "BARON SUCTION TUBE 3 FR", lot: "Lot: 18606", price: 22.90, category: "Tubes & Cannulas", stock: 10 },
+  { sku: "19652", name: "FRAZIER SUCTION TUBE 10 FR", lot: "Lot: 19652", price: 16.00, category: "Tubes & Cannulas", stock: 14 },
+  { sku: "21058", name: "POOL SUCTION TUBE Straight", lot: "Lot: 21058", price: 44.70, category: "Tubes & Cannulas", stock: 5 }
+];
+</script>
+<script>
+  let currentCategory = "All";
+  let searchQuery = "";
+
+  function showTab(tabId, el) {
+    // Hide all tab content within the left column
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
     });
-    document.querySelectorAll('.pt-var').forEach(r => r.style.display = 'none');
-    // If it was closed, open this one
-    if (!isOpen) {
-      row.classList.add('pt-open');
-      row.querySelector('.pi-arrow').textContent = '▼';
-      const variants = document.querySelectorAll(`.pt-var[data-parent="${itemId}"]`);
-      variants.forEach(r => r.style.display = '');
-      if (variants.length) variants[0].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Remove active state from all tabs
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.remove('active');
+    });
+    
+    // Show selected content and activate tab
+    document.getElementById('tab-' + tabId).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function renderInventoryUI() {
+    const catPane = document.getElementById('catListPane');
+    const itemPane = document.getElementById('itemListPane');
+    
+    // Render Categories
+    let catsHtml = `<div class="cat-item ${currentCategory === 'All' ? 'active' : ''}" onclick="selectCategory('All')">
+                      <div>All Items</div>
+                    </div>`;
+                    
+    INVENTORY_CATS.forEach(cat => {
+      catsHtml += `<div class="cat-item ${currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
+                     <div>${cat}</div>
+                   </div>`;
+    });
+    catPane.innerHTML = catsHtml;
+    
+    // Filter Items
+    let filtered = INVENTORY_DB;
+    if (currentCategory !== 'All') {
+      filtered = filtered.filter(i => i.category === currentCategory);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q));
+    }
+    
+    // Render Items
+    let itemsHtml = '';
+    filtered.forEach(item => {
+      // Escape single quotes for inline onclick handler
+      const safeName = item.name.replace(/'/g, "\\'");
+      const safeLot = item.lot.replace(/'/g, "\\'");
+      
+      itemsHtml += `
+        <div class="is-item" onclick="addItemToOrder('${safeName}', '${safeLot}', ${item.price})">
+          <div>
+            <div class="isi-name">${item.name}</div>
+            <div class="isi-lot">${item.lot}</div>
+          </div>
+          <div class="isi-price-box">
+            <div class="isi-price">$${formatCurrency(item.price)}</div>
+            <div class="isi-stock">${item.stock} avail</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    if (filtered.length === 0) {
+      itemsHtml = `<div style="padding:20px; text-align:center; color:var(--muted); font-size:11.5px;">No items found matching criteria.</div>`;
+    }
+    
+    itemPane.innerHTML = itemsHtml;
+  }
+
+  function selectCategory(cat) {
+    currentCategory = cat;
+    renderInventoryUI();
+  }
+
+  // Hook up search input
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.is-top input[type="text"]');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderInventoryUI();
+      });
+    }
+    // Initial Render
+    renderInventoryUI();
+  });
+
+  function formatCurrency(num) {
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function updateTotals() {
+    const tbody = document.getElementById('lineItemsBody');
+    const emptyState = document.getElementById('emptyStateContainer');
+    
+    let subtotal = 0;
+    const rows = tbody.querySelectorAll('tr');
+    
+    if (rows.length === 0) {
+      emptyState.style.display = 'flex';
+      document.getElementById('valTotal').textContent = '$0.00';
+      return;
+    } else {
+      emptyState.style.display = 'none';
+    }
+
+    rows.forEach(row => {
+      const qtyInput = row.querySelector('.qty-input');
+      const priceInput = row.querySelector('.price-input');
+      const totalCell = row.querySelector('.row-total');
+      
+      const qty = parseInt(qtyInput.value) || 0;
+      const price = parseFloat(priceInput.value.replace(/[^0-9.-]+/g, "")) || 0;
+      const rowTotal = qty * price;
+      
+      subtotal += rowTotal;
+      totalCell.textContent = '$' + formatCurrency(rowTotal);
+    });
+
+    const shipping = 0.00; // Mocked
+    const tax = 0.00; // Mocked
+    const grandTotal = subtotal + shipping + tax;
+    
+    document.getElementById('valShipping').textContent = formatCurrency(shipping);
+    document.getElementById('valTax').textContent = formatCurrency(tax);
+    document.getElementById('valTotal').textContent = '$' + formatCurrency(grandTotal);
+  }
+
+  function deleteRow(btn) {
+    btn.closest('tr').remove();
+    updateTotals();
+  }
+
+  function addItemToOrder(desc, lot, price) {
+    const tbody = document.getElementById('lineItemsBody');
+    const tr = document.createElement('tr');
+    
+    tr.innerHTML = `
+      <td><input type="text" class="lt-input" value="${desc}" /></td>
+      <td><input type="text" class="lt-input" placeholder="Add notation..." /></td>
+      <td><input type="text" class="lt-input" value="${lot}" /></td>
+      <td><input type="number" class="lt-input num qty-input" value="1" min="1" onchange="updateTotals()" /></td>
+      <td><input type="text" class="lt-input num price-input" value="${formatCurrency(price)}" onchange="updateTotals()" /></td>
+      <td style="text-align:right; font-weight:700; color:var(--navy);" class="row-total">$0.00</td>
+      <td style="text-align:center;">
+        <div class="del-btn" onclick="deleteRow(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </div>
+      </td>
+    `;
+    
+    tbody.appendChild(tr);
+    updateTotals();
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  INIT & DEPARTMENT DATA LOAD
+  // ═══════════════════════════════════════════════════════
+  
+  // Mock Database mapping Departments to physical addresses
+  const DEPT_ADDRESS_MAP = {
+    "Biomedical Engineering": {
+      add1: "800 North Limestone Street",
+      add2: "Suite B-12",
+      city: "Springfield",
+      state: "OH",
+      zip: "45503",
+      email: "invoices.biomed@springfield-medical.org"
+    },
+    "Central Sterile": {
+      add1: "1500 East Medical Center Drive",
+      add2: "Rear Receiving Dock",
+      city: "Nashville",
+      state: "TN",
+      zip: "37232",
+      email: "central.sterile@hca.com"
+    },
+    "Endoscopy": {
+      add1: "2010 West 86th Street",
+      add2: "Outpatient Pavilion",
+      city: "Tampa",
+      state: "FL",
+      zip: "33614",
+      email: "endo-billing@flhealth.org"
+    },
+    "GI Lab": {
+      add1: "5000 University Drive",
+      add2: "Campus Box 8021",
+      city: "Miami",
+      state: "FL",
+      zip: "33146",
+      email: "gi.lab@university.edu"
+    },
+    "Surgery": {
+      add1: "100 Hospital Drive",
+      add2: "Main Operating Room",
+      city: "Tifton",
+      state: "GA",
+      zip: "31794",
+      email: "surgery-accounts@tiftregional.com"
+    }
+  };
+
+  function loadDepartmentAddress(deptName) {
+    const data = DEPT_ADDRESS_MAP[deptName];
+    if (!data) return;
+    
+    // Auto-fill Shipping
+    document.getElementById('shipAdd1').value = data.add1;
+    document.getElementById('shipAdd2').value = data.add2;
+    document.getElementById('shipCity').value = data.city;
+    document.getElementById('shipState').value = data.state;
+    document.getElementById('shipZip').value = data.zip;
+    
+    // Auto-fill Billing (Mocking "Same as Shipping" behavior naturally)
+    document.getElementById('chkSameAsShipping').checked = true;
+    document.getElementById('billAdd1').value = data.add1;
+    document.getElementById('billAdd2').value = data.add2;
+    document.getElementById('billCity').value = data.city;
+    document.getElementById('billState').value = data.state;
+    document.getElementById('billZip').value = data.zip;
+    
+    // The Billing Email is usually specific
+    const emailInput = document.getElementById('billEmail');
+    if(emailInput) emailInput.value = data.email;
+  }
+
+  // Bind the Department dropdown to trigger the address load manually
+  document.getElementById('hdrDept').addEventListener('change', function(e) {
+    loadDepartmentAddress(e.target.value);
+  });
+
+  function initializeWorkspace() {
+    const params = new URLSearchParams(window.location.search);
+    const client = params.get('client');
+    const dept = params.get('dept');
+    
+    // Set today's date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('hdrOrderDate').value = today;
+    document.getElementById('hdrWoDate').value = today;
+    
+    // Set Client
+    if (client) {
+      document.getElementById('hdrClient').value = client;
+    } else {
+      document.getElementById('hdrClient').value = '88th Medical Group';
+    }
+    
+    // Set Dept and Load Addresses
+    if (dept) {
+      document.getElementById('hdrDept').value = dept;
+      loadDepartmentAddress(dept);
+    } else {
+      document.getElementById('hdrDept').value = 'Biomedical Engineering';
+      loadDepartmentAddress('Biomedical Engineering');
     }
   }
+
+  // Run init
+  initializeWorkspace();
 </script>
 </body>
 </html>

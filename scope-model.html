@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Scope Model | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;background:#f0f2f5;color:#212529}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
+      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
+      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;
+    }
+    .shell{display:flex;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
+    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sidebar-brand{padding:12px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .brand-logo{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .brand-logo svg{width:18px;height:18px}
+    .brand-text .t1{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3}
+    .brand-text .t2{font-size:9.5px;color:var(--muted);margin-top:1px}
+    .nav-group{padding:6px 0;flex:1}
+    .sidebar-footer{padding:8px 12px;border-top:1px solid var(--border);color:var(--muted);font-size:9.5px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;color:var(--label);font-size:11.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:var(--bg);color:var(--navy)}
+    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:700}
+    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+    .nav-item.active svg{opacity:1}
+
+    /* HEADER */
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:48px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
+    .topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+
+    /* PAGE CONTENT */
+    .page-body{flex:1;overflow-y:auto;background:#f0f2f5}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:7px;padding:9px 24px 8px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap}
+    .toolbar-group{display:flex;gap:5px}
+    .btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 13px;border-radius:6px;font-size:12px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
+    .btn-icon{width:30px;height:30px;padding:0;border-radius:6px;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-family:inherit}
+    .btn-navy{background:var(--navy);color:#fff;font-weight:600}
+    .btn-navy:hover{background:#001c5c}
+    .btn-outline{background:#fff;border:1.5px solid var(--border-dk);color:var(--label)}
+    .btn-outline:hover{background:var(--bg)}
+    .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
+    .divider{width:1px;height:24px;background:var(--border);margin:0 4px}
+
+    /* SEGMENTED BUTTONS */
+    .seg-group{display:inline-flex;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;background:#fff}
+    .seg-btn{padding:0 14px;height:28px;border:none;background:transparent;color:var(--label);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;border-right:1px solid var(--border-dk);transition:all .12s}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn:hover{background:var(--bg)}
+    .seg-btn.active{background:var(--navy);color:#fff}
+
+    /* MODEL SELECTOR */
+    .model-bar{padding:10px 24px 0;background:#DDE6F5}
+    .model-sel-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .model-sel-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .model-select{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12.5px;font-family:inherit;color:var(--navy);font-weight:600;background:#fff;cursor:pointer;outline:none;min-width:300px;transition:border-color .15s}
+    .model-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.09)}
+    .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--steel)}
+    .status-pill{border-radius:12px;padding:3px 12px;font-size:11.5px;font-weight:700}
+    .status-active{background:#F0FDF4;border:1px solid #BBF7D0;color:var(--green)}
+    .status-disc{background:#FEF2F2;border:1px solid #FECACA;color:var(--red)}
+    .cb-inline{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--label);cursor:pointer;user-select:none}
+    .cb-inline input{width:14px;height:14px;accent-color:var(--navy);cursor:pointer}
+
+    /* HEADER RECORD CARD */
+    .record-header{padding:10px 24px;background:#DDE6F5}
+    .record-header .panel-body{padding:10px 16px}
+
+    /* TABS */
+    .tab-bar{display:flex;padding:0 24px;background:#DDE6F5;border-bottom:2px solid var(--border-dk);margin-top:6px}
+    .tab{padding:8px 18px;font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none}
+    .tab:hover{color:var(--navy)}
+    .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* TAB CONTENT */
+    .tab-content{padding:12px 20px;display:none}
+    .tab-content.show{display:flex;gap:14px}
+    .tab-content.show-block{display:block;padding:12px 20px}
+
+    /* FORM HELPERS */
+    .col-left{flex:1.4;min-width:0;display:flex;flex-direction:column;gap:8px}
+    .col-right{width:420px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+    .panel{border-radius:8px;overflow:hidden;border:1px solid var(--border-dk);box-shadow:0 1px 4px rgba(0,37,122,.05)}
+    .panel-head{background:#E9EFF9;padding:8px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .panel-body{background:#fff;padding:12px 16px}
+    .fg{display:grid;gap:6px 10px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:1fr 1fr 1fr}
+    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .g6{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr}
+    .span2{grid-column:span 2}
+    .span3{grid-column:span 3}
+    .ff{display:flex;flex-direction:column;gap:2px}
+    .ff label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .req{color:var(--red)}
+    .inp{height:25px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .inp.ro{background:#F7F9FC;color:var(--muted);cursor:default}
+    textarea.inp{height:58px;padding:5px 8px;resize:none;line-height:1.5}
+    select.inp{cursor:pointer;height:27px;line-height:27px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+    .inp-unit{position:relative}
+    .inp-unit input{padding-right:32px}
+    .inp-unit .unit{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);font-weight:600;pointer-events:none}
+    .inp-currency{position:relative}
+    .inp-currency input{padding-left:18px}
+    .inp-currency .sym{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:600;pointer-events:none}
+
+    /* CHECKBOXES */
+    .cb-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+    .cb-item{display:flex;align-items:center;gap:5px;font-size:11.5px;cursor:pointer;color:var(--label);user-select:none}
+    .cb-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--navy);cursor:pointer}
+
+    /* TABLE PANEL */
+    .tbl-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 8px rgba(0,37,122,.06)}
+    .tbl-card-head{background:#E9EFF9;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .tbl-card-title{font-size:13px;font-weight:700;color:var(--navy)}
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:7px 12px;text-align:left;white-space:nowrap}
+    th.center{text-align:center}
+    td{padding:8px 12px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+    td.center{text-align:center}
+    td.mono{font-family:'Cascadia Code','Consolas',monospace;font-size:11px}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    tbody tr.selected{background:#C5D9F8;outline:2px solid var(--navy);outline-offset:-2px}
+    .badge{display:inline-flex;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+    .b-active{background:#F0FDF4;color:var(--green)}
+    .b-inactive{background:#F3F4F6;color:var(--muted)}
+    .edit-btn{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue);border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+    .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit}
+
+    /* COLUMN GROUP HEADERS */
+    th.col-group{background:#1a3d8f;text-align:center;font-size:9px;letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid rgba(255,255,255,.3)}
+
+    /* SPLIT PANE for inventory drill-down */
+    .split-pane{display:flex;gap:14px;flex:1;min-height:0}
+    .split-left{width:320px;flex-shrink:0;display:flex;flex-direction:column}
+    .split-right{flex:1;min-width:0;display:flex;flex-direction:column}
+
+    /* SECTION DIVIDER IN PANEL */
+    .panel-section{border-top:1px solid var(--border);margin-top:8px;padding-top:6px}
+    .panel-section-label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+
+    /* FLAGS TABLE inside panel */
+    .flags-table{width:100%;border-collapse:collapse;font-size:11px}
+    .flags-table th{background:var(--navy);color:#fff;font-size:10px;padding:6px 10px}
+    .flags-table td{padding:6px 10px;border-bottom:1px solid var(--border);font-size:11px}
+
+    /* GEAR BUTTON */
+    .gear-btn{width:22px;height:22px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;transition:all .12s;flex-shrink:0}
+    .gear-btn:hover{background:var(--bg);color:var(--navy);border-color:var(--navy)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:99999;opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{background:var(--green)}
+    .toast.error{background:var(--red)}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:#fff;border-radius:14px;width:600px;max-width:96vw;box-shadow:0 20px 60px rgba(0,37,122,.22);padding:24px}
+    .modal-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:16px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+    .btn-cancel{height:34px;padding:0 16px;border-radius:7px;border:1.5px solid var(--border-dk);background:#fff;color:var(--label);font-size:12px;cursor:pointer;font-family:inherit}
+    .btn-save{height:34px;padding:0 20px;border-radius:7px;border:none;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:#f0f2f5}
+    ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+      </div>
+      <div class="topbar-center">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" stroke="rgba(255,255,255,.5)" stroke-width="2.5"/>
+            <ellipse cx="50" cy="50" rx="22" ry="46" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+            <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+            <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+            <path d="M50 16 L56 44 L50 50 L44 44 Z" fill="white" opacity=".95"/>
+            <path d="M50 84 L44 56 L50 50 L56 56 Z" fill="rgba(255,255,255,.45)"/>
+            <path d="M84 50 L56 56 L50 50 L56 44 Z" fill="rgba(255,255,255,.7)"/>
+            <path d="M16 50 L44 44 L50 50 L44 56 Z" fill="rgba(255,255,255,.45)"/>
+            <circle cx="50" cy="50" r="4" fill="white"/>
+          </svg>
+          <div>
+            <div class="topbar-title">Total Scope, Inc.</div>
+            <div class="topbar-sub">The Leader in Medical Device Repair</div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        Service Location
+        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- TOOLBAR: Actions + Instrument Type + Model Selector -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="btn btn-outline" title="New Scope Model" onclick="showToast('New Scope Model form opened','success')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+            New
+          </button>
+          <button class="btn btn-outline" title="Save Scope Model" onclick="showToast('Scope model saved.','success')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+          <button class="btn btn-outline" title="Clone Model" onclick="showToast('Model cloned.','success')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Clone
+          </button>
+          <button class="btn btn-outline" title="Print Spec Sheet">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+        </div>
+        <div class="divider"></div>
+
+        <!-- INSTRUMENT TYPE SEGMENTED -->
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Type</span>
+        <div class="seg-group" id="instrTypeGroup">
+          <button class="seg-btn active" onclick="switchInstrType('F',this)">Flexible</button>
+          <button class="seg-btn" onclick="switchInstrType('R',this)">Rigid</button>
+          <button class="seg-btn" onclick="switchInstrType('C',this)">Camera</button>
+        </div>
+        <div class="divider"></div>
+
+        <!-- MODEL SELECTOR -->
+        <span class="model-sel-label">Model</span>
+        <select class="model-select" id="modelSelect" onchange="loadModel(this.value)">
+          <optgroup label="Olympus">
+            <option value="GIF-H190" selected>GIF-H190 — Gastroscope</option>
+            <option value="GIF-HQ190">GIF-HQ190 — Gastroscope (HD)</option>
+            <option value="CF-HQ190L">CF-HQ190L — Colonoscope</option>
+            <option value="TJF-Q180V">TJF-Q180V — Duodenoscope</option>
+            <option value="BF-H190">BF-H190 — Bronchoscope</option>
+            <option value="PCF-H190DL">PCF-H190DL — Pediatric Colonoscope</option>
+            <option value="GIF-Q180">GIF-Q180 — Gastroscope</option>
+            <option value="CF-H190DL">CF-H190DL — Colonoscope (Dual Focus)</option>
+          </optgroup>
+          <optgroup label="Pentax">
+            <option value="EG-2990i">EG-2990i — Gastroscope</option>
+            <option value="EC-3890Li">EC-3890Li — Colonoscope</option>
+            <option value="EG-29-i10">EG-29-i10 — Gastroscope</option>
+          </optgroup>
+          <optgroup label="Fujifilm">
+            <option value="EG-740UT">EG-740UT — EUS Gastroscope</option>
+            <option value="EC-760R">EC-760R — Colonoscope</option>
+            <option value="EG-760R">EG-760R — Gastroscope</option>
+          </optgroup>
+        </select>
+        <span class="id-badge">MDL-0042</span>
+        <label class="cb-inline"><input type="checkbox" id="includeInactive"> Include Inactive</label>
+
+        <div style="flex:1"></div>
+        <button class="btn btn-danger" title="Delete Scope Model" onclick="if(confirm('Delete this scope model?')) showToast('Model deleted.','error')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+      </div>
+
+      <!-- HEADER RECORD CARD (always visible, shared across types) -->
+      <div class="record-header">
+        <div class="panel">
+          <div class="panel-head">Record Details</div>
+          <div class="panel-body">
+            <div class="fg g6">
+              <div class="ff span2">
+                <label>Description <span class="req">*</span></label>
+                <input class="inp" id="sScopeTypeDesc" value="GIF H190"/>
+              </div>
+              <div class="ff">
+                <label>Model Category <span class="req">*</span></label>
+                <select class="inp" id="modelCategory">
+                  <option selected>Gastroscope</option>
+                  <option>Colonoscope</option>
+                  <option>Duodenoscope</option>
+                  <option>Bronchoscope</option>
+                  <option>Ureteroscope</option>
+                  <option>Cystoscope</option>
+                  <option>Sigmoidoscope</option>
+                  <option>Choledochoscope</option>
+                  <option>Enteroscope</option>
+                  <option>Rhinolaryngoscope</option>
+                  <option>Laparoscope</option>
+                  <option>Arthroscope</option>
+                  <option>Hysteroscope</option>
+                  <option>Nephroscope</option>
+                  <option>Thoracoscope</option>
+                  <option>Sinuscope</option>
+                  <option>Camera Head</option>
+                  <option>Light Cable</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>Active</label>
+                <select class="inp" id="activeStatus">
+                  <option selected>Active</option>
+                  <option>Inactive</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>GL Account</label>
+                <input class="inp" id="sGLAcct" value=""/>
+              </div>
+              <div class="ff">
+                <label>Inspection Required</label>
+                <div style="padding-top:4px">
+                  <label class="cb-item"><input type="checkbox" id="sInspReqd" checked> Yes</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('specs',this)">Specifications</div>
+        <div class="tab" onclick="switchTab('repair-items',this)">Repair Items</div>
+        <div class="tab" onclick="switchTab('inventory',this)">Inventory</div>
+      </div>
+
+      <!-- ═══════════════════ TAB: SPECIFICATIONS — FLEXIBLE / CAMERA ═══════════════════ -->
+      <div class="tab-content show" id="tab-specs">
+        <!-- FLEXIBLE / CAMERA VIEW -->
+        <div class="col-left" id="flex-specs">
+          <!-- MANUFACTURER & CONFIG -->
+          <div class="panel">
+            <div class="panel-head">Configuration</div>
+            <div class="panel-body">
+              <div class="fg g3">
+                <div class="ff">
+                  <label>Manufacturer <span class="req">*</span></label>
+                  <div style="display:flex;gap:4px">
+                    <select class="inp" id="manufacturer" style="flex:1">
+                      <option>ACMI</option>
+                      <option>EndoChoice</option>
+                      <option>Fujinon</option>
+                      <option>Fujifilm</option>
+                      <option>Karl Storz</option>
+                      <option>Machida</option>
+                      <option selected>Olympus</option>
+                      <option>Pentax</option>
+                      <option>Richard Wolf</option>
+                      <option>Smith & Nephew</option>
+                      <option>Stryker</option>
+                      <option>Vision Sciences</option>
+                    </select>
+                    <button class="gear-btn" title="Manufacturer stats" onclick="document.getElementById('mfgModal').classList.add('open')">&#9881;</button>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Video / Image</label>
+                  <div style="display:flex;gap:4px">
+                    <select class="inp" id="videoImage" style="flex:1">
+                      <option>Fiber</option>
+                      <option>Hybrid</option>
+                      <option selected>Video</option>
+                      <option>Ultrasound</option>
+                      <option>Screen on Scope</option>
+                      <option>Flushing Pump</option>
+                      <option>N/A</option>
+                      <option>None</option>
+                    </select>
+                    <button class="gear-btn" title="Video/Image stats" onclick="document.getElementById('vidModal').classList.add('open')">&#9881;</button>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Avg Days Since Last In</label>
+                  <input class="inp" type="number" id="avgDaysSinceLastIn" value="" placeholder="Enter days"/>
+                </div>
+                <div class="ff">
+                  <label>Est. Expense Multiplier</label>
+                  <input class="inp" type="number" id="estExpenseMultiplier" value="" step="0.01" placeholder="e.g. 1.25"/>
+                </div>
+                <div class="ff">
+                  <label>Contract Cost</label>
+                  <div class="inp-currency">
+                    <span class="sym">$</span>
+                    <input class="inp" type="text" id="nContractCost" value="" placeholder="0.00"/>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Maximum Charge</label>
+                  <div class="inp-currency">
+                    <span class="sym">$</span>
+                    <input class="inp" type="text" id="mMaxCharge" value="" placeholder="0.00"/>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:20px;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">
+                <label class="cb-item"><input type="checkbox" id="bForceOnPortal"> Force On Portal</label>
+                <label class="cb-item"><input type="checkbox" id="bSkipPortal"> Skip Portal</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- PHYSICAL MEASUREMENTS -->
+          <div class="panel">
+            <div class="panel-head">Physical Specifications</div>
+            <div class="panel-body">
+              <div class="fg g4">
+                <div class="ff">
+                  <label>Insertion Tube Length</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="1030"/><span class="unit">mm</span></div>
+                </div>
+                <div class="ff">
+                  <label>Insertion Tube Diameter (OD)</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="9.2" step="0.1"/><span class="unit">mm</span></div>
+                </div>
+                <div class="ff">
+                  <label>Forcep Channel Size (ID)</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="2.8" step="0.1"/><span class="unit">mm</span></div>
+                </div>
+                <div class="ff">
+                  <label>Field of View</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="140"/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Direction of View</label>
+                  <input class="inp" type="text" value="Forward"/>
+                </div>
+                <div class="ff">
+                  <label>Depth of Field</label>
+                  <div style="display:flex;gap:4px;align-items:center">
+                    <div class="inp-unit" style="flex:1"><input class="inp" type="number" value="2" style="width:100%"/><span class="unit">mm</span></div>
+                    <span style="color:var(--muted);font-weight:700">-</span>
+                    <div class="inp-unit" style="flex:1"><input class="inp" type="number" value="100" style="width:100%"/><span class="unit">mm</span></div>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Epoxy Size (Rolling Avg)</label>
+                  <input class="inp" type="number" value="" step="0.01" placeholder=""/>
+                </div>
+                <div class="ff">
+                  <label>Max Epoxy Size</label>
+                  <input class="inp" type="number" value="" step="0.01" placeholder=""/>
+                </div>
+              </div>
+              <!-- Verification -->
+              <div style="display:flex;gap:16px;margin-top:8px;padding-top:6px;border-top:1px solid var(--border);align-items:center">
+                <label class="cb-item"><input type="checkbox" id="bUnableToVerify"> Unable To Verify</label>
+                <div class="ff" style="width:80px">
+                  <label>Verified By</label>
+                  <input class="inp" type="text" value="" placeholder="Initials"/>
+                </div>
+                <div class="ff" style="width:120px">
+                  <label>Verified Date</label>
+                  <input class="inp" type="date" value=""/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANGULATION -->
+          <div class="panel">
+            <div class="panel-head">
+              <span>Angulation Range</span>
+            </div>
+            <div class="panel-body">
+              <div style="display:flex;gap:10px;margin-bottom:8px">
+                <label class="cb-item"><input type="checkbox" checked> Angulation Up/Down Applicable</label>
+                <label class="cb-item"><input type="checkbox" checked> Angulation Left/Right Applicable</label>
+                <label class="cb-item"><input type="checkbox"> Broken Fibers Applicable</label>
+              </div>
+              <div class="fg g4">
+                <div class="ff">
+                  <label>Up</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="210"/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Down</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="90"/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Left</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="100"/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Right</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="100"/><span class="unit">deg</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGID VIEW (hidden by default) -->
+        <div class="col-left" id="rigid-specs" style="display:none">
+          <div class="panel">
+            <div class="panel-head">Rigid Configuration</div>
+            <div class="panel-body">
+              <div class="fg g3">
+                <div class="ff">
+                  <label>Manufacturer <span class="req">*</span></label>
+                  <select class="inp">
+                    <option>ACMI</option>
+                    <option>Karl Storz</option>
+                    <option selected>Olympus</option>
+                    <option>Richard Wolf</option>
+                    <option>Smith & Nephew</option>
+                    <option>Stryker</option>
+                  </select>
+                </div>
+                <div class="ff">
+                  <label>Scope Category <span class="req">*</span></label>
+                  <select class="inp">
+                    <option selected>Arthroscope</option>
+                    <option>Cystoscope</option>
+                    <option>Hysteroscope</option>
+                    <option>Laparoscope</option>
+                    <option>Nephroscope</option>
+                    <option>Resectoscope</option>
+                    <option>Sinuscope</option>
+                    <option>Thoracoscope</option>
+                    <option>Ureteroscope</option>
+                  </select>
+                </div>
+                <div class="ff">
+                  <label>Rank</label>
+                  <input class="inp" type="number" value="" placeholder="Sort order"/>
+                </div>
+                <div class="ff">
+                  <label>Avg Days Since Last In</label>
+                  <input class="inp" type="number" value="" placeholder="Enter days"/>
+                </div>
+                <div class="ff">
+                  <label>Est. Expense Multiplier</label>
+                  <input class="inp" type="number" value="" step="0.01" placeholder="e.g. 1.25"/>
+                </div>
+                <div class="ff">
+                  <label>Contract Cost</label>
+                  <div class="inp-currency">
+                    <span class="sym">$</span>
+                    <input class="inp" type="text" value="" placeholder="0.00"/>
+                  </div>
+                </div>
+                <div class="ff">
+                  <label>Maximum Charge</label>
+                  <div class="inp-currency">
+                    <span class="sym">$</span>
+                    <input class="inp" type="text" value="" placeholder="0.00"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">Rigid Physical Specifications</div>
+            <div class="panel-body">
+              <div class="fg g4">
+                <div class="ff">
+                  <label>Insertion Tube Diameter</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="" step="0.1"/><span class="unit">mm</span></div>
+                </div>
+                <div class="ff">
+                  <label>Insertion Tube Length</label>
+                  <div class="inp-unit"><input class="inp" type="number" value=""/><span class="unit">mm</span></div>
+                </div>
+                <div class="ff">
+                  <label>Image Size &amp; Center Run Out <span class="req">*</span></label>
+                  <input class="inp" type="text" value="" placeholder="00.00"/>
+                </div>
+                <div class="ff">
+                  <label>Field of View</label>
+                  <div class="inp-unit"><input class="inp" type="number" value=""/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Direction of View</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="0"/><span class="unit">deg</span></div>
+                </div>
+                <div class="ff">
+                  <label>Degree</label>
+                  <select class="inp">
+                    <option>0</option>
+                    <option>5</option>
+                    <option>12</option>
+                    <option selected>30</option>
+                    <option>45</option>
+                    <option>70</option>
+                  </select>
+                </div>
+                <div class="ff">
+                  <label>Squint</label>
+                  <input class="inp" type="number" value=""/>
+                </div>
+                <div class="ff">
+                  <label>ID Band</label>
+                  <input class="inp" type="text" value=""/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">Optics &amp; Construction</div>
+            <div class="panel-body">
+              <div class="fg g3">
+                <div class="ff">
+                  <label>Drawing</label>
+                  <select class="inp"><option selected>No</option><option>Yes</option></select>
+                </div>
+                <div class="ff">
+                  <label>Tube System</label>
+                  <select class="inp"><option selected>2 Tube</option><option>3 Tube</option></select>
+                </div>
+                <div class="ff">
+                  <label>Lens System</label>
+                  <select class="inp"><option selected>Rod Lens</option><option>Acromat</option><option>Image Bundle</option></select>
+                </div>
+                <div class="ff">
+                  <label>Autoclaveable</label>
+                  <select class="inp"><option selected>No</option><option>Yes</option></select>
+                </div>
+                <div class="ff">
+                  <label>Resolution Group</label>
+                  <input class="inp" type="number" value=""/>
+                </div>
+                <div class="ff">
+                  <label>Resolution Field</label>
+                  <input class="inp" type="number" value=""/>
+                </div>
+                <div class="ff">
+                  <label>Marker Plate</label>
+                  <select class="inp"><option>6</option><option selected>9</option><option>12</option></select>
+                </div>
+                <div class="ff">
+                  <label>Eye Cup Mount</label>
+                  <select class="inp"><option selected>Black</option><option>Blue</option><option>Red</option><option>Green</option><option>C-Mount</option><option>Cartridge</option></select>
+                </div>
+              </div>
+              <div class="panel-section" style="margin-top:10px;padding-top:8px">
+                <div class="ff">
+                  <label>Notes</label>
+                  <textarea class="inp" style="height:60px" placeholder="Enter notes..."></textarea>
+                </div>
+              </div>
+              <div class="panel-section" style="margin-top:10px;padding-top:8px">
+                <div class="panel-section-label">Drawing Upload</div>
+                <div style="border:2px dashed var(--border-dk);border-radius:6px;padding:16px;text-align:center;color:var(--muted);font-size:11px">
+                  <div style="margin-bottom:6px">Drag &amp; drop drawing file here, or</div>
+                  <button class="btn btn-outline" style="height:26px;font-size:11px" onclick="showToast('File browser opened','success')">Browse Files</button>
+                  <div style="margin-top:6px;font-size:10px;color:#aaa">Accepts: .pdf, .jpg, .png, .dwg</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Shared across Flexible/Rigid/Camera -->
+        <div class="col-right">
+          <!-- OPTICAL / IMAGING (Flexible/Camera only) -->
+          <div class="panel" id="opticalPanel">
+            <div class="panel-head">Optical / Imaging</div>
+            <div class="panel-body">
+              <div class="fg g2">
+                <div class="ff">
+                  <label>Image Sensor</label>
+                  <select class="inp">
+                    <option>CCD</option>
+                    <option selected>CMOS</option>
+                  </select>
+                </div>
+                <div class="ff">
+                  <label>Compatible Processors</label>
+                  <input class="inp" value="CV-190, EVIS EXERA III"/>
+                </div>
+                <div class="ff span2">
+                  <label>Compatible Light Sources</label>
+                  <input class="inp" value="CLV-190"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRICING DEFAULTS -->
+          <div class="panel">
+            <div class="panel-head">Pricing Defaults</div>
+            <div class="panel-body">
+              <div class="fg g2">
+                <div class="ff">
+                  <label>Base Eval Fee</label>
+                  <div class="inp-currency"><span class="sym">$</span><input class="inp" type="text" value="350.00"/></div>
+                </div>
+                <div class="ff">
+                  <label>Minor Repair</label>
+                  <div class="inp-currency"><span class="sym">$</span><input class="inp" type="text" value="1,800.00"/></div>
+                </div>
+                <div class="ff">
+                  <label>Mid Repair</label>
+                  <div class="inp-currency"><span class="sym">$</span><input class="inp" type="text" value="4,200.00"/></div>
+                </div>
+                <div class="ff">
+                  <label>Major Repair</label>
+                  <div class="inp-currency"><span class="sym">$</span><input class="inp" type="text" value="7,500.00"/></div>
+                </div>
+                <div class="ff">
+                  <label>Est. Turnaround</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="10"/><span class="unit">days</span></div>
+                </div>
+                <div class="ff">
+                  <label>Warranty</label>
+                  <div class="inp-unit"><input class="inp" type="number" value="6"/><span class="unit">mos</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FLAGS -->
+          <div class="panel">
+            <div class="panel-head">
+              <span>Flags</span>
+              <button class="btn btn-navy" style="height:24px;font-size:10px;padding:0 10px" onclick="document.getElementById('addFlagModal').classList.add('open')">+ Add Flag</button>
+            </div>
+            <div class="panel-body" style="padding:0">
+              <table class="flags-table">
+                <thead>
+                  <tr>
+                    <th style="font-size:9px;padding:6px 10px">Instrument Type</th>
+                    <th style="font-size:9px;padding:6px 10px">Location</th>
+                    <th style="font-size:9px;padding:6px 10px">Flag</th>
+                    <th style="font-size:9px;padding:6px 10px;width:50px">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Flexible</td>
+                    <td>D&I, Approval</td>
+                    <td style="color:var(--red);font-weight:600">Check connector type before CCD quote</td>
+                    <td class="center"><button class="del-btn" onclick="this.closest('tr').remove()">&#10005;</button></td>
+                  </tr>
+                  <tr>
+                    <td>Flexible</td>
+                    <td>Invoice</td>
+                    <td style="color:var(--amber);font-weight:600">NBI capability — confirm processor compatibility</td>
+                    <td class="center"><button class="del-btn" onclick="this.closest('tr').remove()">&#10005;</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- NOTES -->
+          <div class="panel">
+            <div class="panel-head">Notes</div>
+            <div class="panel-body">
+              <textarea class="inp" style="height:70px">Close-focus capable. NBI compatible. Waterproof per IEC 60529 (IPX8).</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ TAB: REPAIR ITEMS ═══════════════════ -->
+      <div class="tab-content" id="tab-repair-items">
+        <div style="flex:1;min-width:0">
+          <div class="tbl-card">
+            <div class="tbl-card-head">
+              <span class="tbl-card-title">Repair Items — GIF-H190</span>
+              <button class="btn btn-navy" style="height:28px;font-size:11px" onclick="document.getElementById('addRepairModal').classList.add('open')">+ Add Item</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th rowspan="2" style="vertical-align:bottom">Item Description</th>
+                  <th colspan="2" class="col-group">Level 3 (Major)</th>
+                  <th colspan="2" class="col-group">Level 2 (Mid)</th>
+                  <th colspan="2" class="col-group">Level 1 (Minor)</th>
+                  <th rowspan="2" style="vertical-align:bottom;width:60px">Action</th>
+                </tr>
+                <tr>
+                  <th class="center">Time</th>
+                  <th class="center">Warn</th>
+                  <th class="center">Time</th>
+                  <th class="center">Warn</th>
+                  <th class="center">Time</th>
+                  <th class="center">Warn</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">CCD / CMOS Sensor Replacement</td>
+                  <td class="center mono">240</td>
+                  <td class="center mono" style="color:var(--amber)">200</td>
+                  <td class="center mono">180</td>
+                  <td class="center mono" style="color:var(--amber)">150</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Angulation Cable Replacement</td>
+                  <td class="center mono">150</td>
+                  <td class="center mono" style="color:var(--amber)">120</td>
+                  <td class="center mono">90</td>
+                  <td class="center mono" style="color:var(--amber)">75</td>
+                  <td class="center mono">45</td>
+                  <td class="center mono" style="color:var(--amber)">35</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Insertion Tube Replacement</td>
+                  <td class="center mono">300</td>
+                  <td class="center mono" style="color:var(--amber)">250</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Bending Rubber Replacement</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">60</td>
+                  <td class="center mono" style="color:var(--amber)">50</td>
+                  <td class="center mono">30</td>
+                  <td class="center mono" style="color:var(--amber)">25</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Light Guide Bundle Repair</td>
+                  <td class="center mono">180</td>
+                  <td class="center mono" style="color:var(--amber)">150</td>
+                  <td class="center mono">120</td>
+                  <td class="center mono" style="color:var(--amber)">100</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Channel Repair / Lining</td>
+                  <td class="center mono">180</td>
+                  <td class="center mono" style="color:var(--amber)">150</td>
+                  <td class="center mono">90</td>
+                  <td class="center mono" style="color:var(--amber)">75</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Objective Lens Replacement</td>
+                  <td class="center mono">120</td>
+                  <td class="center mono" style="color:var(--amber)">100</td>
+                  <td class="center mono">90</td>
+                  <td class="center mono" style="color:var(--amber)">75</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Air/Water Valve Replacement</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">30</td>
+                  <td class="center mono" style="color:var(--amber)">25</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Suction Valve Replacement</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">30</td>
+                  <td class="center mono" style="color:var(--amber)">25</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Control Body Overhaul</td>
+                  <td class="center mono">360</td>
+                  <td class="center mono" style="color:var(--amber)">300</td>
+                  <td class="center mono">240</td>
+                  <td class="center mono" style="color:var(--amber)">200</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Connector Repair</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">120</td>
+                  <td class="center mono" style="color:var(--amber)">100</td>
+                  <td class="center mono">60</td>
+                  <td class="center mono" style="color:var(--amber)">50</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;color:var(--navy)">Leak Test &amp; Seal</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">—</td>
+                  <td class="center mono">60</td>
+                  <td class="center mono" style="color:var(--amber)">45</td>
+                  <td class="center"><button class="edit-btn">Edit</button> <button class="del-btn">&#10005;</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ TAB: INVENTORY ═══════════════════ -->
+      <div class="tab-content" id="tab-inventory">
+        <div class="split-pane">
+          <!-- LEFT: Repair Items list -->
+          <div class="split-left">
+            <div class="tbl-card" style="flex:1">
+              <div class="tbl-card-head">
+                <span class="tbl-card-title">Repair Items</span>
+              </div>
+              <div style="overflow-y:auto;max-height:calc(100vh - 340px)">
+                <table>
+                  <thead><tr><th>Repair Item</th></tr></thead>
+                  <tbody>
+                    <tr class="selected" onclick="selectRepairItem(this,'CCD / CMOS Sensor Replacement')"><td style="font-weight:600;color:var(--navy)">CCD / CMOS Sensor Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Angulation Cable Replacement')"><td>Angulation Cable Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Insertion Tube Replacement')"><td>Insertion Tube Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Bending Rubber Replacement')"><td>Bending Rubber Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Light Guide Bundle Repair')"><td>Light Guide Bundle Repair</td></tr>
+                    <tr onclick="selectRepairItem(this,'Channel Repair / Lining')"><td>Channel Repair / Lining</td></tr>
+                    <tr onclick="selectRepairItem(this,'Objective Lens Replacement')"><td>Objective Lens Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Air/Water Valve Replacement')"><td>Air/Water Valve Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Suction Valve Replacement')"><td>Suction Valve Replacement</td></tr>
+                    <tr onclick="selectRepairItem(this,'Control Body Overhaul')"><td>Control Body Overhaul</td></tr>
+                    <tr onclick="selectRepairItem(this,'Connector Repair')"><td>Connector Repair</td></tr>
+                    <tr onclick="selectRepairItem(this,'Leak Test &amp; Seal')"><td>Leak Test &amp; Seal</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Inventory for selected repair item -->
+          <div class="split-right">
+            <div class="tbl-card" style="flex:1">
+              <div class="tbl-card-head">
+                <span class="tbl-card-title" id="invTitle">Inventory — CCD / CMOS Sensor Replacement</span>
+                <button class="btn btn-navy" style="height:28px;font-size:11px" onclick="showToast('Link inventory part','success')">+ Link Part</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Part #</th>
+                    <th>Description</th>
+                    <th>Supplier</th>
+                    <th class="center">On Hand</th>
+                    <th class="center">Min Qty</th>
+                    <th>Unit Cost</th>
+                    <th>Last Ordered</th>
+                    <th style="width:50px">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="invBody">
+                  <tr>
+                    <td style="font-weight:600;color:var(--navy)">CCD-H190</td>
+                    <td>CMOS Image Sensor Module</td>
+                    <td>Olympus OEM</td>
+                    <td class="center">3</td>
+                    <td class="center">1</td>
+                    <td>$2,200.00</td>
+                    <td>01/10/2026</td>
+                    <td class="center"><button class="del-btn">&#10005;</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600;color:var(--navy)">CCD-H190-R</td>
+                    <td>CMOS Sensor — Refurbished</td>
+                    <td>Machida Endoscope</td>
+                    <td class="center">1</td>
+                    <td class="center">0</td>
+                    <td>$1,650.00</td>
+                    <td>11/22/2025</td>
+                    <td class="center"><button class="del-btn">&#10005;</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600;color:var(--navy)">FLEX-PCB-190</td>
+                    <td>Flex Circuit Board (Sensor)</td>
+                    <td>Olympus OEM</td>
+                    <td class="center">2</td>
+                    <td class="center">1</td>
+                    <td>$480.00</td>
+                    <td>12/05/2025</td>
+                    <td class="center"><button class="del-btn">&#10005;</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ═══════════════════ MODALS ═══════════════════ -->
+
+<!-- Add Repair Item Modal -->
+<div class="modal-overlay" id="addRepairModal">
+  <div class="modal" style="width:680px">
+    <div class="modal-title">Add Repair Item</div>
+    <div class="fg g3" style="margin-bottom:12px">
+      <div class="ff span3">
+        <label>Repair Item <span class="req">*</span></label>
+        <select class="inp">
+          <option value="">— Select repair item —</option>
+          <option>Biopsy Channel Repair</option>
+          <option>CCD Rewire</option>
+          <option>Control Body Rebuild</option>
+          <option>Distal Tip Replacement</option>
+          <option>Eyepiece Repair</option>
+          <option>Fiber Optic Repair</option>
+          <option>Glue Joint Repair</option>
+          <option>Light Post Repair</option>
+          <option>Umbilical Cable Replacement</option>
+          <option>Video Processor Interface</option>
+          <option>Waterproofing</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Completion &amp; Warning Times (minutes)</div>
+    <div class="fg" style="grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div class="panel" style="box-shadow:none">
+        <div class="panel-head" style="padding:6px 12px;font-size:9px">Level 3 — Major</div>
+        <div class="panel-body" style="padding:8px 12px">
+          <div class="fg g2">
+            <div class="ff"><label>Time (min)</label><input class="inp" type="number" placeholder="0"/></div>
+            <div class="ff"><label>Warning (min)</label><input class="inp" type="number" placeholder="0"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="box-shadow:none">
+        <div class="panel-head" style="padding:6px 12px;font-size:9px">Level 2 — Mid</div>
+        <div class="panel-body" style="padding:8px 12px">
+          <div class="fg g2">
+            <div class="ff"><label>Time (min)</label><input class="inp" type="number" placeholder="0"/></div>
+            <div class="ff"><label>Warning (min)</label><input class="inp" type="number" placeholder="0"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="box-shadow:none">
+        <div class="panel-head" style="padding:6px 12px;font-size:9px">Level 1 — Minor</div>
+        <div class="panel-body" style="padding:8px 12px">
+          <div class="fg g2">
+            <div class="ff"><label>Time (min)</label><input class="inp" type="number" placeholder="0"/></div>
+            <div class="ff"><label>Warning (min)</label><input class="inp" type="number" placeholder="0"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="showToast('Repair item added','success');this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Flag Modal -->
+<div class="modal-overlay" id="addFlagModal">
+  <div class="modal">
+    <div class="modal-title">Add Flag</div>
+    <div class="fg g2" style="margin-bottom:12px">
+      <div class="ff">
+        <label>Instrument Types</label>
+        <div class="cb-row" style="margin-top:2px">
+          <label class="cb-item"><input type="checkbox" checked> Flexible</label>
+          <label class="cb-item"><input type="checkbox"> Rigid</label>
+          <label class="cb-item"><input type="checkbox"> Camera</label>
+        </div>
+      </div>
+      <div class="ff">
+        <label>Locations</label>
+        <div class="cb-row" style="margin-top:2px">
+          <label class="cb-item"><input type="checkbox" checked> D&amp;I</label>
+          <label class="cb-item"><input type="checkbox"> Requisition</label>
+          <label class="cb-item"><input type="checkbox" checked> Approval</label>
+          <label class="cb-item"><input type="checkbox"> Invoice</label>
+          <label class="cb-item"><input type="checkbox"> Booking/Loaner</label>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-bottom:12px">
+      <label class="cb-item"><input type="checkbox"> Visible On D&amp;I</label>
+      <label class="cb-item"><input type="checkbox"> Visible On Blank Inspection</label>
+    </div>
+    <div class="ff">
+      <label>Flag Text <span class="req">*</span></label>
+      <textarea class="inp" style="height:60px" placeholder="Enter flag text..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="showToast('Flag added','success');this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manufacturer Stats Modal -->
+<div class="modal-overlay" id="mfgModal">
+  <div class="modal">
+    <div class="modal-title">Manufacturer — Scope Type Stats</div>
+    <table style="width:100%;margin-bottom:12px">
+      <thead><tr><th>Manufacturer</th><th>Instrument Type</th><th class="center">Scope Type Count</th></tr></thead>
+      <tbody>
+        <tr><td>Olympus</td><td>Flexible</td><td class="center">847</td></tr>
+        <tr><td>Olympus</td><td>Rigid</td><td class="center">126</td></tr>
+        <tr><td>Pentax</td><td>Flexible</td><td class="center">198</td></tr>
+        <tr><td>Fujifilm</td><td>Flexible</td><td class="center">89</td></tr>
+        <tr><td>Karl Storz</td><td>Rigid</td><td class="center">312</td></tr>
+      </tbody>
+    </table>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Video/Image Stats Modal -->
+<div class="modal-overlay" id="vidModal">
+  <div class="modal">
+    <div class="modal-title">Video / Image — Scope Type Stats</div>
+    <table style="width:100%;margin-bottom:12px">
+      <thead><tr><th>Video Image</th><th class="center">Scope Type Count</th></tr></thead>
+      <tbody>
+        <tr><td>Video</td><td class="center">1,086</td></tr>
+        <tr><td>Fiber</td><td class="center">142</td></tr>
+        <tr><td>Hybrid</td><td class="center">23</td></tr>
+        <tr><td>Ultrasound</td><td class="center">11</td></tr>
+        <tr><td>N/A</td><td class="center">7</td></tr>
+      </tbody>
+    </table>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* Instrument Type Switcher */
+function switchInstrType(type, el) {
+  document.querySelectorAll('#instrTypeGroup .seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  const flexSpecs = document.getElementById('flex-specs');
+  const rigidSpecs = document.getElementById('rigid-specs');
+  const opticalPanel = document.getElementById('opticalPanel');
+
+  if (type === 'R') {
+    flexSpecs.style.display = 'none';
+    rigidSpecs.style.display = 'flex';
+    rigidSpecs.style.flexDirection = 'column';
+    rigidSpecs.style.gap = '8px';
+    opticalPanel.style.display = 'none';
+  } else {
+    flexSpecs.style.display = 'flex';
+    flexSpecs.style.flexDirection = 'column';
+    flexSpecs.style.gap = '8px';
+    rigidSpecs.style.display = 'none';
+    opticalPanel.style.display = '';
+  }
+  showToast('Switched to ' + (type==='F'?'Flexible':type==='R'?'Rigid':'Camera') + ' mode', '');
+}
+
+/* Tab Switcher */
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('show'); c.classList.remove('show-block'); });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const tc = document.getElementById('tab-' + id);
+  if (tc) tc.classList.add('show');
+}
+
+/* Model Loader */
+function loadModel(val) {
+  document.getElementById('sScopeTypeDesc').value = val;
+  showToast('Loaded: ' + val, 'success');
+}
+
+/* Inventory drill-down */
+function selectRepairItem(row, name) {
+  document.querySelectorAll('.split-left tbody tr').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  document.getElementById('invTitle').textContent = 'Inventory — ' + name;
+}
+
+/* Toast */
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* Sidebar nav */
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const text = this.textContent.trim();
+    const map = {
+      'My Workspace':'workspace.html','Dashboard':'dashboard.html','Clients':'clients.html',
+      'Departments':'departments.html','Repairs':'repairs.html','Inventory':'inventory.html',
+      'Suppliers':'suppliers.html','Scopes':'scopes.html','Scope Model':'scope-model.html',
+      'Contracts':'contracts.html','Onsite Services':'onsite-services.html',
+      'Product Sale':'product-sale.html','Quality':'quality.html','Financial':'financial.html',
+      'Reports/Extracts':'reports.html','Administration':'administration.html'
+    };
+    if (map[text] && !this.classList.contains('active')) window.location.href = map[text];
+  });
+});
+</script>
+</body>
+</html>

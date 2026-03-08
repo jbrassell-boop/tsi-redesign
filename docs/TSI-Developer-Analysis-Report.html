@@ -1,0 +1,803 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<title>Total Scope, Inc. — Developer Analysis Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #1a1a2e; background: #fff; line-height: 1.6; }
+  .cover { background: linear-gradient(135deg, #1a3a6b 0%, #2d6cdf 100%); color: white; padding: 80px 60px; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .cover h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
+  .cover h2 { font-size: 22px; font-weight: 300; margin-bottom: 40px; opacity: 0.85; }
+  .cover .meta { background: rgba(255,255,255,0.12); border-radius: 12px; padding: 24px 32px; display: inline-block; margin-top: 20px; }
+  .cover .meta p { font-size: 14px; margin-bottom: 6px; opacity: 0.9; }
+  .cover .meta strong { opacity: 1; }
+  .toc { padding: 60px; page-break-after: always; }
+  .toc h2 { font-size: 28px; color: #1a3a6b; border-bottom: 3px solid #2d6cdf; padding-bottom: 12px; margin-bottom: 30px; }
+  .toc ol { padding-left: 24px; }
+  .toc li { font-size: 15px; padding: 6px 0; color: #2d6cdf; }
+  .toc li span { color: #444; }
+  section { padding: 50px 60px; page-break-before: always; }
+  section:first-of-type { page-break-before: avoid; }
+  h2.section-title { font-size: 28px; color: #1a3a6b; border-bottom: 3px solid #2d6cdf; padding-bottom: 12px; margin-bottom: 30px; }
+  h3 { font-size: 18px; color: #1a3a6b; margin: 28px 0 12px; }
+  h4 { font-size: 15px; color: #2d6cdf; margin: 20px 0 8px; }
+  p { margin-bottom: 12px; color: #333; }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; color: #333; }
+  .screenshot { width: 100%; border: 1px solid #dde; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); margin: 20px 0; }
+  .screenshot-label { font-size: 11px; color: #888; text-align: center; margin-top: -14px; margin-bottom: 20px; }
+  .bug-box { background: #fff3f3; border-left: 4px solid #e53935; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  .bug-box .bug-title { font-weight: 700; color: #c62828; font-size: 14px; margin-bottom: 4px; }
+  .warn-box { background: #fffde7; border-left: 4px solid #f9a825; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  .info-box { background: #e8f4fd; border-left: 4px solid #1976d2; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 12px; }
+  th { background: #1a3a6b; color: white; padding: 10px 12px; text-align: left; font-size: 12px; }
+  td { padding: 9px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f9ff; }
+  code { background: #f0f4ff; padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 12px; color: #1565c0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin: 2px; }
+  .badge-red { background: #ffebee; color: #c62828; }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-gray { background: #f5f5f5; color: #555; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 16px 0; }
+  .card { background: #f8faff; border: 1px solid #dde8ff; border-radius: 8px; padding: 18px; }
+  .card h4 { margin-top: 0; }
+  @media print {
+    section { page-break-before: always; }
+    .cover { page-break-after: always; }
+    .toc { page-break-after: always; }
+    img { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <div style="font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:0.7;margin-bottom:16px;">Technical Documentation</div>
+    <h1>Total Scope, Inc.</h1>
+    <h2>Application Deep-Dive Analysis<br>Developer Reference for Redesign</h2>
+    <p style="opacity:0.75;margin-bottom:30px;">Prepared for use with Claude Code as technical specification input</p>
+    <div class="meta">
+      <p><strong>Application URL:</strong> totalscopetestweb.mol-tech.com</p>
+      <p><strong>API Endpoint:</strong> totalscopetestapi.mol-tech.com</p>
+      <p><strong>Environment:</strong> Test / Staging</p>
+      <p><strong>User:</strong> Joseph Brassell — Upper Chichester</p>
+      <p><strong>Analysis Date:</strong> March 8, 2026</p>
+      <p><strong>Sections Analyzed:</strong> Dashboard (Scopes &amp; Tasks Tabs), Scope Model Page</p>
+    </div>
+  </div>
+</div>
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li>Architecture Overview <span>— Tech stack, routing, component libraries, API patterns</span></li>
+    <li>Dashboard — Scopes Tab <span>— Layout, filter system, data table, bugs</span></li>
+    <li>Dashboard — Tasks Tab <span>— Search criteria, table, Add/Edit panels, sub-tables</span></li>
+    <li>Scope Model Page — Flexible Mode <span>— All fields, dropdowns, Flags, sub-tabs</span></li>
+    <li>Scope Model Page — Rigid Mode <span>— Unique field set, Scope Category, all dropdowns</span></li>
+    <li>Scope Model Page — Camera Mode <span>— Field comparison with Flexible</span></li>
+    <li>Modals &amp; Panel Patterns <span>— Right-side panels vs centered dialogs</span></li>
+    <li>Bug Registry <span>— 12 confirmed bugs with severity</span></li>
+    <li>Architecture Issues &amp; Improvement Recommendations <span>— For redesign</span></li>
+  </ol>
+</div>
+
+<!-- SECTION 1: ARCHITECTURE -->
+<section>
+  <h2 class="section-title">1. Architecture Overview</h2>
+
+  <h3>Application Type</h3>
+  <p>Total Scope, Inc. is a single-page application (SPA) built with React and React Router v6. It is a medical device repair management platform used by service technicians, administrators, and client-facing staff to track scopes (endoscopes), repair workflows, tasks, loaners, inventory, acquisitions, quality control, and financials.</p>
+
+  <h3>Confirmed Tech Stack</h3>
+  <table>
+    <tbody><tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
+    <tr><td>Frontend Framework</td><td>React (Create React App)</td><td>Standard CRA setup, no Vite or Next.js</td></tr>
+    <tr><td>Routing</td><td>React Router v6</td><td>Client-side routing, no SSR</td></tr>
+    <tr><td>CSS Framework</td><td>Bootstrap 5.3 (CDN)</td><td>Loaded via CDN link tag, not npm</td></tr>
+    <tr><td>Icons (Bootstrap)</td><td>Bootstrap Icons 1.7.2 (CDN)</td><td>Used for nav icons, action buttons</td></tr>
+    <tr><td>Icons (Extended)</td><td>Iconify (runtime CDN)</td><td>External fetch from api.iconify.design — performance risk</td></tr>
+    <tr><td>Select / Combobox</td><td>React-Select</td><td>Primary dropdown library; styled with custom CSS</td></tr>
+    <tr><td>Select (partial)</td><td>PrimeReact Dropdown</td><td>Used inconsistently on some fields</td></tr>
+    <tr><td>Date Picker</td><td>react-datepicker</td><td>Misused as numeric input on at least one field</td></tr>
+    <tr><td>Currency / Number</td><td>PrimeReact InputNumber</td><td>Used for Contract Cost and Maximum Charge fields</td></tr>
+    <tr><td>Notifications</td><td>react-toastify</td><td>Toast notifications on save/error</td></tr>
+    <tr><td>HTTP Client</td><td>Likely fetch or axios</td><td>Not confirmed, inferred from API calls</td></tr>
+  </tbody></table>
+
+  <h3>Routing Structure</h3>
+  <p>All routes are under the same domain. Key routes identified:</p>
+  <div class="two-col">
+    <div class="card">
+      <h4>Dashboard Routes</h4>
+      <ul>
+        <li><code>/Dashboard/Scopes</code></li>
+        <li><code>/Dashboard/Tasks</code></li>
+        <li><code>/Dashboard/Loaners</code></li>
+        <li><code>/Dashboard/Emails</code></li>
+        <li><code>/Dashboard/ShippingStatus</code></li>
+        <li><code>/Dashboard/Inventory</code></li>
+        <li><code>/Dashboard/Acquisitions</code></li>
+        <li><code>/Dashboard/Searches</code></li>
+        <li><code>/Dashboard/RepairMetrics</code></li>
+        <li><code>/Dashboard/TurnAroundTimes</code></li>
+        <li><code>/Dashboard/Flags</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Feature Page Routes</h4>
+      <ul>
+        <li><code>/MyWorkspace</code></li>
+        <li><code>/Clients</code></li>
+        <li><code>/Departments</code></li>
+        <li><code>/Repairs</code></li>
+        <li><code>/Inventory</code></li>
+        <li><code>/Suppliers</code></li>
+        <li><code>/Scopes</code></li>
+        <li><code>/ScopeModel</code></li>
+        <li><code>/RepairItems</code></li>
+        <li><code>/Instruments</code></li>
+        <li><code>/Contracts</code></li>
+        <li><code>/Acquisitions</code></li>
+        <li><code>/Carts</code></li>
+        <li><code>/Loaners</code></li>
+        <li><code>/OnsiteServices</code></li>
+        <li><code>/ProductSale</code></li>
+        <li><code>/Quality</code></li>
+        <li><code>/Financial</code></li>
+        <li><code>/Reports</code></li>
+        <li><code>/Administration</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>API Architecture</h3>
+  <p>The frontend communicates with a separate REST API hosted at <code>totalscopetestapi.mol-tech.com</code>. Key endpoint patterns discovered via <code>performance.getEntriesByType('resource')</code>:</p>
+  <ul>
+    <li><code>/api/ScopeModel/GetScopeModelDropDown</code> — Returns all scope model options (1,264 items, all loaded at once)</li>
+    <li><code>/api/ScopeModel/GetScopeModelById/{id}</code> — Returns full model record</li>
+    <li><code>/api/RepairItem/GetRepairItemDropDown</code> — Returns 481 repair item options</li>
+    <li><code>/api/Manufacturer/GetManufacturerDropDown</code> — Returns manufacturer list</li>
+    <li><code>/api/Task/GetTaskList</code> — Returns task rows</li>
+    <li><code>/api/Task/SaveTask</code> — POST to save task</li>
+  </ul>
+  <div class="warn-box">
+    <strong>Architecture Warning:</strong> All dropdown data is fetched and loaded into memory on page load with no virtualization or pagination on the client side. At 1,264 items in Scope Model alone, this creates unnecessary memory pressure and slow initial renders.
+  </div>
+
+  <h3>Authentication</h3>
+  <p>The application uses session-based authentication. Navigating to a protected route while unauthenticated redirects to <code>/login</code>. The login screen accepts email + password credentials with an optional "Remember Me" checkbox and a "Forgot Password?" link. No SSO or OAuth observed.</p>
+</section>
+
+<!-- SECTION 2: DASHBOARD SCOPES -->
+<section>
+  <h2 class="section-title">2. Dashboard — Scopes Tab</h2>
+  <p><strong>Route:</strong> <code>/Dashboard/Scopes</code> — This is effectively the application's home screen after login. It shows all active repair jobs in a flat table view.</p>
+
+<div><img id="img-scopes" class="screenshot" style="display:none"><p class="screenshot-label" id="lbl-scopes"></p></div><h3>Layout Structure</h3>
+<p>The page is composed of three zones stacked vertically:</p>
+<ul>
+  <li><strong>Header Bar (fixed, ~56px):</strong> Logo, welcome message, Service Location dropdown</li>
+  <li><strong>Left Sidebar (fixed, ~215px):</strong> Navigation with 22 links + 2 utility links (Change Password, Sign Out)</li>
+  <li><strong>Main Content Area:</strong> Tab strip (11 tabs) + filter bar + scrollable data table</li>
+</ul>
+
+<h3>Header</h3>
+<p>The header uses a CSS gradient from <code>#1a3a6b</code> to approximately <code>#2d6cdf</code> (deep navy to medium blue). It contains: "Welcome, Joseph Brassell" text left-aligned; centered Total Scope, Inc. logo with tagline; right-aligned "Service Location :" label + React-Select dropdown showing the current location (Upper Chichester).</p>
+
+<h3>Sidebar Navigation (22 items)</h3>
+<p>The sidebar is a fixed-width left panel. Active item is highlighted with a dark blue background. All items use Bootstrap Icons. Items in order:</p>
+<div class="two-col">
+<div class="card">
+<ul>
+  <li>My Workspace → <code>/MyWorkspace</code></li>
+  <li>Dashboard → <code>/Dashboard/Scopes</code></li>
+  <li>Clients → <code>/Clients</code></li>
+  <li>Departments → <code>/Departments</code></li>
+  <li>Repairs → <code>/Repairs</code></li>
+  <li>Inventory → <code>/Inventory</code></li>
+  <li>Suppliers → <code>/Suppliers</code></li>
+  <li>Scopes → <code>/Scopes</code></li>
+  <li>Scope Model → <code>/ScopeModel</code></li>
+  <li>Repair Items → <code>/RepairItems</code></li>
+  <li>Instruments → <code>/Instruments</code></li>
+</ul>
+</div>
+<div class="card">
+<ul>
+  <li>Contracts → <code>/Contracts</code></li>
+  <li>Acquisitions → <code>/Acquisitions</code></li>
+  <li>Carts → <code>/Carts</code></li>
+  <li>Loaners → <code>/Loaners</code></li>
+  <li>Onsite Services → <code>/OnsiteServices</code></li>
+  <li>Product Sale → <code>/ProductSale</code></li>
+  <li>Quality → <code>/Quality</code></li>
+  <li>Financial → <code>/Financial</code></li>
+  <li>Reports/Extracts → <code>/Reports</code></li>
+  <li>Administration → <code>/Administration</code></li>
+  <li>Change Password (utility)</li>
+  <li>Sign Out (utility)</li>
+</ul>
+</div>
+</div>
+
+<h3>Tab System (11 Tabs)</h3>
+<p>The tab strip is rendered as individual button elements using Bootstrap active state styling (dark blue = active, white/outline = inactive). All 11 tabs are visible on one row at full width. Tabs: <strong>Scopes</strong>, Tasks, Loaners, Emails, Shipping Status, Inventory, Acquisitions, Searches, Repair Metrics, Turn Around Times, Flags.</p>
+
+<h3>Filter Bar</h3>
+<p>Below the tab strip, three independent radio groups and three checkboxes filter the table in real-time:</p>
+<table>
+  <tbody><tr><th>Group</th><th>Options</th><th>Default</th></tr>
+  <tr><td>Scope Type</td><td>Flexible / Rigid / Instrument / Camera / Carts / Fuse</td><td>Flexible</td></tr>
+  <tr><td>Size</td><td>Large / Small / All</td><td>All</td></tr>
+  <tr><td>Location</td><td>In House / Outsourced</td><td>In House</td></tr>
+  <tr><td>Checkboxes</td><td>Include Cogentix / Include Total Scope / Hot List</td><td>All unchecked</td></tr>
+</tbody></table>
+<div class="bug-box">
+  <div class="bug-title">BUG #1 — Radio Group IDs are "undefined-*"</div>
+  All three radio groups share malformed HTML IDs: <code>id="undefined-Flexible"</code>, <code>id="undefined-Rigid"</code>, etc. The name attribute value that should prefix the ID is resolving as <code>undefined</code> in the component. This means clicking the visible label doesn't toggle the radio — users must click the radio circle directly. Likely caused by passing an undefined <code>name</code> prop to a shared RadioGroup component.
+</div>
+
+<h3>Data Table</h3>
+<p>The table displays <strong>202 rows</strong> of active repair records with no pagination, no virtualization, and no sorting controls. All 202 rows are rendered into the DOM simultaneously on page load.</p>
+<table>
+  <tbody><tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Date In</td><td>Date (MM/DD/YYYY)</td><td>Date scope entered service</td></tr>
+  <tr><td>Client</td><td>Text</td><td>Hospital/clinic name</td></tr>
+  <tr><td>Department</td><td>Text</td><td>Department within client</td></tr>
+  <tr><td>Work Order</td><td>Text</td><td>Unique identifier (e.g. NR23003001)</td></tr>
+  <tr><td>Scope Type</td><td>Text</td><td>Model code (e.g. GIF H190)</td></tr>
+  <tr><td>Serial #</td><td>Text</td><td>Scope serial number</td></tr>
+  <tr><td>Days Last In</td><td>Integer</td><td>Days since last repair; N/A if first time</td></tr>
+  <tr><td>Date Approved</td><td>Date</td><td>May be blank if pending</td></tr>
+  <tr><td>Est Del Date</td><td>Date</td><td>Estimated delivery; "TBD" if unset</td></tr>
+  <tr><td>Repair Status</td><td>Badge/Text</td><td>Multi-word status labels (see below)</td></tr>
+  <tr><td>(scroll right)</td><td>—</td><td>Additional columns hidden off-screen</td></tr>
+</tbody></table>
+
+<h3>Repair Status Distribution (202 rows)</h3>
+<ul>
+  <li><strong>Major Repair:</strong> 96 rows</li>
+  <li><strong>Mid Level Repair:</strong> 41 rows</li>
+  <li><strong>Waiting for Approved:</strong> 31 rows</li>
+  <li><strong>Waiting on Inspection:</strong> 24 rows</li>
+  <li><strong>Minor:</strong> 5 rows</li>
+  <li><strong>Evaluation:</strong> 3 rows</li>
+  <li><strong>Drying Room:</strong> 2 rows</li>
+</ul>
+
+<h3>Row Styling</h3>
+<p>Alternating rows use subtle background tints. The Repair Status column uses wrapped multi-line text cells. No row click action was observed — rows appear to be display-only in this view.</p>
+
+<div class="bug-box">
+  <div class="bug-title">BUG #2 — No Pagination or Virtualization</div>
+  202 rows rendered into DOM simultaneously. No virtual scroll, no page size control, no "Load More." This will degrade as data grows and currently causes slow initial paint on the dashboard.
+</div>
+<div class="bug-box">
+  <div class="bug-title">BUG #3 — No Column Sorting</div>
+  None of the 11 column headers are clickable or sortable. There is no sort indicator or sort direction control. Users cannot reorder by Date In, Client, Status, or any other field.
+</div>
+</section>
+
+<section>
+<h2 class="section-title">3. Dashboard — Tasks Tab</h2>
+<p><strong>Route:</strong> <code>/Dashboard/Tasks</code> — Tracks task records associated with client requests such as loaner requests, repair approvals, and miscellaneous service actions.</p>
+
+<div><img id="img-tasks" class="screenshot" style="display:none"><p class="screenshot-label" id="lbl-tasks"></p></div><h3>Layout Structure</h3>
+<p>Two zones stacked vertically: (1) <strong>Search Criteria accordion</strong> — collapsible Bootstrap 5 accordion with filter controls; (2) <strong>Tasks table</strong> — flat data table with Add button.</p>
+
+<h3>Search Criteria Accordion</h3>
+<p>Rendered as a Bootstrap 5 <code>accordion</code> component. Default state: <strong>expanded</strong>. Chevron in top-right corner collapses/expands. Contains three React-Select dropdowns and a date range picker:</p>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Options</th></tr>
+  <tr><td>Status</td><td>React-Select</td><td>Not Started / In Process / Request Fulfilled / Closed Duplicate / Customer Scope Sent / Unable to Fulfill / Request Declined / Not Completed</td></tr>
+  <tr><td>Priority</td><td>React-Select</td><td>Urgent / High / Normal / Low</td></tr>
+  <tr><td>Type</td><td>React-Select</td><td>Loaner Request / Loaner Wait List / Miscellaneous / No Loaner - expedite / Pick Up Request / Repair Approved / Requisition / Starter Kit Request</td></tr>
+  <tr><td>From Date</td><td>react-datepicker</td><td>MM/DD/YYYY format</td></tr>
+  <tr><td>To Date</td><td>react-datepicker</td><td>MM/DD/YYYY format</td></tr>
+</tbody></table>
+<p>Two action buttons: <strong>Clear All</strong> (gray) and <strong>Search</strong> (dark blue). Note: the page appears to load all tasks on initial render without requiring a Search trigger.</p>
+
+<h3>Tasks Table (12 rows)</h3>
+<table>
+  <tbody><tr><th>Column</th><th>Notes</th></tr>
+  <tr><td>Client</td><td>Hospital/clinic name (multi-line)</td></tr>
+  <tr><td>Department</td><td>Department within client (multi-line)</td></tr>
+  <tr><td>Type</td><td>Task type label (multi-line)</td></tr>
+  <tr><td>Title</td><td>Auto-generated: "Department - Type" pattern (e.g. "Ambulatory Surgery - Loaner Wait List")</td></tr>
+  <tr><td>Date</td><td>MM/DD/YYYY task date</td></tr>
+  <tr><td>Status</td><td>Text label (e.g. "Not Completed", "Not Started")</td></tr>
+  <tr><td>Priority</td><td>Text (Urgent / High / Normal / Low) — colored red for Urgent</td></tr>
+  <tr><td>Requested Models</td><td>Scope model + lens identifiers (e.g. "/LAMBERT 20D Lens, 11272VHUK")</td></tr>
+  <tr><td>Notes</td><td>Short text (maps to <code>psCustomerMessage</code> field in API)</td></tr>
+  <tr><td>Action</td><td>Edit icon (blue pencil) + Delete icon (red trash)</td></tr>
+</tbody></table>
+
+<h3>Add Task — Right-Side Slide Panel</h3>
+<p>Clicking the <strong>Add</strong> button opens a slide panel from the right covering ~50% of the viewport. Panel header: "Add Task" with blue title bar and X close button.</p>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Client</td><td>React-Select dropdown</td><td>Yes</td><td>Full client list</td></tr>
+  <tr><td>Status</td><td>React-Select dropdown</td><td>Yes</td><td>Same 8 options as filter; defaults to "Not Complete"</td></tr>
+  <tr><td>Department</td><td>React-Select dropdown</td><td>Yes</td><td>Filtered by selected Client</td></tr>
+  <tr><td>Type</td><td>React-Select dropdown</td><td>Yes</td><td>Same 8 type options as filter</td></tr>
+  <tr><td>Title</td><td>Text input</td><td>No</td><td>Auto-populated as "Department - Type" when both are selected; editable</td></tr>
+  <tr><td>Priority</td><td>React-Select dropdown</td><td>Yes</td><td>Urgent / High / Normal / Low</td></tr>
+  <tr><td>Task Date</td><td>react-datepicker</td><td>Yes</td><td>Pre-filled with today's date (03/08/2026)</td></tr>
+  <tr><td>Customer Message</td><td>Textarea (resizable)</td><td>No</td><td>Maps to <code>psCustomerMessage</code> in API; displayed as "Notes" in table</td></tr>
+  <tr><td>Task Notes</td><td>Textarea (resizable)</td><td>No</td><td>Internal notes field; not shown in table view</td></tr>
+</tbody></table>
+<div class="warn-box">
+  <strong>API/UI Label Mismatch:</strong> The field displayed as "Notes" in the table view maps to <code>psCustomerMessage</code> at the API level, not a notes field. This naming inconsistency makes it confusing for developers to map UI → API fields.
+</div>
+
+<h3>Loaners Requested Sub-Section</h3>
+<p>Below the textarea fields, a secondary table section "Loaners Requested" appears with its own <strong>Add</strong> button. Columns: Model / Quantity / Action. In the Edit panel (loaded with real data), this table showed 2 pre-existing loaner rows.</p>
+
+<h3>Edit Task Panel</h3>
+<p>Same layout as Add Task, but titled "Update Task" and pre-filled with existing record data. The Title field auto-generation still functions when changing Department or Type.</p>
+
+<div class="bug-box">
+  <div class="bug-title">BUG #4 — Title Field Inconsistency</div>
+  11 of 12 rows follow the "Department - Type" auto-generated title format. 1 row has a custom title ("Test"). There is no clear UI indication that the Title can be customized, and it's unclear if manually edited titles get overwritten when Department/Type changes.
+</div>
+</section><section>
+<h2 class="section-title">4. Scope Model Page — Flexible Mode</h2>
+<p><strong>Route:</strong> <code>/ScopeModel</code> — This is the primary reference data management page for scope instrument models. It controls the specifications, repair item mappings, and inventory parameters for every scope type in the system. Unlike most CRUD pages, it does NOT have a list/grid view — it opens directly in edit mode.</p>
+
+<div class="bug-box">
+  <div class="bug-title">BUG #5 — No List View / Browse Mode</div>
+  Navigating to <code>/ScopeModel</code> drops the user directly into an empty editor form. There is no table of existing models, no search/filter to find models, and no way to see "all scope models" at a glance. The only way to select an existing model is via the Scope Model dropdown in the toolbar. This is a significant UX gap — compare to every other standard admin CRUD page.
+</div>
+
+<div><img id="img-flexible" class="screenshot" style="display:none"><p class="screenshot-label" id="lbl-flexible"></p></div><h3>Top Toolbar</h3>
+<table>
+  <tbody><tr><th>Element</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Copy icon button</td><td>Button</td><td>Copies current model — behavior not fully tested</td></tr>
+  <tr><td>Save icon button</td><td>Button</td><td>Saves current model changes</td></tr>
+  <tr><td>Flexible / Rigid / Camera</td><td>Radio group</td><td>Switches instrument type — resets Scope Model dropdown</td></tr>
+  <tr><td>Scope Model</td><td>React-Select combobox</td><td>1,264 options (Flexible only); no virtualization; supports type-to-filter</td></tr>
+  <tr><td>Include Inactive checkbox</td><td>Checkbox</td><td>Toggles inactive models into the dropdown</td></tr>
+</tbody></table>
+
+<h3>Header Fields (all 3 modes share these)</h3>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Description</td><td>Text input</td><td>Model name/description; auto-populated from Scope Model dropdown</td></tr>
+  <tr><td>Inspection Required</td><td>Checkbox</td><td>Flag indicating inspection is mandatory</td></tr>
+  <tr><td>Model Category</td><td>React-Select</td><td>37 options: Angioscope → Ureteroscope; includes test data "New Cat", "test", "TBD"</td></tr>
+  <tr><td>Active</td><td>React-Select</td><td>Active / Inactive</td></tr>
+  <tr><td>GL Account</td><td>Text input</td><td>General Ledger account code; free-text entry</td></tr>
+  <tr><td>D&amp;I Override</td><td>React-Select</td><td><span style="color:red;font-weight:bold;">BROKEN</span> — dropdown has only 1 empty/blank option</td></tr>
+</tbody></table>
+
+<div class="bug-box">
+  <div class="bug-title">BUG #6 — D&amp;I Override Dropdown is Empty/Broken</div>
+  The D&amp;I Override field opens to a dropdown with exactly one blank option and nothing else. This strongly suggests either: (a) the API endpoint for this dropdown is returning an empty array, or (b) the dropdown options are hardcoded but the data array is empty due to a configuration error. The field itself is not marked as deprecated, so this appears to be an unintended regression.
+</div>
+
+<h3>Specifications — Flexible Tab (Fields)</h3>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Manufacturer</td><td>React-Select + gear button</td><td>20 options: ACMI, Circon, Ecleris, Fujinon, Karl Storz, Olympus, Pentax, Richard Wolf, Stryker, Welch Allyn + others; gear opens Manufacturer count modal</td></tr>
+  <tr><td>Video Image</td><td>React-Select + gear button</td><td>9 options: a (test), Fiber, Flushing Pump, Hybrid, N/A, None, Screen on scope, Ultrasound, Video; gear opens Video Image count modal</td></tr>
+  <tr><td>Avg Days Since Last In</td><td>react-datepicker (calendar)</td><td><span style="color:red;font-weight:bold;">WRONG COMPONENT</span> — this is a numeric field (number of days), not a date</td></tr>
+  <tr><td>Est. Expense Multiplier</td><td>Text input</td><td>Numeric multiplier for expense estimates</td></tr>
+  <tr><td>Contract Cost</td><td>PrimeReact InputNumber</td><td>Currency format with $ prefix</td></tr>
+  <tr><td>Maximum Charge</td><td>PrimeReact InputNumber</td><td>Currency format with $ prefix</td></tr>
+  <tr><td>Force On Portal</td><td>Checkbox</td><td>Portal visibility override</td></tr>
+  <tr><td>Skip Portal</td><td>Checkbox</td><td>Portal bypass flag</td></tr>
+  <tr><td>Angulation Up/Down</td><td>Checkbox</td><td>Applicable section</td></tr>
+  <tr><td>Angulation Left/Right</td><td>Checkbox</td><td>Applicable section</td></tr>
+  <tr><td>Broken</td><td>Checkbox</td><td>Applicable section — marks model as broken variant</td></tr>
+  <tr><td>Insertion Tube Length</td><td>Text input</td><td>Main Specifications section; e.g. "1030mm"</td></tr>
+  <tr><td>Unable To Verify</td><td>Checkbox</td><td>Next to Insertion Tube Length</td></tr>
+  <tr><td>Insertion Tube Diameter (OD)</td><td>Text input</td><td>e.g. "9.2 mm"</td></tr>
+  <tr><td>By</td><td>Text input</td><td>Adjacent to Insertion Tube Diameter; purpose unclear</td></tr>
+  <tr><td>Forcep Channel Size (ID)</td><td>Text input</td><td>e.g. "2.8 mm"</td></tr>
+  <tr><td>As</td><td>Date picker</td><td>Adjacent to Forcep Channel Size; possibly a tolerance/spec date</td></tr>
+  <tr><td>Field of View</td><td>Text input</td><td>e.g. "140"</td></tr>
+  <tr><td>Direction of View</td><td>Text input</td><td>Angle of view specification</td></tr>
+</tbody></table>
+
+<div class="bug-box">
+  <div class="bug-title">BUG #7 — "Avg Days Since Last In" Uses react-datepicker</div>
+  This field represents a numeric count of days — it should be a number input (or PrimeReact InputNumber). Instead it renders a calendar date picker, which is semantically incorrect and creates a confusing UX. The calendar icon appears next to what should be a simple number field.
+</div>
+
+<h3>Flags Panel (right side, persistent)</h3>
+<p>A panel to the right of the main spec fields showing flag records for this model. Columns: Instrument Type / Service Location / Flag / Action. Has an <strong>Add</strong> button that opens the Add Flag right-side panel.</p>
+
+<h3>Add Flag Right-Side Panel Fields</h3>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Instrument Type</td><td>Checkboxes</td><td>Flexible / Rigid / Instrument / Camera (multi-select via checkboxes)</td></tr>
+  <tr><td>Locations</td><td>Checkboxes</td><td>D&amp;I / Requisition / Upon Approval / Invoice / Booking Loaners</td></tr>
+  <tr><td>Visible On D&amp;I</td><td>Checkbox</td><td>—</td></tr>
+  <tr><td>Visible On Blank Inspection</td><td>Checkbox</td><td>—</td></tr>
+  <tr><td>Flag</td><td>Textarea (required)</td><td>Free-text flag description</td></tr>
+</tbody></table>
+
+<h3>Gear Button Modals</h3>
+<p>Both the Manufacturer and Video Image fields have a blue gear button that opens a centered dialog (not a slide panel). These modals show summary count tables:</p>
+<ul>
+  <li><strong>Manufacturer modal:</strong> Columns: Manufacturer / Instrument Type / Scope Type Count</li>
+  <li><strong>Video Image modal:</strong> Columns: Video Image / Scope Type Count</li>
+  <li>Both showed "No Record Found" during testing (model had no associated data yet)</li>
+</ul>
+</section><section>
+<h2 class="section-title">5. Scope Model Page — Rigid Mode</h2>
+<p>Switching to the <strong>Rigid</strong> radio button clears the Scope Model dropdown and auto-loads the first Rigid model in the list (<strong>"0 Deg"</strong> — an Arthroscope). The Specifications tab changes to "Specifications - Rigid" with a completely different field set from Flexible mode.</p>
+
+<h3>Shared Header Fields</h3>
+<p>Description, Inspection Required, Model Category, Active, GL Account, and D&amp;I Override are the same as Flexible mode (D&amp;I Override still broken).</p>
+
+<h3>Specifications — Rigid Tab (Fields)</h3>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Manufacturer</td><td>React-Select + gear</td><td>Same 20 options; auto-populated to "Ecleris" for "0 Deg"</td></tr>
+  <tr><td>Scope Category</td><td>React-Select + gear</td><td><strong>321 options</strong> — all rigid-specific instrument categories; no virtualization</td></tr>
+  <tr><td>Avg Days Since Last In</td><td>Text input (not datepicker)</td><td>In Rigid mode this correctly renders as a text input (inconsistent with Flexible)</td></tr>
+  <tr><td>Est. Expense Multiplier</td><td>Text input</td><td>Same as Flexible</td></tr>
+  <tr><td>Contract Cost</td><td>PrimeReact InputNumber</td><td>Currency; "0 Deg" shows $3,000</td></tr>
+  <tr><td>Maximum Charge</td><td>PrimeReact InputNumber</td><td>Currency; "0 Deg" shows $1,695</td></tr>
+  <tr><td>Force On Portal</td><td>Checkbox</td><td>—</td></tr>
+  <tr><td>Skip Portal</td><td>Checkbox</td><td>—</td></tr>
+  <tr><td>Rank</td><td>Text input</td><td>Sort/priority rank; "0" for "0 Deg"</td></tr>
+  <tr><td>Insertion Tube Diameter</td><td>Text input</td><td>Decimal value (e.g. ".")</td></tr>
+  <tr><td>Image Size &amp; Center Run Out</td><td>Text input (masked)</td><td>Appears as "__" masked input</td></tr>
+  <tr><td>Drawing</td><td>React-Select</td><td>Yes / No</td></tr>
+  <tr><td>Insertion Tube Length</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Field of View</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Tube System</td><td>React-Select</td><td>2 Tube / 3 Tube</td></tr>
+  <tr><td>ID Band</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Squint</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Lens System</td><td>React-Select</td><td>Rod Lens / Acromat / Image Bundle</td></tr>
+  <tr><td>Autoclaveable</td><td>React-Select</td><td>Yes / No; shown as toggle/pill in UI</td></tr>
+  <tr><td>Direction of View</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Degree</td><td>React-Select</td><td>0 / 5 / 12 / 30 / 45 / 70</td></tr>
+  <tr><td>Resolution Group</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Marker Plate</td><td>React-Select</td><td>6 / 9 / 12</td></tr>
+  <tr><td>Resolution Field</td><td>Text input</td><td>—</td></tr>
+  <tr><td>Eye Cup Mount</td><td>React-Select</td><td>Black / Blue / Red / Green / C-Mount / Cartridge</td></tr>
+</tbody></table>
+
+<h3>Notes / Drawing Section (below main fields)</h3>
+<p>Scrolling down in Rigid mode reveals:</p>
+<ul>
+  <li><strong>Notes textarea</strong> — free-text internal notes</li>
+  <li><strong>File uploader</strong> — accepts <code>.xlsx</code> files only (labeled for drawing files)</li>
+  <li><strong>Extract button</strong> — exports current data</li>
+  <li><strong>Import button</strong> — triggers Import/Export centered modal</li>
+</ul>
+<div class="bug-box">
+  <div class="bug-title">BUG #8 — Drawing File Uploader Accepts .xlsx Only</div>
+  The file uploader in the Drawing section is configured to only accept <code>.xlsx</code> (Excel) files. Technical drawings are typically stored as PDF, DXF, SVG, or image formats (PNG/JPG). Restricting to .xlsx is likely incorrect — drawing files are not spreadsheets. This may have been a misconfiguration during development.
+</div>
+
+<h3>Import/Export Modal (Broken)</h3>
+<div class="bug-box">
+  <div class="bug-title">BUG #9 — Import/Export Modal: Instrument Type Shows "No options"</div>
+  Clicking the Import button opens a centered modal with an "Instrument Type" dropdown. This dropdown renders with "No options" — the dropdown data is not loading. This modal appears to be intended for bulk import/export of scope model data by instrument type, but the feature is non-functional in its current state.
+</div>
+
+<h3>Scope Category Gear Button</h3>
+<p>The Scope Category field also has a gear button that opens a centered modal (same pattern as Manufacturer/Video Image). Not fully tested in Rigid mode but expected to show Scope Category / Count summary table.</p>
+</section><section>
+<h2 class="section-title">6. Scope Model Page — Camera Mode &amp; Sub-Tabs</h2>
+
+<h3>Camera Mode</h3>
+<p>Switching to <strong>Camera</strong> clears the Scope Model dropdown. The Specifications tab changes to "Specifications - Camera." The field set is <strong>identical to Flexible mode</strong> — same fields, same layout, same component types including the react-datepicker bug on "Avg Days Since Last In."</p>
+<div class="warn-box">
+  <strong>Note:</strong> Camera mode appears to be a duplicate of Flexible mode in terms of UI fields. The primary difference is likely in how the backend classifies and processes these records. If Camera models have no unique spec fields, consider whether this mode needs a distinct form at all, or if it's purely a classification label.
+</div>
+
+<h3>Repair Items Sub-Tab</h3>
+<p>Available on all 3 instrument modes. Shows a table of repair items linked to this scope model:</p>
+<table>
+  <tbody><tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>Item Description</td><td>Text</td><td>Name of the repair procedure/part</td></tr>
+  <tr><td>Level 3 Time</td><td>Integer (minutes)</td><td>Completion time for Level 3 repair</td></tr>
+  <tr><td>Level 3 Warning</td><td>Integer (minutes)</td><td>Warning threshold time for Level 3</td></tr>
+  <tr><td>Level 2 Time</td><td>Integer (minutes)</td><td>Completion time for Level 2 repair</td></tr>
+  <tr><td>Level 2 Warning</td><td>Integer (minutes)</td><td>Warning threshold time for Level 2</td></tr>
+  <tr><td>Level 1 Time</td><td>Integer (minutes)</td><td>Completion time for Level 1 repair</td></tr>
+  <tr><td>Level 1 Warning</td><td>Integer (minutes)</td><td>Warning threshold time for Level 1</td></tr>
+  <tr><td>Action</td><td>Icon button</td><td>Delete (red trash icon only — no edit)</td></tr>
+</tbody></table>
+<div class="warn-box">
+  <strong>UX Gap:</strong> Repair Items can only be deleted, not edited in-place. To update time values, users must delete and re-add the item. There is no inline edit or separate edit modal for existing repair items.
+</div>
+
+<h3>Add Repair Item Modal (Centered Dialog)</h3>
+<p>Clicking <strong>Add</strong> in the Repair Item sub-tab opens a centered modal (not a slide panel):</p>
+<table>
+  <tbody><tr><th>Field</th><th>Type</th><th>Required</th></tr>
+  <tr><td>Repair Item</td><td>React-Select dropdown (481 options)</td><td>Yes</td></tr>
+  <tr><td>Completion Time — Level 3</td><td>Number input</td><td>Yes</td></tr>
+  <tr><td>Completion Time — Level 2</td><td>Number input</td><td>Yes</td></tr>
+  <tr><td>Completion Time — Level 1</td><td>Number input</td><td>Yes</td></tr>
+  <tr><td>Warning Time — Level 3</td><td>Number input</td><td>—</td></tr>
+  <tr><td>Warning Time — Level 2</td><td>Number input</td><td>—</td></tr>
+  <tr><td>Warning Time — Level 1</td><td>Number input</td><td>—</td></tr>
+</tbody></table>
+<div class="warn-box">
+  <strong>481 Repair Items unvirtualized:</strong> The Repair Item dropdown loads all 481 options into memory with no virtualization. Combined with 1,264 Scope Models and 321 Scope Categories, this page loads a significant amount of reference data upfront.
+</div>
+
+<h3>Inventory Sub-Tab</h3>
+<p>The Inventory sub-tab reveals a <strong>split-panel layout</strong>: left panel lists associated repair items; right panel shows "No Repair Item Selected" until a left-panel row is clicked, at which point it shows the inventory details for that repair item on this scope model. This is a master-detail pattern within the sub-tab.</p>
+
+<div class="info-box">
+  <strong>Component Library Inconsistency:</strong> Within a single page (ScopeModel), four different input libraries are in use: React-Select (dropdowns), PrimeReact InputNumber (currency), react-datepicker (dates + incorrectly on numeric field), and native HTML inputs (text fields). This creates inconsistent styling, keyboard behavior, and accessibility characteristics.
+</div>
+</section><section>
+<h2 class="section-title">7. Modal &amp; Panel Patterns</h2>
+<p>The application uses two distinct overlay patterns. Understanding both is critical for recreating the UI:</p>
+
+<h3>Pattern A: Right-Side Slide Panel</h3>
+<p>CSS class: <code>.right-model-section</code>. Width: ~50% of viewport. Slides in from the right edge. Used for: Add Task, Update Task, Add Flag. Characteristics:</p>
+<ul>
+  <li>Header bar with icon + title (e.g. "Add Task") + X close button in top-right</li>
+  <li>Header background matches the app's primary blue</li>
+  <li>Content area is scrollable independently of the background page</li>
+  <li>Background page content is still visible/accessible on the left</li>
+  <li>No overlay backdrop — the page behind remains fully interactive</li>
+  <li>Save + Cancel buttons at the bottom (Save = dark blue, Cancel = dark gray)</li>
+</ul>
+
+<h3>Pattern B: Centered Dialog Modal</h3>
+<p>CSS class: <code>.center-model-section</code>. Width: ~500-600px centered. Used for: Add Repair Item, Manufacturer gear, Video Image gear, Import/Export. Characteristics:</p>
+<ul>
+  <li>Dark overlay backdrop covers the full page</li>
+  <li>Dialog centered horizontally and vertically</li>
+  <li>Same blue header with icon + title + X close button</li>
+  <li>Save + Cancel buttons at the bottom</li>
+  <li>Clicking outside the dialog (on the backdrop) may or may not close — not confirmed</li>
+</ul>
+
+<table>
+  <tbody><tr><th>Feature</th><th>Right-Side Panel</th><th>Centered Dialog</th></tr>
+  <tr><td>CSS class</td><td><code>.right-model-section</code></td><td><code>.center-model-section</code></td></tr>
+  <tr><td>Width</td><td>~50% viewport</td><td>~500–600px fixed</td></tr>
+  <tr><td>Backdrop</td><td>None (page still visible)</td><td>Dark overlay</td></tr>
+  <tr><td>Used for</td><td>Add/Edit Task, Add Flag</td><td>Add Repair Item, Gear modals, Import/Export</td></tr>
+  <tr><td>Close button</td><td>X in header</td><td>X in header</td></tr>
+  <tr><td>Actions</td><td>Save + Cancel</td><td>Save + Cancel (or just Cancel for read-only)</td></tr>
+</tbody></table>
+
+<div class="info-box">
+  <strong>For Redesign:</strong> Both patterns should be unified into a single modal/drawer system (e.g. using a headless UI library like Radix UI or a custom component). The distinction between "when to use slide panel vs. centered dialog" should be documented as a design system rule: drawer for record-level create/edit, modal for lookup/selection/confirmation.
+</div>
+</section><section>
+<h2 class="section-title">8. Bug Registry — 12 Confirmed Issues</h2>
+<p>All bugs below were confirmed through direct interactive testing. Severity: <span class="badge badge-red">Critical</span> <span class="badge badge-blue">High</span> <span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span> <span class="badge badge-gray">Low</span></p>
+
+<table>
+  <tbody><tr><th>#</th><th>Severity</th><th>Page</th><th>Component</th><th>Description</th><th>Root Cause (Suspected)</th></tr>
+  <tr>
+    <td>1</td>
+    <td><span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span></td>
+    <td>Dashboard/Scopes</td>
+    <td>Filter Radio Groups</td>
+    <td>All radio button IDs render as <code>undefined-Flexible</code>, <code>undefined-Rigid</code>, etc. Label click does not toggle radio.</td>
+    <td>RadioGroup component receives <code>undefined</code> as its <code>name</code> prop. The ID is generated as <code>${name}-${value}</code>.</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><span class="badge badge-blue">High</span></td>
+    <td>Dashboard/Scopes</td>
+    <td>Data Table</td>
+    <td>202 rows rendered to DOM with no pagination, virtualization, or lazy loading. Will degrade severely as data grows.</td>
+    <td>Missing pagination implementation. API likely supports page params but frontend doesn't use them.</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><span class="badge badge-blue">High</span></td>
+    <td>Dashboard/Scopes</td>
+    <td>Table Headers</td>
+    <td>No column sorting. All 11 column headers are static text with no click handler or sort indicator.</td>
+    <td>Sort functionality never implemented. No <code>onClick</code> or sort state management in table component.</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span></td>
+    <td>Dashboard/Tasks</td>
+    <td>Task Title Field</td>
+    <td>Title auto-generates as "Department - Type" but it's unclear if manual edits are preserved when Department/Type changes.</td>
+    <td>Auto-generation logic likely overwrites the field on any Department or Type change event.</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><span class="badge badge-red">Critical</span></td>
+    <td>ScopeModel</td>
+    <td>Page Entry</td>
+    <td>No list/browse view exists. Page opens directly to an empty form. Users have no way to see or search all scope models except via the dropdown.</td>
+    <td>Intentional design decision that creates a serious UX gap. No list component was built for this page.</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td><span class="badge badge-red">Critical</span></td>
+    <td>ScopeModel</td>
+    <td>D&amp;I Override dropdown</td>
+    <td>Dropdown opens with only one blank/empty option. Feature is completely non-functional.</td>
+    <td>API endpoint for D&amp;I Override options returns empty array, or the options array in state is empty due to missing data fetch.</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td><span class="badge badge-blue">High</span></td>
+    <td>ScopeModel (Flexible)</td>
+    <td>Avg Days Since Last In</td>
+    <td>Field uses <code>react-datepicker</code> (calendar picker) but the field is a numeric day count, not a date.</td>
+    <td>Developer used a date picker by mistake — possibly copy-pasted from a nearby date field. Should be <code>&lt;InputNumber&gt;</code> or <code>&lt;input type="number"&gt;</code>.</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td><span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span></td>
+    <td>ScopeModel (Rigid)</td>
+    <td>Drawing File Uploader</td>
+    <td>File input restricted to <code>.xlsx</code> only. Technical drawings should be PDF, DXF, SVG, or image files.</td>
+    <td>Wrong file type filter applied. <code>accept=".xlsx"</code> should be <code>accept=".pdf,.dxf,.svg,.png,.jpg"</code> or similar.</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td><span class="badge badge-red">Critical</span></td>
+    <td>ScopeModel</td>
+    <td>Import/Export Modal</td>
+    <td>Instrument Type dropdown in modal shows "No options." Modal is non-functional.</td>
+    <td>Data fetch for modal dropdown options is failing — likely missing API call or incorrect endpoint on modal open.</td>
+  </tr>
+  <tr>
+    <td>10</td>
+    <td><span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span></td>
+    <td>ScopeModel</td>
+    <td>Scope Model Dropdown</td>
+    <td>1,264 items loaded into a non-virtualized React-Select. Scrolling through all options causes jank and lag.</td>
+    <td>Missing <code>react-window</code> or <code>react-virtual</code> integration with React-Select. Use <code>react-select/async</code> with server-side filtering instead.</td>
+  </tr>
+  <tr>
+    <td>11</td>
+    <td><span class="badge" style="background:#fff3e0;color:#e65100;">Medium</span></td>
+    <td>ScopeModel</td>
+    <td>Repair Items sub-tab</td>
+    <td>Existing repair items cannot be edited — only deleted and re-created. No inline edit or edit modal for existing rows.</td>
+    <td>Missing edit functionality. Only delete action implemented in the table row.</td>
+  </tr>
+  <tr>
+    <td>12</td>
+    <td><span class="badge badge-blue">High</span></td>
+    <td>ScopeModel</td>
+    <td>Video Image dropdown</td>
+    <td>Options list includes "a" as the first option — clearly test/junk data that was never cleaned up.</td>
+    <td>Test data left in production/staging database. Needs cleanup and a validation rule to prevent single-character entries.</td>
+  </tr>
+</tbody></table>
+</section><section>
+<h2 class="section-title">9. Architecture Issues &amp; Improvement Recommendations</h2>
+<p>This section is written specifically for Claude Code and the development team as a redesign specification input. Each issue is paired with a concrete recommendation.</p>
+
+<h3>Issue A: Mixed Component Library Stack</h3>
+<p><strong>Current state:</strong> The app uses at least 4 different input component libraries simultaneously on the same page: React-Select, PrimeReact, react-datepicker, and Bootstrap native inputs. Each has different styling, keyboard nav behavior, accessibility support, and CSS class naming.</p>
+<p><strong>Recommendation:</strong> Pick one component library as the foundation. Recommended options: (1) <strong>shadcn/ui + Radix UI</strong> — headless, fully accessible, easy to style with Tailwind; (2) <strong>Mantine</strong> — full-featured, consistent; (3) <strong>Ant Design</strong> — enterprise-focused, high component coverage. All React-Select, PrimeReact, and react-datepicker usage should be replaced with the chosen library's equivalents.</p>
+
+<h3>Issue B: No Virtualization on Large Dropdowns</h3>
+<p><strong>Current state:</strong> 1,264 scope model options, 481 repair item options, and 321 scope categories all loaded into unvirtualized dropdowns at page load.</p>
+<p><strong>Recommendation:</strong> Implement server-side filtering + async loading: use <code>react-select/async</code> with debounced API search. Only fetch matching options as the user types. Cache frequently accessed items in a React Query or SWR cache.</p>
+
+<h3>Issue C: No Pagination on Tables</h3>
+<p><strong>Current state:</strong> Dashboard Scopes tab shows 202+ rows with zero pagination. This will grow over time and eventually cause the page to become unusable.</p>
+<p><strong>Recommendation:</strong> Implement server-side pagination with configurable page size (25/50/100). Use cursor-based pagination for better performance at scale. Consider <strong>TanStack Table</strong> (React Table v8) for the table layer — it handles sorting, filtering, and pagination in a headless, composable way.</p>
+
+<h3>Issue D: No Column Sorting</h3>
+<p><strong>Current state:</strong> No sortable columns anywhere in the application.</p>
+<p><strong>Recommendation:</strong> TanStack Table's <code>getSortedRowModel()</code> handles client-side sort. For server-side sort, pass sort params to the API. At minimum, Date In, Client, Repair Status, and Priority should be sortable on Dashboard/Scopes.</p>
+
+<h3>Issue E: ScopeModel Has No List View</h3>
+<p><strong>Current state:</strong> Users must know the exact model name to navigate to it via the dropdown. There is no browse/search interface.</p>
+<p><strong>Recommendation:</strong> Add a standard list view as the default for <code>/ScopeModel</code>, with a data table showing: Description, Manufacturer, Model Category, Instrument Type, Active status, Contract Cost. Clicking a row navigates to <code>/ScopeModel/{id}</code> in edit view. The current toolbar-based editor becomes the record detail page.</p>
+
+<h3>Issue F: Non-Bookmarkable Record URLs</h3>
+<p><strong>Current state:</strong> Selecting a scope model via dropdown does not update the URL. <code>/ScopeModel</code> always stays as-is regardless of which model is loaded. Same issue likely exists on other pages with dropdown-driven record selection.</p>
+<p><strong>Recommendation:</strong> Update the URL on record selection: <code>/ScopeModel/GIF-H190</code> or <code>/ScopeModel?model=12345</code>. This enables bookmarking, browser back/forward navigation, and sharing direct links to specific records.</p>
+
+<h3>Issue G: Iconify Runtime CDN Dependency</h3>
+<p><strong>Current state:</strong> Some icons are loaded at runtime from <code>api.iconify.design</code> (external CDN). If this CDN is unavailable, icons fail silently and parts of the UI become icon-less.</p>
+<p><strong>Recommendation:</strong> Bundle all icons as static SVG imports or use a single icon library (Lucide React or Heroicons) installed as an npm package. Eliminate all external CDN icon dependencies.</p>
+
+<h3>Issue H: API Data / Label Mismatches</h3>
+<p><strong>Current state:</strong> The "Notes" column in the Tasks table maps to <code>psCustomerMessage</code> at the API level. Field naming conventions appear inconsistent between the UI and the API.</p>
+<p><strong>Recommendation:</strong> Create a typed API schema layer (e.g. using <strong>Zod</strong> or <strong>TypeScript interfaces</strong> generated from the OpenAPI spec). UI components should consume named, typed fields — not raw API field names.</p>
+
+<h3>Issue I: Test Data in Production Schema Options</h3>
+<p><strong>Current state:</strong> Video Image dropdown includes "a" as a valid option. Model Category dropdown includes "New Cat", "test", "TBD". These are clearly test entries that contaminate the reference data.</p>
+<p><strong>Recommendation:</strong> Add server-side validation to reject single-character or common test string values (case-insensitive "test", "TBD") in admin dropdowns. Implement a data cleanup migration to remove existing invalid entries.</p>
+
+<h3>Issue J: Bootstrap via CDN (Not NPM)</h3>
+<p><strong>Current state:</strong> Bootstrap 5.3 is loaded via CDN <code>&lt;link&gt;</code> tag, not installed as an npm package. This prevents tree-shaking, makes upgrades manual, and can cause CSS conflicts with React component libraries.</p>
+<p><strong>Recommendation:</strong> If keeping Bootstrap, install via npm and import only the needed modules. Better yet, replace Bootstrap with Tailwind CSS for utility-first styling that works cleanly with any component library.</p>
+
+<h3>Redesign Priority Summary for Claude Code</h3>
+<table>
+  <tbody><tr><th>Priority</th><th>Task</th></tr>
+  <tr><td>P0 — Fix Bugs</td><td>Fix D&amp;I Override dropdown, Import/Export modal, Avg Days datepicker bug, radio group IDs, drawing file uploader types</td></tr>
+  <tr><td>P1 — Core UX</td><td>Add list view to ScopeModel, add pagination to Dashboard tables, add column sorting, bookmarkable URLs</td></tr>
+  <tr><td>P2 — Performance</td><td>Virtualize all large dropdowns (async React-Select), implement server-side pagination</td></tr>
+  <tr><td>P3 — Architecture</td><td>Unify component library, remove CDN dependencies, add typed API schema layer, clean test data</td></tr>
+  <tr><td>P4 — Design System</td><td>Standardize modal/panel patterns, create reusable table component, consistent form layout rules</td></tr>
+</tbody></table>
+</section><section>
+<h2 class="section-title">10. Screenshots — Application State During Analysis</h2>
+<p>The following screenshots were captured during the live analysis session on March 8, 2026 using the test environment (Joseph Brassell, Upper Chichester service location).</p>
+
+<h3>Screenshot 1 — Dashboard / Scopes Tab</h3>
+<p>Default view after login. Flexible filter active, In House selected, showing 202 active repair records. Header, sidebar, tab strip, filter bar, and data table all visible.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: Dashboard/Scopes Tab — 202 rows, 11 tabs, filter radio groups, 11-column table]<br>
+  <em>Captured: ss_154124rrm — 1158×791px</em>
+</div>
+
+<h3>Screenshot 2 — Dashboard / Tasks Tab</h3>
+<p>Tasks tab active. Search Criteria accordion expanded showing 3 React-Select dropdowns + date range. Tasks table shows 12 rows with Client, Department, Type, Title, Date, Status, Priority, Requested Models, Notes, Action columns.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: Dashboard/Tasks Tab — Search Criteria + 12-row Tasks table]<br>
+  <em>Captured: ss_8951qturw — 1158×739px</em>
+</div>
+
+<h3>Screenshot 3 — Add Task Right-Side Panel</h3>
+<p>Add Task slide panel open from the right (~50% viewport). Shows all 9 form fields: Client, Status (pre-filled "Not Complete"), Department, Type, Title, Priority, Task Date (03/08/2026), Customer Message textarea, Task Notes textarea, plus Loaners Requested sub-table at bottom.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: Add Task Panel — Right-side slide panel with all fields visible]<br>
+  <em>Captured: ss_2025dlz5n — 1158×739px</em>
+</div>
+
+<h3>Screenshot 4 — ScopeModel / Flexible Mode (GIF H190 loaded)</h3>
+<p>ScopeModel page with GIF H190 loaded in Flexible mode. Shows: Description="GIF H190", Model Category="Gastroscope", Manufacturer="Olympus" (truncated), Video Image="V..." (Video), Contract Cost=$1,800, Maximum Charge=$4,995, Angulation Up/Down checked, Angulation Left/Right checked, Insertion Tube Length=1030mm, Insertion Tube Diameter=9.2mm, Forcep Channel Size=2.8mm, Field of View=140.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: ScopeModel Flexible — GIF H190 fully populated record]<br>
+  <em>Captured: ss_9436d99da — 1158×739px</em>
+</div>
+
+<h3>Screenshot 5 — ScopeModel / Repair Items Sub-Tab</h3>
+<p>Repair Items tab active on GIF H190. Shows the table structure with columns: Item Description, Level 3 Time, Level 3 Warning, Level 2 Time, Level 2 Warning, Level 1 Time, Level 1 Warning, Action. "No Record Found" state for GIF H190. Add button visible in top right.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: ScopeModel Repair Items Tab — empty state with column headers]<br>
+  <em>Captured: ss_7011bj8gn — 1158×739px</em>
+</div>
+
+<h3>Screenshot 6 — Add Repair Item Centered Modal</h3>
+<p>Add Repair Item modal (centered dialog). Shows: Repair Item dropdown (Select Repair Item placeholder — 481 options), Completion Time row with Level 3/2/1 columns, Warning Time row with Level 3/2/1 columns. Save + Cancel buttons at bottom.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: Add Repair Item Modal — centered dialog with 7 fields]<br>
+  <em>Captured: ss_0225m8imb — 1158×739px</em>
+</div>
+
+<h3>Screenshot 7 — ScopeModel / Rigid Mode (0 Deg — Arthroscope)</h3>
+<p>Rigid mode, Repair Items sub-tab. Shows "0 Deg" (Arthroscope) model loaded, with one repair item: "!! Specialty Rigid Repair I" — Level 3 Time=5, Level 3 Warning=4, Level 2 Time=3, Level 2 Warning=5, Level 1 Time=3, Level 1 Warning=3.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: ScopeModel Rigid Repair Items — actual repair item row with all time values]<br>
+  <em>Captured: ss_7832g8y1v — 1158×739px</em>
+</div>
+
+<h3>Screenshot 8 — ScopeModel / Rigid Specifications</h3>
+<p>Specifications - Rigid tab for 0 Deg model. Shows unique Rigid fields: Manufacturer (Ecleris), Scope Category dropdown, Avg Days Since Last In (text input — correctly rendered in Rigid), Contract Cost=$3,000, Maximum Charge=$1,695, plus lower section with Rank=0, Drawing dropdown, Tube System, Lens System, Autoclaveable (No), Degree, Resolution Group, Marker Plate, Resolution Field, Eye Cup Mount, Image Size &amp; Center Run Out, Field of View, ID Band, Squint, Direction of View. Flags panel shows No Record Found.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: ScopeModel Rigid Specifications — full unique Rigid field set]<br>
+  <em>Captured: ss_62635lilp — 1158×739px</em>
+</div>
+
+<h3>Screenshot 9 — Add Flag Right-Side Panel</h3>
+<p>Add Flag slide panel open from right. Shows: Instrument Type checkboxes (Flexible/Rigid/Instrument/Camera), Locations checkboxes (D&amp;I/Requisition/Upon Approval/Invoice/Booking Loaners), Visible On D&amp;I checkbox, Visible On Blank Inspection checkbox, Flag textarea (required), Save + Cancel buttons.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: Add Flag Panel — right-side panel with checkboxes and textarea]<br>
+  <em>Captured: ss_8838ytlok — 1158×739px</em>
+</div>
+
+<h3>Screenshot 10 — ScopeModel / Camera Mode</h3>
+<p>Camera mode, Specifications - Camera tab. Field set is identical to Flexible mode. Scope Model dropdown is reset/empty when switching to Camera. Flags panel shows loading spinner. Contract Cost shows $3,000, Maximum Charge $1,695 carried over from previous mode switch.</p>
+<div style="background:#f0f4ff;border:2px dashed #2d6cdf;border-radius:8px;padding:20px;text-align:center;color:#1a3a6b;margin:16px 0;">
+  [Screenshot: ScopeModel Camera Mode — identical fields to Flexible mode]<br>
+  <em>Captured: ss_7311ul223 — 1158×739px</em>
+</div>
+</section><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><button onclick="window.print()" style="background:#1a3a6b;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:15px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);font-weight:600;">🖨️ Print / Save as PDF</button></div></body></html>

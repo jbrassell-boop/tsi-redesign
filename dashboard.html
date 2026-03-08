@@ -39,7 +39,13 @@
     .topbar-center{display:flex;flex-direction:column;align-items:center}
     .topbar-title{color:#fff;font-weight:900;font-size:17px;letter-spacing:.3px}
     .topbar-sub{color:#9DABE2;font-size:9px;letter-spacing:2px;text-transform:uppercase}
-    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .topbar-right{display:flex;align-items:center;gap:16px;color:rgba(255,255,255,.7);font-size:12px}
+    
+    /* AUTO-SAVE INDICATOR */
+    .save-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:#A7F3D0;opacity:0.8;font-weight:500;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);animation:pulse-save 4s infinite}
+    @keyframes pulse-save{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}
+    .save-indicator svg{width:12px;height:12px}
+
     .svc-select{height:30px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:11.5px;cursor:pointer;outline:none;font-family:inherit}
 
     /* PAGE BODY — no padding, full bleed */
@@ -50,6 +56,7 @@
     .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .1s;min-width:0}
     .stat-chip:last-child{border-right:none}
     .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
     .stat-chip.alert{background:#FEF9F9}
     .stat-chip.warn{background:#FFFDF7}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
@@ -60,7 +67,7 @@
 
     /* SUBNAV */
     .subnav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:2px solid var(--border);padding:0 14px;flex-shrink:0;overflow-x:auto}
-    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
     .subnav-tab:hover{color:var(--navy)}
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
     .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
@@ -91,11 +98,16 @@
     th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;cursor:pointer;user-select:none;text-transform:uppercase}
     th:last-child{border-right:none}
     th:hover{background:#1A3F8F}
-    th .sort{margin-left:3px;opacity:.4;font-size:9px}
+    th .sort{margin-left:3px;opacity:.4;font-size:9px;transition:opacity .1s}
     th.sorted .sort{opacity:1}
-    td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
-    tbody tr:nth-child(even){background:var(--row-alt)}
-    tbody tr:hover{background:var(--hover);cursor:pointer}
+    th.sorted.asc .sort::after{content:'▲'}
+    th.sorted.desc .sort::after{content:'▼'}
+    td{padding:5px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tr.row-main td{padding-bottom:1px;border-bottom:none}
+    /* Paired rows: every other PAIR gets alt bg */
+    tbody tr.row-main:nth-child(4n+3),tbody tr.row-main:nth-child(4n+3)+tr.row-detail{background:var(--row-alt)}
+    tbody tr.row-main:nth-child(4n+1),tbody tr.row-main:nth-child(4n+1)+tr.row-detail{background:var(--card)}
+    tbody tr.row-main:hover,tbody tr.row-main:hover+tr.row-detail{background:var(--hover);cursor:pointer}
     tbody tr.urgent{border-left:3px solid var(--red)}
     tbody tr.attention{border-left:3px solid var(--amber)}
 
@@ -114,6 +126,15 @@
     .b-quoted{background:#E8EAF6;color:var(--navy);border:1px solid #9FA8DA}
     .b-invoiced{background:#F5F5F5;color:#616161;border:1px solid #BDBDBD}
 
+    /* Sub-row detail line (cockpit density — quiet, scannable) */
+    .row-detail td{padding:0 8px 4px 8px !important;border-top:none !important;border-bottom:1px solid var(--border) !important;font-size:10px;color:#9CA3AF;line-height:1.3;background:inherit}
+    .row-detail:hover{background:inherit !important}
+    .row-detail .d-note{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;color:#B0B8C8;cursor:pointer;padding:1px 4px;border-radius:3px;transition:background .1s}
+    .row-detail .d-note:hover{background:#EDF2FF;color:var(--label)}
+    .row-detail .note-edit{width:100%;border:1.5px solid var(--navy);border-radius:4px;padding:3px 6px;font-size:10px;font-family:inherit;font-style:italic;color:var(--text);outline:none;box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    /* Hot badge */
+    .hot-flag{background:#FEE2E2;color:var(--red);font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px}
+
     /* Days-In heat */
     .days-crit{color:var(--red);font-weight:700}
     .days-warn{color:var(--amber);font-weight:600}
@@ -129,13 +150,77 @@
     .pg-btn:hover:not(.on){background:var(--bg)}
     .pg-select{height:26px;font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 6px;font-family:inherit}
 
-    /* INLINE ACTION BUTTONS */
-    .row-actions{display:flex;gap:3px;justify-content:center}
-    .act-btn{height:24px;padding:0 8px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;border:none;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;transition:all .1s}
-    .act-open{background:var(--navy);color:#fff}
-    .act-open:hover{background:#1A3F8F}
-    .act-email{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE}
-    .act-email:hover{background:#DBEAFE}
+    /* GROUP-BY rows */
+    .group-row td{background:#E9EFF9;padding:6px 12px;font-size:11.5px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--border-dk);cursor:pointer;user-select:none}
+    .group-row td:hover{background:#DCE5F5}
+    .group-row .g-toggle{display:inline-block;width:14px;font-size:10px;color:var(--muted);margin-right:6px;transition:transform .15s}
+    .group-row .g-toggle.collapsed{transform:rotate(-90deg)}
+    .group-row .g-count{font-weight:400;color:var(--muted);font-size:10px;margin-left:6px}
+    .group-row .g-sum{float:right;font-weight:600;color:var(--steel);font-size:10.5px}
+    tr.group-hidden{display:none}
+
+    /* CONTEXT MENU */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:180px;padding:4px 0;display:none;font-size:11.5px}
+    .ctx-menu.show{display:block}
+    .ctx-item{padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text);transition:background .08s}
+    .ctx-item:hover{background:var(--bg);color:var(--navy)}
+    .ctx-item svg{width:13px;height:13px;opacity:.6}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger:hover{background:#FEF2F2}
+
+    /* MODAL OVERLAY (Global Search & Create) */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px)}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:#fff;border-radius:12px;width:1050px;max-width:98vw;box-shadow:0 24px 72px rgba(0,37,122,.25);overflow:hidden;transform:translateY(15px);transition:transform .2s;display:flex;flex-direction:column;max-height:85vh}
+    .modal-overlay.open .modal{transform:translateY(0)}
+    .modal-hd{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#F7F9FC;flex-shrink:0}
+    .modal-hd h2{font-size:15px;color:var(--navy);font-weight:800}
+    .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;transition:all .1s}
+    .modal-close:hover{background:#E9EFF9;color:var(--navy)}
+    .modal-close svg{width:18px;height:18px}
+    
+    .modal-bd{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .modal-search-area{padding:24px 32px;border-bottom:1px solid var(--border);background:#fff;display:flex;gap:40px;flex-shrink:0;justify-content:center}
+    .ms-col{display:flex;flex-direction:column;gap:14px}
+    .ms-row{display:flex;align-items:center;gap:12px}
+    .ms-label{width:65px;text-align:right;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+    .ms-input{height:30px;width:200px;border:1px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;outline:none;transition:border-color .15s}
+    .ms-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    
+    .ms-checks{display:flex;flex-direction:column;gap:10px;margin-top:2px}
+    .ms-chk-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--label);cursor:pointer}
+    .ms-chk-item input{width:14px;height:14px;accent-color:var(--navy);cursor:pointer}
+    .ms-chk-item span{line-height:1.2}
+    
+    .ms-btn-row{width:100%;display:flex;justify-content:center;margin-top:16px}
+    .btn-search{height:32px;padding:0 28px;background:#F8FAFC;border:1px solid var(--border-dk);border-radius:6px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;box-shadow:0 1px 2px rgba(0,0,0,.03);transition:all .1s}
+    .btn-search:hover{background:#EDF2FF;border-color:var(--navy)}
+
+    .modal-results-area{flex:1;overflow:auto;background:#fff;padding:24px 32px}
+    .mr-table-wrap{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,37,122,.04)}
+    .mrt{width:100%;border-collapse:collapse;text-align:left}
+    .mrt th{background:var(--navy);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:10px 14px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
+    .mrt td{padding:10px 14px;font-size:11.5px;border-bottom:1px solid var(--border);color:var(--text)}
+    .mrt tbody tr:nth-last-child(1) td{border-bottom:none}
+    .mrt tbody tr:hover{background:#F7F9FC;cursor:pointer}
+    .mrt tbody tr.selected{background:#EDF2FF;outline:2px solid var(--navy);outline-offset:-2px}
+    .msg-empty{padding:40px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic}
+    
+    .modal-ft{padding:16px 32px;border-top:1px solid var(--border);background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+    .mf-left{display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .2s;transform:translateX(-10px);flex:1}
+    .mf-left.show{opacity:1;pointer-events:all;transform:translateX(0)}
+    .mf-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .mf-select{height:32px;border:1px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:12px;outline:none;background:#fff;width:170px}
+    .btn-start{height:32px;padding:0 16px;border-radius:6px;border:none;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .1s;white-space:nowrap}
+    .btn-start:hover{background:#001c5c}
+
+    .mf-right{display:flex;gap:10px}
+    .btn-cancel{height:36px;padding:0 18px;border-radius:8px;border:1px solid var(--border-dk);background:#fff;color:var(--label);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .1s}
+    .btn-cancel:hover{background:#F7F9FC;border-color:var(--navy);color:var(--navy)}
+    .btn-primary-alt{height:36px;padding:0 24px;border-radius:8px;border:1px solid #BAC9E8;background:#EDF2FF;color:var(--navy);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .1s;display:flex;align-items:center;gap:6px}
+    .btn-primary-alt:hover{background:#DCE5F5;border-color:var(--navy)}
+    .btn-create{height:36px;padding:0 24px;border-radius:8px;border:none;background:var(--navy);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .1s;display:flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,37,122,.15)}
+    .btn-create:hover{background:#001c5c;transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,37,122,.2)}
 
     ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:#f0f2f5}
@@ -203,6 +288,12 @@
         </div>
       </div>
       <div class="topbar-right">
+        <button onclick="openCreateModal()" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;margin-right:12px;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Work Order</button>
+        <div class="save-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Saved just now
+        </div>
+        <span style="opacity:0.5; margin: 0 4px;">|</span>
         Service Location
         <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
       </div>
@@ -245,19 +336,20 @@
 
       <!-- SUB-NAV TABS -->
       <div class="subnav">
-        <div class="subnav-tab active">Scopes</div>
-        <div class="subnav-tab">Tasks<span class="tab-badge">5</span></div>
-        <div class="subnav-tab">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></div>
-        <div class="subnav-tab">Emails</div>
-        <div class="subnav-tab">Shipping Status</div>
-        <div class="subnav-tab">Inventory</div>
-        <div class="subnav-tab">Acquisitions</div>
-        <div class="subnav-tab">Repair Metrics</div>
-        <div class="subnav-tab">Turn Around Times</div>
-        <div class="subnav-tab">Flags</div>
+        <a class="subnav-tab active" href="dashboard.html">Scopes</a>
+        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
+        <a class="subnav-tab" href="#">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
+        <a class="subnav-tab" href="#">Emails</a>
+        <a class="subnav-tab" href="#">Shipping Status</a>
+        <a class="subnav-tab" href="#">Inventory</a>
+        <a class="subnav-tab" href="#">Acquisitions</a>
+        <a class="subnav-tab" href="#">Searches</a>
+        <a class="subnav-tab" href="#">Repair Metrics</a>
+        <a class="subnav-tab" href="#">Turn Around Times</a>
+        <a class="subnav-tab" href="#">Flags</a>
       </div>
 
-      <!-- TOOLBAR — filter bar + instant search -->
+      <!-- ══ SCOPES TAB CONTENT ══ -->
       <div class="toolbar">
         <div class="filter-group">
           <span class="filter-label">Type</span>
@@ -289,10 +381,23 @@
             <button class="seg-btn">Hot List</button>
           </div>
         </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Group</span>
+          <select class="pg-select" id="groupBySelect" style="height:28px;font-size:11px;min-width:100px">
+            <option value="">None</option>
+            <option value="client">Client</option>
+            <option value="dept">Department</option>
+            <option value="status">Status</option>
+            <option value="tech">Tech</option>
+            <option value="type">Scope Type</option>
+          </select>
+        </div>
         <div class="toolbar-search">
           <input class="search-input" type="text" placeholder="Search WO, client, serial…"/>
         </div>
         <div class="toolbar-actions">
+          <button class="tb-btn" onclick="generateTechSheets()">Tech Sheets</button>
           <button class="tb-btn">⇅ Export</button>
           <button class="tb-btn">🖨 Print</button>
         </div>
@@ -303,18 +408,18 @@
         <table>
           <thead>
             <tr>
-              <th style="width:85px" class="sorted">Date In <span class="sort">▼</span></th>
-              <th>Client <span class="sort">↕</span></th>
-              <th>Department <span class="sort">↕</span></th>
-              <th style="width:110px">Work Order <span class="sort">↕</span></th>
-              <th>Scope Type <span class="sort">↕</span></th>
-              <th style="width:80px">Serial # <span class="sort">↕</span></th>
-              <th style="width:55px;text-align:center">Days In <span class="sort">↕</span></th>
-              <th>Repair Status <span class="sort">↕</span></th>
-              <th style="width:90px">Date Approved <span class="sort">↕</span></th>
-              <th style="width:90px">Est Delivery <span class="sort">↕</span></th>
-              <th style="width:80px;text-align:right">Approved $ <span class="sort">↕</span></th>
-              <th style="width:110px;text-align:center">Actions</th>
+              <th style="width:85px;cursor:pointer" class="sorted desc">Date In <span class="sort"></span></th>
+              <th style="cursor:pointer">Client <span class="sort">↕</span></th>
+              <th style="cursor:pointer">Department <span class="sort">↕</span></th>
+              <th style="width:110px;cursor:pointer">Work Order <span class="sort">↕</span></th>
+              <th style="cursor:pointer">Scope Type <span class="sort">↕</span></th>
+              <th style="width:80px;cursor:pointer">Serial # <span class="sort">↕</span></th>
+              <th style="width:55px;text-align:center;cursor:pointer">Days In <span class="sort">↕</span></th>
+              <th style="cursor:pointer">Repair Status <span class="sort">↕</span></th>
+              <th style="width:90px;cursor:pointer">Date Approved <span class="sort">↕</span></th>
+              <th style="width:90px;cursor:pointer">Est Delivery <span class="sort">↕</span></th>
+              <th style="width:80px;text-align:right;cursor:pointer">Approved $ <span class="sort">↕</span></th>
+              <th style="width:70px;cursor:pointer">Tech <span class="sort">↕</span></th>
             </tr>
           </thead>
           <tbody id="scopesTbody">
@@ -344,61 +449,170 @@
   </div>
 </div>
 
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" data-action="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Open Repair</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" data-action="hotlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><span id="ctxHotLabel">Add to Hot List</span></div>
+  <div class="ctx-item" data-action="assign"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Assign Tech</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" data-action="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Add Note</div>
+  <div class="ctx-item danger" data-action="hold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Place on Hold</div>
+</div>
+
+<!-- CREATE WORK ORDER MODAL (Interceptor) -->
+<div class="modal-overlay" id="createOrderModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Repair Search</h2>
+      <button class="modal-close" onclick="closeCreateModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="modal-bd">
+      
+      <!-- Top Search Area -->
+      <div class="modal-search-area">
+        <div class="ms-col">
+          <div class="ms-row">
+            <span class="ms-label">W.O. #</span>
+            <input type="text" class="ms-input" id="searchWo" />
+          </div>
+          <div class="ms-row">
+            <span class="ms-label">P.O. #</span>
+            <input type="text" class="ms-input" />
+          </div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-row">
+            <span class="ms-label">Serial #</span>
+            <input type="text" class="ms-input" id="searchSerial" />
+          </div>
+          <div class="ms-row">
+            <span class="ms-label"></span>
+            <label class="ms-chk-item"><input type="checkbox" checked/> <span>Only Open Repairs</span></label>
+          </div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-checks">
+            <label class="ms-chk-item"><input type="checkbox"/> <span style="color:var(--muted)">Include Inactive Clients/Departments<br/><i style="font-size:9.5px">(does not apply to serial # only searches)</i></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="ms-btn-row">
+        <button class="btn-search" onclick="runGlobalSearch()">Search</button>
+      </div>
+
+      <!-- Bottom Results Area -->
+      <div class="modal-results-area">
+        <div class="mr-table-wrap">
+          <table class="mrt">
+            <thead>
+              <tr>
+                <th style="width:20%">Client</th>
+                <th style="width:16%">Department</th>
+                <th style="width:14%">Work Order</th>
+                <th style="width:12%">Date In</th>
+                <th style="width:12%">Model</th>
+                <th style="width:16%">Serial Number</th>
+                <th style="width:10%">P.O. #</th>
+              </tr>
+            </thead>
+            <tbody id="globalSearchResults">
+              <tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-ft">
+      <div class="mf-left" id="newDeviceForm">
+        <span class="mf-label" style="color:var(--navy)">New Product Sale:</span>
+        <select class="mf-select" id="newClientSelect">
+          <option value="" disabled selected>-- Select Client --</option>
+          <option>88th Medical Group</option>
+          <option>A.I.duPont Children Hospital</option>
+          <option>Mercy Health</option>
+          <option>Nashville General Hospital</option>
+          <option>Tift Regional Medical Center</option>
+        </select>
+        <select class="mf-select" id="newDeptSelect" disabled>
+          <option value="" disabled selected>-- Select Dept --</option>
+          <option>Biomedical Engineering</option>
+          <option>Central Sterile</option>
+          <option>Endoscopy</option>
+          <option>GI Lab</option>
+          <option>Surgery</option>
+        </select>
+        <button class="btn-start" onclick="submitNewWorkspace()">Start Workspace <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-left:4px"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+      </div>
+      <div class="mf-right" id="primaryActionRow">
+        <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn-primary-alt" id="btnOpenRecord" style="opacity:0.5;pointer-events:none" onclick="alert('Opening existing record!')">Open Selected</button>
+        <button class="btn-create" onclick="revealNewOrderForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create New</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ═══════════════════════════════════════════════════════
 //  FAKE DATA — 47 in-house scopes with realistic info
 // ═══════════════════════════════════════════════════════
+// cat = F(lexible), R(igid), I(nstrument), C(amera), K(carts), U(fuse)
+// size = L(arge), S(mall)
+// src = inhouse, outsourced, cogentix
 const SCOPES = [
-  {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:''},
-  {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:''},
-  {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:''},
-  {dateIn:'03/02/2026',client:'West Side GI Center',dept:'Endoscopy',wo:'NI26006558',type:'EC-3890LK',serial:'4201553',daysIn:6,status:'Ready to Ship',dateApproved:'03/03/2026',estDel:'03/08/2026',approved:310,tech:'Rob',notes:'Bending rubber replacement complete. QC passed. Ready for pickup.',quoted:310,invoice:'INV-26-0482'},
-  {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered from ChipTech Medical. ETA unknown.',quoted:895,invoice:''},
-  {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair — cord replacement in progress.',quoted:640,invoice:''},
-  {dateIn:'02/27/2026',client:'Shreveport Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006518',type:'GIF-H190',serial:'3877201',daysIn:9,status:'Ready to Ship',dateApproved:'02/28/2026',estDel:'03/08/2026',approved:420,tech:'Rob',notes:'Light guide bundle replacement. Complete and tested. Shipping today.',quoted:420,invoice:'INV-26-0471'},
-  {dateIn:'02/26/2026',client:'Tampa Minimally Invasive',dept:'Endoscopy',wo:'NI26006505',type:'GIF-Q165',serial:'3412906',daysIn:10,status:'In Repair',dateApproved:'02/27/2026',estDel:'03/14/2026',approved:1850,tech:'Rob',notes:'Multiple issues — angulation + bending rubber + fluid invasion. Major rebuild.',quoted:2100,invoice:''},
-  {dateIn:'02/25/2026',client:'Acadiana Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006490',type:'GIF-H185',serial:'3015882',daysIn:11,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation complete. Quote sent 02/26. Follow up scheduled 03/01.',quoted:780,invoice:''},
-  {dateIn:'02/24/2026',client:'A.I.duPont Children Hospital',dept:'Endoscopy',wo:'NI26006478',type:'GIF-XP190N',serial:'4518203',daysIn:12,status:'Approved',dateApproved:'02/26/2026',estDel:'03/10/2026',approved:1100,tech:'Tom',notes:'Approved for repair. Waiting for parts — insertion tube on order.',quoted:1100,invoice:''},
-  {dateIn:'02/22/2026',client:'Yale-New Haven Hospital',dept:'Operating Room',wo:'NI26006460',type:'PCF-H180AL',serial:'2802563',daysIn:14,status:'In Repair',dateApproved:'02/23/2026',estDel:'03/08/2026',approved:560,tech:'Rob',notes:'Channel blockage. Cleaning and channel liner replacement in progress.',quoted:560,invoice:''},
-  {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete. Awaiting FedEx pickup.',quoted:380,invoice:'INV-26-0455'},
-  {dateIn:'02/18/2026',client:'Tift Regional Medical Center',dept:'GI Lab',wo:'NI26006421',type:'GIF-H190',serial:'3801990',daysIn:18,status:'In Repair',dateApproved:'02/20/2026',estDel:'03/10/2026',approved:485,tech:'Rob',notes:'Second scope from Tift. Fluid invasion — distal end.',quoted:650,invoice:''},
-  {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx. Tracking: 7892-4481-0033.',quoted:620,invoice:'INV-26-0430'},
-  {dateIn:'02/10/2026',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NI26006355',type:'GIF-Q165',serial:'3412290',daysIn:26,status:'In Repair',dateApproved:'02/12/2026',estDel:'03/15/2026',approved:2800,tech:'Rob',notes:'Major rebuild — CCD chip + insertion tube + angulation cable.',quoted:2800,invoice:''},
-  {dateIn:'02/06/2026',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NI26006312',type:'GIF-H185',serial:'3015882',daysIn:30,status:'Waiting on Inspection',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Received for evaluation. Initial inspection scheduled for this week.',quoted:0,invoice:''},
-  {dateIn:'02/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006287',type:'CF-HQ190L',serial:'3912087',daysIn:33,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Angulation drum replacement complete. Final QC passed.',quoted:720,invoice:'INV-26-0410'},
-  {dateIn:'01/28/2026',client:'Northside Hospital',dept:'Endoscopy',wo:'NI26006244',type:'EG-760Z',serial:'4450188',daysIn:39,status:'Shipped',dateApproved:'02/01/2026',estDel:'02/28/2026',approved:640,tech:'Rob',notes:'Shipped 02/27. Delivered and confirmed by client.',quoted:640,invoice:'INV-26-0385'},
-  {dateIn:'01/22/2026',client:'Metro Health Hospital',dept:'GI Lab',wo:'NI26006190',type:'GIF-H190',serial:'3615401',daysIn:45,status:'Shipped',dateApproved:'01/25/2026',estDel:'02/20/2026',approved:510,tech:'Tom',notes:'Delivered successfully. No issues reported.',quoted:510,invoice:'INV-26-0360'},
+  {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'03/02/2026',client:'West Side GI Center',dept:'Endoscopy',wo:'NI26006558',type:'EC-3890LK',serial:'4201553',daysIn:6,status:'Ready to Ship',dateApproved:'03/03/2026',estDel:'03/08/2026',approved:310,tech:'Rob',notes:'Bending rubber replacement complete. QC passed. Ready for pickup.',quoted:310,invoice:'INV-26-0482',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered from ChipTech Medical. ETA unknown.',quoted:895,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+  {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair — cord replacement in progress.',quoted:640,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/27/2026',client:'Shreveport Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006518',type:'GIF-H190',serial:'3877201',daysIn:9,status:'Ready to Ship',dateApproved:'02/28/2026',estDel:'03/08/2026',approved:420,tech:'Rob',notes:'Light guide bundle replacement. Complete and tested. Shipping today.',quoted:420,invoice:'INV-26-0471',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/26/2026',client:'Tampa Minimally Invasive',dept:'Endoscopy',wo:'NI26006505',type:'GIF-Q165',serial:'3412906',daysIn:10,status:'In Repair',dateApproved:'02/27/2026',estDel:'03/14/2026',approved:1850,tech:'Rob',notes:'Multiple issues — angulation + bending rubber + fluid invasion. Major rebuild.',quoted:2100,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'02/25/2026',client:'Acadiana Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006490',type:'GIF-H185',serial:'3015882',daysIn:11,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation complete. Quote sent 02/26. Follow up scheduled 03/01.',quoted:780,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/24/2026',client:'A.I.duPont Children Hospital',dept:'Endoscopy',wo:'NI26006478',type:'GIF-XP190N',serial:'4518203',daysIn:12,status:'Approved',dateApproved:'02/26/2026',estDel:'03/10/2026',approved:1100,tech:'Tom',notes:'Approved for repair. Waiting for parts — insertion tube on order.',quoted:1100,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'02/22/2026',client:'Yale-New Haven Hospital',dept:'Operating Room',wo:'NI26006460',type:'PCF-H180AL',serial:'2802563',daysIn:14,status:'In Repair',dateApproved:'02/23/2026',estDel:'03/08/2026',approved:560,tech:'Rob',notes:'Channel blockage. Cleaning and channel liner replacement in progress.',quoted:560,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete. Awaiting FedEx pickup.',quoted:380,invoice:'INV-26-0455',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/18/2026',client:'Tift Regional Medical Center',dept:'GI Lab',wo:'NI26006421',type:'GIF-H190',serial:'3801990',daysIn:18,status:'In Repair',dateApproved:'02/20/2026',estDel:'03/10/2026',approved:485,tech:'Rob',notes:'Second scope from Tift. Fluid invasion — distal end.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx. Tracking: 7892-4481-0033.',quoted:620,invoice:'INV-26-0430',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/10/2026',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NI26006355',type:'GIF-Q165',serial:'3412290',daysIn:26,status:'In Repair',dateApproved:'02/12/2026',estDel:'03/15/2026',approved:2800,tech:'Rob',notes:'Major rebuild — CCD chip + insertion tube + angulation cable.',quoted:2800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'02/06/2026',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NI26006312',type:'GIF-H185',serial:'3015882',daysIn:30,status:'Waiting on Inspection',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Received for evaluation. Initial inspection scheduled for this week.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006287',type:'CF-HQ190L',serial:'3912087',daysIn:33,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Angulation drum replacement complete. Final QC passed.',quoted:720,invoice:'INV-26-0410',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/28/2026',client:'Northside Hospital',dept:'Endoscopy',wo:'NI26006244',type:'EG-760Z',serial:'4450188',daysIn:39,status:'Shipped',dateApproved:'02/01/2026',estDel:'02/28/2026',approved:640,tech:'Rob',notes:'Shipped 02/27. Delivered and confirmed by client.',quoted:640,invoice:'INV-26-0385',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/22/2026',client:'Metro Health Hospital',dept:'GI Lab',wo:'NI26006190',type:'GIF-H190',serial:'3615401',daysIn:45,status:'Shipped',dateApproved:'01/25/2026',estDel:'02/20/2026',approved:510,tech:'Tom',notes:'Delivered successfully. No issues reported.',quoted:510,invoice:'INV-26-0360',cat:'F',size:'L',src:'inhouse',hot:false},
   // Older items that are stuck / problematic
-  {dateIn:'01/03/2023',client:'Tri State ENT Products - PA',dept:'Office',wo:'NR23003001',type:'ENF GP',serial:'2007037',daysIn:1178,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Scope received for evaluation. Client has not responded to quote sent 01/15/2023. Two follow-up emails sent (02/01 and 03/01). Awaiting approval to proceed.',quoted:350,invoice:''},
-  {dateIn:'06/13/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23164014',type:'GIF H190',serial:'2515171',daysIn:1196,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Quote sent. Client unreachable. Multiple voicemails left.',quoted:1800,invoice:''},
-  {dateIn:'06/20/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23171010',type:'GF-UE160-AL5',serial:'1700599',daysIn:989,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold pending budget review for next fiscal year.',quoted:3200,invoice:''},
-  {dateIn:'07/06/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201718700001',type:'GIF Q140',serial:'2915229',daysIn:0,status:'In Repair',dateApproved:'07/06/2017',estDel:'TBD',approved:0,tech:'Rob',notes:'Internal loaner — mid-level repair. Low priority.',quoted:0,invoice:''},
-  {dateIn:'09/22/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201726500039',type:'11278AU1',serial:'2086426',daysIn:0,status:'In Repair',dateApproved:'09/22/2017',estDel:'TBD',approved:0,tech:'Tom',notes:'Internal loaner. Waiting for parts allocation.',quoted:0,invoice:''},
-  {dateIn:'11/08/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17312003',type:'GIF H180',serial:'2601945',daysIn:0,status:'Waiting on Inspection',dateApproved:'',estDel:'11/20/2017',approved:0,tech:'',notes:'Acquisition scope awaiting inspection.',quoted:0,invoice:''},
-  {dateIn:'12/15/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17349037',type:'TJF 160VF',serial:'2302212',daysIn:0,status:'Approved',dateApproved:'12/15/2017',estDel:'12/15/2017',approved:0,tech:'Rob',notes:'Approved for refurbishment.',quoted:0,invoice:''},
-  {dateIn:'01/04/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18004003',type:'EC 3490Li',serial:'A110180',daysIn:0,status:'In Repair',dateApproved:'01/05/2018',estDel:'TBD',approved:0,tech:'Tom',notes:'Major rebuild in progress.',quoted:0,invoice:''},
-  {dateIn:'03/09/2018',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'NR18068030',type:'SIF Q180',serial:'2422434',daysIn:0,status:'In Repair',dateApproved:'03/09/2018',estDel:'TBD',approved:0,tech:'Rob',notes:'Loaner scope. Mid-level repair.',quoted:0,invoice:''},
-  {dateIn:'04/13/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18103039',type:'PCF H180AL',serial:'2802563',daysIn:0,status:'Waiting for Approval',dateApproved:'04/13/2018',estDel:'04/13/2018',approved:0,tech:'',notes:'Evaluation completed. Awaiting internal approval.',quoted:0,invoice:''},
-  {dateIn:'05/22/2019',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NR19142001',type:'GIF H185',serial:'3015882',daysIn:0,status:'Approved',dateApproved:'06/01/2019',estDel:'06/15/2019',approved:1250,tech:'Tom',notes:'Approved and in progress.',quoted:1250,invoice:''},
-  {dateIn:'08/15/2021',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NR21227003',type:'GIF Q165',serial:'3412290',daysIn:0,status:'In Repair',dateApproved:'08/18/2021',estDel:'09/02/2021',approved:2800,tech:'Rob',notes:'Major rebuild — long-running repair.',quoted:2800,invoice:''},
+  {dateIn:'01/03/2023',client:'Tri State ENT Products - PA',dept:'Office',wo:'NR23003001',type:'ENF GP',serial:'2007037',daysIn:1178,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Scope received for evaluation. Client has not responded to quote sent 01/15/2023.',quoted:350,invoice:'',cat:'I',size:'S',src:'inhouse',hot:true},
+  {dateIn:'06/13/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23164014',type:'GIF H190',serial:'2515171',daysIn:1196,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Quote sent. Client unreachable. Multiple voicemails left.',quoted:1800,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+  {dateIn:'06/20/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23171010',type:'GF-UE160-AL5',serial:'1700599',daysIn:989,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold pending budget review for next fiscal year.',quoted:3200,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+  {dateIn:'07/06/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201718700001',type:'GIF Q140',serial:'2915229',daysIn:0,status:'In Repair',dateApproved:'07/06/2017',estDel:'TBD',approved:0,tech:'Rob',notes:'Internal loaner — mid-level repair. Low priority.',quoted:0,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'09/22/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201726500039',type:'11278AU1',serial:'2086426',daysIn:0,status:'In Repair',dateApproved:'09/22/2017',estDel:'TBD',approved:0,tech:'Tom',notes:'Internal loaner. Waiting for parts allocation.',quoted:0,invoice:'',cat:'R',size:'L',src:'inhouse',hot:false},
+  {dateIn:'11/08/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17312003',type:'GIF H180',serial:'2601945',daysIn:0,status:'Waiting on Inspection',dateApproved:'',estDel:'11/20/2017',approved:0,tech:'',notes:'Acquisition scope awaiting inspection.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'12/15/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17349037',type:'TJF 160VF',serial:'2302212',daysIn:0,status:'Approved',dateApproved:'12/15/2017',estDel:'12/15/2017',approved:0,tech:'Rob',notes:'Approved for refurbishment.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/04/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18004003',type:'EC 3490Li',serial:'A110180',daysIn:0,status:'In Repair',dateApproved:'01/05/2018',estDel:'TBD',approved:0,tech:'Tom',notes:'Major rebuild in progress.',quoted:0,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'03/09/2018',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'NR18068030',type:'SIF Q180',serial:'2422434',daysIn:0,status:'In Repair',dateApproved:'03/09/2018',estDel:'TBD',approved:0,tech:'Rob',notes:'Loaner scope. Mid-level repair.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'04/13/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18103039',type:'PCF H180AL',serial:'2802563',daysIn:0,status:'Waiting for Approval',dateApproved:'04/13/2018',estDel:'04/13/2018',approved:0,tech:'',notes:'Evaluation completed. Awaiting internal approval.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'05/22/2019',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NR19142001',type:'GIF H185',serial:'3015882',daysIn:0,status:'Approved',dateApproved:'06/01/2019',estDel:'06/15/2019',approved:1250,tech:'Tom',notes:'Approved and in progress.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'08/15/2021',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NR21227003',type:'GIF Q165',serial:'3412290',daysIn:0,status:'In Repair',dateApproved:'08/18/2021',estDel:'09/02/2021',approved:2800,tech:'Rob',notes:'Major rebuild — long-running repair.',quoted:2800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
   // More recent active ones
-  {dateIn:'02/15/2026',client:'West Calcasieu Cameron Hospital',dept:'Surgery',wo:'NI26006401',type:'GIF-H190',serial:'3955012',daysIn:21,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Price increase discussion pending. Quote sent with new rates.',quoted:890,invoice:''},
-  {dateIn:'02/12/2026',client:'Baptist Health Louisville',dept:'GI Lab',wo:'NI26006378',type:'CF-H185L',serial:'3180045',daysIn:24,status:'In Repair',dateApproved:'02/14/2026',estDel:'03/12/2026',approved:1650,tech:'Rob',notes:'Major angulation rebuild. Parts received, assembly in progress.',quoted:1650,invoice:''},
-  {dateIn:'02/08/2026',client:'Erlanger Medical Center',dept:'Endoscopy',wo:'NI26006340',type:'GIF-XP190N',serial:'4380912',daysIn:28,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:440,tech:'Tom',notes:'Light bundle replaced. QC complete. Shipping Monday.',quoted:440,invoice:'INV-26-0402'},
-  {dateIn:'02/05/2026',client:'Mountain View Regional',dept:'Operating Room',wo:'NI26006320',type:'GIF-H190',serial:'3720481',daysIn:31,status:'In Repair',dateApproved:'02/07/2026',estDel:'03/18/2026',approved:2200,tech:'Rob',notes:'Extensive damage — insertion tube + CCD + angulation. Major rebuild.',quoted:2500,invoice:''},
-  {dateIn:'01/30/2026',client:'Piedmont Athens Regional',dept:'Endoscopy',wo:'NI26006260',type:'CF-H185L',serial:'3005518',daysIn:37,status:'Ready to Ship',dateApproved:'02/05/2026',estDel:'03/07/2026',approved:550,tech:'Tom',notes:'Bending section repair. QC passed. Shipping tomorrow.',quoted:550,invoice:'INV-26-0395'},
-  {dateIn:'01/25/2026',client:'Fort Sanders Regional',dept:'GI Lab',wo:'NI26006220',type:'EC-3890LK',serial:'4101337',daysIn:42,status:'Shipped',dateApproved:'01/28/2026',estDel:'02/25/2026',approved:380,tech:'Rob',notes:'Delivered 02/24. Client confirmed receipt.',quoted:380,invoice:'INV-26-0368'},
-  {dateIn:'01/20/2026',client:'Augusta University Medical',dept:'Biomedical',wo:'NI26006185',type:'BF-UC180F',serial:'3550910',daysIn:47,status:'In Repair',dateApproved:'01/23/2026',estDel:'03/20/2026',approved:3100,tech:'Tom',notes:'EBUS scope. CCD replacement + insertion tube. Complex repair.',quoted:3400,invoice:''},
-  {dateIn:'01/15/2026',client:'AnMed Health Medical Center',dept:'Endoscopy',wo:'NI26006150',type:'GIF-H190',serial:'3801555',daysIn:52,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation done. Quote sent 01/18. Client reviewing with purchasing.',quoted:920,invoice:''},
-  {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold — evaluating whether to repair or purchase new.',quoted:1800,invoice:''},
-  {dateIn:'01/05/2026',client:'Memorial Health Savannah',dept:'Surgery',wo:'NI26006055',type:'CF-HQ190L',serial:'3980122',daysIn:62,status:'Ready to Ship',dateApproved:'01/12/2026',estDel:'03/08/2026',approved:980,tech:'Rob',notes:'Insertion tube replacement complete. Final QC today.',quoted:980,invoice:'INV-26-0340'},
-  {dateIn:'12/28/2025',client:'Grady Memorial Hospital',dept:'Endoscopy',wo:'NI25365820',type:'GIF-H190',serial:'3645003',daysIn:70,status:'Ready to Ship',dateApproved:'01/05/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Light guide bundle + bending rubber. Completed. Awaiting shipping.',quoted:720,invoice:'INV-26-0330'},
-  {dateIn:'12/20/2025',client:'Spartanburg Medical Center',dept:'GI Lab',wo:'NI25354780',type:'GIF-H185',serial:'3012508',daysIn:78,status:'Shipped',dateApproved:'01/02/2026',estDel:'02/15/2026',approved:560,tech:'Rob',notes:'Delivered and confirmed.',quoted:560,invoice:'INV-26-0312'},
-  {dateIn:'12/15/2025',client:'Lexington Medical Center',dept:'Endoscopy',wo:'NI25349700',type:'EG-760Z',serial:'4470299',daysIn:83,status:'In Repair',dateApproved:'12/20/2025',estDel:'03/25/2026',approved:4200,tech:'Tom',notes:'Major rebuild — scope had extensive water damage. Insurance claim filed.',quoted:4500,invoice:''},
-  {dateIn:'12/10/2025',client:'CaroMont Regional Medical',dept:'Operating Room',wo:'NI25344650',type:'GIF-H190',serial:'3888740',daysIn:88,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client disputing quote. Escalated to Joseph Brassell.',quoted:2100,invoice:''},
-  {dateIn:'12/01/2025',client:'Vidant Medical Center',dept:'GI Lab',wo:'NI25335500',type:'CF-H185L',serial:'3101870',daysIn:97,status:'In Repair',dateApproved:'12/08/2025',estDel:'03/30/2026',approved:3800,tech:'Rob',notes:'Complete overhaul — every major component being replaced.',quoted:4200,invoice:''},
-  {dateIn:'11/20/2025',client:'McLeod Regional Medical',dept:'Endoscopy',wo:'NI25324400',type:'GIF-XP190N',serial:'4590122',daysIn:108,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Parts unavailable. Special order from Japan. ETA 6-8 weeks.',quoted:5500,invoice:''},
-  {dateIn:'11/10/2025',client:'Phoebe Putney Memorial',dept:'Surgery',wo:'NI25314300',type:'GIF-Q165',serial:'3350801',daysIn:118,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Multiple quotes sent. Client requesting line-item breakdown.',quoted:1650,invoice:''},
+  {dateIn:'02/15/2026',client:'West Calcasieu Cameron Hospital',dept:'Surgery',wo:'NI26006401',type:'GIF-H190',serial:'3955012',daysIn:21,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Price increase discussion pending. Quote sent with new rates.',quoted:890,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'02/12/2026',client:'Baptist Health Louisville',dept:'GI Lab',wo:'NI26006378',type:'CF-H185L',serial:'3180045',daysIn:24,status:'In Repair',dateApproved:'02/14/2026',estDel:'03/12/2026',approved:1650,tech:'Rob',notes:'Major angulation rebuild. Parts received, assembly in progress.',quoted:1650,invoice:'',cat:'F',size:'L',src:'outsourced',hot:false},
+  {dateIn:'02/08/2026',client:'Erlanger Medical Center',dept:'Endoscopy',wo:'NI26006340',type:'GIF-XP190N',serial:'4380912',daysIn:28,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:440,tech:'Tom',notes:'Light bundle replaced. QC complete. Shipping Monday.',quoted:440,invoice:'INV-26-0402',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'02/05/2026',client:'Mountain View Regional',dept:'Operating Room',wo:'NI26006320',type:'GIF-H190',serial:'3720481',daysIn:31,status:'In Repair',dateApproved:'02/07/2026',estDel:'03/18/2026',approved:2200,tech:'Rob',notes:'Extensive damage — insertion tube + CCD + angulation. Major rebuild.',quoted:2500,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+  {dateIn:'01/30/2026',client:'Piedmont Athens Regional',dept:'Endoscopy',wo:'NI26006260',type:'CF-H185L',serial:'3005518',daysIn:37,status:'Ready to Ship',dateApproved:'02/05/2026',estDel:'03/07/2026',approved:550,tech:'Tom',notes:'Bending section repair. QC passed. Shipping tomorrow.',quoted:550,invoice:'INV-26-0395',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/25/2026',client:'Fort Sanders Regional',dept:'GI Lab',wo:'NI26006220',type:'EC-3890LK',serial:'4101337',daysIn:42,status:'Shipped',dateApproved:'01/28/2026',estDel:'02/25/2026',approved:380,tech:'Rob',notes:'Delivered 02/24. Client confirmed receipt.',quoted:380,invoice:'INV-26-0368',cat:'F',size:'S',src:'cogentix',hot:false},
+  {dateIn:'01/20/2026',client:'Augusta University Medical',dept:'Biomedical',wo:'NI26006185',type:'BF-UC180F',serial:'3550910',daysIn:47,status:'In Repair',dateApproved:'01/23/2026',estDel:'03/20/2026',approved:3100,tech:'Tom',notes:'EBUS scope. CCD replacement + insertion tube. Complex repair.',quoted:3400,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/15/2026',client:'AnMed Health Medical Center',dept:'Endoscopy',wo:'NI26006150',type:'GIF-H190',serial:'3801555',daysIn:52,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation done. Quote sent 01/18. Client reviewing with purchasing.',quoted:920,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold — evaluating whether to repair or purchase new.',quoted:1800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  {dateIn:'01/05/2026',client:'Memorial Health Savannah',dept:'Surgery',wo:'NI26006055',type:'CF-HQ190L',serial:'3980122',daysIn:62,status:'Ready to Ship',dateApproved:'01/12/2026',estDel:'03/08/2026',approved:980,tech:'Rob',notes:'Insertion tube replacement complete. Final QC today.',quoted:980,invoice:'INV-26-0340',cat:'R',size:'L',src:'inhouse',hot:false},
+  {dateIn:'12/28/2025',client:'Grady Memorial Hospital',dept:'Endoscopy',wo:'NI25365820',type:'GIF-H190',serial:'3645003',daysIn:70,status:'Ready to Ship',dateApproved:'01/05/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Light guide bundle + bending rubber. Completed. Awaiting shipping.',quoted:720,invoice:'INV-26-0330',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'12/20/2025',client:'Spartanburg Medical Center',dept:'GI Lab',wo:'NI25354780',type:'GIF-H185',serial:'3012508',daysIn:78,status:'Shipped',dateApproved:'01/02/2026',estDel:'02/15/2026',approved:560,tech:'Rob',notes:'Delivered and confirmed.',quoted:560,invoice:'INV-26-0312',cat:'F',size:'L',src:'cogentix',hot:false},
+  {dateIn:'12/15/2025',client:'Lexington Medical Center',dept:'Endoscopy',wo:'NI25349700',type:'EG-760Z',serial:'4470299',daysIn:83,status:'In Repair',dateApproved:'12/20/2025',estDel:'03/25/2026',approved:4200,tech:'Tom',notes:'Major rebuild — scope had extensive water damage. Insurance claim filed.',quoted:4500,invoice:'',cat:'R',size:'L',src:'outsourced',hot:false},
+  {dateIn:'12/10/2025',client:'CaroMont Regional Medical',dept:'Operating Room',wo:'NI25344650',type:'GIF-H190',serial:'3888740',daysIn:88,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client disputing quote. Escalated to Joseph Brassell.',quoted:2100,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+  {dateIn:'12/01/2025',client:'Vidant Medical Center',dept:'GI Lab',wo:'NI25335500',type:'CF-H185L',serial:'3101870',daysIn:97,status:'In Repair',dateApproved:'12/08/2025',estDel:'03/30/2026',approved:3800,tech:'Rob',notes:'Complete overhaul — every major component being replaced.',quoted:4200,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+  {dateIn:'11/20/2025',client:'McLeod Regional Medical',dept:'Endoscopy',wo:'NI25324400',type:'GIF-XP190N',serial:'4590122',daysIn:108,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Parts unavailable. Special order from Japan. ETA 6-8 weeks.',quoted:5500,invoice:'',cat:'F',size:'S',src:'inhouse',hot:true},
+  {dateIn:'11/10/2025',client:'Phoebe Putney Memorial',dept:'Surgery',wo:'NI25314300',type:'GIF-Q165',serial:'3350801',daysIn:118,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Multiple quotes sent. Client requesting line-item breakdown.',quoted:1650,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -408,7 +622,18 @@ let activeFilter = null;     // stat chip filter
 let searchTerm = '';
 let currentPage = 1;
 let rowsPerPage = 15;
-let activeTab = 'Scopes';
+let sortCol = 'dateIn';
+let sortDir = 'desc';        // 'asc' or 'desc'
+// Segmented filter state
+let filterType = 'Flexible';  // matches button text
+let filterSize = 'All';
+let filterSource = 'In House';
+let groupBy = '';              // '' = no grouping, or a field name
+let collapsedGroups = new Set(); // group keys that are collapsed
+
+// Category label → data value map
+const CAT_MAP = {'Flexible':'F','Rigid':'R','Instrument':'I','Camera':'C','Carts':'K','Fuse':'U'};
+const SRC_MAP = {'In House':'inhouse','Outsourced':'outsourced','Cogentix':'cogentix','Hot List':'hot'};
 
 // ═══════════════════════════════════════════════════════
 //  STATUS HELPERS
@@ -429,24 +654,27 @@ function daysClass(d) {
   if (d >= 14) return 'days-warn';
   return 'days-ok';
 }
-function rowClass(s) {
-  if (/hold/i.test(s)) return 'urgent';
-  if (/waiting/i.test(s) || /inspection/i.test(s)) return 'attention';
+function rowClass(status, daysIn) {
+  if (/hold/i.test(status) || daysIn >= 90) return 'urgent';
+  if (/waiting/i.test(status) || /inspection/i.test(status)) return 'attention';
   return '';
 }
 function fmt$(n) { return n ? '$'+n.toLocaleString('en-US',{minimumFractionDigits:2}) : '$0.00'; }
+function parseDate(d) { if (!d || d==='TBD') return 0; const p=d.split('/'); return new Date(p[2],p[0]-1,p[1]).getTime(); }
+function truncate(s, max) { return s && s.length > max ? s.substring(0, max) + '…' : (s || '—'); }
 
 // ═══════════════════════════════════════════════════════
 //  STAT COUNTS
 // ═══════════════════════════════════════════════════════
 function calcStats() {
-  const inHouse = SCOPES.length;
-  const waiting = SCOPES.filter(s=>/waiting/i.test(s.status)).length;
-  const inRepair = SCOPES.filter(s=>/in repair/i.test(s.status)).length;
-  const overdue = SCOPES.filter(s=>/hold/i.test(s.status) || s.daysIn>=90).length;
-  const ready = SCOPES.filter(s=>/ready/i.test(s.status)).length;
-  const loaners = SCOPES.filter(s=>/loaner/i.test(s.client)).length;
-  const shipped = SCOPES.filter(s=>/shipped/i.test(s.status)).length;
+  const open = SCOPES.filter(s => !/shipped|invoiced/i.test(s.status));
+  const inHouse = open.length;
+  const waiting = open.filter(s=>/waiting/i.test(s.status)).length;
+  const inRepair = open.filter(s=>/in repair/i.test(s.status)).length;
+  const overdue = open.filter(s=>/hold/i.test(s.status) || s.daysIn>=90).length;
+  const ready = open.filter(s=>/ready/i.test(s.status)).length;
+  const loaners = open.filter(s=>/loaner/i.test(s.client)).length;
+  const shipped = SCOPES.filter(s=>/shipped/i.test(s.status)).length; // total shipped, for the chip
   return {inHouse, waiting, inRepair, overdue, ready, loaners, shipped};
 }
 
@@ -462,7 +690,33 @@ function updateStats() {
 // ═══════════════════════════════════════════════════════
 function getFiltered() {
   let list = [...SCOPES];
-  // stat chip filter
+
+  // Dashboard shows open repairs only — exclude shipped/invoiced unless explicitly filtering for them
+  if (activeFilter !== 'shipped') {
+    list = list.filter(s => !/shipped|invoiced/i.test(s.status));
+  }
+
+  // Segmented filter: Type
+  if (filterType !== 'All') {
+    const catVal = CAT_MAP[filterType];
+    if (catVal) list = list.filter(s => s.cat === catVal);
+  }
+
+  // Segmented filter: Size
+  if (filterSize !== 'All') {
+    const sizeVal = filterSize === 'Large' ? 'L' : 'S';
+    list = list.filter(s => s.size === sizeVal);
+  }
+
+  // Segmented filter: Source
+  const srcVal = SRC_MAP[filterSource];
+  if (srcVal === 'hot') {
+    list = list.filter(s => s.hot);
+  } else if (srcVal) {
+    list = list.filter(s => s.src === srcVal);
+  }
+
+  // Stat chip filter
   if (activeFilter === 'inHouse') { /* no filter, show all */ }
   else if (activeFilter === 'waiting') list = list.filter(s=>/waiting/i.test(s.status));
   else if (activeFilter === 'inRepair') list = list.filter(s=>/in repair/i.test(s.status));
@@ -470,7 +724,8 @@ function getFiltered() {
   else if (activeFilter === 'ready') list = list.filter(s=>/ready/i.test(s.status));
   else if (activeFilter === 'loaners') list = list.filter(s=>/loaner/i.test(s.client));
   else if (activeFilter === 'shipped') list = list.filter(s=>/shipped/i.test(s.status));
-  // search
+
+  // Search
   if (searchTerm) {
     const q = searchTerm.toLowerCase();
     list = list.filter(s =>
@@ -478,28 +733,61 @@ function getFiltered() {
       s.wo.toLowerCase().includes(q) ||
       s.serial.toLowerCase().includes(q) ||
       s.type.toLowerCase().includes(q) ||
-      s.dept.toLowerCase().includes(q)
+      s.dept.toLowerCase().includes(q) ||
+      s.status.toLowerCase().includes(q)
     );
   }
   return list;
 }
 
 // ═══════════════════════════════════════════════════════
+//  SORTING
+// ═══════════════════════════════════════════════════════
+const SORT_KEYS = ['dateIn','client','dept','wo','type','serial','daysIn','status','dateApproved','estDel','approved','tech'];
+
+function sortList(list) {
+  const dir = sortDir === 'asc' ? 1 : -1;
+  return list.sort((a, b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    // Date columns
+    if (sortCol === 'dateIn' || sortCol === 'dateApproved' || sortCol === 'estDel') {
+      va = parseDate(va); vb = parseDate(vb);
+    }
+    // Numeric columns
+    if (sortCol === 'daysIn' || sortCol === 'approved') {
+      va = Number(va) || 0; vb = Number(vb) || 0;
+    }
+    // String columns
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va < vb) return -1 * dir;
+    if (va > vb) return 1 * dir;
+    return 0;
+  });
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('thead th').forEach((th, i) => {
+    th.classList.remove('sorted','asc','desc');
+    const span = th.querySelector('.sort');
+    if (!span) return;
+    if (SORT_KEYS[i] === sortCol) {
+      th.classList.add('sorted', sortDir);
+      span.textContent = '';  // CSS ::after handles the arrow
+    } else {
+      span.textContent = '↕';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 //  RENDER TABLE
 // ═══════════════════════════════════════════════════════
-function renderTable() {
-  const filtered = getFiltered();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
-  if (currentPage > totalPages) currentPage = totalPages;
-  const start = (currentPage - 1) * rowsPerPage;
-  const page = filtered.slice(start, start + rowsPerPage);
-
-  const tbody = document.getElementById('scopesTbody');
-  tbody.innerHTML = page.map((s, i) => {
-    const rc = rowClass(s.status);
-    return `<tr class="${rc}">
+function renderRow(s) {
+  const rc = rowClass(s.status, s.daysIn);
+  const hotBadge = s.hot ? '<span class="hot-flag">HOT</span>' : '';
+  return `<tr class="row-main ${rc}">
       <td>${s.dateIn}</td>
-      <td style="font-weight:500">${s.client}</td>
+      <td style="font-weight:500">${s.client}${hotBadge}</td>
       <td style="color:var(--muted)">${s.dept}</td>
       <td><a class="wo-link" href="#" onclick="event.preventDefault();alert('Opening WO ${s.wo}')">${s.wo}</a></td>
       <td>${s.type}</td>
@@ -509,9 +797,52 @@ function renderTable() {
       <td style="color:var(--muted)">${s.dateApproved||'—'}</td>
       <td style="color:var(--muted)">${s.estDel||'—'}</td>
       <td style="text-align:right;${s.approved?'font-weight:600;color:var(--navy)':''}">${fmt$(s.approved)}</td>
-      <td><div class="row-actions"><button class="act-btn act-open" onclick="alert('Opening WO ${s.wo}')">Open WO</button><button class="act-btn act-email" onclick="alert('Email to ${s.client}')">✉ Email</button></div></td>
-    </tr>`;
-  }).join('');
+      <td style="font-weight:600;color:var(--navy)">${s.tech||'<span style="color:var(--muted);font-weight:400">—</span>'}</td>
+    </tr>
+    <tr class="row-detail"><td colspan="12"><span class="d-note" data-wo="${s.wo}" title="${s.notes ? (s.notes).replace(/"/g,'&quot;') : 'Click to add note'}">${s.notes ? truncate(s.notes, 140) : '<span style="color:#CDD5E0">+ add note</span>'}</span></td></tr>`;
+}
+
+function renderTable() {
+  const filtered = sortList(getFiltered());
+  const tbody = document.getElementById('scopesTbody');
+
+  // ── GROUPED MODE ──
+  if (groupBy) {
+    const groups = new Map();
+    filtered.forEach(s => {
+      const key = s[groupBy] || 'Unassigned';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(s);
+    });
+    let html = '';
+    for (const [key, items] of groups) {
+      const isCollapsed = collapsedGroups.has(key);
+      const totalApproved = items.reduce((sum, s) => sum + (s.approved || 0), 0);
+      html += `<tr class="group-row" data-group="${key.replace(/"/g,'&quot;')}">
+        <td colspan="12">
+          <span class="g-toggle ${isCollapsed ? 'collapsed' : ''}">▼</span>
+          ${key} <span class="g-count">(${items.length} scope${items.length !== 1 ? 's' : ''})</span>
+          ${totalApproved ? '<span class="g-sum">'+fmt$(totalApproved)+'</span>' : ''}
+        </td>
+      </tr>`;
+      items.forEach(s => {
+        html += renderRow(s).replace(/class="row-main/g, `class="row-main ${isCollapsed ? 'group-hidden' : ''}`).replace(/class="row-detail/g, `class="row-detail ${isCollapsed ? 'group-hidden' : ''}`);
+      });
+    }
+    tbody.innerHTML = html;
+    document.getElementById('recordInfo').innerHTML = `<strong>${filtered.length}</strong> scopes in <strong>${groups.size}</strong> groups · Last updated: ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
+    document.getElementById('paginationBtns').innerHTML = '';
+    updateSortHeaders();
+    return;
+  }
+
+  // ── FLAT MODE (with pagination) ──
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * rowsPerPage;
+  const page = filtered.slice(start, start + rowsPerPage);
+
+  tbody.innerHTML = page.map(s => renderRow(s)).join('');
 
   // Footer
   const showing = filtered.length ? `${start+1}–${Math.min(start+rowsPerPage, filtered.length)}` : '0';
@@ -526,6 +857,8 @@ function renderTable() {
   if (totalPages > 7) btns += `<button class="pg-btn" disabled>…</button><button class="pg-btn ${totalPages===currentPage?'on':''}" onclick="goPage(${totalPages})">${totalPages}</button>`;
   btns += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>›</button>`;
   pagDiv.innerHTML = btns;
+
+  updateSortHeaders();
 }
 
 function goPage(p) {
@@ -536,7 +869,23 @@ function goPage(p) {
   renderTable();
 }
 
-// Panel removed — actions are inline in each row
+// ═══════════════════════════════════════════════════════
+//  COLUMN HEADER SORTING
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('thead th').forEach((th, i) => {
+  if (i >= SORT_KEYS.length) return; // skip Actions column
+  th.addEventListener('click', () => {
+    const col = SORT_KEYS[i];
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = (col === 'dateIn' || col === 'dateApproved' || col === 'estDel' || col === 'daysIn' || col === 'approved') ? 'desc' : 'asc';
+    }
+    currentPage = 1;
+    renderTable();
+  });
+});
 
 // ═══════════════════════════════════════════════════════
 //  STAT CHIP CLICKS
@@ -547,10 +896,8 @@ document.querySelectorAll('.stat-chip').forEach((chip, i) => {
     const f = CHIP_FILTERS[i];
     activeFilter = activeFilter === f ? null : f;
     currentPage = 1;
-    selectedRow = 0;
-    // visual feedback
-    document.querySelectorAll('.stat-chip').forEach(c => c.style.outline = 'none');
-    if (activeFilter) chip.style.outline = '2px solid var(--navy)';
+    document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+    if (activeFilter) chip.classList.add('active-chip');
     renderTable();
   };
 });
@@ -565,25 +912,22 @@ document.querySelector('.search-input').addEventListener('input', function() {
 });
 
 // ═══════════════════════════════════════════════════════
-//  FILTER BUTTONS (seg-btn)
+//  SEGMENTED FILTER BUTTONS — actually filter data
 // ═══════════════════════════════════════════════════════
-document.querySelectorAll('.seg-group').forEach(group => {
+const segGroups = document.querySelectorAll('.seg-group');
+// Group 0 = Type, Group 1 = Size, Group 2 = Source
+segGroups.forEach((group, gi) => {
   group.querySelectorAll('.seg-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       group.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
+      const val = btn.textContent.trim();
+      if (gi === 0) filterType = val;
+      else if (gi === 1) filterSize = val;
+      else if (gi === 2) filterSource = val;
+      currentPage = 1;
+      renderTable();
     });
-  });
-});
-
-// ═══════════════════════════════════════════════════════
-//  SUB-TAB SWITCHING
-// ═══════════════════════════════════════════════════════
-document.querySelectorAll('.subnav-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.subnav-tab').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    activeTab = this.textContent.replace(/\d/g,'').trim();
   });
 });
 
@@ -597,13 +941,311 @@ document.getElementById('rowsSelect').addEventListener('change', function() {
 });
 
 // ═══════════════════════════════════════════════════════
-//  TAB BADGES — show counts
+//  GROUP BY
 // ═══════════════════════════════════════════════════════
-function updateTabBadges() {
-  const s = calcStats();
-  // Tasks badge — use waiting count
-  // Loaners badge — use loaner count
-  // Already set in HTML, no dynamic update needed for mockup
+document.getElementById('groupBySelect').addEventListener('change', function() {
+  groupBy = this.value;
+  // Start all groups collapsed
+  collapsedGroups.clear();
+  if (groupBy) {
+    const filtered = getFiltered();
+    filtered.forEach(s => collapsedGroups.add(s[groupBy] || 'Unassigned'));
+  }
+  currentPage = 1;
+  renderTable();
+});
+
+// Toggle group collapse on click
+document.getElementById('scopesTbody').addEventListener('click', e => {
+  const groupRow = e.target.closest('.group-row');
+  if (!groupRow) return;
+  const key = groupRow.dataset.group;
+  if (collapsedGroups.has(key)) collapsedGroups.delete(key);
+  else collapsedGroups.add(key);
+  renderTable();
+});
+
+// ═══════════════════════════════════════════════════════
+//  CONTEXT MENU
+// ═══════════════════════════════════════════════════════
+const ctxMenu = document.getElementById('ctxMenu');
+let ctxScope = null; // the SCOPES record for the right-clicked row
+
+document.addEventListener('contextmenu', e => {
+  const row = e.target.closest('tr.row-main');
+  if (!row) { ctxMenu.classList.remove('show'); return; }
+  e.preventDefault();
+  // Find which scope this row belongs to
+  const woLink = row.querySelector('.wo-link');
+  if (woLink) {
+    const wo = woLink.textContent.trim();
+    ctxScope = SCOPES.find(s => s.wo === wo);
+  }
+  if (!ctxScope) return;
+  // Update hot list label
+  document.getElementById('ctxHotLabel').textContent = ctxScope.hot ? 'Remove from Hot List' : 'Add to Hot List';
+  // Position
+  ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+  ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - 280) + 'px';
+  ctxMenu.classList.add('show');
+});
+
+document.addEventListener('click', () => ctxMenu.classList.remove('show'));
+
+ctxMenu.querySelectorAll('.ctx-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (!ctxScope) return;
+    const action = item.dataset.action;
+    ctxMenu.classList.remove('show');
+    switch(action) {
+      case 'open':
+        alert('Opening repair: ' + ctxScope.wo);
+        break;
+      case 'hotlist':
+        ctxScope.hot = !ctxScope.hot;
+        renderTable();
+        break;
+      case 'assign':
+        const tech = prompt('Assign tech (Rob / Tom):', ctxScope.tech || '');
+        if (tech !== null) { ctxScope.tech = tech; renderTable(); }
+        break;
+      case 'note':
+        const note = prompt('Add note:', '');
+        if (note) { ctxScope.notes = (ctxScope.notes ? ctxScope.notes + ' | ' : '') + note; renderTable(); }
+        break;
+      case 'hold':
+        if (confirm('Place ' + ctxScope.wo + ' on hold?')) {
+          ctxScope.status = 'On Hold';
+          renderTable();
+          updateStats();
+        }
+        break;
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  TECH SHEETS — extract approved WOs grouped by tech
+// ═══════════════════════════════════════════════════════
+function generateTechSheets() {
+  // Get all approved work orders (have a dateApproved and not shipped/invoiced)
+  const approved = SCOPES.filter(s => s.dateApproved && !/shipped|invoiced/i.test(s.status));
+  if (!approved.length) { alert('No approved work orders to extract.'); return; }
+
+  // Group by tech
+  const byTech = new Map();
+  approved.forEach(s => {
+    const tech = s.tech || 'Unassigned';
+    if (!byTech.has(tech)) byTech.set(tech, []);
+    byTech.get(tech).push(s);
+  });
+
+  // Sort each tech's WOs by repair level priority (Major > Mid-Level > Minor > unknown)
+  const lvlOrder = { 'major': 0, 'mid-level': 1, 'minor': 2 };
+  byTech.forEach((list) => {
+    list.sort((a, b) => {
+      const aLvl = (lvlOrder[(a.repairLevel || '').toLowerCase()] ?? 3);
+      const bLvl = (lvlOrder[(b.repairLevel || '').toLowerCase()] ?? 3);
+      return aLvl - bLvl || a.wo.localeCompare(b.wo);
+    });
+  });
+
+  // Build print window
+  const user = document.querySelector('.topbar-welcome strong')?.textContent || 'System';
+  let html = '';
+  byTech.forEach((list, tech) => {
+    html += `<div class="tech-section">
+      <h2>${tech} <span class="wo-count">(${list.length} work order${list.length > 1 ? 's' : ''})</span></h2>
+      <table>
+        <thead><tr><th>WO #</th><th>Client</th><th>Dept</th><th>Model</th><th>Serial</th><th>Status</th><th>Approved $</th><th>Est. Delivery</th></tr></thead>
+        <tbody>
+        ${list.map(s => `<tr>
+          <td>${s.wo}</td><td>${s.client}</td><td>${s.dept}</td><td>${s.type}</td>
+          <td>${s.serial}</td><td>${s.status}</td><td>${fmt$(s.approved)}</td><td>${s.estDel || 'TBD'}</td>
+        </tr>
+        <tr class="note-row"><td colspan="8"><strong>Notes:</strong> ${s.notes || '—'}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  });
+
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>Tech Sheets — Approved Work Orders</title>
+    <style>
+    body{font-family:'Inter',Arial,sans-serif;font-size:12px;padding:30px 40px;color:#1A202C}
+    h1{font-size:18px;color:#00257A;margin-bottom:2px}
+    .subtitle{color:#8896AA;font-size:11px;margin-bottom:24px}
+    .tech-section{margin-bottom:28px;page-break-inside:avoid}
+    h2{font-size:14px;color:#00257A;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid #00257A}
+    h2 .wo-count{font-weight:400;color:#8896AA;font-size:11px}
+    table{width:100%;border-collapse:collapse;margin-bottom:4px}
+    th,td{padding:6px 10px;border:1px solid #DDE3EE;text-align:left;font-size:11px}
+    th{background:#E9EFF9;color:#00257A;font-weight:600;font-size:10px;text-transform:uppercase}
+    .note-row td{background:#FAFBFD;font-size:10.5px;color:#4A5568;border-top:none;padding:4px 10px}
+    .sig-line{margin-top:40px;display:flex;gap:60px}
+    .sig-block{flex:1;border-top:1px solid #333;padding-top:6px;font-size:10px;color:#8896AA}
+    .iso-tag{margin-top:30px;font-size:9px;color:#8896AA;border-top:1px solid #DDE3EE;padding-top:8px}
+    @media print{body{padding:20px}.tech-section{page-break-inside:avoid}}
+    </style></head><body>
+    <h1>Total Scope, Inc. — Tech Sheets</h1>
+    <div class="subtitle">ISO 13485 Controlled Document · Approved Work Orders by Technician · Generated ${new Date().toLocaleDateString()}</div>
+    ${html}
+    <div class="sig-line">
+      <div class="sig-block">Supervisor Signature</div>
+      <div class="sig-block">Date</div>
+      <div class="sig-block">QC Inspector</div>
+      <div class="sig-block">Date</div>
+    </div>
+    <div class="iso-tag">ISO 13485:2016 · QMS-TECH-001 Rev 3 · Total Scope, Inc. · Extracted by ${user}</div>
+    </body></html>`);
+  w.document.close();
+  w.print();
+}
+
+// ═══════════════════════════════════════════════════════
+//  INLINE NOTE EDITING — click note to edit
+// ═══════════════════════════════════════════════════════
+document.getElementById('scopesTbody').addEventListener('click', e => {
+  const noteSpan = e.target.closest('.d-note');
+  if (!noteSpan) return;
+  const wo = noteSpan.dataset.wo;
+  const scope = SCOPES.find(s => s.wo === wo);
+  if (!scope) return;
+  // Don't re-enter edit if already editing
+  if (noteSpan.querySelector('.note-edit')) return;
+  const td = noteSpan.closest('td');
+  const currentNote = scope.notes || '';
+  td.innerHTML = `<input class="note-edit" type="text" value="${currentNote.replace(/"/g,'&quot;')}" />`;
+  const input = td.querySelector('.note-edit');
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  function save() {
+    scope.notes = input.value.trim();
+    renderTable();
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { renderTable(); }
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  GLOBAL REPAIR SEARCH MODAL LOGIC
+// ═══════════════════════════════════════════════════════
+const createModal = document.getElementById('createOrderModal');
+let selectedHistoricalDevice = null;
+
+function openCreateModal() {
+  createModal.classList.add('open');
+  document.getElementById('searchWo').value = '';
+  document.getElementById('searchSerial').value = '';
+  document.getElementById('globalSearchResults').innerHTML = '<tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>';
+  resetNewDeviceForm();
+}
+
+function closeCreateModal() {
+  createModal.classList.remove('open');
+}
+
+function resetNewDeviceForm() {
+  selectedHistoricalDevice = null;
+  document.getElementById('newDeviceForm').classList.remove('show');
+  document.getElementById('primaryActionRow').style.display = 'flex';
+  document.getElementById('newClientSelect').value = '';
+  document.getElementById('newDeptSelect').value = '';
+  document.getElementById('newDeptSelect').disabled = true;
+  document.getElementById('btnOpenRecord').style.opacity = '0.5';
+  document.getElementById('btnOpenRecord').style.pointerEvents = 'none';
+}
+
+function selectRow(tr, client, dept) {
+  document.querySelectorAll('.mrt tr').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+  selectedHistoricalDevice = { client, dept };
+  
+  // Hide the manual creation form since we have context
+  document.getElementById('newDeviceForm').classList.remove('show');
+  
+  // Enable the Open Record button
+  document.getElementById('btnOpenRecord').style.opacity = '1';
+  document.getElementById('btnOpenRecord').style.pointerEvents = 'all';
+}
+
+function runGlobalSearch() {
+  const tbody = document.getElementById('globalSearchResults');
+  const woQ = document.getElementById('searchWo').value.trim().toLowerCase();
+  const serQ = document.getElementById('searchSerial').value.trim().toLowerCase();
+  
+  resetNewDeviceForm();
+  
+  if (!woQ && !serQ) {
+    tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">Please enter a W.O. # or Serial # to search the device history database.</td></tr>';
+    return;
+  }
+  
+  // Use the existing SCOPES database to fake a search return
+  const results = SCOPES.filter(s => {
+    const matchWO = woQ ? s.wo.toLowerCase().includes(woQ) : true;
+    const matchSer = serQ ? s.serial.toLowerCase().includes(serQ) : true;
+    return matchWO && matchSer;
+  });
+  
+  if (results.length === 0) {
+    // Show one "Unknown Device" row simulating creating a totally new order
+    tbody.innerHTML = `<tr><td colspan="7" class="msg-empty">No device history found for that serial number. Click <b>Create New</b> below to start a fresh record.</td></tr>`;
+  } else {
+    // Plot the historical records
+    tbody.innerHTML = results.map((s, idx) => `
+      <tr onclick="selectRow(this, '${s.client}', '${s.dept}')">
+        <td style="font-weight:600">${s.client}</td>
+        <td>${s.dept}</td>
+        <td style="color:var(--navy);font-weight:600">${s.wo}</td>
+        <td>${s.dateIn}</td>
+        <td>${s.type}</td>
+        <td style="font-family:monospace">${s.serial}</td>
+        <td>PO-992${idx}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+// Client Select enables Department Select
+document.getElementById('newClientSelect').addEventListener('change', (e) => {
+  if (e.target.value) {
+    document.getElementById('newDeptSelect').disabled = false;
+  }
+});
+
+function revealNewOrderForm() {
+  if (selectedHistoricalDevice) {
+    // User selected an existing device from the table. Proceed with those inherited details immediately.
+    const url = new URL('product-sale.html', window.location.href);
+    url.searchParams.set('client', selectedHistoricalDevice.client);
+    url.searchParams.set('dept', selectedHistoricalDevice.dept);
+    window.location.href = url.href;
+    return;
+  }
+  
+  // They are creating a completely new record. Reveal the new form side, hide the action buttons.
+  document.getElementById('primaryActionRow').style.display = 'none';
+  document.getElementById('newDeviceForm').classList.add('show');
+}
+
+function submitNewWorkspace() {
+  const client = document.getElementById('newClientSelect').value;
+  const dept = document.getElementById('newDeptSelect').value;
+  
+  if (!client || !dept) {
+    alert("Please select both a Client and Department before starting the workspace.");
+    return;
+  }
+  
+  // Validated! Proceed to workspace with parameters.
+  const url = new URL('product-sale.html', window.location.href);
+  url.searchParams.set('client', client);
+  url.searchParams.set('dept', dept);
+  window.location.href = url.href;
 }
 
 // ═══════════════════════════════════════════════════════
