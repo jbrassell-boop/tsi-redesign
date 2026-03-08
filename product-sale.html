@@ -89,16 +89,16 @@
 
     /* ── ORDER COLUMN ── */
     .order-col { display:flex; flex-direction:column; flex:0 0 56%; min-width:0; border-left:2px solid var(--border-dk); overflow:hidden; }
-    .col-hd { display:flex; align-items:center; justify-content:space-between; padding:6px 12px; background:var(--navy); color:#fff; flex-shrink:0; gap:8px; }
-    .col-title { font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; white-space:nowrap; }
-    .col-meta { font-size:10.5px; color:rgba(255,255,255,.65); white-space:nowrap; }
-    .col-meta strong { color:#fff; font-weight:600; }
+    .col-hd { display:flex; align-items:center; justify-content:space-between; padding:6px 12px; background:#E9EFF9; color:var(--navy); flex-shrink:0; gap:8px; border-bottom:1px solid var(--border-dk); }
+    .col-title { font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; white-space:nowrap; color:var(--navy); }
+    .col-meta { font-size:10.5px; color:var(--muted); white-space:nowrap; }
+    .col-meta strong { color:var(--navy); font-weight:600; }
     .order-scroll { flex:1; overflow-y:auto; }
 
     /* ── ORDER TABLE ── */
     .ot { width:100%; border-collapse:collapse; }
     .ot thead { position:sticky; top:0; z-index:2; }
-    .ot th { background:#1a3a70; color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.1); }
+    .ot th { background:var(--navy); color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.1); }
     .ot th:last-child { border-right:none; }
     .ot td { padding:4px 7px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; color:var(--text); }
     .ot tbody tr:nth-child(even) { background:var(--row-alt); }
@@ -125,22 +125,21 @@
 
     /* ── PICKER COLUMN ── */
     .picker-col { display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden; border-right:2px solid var(--border-dk); }
-    .picker-hd { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:6px 10px; background:var(--navy); flex-shrink:0; color:#fff; }
+    .picker-hd { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:6px 10px; background:#E9EFF9; flex-shrink:0; color:var(--navy); border-bottom:1px solid var(--border-dk); }
     .picker-controls { display:flex; align-items:center; gap:5px; }
     .psearch-wrap { position:relative; display:flex; align-items:center; }
     .psearch-icon { position:absolute; left:7px; pointer-events:none; }
-    .psearch-icon svg { width:11px; height:11px; color:rgba(255,255,255,.5); }
-    .psearch { height:26px; border:1px solid rgba(255,255,255,.25); border-radius:3px; padding:0 7px 0 24px; font-size:11px; font-family:inherit; background:rgba(255,255,255,.12); color:#fff; outline:none; width:150px; transition:all .15s; }
-    .psearch::placeholder { color:rgba(255,255,255,.45); }
-    .psearch:focus { border-color:rgba(255,255,255,.55); background:rgba(255,255,255,.18); width:180px; }
-    .psel { height:26px; border:1px solid rgba(255,255,255,.25); border-radius:3px; padding:0 6px; font-size:11px; font-family:inherit; background:rgba(255,255,255,.12); color:#fff; cursor:pointer; outline:none; }
-    .psel option { background:#0d2060; color:#fff; }
+    .psearch-icon svg { width:11px; height:11px; color:var(--muted); }
+    .psearch { height:26px; border:1px solid var(--border-dk); border-radius:3px; padding:0 7px 0 24px; font-size:11px; font-family:inherit; background:#fff; color:var(--text); outline:none; width:150px; transition:all .15s; }
+    .psearch::placeholder { color:var(--muted); }
+    .psearch:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(46,116,181,.1); width:180px; }
+    .psel { height:26px; border:1px solid var(--border-dk); border-radius:3px; padding:0 6px; font-size:11px; font-family:inherit; background:#fff; color:var(--text); cursor:pointer; outline:none; }
     .picker-scroll { flex:1; overflow-y:auto; overflow-x:hidden; }
 
     /* ── PICKER TABLE ── */
     .pt { width:100%; border-collapse:collapse; table-layout:fixed; }
     .pt thead { position:sticky; top:0; z-index:2; }
-    .pt th { background:#1a3a70; color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; overflow:hidden; border-right:1px solid rgba(255,255,255,.1); }
+    .pt th { background:var(--navy); color:#fff; font-size:10px; font-weight:600; padding:6px 8px; text-align:left; white-space:nowrap; overflow:hidden; border-right:1px solid rgba(255,255,255,.1); }
     .pt th:last-child { border-right:none; }
     .pt td { padding:5px 8px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
     /* Category separator rows */
@@ -772,195 +771,6 @@
 
         </div><!-- /.order-col -->
 
-        <!-- old picker removed --><div style="display:none">
-
-          <div class="picker-hd">
-            <span class="col-title">Inventory — click a row to add</span>
-            <div class="picker-controls">
-              <div class="psearch-wrap">
-                <span class="psearch-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-                <input class="psearch" placeholder="Search items, part #..." />
-              </div>
-              <select class="psel">
-                <option>All Status</option>
-                <option>Active</option>
-                <option>Low Stock</option>
-                <option>Out of Stock</option>
-              </select>
-              <select class="psel">
-                <option>All Categories</option>
-                <option>IT Assembly</option>
-                <option>Angulation</option>
-                <option>Optics</option>
-                <option>Accessories</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="picker-scroll">
-            <table class="pt">
-              <colgroup>
-                <col style="width:auto" />
-                <col style="width:110px" />
-                <col style="width:74px" />
-                <col style="width:76px" />
-                <col style="width:42px" />
-                <col style="width:58px" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Model Fit</th>
-                  <th style="text-align:center;">Stock</th>
-                  <th style="text-align:right;">Unit Price</th>
-                  <th style="text-align:center;">Qty</th>
-                  <th style="text-align:center;"></th>
-                </tr>
-              </thead>
-              <tbody>
-
-                <!-- GROUP: Insertion Tube Assemblies -->
-                <tr class="pt-group" onclick="toggleGroup(this)">
-                  <td colspan="6"><span class="pg-arrow">▼</span>Insertion Tube Assemblies</td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">IT ASSEMBLY LD/SD</td>
-                  <td class="pt-model">GIF-H180 / GIF-190</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,250.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">IT ASSEMBLY MINI</td>
-                  <td class="pt-model">PCF-H190 / EG-H185</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,100.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- GROUP: Angulation Components -->
-                <tr class="pt-group" onclick="toggleGroup(this)">
-                  <td colspan="6"><span class="pg-arrow">▼</span>Angulation Components</td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">ANGULATION ASSEMBLY</td>
-                  <td class="pt-model">GIF-H180</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$980.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">ANGULATION CABLE ADJUSTER</td>
-                  <td class="pt-model">Universal</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$145.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">BENDING RUBBER</td>
-                  <td class="pt-model">GIF-H180 / H185</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$875.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- GROUP: Imaging / Optics -->
-                <tr class="pt-group" onclick="toggleGroup(this)">
-                  <td colspan="6"><span class="pg-arrow">▼</span>Imaging / Optics</td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">CCD CHIP ASSEMBLY</td>
-                  <td class="pt-model">GIF-H180 HD</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$240.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">ACHROMAT LENS</td>
-                  <td class="pt-model">GIF-H180 / CF-Q180</td>
-                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
-                  <td class="pt-price">$315.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">LIGHT GUIDE BUNDLE</td>
-                  <td class="pt-model">Universal 3.5mm</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$390.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-                <!-- GROUP: Accessories & Hardware -->
-                <tr class="pt-group" onclick="toggleGroup(this)">
-                  <td colspan="6"><span class="pg-arrow">▼</span>Accessories &amp; Hardware</td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">AIR WATER NOZZLES</td>
-                  <td class="pt-model">GIF / PCF / CF</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$62.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">UNIVERSAL CORD SEAL</td>
-                  <td class="pt-model">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$28.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">WATER BOTTLE CONNECTOR</td>
-                  <td class="pt-model">Olympus OEM</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$19.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">DISTAL TIP HOOD</td>
-                  <td class="pt-model">PCF-H190 / H180</td>
-                  <td style="text-align:center;"><span class="stk-o">Out of Stock</span></td>
-                  <td class="pt-price">$48.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add-dis" disabled>+ Add</button></td>
-                </tr>
-
-                <!-- GROUP: Carts & Equipment -->
-                <tr class="pt-group" onclick="toggleGroup(this)">
-                  <td colspan="6"><span class="pg-arrow">▼</span>Carts &amp; Equipment</td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">SCOPE CART — STANDARD</td>
-                  <td class="pt-model">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,850.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-                <tr class="pt-child">
-                  <td class="pt-name">SCOPE CART — COMPACT</td>
-                  <td class="pt-model">Universal</td>
-                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
-                  <td class="pt-price">$1,250.00</td>
-                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
-                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
-                </tr>
-
-              </tbody>
-            </table>
-          </div>
-
-        </div><!-- hidden old picker removed -->
 
       </div><!-- /.workspace -->
 
