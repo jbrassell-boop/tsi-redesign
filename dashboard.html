@@ -3,100 +3,155 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Dashboard | TSI Redesign</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px;background:#f0f2f5;color:#212529}
     :root{
       --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
       --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
-      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;
+      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#F2F5FB;--hover:#D8E6FF;
     }
     .shell{display:flex;height:100vh;overflow:hidden}
-    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-    .sb-section{padding:4px 12px 6px;color:var(--muted);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-top:10px}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;color:var(--label);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
-    .nav-item:hover{background:var(--bg);color:var(--navy)}
-    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:700}
-    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0;opacity:.7}
-    .nav-item.active .icon{opacity:1}
-    .nav-divider{margin:8px 14px;border-top:1px solid var(--border)}
+
+    /* SIDEBAR */
+    .sidebar{width:208px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sb-section{padding:4px 12px 10px;color:rgba(255,255,255,.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.62);font-size:12.5px;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:rgba(255,255,255,.06)}
+    .nav-item.active{background:rgba(157,171,226,.18);color:#fff;border-left-color:var(--red);font-weight:600}
+    .nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .nav-divider{margin:10px 16px;border-top:1px solid rgba(255,255,255,.08)}
+
+    /* MAIN */
     .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
-    .topbar{height:58px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar{height:54px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
     .topbar-left{display:flex;align-items:center;gap:10px}
-    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
-    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
+    .topbar-avatar{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:12.5px}
     .topbar-welcome strong{color:#fff}
     .topbar-center{display:flex;flex-direction:column;align-items:center}
-    .topbar-title{color:#fff;font-weight:900;font-size:19px;letter-spacing:.3px}
-    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-title{color:#fff;font-weight:900;font-size:17px;letter-spacing:.3px}
+    .topbar-sub{color:#9DABE2;font-size:9px;letter-spacing:2px;text-transform:uppercase}
     .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
-    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
-    .page-body{flex:1;overflow-y:auto;padding:24px}
-    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:18px}
-    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
-    .sep{color:var(--border)}
-    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+    .svc-select{height:30px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:11.5px;cursor:pointer;outline:none;font-family:inherit}
+
+    /* PAGE BODY — no padding, full bleed */
+    .page-body{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+    /* STAT STRIP — compact pulse bar */
+    .stat-strip{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);padding:0;flex-shrink:0;overflow-x:auto}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .1s;min-width:0}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.alert{background:#FEF9F9}
+    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .stat-chip .s-data{min-width:0}
+    .stat-chip .s-val{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .stat-chip .s-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-red{color:var(--red)}.s-amber{color:var(--amber)}.s-green{color:var(--green)}.s-navy{color:var(--navy)}
 
     /* SUBNAV */
-    .subnav{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--card);padding:0 16px;margin-bottom:20px;overflow-x:auto;flex-shrink:0}
-    .subnav-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s}
+    .subnav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:2px solid var(--border);padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative}
     .subnav-tab:hover{color:var(--navy)}
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
 
-    /* STAT CARDS */
-    .stat-row-3{display:flex;gap:14px;margin-bottom:20px}
-    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;box-shadow:0 1px 8px rgba(0,37,122,.05)}
-    .stat-card .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-    .stat-card .val{font-size:26px;font-weight:900;letter-spacing:-.5px}
-    .stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+    /* TOOLBAR — filter + search */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.on{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.on):hover{background:var(--bg);color:var(--navy)}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk)}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .toolbar-actions{display:flex;gap:4px}
+    .tb-btn{height:30px;padding:0 10px;border:1px solid var(--border-dk);border-radius:6px;font-size:11px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--label);display:flex;align-items:center;gap:4px;font-weight:500}
+    .tb-btn:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .chk-group{display:flex;align-items:center;gap:8px}
+    .chk-item{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--label);cursor:pointer;white-space:nowrap}
+    .chk-item input{accent-color:var(--navy);width:13px;height:13px}
 
-    /* CONTENT LAYOUT */
-    .dash-layout{display:flex;gap:20px}
-    .dash-main{flex:2;min-width:0}
-    .dash-side{flex:1;min-width:240px;max-width:320px}
-
-    /* CARD */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06);margin-bottom:16px}
-    .card-head{padding:12px 20px;border-bottom:1px solid var(--border);background:#E9EFF9;display:flex;align-items:center;justify-content:space-between}
-    .card-head .title{font-size:13px;font-weight:700;color:var(--navy)}
-    .card-body{padding:16px 20px}
-
-    /* TABLE */
-    table{width:100%;border-collapse:collapse}
-    th{background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:9px 14px;text-align:left;white-space:nowrap}
-    td{padding:9px 14px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+    /* DATA TABLE — the main event */
+    .table-wrap{flex:1;overflow:auto;position:relative}
+    table{width:100%;border-collapse:collapse;min-width:1100px}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;cursor:pointer;user-select:none;text-transform:uppercase}
+    th:last-child{border-right:none}
+    th:hover{background:#1A3F8F}
+    th .sort{margin-left:3px;opacity:.4;font-size:9px}
+    th.sorted .sort{opacity:1}
+    td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
-    tbody tr:hover{background:#D8E6FF;cursor:pointer}
-    .badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
-    .b-inrepair{background:#FFFBEB;color:var(--amber)}
-    .b-shipped{background:#EFF6FF;color:var(--blue)}
-    .b-complete{background:#F0F4F7;color:var(--steel)}
-    .b-quoted{background:#EEF2FA;color:var(--navy)}
-    .b-invoiced{background:#F3F4F6;color:var(--muted)}
+    tbody tr:hover{background:var(--hover);cursor:pointer}
+    tbody tr.urgent{border-left:3px solid var(--red)}
+    tbody tr.attention{border-left:3px solid var(--amber)}
 
-    /* ALERT CARDS */
-    .alert-item{padding:10px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);border-left:3px solid transparent;margin-bottom:8px}
-    .alert-item.high{border-left-color:var(--red);background:#FEF9F9}
-    .alert-item.med{border-left-color:var(--amber);background:#FFFDF7}
-    .alert-id{font-size:11px;font-weight:700;color:var(--navy)}
-    .alert-desc{font-size:12px;color:var(--text);margin:3px 0}
-    .alert-meta{font-size:11px;color:var(--muted)}
+    /* Quick-jump link in WO column */
+    .wo-link{color:var(--blue);font-weight:600;text-decoration:none;cursor:pointer}
+    .wo-link:hover{text-decoration:underline}
 
-    /* LOANER */
-    .loaner-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
-    .loaner-model{font-size:12.5px;font-weight:600;color:var(--text)}
-    .loaner-client{font-size:11px;color:var(--muted)}
-    .loaner-due{font-size:11px;margin-top:2px}
-    .due-overdue{color:var(--red);font-weight:600}
+    /* Status badges */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .b-waiting{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
+    .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .b-hold{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+    .b-complete{background:#F3F4F6;color:var(--steel);border:1px solid #CFD8DC}
+    .b-shipped{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
+    .b-quoted{background:#E8EAF6;color:var(--navy);border:1px solid #9FA8DA}
+    .b-invoiced{background:#F5F5F5;color:#616161;border:1px solid #BDBDBD}
 
-    ::-webkit-scrollbar{width:6px}
+    /* Days-In heat */
+    .days-crit{color:var(--red);font-weight:700}
+    .days-warn{color:var(--amber);font-weight:600}
+    .days-ok{color:var(--muted)}
+
+    /* FOOTER BAR */
+    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .record-info{font-size:11px;color:var(--muted)}
+    .record-info strong{color:var(--text)}
+    .pagination{display:flex;align-items:center;gap:3px}
+    .pg-btn{padding:4px 9px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--text)}
+    .pg-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .pg-btn:hover:not(.on){background:var(--bg)}
+    .pg-select{height:26px;font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 6px;font-family:inherit}
+
+    /* DETAIL PANEL — slide-in from right */
+    .detail-panel{position:absolute;top:0;right:0;bottom:0;width:380px;background:var(--card);border-left:2px solid var(--navy);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:10;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease;overflow:hidden}
+    .detail-panel.open{transform:translateX(0)}
+    .dp-header{padding:14px 16px;background:#E9EFF9;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .dp-title{font-size:14px;font-weight:700;color:var(--navy)}
+    .dp-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted)}
+    .dp-close:hover{background:var(--bg);color:var(--navy)}
+    .dp-body{flex:1;overflow-y:auto;padding:16px}
+    .dp-section{margin-bottom:16px}
+    .dp-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+    .dp-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+    .dp-row .dp-label{color:var(--muted);font-weight:500}
+    .dp-row .dp-val{color:var(--text);font-weight:600;text-align:right}
+    .dp-actions{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+    .dp-btn{flex:1;height:34px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none;display:flex;align-items:center;justify-content:center;gap:4px}
+    .dp-btn-primary{background:var(--navy);color:#fff}
+    .dp-btn-primary:hover{background:#1A3F8F}
+    .dp-btn-secondary{background:var(--card);color:var(--navy);border:1.5px solid var(--border-dk)}
+    .dp-btn-secondary:hover{background:var(--bg)}
+
+    ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:#f0f2f5}
     ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
   </style>
 </head>
 <body>
 <div class="shell">
+
+  <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sb-section">Navigation</div>
     <div class="nav-item"><span class="icon">⊞</span> My Workspace</div>
@@ -124,6 +179,7 @@
     <div class="nav-item"><span class="icon">→</span> Sign Out</div>
   </nav>
 
+  <!-- MAIN -->
   <div class="main">
     <header class="topbar">
       <div class="topbar-left">
@@ -140,17 +196,46 @@
       </div>
     </header>
 
+    <!-- PAGE BODY -->
     <div class="page-body">
-      <div class="breadcrumb">
-        <span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Dashboard</span>
+
+      <!-- STAT STRIP — compact pulse, not hero cards -->
+      <div class="stat-strip">
+        <div class="stat-chip alert">
+          <div class="s-icon" style="background:#FEF2F2">🔧</div>
+          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFFBEB">⏳</div>
+          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">⚙</div>
+          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
+        </div>
+        <div class="stat-chip alert">
+          <div class="s-icon" style="background:#FEF2F2">⚠</div>
+          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9">✓</div>
+          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFFBEB">↺</div>
+          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#F3E8FD">📦</div>
+          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+        </div>
       </div>
 
-      <!-- SUBNAV TABS -->
+      <!-- SUB-NAV TABS -->
       <div class="subnav">
-        <div class="subnav-tab active">Overview</div>
-        <div class="subnav-tab">Scopes</div>
-        <div class="subnav-tab">Tasks</div>
-        <div class="subnav-tab">Loaners</div>
+        <div class="subnav-tab active">Scopes</div>
+        <div class="subnav-tab">Tasks<span class="tab-badge">5</span></div>
+        <div class="subnav-tab">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></div>
         <div class="subnav-tab">Emails</div>
         <div class="subnav-tab">Shipping Status</div>
         <div class="subnav-tab">Inventory</div>
@@ -160,123 +245,341 @@
         <div class="subnav-tab">Flags</div>
       </div>
 
-      <!-- STAT CARDS -->
-      <div class="stat-row-3">
-        <div class="stat-card">
-          <div class="lbl">Active Repairs</div>
-          <div class="val" style="color:var(--amber)">12</div>
-          <div class="sub">4 due this week</div>
+      <!-- TOOLBAR — filter bar + instant search -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <span class="filter-label">Type</span>
+          <div class="seg-group">
+            <button class="seg-btn on">Flexible</button>
+            <button class="seg-btn">Rigid</button>
+            <button class="seg-btn">Instrument</button>
+            <button class="seg-btn">Camera</button>
+            <button class="seg-btn">Carts</button>
+            <button class="seg-btn">Fuse</button>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Open Invoices</div>
-          <div class="val" style="color:var(--red)">$31,240</div>
-          <div class="sub">3 overdue</div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Size</span>
+          <div class="seg-group">
+            <button class="seg-btn">Large</button>
+            <button class="seg-btn">Small</button>
+            <button class="seg-btn on">All</button>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Loaners Out</div>
-          <div class="val" style="color:var(--amber)">4</div>
-          <div class="sub">2 overdue</div>
+        <div class="filter-sep"></div>
+        <div class="chk-group">
+          <label class="chk-item"><input type="checkbox" checked/> In House</label>
+          <label class="chk-item"><input type="checkbox"/> Outsourced</label>
+          <label class="chk-item"><input type="checkbox"/> Cogentix</label>
+          <label class="chk-item"><input type="checkbox"/> Hot List</label>
         </div>
-        <div class="stat-card">
-          <div class="lbl">MTD Revenue</div>
-          <div class="val" style="color:var(--green)">$84,600</div>
-          <div class="sub">↑ 11% vs Feb</div>
+        <div class="toolbar-search">
+          <input class="search-input" type="text" placeholder="Search WO, client, serial…"/>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Active Clients</div>
-          <div class="val">10</div>
-          <div class="sub">All locations</div>
+        <div class="toolbar-actions">
+          <button class="tb-btn">⇅ Export</button>
+          <button class="tb-btn">🖨 Print</button>
         </div>
       </div>
 
-      <!-- MAIN LAYOUT -->
-      <div class="dash-layout">
-        <div class="dash-main">
-          <div class="card">
-            <div class="card-head">
-              <span class="title">Recent Repairs</span>
-              <a href="#" style="font-size:12px;color:var(--blue);text-decoration:none">View all →</a>
+      <!-- DATA TABLE — the working surface -->
+      <div class="table-wrap" style="position:relative">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:85px" class="sorted">Date In <span class="sort">▼</span></th>
+              <th>Client <span class="sort">↕</span></th>
+              <th>Department <span class="sort">↕</span></th>
+              <th style="width:110px">Work Order <span class="sort">↕</span></th>
+              <th>Scope Type <span class="sort">↕</span></th>
+              <th style="width:80px">Serial # <span class="sort">↕</span></th>
+              <th style="width:55px;text-align:center">Days In <span class="sort">↕</span></th>
+              <th>Repair Status <span class="sort">↕</span></th>
+              <th style="width:90px">Date Approved <span class="sort">↕</span></th>
+              <th style="width:90px">Est Delivery <span class="sort">↕</span></th>
+              <th style="width:80px;text-align:right">Approved $ <span class="sort">↕</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ROW 1 — critical: 1,178 days, waiting approval -->
+            <tr class="urgent">
+              <td>01/03/2023</td>
+              <td style="font-weight:500">Tri State ENT Products - PA</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR23003001</a></td>
+              <td>ENF GP</td>
+              <td>2007037</td>
+              <td style="text-align:center"><span class="days-crit">1,178</span></td>
+              <td><span class="badge b-waiting">Waiting for Approval</span></td>
+              <td style="color:var(--muted)">—</td>
+              <td style="color:var(--muted)">—</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 2 -->
+            <tr class="urgent">
+              <td>06/13/2023</td>
+              <td style="font-weight:500">Bhatti GI Consultants, PA</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR23164014</a></td>
+              <td>GIF H190</td>
+              <td>2515171</td>
+              <td style="text-align:center"><span class="days-crit">1,196</span></td>
+              <td><span class="badge b-waiting">Waiting for Approval</span></td>
+              <td style="color:var(--muted)">—</td>
+              <td style="color:var(--muted)">—</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 3 -->
+            <tr class="attention">
+              <td>06/20/2023</td>
+              <td style="font-weight:500">Bhatti GI Consultants, PA</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR23171010</a></td>
+              <td>GF-UE160-AL5</td>
+              <td>1700599</td>
+              <td style="text-align:center"><span class="days-warn">989</span></td>
+              <td><span class="badge b-hold">On Hold</span></td>
+              <td style="color:var(--muted)">—</td>
+              <td style="color:var(--muted)">—</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 4 — loaner repair -->
+            <tr>
+              <td>07/06/2017</td>
+              <td style="font-weight:500">TSI Loaner Repair</td>
+              <td style="color:var(--muted)">TSI Loaner Repair</td>
+              <td><a class="wo-link" href="#">201718700001</a></td>
+              <td>GIF Q140</td>
+              <td>2915229</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Mid Level</span></td>
+              <td>07/06/2017</td>
+              <td style="color:var(--muted)">TBD</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 5 -->
+            <tr>
+              <td>09/22/2017</td>
+              <td style="font-weight:500">TSI Loaner Repair</td>
+              <td style="color:var(--muted)">TSI Loaner Repair</td>
+              <td><a class="wo-link" href="#">201726500039</a></td>
+              <td>11278AU1</td>
+              <td>2086426</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Mid Level</span></td>
+              <td>09/22/2017</td>
+              <td style="color:var(--muted)">TBD</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 6 -->
+            <tr class="attention">
+              <td>11/08/2017</td>
+              <td style="font-weight:500">Total Scope Acquisitions</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR17312003</a></td>
+              <td>GIF H180</td>
+              <td>2601945</td>
+              <td style="text-align:center"><span class="days-warn">N/A</span></td>
+              <td><span class="badge b-waiting">Waiting on Inspection</span></td>
+              <td style="color:var(--muted)">—</td>
+              <td>11/20/2017</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 7 -->
+            <tr>
+              <td>12/15/2017</td>
+              <td style="font-weight:500">Total Scope Acquisitions</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR17349037</a></td>
+              <td>TJF 160VF</td>
+              <td>2302212</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-approved">Approved</span></td>
+              <td>12/15/2017</td>
+              <td>12/15/2017</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 8 -->
+            <tr>
+              <td>01/04/2018</td>
+              <td style="font-weight:500">Total Scope Acquisitions</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR18004003</a></td>
+              <td>EC 3490Li</td>
+              <td>A110180</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Major</span></td>
+              <td>01/05/2018</td>
+              <td style="color:var(--muted)">TBD</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 9 -->
+            <tr>
+              <td>03/09/2018</td>
+              <td style="font-weight:500">TSI Loaner Repair</td>
+              <td style="color:var(--muted)">TSI Loaner Repair</td>
+              <td><a class="wo-link" href="#">NR18068030</a></td>
+              <td>SIF Q180</td>
+              <td>2422434</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Mid Level</span></td>
+              <td>03/09/2018</td>
+              <td style="color:var(--muted)">TBD</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 10 -->
+            <tr>
+              <td>04/13/2018</td>
+              <td style="font-weight:500">Total Scope Acquisitions</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR18103039</a></td>
+              <td>PCF H180AL</td>
+              <td>2802563</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-waiting">Waiting for Approval</span></td>
+              <td>04/13/2018</td>
+              <td>04/13/2018</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 11 -->
+            <tr>
+              <td>05/22/2019</td>
+              <td style="font-weight:500">Wills Eye Hospital - PA</td>
+              <td style="color:var(--muted)">Central Sterile</td>
+              <td><a class="wo-link" href="#">NR19142001</a></td>
+              <td>GIF H185</td>
+              <td>3015882</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-approved">Approved</span></td>
+              <td>06/01/2019</td>
+              <td>06/15/2019</td>
+              <td style="text-align:right;font-weight:600;color:var(--navy)">$1,250.00</td>
+            </tr>
+            <!-- ROW 12 -->
+            <tr>
+              <td>05/30/2018</td>
+              <td style="font-weight:500">Total Scope Acquisitions</td>
+              <td style="color:var(--muted)">Office</td>
+              <td><a class="wo-link" href="#">NR18150030</a></td>
+              <td>GIF 160</td>
+              <td>2510075</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Minor</span></td>
+              <td>05/30/2018</td>
+              <td style="color:var(--muted)">TBD</td>
+              <td style="text-align:right">$0.00</td>
+            </tr>
+            <!-- ROW 13 -->
+            <tr>
+              <td>08/15/2021</td>
+              <td style="font-weight:500">Halifax Medical Center - FL</td>
+              <td style="color:var(--muted)">Sterile Processing</td>
+              <td><a class="wo-link" href="#">NR21227003</a></td>
+              <td>GIF Q165</td>
+              <td>3412290</td>
+              <td style="text-align:center"><span class="days-ok">N/A</span></td>
+              <td><span class="badge b-inrepair">In Repair — Major</span></td>
+              <td>08/18/2021</td>
+              <td>09/02/2021</td>
+              <td style="text-align:right;font-weight:600;color:var(--navy)">$2,800.00</td>
+            </tr>
+            <!-- ROW 14 -->
+            <tr>
+              <td>02/18/2026</td>
+              <td style="font-weight:500">Tift Regional Medical Center</td>
+              <td style="color:var(--muted)">Endoscopy</td>
+              <td><a class="wo-link" href="#">NI26004421</a></td>
+              <td>GIF-H190</td>
+              <td>3801442</td>
+              <td style="text-align:center"><span class="days-warn">18</span></td>
+              <td><span class="badge b-inrepair">In Repair</span></td>
+              <td>02/20/2026</td>
+              <td>03/10/2026</td>
+              <td style="text-align:right;font-weight:600;color:var(--navy)">$485.00</td>
+            </tr>
+            <!-- ROW 15 -->
+            <tr>
+              <td>02/14/2026</td>
+              <td style="font-weight:500">Nashville General Hospital</td>
+              <td style="color:var(--muted)">GI Lab</td>
+              <td><a class="wo-link" href="#">NI26004398</a></td>
+              <td>CF-H185L</td>
+              <td>2918371</td>
+              <td style="text-align:center"><span class="days-warn">22</span></td>
+              <td><span class="badge b-shipped">Shipped</span></td>
+              <td>02/16/2026</td>
+              <td>03/05/2026</td>
+              <td style="text-align:right;font-weight:600;color:var(--navy)">$620.00</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- DETAIL PANEL — quick-view without navigating away -->
+        <div class="detail-panel open">
+          <div class="dp-header">
+            <div class="dp-title">NR23003001</div>
+            <button class="dp-close">✕</button>
+          </div>
+          <div class="dp-body">
+            <div class="dp-section">
+              <div class="dp-section-title">Scope Info</div>
+              <div class="dp-row"><span class="dp-label">Client</span><span class="dp-val">Tri State ENT Products - PA</span></div>
+              <div class="dp-row"><span class="dp-label">Department</span><span class="dp-val">Office</span></div>
+              <div class="dp-row"><span class="dp-label">Scope Type</span><span class="dp-val">ENF GP</span></div>
+              <div class="dp-row"><span class="dp-label">Serial #</span><span class="dp-val">2007037</span></div>
+              <div class="dp-row"><span class="dp-label">Model</span><span class="dp-val">Olympus ENF-GP</span></div>
             </div>
-            <div style="overflow-x:auto">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Invoice #</th>
-                    <th>Client</th>
-                    <th>Scope</th>
-                    <th>Issue</th>
-                    <th>Date</th>
-                    <th>Tech</th>
-                    <th>Status</th>
-                    <th style="text-align:right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004421</td><td>Tift Regional Medical Center</td><td style="color:var(--muted)">Olympus GIF-H190</td><td style="font-size:12px">Fluid invasion — distal end</td><td style="color:var(--muted)">02/18/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-inrepair">In Repair</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$485.00</td></tr>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004398</td><td>Nashville General Hospital</td><td style="color:var(--muted)">Olympus CF-H185L</td><td style="font-size:12px">Angulation cable failure</td><td style="color:var(--muted)">02/14/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-shipped">Shipped</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$620.00</td></tr>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004355</td><td>West Side GI Center</td><td style="color:var(--muted)">Pentax EC-3890LK</td><td style="font-size:12px">Bending rubber tear at tip</td><td style="color:var(--muted)">02/10/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-complete">Complete</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$310.00</td></tr>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004312</td><td>Metro Health Hospital</td><td style="color:var(--muted)">Olympus BF-UC180F</td><td style="font-size:12px">CCD chip — no image</td><td style="color:var(--muted)">02/06/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-quoted">Quoted</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$895.00</td></tr>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004287</td><td>88th Medical Group</td><td style="color:var(--muted)">Olympus CF-HQ190L</td><td style="font-size:12px">Insertion tube kink damage</td><td style="color:var(--muted)">02/03/2026</td><td style="color:var(--muted)">Rob</td><td><span class="badge b-inrepair">In Repair</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$480.00</td></tr>
-                  <tr><td style="color:var(--blue);font-weight:600">NI26004244</td><td>Northside Hospital</td><td style="color:var(--muted)">Fujifilm EG-760Z</td><td style="font-size:12px">Universal cord leak</td><td style="color:var(--muted)">01/28/2026</td><td style="color:var(--muted)">Tom</td><td><span class="badge b-shipped">Shipped</span></td><td style="text-align:right;font-weight:600;color:var(--navy)">$640.00</td></tr>
-                </tbody>
-              </table>
+            <div class="dp-section">
+              <div class="dp-section-title">Repair Status</div>
+              <div class="dp-row"><span class="dp-label">Status</span><span class="dp-val"><span class="badge b-waiting">Waiting for Approval</span></span></div>
+              <div class="dp-row"><span class="dp-label">Date In</span><span class="dp-val">01/03/2023</span></div>
+              <div class="dp-row"><span class="dp-label">Days In</span><span class="dp-val" style="color:var(--red);font-weight:700">1,178 days</span></div>
+              <div class="dp-row"><span class="dp-label">Technician</span><span class="dp-val">—</span></div>
+              <div class="dp-row"><span class="dp-label">Date Approved</span><span class="dp-val">—</span></div>
+              <div class="dp-row"><span class="dp-label">Est Delivery</span><span class="dp-val">—</span></div>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">Financial</div>
+              <div class="dp-row"><span class="dp-label">Quoted</span><span class="dp-val">$0.00</span></div>
+              <div class="dp-row"><span class="dp-label">Approved</span><span class="dp-val">$0.00</span></div>
+              <div class="dp-row"><span class="dp-label">Invoice #</span><span class="dp-val">—</span></div>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">Issue / Notes</div>
+              <div style="font-size:12px;color:var(--text);line-height:1.5;padding:6px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+                Scope received for evaluation. Client has not responded to quote sent 01/15/2023. Two follow-up emails sent (02/01 and 03/01). Awaiting approval to proceed with repair.
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="dash-side">
-          <div class="card">
-            <div class="card-head"><span class="title">Quality Alerts</span><span style="background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 open</span></div>
-            <div class="card-body">
-              <div class="alert-item high">
-                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-041</span><span class="badge" style="background:#FEF2F2;color:var(--red)">High</span></div>
-                <div class="alert-desc">Scope returned with residual fluid post-repair</div>
-                <div class="alert-meta">Tift Regional · Rob Mancini</div>
-              </div>
-              <div class="alert-item high">
-                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-029</span><span class="badge" style="background:#FEF2F2;color:var(--red)">High</span></div>
-                <div class="alert-desc">Avoidable damage pattern — 3 events in 90 days</div>
-                <div class="alert-meta">Theda Oaks · Joseph Brassell</div>
-              </div>
-              <div class="alert-item med">
-                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="alert-id">QC-2026-022</span><span class="badge" style="background:#FFFBEB;color:var(--amber)">Medium</span></div>
-                <div class="alert-desc">CCD chip delivery delay — BF-UC180F platform</div>
-                <div class="alert-meta">ChipTech Medical · Debbie Hightower</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-head"><span class="title">Loaners Out</span></div>
-            <div class="card-body">
-              <div class="loaner-item">
-                <div>
-                  <div class="loaner-model">Olympus GIF-H190</div>
-                  <div class="loaner-client">Tift Regional Medical Center</div>
-                  <div class="loaner-due">Due 03/04/2026</div>
-                </div>
-                <span class="badge" style="background:#EFF6FF;color:var(--blue)">Out</span>
-              </div>
-              <div class="loaner-item" style="background:#FEF9F9;border-color:#FECACA">
-                <div>
-                  <div class="loaner-model">Olympus CF-H185L</div>
-                  <div class="loaner-client">Nashville General Hospital</div>
-                  <div class="loaner-due due-overdue">⚠ Overdue — due 02/28/2026</div>
-                </div>
-                <span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>
-              </div>
-              <div class="loaner-item" style="background:#FEF9F9;border-color:#FECACA">
-                <div>
-                  <div class="loaner-model">Olympus GIF-Q165</div>
-                  <div class="loaner-client">Metro Health Hospital</div>
-                  <div class="loaner-due due-overdue">⚠ Overdue — due 02/20/2026</div>
-                </div>
-                <span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>
-              </div>
-            </div>
+          <div class="dp-actions">
+            <button class="dp-btn dp-btn-primary">Open Work Order →</button>
+            <button class="dp-btn dp-btn-secondary">Email Client</button>
           </div>
         </div>
       </div>
+
+      <!-- FOOTER -->
+      <div class="table-footer">
+        <div class="record-info">
+          Showing <strong>1–15</strong> of <strong>47</strong> in-house scopes · Last updated: 08:35 AM
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select"><option>15</option><option>25</option><option>50</option><option>All</option></select>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn">‹</button>
+            <button class="pg-btn on">1</button>
+            <button class="pg-btn">2</button>
+            <button class="pg-btn">3</button>
+            <button class="pg-btn">4</button>
+            <button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
