@@ -7,277 +7,162 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ── RESET ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'Inter', Arial, sans-serif; font-size: 13px; background: #f0f2f5; color: #212529; }
 
-    /* ── COLORS (matching TSI site) ── */
     :root {
-      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
-      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
-      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;
-      --white:#ffffff;--blue-lt:#4a7cc1;--blue-bg:#E8EDF5;--gray-bg:#f8f9fa;
-      --border-dark:#B8C8E0;--header-h:56px;--sidebar-w:208px;
+      --navy:#00257A; --blue:#2E74B5; --red:#B71234; --green:#16A34A; --amber:#D97706; --steel:#44697D;
+      --muted:#8896AA; --label:#4A5568; --text:#1A202C; --border:#DDE3EE; --border-dk:#B8C8E0;
+      --bg:#E8EDF5; --card:#FFFFFF; --row-alt:#E6EEFB;
+      --sidebar-w:208px;
     }
 
-    /* ── LAYOUT SHELL ── */
-    .shell { display: flex; height: 100vh; overflow: hidden; }
+    /* ── SHELL ── */
+    .shell { display:flex; height:100vh; overflow:hidden; }
 
     /* ── SIDEBAR ── */
-    .sidebar {
-      width: var(--sidebar-w); background: #fff; border-right: 1px solid var(--border); display: flex;
-      flex-direction: column; flex-shrink: 0; overflow-y: auto; overflow-x: hidden;
-    }
-    .sidebar-brand {
-      padding: 14px 12px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .brand-logo { width: 36px; height: 36px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
-    .brand-logo svg { width: 22px; height: 22px; color: #fff; }
-    .brand-text { color: var(--navy); }
-    .brand-text .t1 { font-size: 12px; font-weight: 700; line-height: 1.3; }
-    .brand-text .t2 { font-size: 10px; color: var(--muted); margin-top: 1px; }
-
-    .nav-group { padding: 8px 0; flex: 1; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 7px 14px; margin: 1px 6px; cursor: pointer; color: var(--label);
-      font-size: 12px; font-weight: 500; transition: all .12s;
-      border-left: 3px solid transparent; white-space: nowrap; border-radius: 7px;
-    }
-    .nav-item:hover { background: var(--bg); color: var(--navy); }
-    .nav-item.active { background: #DDE6F5; color: var(--navy); border-left-color: var(--navy); font-weight: 600; }
-    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .7; }
-    .nav-item.active svg { opacity: 1; }
-
-    .sidebar-footer {
-      padding: 10px 14px; border-top: 1px solid var(--border);
-      color: var(--muted); font-size: 10px; line-height: 1.5;
-    }
+    .sidebar { width:var(--sidebar-w); background:#fff; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; overflow-x:hidden; }
+    .sidebar-brand { padding:14px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .brand-logo { width:36px; height:36px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .brand-logo svg { width:20px; height:20px; }
+    .brand-text .t1 { font-size:12px; font-weight:700; color:var(--navy); line-height:1.3; }
+    .brand-text .t2 { font-size:10px; color:var(--muted); margin-top:1px; }
+    .nav-group { padding:8px 0; flex:1; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:7px 14px; margin:1px 6px; cursor:pointer; color:var(--label); font-size:12px; font-weight:500; transition:all .12s; border-left:3px solid transparent; white-space:nowrap; border-radius:7px; }
+    .nav-item:hover { background:var(--bg); color:var(--navy); }
+    .nav-item.active { background:#DDE6F5; color:var(--navy); border-left-color:var(--navy); font-weight:600; }
+    .nav-item svg { width:15px; height:15px; flex-shrink:0; opacity:.7; }
+    .nav-item.active svg { opacity:1; }
+    .sidebar-footer { padding:10px 14px; border-top:1px solid var(--border); color:var(--muted); font-size:10px; }
 
     /* ── MAIN ── */
-    .main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .main { display:flex; flex-direction:column; flex:1; overflow:hidden; }
 
-    /* ── TOP HEADER ── */
-    .topbar {
-      height: var(--header-h); background: linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; flex-shrink: 0;
-      box-shadow: 0 2px 12px rgba(0,37,122,.18);
-    }
-    .topbar-left { display: flex; align-items: center; gap: 14px; }
-    .topbar-logo { font-size: 15px; font-weight: 700; color: #fff; }
-    .topbar-logo span { font-size: 11px; font-weight: 400; color: rgba(255,255,255,.6); display: block; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .topbar-user { color: rgba(255,255,255,.85); font-size: 12px; }
-    .svc-loc {
-      display: flex; align-items: center; gap: 6px;
-      color: rgba(255,255,255,.75); font-size: 12px;
-    }
-    .svc-loc select {
-      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
-      color: #fff; border-radius: 4px; padding: 4px 8px; font-size: 12px;
-    }
-
-    /* ── PAGE CONTENT ── */
-    .page { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    /* ── TOPBAR ── */
+    .topbar { height:56px; background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%); display:flex; align-items:center; justify-content:space-between; padding:0 20px; flex-shrink:0; box-shadow:0 2px 12px rgba(0,37,122,.18); }
+    .topbar-logo { font-size:15px; font-weight:700; color:#fff; }
+    .topbar-logo span { font-size:11px; font-weight:400; color:rgba(255,255,255,.6); display:block; }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .topbar-user { color:rgba(255,255,255,.85); font-size:12px; }
+    .svc-loc { display:flex; align-items:center; gap:6px; color:rgba(255,255,255,.75); font-size:12px; }
+    .svc-loc select { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:4px; padding:4px 8px; font-size:12px; }
 
     /* ── TOOLBAR ── */
-    .toolbar {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px; background: #DDE6F5;
-      border-bottom: 1px solid var(--border-dk);
-      flex-shrink: 0;
-    }
-    .tbtn {
-      display: inline-flex; align-items: center; gap: 5px;
-      height: 30px; padding: 0 12px; border-radius: 4px; font-size: 12px;
-      font-weight: 500; cursor: pointer; border: 1px solid transparent;
-      font-family: inherit; transition: all .12s;
-    }
-    .tbtn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .tbtn-primary:hover { background: var(--navy); border-color: var(--navy); }
-    .tbtn-secondary { background: var(--white); color: var(--text); border-color: var(--border-dark); }
-    .tbtn-secondary:hover { background: var(--gray-bg); }
-    .tbtn-danger { background: var(--white); color: var(--red); border-color: #e0a0a0; }
-    .tbtn-danger:hover { background: #fdf0f0; }
-    .tbtn svg { width: 13px; height: 13px; }
-    .tb-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+    .toolbar { display:flex; align-items:center; gap:5px; padding:7px 14px; background:#DDE6F5; border-bottom:1px solid var(--border-dk); flex-shrink:0; flex-wrap:wrap; }
+    .tbtn { display:inline-flex; align-items:center; gap:5px; height:28px; padding:0 10px; border-radius:4px; font-size:11.5px; font-weight:500; cursor:pointer; border:1px solid transparent; font-family:inherit; transition:all .12s; white-space:nowrap; }
+    .tbtn svg { width:12px; height:12px; }
+    .tbtn-primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .tbtn-primary:hover { background:var(--navy); border-color:var(--navy); }
+    .tbtn-secondary { background:#fff; color:var(--text); border-color:var(--border-dk); }
+    .tbtn-secondary:hover { background:var(--bg); }
+    .tbtn-danger { background:#fff; color:var(--red); border-color:#e0a0a0; }
+    .tbtn-danger:hover { background:#fdf0f0; }
+    .tb-sep { width:1px; height:20px; background:var(--border-dk); margin:0 2px; }
 
-    /* ── FORM AREA ── */
-    .form-area { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    /* ── PAGE ── */
+    .page { display:flex; flex-direction:column; flex:1; overflow:hidden; }
 
-    /* ── HEADER CARD ── */
-    .header-card {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 6px; padding: 12px 16px;
-    }
-    .hrow { display: grid; gap: 10px; align-items: end; margin-bottom: 10px; }
-    .hrow:last-child { margin-bottom: 0; }
-    .hrow-1 { grid-template-columns: 2fr 1.5fr 140px 36px; }
-    .hrow-2 { grid-template-columns: 1.2fr 1.3fr 130px 130px 130px 130px; }
-
-    .field-group { display: flex; flex-direction: column; gap: 3px; }
-    .field-label {
-      font-size: 11px; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .4px;
-    }
-    .field-label .req { color: var(--red); margin-left: 2px; }
-    .field-input, .field-select {
-      height: 32px; border: 1px solid var(--border-dark); border-radius: 4px;
-      padding: 0 8px; font-size: 12px; font-family: inherit; color: var(--text);
-      background: var(--white); outline: none; width: 100%;
-      transition: border-color .15s;
-    }
-    .field-input:focus, .field-select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(45,95,168,.15); }
-    .field-input.readonly { background: #f4f6fb; color: var(--muted); cursor: default; }
-    .field-select { cursor: pointer; }
-    .invoice-check { display: flex; align-items: center; justify-content: center; height: 32px; }
-    .invoice-check input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--blue); }
-
-    /* ── TABS ── */
-    .tabs { display: flex; border-bottom: 2px solid var(--border); gap: 0; flex-shrink: 0; }
-    .tab {
-      padding: 8px 18px; font-size: 12px; font-weight: 500; cursor: pointer;
-      border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0;
-      color: var(--muted); background: transparent; font-family: inherit;
-      margin-bottom: -2px; transition: all .12s;
-    }
-    .tab:hover { color: var(--blue); background: var(--blue-bg); }
-    .tab.active { background: var(--white); color: var(--blue); font-weight: 700; border-color: var(--border); border-bottom-color: var(--white); }
-
-    /* ── MAIN TAB CONTENT ── */
-    .tab-content { background: var(--white); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; flex: 1; overflow: hidden; display: flex; }
-
-    /* ── TWO COLUMN LAYOUT ── */
-    .two-col { display: flex; height: 100%; }
-    .left-panel { width: 260px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
-    .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-    /* ── PANEL SECTIONS ── */
-    .panel-section { padding: 12px; border-bottom: 1px solid var(--border); }
-    .panel-section:last-child { border-bottom: none; flex: 1; }
-    .panel-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .5px; color: var(--muted); margin-bottom: 10px;
-    }
-    .field-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
-    .field-row:last-child { margin-bottom: 0; }
-    .field-row textarea {
-      border: 1px solid var(--border-dark); border-radius: 4px;
-      padding: 6px 8px; font-size: 12px; font-family: inherit;
-      resize: vertical; min-height: 60px; outline: none; width: 100%;
-      color: var(--text); transition: border-color .15s;
-    }
-    .field-row textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(45,95,168,.15); }
-
-    /* ── FINANCIALS  ── */
-    .fin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-    .fin-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border-radius: 4px; }
-    .fin-row:hover { background: var(--row-alt); }
-    .fin-label { font-size: 12px; color: var(--muted); }
-    .fin-value { font-size: 12px; font-weight: 600; color: var(--text); }
-    .fin-total { background: var(--blue-bg); border: 1px solid var(--border); border-radius: 4px; padding: 7px 8px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .fin-total .label { font-size: 12px; font-weight: 700; color: var(--navy); }
-    .fin-total .value { font-size: 14px; font-weight: 700; color: var(--navy); }
-
-    /* ── LINE ITEMS TABLE ── */
-    .table-toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 12px; border-bottom: 1px solid var(--border);
-      background: var(--gray-bg); flex-shrink: 0;
-    }
-    .table-title { font-size: 12px; font-weight: 700; color: var(--navy); }
-    .search-bar { display: flex; align-items: center; gap: 6px; }
-    .search-bar input {
-      height: 28px; border: 1px solid var(--border-dark); border-radius: 4px;
-      padding: 0 8px; font-size: 12px; width: 180px; outline: none;
-      font-family: inherit;
-    }
-    .search-bar input:focus { border-color: var(--blue); }
-
-    .items-table { flex: 1; overflow: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    thead { position: sticky; top: 0; z-index: 2; }
-    th {
-      background: var(--navy); color: #fff; font-size: 11px; font-weight: 600;
-      padding: 8px 10px; text-align: left; white-space: nowrap;
-      border-right: 1px solid rgba(255,255,255,.12);
-      letter-spacing: .3px;
-    }
-    th:last-child { border-right: none; }
-    td {
-      padding: 7px 10px; font-size: 12px; border-bottom: 1px solid var(--border);
-      vertical-align: middle; color: var(--text);
-    }
-    tbody tr:nth-child(even) { background: var(--row-alt); }
-    tbody tr:hover { background: #dce8f7; }
-    .td-center { text-align: center; }
-    .td-right { text-align: right; }
-    td input {
-      height: 26px; border: 1px solid var(--border); border-radius: 3px;
-      padding: 0 6px; font-size: 12px; width: 100%; font-family: inherit;
-      background: var(--white); outline: none;
-    }
-    td input:focus { border-color: var(--blue); }
-    .add-row-btn {
-      display: flex; align-items: center; gap: 5px;
-      padding: 10px 12px; color: var(--blue); cursor: pointer;
-      font-size: 12px; font-weight: 500; border-top: 1px dashed var(--border);
-    }
-    .add-row-btn:hover { background: var(--blue-bg); }
-
-    /* Scrollbar styling */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #999; }
+    /* ── ORDER HEADER ── */
+    .ohdr { background:#fff; border-bottom:2px solid var(--border-dk); flex-shrink:0; padding:10px 16px 12px; }
+    .orow { display:grid; gap:8px; margin-bottom:8px; align-items:end; }
+    .orow:last-child { margin-bottom:0; }
+    .orow-1 { grid-template-columns: 2.4fr 1.8fr 130px 44px; }
+    .orow-2 { grid-template-columns: repeat(6, 1fr); }
+    .orow-3 { grid-template-columns: 1.1fr 1.3fr 1fr 0.9fr 2fr; }
+    .fl { display:block; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
+    .fl .req { color:var(--red); }
+    .fi { height:30px; border:1px solid var(--border-dk); border-radius:4px; padding:0 8px; font-size:12px; font-family:inherit; color:var(--text); background:#fff; outline:none; width:100%; transition:border-color .15s; }
+    .fi:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(46,116,181,.14); }
+    .fi-ro { background:#f4f6fb; color:var(--muted); cursor:default; }
+    .fi-chk { display:flex; align-items:center; justify-content:center; height:30px; }
+    .fi-chk input { width:16px; height:16px; accent-color:var(--blue); cursor:pointer; }
+    .ohdr-divider { height:1px; background:var(--border); margin:10px 0 10px; }
 
     /* ── STATUS BADGE ── */
-    .badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;
-    }
-    .badge-draft { background: #f0f0f0; color: #666; border: 1px solid #ddd; }
-    .badge-open  { background: #e8f4fd; color: var(--blue); border: 1px solid #b3d4f0; }
-    .badge-inv   { background: #eafaf1; color: var(--green); border: 1px solid #a3d9b1; }
+    .badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:10px; font-size:10.5px; font-weight:700; }
+    .badge-draft { background:#f0f0f0; color:#666; border:1px solid #ddd; }
+    .badge-open  { background:#e8f4fd; color:var(--blue); border:1px solid #b3d4f0; }
+    .badge-inv   { background:#eafaf1; color:var(--green); border:1px solid #a3d9b1; }
 
-    /* ── INVENTORY PICKER ── */
-    .order-section { display: flex; flex-direction: column; flex: 0 0 210px; border-bottom: 2px solid var(--border-dk); overflow: hidden; }
-    .order-items { flex: 1; overflow-y: auto; }
-    .picker-section { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-    .picker-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: #E9EFF9; border-bottom: 1px solid var(--border-dk); flex-shrink: 0; }
-    .picker-title { font-size: 11.5px; font-weight: 700; color: var(--navy); }
-    .picker-search { height: 26px; border: 1px solid var(--border-dk); border-radius: 4px; padding: 0 8px; font-size: 11.5px; width: 200px; outline: none; font-family: inherit; }
-    .picker-search:focus { border-color: var(--blue); }
-    .picker-sel { height: 26px; border: 1px solid var(--border-dk); border-radius: 4px; padding: 0 6px; font-size: 11.5px; font-family: inherit; background: #fff; cursor: pointer; }
-    .picker-tbl { flex: 1; overflow-y: auto; }
-    .picker-tbl th { background: var(--navy); color: #fff; font-size: 10.5px; font-weight: 600; padding: 7px 10px; text-align: left; white-space: nowrap; border-right: 1px solid rgba(255,255,255,.1); }
-    .picker-tbl th:last-child { border-right: none; }
-    .picker-tbl td { padding: 6px 10px; font-size: 11.5px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .picker-tbl tbody tr:nth-child(even) { background: var(--row-alt); }
-    .picker-tbl tbody tr:hover { background: #dce8f7; cursor: pointer; }
-    .add-btn { height: 24px; padding: 0 10px; border-radius: 4px; background: var(--blue); color: #fff; border: none; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .12s; white-space: nowrap; }
-    .add-btn:hover { background: var(--navy); }
-    .qty-pick { height: 24px; border: 1px solid var(--border); border-radius: 3px; padding: 0 5px; font-size: 11.5px; width: 46px; text-align: center; font-family: inherit; outline: none; background: #fff; }
-    .qty-pick:focus { border-color: var(--blue); }
+    /* ── WORKSPACE (dual panel) ── */
+    .workspace { display:flex; flex:1; overflow:hidden; }
 
-    /* ── NOTES placeholder styling ── */
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      flex: 1; color: var(--muted); gap: 8px; padding: 20px;
-    }
-    .empty-state svg { width: 36px; height: 36px; opacity: .3; }
-    .empty-state span { font-size: 12px; }
+    /* ── ORDER COLUMN ── */
+    .order-col { display:flex; flex-direction:column; flex:0 0 58%; min-width:0; border-right:2px solid var(--border-dk); overflow:hidden; }
+    .col-hd { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:var(--navy); color:#fff; flex-shrink:0; gap:8px; }
+    .col-title { font-size:10.5px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; white-space:nowrap; }
+    .col-meta { font-size:11px; color:rgba(255,255,255,.65); white-space:nowrap; }
+    .col-meta strong { color:#fff; font-weight:600; }
+    .order-scroll { flex:1; overflow-y:auto; }
 
-    /* ── REDESIGN BANNER ── */
-    .redesign-banner {
-      background: linear-gradient(90deg, #fff3cd, #fff8e1);
-      border: 1px solid #f0c040; border-radius: 6px;
-      padding: 8px 14px; font-size: 11.5px; color: #856404;
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-    }
-    .redesign-banner strong { font-weight: 700; }
+    /* ── ORDER TABLE ── */
+    .ot { width:100%; border-collapse:collapse; }
+    .ot thead { position:sticky; top:0; z-index:2; }
+    .ot th { background:#1a3a70; color:#fff; font-size:10.5px; font-weight:600; padding:7px 9px; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.1); }
+    .ot th:last-child { border-right:none; }
+    .ot td { padding:5px 8px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:middle; color:var(--text); }
+    .ot tbody tr:nth-child(even) { background:var(--row-alt); }
+    .ot tbody tr:hover:not(.ot-addrow) { background:#dce8f7; }
+    .ot td .eti { width:100%; height:26px; border:1px solid transparent; border-radius:3px; padding:0 5px; font-size:12px; font-family:inherit; background:transparent; outline:none; color:var(--text); }
+    .ot td .eti:focus { border-color:var(--blue); background:#fff; box-shadow:0 0 0 2px rgba(46,116,181,.1); }
+    .ot-addrow td { border-bottom:none; border-top:1px dashed var(--border-dk); }
+    .add-line-btn { display:inline-flex; align-items:center; gap:5px; color:var(--blue); font-size:12px; font-weight:600; cursor:pointer; border:none; background:none; font-family:inherit; padding:7px 4px; }
+    .add-line-btn:hover { color:var(--navy); }
+    .del-row { cursor:pointer; color:var(--red); font-size:18px; line-height:1; opacity:.6; transition:opacity .12s; }
+    .del-row:hover { opacity:1; }
+
+    /* ── ORDER SUMMARY FOOTER ── */
+    .order-footer { border-top:2px solid var(--border-dk); background:#f6f9ff; flex-shrink:0; display:flex; align-items:stretch; gap:0; }
+    .sum-fields { flex:1; display:flex; flex-direction:column; gap:0; padding:8px 14px; justify-content:center; gap:5px; }
+    .sum-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+    .sum-lbl { color:var(--muted); font-weight:500; }
+    .sum-input { height:24px; border:1px solid var(--border-dk); border-radius:3px; padding:0 6px; font-size:12px; font-family:inherit; text-align:right; outline:none; background:#fff; width:80px; }
+    .sum-input:focus { border-color:var(--blue); }
+    .sum-sub { color:var(--label); font-weight:600; }
+    .sum-total-box { background:var(--navy); min-width:130px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 20px; flex-shrink:0; }
+    .sum-total-lbl { font-size:9.5px; font-weight:700; color:rgba(255,255,255,.65); text-transform:uppercase; letter-spacing:.8px; }
+    .sum-total-val { font-size:22px; font-weight:700; color:#fff; margin-top:2px; letter-spacing:-.5px; }
+
+    /* ── PICKER COLUMN ── */
+    .picker-col { display:flex; flex-direction:column; flex:1; min-width:0; overflow:hidden; }
+    .picker-hd { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:8px 12px; background:var(--navy); flex-shrink:0; }
+    .picker-controls { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .psearch-wrap { position:relative; display:flex; align-items:center; }
+    .psearch-icon { position:absolute; left:8px; pointer-events:none; }
+    .psearch-icon svg { width:13px; height:13px; color:rgba(255,255,255,.5); }
+    .psearch { height:28px; border:1px solid rgba(255,255,255,.25); border-radius:4px; padding:0 8px 0 28px; font-size:12px; font-family:inherit; background:rgba(255,255,255,.12); color:#fff; outline:none; width:170px; transition:all .15s; }
+    .psearch::placeholder { color:rgba(255,255,255,.45); }
+    .psearch:focus { border-color:rgba(255,255,255,.55); background:rgba(255,255,255,.18); width:200px; }
+    .psel { height:28px; border:1px solid rgba(255,255,255,.25); border-radius:4px; padding:0 8px; font-size:11.5px; font-family:inherit; background:rgba(255,255,255,.12); color:#fff; cursor:pointer; outline:none; }
+    .psel option { background:#0d2060; color:#fff; }
+    .picker-scroll { flex:1; overflow-y:auto; }
+
+    /* ── PICKER TABLE ── */
+    .pt { width:100%; border-collapse:collapse; }
+    .pt thead { position:sticky; top:0; z-index:2; }
+    .pt th { background:#1a3a70; color:#fff; font-size:10.5px; font-weight:600; padding:7px 10px; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.1); }
+    .pt th:last-child { border-right:none; }
+    .pt td { padding:7px 10px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .pt tbody tr { cursor:pointer; transition:background .1s; }
+    .pt tbody tr:nth-child(even) { background:var(--row-alt); }
+    .pt tbody tr:hover { background:#cfe3f7; }
+    .pt-name { font-weight:600; color:var(--text); }
+    .pt-model { color:var(--label); font-size:11.5px; }
+    .pt-desc { color:var(--muted); font-size:11px; }
+    .pt-price { font-weight:700; color:var(--navy); text-align:right; white-space:nowrap; }
+    .stk-a { background:#eafaf1; color:#1a7f4b; border:1px solid #a3d9b1; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; white-space:nowrap; display:inline-block; }
+    .stk-l { background:#fff3cd; color:#8a6200; border:1px solid #f0c040; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; white-space:nowrap; display:inline-block; }
+    .stk-o { background:#fde8e8; color:#b71234; border:1px solid #f0b0b0; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; white-space:nowrap; display:inline-block; }
+    .pt-qty { height:26px; border:1px solid var(--border-dk); border-radius:3px; padding:0 5px; font-size:12px; width:44px; text-align:center; font-family:inherit; outline:none; background:#fff; }
+    .pt-qty:focus { border-color:var(--blue); }
+    .pt-add { height:26px; padding:0 12px; border-radius:4px; background:var(--blue); color:#fff; border:none; font-size:11.5px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:background .12s; }
+    .pt-add:hover { background:var(--navy); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:#f0f2f5; }
+    ::-webkit-scrollbar-thumb { background:#c0c8d8; border-radius:3px; }
+    ::-webkit-scrollbar-thumb:hover { background:#a0aabf; }
   </style>
 </head>
 <body>
@@ -287,7 +172,7 @@
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1b3a6b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
       <div class="brand-text">
         <div class="t1">Total Scope, Inc.</div>
@@ -295,10 +180,9 @@
       </div>
     </div>
     <div class="nav-group">
-      <!-- nav items -->
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
@@ -309,7 +193,7 @@
       <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
     </div>
     <div class="sidebar-footer">© 2026 Total Scope, Inc.</div>
@@ -318,22 +202,17 @@
   <!-- MAIN -->
   <div class="main">
 
-    <!-- TOP BAR -->
+    <!-- TOPBAR -->
     <header class="topbar">
-      <div class="topbar-left">
-        <div class="topbar-logo">
-          Total Scope, Inc.
-          <span>The Leader in Medical Device Repair</span>
-        </div>
+      <div class="topbar-logo">
+        Total Scope, Inc.
+        <span>The Leader in Medical Device Repair</span>
       </div>
       <div class="topbar-right">
         <div class="topbar-user">Welcome, Joseph Brassell</div>
         <div class="svc-loc">
           Service Location:
-          <select>
-            <option>Upper Chichester</option>
-            <option>Nashville</option>
-          </select>
+          <select><option>Upper Chichester</option><option>Nashville</option></select>
         </div>
       </div>
     </header>
@@ -344,395 +223,390 @@
       <!-- TOOLBAR -->
       <div class="toolbar">
         <button class="tbtn tbtn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-          Save
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Search
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search
         </button>
         <div class="tb-sep"></div>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
-          Quote
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>Quote
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Approve
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Approve
         </button>
         <button class="tbtn tbtn-danger">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-          Void
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Void
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Invoice
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Invoice
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-          Pick List
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Pick List
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          Copy
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Copy
         </button>
         <div class="tb-sep"></div>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,17 2,12 6,7"/><polyline points="18,17 22,12 18,7"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-          Email
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,17 2,12 6,7"/><polyline points="18,17 22,12 18,7"/><line x1="2" y1="12" x2="22" y2="12"/></svg>Email
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print
         </button>
         <button class="tbtn tbtn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h6v13H7v-4"/></svg>
-          Packing List
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h6v13H7v-4"/></svg>Packing List
         </button>
         <div class="tb-sep"></div>
         <button class="tbtn tbtn-danger" style="margin-left:auto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          Delete
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete
         </button>
       </div>
 
-      <!-- FORM AREA -->
-      <div class="form-area">
+      <!-- ORDER HEADER -->
+      <div class="ohdr">
 
-        <!-- REDESIGN NOTE (remove before delivering to MOL-Tech) -->
-        <div class="redesign-banner">
-          ⚠️ <strong>REDESIGN MOCKUP</strong> — This shows the improved Product Sale layout. Colors match the existing TSI site. Spacing and proportions are the key deliverable.
+        <!-- Row 1: Client / Dept / Invoice# / Inv'd -->
+        <div class="orow orow-1">
+          <div>
+            <label class="fl">Client <span class="req">*</span></label>
+            <select class="fi">
+              <option>88th Medical Group</option>
+              <option>BayCare Surgery Center</option>
+              <option>Jefferson Health</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl">Department <span class="req">*</span></label>
+            <select class="fi">
+              <option>Biomedical Engineering</option>
+              <option>Sterile Processing</option>
+              <option>Endoscopy Suite</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl">Invoice #</label>
+            <input class="fi fi-ro" value="NI26066001" readonly />
+          </div>
+          <div>
+            <label class="fl" style="text-align:center;">Inv'd</label>
+            <div class="fi-chk"><input type="checkbox" /></div>
+          </div>
         </div>
 
-        <!-- HEADER CARD -->
-        <div class="header-card">
-          <!-- ROW 1: Client / Dept / Invoice# / Invoiced checkbox -->
-          <div class="hrow hrow-1">
-            <div class="field-group">
-              <label class="field-label">Client <span class="req">*</span></label>
-              <select class="field-select">
-                <option>88th Medical Group</option>
-                <option>BayCare Surgery Center</option>
+        <!-- Row 2: Sales Rep / Price List / Dates -->
+        <div class="orow orow-2">
+          <div>
+            <label class="fl">Sales Rep <span class="req">*</span></label>
+            <select class="fi"><option>Brandi Cook</option><option>Mike Torres</option></select>
+          </div>
+          <div>
+            <label class="fl">Price List</label>
+            <select class="fi"><option>— Select —</option><option>GSA 2024</option><option>Standard</option></select>
+          </div>
+          <div>
+            <label class="fl">Order Date</label>
+            <input type="date" class="fi" value="2026-03-07" />
+          </div>
+          <div>
+            <label class="fl">Quote Date</label>
+            <input type="date" class="fi" />
+          </div>
+          <div>
+            <label class="fl">Approval Date</label>
+            <input type="date" class="fi" />
+          </div>
+          <div>
+            <label class="fl">Invoice Date</label>
+            <input type="date" class="fi" />
+          </div>
+        </div>
+
+        <div class="ohdr-divider"></div>
+
+        <!-- Row 3: Contact details + Notes inline -->
+        <div class="orow orow-3">
+          <div>
+            <label class="fl">Contact Name</label>
+            <select class="fi"><option>— Select —</option><option>Sarah Mitchell</option><option>James Park</option></select>
+          </div>
+          <div>
+            <label class="fl">Email</label>
+            <input class="fi" placeholder="contact@hospital.org" />
+          </div>
+          <div>
+            <label class="fl">Phone</label>
+            <input class="fi" placeholder="+1 (___) ___-____" />
+          </div>
+          <div>
+            <label class="fl">Purchase Order #</label>
+            <input class="fi" placeholder="PO-XXXXXX" />
+          </div>
+          <div>
+            <label class="fl">Order Notes</label>
+            <input class="fi" placeholder="Internal notes about this order..." />
+          </div>
+        </div>
+
+      </div><!-- /.ohdr -->
+
+      <!-- DUAL PANEL WORKSPACE -->
+      <div class="workspace">
+
+        <!-- ── LEFT: ORDER LINES ── -->
+        <div class="order-col">
+
+          <div class="col-hd">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="col-title">Order Lines</span>
+              <span class="badge badge-draft">Draft</span>
+            </div>
+            <span class="col-meta">3 items &nbsp;·&nbsp; <strong>$4,575.00</strong></span>
+          </div>
+
+          <div class="order-scroll">
+            <table class="ot">
+              <thead>
+                <tr>
+                  <th style="width:30px;text-align:center;">#</th>
+                  <th>Description</th>
+                  <th style="width:120px;">Description 2</th>
+                  <th style="width:88px;">Lot #</th>
+                  <th style="width:50px;text-align:center;">Qty</th>
+                  <th style="width:86px;text-align:right;">Unit Price</th>
+                  <th style="width:86px;text-align:right;">Total</th>
+                  <th style="width:30px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align:center;color:var(--muted);font-size:11px;">1</td>
+                  <td><input class="eti" value="Olympus GIF-H180 Insertion Tube" /></td>
+                  <td><input class="eti" placeholder="Optional" /></td>
+                  <td><input class="eti" placeholder="Lot #" /></td>
+                  <td><input class="eti" value="2" style="text-align:center;" /></td>
+                  <td><input class="eti" value="$1,250.00" style="text-align:right;" /></td>
+                  <td style="text-align:right;font-weight:700;color:var(--navy);">$2,500.00</td>
+                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;color:var(--muted);font-size:11px;">2</td>
+                  <td><input class="eti" value="Bending Rubber — GIF-H180" /></td>
+                  <td><input class="eti" placeholder="Optional" /></td>
+                  <td><input class="eti" placeholder="Lot #" /></td>
+                  <td><input class="eti" value="1" style="text-align:center;" /></td>
+                  <td><input class="eti" value="$875.00" style="text-align:right;" /></td>
+                  <td style="text-align:right;font-weight:700;color:var(--navy);">$875.00</td>
+                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;color:var(--muted);font-size:11px;">3</td>
+                  <td><input class="eti" value="CCD Chip Assembly" /></td>
+                  <td><input class="eti" placeholder="Optional" /></td>
+                  <td><input class="eti" placeholder="Lot #" /></td>
+                  <td><input class="eti" value="5" style="text-align:center;" /></td>
+                  <td><input class="eti" value="$240.00" style="text-align:right;" /></td>
+                  <td style="text-align:right;font-weight:700;color:var(--navy);">$1,200.00</td>
+                  <td style="text-align:center;"><span class="del-row" title="Remove">×</span></td>
+                </tr>
+                <tr class="ot-addrow">
+                  <td></td>
+                  <td colspan="7">
+                    <button class="add-line-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add line item
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ORDER SUMMARY FOOTER -->
+          <div class="order-footer">
+            <div class="sum-fields">
+              <div class="sum-row">
+                <span class="sum-lbl">Subtotal</span>
+                <span class="sum-sub">$4,575.00</span>
+              </div>
+              <div class="sum-row">
+                <span class="sum-lbl">Shipping</span>
+                <input class="sum-input" value="$0.00" />
+              </div>
+              <div class="sum-row">
+                <span class="sum-lbl">Tax</span>
+                <input class="sum-input" value="$0.00" />
+              </div>
+            </div>
+            <div class="sum-total-box">
+              <div class="sum-total-lbl">Order Total</div>
+              <div class="sum-total-val">$4,575.00</div>
+            </div>
+          </div>
+
+        </div><!-- /.order-col -->
+
+        <!-- ── RIGHT: INVENTORY PICKER ── -->
+        <div class="picker-col">
+
+          <div class="picker-hd">
+            <span class="col-title">Inventory — click a row to add</span>
+            <div class="picker-controls">
+              <div class="psearch-wrap">
+                <span class="psearch-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                <input class="psearch" placeholder="Search items, part #..." />
+              </div>
+              <select class="psel">
+                <option>All Status</option>
+                <option>Active</option>
+                <option>Low Stock</option>
+                <option>Out of Stock</option>
+              </select>
+              <select class="psel">
+                <option>All Categories</option>
+                <option>IT Assembly</option>
+                <option>Angulation</option>
+                <option>Optics</option>
+                <option>Accessories</option>
               </select>
             </div>
-            <div class="field-group">
-              <label class="field-label">Department <span class="req">*</span></label>
-              <select class="field-select">
-                <option>Biomedical Engineering</option>
-                <option>Sterile Processing</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Invoice #</label>
-              <input class="field-input readonly" value="NI26066001" readonly />
-            </div>
-            <div class="field-group">
-              <label class="field-label" style="text-align:center">Inv'd</label>
-              <div class="invoice-check"><input type="checkbox" /></div>
-            </div>
           </div>
 
-          <!-- ROW 2: Sales Rep / PriceList / OrderDate / QuoteDate / ApprovalDate / InvoiceDate -->
-          <div class="hrow hrow-2">
-            <div class="field-group">
-              <label class="field-label">Sales Rep <span class="req">*</span></label>
-              <select class="field-select"><option>Brandi Cook</option></select>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Price List</label>
-              <select class="field-select"><option>— Select —</option><option>GSA 2024</option></select>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Order Date</label>
-              <input type="date" class="field-input" value="2026-03-07" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">Quote Date</label>
-              <input type="date" class="field-input" placeholder="mm/dd/yyyy" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">Approval Date</label>
-              <input type="date" class="field-input" placeholder="mm/dd/yyyy" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">Invoice Date</label>
-              <input type="date" class="field-input" placeholder="mm/dd/yyyy" />
-            </div>
+          <div class="picker-scroll">
+            <table class="pt">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th style="width:130px;">Size / Model Fit</th>
+                  <th>Description</th>
+                  <th style="width:76px;text-align:center;">Stock</th>
+                  <th style="width:82px;text-align:right;">Unit Price</th>
+                  <th style="width:52px;text-align:center;">Qty</th>
+                  <th style="width:66px;text-align:center;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="pt-name">IT ASSEMBLY LD/SD</td>
+                  <td class="pt-model">GIF-H180 / GIF-190</td>
+                  <td class="pt-desc">Insertion tube assembly, large diameter</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,250.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">ANGULATION ASSEMBLY</td>
+                  <td class="pt-model">GIF-H180</td>
+                  <td class="pt-desc">4-way angulation mechanism, complete</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$980.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">ANGULATION CABLE ADJUSTER</td>
+                  <td class="pt-model">Universal</td>
+                  <td class="pt-desc">Cable tension adjuster kit w/ hardware</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$145.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">AIR WATER NOZZLES</td>
+                  <td class="pt-model">GIF / PCF / CF Series</td>
+                  <td class="pt-desc">Replacement nozzle set, 10-pack</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$62.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">BENDING RUBBER</td>
+                  <td class="pt-model">GIF-H180 / GIF-H185</td>
+                  <td class="pt-desc">Distal bending section rubber, standard</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$875.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">CCD CHIP ASSEMBLY</td>
+                  <td class="pt-model">GIF-H180 HD</td>
+                  <td class="pt-desc">High-definition imaging sensor, OEM spec</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$240.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">LIGHT GUIDE BUNDLE</td>
+                  <td class="pt-model">Universal — 3.5mm</td>
+                  <td class="pt-desc">Fiber optic light bundle, 2m length</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$390.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">UNIVERSAL CORD SEAL</td>
+                  <td class="pt-model">Universal</td>
+                  <td class="pt-desc">Waterproof universal cord seal kit</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$28.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">WATER BOTTLE CONNECTOR</td>
+                  <td class="pt-model">Olympus OEM</td>
+                  <td class="pt-desc">Irrigation water bottle connector cap</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$19.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">ACHROMAT LENS</td>
+                  <td class="pt-model">GIF-H180 / CF-Q180</td>
+                  <td class="pt-desc">Objective lens, achromatic doublet</td>
+                  <td style="text-align:center;"><span class="stk-l">Low Stock</span></td>
+                  <td class="pt-price">$315.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">SCOPE CART — STANDARD</td>
+                  <td class="pt-model">Universal</td>
+                  <td class="pt-desc">Stainless mobile storage cart, 4-shelf</td>
+                  <td style="text-align:center;"><span class="stk-a">Active</span></td>
+                  <td class="pt-price">$1,850.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="pt-name">DISTAL TIP HOOD</td>
+                  <td class="pt-model">PCF-H190 / PCF-H180</td>
+                  <td class="pt-desc">Soft distal attachment cap, single-use 10pk</td>
+                  <td style="text-align:center;"><span class="stk-o">Out of Stock</span></td>
+                  <td class="pt-price">$48.00</td>
+                  <td style="text-align:center;"><input class="pt-qty" value="1" onclick="event.stopPropagation()" /></td>
+                  <td style="text-align:center;"><button class="pt-add" onclick="event.stopPropagation()" style="background:#aaa;">+ Add</button></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
 
-        <!-- TABS -->
-        <div>
-          <div class="tabs">
-            <button class="tab active">Main</button>
-            <button class="tab">Address</button>
-            <button class="tab">Documents</button>
-          </div>
+        </div><!-- /.picker-col -->
 
-          <!-- TAB CONTENT -->
-          <div class="tab-content" style="height: calc(100vh - 390px); min-height: 320px;">
-            <div class="two-col">
+      </div><!-- /.workspace -->
 
-              <!-- LEFT PANEL: Contact + Financials -->
-              <div class="left-panel">
-
-                <div class="panel-section">
-                  <div class="panel-title">Contact Info</div>
-                  <div class="field-row">
-                    <label class="field-label">Name</label>
-                    <select class="field-select"><option>— Select —</option></select>
-                  </div>
-                  <div class="field-row">
-                    <label class="field-label">Email</label>
-                    <input class="field-input" placeholder="Enter email" />
-                  </div>
-                  <div class="field-row">
-                    <label class="field-label">Phone</label>
-                    <input class="field-input" placeholder="+1 (___) ___-____" />
-                  </div>
-                  <div class="field-row">
-                    <label class="field-label">Purchase Order</label>
-                    <input class="field-input" placeholder="PO Number" />
-                  </div>
-                </div>
-
-                <div class="panel-section">
-                  <div class="panel-title">Notes</div>
-                  <div class="field-row">
-                    <textarea placeholder="Enter notes..."></textarea>
-                  </div>
-                </div>
-
-                <div class="panel-section">
-                  <div class="panel-title">Charges</div>
-                  <div class="fin-row"><span class="fin-label">Shipping</span><input class="field-input" value="$0.00" style="width:90px;text-align:right;" /></div>
-                  <div class="fin-row"><span class="fin-label">Tax</span><input class="field-input" value="$0.00" style="width:90px;text-align:right;" /></div>
-                  <div class="fin-total">
-                    <span class="label">Total</span>
-                    <span class="value">$0.00</span>
-                  </div>
-                </div>
-
-              </div>
-
-              <!-- RIGHT PANEL: Order Lines + Inventory Picker -->
-              <div class="right-panel">
-
-                <!-- TOP: Current Order Lines (fixed height) -->
-                <div class="order-section">
-                  <div class="table-toolbar">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                      <span class="table-title">Order Lines</span>
-                      <span class="badge badge-draft">Draft</span>
-                    </div>
-                    <div class="search-bar">
-                      <span style="font-size:11px;color:var(--muted);">3 items · <strong style="color:var(--text);">$4,575.00</strong></span>
-                    </div>
-                  </div>
-                  <div class="order-items">
-                    <table style="width:100%;border-collapse:collapse;">
-                      <thead>
-                        <tr>
-                          <th style="width:32px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 8px;text-align:center;">#</th>
-                          <th style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 10px;text-align:left;">Description</th>
-                          <th style="width:110px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 10px;text-align:left;">Description 2</th>
-                          <th style="width:90px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 10px;text-align:left;">Lot #</th>
-                          <th style="width:54px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 8px;text-align:center;">Qty</th>
-                          <th style="width:82px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 10px;text-align:right;">Unit Price</th>
-                          <th style="width:82px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:6px 10px;text-align:right;">Total</th>
-                          <th style="width:32px;background:var(--navy);"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td style="text-align:center;color:var(--muted);font-size:11px;padding:5px 8px;border-bottom:1px solid var(--border);">1</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="Olympus GIF-H180 Insertion Tube" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Optional" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Lot #" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="2" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:center;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="$1,250.00" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:right;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:5px 10px;border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;text-align:right;">$2,500.00</td>
-                          <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;"><span style="cursor:pointer;color:var(--red);font-size:16px;" title="Remove">×</span></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);">
-                          <td style="text-align:center;color:var(--muted);font-size:11px;padding:5px 8px;border-bottom:1px solid var(--border);">2</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="Bending Rubber — GIF-H180" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='var(--row-alt)'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Optional" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Lot #" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="1" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:center;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="$875.00" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:right;" /></td>
-                          <td style="padding:5px 10px;border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;text-align:right;">$875.00</td>
-                          <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;"><span style="cursor:pointer;color:var(--red);font-size:16px;" title="Remove">×</span></td>
-                        </tr>
-                        <tr>
-                          <td style="text-align:center;color:var(--muted);font-size:11px;padding:5px 8px;border-bottom:1px solid var(--border);">3</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="CCD Chip Assembly" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" onfocus="this.style.borderColor='var(--blue)';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Optional" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input placeholder="Lot #" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="5" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:center;" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);"><input value="$240.00" style="width:100%;border:1px solid transparent;padding:2px 4px;border-radius:3px;font-size:11.5px;font-family:inherit;background:transparent;text-align:right;" /></td>
-                          <td style="padding:5px 10px;border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;text-align:right;">$1,200.00</td>
-                          <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;"><span style="cursor:pointer;color:var(--red);font-size:16px;" title="Remove">×</span></td>
-                        </tr>
-                        <tr>
-                          <td style="text-align:center;color:var(--muted);font-size:11px;padding:5px 8px;"></td>
-                          <td colspan="6" style="padding:5px 6px;">
-                            <button style="display:inline-flex;align-items:center;gap:5px;border:none;background:none;color:var(--blue);font-size:11.5px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                              Add line item
-                            </button>
-                          </td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <!-- BOTTOM: Inventory Picker -->
-                <div class="picker-section">
-                  <div class="picker-toolbar">
-                    <span class="picker-title">Inventory — Click a row to add to order</span>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                      <input class="picker-search" placeholder="Search items, part #..." />
-                      <select class="picker-sel">
-                        <option>All Status</option>
-                        <option>Active</option>
-                        <option>Low Stock</option>
-                        <option>Out of Stock</option>
-                      </select>
-                      <select class="picker-sel">
-                        <option>All Categories</option>
-                        <option>IT Assembly</option>
-                        <option>Angulation</option>
-                        <option>Optics</option>
-                        <option>Accessories</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="picker-tbl" style="flex:1;overflow-y:auto;">
-                    <table style="width:100%;border-collapse:collapse;">
-                      <thead style="position:sticky;top:0;z-index:1;">
-                        <tr>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:left;white-space:nowrap;">Item Name</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:left;white-space:nowrap;width:130px;">Size / Model Fit</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:left;white-space:nowrap;">Description</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:center;white-space:nowrap;width:80px;">Stock</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:right;white-space:nowrap;width:82px;">Unit Price</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:center;white-space:nowrap;width:60px;">Qty</th>
-                          <th class="picker-tbl th" style="background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:7px 10px;text-align:center;white-space:nowrap;width:62px;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style="cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background=''">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">IT ASSEMBLY LD/SD</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF-H180 / GIF-190</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Insertion tube assembly, large diameter</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$1,250.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background='var(--row-alt)'">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">ANGULATION ASSEMBLY</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF-H180</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">4-way angulation mechanism, complete</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$980.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background=''">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">ANGULATION CABLE ADJUSTER</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">Universal</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Cable tension adjuster kit w/ hardware</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#fff3cd;color:#856404;border:1px solid #f0c040;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Low Stock</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$145.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background='var(--row-alt)'">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">AIR WATER NOZZLES</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF / PCF / CF Series</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Replacement nozzle set, 10 pk</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$62.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background=''">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">BENDING RUBBER</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF-H180 / GIF-H185</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Distal bending section rubber, standard</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$875.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background='var(--row-alt)'">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">CCD CHIP ASSEMBLY</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF-H180 HD</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">High-definition imaging sensor, OEM</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#fff3cd;color:#856404;border:1px solid #f0c040;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Low Stock</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$240.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background=''">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">LIGHT GUIDE BUNDLE</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">Universal — 3.5mm</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Fiber optic light bundle, 2m</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$390.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background='var(--row-alt)'">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">UNIVERSAL CORD SEAL</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">Universal</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Waterproof universal cord seal</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$28.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background=''">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">WATER BOTTLE CONNECTOR</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">Olympus OEM</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Irrigation water bottle connector cap</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#eafaf1;color:#27ae60;border:1px solid #a3d9b1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Active</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$19.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                        <tr style="background:var(--row-alt);cursor:pointer;" onmouseenter="this.style.background='#dce8f7'" onmouseleave="this.style.background='var(--row-alt)'">
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);font-weight:600;">ACHROMAT LENS</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--label);">GIF-H180 / CF-Q180</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);color:var(--muted);">Objective lens, achromatic doublet</td>
-                          <td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);text-align:center;"><span style="background:#fff3cd;color:#856404;border:1px solid #f0c040;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Low Stock</span></td>
-                          <td style="padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;">$315.00</td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><input class="qty-pick" value="1" onclick="event.stopPropagation()" /></td>
-                          <td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;"><button class="add-btn" onclick="event.stopPropagation()">+ Add</button></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-</div>
+    </div><!-- /.page -->
+  </div><!-- /.main -->
+</div><!-- /.shell -->
 </body>
 </html>
