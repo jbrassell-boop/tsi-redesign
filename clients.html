@@ -220,28 +220,15 @@
         <div class="topbar-avatar">JB</div>
         <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
       </div>
-      <div class="topbar-center">
-        <div style="display:flex;align-items:center;gap:10px">
-          <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="rgba(255,255,255,.5)" stroke-width="2.5"/>
-            <ellipse cx="50" cy="50" rx="22" ry="46" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
-            <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
-            <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
-            <path d="M50 16 L56 44 L50 50 L44 44 Z" fill="white" opacity=".95"/>
-            <path d="M50 84 L44 56 L50 50 L56 56 Z" fill="rgba(255,255,255,.45)"/>
-            <path d="M84 50 L56 56 L50 50 L56 44 Z" fill="rgba(255,255,255,.7)"/>
-            <path d="M16 50 L44 44 L50 50 L44 56 Z" fill="rgba(255,255,255,.45)"/>
-            <circle cx="50" cy="50" r="4" fill="white"/>
-          </svg>
-          <div>
-            <div class="topbar-title">Total Scope, Inc.</div>
-            <div class="topbar-sub">The Leader in Medical Device Repair</div>
-          </div>
-        </div>
-      </div>
+      <div class="topbar-center"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:32px"/></div>
       <div class="topbar-right">
+        <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
         Service Location
-        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation(this.value)">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
@@ -259,7 +246,7 @@
 
         <!-- CLIENT SELECTOR inline -->
         <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Client :</span>
-        <select class="client-select" onchange="loadClientByName(this.value)">
+        <select class="client-select" id="clientSelect" onchange="onClientChange(this.value)">
           <option>88th Medical Group</option>
           <option>Tift Regional Medical Center</option>
           <option>Nashville General Hospital</option>
@@ -280,7 +267,7 @@
           Delete
         </button>
         <div class="divider"></div>
-        <button class="btn btn-navy" style="gap:4px" title="Ctrl+S" onclick="showToast('Client \u201c' + document.querySelector('.client-select').value + '\u201d saved.', 'success')">
+        <button class="btn btn-navy" style="gap:4px" title="Ctrl+S" onclick="saveClientToAPI()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
           Save
         </button>
@@ -916,7 +903,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('deleteClientModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" style="background:var(--red)" onclick="document.getElementById('deleteClientModal').classList.remove('open');showToast('Client deleted.','error')">Yes, Delete</button>
+      <button class="btn-save" style="background:var(--red)" onclick="doDeleteClient()">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -1022,7 +1009,11 @@
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
 const CLIENTS = {
   '88th Medical Group': {
     id:'3502', active:true, name:'88th Medical Group', unit:'Wright Patterson AFB, Bldg. 830123',
@@ -1133,10 +1124,20 @@ function loadClientByName(name) { _currentClientName = name; loadClient(CLIENTS[
 
 function loadClient(c) {
   if(!c) return;
+  _currentClientData = c;
   document.getElementById('clientBadge').textContent = '#' + c.id;
-  const pill = document.getElementById('clientStatus');
-  if(c.active) { pill.textContent='✓ Active'; pill.style.background='#F0FDF4'; pill.style.color='#16A34A'; pill.style.borderColor='#BBF7D0'; }
-  else { pill.textContent='✗ Inactive'; pill.style.background='#FEF2F2'; pill.style.color='#B71234'; pill.style.borderColor='#FECACA'; }
+  // Update the Active/Inactive chip in the status strip
+  const statusChip = document.querySelector('.status-strip .ss-chip:first-child');
+  if (statusChip) {
+    if (c.active) {
+      statusChip.className = 'ss-chip ss-active';
+      statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Active';
+    } else {
+      statusChip.className = 'ss-chip';
+      statusChip.style.background = '#FEF2F2'; statusChip.style.borderColor = '#FECACA'; statusChip.style.color = '#B71234';
+      statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Inactive';
+    }
+  }
   setVal('ci-name', c.name); setVal('ci-unit', c.unit);
   setOpt('ci-country', c.country); setVal('ci-zip', c.zip);
   setVal('ci-city', c.city); setOpt('ci-state', c.state);
@@ -1153,10 +1154,16 @@ function loadClient(c) {
   setOpt('def-credit', c.credit); setOpt('def-billto', c.billto);
   setVal('def-discount', c.discount); setVal('def-markup', c.markup);
   setChk('def-blind-ps3', c.blindPS3); setChk('def-req-totals', c.reqTotals); setChk('def-blind-final', c.blindFinal);
+  // Update status strip chips
+  const chips = document.querySelectorAll('.status-strip .ss-chip .ss-val');
+  if (chips[0]) chips[0].textContent = c.salesrep || '—';
+  if (chips[1]) chips[1].textContent = c.pricing || '—';
+  if (chips[2]) chips[2].textContent = c.terms || '—';
   renderCreditMemos(c);
 }
 
 let _currentClientName = '88th Medical Group';
+let _currentClientData = null; // Holds current loaded client for live mode
 
 function saveFlagMock() {
   const text = document.getElementById('flag-text').value.trim();
@@ -1215,7 +1222,7 @@ function showNewCMForm() {
 }
 
 function openCreditMemo() {
-  const c = CLIENTS[_currentClientName];
+  const c = _currentClientData || CLIENTS[_currentClientName];
   if(!c) return;
   document.getElementById('creditMemoModal').classList.add('open');
   document.getElementById('cm-client-name').textContent = c.name;
@@ -1277,7 +1284,7 @@ function addCreditMemo() {
   const date = document.getElementById('cm-add-date').value;
   if(!amt || amt <= 0) { showToast('Enter a valid amount.', 'error'); return; }
   if(!desc) { showToast('Reason is required.', 'error'); return; }
-  const c = CLIENTS[_currentClientName];
+  const c = _currentClientData || CLIENTS[_currentClientName];
   const d = date ? new Date(date+'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
   const nextNum = String((c.creditMemos.length + 1)).padStart(3,'0');
   const yr = new Date().getFullYear();
@@ -1293,21 +1300,29 @@ async function lookupZip(zip) {
   zip = zip.trim();
   if(!/^\d{5}$/.test(zip)) return;
   const zipEl = document.getElementById('ci-zip');
-  const cityEl = document.getElementById('ci-city');
-  const stateEl = document.getElementById('ci-state');
   zipEl.style.borderColor = 'var(--border-dk)';
   try {
+    if (_liveMode) {
+      const data = await API.get('/Client/GetCityStateUSA?zipCode=' + zip);
+      if (data) {
+        document.getElementById('ci-city').value = data.sCity || '';
+        setOpt('ci-state', data.sState || '');
+        zipEl.style.borderColor = 'var(--green)';
+        setTimeout(() => zipEl.style.borderColor = 'var(--border-dk)', 1500);
+        return;
+      }
+    }
+    // Fallback to public API
     const res = await fetch('https://api.zippopotam.us/us/' + zip);
     if(!res.ok) { zipEl.style.borderColor = 'var(--red)'; return; }
     const data = await res.json();
     if(data.places && data.places.length > 0) {
-      const place = data.places[0];
-      cityEl.value = place['place name'];
-      setOpt('ci-state', place['state abbreviation']);
+      document.getElementById('ci-city').value = data.places[0]['place name'];
+      setOpt('ci-state', data.places[0]['state abbreviation']);
       zipEl.style.borderColor = 'var(--green)';
       setTimeout(() => zipEl.style.borderColor = 'var(--border-dk)', 1500);
     }
-  } catch(e) { /* network error — fail silently */ }
+  } catch(e) { /* fail silently */ }
 }
 
 async function lookupZipAdd(zip) {
@@ -1338,7 +1353,7 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2800);
 }
 
-function saveNewClient() {
+async function saveNewClient() {
   const name = document.getElementById('add-name').value.trim();
   const deptName = document.getElementById('add-dept-name').value;
   const salesRep = document.getElementById('add-dept-salesrep').value;
@@ -1347,7 +1362,39 @@ function saveNewClient() {
   if(!name) { showToast('Client Name is required.', 'error'); document.getElementById('add-name').focus(); return; }
   if(!deptName || !salesRep || !pricing || !deptType) { showToast('Please complete all required department fields.', 'error'); return; }
 
-  // generate new ID
+  if (_liveMode) {
+    // Build API payload
+    const locKey = parseInt(document.getElementById('svcLocation').value) || 1;
+    const payload = {
+      psClientName1: name,
+      psUnitBuilding: document.getElementById('add-unit').value.trim(),
+      psAddress1: document.getElementById('add-addr1').value.trim(),
+      psAddress2: document.getElementById('add-addr2').value.trim(),
+      psZipCode: document.getElementById('add-zip').value.trim(),
+      psCity: document.getElementById('add-city').value.trim(),
+      psState: document.getElementById('add-state').value,
+      psCountry: document.getElementById('add-country').value,
+      psPhoneNumber: document.getElementById('add-phone').value.trim(),
+      psFaxNumber: document.getElementById('add-fax').value.trim(),
+      plServiceLocationKey: locKey,
+      psDepartmentName: deptName,
+      psSalesRepName: salesRep,
+      psPricingCategory: pricing,
+      psDepartmentType: deptType,
+    };
+    try {
+      const result = await API.addClient(payload);
+      document.getElementById('addClientModal').classList.remove('open');
+      showToast('Client \u201c' + name + '\u201d created.', 'success');
+      // Reload client list
+      await changeServiceLocation(locKey);
+    } catch (e) {
+      showToast('Add failed: ' + e.message, 'error');
+    }
+    return;
+  }
+
+  // Demo mode fallback
   const ids = Object.values(CLIENTS).map(c => parseInt(c.id)).filter(n => !isNaN(n));
   const newId = String(Math.max(...ids) + 1).padStart(4, '0');
 
@@ -1371,28 +1418,11 @@ function saveNewClient() {
   };
 
   CLIENTS[name] = newClient;
-
-  // add to toolbar dropdown
   const sel = document.querySelector('.client-select');
   const opt = document.createElement('option');
   opt.value = name; opt.textContent = name;
   sel.appendChild(opt);
 
-  // add to Find modal table
-  const tbody = document.getElementById('clientSearchBody');
-  const tr = document.createElement('tr');
-  tr.className = 'search-row'; tr.style.cursor = 'pointer';
-  tr.onclick = () => selectClient(tr, name, newId);
-  tr.innerHTML = `
-    <td style="padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--blue)">${name}</td>
-    <td style="padding:9px 14px;font-size:12.5px">#${newId}</td>
-    <td style="padding:9px 14px;font-size:12.5px;font-weight:600">${newClient.zip||'—'}</td>
-    <td style="padding:9px 14px;font-size:12.5px">${newClient.city}${newClient.state?', '+newClient.state:''}</td>
-    <td style="padding:9px 14px;font-size:12.5px">—</td>
-    <td style="padding:9px 14px"><span class="badge b-active">Active</span></td>`;
-  tbody.appendChild(tr);
-
-  // load the new client immediately
   _currentClientName = name;
   sel.value = name;
   loadClient(newClient);
@@ -1488,19 +1518,40 @@ function confirmDeactivate() {
 }
 
 function doDeactivate() {
-  const name = document.querySelector('.client-select').value;
-  const c = CLIENTS[name];
+  const sel = document.querySelector('.client-select');
+  const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : sel.value;
+  const c = _currentClientData || CLIENTS[name];
   if(c) c.active = false;
-  const pill = document.getElementById('clientStatus');
-  pill.textContent = '✗ Inactive';
-  pill.style.background = '#FEF2F2';
-  pill.style.color = '#B71234';
-  pill.style.borderColor = '#FECACA';
+  // Update status strip chip
+  const statusChip = document.querySelector('.status-strip .ss-chip:first-child');
+  if (statusChip) {
+    statusChip.className = 'ss-chip';
+    statusChip.style.background = '#FEF2F2'; statusChip.style.borderColor = '#FECACA'; statusChip.style.color = '#B71234';
+    statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Inactive';
+  }
   setChk('ci-active', false);
   const lbl = document.getElementById('ci-active-lbl');
   lbl.textContent = 'No'; lbl.style.color = 'var(--red)';
   document.getElementById('deactivateModal').classList.remove('open');
   showToast('\u201c' + name + '\u201d marked as inactive. Record preserved.', 'success');
+}
+
+async function doDeleteClient() {
+  document.getElementById('deleteClientModal').classList.remove('open');
+  if (_liveMode) {
+    const key = document.querySelector('.client-select').value;
+    try {
+      await API.deleteClient(key);
+      showToast('Client deleted.', 'success');
+      // Reload list
+      const locKey = document.getElementById('svcLocation').value || 1;
+      changeServiceLocation(locKey);
+    } catch (e) {
+      showToast('Delete failed: ' + e.message, 'error');
+    }
+  } else {
+    showToast('Client deleted (demo).', 'error');
+  }
 }
 
 function showTab(name, el) {
@@ -1529,8 +1580,262 @@ function selectClient(row, name, id) {
   filterClients('');
 }
 
-// Auto-load default client on page load
-loadClient(CLIENTS['88th Medical Group']);
+// ═══════════════════════════════════════════════════════
+//  API Wiring — live data with demo fallback
+// ═══════════════════════════════════════════════════════
+
+let _liveMode = false;
+let _clientList = []; // [{lClientKey, sClientName1}]
+
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) {
+    b.textContent = 'Live Data';
+    b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0';
+  } else {
+    b.textContent = 'Demo Data';
+    b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A';
+  }
+}
+
+function updateUserInfo() {
+  const user = API.getUser();
+  if (!user) return;
+  const name = (user.sFirstName || '') + ' ' + (user.sLastName || '');
+  const initials = ((user.sFirstName||'')[0]||'') + ((user.sLastName||'')[0]||'');
+  const avatar = document.querySelector('.topbar-avatar');
+  const welcome = document.querySelector('.topbar-welcome');
+  if (avatar) avatar.textContent = initials.toUpperCase();
+  if (welcome) welcome.innerHTML = 'Welcome, <strong>' + name.trim() + '</strong>';
+}
+
+// Map API detail response to our local field structure
+function mapApiClient(d) {
+  return {
+    id: String(d.lClientKey || ''),
+    active: d.bActive !== false,
+    name: d.sClientName1 || '',
+    unit: d.sUnitBuilding || '',
+    country: d.sCountry || 'USA',
+    zip: d.sZipCode || '',
+    city: d.sCity || '',
+    state: d.sState || '',
+    addr1: d.sAddress1 || '',
+    addr2: d.sAddress2 || '',
+    phone: d.sPhoneNumber || '',
+    fax: d.sFaxNumber || '',
+    since: fmtDate(d.dtClientSince),
+    portal: String(d.lPortalMonths || ''),
+    skip: !!d.bSkipMetrics,
+    creditMemo: !!d.bOpenCreditMemo,
+    national: !!d.bNationalAccount,
+    pricing: d.sPricingCategory || '',
+    salesrep: d.sSalesRepName || '',
+    dist: d.sDistributor || '',
+    terms: d.sPaymentTerms || '',
+    credit: d.sCreditLimit || '',
+    billto: d.sBillTo || '',
+    discount: d.dblDiscount != null ? d.dblDiscount + '%' : '0%',
+    markup: d.dblMarkup != null ? d.dblMarkup + '%' : '0%',
+    blindPS3: !!d.bBlindPS3,
+    reqTotals: !!d.bReqTotalsOnly,
+    blindFinal: !!d.bBlindTotalsOnFinal,
+    creditMemos: [], // credit memos are managed separately
+    _raw: d // keep raw for save
+  };
+}
+
+function fmtDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  if (isNaN(d)) return v;
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+}
+
+// Populate client dropdown and Find modal from a list
+function populateClientList(clients) {
+  _clientList = clients;
+  const sel = document.querySelector('.client-select');
+  sel.innerHTML = '';
+  const tbody = document.getElementById('clientSearchBody');
+  tbody.innerHTML = '';
+
+  clients.forEach(c => {
+    const name = c.sClientName1 || c.name || '';
+    const key = c.lClientKey || c.id || '';
+    // Dropdown option
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = name;
+    sel.appendChild(opt);
+    // Find modal row
+    const tr = document.createElement('tr');
+    tr.className = 'search-row';
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => selectClientByKey(key, name);
+    tr.innerHTML = `
+      <td style="font-weight:600;color:var(--blue)">${name}</td>
+      <td>#${key}</td>
+      <td style="font-weight:600">${c.sZipCode || c.zip || ''}</td>
+      <td>${c.sCity || c.city || ''}${c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : '')}</td>
+      <td>${c.sServiceLocationName || ''}</td>
+      <td><span class="badge ${c.bActive === false ? 'b-inactive' : 'b-active'}">${c.bActive === false ? 'Inactive' : 'Active'}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Load a specific client by API key
+async function selectClientByKey(key, name) {
+  document.getElementById('searchModal').classList.remove('open');
+  document.getElementById('clientSearchInput').value = '';
+  filterClients('');
+
+  // Set dropdown
+  const sel = document.querySelector('.client-select');
+  sel.value = key;
+
+  if (_liveMode) {
+    try {
+      const detail = await API.getClientById(key);
+      const mapped = mapApiClient(detail);
+      _currentClientName = mapped.name;
+      loadClient(mapped);
+      return;
+    } catch (e) {
+      console.warn('[TSI Clients] Failed to load client detail:', e);
+      if (e.status === 401) {
+        showToast('Session expired — please log in again.', 'error');
+        return;
+      }
+    }
+  }
+  // Fallback to demo
+  if (CLIENTS[name]) {
+    _currentClientName = name;
+    loadClient(CLIENTS[name]);
+  }
+}
+
+// Handle client dropdown change
+async function onClientChange(val) {
+  if (_liveMode) {
+    const key = val;
+    const opt = document.querySelector('.client-select option[value="' + key + '"]');
+    const name = opt ? opt.textContent : '';
+    await selectClientByKey(key, name);
+  } else {
+    // Demo mode — val is the name
+    _currentClientName = val;
+    loadClient(CLIENTS[val]);
+  }
+}
+
+// Service location change
+async function changeServiceLocation(locKey) {
+  if (!_liveMode) return;
+  try {
+    const clients = await API.getAllClients(locKey);
+    if (clients && clients.length > 0) {
+      populateClientList(clients);
+      // Auto-load first client
+      const first = clients[0];
+      await selectClientByKey(first.lClientKey, first.sClientName1);
+    }
+  } catch (e) {
+    console.warn('[TSI Clients] Location change failed:', e);
+  }
+}
+
+// Save client to API
+async function saveClientToAPI() {
+  if (!_liveMode) {
+    showToast('Client "' + document.querySelector('.client-select option:checked').textContent + '" saved (demo).', 'success');
+    return;
+  }
+  // Build update payload from form fields
+  const sel = document.querySelector('.client-select');
+  const key = parseInt(sel.value);
+  if (!key) { showToast('No client selected.', 'error'); return; }
+
+  const payload = {
+    plClientKey: key,
+    psClientName1: document.getElementById('ci-name').value.trim(),
+    psUnitBuilding: document.getElementById('ci-unit').value.trim(),
+    psAddress1: document.getElementById('ci-addr1').value.trim(),
+    psAddress2: document.getElementById('ci-addr2').value.trim(),
+    psZipCode: document.getElementById('ci-zip').value.trim(),
+    psCity: document.getElementById('ci-city').value.trim(),
+    psState: document.getElementById('ci-state').value,
+    psCountry: document.getElementById('ci-country').value,
+    psPhoneNumber: document.getElementById('ci-phone').value.trim(),
+    psFaxNumber: document.getElementById('ci-fax').value.trim(),
+    pbActive: document.getElementById('ci-active').checked,
+    pbSkipMetrics: document.getElementById('ci-skip').checked,
+    pbOpenCreditMemo: document.getElementById('ci-credit-memo').checked,
+    pbNationalAccount: document.getElementById('ci-national').checked,
+    psPricingCategory: document.getElementById('def-pricing').value,
+    psSalesRepName: document.getElementById('def-salesrep').value,
+    psDistributor: document.getElementById('def-dist').value,
+    psPaymentTerms: document.getElementById('def-terms').value,
+    psCreditLimit: document.getElementById('def-credit').value,
+    psBillTo: document.getElementById('def-billto').value,
+    pdblDiscount: parseFloat(document.getElementById('def-discount').value) || 0,
+    pdblMarkup: parseFloat(document.getElementById('def-markup').value) || 0,
+    pbBlindPS3: document.getElementById('def-blind-ps3').checked,
+    pbReqTotalsOnly: document.getElementById('def-req-totals').checked,
+    pbBlindTotalsOnFinal: document.getElementById('def-blind-final').checked,
+  };
+
+  try {
+    await API.updateClient(payload);
+    showToast('Client "' + payload.psClientName1 + '" saved.', 'success');
+  } catch (e) {
+    console.error('[TSI Clients] Save failed:', e);
+    showToast('Save failed: ' + e.message, 'error');
+  }
+}
+
+// ── Page Init ─────────────────────────────────────────
+async function initPage() {
+  updateUserInfo();
+
+  // Try loading from API
+  try {
+    const locKey = document.getElementById('svcLocation').value || 1;
+    const clients = await API.getAllClients(locKey);
+    if (clients && clients.length > 0) {
+      _liveMode = true;
+      showDataBadge(true);
+      populateClientList(clients);
+
+      // Update dropdown handler for live mode
+      const sel = document.querySelector('.client-select');
+      sel.onchange = function() { onClientChange(this.value); };
+
+      // Load first client detail
+      const first = clients[0];
+      await selectClientByKey(first.lClientKey, first.sClientName1);
+      console.log('[TSI Clients] Loaded', clients.length, 'clients from API');
+      return;
+    }
+  } catch (e) {
+    console.warn('[TSI Clients] API unavailable, using demo data:', e.message);
+    if (e.status === 401) {
+      showToast('Session expired — redirecting to login...', 'error');
+      setTimeout(() => window.location.href = 'login.html?expired=1', 1500);
+      return;
+    }
+  }
+
+  // Fallback to demo data
+  _liveMode = false;
+  showDataBadge(false);
+  loadClient(CLIENTS['88th Medical Group']);
+}
+
+initPage();
 
 </script>
 </body>

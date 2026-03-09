@@ -212,19 +212,40 @@ const API = (() => {
     return post('/Client/UpdateClient', data);
   }
 
+  async function deleteClient(clientKey) {
+    return del('/Client/DeleteClient?plClientKey=' + clientKey);
+  }
+
   // ── Inventory ─────────────────────────────────────────
   async function getInventoryList(filters) {
     const defaults = {
       plInventoryKey: 0,
       pbIncludeInactive: false,
-      pageIndex: 1,
-      pageSize: 50
+      Pagination: { PageNumber: 1, PageSize: 100 },
+      Filters: {}
     };
     return post('/Inventory/GetAllInventoryList', { ...defaults, ...filters });
   }
 
   async function getInventoryById(inventoryKey) {
     return get('/Inventory/GetInventoryById?plInventoryKey=' + inventoryKey);
+  }
+
+  async function getInventorySizes(inventoryKey, filters) {
+    const defaults = {
+      plInventoryKey: inventoryKey,
+      Pagination: { PageNumber: 1, PageSize: 100 },
+      Filters: {}
+    };
+    return post('/Inventory/GetAllInventorySizesList', { ...defaults, ...filters });
+  }
+
+  async function addInventory(data) {
+    return post('/Inventory/AddInventory', data);
+  }
+
+  async function updateInventory(data) {
+    return post('/Inventory/UpdateInventory', data);
   }
 
   // ── Departments ───────────────────────────────────────
@@ -276,10 +297,14 @@ const API = (() => {
     getClientById,
     addClient,
     updateClient,
+    deleteClient,
 
     // Inventory
     getInventoryList,
     getInventoryById,
+    getInventorySizes,
+    addInventory,
+    updateInventory,
 
     // Departments
     getDepartments,

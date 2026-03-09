@@ -186,28 +186,12 @@
         <div class="topbar-avatar">JB</div>
         <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
       </div>
-      <div class="topbar-center">
-        <div style="display:flex;align-items:center;gap:10px">
-          <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="rgba(255,255,255,.5)" stroke-width="2.5"/>
-            <ellipse cx="50" cy="50" rx="22" ry="46" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
-            <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
-            <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
-            <path d="M50 16 L56 44 L50 50 L44 44 Z" fill="white" opacity=".95"/>
-            <path d="M50 84 L44 56 L50 50 L56 56 Z" fill="rgba(255,255,255,.45)"/>
-            <path d="M84 50 L56 56 L50 50 L56 44 Z" fill="rgba(255,255,255,.7)"/>
-            <path d="M16 50 L44 44 L50 50 L44 56 Z" fill="rgba(255,255,255,.45)"/>
-            <circle cx="50" cy="50" r="4" fill="white"/>
-          </svg>
-          <div>
-            <div class="topbar-title">Total Scope, Inc.</div>
-            <div class="topbar-sub">The Leader in Medical Device Repair</div>
-          </div>
-        </div>
-      </div>
+      <div class="topbar-center"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:32px"/></div>
       <div class="topbar-right">
+        <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
         Service Location
-        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+        <select class="svc-select" id="svcLocation"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
@@ -252,10 +236,10 @@
       <!-- REPAIR LIST -->
       <div class="repair-list">
         <div class="list-header">
-          <span class="list-title">Repairs (4)</span>
+          <span class="list-title" id="repairCount">Repairs (4)</span>
           <input class="list-search" placeholder="Filter…"/>
         </div>
-        <div class="list-items">
+        <div class="list-items" id="repairList">
           <div class="list-item selected">
             <div class="wo"><span class="status-dot dot-inrepair"></span>NR23003001</div>
             <div class="meta">ENF GP · SN 2007037</div>
@@ -402,5 +386,157 @@
     </div>
   </div>
 </div>
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+let _liveMode = false;
+let _repairs = [];
+
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) {
+    b.textContent = 'Live Data'; b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0';
+  } else {
+    b.textContent = 'Demo Data'; b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A';
+  }
+}
+
+function updateUserInfo() {
+  const user = API.getUser();
+  if (!user) return;
+  const name = (user.sFirstName || '') + ' ' + (user.sLastName || '');
+  const initials = ((user.sFirstName||'')[0]||'') + ((user.sLastName||'')[0]||'');
+  const avatar = document.querySelector('.topbar-avatar');
+  const welcome = document.querySelector('.topbar-welcome');
+  if (avatar) avatar.textContent = initials.toUpperCase();
+  if (welcome) welcome.innerHTML = 'Welcome, <strong>' + name.trim() + '</strong>';
+}
+
+function fmtDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  if (isNaN(d)) return v;
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+}
+
+function getStatusDot(status) {
+  const s = (status || '').toLowerCase();
+  if (s.includes('approv') || s.includes('complete')) return 'dot-approved';
+  if (s.includes('repair') || s.includes('progress')) return 'dot-inrepair';
+  return 'dot-waiting';
+}
+
+function getStatusBadge(status) {
+  const s = (status || '').toLowerCase();
+  if (s.includes('approv') || s.includes('complete')) return 'badge-approved';
+  if (s.includes('repair') || s.includes('progress')) return 'badge-inrepair';
+  return 'badge-waiting';
+}
+
+function populateRepairList(repairs) {
+  _repairs = repairs;
+  const list = document.getElementById('repairList');
+  const count = document.getElementById('repairCount');
+  count.textContent = 'Repairs (' + repairs.length + ')';
+
+  list.innerHTML = repairs.map((r, i) => {
+    const wo = r.sWorkOrderNumber || '';
+    const scope = r.sScopeTypeDesc || '';
+    const serial = r.sSerialNumber || '';
+    const dateIn = fmtDate(r.dtDateIn);
+    const status = r.sRepairStatus || r.ProgBarStatus || '';
+    const dot = getStatusDot(status);
+    const sel = i === 0 ? ' selected' : '';
+    return `<div class="list-item${sel}" data-idx="${i}" onclick="selectRepair(${i})">
+      <div class="wo"><span class="status-dot ${dot}"></span>${wo}</div>
+      <div class="meta">${scope} · SN ${serial}</div>
+      <div class="date">Date In: ${dateIn}</div>
+    </div>`;
+  }).join('');
+
+  if (repairs.length > 0) selectRepair(0);
+}
+
+function selectRepair(idx) {
+  const r = _repairs[idx];
+  if (!r) return;
+
+  // Highlight list item
+  document.querySelectorAll('.list-item').forEach(el => el.classList.remove('selected'));
+  const item = document.querySelector(`.list-item[data-idx="${idx}"]`);
+  if (item) item.classList.add('selected');
+
+  const wo = r.sWorkOrderNumber || '';
+  const status = r.sRepairStatus || r.ProgBarStatus || '';
+
+  // Detail header
+  const title = document.querySelector('.detail-title h2');
+  if (title) title.textContent = wo;
+  const badge = document.querySelector('.detail-title .badge');
+  if (badge) {
+    badge.textContent = status;
+    badge.className = 'badge ' + getStatusBadge(status);
+  }
+
+  // Meta grid
+  const cells = document.querySelectorAll('.meta-grid .meta-cell .val');
+  if (cells[0]) cells[0].textContent = r.sClientName1 || '';
+  if (cells[1]) cells[1].textContent = r.sDepartmentName || '';
+  if (cells[2]) cells[2].textContent = r.sScopeTypeDesc || '';
+  if (cells[3]) cells[3].textContent = r.sSerialNumber || '';
+  if (cells[4]) cells[4].textContent = fmtDate(r.dtDateIn);
+  if (cells[5]) { cells[5].textContent = wo; cells[5].style.fontWeight = '700'; cells[5].style.color = 'var(--navy)'; }
+
+  // Dates & Status form
+  const dateInInput = document.querySelector('.section-body input[type="date"]');
+  if (dateInInput && r.dtDateIn) {
+    const d = new Date(r.dtDateIn);
+    if (!isNaN(d)) dateInInput.value = d.toISOString().split('T')[0];
+  }
+
+  // Scope info
+  const roInputs = document.querySelectorAll('.section-body input.ro');
+  if (roInputs[0]) roInputs[0].value = r.sScopeTypeDesc || '';
+  if (roInputs[1]) roInputs[1].value = r.sSerialNumber || '';
+  if (roInputs[2]) roInputs[2].value = r.sManufacturerName || '';
+}
+
+// ── Page Init ─────────────────────────────────────────
+async function initPage() {
+  updateUserInfo();
+
+  try {
+    const user = API.getUser();
+    const repairs = await API.getRepairs({
+      plUserKey: user?.lUserKey || null,
+      plServiceLocationKey: parseInt(document.getElementById('svcLocation').value) || 1
+    });
+    const list = Array.isArray(repairs) ? repairs : (repairs?.list || repairs?.items || []);
+    if (list.length > 0) {
+      _liveMode = true;
+      showDataBadge(true);
+      populateRepairList(list);
+      console.log('[TSI Repairs] Loaded', list.length, 'repairs from API');
+      return;
+    }
+  } catch (e) {
+    console.warn('[TSI Repairs] API unavailable, using demo data:', e.message);
+    if (e.status === 401) {
+      document.querySelector('.list-items').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Session expired — <a href="login.html?expired=1" style="color:var(--blue);font-weight:700">log in again</a></div>';
+      return;
+    }
+  }
+
+  // Fallback — keep existing hardcoded HTML
+  _liveMode = false;
+  showDataBadge(false);
+}
+
+initPage();
+</script>
 </body>
 </html>
