@@ -138,12 +138,12 @@ const API = (() => {
 
     const res = await fetch(BASE_URL + endpoint, opts);
 
-    // Token expired or invalid
+    // Token expired or invalid — auto-redirect to login
     if (res.status === 401) {
-      console.warn('[TSI API] 401 on', endpoint, '— token may be expired');
-      const err = new Error('Session expired');
-      err.status = 401;
-      throw err;
+      console.warn('[TSI API] 401 on', endpoint, '— token expired, redirecting');
+      clearToken();
+      window.location.href = 'login.html?expired=1';
+      return; // halt further execution
     }
 
     const envelope = await res.json();
