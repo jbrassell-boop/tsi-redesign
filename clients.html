@@ -177,6 +177,13 @@
     ::-webkit-scrollbar{width:6px}
     ::-webkit-scrollbar-track{background:#f0f2f5}
     ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+    /* Autosave status */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .save-saving { animation: pulse .8s infinite; color: var(--blue) !important; }
+    .save-saved { color: var(--green) !important; }
+    .save-dirty { color: var(--amber) !important; }
+    .save-error { color: var(--red) !important; }
+    .save-ready { color: var(--muted) !important; }
   </style>
 </head>
 <body>
@@ -268,8 +275,11 @@
           Delete
         </button>
         <div class="divider"></div>
-        <button class="btn btn-navy" style="gap:4px" title="Ctrl+S" onclick="saveClientToAPI()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+        <span id="saveStatus" style="font-size:11px;display:flex;align-items:center;gap:5px" class="save-ready">
+          <span id="saveIcon">&#9679;</span> <span id="saveText">Ready</span>
+        </span>
+        <button class="btn btn-outline" style="gap:4px;font-size:11px;padding:4px 10px" title="Ctrl+S" onclick="autoSave()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
           Save
         </button>
       </div>
@@ -1161,6 +1171,8 @@ function loadClient(c) {
   if (chips[1]) chips[1].textContent = c.pricing || '—';
   if (chips[2]) chips[2].textContent = c.terms || '—';
   renderCreditMemos(c);
+  _dirty = false;
+  updateSaveStatus('ready');
 }
 
 let _currentClientName = '88th Medical Group';
@@ -1747,14 +1759,19 @@ async function changeServiceLocation(locKey) {
 
 // Save client to API
 async function saveClientToAPI() {
+  updateSaveStatus('saving');
   if (!_liveMode) {
+    // Simulate save delay in demo mode
+    await new Promise(r => setTimeout(r, 400));
+    _dirty = false;
+    updateSaveStatus('saved');
     showToast('Client "' + document.querySelector('.client-select option:checked').textContent + '" saved (demo).', 'success');
     return;
   }
   // Build update payload from form fields
   const sel = document.querySelector('.client-select');
   const key = parseInt(sel.value);
-  if (!key) { showToast('No client selected.', 'error'); return; }
+  if (!key) { updateSaveStatus('error'); showToast('No client selected.', 'error'); return; }
 
   const payload = {
     plClientKey: key,
@@ -1787,12 +1804,79 @@ async function saveClientToAPI() {
 
   try {
     await API.updateClient(payload);
+    _dirty = false;
+    updateSaveStatus('saved');
     showToast('Client "' + payload.psClientName1 + '" saved.', 'success');
   } catch (e) {
     console.error('[TSI Clients] Save failed:', e);
+    updateSaveStatus('error');
     showToast('Save failed: ' + e.message, 'error');
   }
 }
+
+// ── Autosave ──────────────────────────────────────────
+let _dirty = false;
+let _saveTimer = null;
+
+function updateSaveStatus(state) {
+  const el = document.getElementById('saveStatus');
+  const icon = document.getElementById('saveIcon');
+  const text = document.getElementById('saveText');
+  if (!el) return;
+  el.className = '';
+  switch (state) {
+    case 'ready':
+      el.className = 'save-ready';
+      icon.textContent = '\u25CF';
+      text.textContent = 'Ready';
+      break;
+    case 'dirty':
+      el.className = 'save-dirty';
+      icon.textContent = '\u25CF';
+      text.textContent = 'Unsaved changes';
+      break;
+    case 'saving':
+      el.className = 'save-saving';
+      icon.textContent = '\u25CF';
+      text.textContent = 'Saving\u2026';
+      break;
+    case 'saved':
+      el.className = 'save-saved';
+      icon.textContent = '\u2713';
+      const now = new Date();
+      const t = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      text.textContent = 'Saved at ' + t;
+      break;
+    case 'error':
+      el.className = 'save-error';
+      icon.textContent = '\u2717';
+      text.textContent = 'Save failed';
+      break;
+  }
+}
+
+function markDirty() {
+  if (!_dirty) {
+    _dirty = true;
+    updateSaveStatus('dirty');
+  }
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(autoSave, 1500);
+}
+
+async function autoSave() {
+  if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+  if (!_dirty) return;
+  await saveClientToAPI();
+}
+
+// Ctrl+S manual save shortcut
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    autoSave();
+  }
+});
 
 // ── Page Init ─────────────────────────────────────────
 async function initPage() {
@@ -1828,6 +1912,18 @@ async function initPage() {
 }
 
 initPage();
+
+// Autosave: listen to all form fields in the Main tab
+document.querySelectorAll('#tab-main input, #tab-main select').forEach(el => {
+  el.addEventListener('change', markDirty);
+  if (el.type === 'text' || el.type === 'number' || el.tagName === 'TEXTAREA') {
+    el.addEventListener('input', markDirty);
+  }
+});
+// Also chips and toggles
+document.querySelectorAll('#tab-main .chip').forEach(el => {
+  el.addEventListener('click', () => setTimeout(markDirty, 50));
+});
 
 </script>
 </body>
