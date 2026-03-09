@@ -212,6 +212,26 @@
     .mf-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
     .mf-select{height:32px;border:1px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:12px;outline:none;background:#fff;width:170px}
     .btn-start{height:32px;padding:0 16px;border-radius:6px;border:none;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .1s;white-space:nowrap}
+    /* Searchable Client Picker */
+    .client-picker{position:relative;width:280px}
+    .cp-input{width:100%;height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 12px 0 32px;font-size:12px;outline:none;font-family:inherit;transition:border-color .15s;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center}
+    .cp-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .cp-input::placeholder{color:var(--muted)}
+    .cp-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border-dk);border-top:none;border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,37,122,.12)}
+    .cp-dropdown.open{display:block}
+    .cp-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;transition:background .1s}
+    .cp-item:last-child{border-bottom:none}
+    .cp-item:hover,.cp-item.highlighted{background:#EDF2FF}
+    .cp-item-name{font-size:12px;font-weight:600;color:var(--navy)}
+    .cp-item-detail{font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:8px}
+    .cp-item-detail span{display:inline-flex;align-items:center;gap:3px}
+    .cp-selected{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:6px 12px;display:none;align-items:center;gap:10px}
+    .cp-selected.show{display:flex}
+    .cp-sel-name{font-size:12px;font-weight:700;color:var(--navy)}
+    .cp-sel-detail{font-size:10px;color:var(--muted)}
+    .cp-sel-clear{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;margin-left:auto;padding:2px 4px;border-radius:4px;transition:all .1s}
+    .cp-sel-clear:hover{color:var(--red);background:#FEF2F2}
+    .dept-picker{width:220px}
     .btn-start:hover{background:#001c5c}
 
     .mf-right{display:flex;gap:10px}
@@ -527,22 +547,25 @@
     <div class="modal-ft">
       <div class="mf-left" id="newDeviceForm">
         <span class="mf-label" style="color:var(--navy)">New Product Sale:</span>
-        <select class="mf-select" id="newClientSelect">
-          <option value="" disabled selected>-- Select Client --</option>
-          <option>88th Medical Group</option>
-          <option>A.I.duPont Children Hospital</option>
-          <option>Mercy Health</option>
-          <option>Nashville General Hospital</option>
-          <option>Tift Regional Medical Center</option>
-        </select>
-        <select class="mf-select" id="newDeptSelect" disabled>
+
+        <!-- Searchable Client Picker -->
+        <div class="client-picker" id="clientPickerWrap">
+          <input type="text" class="cp-input" id="clientPickerInput" placeholder="Type client name, city, or ID…" autocomplete="off" />
+          <div class="cp-dropdown" id="clientPickerDropdown"></div>
+        </div>
+        <div class="cp-selected" id="clientPickerSelected">
+          <div>
+            <div class="cp-sel-name" id="cpSelName"></div>
+            <div class="cp-sel-detail" id="cpSelDetail"></div>
+          </div>
+          <button class="cp-sel-clear" onclick="clearClientPick()" title="Change client">&times;</button>
+        </div>
+
+        <!-- Department dropdown (populated after client selected) -->
+        <select class="mf-select dept-picker" id="newDeptSelect" disabled>
           <option value="" disabled selected>-- Select Dept --</option>
-          <option>Biomedical Engineering</option>
-          <option>Central Sterile</option>
-          <option>Endoscopy</option>
-          <option>GI Lab</option>
-          <option>Surgery</option>
         </select>
+
         <button class="btn-start" onclick="submitNewWorkspace()">Start Workspace <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-left:4px"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
       <div class="mf-right" id="primaryActionRow">
@@ -1152,9 +1175,7 @@ function resetNewDeviceForm() {
   selectedHistoricalDevice = null;
   document.getElementById('newDeviceForm').classList.remove('show');
   document.getElementById('primaryActionRow').style.display = 'flex';
-  document.getElementById('newClientSelect').value = '';
-  document.getElementById('newDeptSelect').value = '';
-  document.getElementById('newDeptSelect').disabled = true;
+  clearClientPick();
   document.getElementById('btnOpenRecord').style.opacity = '0.5';
   document.getElementById('btnOpenRecord').style.pointerEvents = 'none';
 }
@@ -1210,11 +1231,119 @@ function runGlobalSearch() {
   }
 }
 
-// Client Select enables Department Select
-document.getElementById('newClientSelect').addEventListener('change', (e) => {
-  if (e.target.value) {
-    document.getElementById('newDeptSelect').disabled = false;
+// ═══════════════════════════════════════════════════════
+//  SEARCHABLE CLIENT PICKER
+// ═══════════════════════════════════════════════════════
+const CLIENT_DB = [
+  {name:'88th Medical Group', id:'3502', city:'Coosada', state:'AL', depts:['Biomedical Engineering','Endoscopy']},
+  {name:'A.I.duPont Children Hospital', id:'4010', city:'Wilmington', state:'DE', depts:['Endoscopy','Central Sterile','Pediatrics']},
+  {name:'Acadiana Endoscopy Center', id:'2845', city:'Lafayette', state:'LA', depts:['Ambulatory Surgery','Endoscopy']},
+  {name:'AnMed Health Medical Center', id:'1920', city:'Anderson', state:'SC', depts:['Endoscopy','GI Lab']},
+  {name:'Augusta University Medical', id:'3711', city:'Augusta', state:'GA', depts:['Biomedical','Surgery']},
+  {name:'Baptist Health Louisville', id:'2330', city:'Louisville', state:'KY', depts:['GI Lab','Endoscopy']},
+  {name:'CaroMont Regional Medical', id:'3290', city:'Gastonia', state:'NC', depts:['Operating Room','Endoscopy']},
+  {name:'Coliseum Medical Center', id:'1558', city:'Macon', state:'GA', depts:['GI Lab','Surgery']},
+  {name:'Erlanger Medical Center', id:'2105', city:'Chattanooga', state:'TN', depts:['Endoscopy','GI Lab']},
+  {name:'Fort Sanders Regional', id:'1875', city:'Knoxville', state:'TN', depts:['GI Lab','Surgery']},
+  {name:'Grady Memorial Hospital', id:'0742', city:'Atlanta', state:'GA', depts:['Endoscopy','Surgery']},
+  {name:'Halifax Medical Center - FL', id:'1204', city:'Daytona Beach', state:'FL', depts:['Sterile Processing','Endoscopy']},
+  {name:'Lexington Medical Center', id:'3450', city:'West Columbia', state:'SC', depts:['Endoscopy','GI Lab']},
+  {name:'McLeod Regional Medical', id:'2688', city:'Florence', state:'SC', depts:['Endoscopy','Surgery']},
+  {name:'Memorial Health Savannah', id:'1330', city:'Savannah', state:'GA', depts:['Surgery','Endoscopy']},
+  {name:'Mercy Health', id:'4120', city:'Cincinnati', state:'OH', depts:['GI Lab','Endoscopy','Central Sterile']},
+  {name:'Metro Health Hospital', id:'2755', city:'Cleveland', state:'OH', depts:['GI Lab','Sterile Processing']},
+  {name:'Mountain View Regional', id:'3180', city:'Las Cruces', state:'NM', depts:['Operating Room','Endoscopy']},
+  {name:'Nashville General Hospital', id:'2210', city:'Nashville', state:'TN', depts:['GI Lab','Endoscopy','Surgery']},
+  {name:'Northside Hospital', id:'0917', city:'Atlanta', state:'GA', depts:['Surgery','Endoscopy','Central Sterile']},
+  {name:'Phoebe Putney Memorial', id:'1015', city:'Albany', state:'GA', depts:['Surgery','GI Lab']},
+  {name:'Piedmont Athens Regional', id:'2900', city:'Athens', state:'GA', depts:['Endoscopy','GI Lab']},
+  {name:'Shreveport Endoscopy Center', id:'1650', city:'Shreveport', state:'LA', depts:['Ambulatory Surgery','Endoscopy']},
+  {name:'Spartanburg Medical Center', id:'2470', city:'Spartanburg', state:'SC', depts:['GI Lab','Surgery']},
+  {name:'Tampa Minimally Invasive', id:'3089', city:'Tampa', state:'FL', depts:['Endoscopy','Surgery']},
+  {name:'Tift Regional Medical Center', id:'1084', city:'Tifton', state:'GA', depts:['Endoscopy','GI Lab','Central Sterile']},
+  {name:'Vidant Medical Center', id:'3560', city:'Greenville', state:'NC', depts:['GI Lab','Surgery']},
+  {name:'West Bozeman Surgery Center', id:'3740', city:'Bozeman', state:'MT', depts:['Endoscopy']},
+  {name:'West Calcasieu Cameron Hospital', id:'2615', city:'Sulphur', state:'LA', depts:['Surgery','Endoscopy']},
+  {name:'West Side GI Center', id:'3341', city:'Chicago', state:'IL', depts:['Endoscopy']},
+  {name:'Wills Eye Hospital - PA', id:'0820', city:'Philadelphia', state:'PA', depts:['Central Sterile','Surgery']},
+  {name:'Yale-New Haven Hospital', id:'0512', city:'New Haven', state:'CT', depts:['Operating Room','Endoscopy','GI Lab']},
+];
+
+let pickedClient = null;
+const cpInput = document.getElementById('clientPickerInput');
+const cpDropdown = document.getElementById('clientPickerDropdown');
+const cpWrap = document.getElementById('clientPickerWrap');
+const cpSelected = document.getElementById('clientPickerSelected');
+let cpHighlightIdx = -1;
+
+function renderClientDropdown(query) {
+  const q = (query || '').toLowerCase();
+  const matches = q ? CLIENT_DB.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.city.toLowerCase().includes(q) ||
+    c.state.toLowerCase().includes(q) ||
+    ('#'+c.id).includes(q) ||
+    c.id.includes(q)
+  ) : CLIENT_DB;
+  cpHighlightIdx = -1;
+  if (matches.length === 0) {
+    cpDropdown.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">No clients found — try a different spelling</div>';
+  } else {
+    cpDropdown.innerHTML = matches.map((c, i) => `
+      <div class="cp-item" data-idx="${CLIENT_DB.indexOf(c)}" onmousedown="pickClient(${CLIENT_DB.indexOf(c)})">
+        <div class="cp-item-name">${highlightMatch(c.name, q)}</div>
+        <div class="cp-item-detail">
+          <span style="font-weight:600;color:var(--steel)">#${c.id}</span>
+          <span>${c.city}, ${c.state}</span>
+          <span style="color:var(--green)">${c.depts.length} dept${c.depts.length>1?'s':''}</span>
+        </div>
+      </div>
+    `).join('');
   }
+  cpDropdown.classList.add('open');
+}
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query);
+  if (idx < 0) return text;
+  return text.slice(0, idx) + '<strong style="background:#FEFCE8;padding:0 1px">' + text.slice(idx, idx+query.length) + '</strong>' + text.slice(idx+query.length);
+}
+
+function pickClient(idx) {
+  const c = CLIENT_DB[idx];
+  pickedClient = c;
+  cpInput.value = '';
+  cpWrap.style.display = 'none';
+  document.getElementById('cpSelName').textContent = c.name;
+  document.getElementById('cpSelDetail').textContent = '#' + c.id + ' · ' + c.city + ', ' + c.state;
+  cpSelected.classList.add('show');
+  cpDropdown.classList.remove('open');
+  // Populate dept dropdown
+  const deptSel = document.getElementById('newDeptSelect');
+  deptSel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>' + c.depts.map(d => '<option>'+d+'</option>').join('');
+  deptSel.disabled = false;
+}
+
+function clearClientPick() {
+  pickedClient = null;
+  cpSelected.classList.remove('show');
+  cpWrap.style.display = '';
+  cpInput.value = '';
+  cpInput.focus();
+  document.getElementById('newDeptSelect').innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
+  document.getElementById('newDeptSelect').disabled = true;
+}
+
+cpInput.addEventListener('input', () => renderClientDropdown(cpInput.value));
+cpInput.addEventListener('focus', () => renderClientDropdown(cpInput.value));
+cpInput.addEventListener('blur', () => setTimeout(() => cpDropdown.classList.remove('open'), 150));
+cpInput.addEventListener('keydown', (e) => {
+  const items = cpDropdown.querySelectorAll('.cp-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); cpHighlightIdx = Math.min(cpHighlightIdx+1, items.length-1); items.forEach((it,i)=>it.classList.toggle('highlighted',i===cpHighlightIdx)); items[cpHighlightIdx]?.scrollIntoView({block:'nearest'}); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); cpHighlightIdx = Math.max(cpHighlightIdx-1, 0); items.forEach((it,i)=>it.classList.toggle('highlighted',i===cpHighlightIdx)); items[cpHighlightIdx]?.scrollIntoView({block:'nearest'}); }
+  if (e.key === 'Enter' && cpHighlightIdx >= 0 && items[cpHighlightIdx]) { e.preventDefault(); const idx = parseInt(items[cpHighlightIdx].dataset.idx); pickClient(idx); }
+  if (e.key === 'Escape') cpDropdown.classList.remove('open');
 });
 
 function revealNewOrderForm() {
@@ -1233,7 +1362,7 @@ function revealNewOrderForm() {
 }
 
 function submitNewWorkspace() {
-  const client = document.getElementById('newClientSelect').value;
+  const client = pickedClient ? pickedClient.name : '';
   const dept = document.getElementById('newDeptSelect').value;
   
   if (!client || !dept) {
