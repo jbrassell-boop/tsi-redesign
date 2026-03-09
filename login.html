@@ -118,6 +118,13 @@
         <span class="spinner"></span>
       </button>
     </form>
+
+    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Or explore with sample data</div>
+      <button type="button" class="btn-login" onclick="enterDemo()" style="background:var(--steel);height:36px;font-size:12px">
+        Enter Demo Mode
+      </button>
+    </div>
   </div>
 
   <div class="login-footer">
@@ -170,6 +177,14 @@
       btn.classList.remove('loading');
       btn.disabled = false;
     }
+  }
+
+  function enterDemo() {
+    localStorage.setItem('tsi_token', 'demo');
+    localStorage.setItem('tsi_user', JSON.stringify({
+      sFirstName: 'Demo', sLastName: 'User', sEmailAddress: 'demo@totalscope.com', lUserKey: 0
+    }));
+    window.location.href = 'dashboard.html';
   }
 
   // Focus email field on load
