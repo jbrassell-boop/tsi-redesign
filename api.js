@@ -4,11 +4,9 @@
 
 const API = (() => {
   // Change this ONE line when going to production
-  // Netlify proxy: /api/* → totalscopetestapi.mol-tech.com/api/*
-  // This avoids CORS issues since the browser talks to the same origin.
-  // For local dev, fall back to the direct URL.
-  const IS_NETLIFY = location.hostname.includes('netlify.app');
-  const BASE_URL = IS_NETLIFY ? '/api' : 'https://totalscopetestapi.mol-tech.com/api';
+  // API supports CORS — call directly from any origin.
+  // Netlify proxy is available as fallback at /api/* if needed.
+  const BASE_URL = 'https://totalscopetestapi.mol-tech.com/api';
 
   // ── Token Management ──────────────────────────────────
   function getToken() {
@@ -79,31 +77,42 @@ const API = (() => {
     }
 
     if (json.statusCode === 200 && json.data) {
-      // Auth response: data contains user, token, etc. directly
-      // or data.Token depending on structure
-      const authData = json.data;
-      const token = authData.Token?.token || authData.token;
-      const user = authData.User || authData.user;
+      const d = json.data;
+      console.log('[TSI Auth] Response data keys:', Object.keys(d));
 
-      if (token) {
+      // Check authentication result
+      if (d.isAuthenticated && d.token) {
+        setToken(d.token);
+        if (d.user) setUser(d.user);
+        console.log('[TSI Auth] Token stored, length:', d.token.length);
+        console.log('[TSI Auth] User:', d.user?.sFirstName, d.user?.sLastName, 'Key:', d.user?.lUserKey);
+        return { success: true, user: d.user, data: d };
+      }
+
+      // Also handle capitalized keys (Token.token / User) in case API varies
+      const token = d.Token?.token || d.token;
+      const user = d.User || d.user;
+      if (token && typeof token === 'string' && token.length > 20) {
         setToken(token);
         if (user) setUser(user);
-        console.log('[TSI Auth] Token stored, length:', token.length, 'starts with:', token.substring(0,20) + '...');
-        console.log('[TSI Auth] User:', user?.sFirstName, user?.sLastName, 'Key:', user?.lUserKey);
-        return { success: true, user: user, data: authData };
-      } else {
-        console.warn('[TSI Auth] No token found in response. authData keys:', Object.keys(authData));
+        return { success: true, user, data: d };
       }
-    }
 
-    // Check if 2FA is required
-    if (json.data && json.data.bIsTwoFactorAuthentication) {
-      return { success: false, requires2FA: true, data: json.data };
+      // 2FA required
+      if (d.bIsTwoFactorAuthentication) {
+        return { success: false, requires2FA: true, data: d };
+      }
+
+      // Not authenticated — return the API message
+      return {
+        success: false,
+        message: d.message || json.message || 'Login failed. Check your credentials.'
+      };
     }
 
     return {
       success: false,
-      message: json.message || json.data?.Message || 'Login failed. Check your credentials.'
+      message: json.message || 'Login failed. Check your credentials.'
     };
   }
 
