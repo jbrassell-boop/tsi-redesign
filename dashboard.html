@@ -315,7 +315,9 @@
         </div>
         <span style="opacity:0.5; margin: 0 4px;">|</span>
         Service Location
-        <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+        <select class="svc-select" id="svcLocationSelect" onchange="changeServiceLocation()"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
+        <span style="opacity:0.5; margin: 0 4px;">|</span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
@@ -578,65 +580,161 @@
 </div>
 
 
+<script src="api.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
-//  FAKE DATA — 47 in-house scopes with realistic info
+//  AUTH CHECK — redirect to login if no token
 // ═══════════════════════════════════════════════════════
-// cat = F(lexible), R(igid), I(nstrument), C(amera), K(carts), U(fuse)
-// size = L(arge), S(mall)
-// src = inhouse, outsourced, cogentix
-const SCOPES = [
-  {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'03/02/2026',client:'West Side GI Center',dept:'Endoscopy',wo:'NI26006558',type:'EC-3890LK',serial:'4201553',daysIn:6,status:'Ready to Ship',dateApproved:'03/03/2026',estDel:'03/08/2026',approved:310,tech:'Rob',notes:'Bending rubber replacement complete. QC passed. Ready for pickup.',quoted:310,invoice:'INV-26-0482',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered from ChipTech Medical. ETA unknown.',quoted:895,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-  {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair — cord replacement in progress.',quoted:640,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/27/2026',client:'Shreveport Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006518',type:'GIF-H190',serial:'3877201',daysIn:9,status:'Ready to Ship',dateApproved:'02/28/2026',estDel:'03/08/2026',approved:420,tech:'Rob',notes:'Light guide bundle replacement. Complete and tested. Shipping today.',quoted:420,invoice:'INV-26-0471',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/26/2026',client:'Tampa Minimally Invasive',dept:'Endoscopy',wo:'NI26006505',type:'GIF-Q165',serial:'3412906',daysIn:10,status:'In Repair',dateApproved:'02/27/2026',estDel:'03/14/2026',approved:1850,tech:'Rob',notes:'Multiple issues — angulation + bending rubber + fluid invasion. Major rebuild.',quoted:2100,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'02/25/2026',client:'Acadiana Endoscopy Center',dept:'Ambulatory Surgery',wo:'NI26006490',type:'GIF-H185',serial:'3015882',daysIn:11,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation complete. Quote sent 02/26. Follow up scheduled 03/01.',quoted:780,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/24/2026',client:'A.I.duPont Children Hospital',dept:'Endoscopy',wo:'NI26006478',type:'GIF-XP190N',serial:'4518203',daysIn:12,status:'Approved',dateApproved:'02/26/2026',estDel:'03/10/2026',approved:1100,tech:'Tom',notes:'Approved for repair. Waiting for parts — insertion tube on order.',quoted:1100,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'02/22/2026',client:'Yale-New Haven Hospital',dept:'Operating Room',wo:'NI26006460',type:'PCF-H180AL',serial:'2802563',daysIn:14,status:'In Repair',dateApproved:'02/23/2026',estDel:'03/08/2026',approved:560,tech:'Rob',notes:'Channel blockage. Cleaning and channel liner replacement in progress.',quoted:560,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete. Awaiting FedEx pickup.',quoted:380,invoice:'INV-26-0455',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/18/2026',client:'Tift Regional Medical Center',dept:'GI Lab',wo:'NI26006421',type:'GIF-H190',serial:'3801990',daysIn:18,status:'In Repair',dateApproved:'02/20/2026',estDel:'03/10/2026',approved:485,tech:'Rob',notes:'Second scope from Tift. Fluid invasion — distal end.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx. Tracking: 7892-4481-0033.',quoted:620,invoice:'INV-26-0430',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/10/2026',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NI26006355',type:'GIF-Q165',serial:'3412290',daysIn:26,status:'In Repair',dateApproved:'02/12/2026',estDel:'03/15/2026',approved:2800,tech:'Rob',notes:'Major rebuild — CCD chip + insertion tube + angulation cable.',quoted:2800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'02/06/2026',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NI26006312',type:'GIF-H185',serial:'3015882',daysIn:30,status:'Waiting on Inspection',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Received for evaluation. Initial inspection scheduled for this week.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006287',type:'CF-HQ190L',serial:'3912087',daysIn:33,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Angulation drum replacement complete. Final QC passed.',quoted:720,invoice:'INV-26-0410',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/28/2026',client:'Northside Hospital',dept:'Endoscopy',wo:'NI26006244',type:'EG-760Z',serial:'4450188',daysIn:39,status:'Shipped',dateApproved:'02/01/2026',estDel:'02/28/2026',approved:640,tech:'Rob',notes:'Shipped 02/27. Delivered and confirmed by client.',quoted:640,invoice:'INV-26-0385',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/22/2026',client:'Metro Health Hospital',dept:'GI Lab',wo:'NI26006190',type:'GIF-H190',serial:'3615401',daysIn:45,status:'Shipped',dateApproved:'01/25/2026',estDel:'02/20/2026',approved:510,tech:'Tom',notes:'Delivered successfully. No issues reported.',quoted:510,invoice:'INV-26-0360',cat:'F',size:'L',src:'inhouse',hot:false},
-  // Older items that are stuck / problematic
-  {dateIn:'01/03/2023',client:'Tri State ENT Products - PA',dept:'Office',wo:'NR23003001',type:'ENF GP',serial:'2007037',daysIn:1178,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Scope received for evaluation. Client has not responded to quote sent 01/15/2023.',quoted:350,invoice:'',cat:'I',size:'S',src:'inhouse',hot:true},
-  {dateIn:'06/13/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23164014',type:'GIF H190',serial:'2515171',daysIn:1196,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Quote sent. Client unreachable. Multiple voicemails left.',quoted:1800,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-  {dateIn:'06/20/2023',client:'Bhatti GI Consultants, PA',dept:'Office',wo:'NR23171010',type:'GF-UE160-AL5',serial:'1700599',daysIn:989,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold pending budget review for next fiscal year.',quoted:3200,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-  {dateIn:'07/06/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201718700001',type:'GIF Q140',serial:'2915229',daysIn:0,status:'In Repair',dateApproved:'07/06/2017',estDel:'TBD',approved:0,tech:'Rob',notes:'Internal loaner — mid-level repair. Low priority.',quoted:0,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'09/22/2017',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'201726500039',type:'11278AU1',serial:'2086426',daysIn:0,status:'In Repair',dateApproved:'09/22/2017',estDel:'TBD',approved:0,tech:'Tom',notes:'Internal loaner. Waiting for parts allocation.',quoted:0,invoice:'',cat:'R',size:'L',src:'inhouse',hot:false},
-  {dateIn:'11/08/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17312003',type:'GIF H180',serial:'2601945',daysIn:0,status:'Waiting on Inspection',dateApproved:'',estDel:'11/20/2017',approved:0,tech:'',notes:'Acquisition scope awaiting inspection.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'12/15/2017',client:'Total Scope Acquisitions',dept:'Office',wo:'NR17349037',type:'TJF 160VF',serial:'2302212',daysIn:0,status:'Approved',dateApproved:'12/15/2017',estDel:'12/15/2017',approved:0,tech:'Rob',notes:'Approved for refurbishment.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/04/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18004003',type:'EC 3490Li',serial:'A110180',daysIn:0,status:'In Repair',dateApproved:'01/05/2018',estDel:'TBD',approved:0,tech:'Tom',notes:'Major rebuild in progress.',quoted:0,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'03/09/2018',client:'TSI Loaner Repair',dept:'TSI Loaner Repair',wo:'NR18068030',type:'SIF Q180',serial:'2422434',daysIn:0,status:'In Repair',dateApproved:'03/09/2018',estDel:'TBD',approved:0,tech:'Rob',notes:'Loaner scope. Mid-level repair.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'04/13/2018',client:'Total Scope Acquisitions',dept:'Office',wo:'NR18103039',type:'PCF H180AL',serial:'2802563',daysIn:0,status:'Waiting for Approval',dateApproved:'04/13/2018',estDel:'04/13/2018',approved:0,tech:'',notes:'Evaluation completed. Awaiting internal approval.',quoted:0,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'05/22/2019',client:'Wills Eye Hospital - PA',dept:'Central Sterile',wo:'NR19142001',type:'GIF H185',serial:'3015882',daysIn:0,status:'Approved',dateApproved:'06/01/2019',estDel:'06/15/2019',approved:1250,tech:'Tom',notes:'Approved and in progress.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'08/15/2021',client:'Halifax Medical Center - FL',dept:'Sterile Processing',wo:'NR21227003',type:'GIF Q165',serial:'3412290',daysIn:0,status:'In Repair',dateApproved:'08/18/2021',estDel:'09/02/2021',approved:2800,tech:'Rob',notes:'Major rebuild — long-running repair.',quoted:2800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  // More recent active ones
-  {dateIn:'02/15/2026',client:'West Calcasieu Cameron Hospital',dept:'Surgery',wo:'NI26006401',type:'GIF-H190',serial:'3955012',daysIn:21,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Price increase discussion pending. Quote sent with new rates.',quoted:890,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'02/12/2026',client:'Baptist Health Louisville',dept:'GI Lab',wo:'NI26006378',type:'CF-H185L',serial:'3180045',daysIn:24,status:'In Repair',dateApproved:'02/14/2026',estDel:'03/12/2026',approved:1650,tech:'Rob',notes:'Major angulation rebuild. Parts received, assembly in progress.',quoted:1650,invoice:'',cat:'F',size:'L',src:'outsourced',hot:false},
-  {dateIn:'02/08/2026',client:'Erlanger Medical Center',dept:'Endoscopy',wo:'NI26006340',type:'GIF-XP190N',serial:'4380912',daysIn:28,status:'Ready to Ship',dateApproved:'02/10/2026',estDel:'03/08/2026',approved:440,tech:'Tom',notes:'Light bundle replaced. QC complete. Shipping Monday.',quoted:440,invoice:'INV-26-0402',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'02/05/2026',client:'Mountain View Regional',dept:'Operating Room',wo:'NI26006320',type:'GIF-H190',serial:'3720481',daysIn:31,status:'In Repair',dateApproved:'02/07/2026',estDel:'03/18/2026',approved:2200,tech:'Rob',notes:'Extensive damage — insertion tube + CCD + angulation. Major rebuild.',quoted:2500,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-  {dateIn:'01/30/2026',client:'Piedmont Athens Regional',dept:'Endoscopy',wo:'NI26006260',type:'CF-H185L',serial:'3005518',daysIn:37,status:'Ready to Ship',dateApproved:'02/05/2026',estDel:'03/07/2026',approved:550,tech:'Tom',notes:'Bending section repair. QC passed. Shipping tomorrow.',quoted:550,invoice:'INV-26-0395',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/25/2026',client:'Fort Sanders Regional',dept:'GI Lab',wo:'NI26006220',type:'EC-3890LK',serial:'4101337',daysIn:42,status:'Shipped',dateApproved:'01/28/2026',estDel:'02/25/2026',approved:380,tech:'Rob',notes:'Delivered 02/24. Client confirmed receipt.',quoted:380,invoice:'INV-26-0368',cat:'F',size:'S',src:'cogentix',hot:false},
-  {dateIn:'01/20/2026',client:'Augusta University Medical',dept:'Biomedical',wo:'NI26006185',type:'BF-UC180F',serial:'3550910',daysIn:47,status:'In Repair',dateApproved:'01/23/2026',estDel:'03/20/2026',approved:3100,tech:'Tom',notes:'EBUS scope. CCD replacement + insertion tube. Complex repair.',quoted:3400,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/15/2026',client:'AnMed Health Medical Center',dept:'Endoscopy',wo:'NI26006150',type:'GIF-H190',serial:'3801555',daysIn:52,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Evaluation done. Quote sent 01/18. Client reviewing with purchasing.',quoted:920,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold — evaluating whether to repair or purchase new.',quoted:1800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-  {dateIn:'01/05/2026',client:'Memorial Health Savannah',dept:'Surgery',wo:'NI26006055',type:'CF-HQ190L',serial:'3980122',daysIn:62,status:'Ready to Ship',dateApproved:'01/12/2026',estDel:'03/08/2026',approved:980,tech:'Rob',notes:'Insertion tube replacement complete. Final QC today.',quoted:980,invoice:'INV-26-0340',cat:'R',size:'L',src:'inhouse',hot:false},
-  {dateIn:'12/28/2025',client:'Grady Memorial Hospital',dept:'Endoscopy',wo:'NI25365820',type:'GIF-H190',serial:'3645003',daysIn:70,status:'Ready to Ship',dateApproved:'01/05/2026',estDel:'03/08/2026',approved:720,tech:'Tom',notes:'Light guide bundle + bending rubber. Completed. Awaiting shipping.',quoted:720,invoice:'INV-26-0330',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'12/20/2025',client:'Spartanburg Medical Center',dept:'GI Lab',wo:'NI25354780',type:'GIF-H185',serial:'3012508',daysIn:78,status:'Shipped',dateApproved:'01/02/2026',estDel:'02/15/2026',approved:560,tech:'Rob',notes:'Delivered and confirmed.',quoted:560,invoice:'INV-26-0312',cat:'F',size:'L',src:'cogentix',hot:false},
-  {dateIn:'12/15/2025',client:'Lexington Medical Center',dept:'Endoscopy',wo:'NI25349700',type:'EG-760Z',serial:'4470299',daysIn:83,status:'In Repair',dateApproved:'12/20/2025',estDel:'03/25/2026',approved:4200,tech:'Tom',notes:'Major rebuild — scope had extensive water damage. Insurance claim filed.',quoted:4500,invoice:'',cat:'R',size:'L',src:'outsourced',hot:false},
-  {dateIn:'12/10/2025',client:'CaroMont Regional Medical',dept:'Operating Room',wo:'NI25344650',type:'GIF-H190',serial:'3888740',daysIn:88,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client disputing quote. Escalated to Joseph Brassell.',quoted:2100,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-  {dateIn:'12/01/2025',client:'Vidant Medical Center',dept:'GI Lab',wo:'NI25335500',type:'CF-H185L',serial:'3101870',daysIn:97,status:'In Repair',dateApproved:'12/08/2025',estDel:'03/30/2026',approved:3800,tech:'Rob',notes:'Complete overhaul — every major component being replaced.',quoted:4200,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-  {dateIn:'11/20/2025',client:'McLeod Regional Medical',dept:'Endoscopy',wo:'NI25324400',type:'GIF-XP190N',serial:'4590122',daysIn:108,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Parts unavailable. Special order from Japan. ETA 6-8 weeks.',quoted:5500,invoice:'',cat:'F',size:'S',src:'inhouse',hot:true},
-  {dateIn:'11/10/2025',client:'Phoebe Putney Memorial',dept:'Surgery',wo:'NI25314300',type:'GIF-Q165',serial:'3350801',daysIn:118,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Multiple quotes sent. Client requesting line-item breakdown.',quoted:1650,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
-];
+API.requireAuth();
+
+// ═══════════════════════════════════════════════════════
+//  DATA — loaded from API (falls back to empty array)
+// ═══════════════════════════════════════════════════════
+let SCOPES = [];
+let DATA_SOURCE = 'loading'; // 'api', 'fallback', 'loading'
+
+// Map API response fields → our local field names
+function mapApiRow(r) {
+  // Parse date from API format (could be ISO or MM/DD/YYYY)
+  function fmtDate(d) {
+    if (!d) return '';
+    // If ISO format (2026-03-05T00:00:00), convert to MM/DD/YYYY
+    if (d.includes('-') && d.length >= 10) {
+      const dt = new Date(d);
+      if (!isNaN(dt)) return (dt.getMonth()+1).toString().padStart(2,'0') + '/' + dt.getDate().toString().padStart(2,'0') + '/' + dt.getFullYear();
+    }
+    return d;
+  }
+
+  // Guess category from scope type description
+  function guessCategory(typeDesc, rigidFlexible) {
+    if (rigidFlexible === 'R') return 'R';
+    if (rigidFlexible === 'I') return 'I';
+    if (rigidFlexible === 'C') return 'C';
+    return 'F'; // default flexible
+  }
+
+  // Guess size from diameter field
+  function guessSize(diameter) {
+    if (!diameter) return 'L';
+    const d = parseFloat(diameter);
+    return d && d < 10 ? 'S' : 'L';
+  }
+
+  // Determine source
+  function getSource(row) {
+    if (row.IsCogentix === 1) return 'cogentix';
+    if (row.VendorKey && row.VendorKey > 0) return 'outsourced';
+    return 'inhouse';
+  }
+
+  return {
+    dateIn: fmtDate(r.dtDateIn || r.DateIn),
+    client: r.sClientName1 || '',
+    dept: r.sDepartmentName || '',
+    wo: r.sWorkOrderNumber || '',
+    type: r.sScopeTypeDesc || '',
+    serial: r.sSerialNumber || '',
+    daysIn: parseInt(r.DaysLastIn) || 0,
+    status: r.sRepairStatus || r.ProgBarStatus || '',
+    dateApproved: fmtDate(r.dtAprRecvd || r.DateApproved),
+    estDel: fmtDate(r.EstDelDate) || '',
+    approved: parseFloat(r.Approved) || 0,
+    tech: r.ResponsibleTech || '',
+    notes: r.Note || '',
+    quoted: 0,
+    invoice: '',
+    cat: guessCategory(r.sScopeTypeDesc, r.sRigidOrFlexible),
+    size: guessSize(r.Diameter),
+    src: getSource(r),
+    hot: r.bHotList === true || r.bHotList === 1,
+    // Keep raw API fields for future use
+    _raw: r
+  };
+}
+
+// Load data from API
+async function loadDashboardData(filters) {
+  try {
+    document.getElementById('recordInfo').innerHTML = 'Connecting to API…';
+    const data = await API.getDashboardScopes(filters);
+
+    if (data && Array.isArray(data) && data.length > 0) {
+      SCOPES = data.map(mapApiRow);
+      DATA_SOURCE = 'api';
+      console.log('[TSI] Loaded ' + SCOPES.length + ' scopes from live API');
+    } else if (data && data.length === 0) {
+      SCOPES = [];
+      DATA_SOURCE = 'api';
+      console.log('[TSI] API returned 0 scopes (empty result set)');
+    } else {
+      throw new Error('Unexpected API response format');
+    }
+  } catch (err) {
+    if (err.status === 401) {
+      console.warn('[TSI] 401 — session expired. Redirecting to login.');
+      // Only redirect if we actually have no valid token at all
+      // Give user a chance to see what happened
+      DATA_SOURCE = 'expired';
+      SCOPES = getDemoData();
+      // Show a banner instead of immediately redirecting
+      document.getElementById('recordInfo').innerHTML = '<span style="color:var(--red);font-weight:600">Session expired — <a href="login.html" style="color:var(--navy)">Log in again</a></span>';
+      updateDataSourceBadge();
+      updateStats();
+      renderTable();
+      return;
+    }
+    console.warn('[TSI] API call failed, using demo data:', err.message);
+    DATA_SOURCE = 'fallback';
+    SCOPES = getDemoData();
+  }
+
+  // Update the topbar to show data source
+  updateDataSourceBadge();
+  updateStats();
+  renderTable();
+}
+
+function updateDataSourceBadge() {
+  const indicator = document.querySelector('.save-indicator');
+  if (!indicator) return;
+  if (DATA_SOURCE === 'api') {
+    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Live Data';
+    indicator.style.color = '#A7F3D0';
+  } else {
+    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data (API unavailable)';
+    indicator.style.color = '#FDE68A';
+  }
+}
+
+// Populate topbar user info from token
+function updateUserInfo() {
+  const user = API.getUser();
+  if (user) {
+    const avatar = document.querySelector('.topbar-avatar');
+    const welcome = document.querySelector('.topbar-welcome');
+    if (avatar && user.sFirstName) {
+      avatar.textContent = (user.sFirstName?.[0] || '') + (user.sLastName?.[0] || '');
+    }
+    if (welcome && user.sFirstName) {
+      welcome.innerHTML = 'Welcome back, <strong>' + user.sFirstName + '</strong>';
+    }
+  }
+}
+
+// Demo data fallback — keeps the page functional if API is unreachable
+function getDemoData() {
+  return [
+    {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered.',quoted:895,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+    {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair.',quoted:640,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete.',quoted:380,invoice:'INV-26-0455',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx.',quoted:620,invoice:'INV-26-0430',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold.',quoted:1800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+  ];
+}
 
 // ═══════════════════════════════════════════════════════
 //  STATE
@@ -1378,10 +1476,19 @@ function submitNewWorkspace() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  INIT
+//  SERVICE LOCATION SWITCHER — re-fetches data
 // ═══════════════════════════════════════════════════════
-updateStats();
-renderTable();
+function changeServiceLocation() {
+  const sel = document.getElementById('svcLocationSelect');
+  const locationKey = parseInt(sel.value) || 1;
+  loadDashboardData({ plServiceLocationKey: locationKey });
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT — load from API, then render
+// ═══════════════════════════════════════════════════════
+updateUserInfo();
+loadDashboardData();
 </script>
 </body>
 </html>

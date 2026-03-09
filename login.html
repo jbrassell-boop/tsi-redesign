@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Login | Total Scope, Inc.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:13px}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--steel:#44697D;
+      --border:#DDE3EE;--border-dk:#B8C8E0;
+      --bg:#E8EDF5;--muted:#8896AA;--text:#1A202C;--red:#B71234;
+    }
+
+    body{
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#E8EDF5 0%,#D0D9EB 50%,#BCC8DB 100%);
+      min-height:100vh;
+    }
+
+    .login-card{
+      width:400px;background:#fff;border-radius:12px;
+      box-shadow:0 12px 48px rgba(0,37,122,.12),0 2px 8px rgba(0,0,0,.06);
+      overflow:hidden;
+    }
+
+    .login-header{
+      background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);
+      padding:28px 32px;text-align:center;
+    }
+    .login-header .logo{
+      width:52px;height:52px;border-radius:50%;
+      background:rgba(255,255,255,.12);
+      display:inline-flex;align-items:center;justify-content:center;
+      margin-bottom:12px;
+    }
+    .login-header .logo svg{width:26px;height:26px}
+    .login-header h1{color:#fff;font-size:18px;font-weight:800;letter-spacing:.3px}
+    .login-header p{color:rgba(255,255,255,.55);font-size:11px;margin-top:4px;letter-spacing:1.5px;text-transform:uppercase}
+
+    .login-body{padding:32px}
+
+    .field{margin-bottom:20px}
+    .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .field input{
+      width:100%;height:40px;border:1.5px solid var(--border-dk);border-radius:8px;
+      padding:0 14px;font-size:13px;font-family:inherit;color:var(--text);
+      outline:none;transition:all .15s;
+    }
+    .field input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .field input::placeholder{color:#C0C8D4}
+
+    .error-msg{
+      display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;
+      padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:16px;
+      line-height:1.4;
+    }
+    .error-msg.show{display:block}
+
+    .expired-msg{
+      display:none;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;
+      padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:16px;
+      line-height:1.4;
+    }
+    .expired-msg.show{display:block}
+
+    .btn-login{
+      width:100%;height:42px;background:var(--navy);color:#fff;border:none;
+      border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+      font-family:inherit;transition:all .15s;letter-spacing:.3px;
+    }
+    .btn-login:hover{background:#1A3F8F;box-shadow:0 4px 12px rgba(0,37,122,.25)}
+    .btn-login:active{transform:scale(.98)}
+    .btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+
+    .login-footer{
+      padding:16px 32px;border-top:1px solid var(--border);
+      text-align:center;font-size:10px;color:var(--muted);
+    }
+
+    .spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
+    .btn-login.loading .btn-text{display:none}
+    .btn-login.loading .spinner{display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="M11 7v4l2.5 2.5"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+    <h1>Total Scope, Inc.</h1>
+    <p>Operations Portal</p>
+  </div>
+
+  <div class="login-body">
+    <div class="expired-msg" id="expiredMsg">Your session has expired. Please log in again.</div>
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="you@totalscope.com" autocomplete="username" required/>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required/>
+      </div>
+      <button type="submit" class="btn-login" id="loginBtn">
+        <span class="btn-text">Sign In</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </div>
+
+  <div class="login-footer">
+    Total Scope, Inc. &mdash; Medical Device Repair Leader &mdash; ISO 13485 Certified
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+  // If already logged in, go to dashboard
+  if (API.isLoggedIn()) {
+    window.location.href = 'dashboard.html';
+  }
+
+  // Show session expired message if redirected
+  if (new URLSearchParams(window.location.search).get('expired') === '1') {
+    document.getElementById('expiredMsg').classList.add('show');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const errorEl = document.getElementById('errorMsg');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    // Reset
+    errorEl.classList.remove('show');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const result = await API.login(email, password);
+      console.log('[TSI Login] Result:', result);
+
+      if (result.success) {
+        window.location.href = 'dashboard.html';
+      } else if (result.requires2FA) {
+        errorEl.textContent = 'Two-factor authentication is required. This feature is coming soon.';
+        errorEl.classList.add('show');
+      } else {
+        errorEl.textContent = result.message;
+        errorEl.classList.add('show');
+      }
+    } catch (err) {
+      console.error('[TSI Login] Error:', err);
+      errorEl.textContent = 'Could not reach the server. Check your connection and try again.';
+      errorEl.classList.add('show');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  // Focus email field on load
+  document.getElementById('email').focus();
+</script>
+
+</body>
+</html>

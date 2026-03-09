@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Contracts | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;background:#f0f2f5;color:#212529}
+    :root{
+      --navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;
+      --muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;
+      --bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;
+    }
+    .shell{display:flex;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
+    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sidebar-brand{padding:12px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .brand-logo{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .brand-logo svg{width:18px;height:18px}
+    .brand-text .t1{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3}
+    .brand-text .t2{font-size:9.5px;color:var(--muted);margin-top:1px}
+    .nav-group{padding:6px 0;flex:1}
+    .sidebar-footer{padding:8px 12px;border-top:1px solid var(--border);color:var(--muted);font-size:9.5px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;color:var(--label);font-size:11.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:var(--bg);color:var(--navy)}
+    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:700}
+    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+    .nav-item.active svg{opacity:1}
+
+    /* MAIN */
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:48px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}.topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+
+    /* TOP-LEVEL TABS (module tabs) */
+    .module-tabs{display:flex;padding:0 20px;background:#DDE6F5;border-bottom:2px solid var(--border-dk);flex-shrink:0}
+    .mtab{padding:7px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;user-select:none}
+    .mtab:hover{color:var(--navy)}
+    .mtab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:7px;padding:8px 20px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-shrink:0;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:5px;font-size:11px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
+    .btn svg{width:12px;height:12px}
+    .btn-navy{background:var(--navy);color:#fff;font-weight:600}
+    .btn-navy:hover{background:#001A5C}
+    .btn-outline{background:#fff;border:1.5px solid var(--border-dk);color:var(--label)}
+    .btn-outline:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
+    .btn-danger:hover{background:#FEE2E2}
+    .divider{width:1px;height:22px;background:var(--border);margin:0 3px}
+
+    /* SEGMENTED BUTTON (filter) */
+    .seg-group{display:flex;border:1.5px solid var(--border-dk);border-radius:5px;overflow:hidden;background:#fff}
+    .seg-btn{padding:0 10px;height:24px;font-size:10.5px;font-weight:600;border:none;background:#fff;color:var(--label);cursor:pointer;font-family:inherit;border-right:1px solid var(--border-dk);transition:all .1s;display:flex;align-items:center;gap:4px}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn:hover{background:var(--bg)}
+    .seg-btn.on{background:var(--navy);color:#fff}
+    .seg-btn .cnt{font-size:9px;opacity:.7}
+
+    /* STATUS STRIP */
+    .status-strip{display:flex;align-items:center;gap:6px;padding:6px 20px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+    .ss-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
+    .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
+    .ss-chip .ss-val{color:var(--text)}
+    .ss-active{background:#F0FDF4;border-color:#BBF7D0;color:var(--green)}
+    .ss-warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+    .ss-neutral{background:#F8FAFF;border-color:var(--border)}
+    .ss-info{background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)}
+
+    /* SPLIT LAYOUT */
+    .split{display:flex;flex:1;overflow:hidden}
+    .list-panel{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#fff;overflow:hidden}
+    .list-head{background:#E9EFF9;padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .list-search{padding:6px 10px;border-bottom:1px solid var(--border)}
+    .inp-search{width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 10px 0 28px;font-size:11px;outline:none;font-family:inherit;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat #fff;transition:border-color .15s}
+    .inp-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .list-scroll{flex:1;overflow-y:auto}
+    .list-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+    .list-item:hover{background:#D8E6FF}
+    .list-item.selected{background:#EDF2FF;border-left:4px solid var(--navy);padding-left:8px}
+    .li-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+    .li-name{font-size:12px;font-weight:700;color:var(--navy)}
+    .li-badge{display:inline-flex;padding:1px 7px;border-radius:8px;font-size:9.5px;font-weight:700}
+    .b-active{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
+    .b-expired{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}
+    .b-pending{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+    .b-draft{background:#F3F4F6;color:var(--muted);border:1px solid var(--border)}
+    .li-meta{font-size:10.5px;color:var(--muted);display:flex;gap:12px;margin-top:1px}
+    .li-meta b{color:var(--text);font-weight:600}
+    .list-footer{padding:4px 12px;border-top:1px solid var(--border);background:#FAFBFF;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);flex-shrink:0}
+
+    /* DETAIL PANEL */
+    .detail-panel{flex:1;overflow-y:auto;background:#f0f2f5;display:flex;flex-direction:column}
+
+    /* DETAIL HEADER */
+    .detail-header{padding:10px 16px;border-bottom:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .dh-left{display:flex;align-items:center;gap:10px}
+    .dh-left h2{font-size:14px;font-weight:800;color:var(--navy)}
+    .dh-id{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 10px;font-size:11px;font-weight:700;color:var(--steel)}
+    .dh-status{display:inline-flex;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700}
+    .dh-actions{display:flex;gap:6px}
+
+    /* DETAIL TABS */
+    .tab-bar{display:flex;padding:0 12px;background:#DDE6F5;border-bottom:2px solid var(--border-dk);overflow-x:auto;flex-shrink:0}
+    .tab{padding:6px 12px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;user-select:none}
+    .tab:hover{color:var(--navy)}
+    .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
+
+    /* TAB CONTENT */
+    .tab-content{display:none;flex:1;overflow-y:auto;padding:10px 14px}
+    .tab-content.show{display:block}
+
+    /* PANELS/CARDS */
+    .panel{background:#fff;border:1px solid var(--border-dk);border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,37,122,.05);margin-bottom:10px}
+    .panel-head{background:#E9EFF9;padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .panel-body{padding:12px 14px}
+
+    /* FORM GRID */
+    .fg{display:grid;gap:8px 14px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:1fr 1fr 1fr}
+    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .span2{grid-column:span 2}
+    .span3{grid-column:span 3}
+
+    .ff{display:flex;flex-direction:column;gap:2px}
+    .ff label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .req{color:var(--red)}
+    .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .inp.ro{background:#F7F9FC;color:var(--muted);cursor:default}
+    select.inp{cursor:pointer;height:27px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+    textarea.inp{height:52px;padding:5px 8px;resize:none;line-height:1.5}
+
+    /* TOGGLE */
+    .toggle-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+    .toggle-label{font-size:11px;color:var(--text)}
+    .toggle{position:relative;width:34px;height:19px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:#CBD5E0;border-radius:10px;cursor:pointer;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--navy)}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:8px 12px;text-align:left;white-space:nowrap}
+    td{padding:8px 12px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .tbl-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+
+    /* TWO-COL LAYOUT */
+    .two-col{display:flex;gap:10px;align-items:flex-start}
+    .col-l{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+    .col-r{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+
+    /* TRANSFER LIST */
+    .transfer{display:flex;gap:8px;align-items:stretch}
+    .transfer-box{flex:1;border:1px solid var(--border-dk);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+    .transfer-head{background:#E9EFF9;padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .transfer-list{flex:1;overflow-y:auto;max-height:200px}
+    .transfer-item{padding:7px 12px;font-size:11.5px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px}
+    .transfer-item:hover{background:#D8E6FF}
+    .transfer-item.sel{background:#EDF2FF;font-weight:600}
+    .transfer-arrows{display:flex;flex-direction:column;gap:4px;justify-content:center;padding:0 4px}
+    .transfer-arrows button{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border-dk);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--navy);transition:all .1s}
+    .transfer-arrows button:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+    /* KPI ROW */
+    .kpi-row{display:flex;gap:10px;margin-bottom:10px}
+    .kpi{flex:1;background:#fff;border:1px solid var(--border-dk);border-radius:8px;padding:10px 14px;text-align:center}
+    .kpi-val{font-size:18px;font-weight:800;color:var(--navy)}
+    .kpi-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.5px;margin-top:2px}
+    .kpi-val.green{color:var(--green)}
+    .kpi-val.red{color:var(--red)}
+    .kpi-val.amber{color:var(--amber)}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal-box{background:var(--card);border-radius:8px;width:700px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.25);overflow:hidden}
+    .modal-box.lg{width:860px}
+    .modal-box.sm{width:420px}
+    .modal-header{background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);padding:10px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-header h3{font-size:13px;font-weight:700}
+    .modal-close{width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{background:rgba(255,255,255,.25)}
+    .modal-body{padding:12px 16px;overflow-y:auto;flex:1}
+    .modal-footer{padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;overflow:hidden}
+    .btn-cancel{height:28px;padding:0 14px;border-radius:5px;border:1.5px solid var(--border-dk);background:#fff;color:var(--label);font-size:11px;cursor:pointer;font-family:inherit}
+    .btn-cancel:hover{background:var(--bg)}
+    .btn-save{height:28px;padding:0 16px;border-radius:5px;border:none;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+    .btn-save:hover{background:#001A5C}
+
+    /* EMPTY STATE */
+    .empty-state{padding:40px;text-align:center;color:var(--muted);font-size:12px;font-style:italic}
+
+    /* MODULE VIEWS */
+    .module-view{display:none;flex:1;overflow:hidden;flex-direction:column}
+    .module-view.show{display:flex}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left"><div class="topbar-avatar">JB</div><span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span></div>
+      <div class="topbar-center"><div class="topbar-title">Total Scope, Inc.</div><div class="topbar-sub">The Leader in Medical Device Repair</div></div>
+      <div class="topbar-right">Service Location <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select></div>
+    </header>
+
+    <!-- MODULE TABS -->
+    <div class="module-tabs">
+      <div class="mtab active" onclick="switchModule('open',this)">Open</div>
+      <div class="mtab" onclick="switchModule('invoices',this)">Invoices</div>
+      <div class="mtab" onclick="switchModule('reports',this)">Reports</div>
+      <div class="mtab" onclick="switchModule('costs',this)">Model Contract Costs</div>
+      <div class="mtab" onclick="switchModule('pending',this)">Pending Contracts</div>
+    </div>
+
+    <!-- ═══════════ MODULE: OPEN CONTRACTS ═══════════ -->
+    <div class="module-view show" id="mv-open">
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="document.getElementById('newContractModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Contract</button>
+        <div class="divider"></div>
+        <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg> Contract Types</button>
+        <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Extract</button>
+        <div class="divider"></div>
+        <div class="seg-group">
+          <button class="seg-btn on" onclick="filterStatus(this,'all')">All <span class="cnt">(48)</span></button>
+          <button class="seg-btn" onclick="filterStatus(this,'active')">Active <span class="cnt">(39)</span></button>
+          <button class="seg-btn" onclick="filterStatus(this,'expiring')">Expiring <span class="cnt">(5)</span></button>
+          <button class="seg-btn" onclick="filterStatus(this,'expired')">Expired <span class="cnt">(4)</span></button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn btn-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg> Save Changes</button>
+      </div>
+
+      <div class="split">
+        <!-- CONTRACT LIST -->
+        <div class="list-panel">
+          <div class="list-head">
+            <span>Contracts</span>
+            <span style="font-weight:500;font-size:10px;color:var(--muted)">48 records</span>
+          </div>
+          <div class="list-search">
+            <input class="inp-search" placeholder="Search contracts, client, PO#..." id="contractSearch" oninput="filterContracts(this.value)"/>
+          </div>
+          <div class="list-scroll" id="contractList">
+            <!-- Populated by JS -->
+          </div>
+          <div class="list-footer">
+            <span id="listCount">Showing 48 of 48</span>
+            <span>Click to view details</span>
+          </div>
+        </div>
+
+        <!-- CONTRACT DETAIL -->
+        <div class="detail-panel" id="detailPanel">
+          <div class="detail-header">
+            <div class="dh-left">
+              <h2 id="detailName">88th Medical Group - Capitated</h2>
+              <span class="dh-id" id="detailId">CNT-9022</span>
+              <span class="dh-status b-active" id="detailStatus">ACTIVE</span>
+            </div>
+            <div class="dh-actions">
+              <button class="btn btn-outline" title="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="btn btn-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg> Save</button>
+            </div>
+          </div>
+
+          <!-- STATUS STRIP -->
+          <div class="status-strip">
+            <div class="ss-chip ss-active"><span class="ss-label">Status</span><span class="ss-val">Active</span></div>
+            <div class="ss-chip ss-neutral"><span class="ss-label">Type</span><span class="ss-val">CPO</span></div>
+            <div class="ss-chip ss-neutral"><span class="ss-label">Frequency</span><span class="ss-val">Quarterly</span></div>
+            <div class="ss-chip ss-info"><span class="ss-label">Annual</span><span class="ss-val">$22,400</span></div>
+            <div class="ss-chip ss-neutral"><span class="ss-label">Term</span><span class="ss-val">11/14/2026</span></div>
+            <div class="ss-chip ss-neutral"><span class="ss-label">Sales Rep</span><span class="ss-val">J. Miller</span></div>
+          </div>
+
+          <!-- DETAIL TABS -->
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab('specs',this)">Specifications</div>
+            <div class="tab" onclick="switchTab('address',this)">Address</div>
+            <div class="tab" onclick="switchTab('departments',this)">Departments</div>
+            <div class="tab" onclick="switchTab('scopes',this)">Scopes <span class="tab-count">16</span></div>
+            <div class="tab" onclick="switchTab('repairs',this)">Repairs <span class="tab-count">8</span></div>
+            <div class="tab" onclick="switchTab('notes',this)">Notes <span class="tab-count">3</span></div>
+            <div class="tab" onclick="switchTab('amendments',this)">Amendments</div>
+            <div class="tab" onclick="switchTab('renewal',this)">Renewal</div>
+            <div class="tab" onclick="switchTab('invoices-detail',this)">Invoices <span class="tab-count">6</span></div>
+            <div class="tab" onclick="switchTab('affiliates',this)">Affiliates</div>
+            <div class="tab" onclick="switchTab('documents',this)">Documents <span class="tab-count">3</span></div>
+            <div class="tab" onclick="switchTab('expense',this)">Expense Trending</div>
+            <div class="tab" onclick="switchTab('reportcard',this)">Report Card</div>
+            <div class="tab" onclick="switchTab('commission',this)">Commission Rates</div>
+          </div>
+
+          <!-- TAB: SPECIFICATIONS -->
+          <div class="tab-content show" id="tab-specs">
+            <div class="two-col">
+              <div class="col-l">
+                <div class="panel">
+                  <div class="panel-head">Contract Information</div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" value="88th Medical Group - Capitated Service"/></div>
+                      <div class="ff"><label>Contract Type <span class="req">*</span></label>
+                        <select class="inp">
+                          <option selected>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option>
+                        </select>
+                      </div>
+                      <div class="ff"><label>Client <span class="req">*</span></label><input class="inp" value="88th Medical Group"/></div>
+                      <div class="ff"><label>Sales Representative <span class="req">*</span></label>
+                        <select class="inp"><option selected>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
+                      </div>
+                      <div class="ff"><label>Purchase Order #</label><input class="inp" value="PO-2025-1184"/></div>
+                      <div class="ff"><label>Invoice Frequency</label>
+                        <select class="inp"><option>None</option><option>18 Months</option><option>Annual</option><option>Monthly</option><option>Once</option><option selected>Quarterly</option></select>
+                      </div>
+                      <div class="ff"><label>Payment Terms</label>
+                        <select class="inp"><option>Due Upon Receipt</option><option>Net 15</option><option selected>Net 30</option><option>Net 45</option><option>Net 60</option><option>Net 90</option></select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-head">Notes</div>
+                  <div class="panel-body">
+                    <textarea class="inp" style="height:70px">Annual capitated service contract. Covers all flexible endoscopes in Biomedical Engineering dept. Renewal pending review by Q4.</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="col-r">
+                <div class="panel">
+                  <div class="panel-head">Term &amp; Financials</div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" type="date" value="2025-11-14"/></div>
+                      <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date" value="2026-11-14"/></div>
+                      <div class="ff"><label>Contract Total</label><input class="inp" value="$22,400.00" style="font-weight:700"/></div>
+                      <div class="ff"><label>Annual Value</label><input class="inp" value="$22,400.00" style="font-weight:700;color:var(--green)"/></div>
+                    </div>
+                    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+                      <div class="fg g2">
+                        <div class="ff"><label>Sales Tax</label>
+                          <select class="inp"><option selected>None</option><option>CAL</option><option>Cal - LA County</option><option>IDAHO</option><option>NJ</option><option>PA</option><option>Tennessee</option></select>
+                        </div>
+                        <div class="ff"><label>Currency</label><input class="inp ro" value="USD" readonly/></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-head">Options</div>
+                  <div class="panel-body">
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Auto-Renew</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Send Renewal Reminders</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Include on Client Portal</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Require PO for Repairs</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: ADDRESS -->
+          <div class="tab-content" id="tab-address">
+            <div class="two-col">
+              <div class="col-l">
+                <div class="panel">
+                  <div class="panel-head">Billing Address</div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff span2"><label>Address Line 1</label><input class="inp" value="88 Wright Patterson Ave"/></div>
+                      <div class="ff span2"><label>Address Line 2</label><input class="inp" value="Bldg 830, Suite 2"/></div>
+                      <div class="ff"><label>City</label><input class="inp" value="WPAFB"/></div>
+                      <div class="ff"><label>State</label><select class="inp"><option selected>OH</option><option>PA</option><option>CA</option><option>TX</option><option>FL</option><option>NY</option></select></div>
+                      <div class="ff"><label>ZIP</label><input class="inp" value="45433"/></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-r">
+                <div class="panel">
+                  <div class="panel-head">Shipping Address <button class="btn btn-outline" style="height:20px;font-size:9px" onclick="alert('Copied billing address')">Copy from Billing</button></div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff span2"><label>Address Line 1</label><input class="inp" value="88 Wright Patterson Ave"/></div>
+                      <div class="ff span2"><label>Address Line 2</label><input class="inp" value="Bldg 830, Suite 2"/></div>
+                      <div class="ff"><label>City</label><input class="inp" value="WPAFB"/></div>
+                      <div class="ff"><label>State</label><select class="inp"><option selected>OH</option><option>PA</option><option>CA</option><option>TX</option><option>FL</option><option>NY</option></select></div>
+                      <div class="ff"><label>ZIP</label><input class="inp" value="45433"/></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: DEPARTMENTS -->
+          <div class="tab-content" id="tab-departments">
+            <div class="transfer">
+              <div class="transfer-box">
+                <div class="transfer-head"><span>Assigned Departments</span><span style="font-weight:500;font-size:9px;color:var(--muted)">3 assigned</span></div>
+                <div class="transfer-list">
+                  <div class="transfer-item sel">Biomedical Engineering</div>
+                  <div class="transfer-item">Endoscopy Center</div>
+                  <div class="transfer-item">Pulmonology</div>
+                </div>
+              </div>
+              <div class="transfer-arrows">
+                <button title="Add">&rarr;</button>
+                <button title="Remove">&larr;</button>
+              </div>
+              <div class="transfer-box">
+                <div class="transfer-head"><span>Available Departments</span><span style="font-weight:500;font-size:9px;color:var(--muted)">12 available</span></div>
+                <div class="transfer-list">
+                  <div class="transfer-item">Anesthesiology</div>
+                  <div class="transfer-item">Cardiology</div>
+                  <div class="transfer-item">Central Sterile</div>
+                  <div class="transfer-item">Emergency Dept</div>
+                  <div class="transfer-item">Gastroenterology</div>
+                  <div class="transfer-item">General Surgery</div>
+                  <div class="transfer-item">ICU</div>
+                  <div class="transfer-item">Neurology</div>
+                  <div class="transfer-item">Oncology</div>
+                  <div class="transfer-item">Orthopedics</div>
+                  <div class="transfer-item">Radiology</div>
+                  <div class="transfer-item">Urology</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SCOPES -->
+          <div class="tab-content" id="tab-scopes">
+            <div class="panel">
+              <div class="panel-head">
+                <span>Covered Scopes (16)</span>
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-outline" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Extract</button>
+                  <button class="btn btn-outline" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
+                  <button class="btn btn-danger" style="height:22px;font-size:10px">Remove</button>
+                </div>
+              </div>
+              <div class="panel-body" style="padding:0;max-height:200px;overflow-y:auto">
+                <table>
+                  <thead><tr><th>Serial #</th><th>Model</th><th>Manufacturer</th><th>Coverage</th><th>Effective</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:600;color:var(--blue)">1011439</td><td>GF-UE160-AL5</td><td>Olympus</td><td>Full</td><td>11/14/2025</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">1030608</td><td>BF 1T240</td><td>Olympus</td><td>Full</td><td>11/14/2025</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">2007037</td><td>ENF GP</td><td>Olympus</td><td>Full</td><td>11/14/2025</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">2515171</td><td>GIF H180</td><td>Olympus</td><td>Labor Only</td><td>11/14/2025</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">3015882</td><td>CF H185</td><td>Olympus</td><td>Full</td><td>11/14/2025</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">2801142</td><td>TJF Q180V</td><td>Olympus</td><td>Full</td><td>11/14/2025</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <span>Available Scopes</span>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input class="inp" placeholder="Search serial #..." style="width:160px;height:22px;font-size:10px"/>
+                  <div class="toggle-row" style="padding:0"><label class="toggle" style="width:28px;height:16px"><input type="checkbox"/><span class="toggle-slider" style="border-radius:8px"></span></label><span class="toggle-label" style="font-size:10px">Include Inactive</span></div>
+                  <button class="btn btn-navy" style="height:22px;font-size:10px">Add</button>
+                  <button class="btn btn-outline" style="height:22px;font-size:10px">New</button>
+                </div>
+              </div>
+              <div class="panel-body" style="padding:0;max-height:160px;overflow-y:auto">
+                <table>
+                  <thead><tr><th>Serial #</th><th>Model</th><th>Manufacturer</th><th>Dept</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:600;color:var(--blue)">4210088</td><td>PCF H190L</td><td>Olympus</td><td>Endoscopy</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">4310215</td><td>GIF XP190N</td><td>Olympus</td><td>GI Lab</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">5500019</td><td>EG29-i10</td><td>Pentax</td><td>Pulmonology</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: REPAIRS -->
+          <div class="tab-content" id="tab-repairs">
+            <div class="panel">
+              <div class="panel-head"><span>Repair History (8)</span><button class="btn btn-outline" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Extract</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>W.O. #</th><th>Serial #</th><th>Model</th><th>Type</th><th>Date In</th><th>Status</th><th>Cost</th><th>Tech</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:600;color:var(--blue)">NC80094481</td><td>1011439</td><td>GF-UE160-AL5</td><td>Repair</td><td>02/14/2026</td><td><span style="color:var(--green);font-weight:600">Complete</span></td><td>$1,280</td><td>M. Torres</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">NC80094502</td><td>2007037</td><td>ENF GP</td><td>PM</td><td>01/22/2026</td><td><span style="color:var(--green);font-weight:600">Complete</span></td><td>$420</td><td>R. Chen</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">NC80094518</td><td>3015882</td><td>CF H185</td><td>Repair</td><td>03/01/2026</td><td><span style="color:var(--amber);font-weight:600">In Repair</span></td><td>$890</td><td>M. Torres</td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">NC80094533</td><td>1030608</td><td>BF 1T240</td><td>Evaluation</td><td>12/18/2025</td><td><span style="color:var(--green);font-weight:600">Complete</span></td><td>$0</td><td>S. Patel</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: NOTES -->
+          <div class="tab-content" id="tab-notes">
+            <div class="panel">
+              <div class="panel-head"><span>Contract Notes (3)</span><button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addNoteModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Date</th><th>Author</th><th>Note</th></tr></thead>
+                  <tbody>
+                    <tr><td style="white-space:nowrap">03/05/2026</td><td>J. Brassell</td><td>Renewal discussion scheduled with procurement for 03/20.</td></tr>
+                    <tr><td style="white-space:nowrap">01/15/2026</td><td>J. Miller</td><td>Client requested adding 3 new scopes to contract. Pending amendment.</td></tr>
+                    <tr><td style="white-space:nowrap">11/20/2025</td><td>J. Brassell</td><td>Initial contract setup complete. All 16 scopes verified and added.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: AMENDMENTS -->
+          <div class="tab-content" id="tab-amendments">
+            <div class="panel">
+              <div class="panel-head"><span>Amendments</span><button class="btn btn-navy" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Amendment</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Amendment #</th><th>Date</th><th>Type</th><th>Description</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:600">AMD-001</td><td>01/22/2026</td><td>Scope Addition</td><td>Added 3 ENF GP scopes per client request</td><td><button class="btn btn-outline" style="height:20px;font-size:9px">View</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><span>Amendment Scopes</span></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Amendment</th><th>Serial #</th><th>Model</th><th>Manufacturer</th><th>Action</th><th>Effective</th></tr></thead>
+                  <tbody>
+                    <tr><td>AMD-001</td><td style="font-weight:600;color:var(--blue)">4210088</td><td>PCF H190L</td><td>Olympus</td><td><span style="color:var(--green);font-weight:600">Added</span></td><td>02/01/2026</td></tr>
+                    <tr><td>AMD-001</td><td style="font-weight:600;color:var(--blue)">4310215</td><td>GIF XP190N</td><td>Olympus</td><td><span style="color:var(--green);font-weight:600">Added</span></td><td>02/01/2026</td></tr>
+                    <tr><td>AMD-001</td><td style="font-weight:600;color:var(--blue)">5500019</td><td>EG29-i10</td><td>Pentax</td><td><span style="color:var(--green);font-weight:600">Added</span></td><td>02/01/2026</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: RENEWAL -->
+          <div class="tab-content" id="tab-renewal">
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+              <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Extract</button>
+              <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
+              <div class="divider"></div>
+              <button class="btn btn-navy">Initialize Renewal</button>
+              <button class="btn btn-outline">Create Renewal Doc</button>
+              <button class="btn btn-navy">Finalize Renewal</button>
+            </div>
+            <div class="two-col">
+              <div class="col-l">
+                <div class="panel">
+                  <div class="panel-head"><span>Renewal Scopes</span><span style="font-weight:500;font-size:9px;color:var(--muted)">16 scopes</span></div>
+                  <div class="panel-body"><p class="empty-state" style="padding:20px">Click "Initialize Renewal" to populate renewal scopes from current contract.</p></div>
+                </div>
+              </div>
+              <div class="col-r">
+                <div class="panel">
+                  <div class="panel-head"><span>Available Scopes</span></div>
+                  <div class="panel-body" style="padding:0;max-height:180px;overflow-y:auto">
+                    <table>
+                      <thead><tr><th>Serial #</th><th>Model</th><th>Manufacturer</th></tr></thead>
+                      <tbody>
+                        <tr><td style="font-weight:600;color:var(--blue)">4210088</td><td>PCF H190L</td><td>Olympus</td></tr>
+                        <tr><td style="font-weight:600;color:var(--blue)">4310215</td><td>GIF XP190N</td><td>Olympus</td></tr>
+                        <tr><td style="font-weight:600;color:var(--blue)">5500019</td><td>EG29-i10</td><td>Pentax</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: INVOICES (within contract detail) -->
+          <div class="tab-content" id="tab-invoices-detail">
+            <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+              <select class="inp" style="width:200px"><option selected>All Departments</option><option>Biomedical Engineering</option><option>Endoscopy Center</option><option>Pulmonology</option></select>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><span>Invoices (6)</span></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Invoice #</th><th>Date</th><th>Department</th><th>Amount</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:600;color:var(--blue)">INV-40221</td><td>03/01/2026</td><td>Biomedical Engineering</td><td>$5,600.00</td><td><span style="color:var(--amber);font-weight:600">Pending</span></td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">INV-39884</td><td>12/01/2025</td><td>Biomedical Engineering</td><td>$5,600.00</td><td><span style="color:var(--green);font-weight:600">Paid</span></td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">INV-39602</td><td>09/01/2025</td><td>Biomedical Engineering</td><td>$5,600.00</td><td><span style="color:var(--green);font-weight:600">Paid</span></td></tr>
+                    <tr><td style="font-weight:600;color:var(--blue)">INV-39201</td><td>06/01/2025</td><td>Biomedical Engineering</td><td>$5,600.00</td><td><span style="color:var(--green);font-weight:600">Paid</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: AFFILIATES -->
+          <div class="tab-content" id="tab-affiliates">
+            <div class="panel">
+              <div class="panel-head"><span>Affiliates</span><button class="btn btn-navy" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Affiliate</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Affiliate Name</th><th>Type</th><th>Relationship</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td>Wright-Patterson Medical Center</td><td>Hospital</td><td>Parent Facility</td><td><button class="btn btn-outline" style="height:20px;font-size:9px">Edit</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: DOCUMENTS -->
+          <div class="tab-content" id="tab-documents">
+            <div class="panel">
+              <div class="panel-head"><span>Documents (3)</span><button class="btn btn-navy" style="height:22px;font-size:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Name</th><th>Date</th><th>Type</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Contract_CNT-9022_Signed.pdf</td><td>11/14/2025</td><td>Contract</td><td><button class="btn btn-outline" style="height:20px;font-size:9px">Download</button></td></tr>
+                    <tr><td><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Scope_Inventory_List.xlsx</td><td>11/14/2025</td><td>Attachment</td><td><button class="btn btn-outline" style="height:20px;font-size:9px">Download</button></td></tr>
+                    <tr><td><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Amendment_AMD-001.pdf</td><td>01/22/2026</td><td>Amendment</td><td><button class="btn btn-outline" style="height:20px;font-size:9px">Download</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: EXPENSE TRENDING -->
+          <div class="tab-content" id="tab-expense">
+            <div class="two-col">
+              <div class="col-l">
+                <div class="panel">
+                  <div class="panel-head">Expense Data</div>
+                  <div class="panel-body" style="padding:0">
+                    <table>
+                      <thead><tr><th>Month</th><th>Expenses</th></tr></thead>
+                      <tbody>
+                        <tr><td>Nov 2025</td><td>$420</td></tr>
+                        <tr><td>Dec 2025</td><td>$0</td></tr>
+                        <tr><td>Jan 2026</td><td>$420</td></tr>
+                        <tr><td>Feb 2026</td><td>$1,280</td></tr>
+                        <tr><td>Mar 2026</td><td>$890</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-r">
+                <div class="panel">
+                  <div class="panel-head">Trend Chart <div style="display:flex;gap:6px;align-items:center"><input class="inp" type="date" value="2025-11-01" style="height:22px;font-size:10px;width:120px"/><span style="font-size:10px;color:var(--muted)">to</span><input class="inp" type="date" value="2026-03-31" style="height:22px;font-size:10px;width:120px"/><button class="btn btn-outline" style="height:22px;font-size:10px">Refresh</button></div></div>
+                  <div class="panel-body" style="height:180px;display:flex;align-items:flex-end;gap:8px;padding:16px 20px 12px">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:38px;opacity:.7"></div>
+                      <span style="font-size:9px;color:var(--muted)">Nov</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:4px;opacity:.3"></div>
+                      <span style="font-size:9px;color:var(--muted)">Dec</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:38px;opacity:.7"></div>
+                      <span style="font-size:9px;color:var(--muted)">Jan</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:116px"></div>
+                      <span style="font-size:9px;color:var(--muted)">Feb</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                      <div style="background:var(--amber);width:100%;border-radius:4px 4px 0 0;height:80px"></div>
+                      <span style="font-size:9px;color:var(--muted)">Mar</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: REPORT CARD -->
+          <div class="tab-content" id="tab-reportcard">
+            <div class="kpi-row">
+              <div class="kpi"><div class="kpi-val">$22,400</div><div class="kpi-label">Contract Total</div></div>
+              <div class="kpi"><div class="kpi-val green">$16,800</div><div class="kpi-label">Revenue</div></div>
+              <div class="kpi"><div class="kpi-val">$3,010</div><div class="kpi-label">Consumption</div></div>
+              <div class="kpi"><div class="kpi-val green">86.6%</div><div class="kpi-label">Margin</div></div>
+              <div class="kpi"><div class="kpi-val amber">$3,010</div><div class="kpi-label">Expenses</div></div>
+            </div>
+            <div class="two-col">
+              <div class="col-l">
+                <div class="panel">
+                  <div class="panel-head">Efficiency Rating</div>
+                  <div class="panel-body" style="text-align:center;padding:20px">
+                    <div style="font-size:32px;font-weight:900;color:var(--green)">82.1%</div>
+                    <div style="font-size:10px;color:var(--muted);margin-top:4px">CONTRACT IS PERFORMING WELL</div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-head">Contract Index (Expenses)</div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff"><label>Total Expenses</label><input class="inp ro" value="$3,010.00" readonly/></div>
+                      <div class="ff"><label>Budget Allocation</label><input class="inp ro" value="$8,960.00" readonly/></div>
+                      <div class="ff"><label>Index Value</label><input class="inp ro" value="0.336" readonly style="font-weight:700;color:var(--green)"/></div>
+                      <div class="ff"><label>Percent Time Elapsed</label><input class="inp ro" value="33.3%" readonly/></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-r">
+                <div class="panel">
+                  <div class="panel-head">Contract Index (Consumption)</div>
+                  <div class="panel-body">
+                    <div class="fg g2">
+                      <div class="ff"><label>Total Consumption</label><input class="inp ro" value="$3,010.00" readonly/></div>
+                      <div class="ff"><label>Budget Allocation</label><input class="inp ro" value="$8,960.00" readonly/></div>
+                      <div class="ff"><label>Index Value</label><input class="inp ro" value="0.336" readonly style="font-weight:700;color:var(--green)"/></div>
+                      <div class="ff"><label>Percent Time Elapsed</label><input class="inp ro" value="33.3%" readonly/></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-head">Category Breakdown</div>
+                  <div class="panel-body" style="padding:0">
+                    <table>
+                      <thead><tr><th>Category</th><th>Amount</th><th>% of Total</th></tr></thead>
+                      <tbody>
+                        <tr><td>Repairs</td><td>$2,170</td><td>72.1%</td></tr>
+                        <tr><td>Preventive Maintenance</td><td>$840</td><td>27.9%</td></tr>
+                        <tr><td>Evaluations</td><td>$0</td><td>0%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: COMMISSION RATES -->
+          <div class="tab-content" id="tab-commission">
+            <div class="panel">
+              <div class="panel-head"><span>Commission Rates</span><button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addCommissionModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Rate</button></div>
+              <div class="panel-body" style="padding:0">
+                <table>
+                  <thead><tr><th>Effective Date</th><th>End Date</th><th>Sales Rep</th><th>Rate</th></tr></thead>
+                  <tbody>
+                    <tr><td>11/14/2025</td><td>11/14/2026</td><td>J. Miller</td><td style="font-weight:700;color:var(--navy)">8.5%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /detail-panel -->
+      </div><!-- /split -->
+    </div><!-- /mv-open -->
+
+    <!-- ═══════════ MODULE: INVOICES ═══════════ -->
+    <div class="module-view" id="mv-invoices">
+      <div class="toolbar">
+        <div class="seg-group">
+          <button class="seg-btn on">Create Invoices</button>
+          <button class="seg-btn">Prior Invoices</button>
+          <button class="seg-btn">Without Schedule</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        <div class="panel" style="max-width:700px;margin:0 auto">
+          <div class="panel-head">Create Invoices</div>
+          <div class="panel-body">
+            <div style="margin-bottom:14px">
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Invoice Type</label>
+              <div class="seg-group">
+                <button class="seg-btn on">Overdue / Current</button>
+                <button class="seg-btn">Upcoming</button>
+                <button class="seg-btn">Future</button>
+                <button class="seg-btn">All Others</button>
+              </div>
+            </div>
+            <div class="toggle-row" style="margin-bottom:14px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Expired Contracts</span></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline">Preview Invoices</button>
+              <button class="btn btn-navy">Create Invoices</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ MODULE: REPORTS ═══════════ -->
+    <div class="module-view" id="mv-reports">
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div class="panel">
+            <div class="panel-head">Covered Scopes Report</div>
+            <div class="panel-body">
+              <div class="fg" style="grid-template-columns:1fr">
+                <div class="ff"><label>As-Of Date</label><input class="inp" type="date" value="2026-03-09"/></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Summary Only</span></div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:12px">
+                <button class="btn btn-navy">Extract</button>
+                <button class="btn btn-outline">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Efficiency Extract</div>
+            <div class="panel-body">
+              <div class="fg" style="grid-template-columns:1fr">
+                <div class="ff"><label>Efficiency Metric</label><select class="inp"><option>Overall Efficiency</option><option>Labor Efficiency</option><option>Parts Efficiency</option></select></div>
+                <div class="ff"><label>Client</label><select class="inp"><option>All Clients</option><option>88th Medical Group</option><option>Halifax Medical</option><option>Wills Eye</option></select></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Include Expiring</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Include Inactive</span></div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:12px">
+                <button class="btn btn-navy">Extract</button>
+                <button class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Monthly Revenue</div>
+            <div class="panel-body">
+              <div class="fg" style="grid-template-columns:1fr">
+                <div class="ff"><label>Month</label><input class="inp" type="month" value="2026-03"/></div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:12px">
+                <button class="btn btn-navy">Extract</button>
+                <button class="btn btn-outline">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ MODULE: MODEL CONTRACT COSTS ═══════════ -->
+    <div class="module-view" id="mv-costs">
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;margin:0 auto">
+          <div class="panel">
+            <div class="panel-head">Import Pricing Data</div>
+            <div class="panel-body">
+              <div style="border:2px dashed var(--border-dk);border-radius:8px;padding:30px;text-align:center;margin-bottom:12px;background:#FAFBFF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" style="width:32px;height:32px;margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div style="font-size:12px;color:var(--label);margin-bottom:4px">Drag .xlsx file here</div>
+                <div style="font-size:10px;color:var(--muted)">Max 3MB &bull; Excel files only</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-outline">Upload Manually</button>
+                <button class="btn btn-navy" style="opacity:.5;pointer-events:none">Import</button>
+                <button class="btn btn-outline">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Export Pricing Data</div>
+            <div class="panel-body">
+              <div class="fg" style="grid-template-columns:1fr">
+                <div class="ff"><label>Instrument Type</label>
+                  <select class="inp"><option>-- Select --</option><option>Flexible Endoscope</option><option>Rigid Endoscope</option><option>Camera</option><option>Light Source</option><option>Insufflator</option></select>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:12px">
+                <button class="btn btn-navy">Export</button>
+                <button class="btn btn-outline">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ MODULE: PENDING CONTRACTS ═══════════ -->
+    <div class="module-view" id="mv-pending">
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="document.getElementById('newContractModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contract</button>
+        <div class="divider"></div>
+        <div class="toggle-row" style="padding:0"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Expired Contracts</span></div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        <div class="panel">
+          <div class="panel-head"><span>Pending Contracts (3)</span></div>
+          <div class="panel-body" style="padding:0">
+            <table>
+              <thead><tr><th>Contract Type</th><th>Contract Name</th><th>Client</th><th>Sales Rep</th><th>Created</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Fuse</td><td>Regional Medical - Full Service 2026</td><td>Regional Medical Center</td><td>R. Thompson</td><td>03/02/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
+                <tr><td>CPO</td><td>St. Mary's Hospital - Capitated</td><td>St. Mary's Hospital</td><td>J. Miller</td><td>02/28/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
+                <tr><td>Shared Risk</td><td>Valley Health - Shared Risk Pilot</td><td>Valley Health System</td><td>S. Chen</td><td>02/15/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- NEW CONTRACT MODAL -->
+<div class="modal-overlay" id="newContractModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box lg">
+    <div class="modal-header">
+      <h3>New Contract</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg g2" style="margin-bottom:12px">
+        <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" placeholder="Enter contract name..."/></div>
+        <div class="ff"><label>Contract Type <span class="req">*</span></label>
+          <select class="inp"><option>-- Select --</option><option>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option></select>
+        </div>
+        <div class="ff"><label>Client <span class="req">*</span></label>
+          <select class="inp"><option>-- Select Client --</option><option>88th Medical Group</option><option>Halifax Medical</option><option>Wills Eye</option><option>Tift Regional</option><option>Regional Medical Center</option><option>St. Mary's Hospital</option></select>
+        </div>
+        <div class="ff"><label>Sales Representative <span class="req">*</span></label>
+          <select class="inp"><option>-- Select --</option><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
+        </div>
+        <div class="ff"><label>Purchase Order #</label><input class="inp" placeholder="PO-XXXX-XXXX"/></div>
+        <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" type="date"/></div>
+        <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date"/></div>
+        <div class="ff"><label>Invoice Frequency</label>
+          <select class="inp"><option>None</option><option>Monthly</option><option>Quarterly</option><option>Annual</option><option>Once</option></select>
+        </div>
+        <div class="ff"><label>Payment Terms</label>
+          <select class="inp"><option>Net 30</option><option>Due Upon Receipt</option><option>Net 15</option><option>Net 45</option><option>Net 60</option><option>Net 90</option></select>
+        </div>
+        <div class="ff"><label>Contract Total</label><input class="inp" placeholder="$0.00"/></div>
+        <div class="ff span2"><label>Notes</label><textarea class="inp" placeholder="Optional notes..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Create Contract</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD NOTE MODAL -->
+<div class="modal-overlay" id="addNoteModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box sm">
+    <div class="modal-header">
+      <h3>Add Note</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ff"><label>Note <span class="req">*</span></label><textarea class="inp" style="height:100px" placeholder="Enter note..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD COMMISSION MODAL -->
+<div class="modal-overlay" id="addCommissionModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box sm">
+    <div class="modal-header">
+      <h3>Add Commission Rate</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg g2">
+        <div class="ff"><label>Effective Date <span class="req">*</span></label><input class="inp" type="date"/></div>
+        <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date"/></div>
+        <div class="ff"><label>Sales Rep <span class="req">*</span></label>
+          <select class="inp"><option>-- Select --</option><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
+        </div>
+        <div class="ff"><label>Commission Rate (%)</label><input class="inp" type="number" placeholder="0.0" step="0.5"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// CONTRACT DATA
+const contracts = [
+  {id:'CNT-9022',name:'88th Medical Group - Capitated',client:'88th Medical Group',type:'CPO',status:'Active',term:'11/14/2026',annual:'$22,400',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-8841',name:'Halifax Medical - Preventive Maint',client:'Halifax Medical',type:'Fuse',status:'Active',term:'08/22/2026',annual:'$14,500',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-7720',name:'Wills Eye - Full Service (Rigid)',client:'Wills Eye Hospital',type:'CPO',status:'Expired',term:'01/15/2026',annual:'$9,800',rep:'S. Chen',freq:'Monthly'},
+  {id:'CNT-9105',name:'Tift Regional - Flexible Service',client:'Tift Regional Medical',type:'Capitated Service',status:'Active',term:'12/31/2026',annual:'$31,000',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9110',name:'Memorial Health - Cart Service',client:'Memorial Health System',type:'Cart',status:'Active',term:'03/31/2027',annual:'$18,750',rep:'K. Davis',freq:'Annual'},
+  {id:'CNT-8990',name:'St. Luke\'s - Airway Mgmt',client:'St. Luke\'s University',type:'Airway',status:'Active',term:'06/30/2026',annual:'$8,200',rep:'R. Thompson',freq:'Quarterly'},
+  {id:'CNT-9045',name:'Christiana Care - Shared Risk',client:'Christiana Care Health',type:'Shared Risk',status:'Active',term:'09/15/2026',annual:'$42,000',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-8875',name:'Lehigh Valley - Rental Fleet',client:'Lehigh Valley Health',type:'Rental',status:'Active',term:'04/20/2026',annual:'$11,600',rep:'S. Chen',freq:'Monthly'},
+  {id:'CNT-7680',name:'Jefferson - Capitated (Expired)',client:'Jefferson Health',type:'CPO',status:'Expired',term:'12/01/2025',annual:'$27,500',rep:'K. Davis',freq:'Annual'},
+  {id:'CNT-9088',name:'Geisinger - Comprehensive Svc',client:'Geisinger Health',type:'Fuse',status:'Active',term:'10/01/2026',annual:'$38,200',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9120',name:'HCA Florida - Flex PM',client:'HCA Florida',type:'Capitated Service',status:'Active',term:'02/28/2027',annual:'$15,400',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-8950',name:'Bayhealth - Full Service',client:'Bayhealth Medical',type:'CPO',status:'Expiring',term:'04/15/2026',annual:'$19,800',rep:'S. Chen',freq:'Quarterly'},
+  {id:'CNT-9015',name:'Penn Medicine - Camera Fleet',client:'Penn Medicine',type:'Cart',status:'Active',term:'07/31/2026',annual:'$24,100',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-7755',name:'Main Line Health - Labor Only',client:'Main Line Health',type:'CPO',status:'Expired',term:'02/28/2026',annual:'$6,500',rep:'K. Davis',freq:'Quarterly'},
+  {id:'CNT-9135',name:'Virtua Health - Fuse Agreement',client:'Virtua Health',type:'Fuse',status:'Active',term:'01/15/2027',annual:'$21,300',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-8910',name:'Crozer Health - Rental + PM',client:'Crozer Health',type:'Rental',status:'Expiring',term:'04/30/2026',annual:'$13,200',rep:'S. Chen',freq:'Monthly'},
+  {id:'CNT-9078',name:'AtlantiCare - Capitated Svc',client:'AtlantiCare',type:'Capitated Service',status:'Active',term:'11/30/2026',annual:'$16,900',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9140',name:'Cooper University - Shared Risk',client:'Cooper University Health',type:'Shared Risk',status:'Active',term:'05/31/2027',annual:'$35,400',rep:'K. Davis',freq:'Annual'},
+  {id:'CNT-7801',name:'Tower Health - PM Only (Exp)',client:'Tower Health',type:'Fuse',status:'Expired',term:'11/30/2025',annual:'$7,200',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-9060',name:'WellSpan Health - Full Flex',client:'WellSpan Health',type:'CPO',status:'Active',term:'08/15/2026',annual:'$29,500',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9095',name:'Inspira Health - Airway Svc',client:'Inspira Health',type:'Airway',status:'Active',term:'10/31/2026',annual:'$9,400',rep:'S. Chen',freq:'Monthly'},
+  {id:'CNT-8985',name:'Holy Redeemer - Cart Rental',client:'Holy Redeemer Health',type:'Cart',status:'Expiring',term:'05/15/2026',annual:'$12,700',rep:'K. Davis',freq:'Quarterly'},
+  {id:'CNT-9150',name:'UPMC - Enterprise Capitated',client:'UPMC',type:'Capitated Service',status:'Active',term:'12/31/2027',annual:'$86,000',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-9025',name:'Nemours - Pediatric Flex',client:'Nemours Children\'s',type:'Fuse',status:'Active',term:'09/30/2026',annual:'$11,800',rep:'R. Thompson',freq:'Quarterly'},
+  {id:'CNT-8940',name:'Shore Medical - Shared Risk',client:'Shore Medical Center',type:'Shared Risk',status:'Expiring',term:'06/01/2026',annual:'$14,300',rep:'S. Chen',freq:'Annual'},
+  {id:'CNT-9165',name:'Doylestown Health - Full Svc',client:'Doylestown Health',type:'CPO',status:'Active',term:'03/15/2027',annual:'$17,600',rep:'K. Davis',freq:'Quarterly'},
+  {id:'CNT-9035',name:'Einstein Healthcare - Rental',client:'Einstein Healthcare',type:'Rental',status:'Active',term:'07/15/2026',annual:'$10,500',rep:'R. Thompson',freq:'Monthly'},
+  {id:'CNT-9170',name:'Hackensack Meridian - Enterprise',client:'Hackensack Meridian',type:'CPO',status:'Active',term:'06/30/2027',annual:'$72,000',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9055',name:'Capital Health - Airway PM',client:'Capital Health',type:'Airway',status:'Active',term:'08/31/2026',annual:'$7,800',rep:'S. Chen',freq:'Annual'},
+  {id:'CNT-8920',name:'Beebe Healthcare - Flex Svc',client:'Beebe Healthcare',type:'Fuse',status:'Active',term:'05/20/2026',annual:'$13,100',rep:'K. Davis',freq:'Quarterly'},
+  {id:'CNT-9180',name:'Reading Hospital - Cart Fleet',client:'Reading Hospital',type:'Cart',status:'Active',term:'02/15/2027',annual:'$20,400',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-9070',name:'ChristianaCare - Rigid Svc',client:'ChristianaCare',type:'CPO',status:'Active',term:'09/01/2026',annual:'$25,800',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-9185',name:'RWJ Barnabas - Shared Risk',client:'RWJ Barnabas Health',type:'Shared Risk',status:'Active',term:'04/30/2027',annual:'$45,000',rep:'S. Chen',freq:'Quarterly'},
+  {id:'CNT-8960',name:'Grand View Health - Rental',client:'Grand View Health',type:'Rental',status:'Expiring',term:'04/10/2026',annual:'$8,900',rep:'K. Davis',freq:'Monthly'},
+  {id:'CNT-9190',name:'Abington Hospital - Capitated',client:'Abington Hospital',type:'Capitated Service',status:'Active',term:'01/31/2027',annual:'$19,200',rep:'J. Miller',freq:'Quarterly'},
+  {id:'CNT-9080',name:'Deborah Heart - PM Flex',client:'Deborah Heart & Lung',type:'Fuse',status:'Active',term:'10/15/2026',annual:'$6,700',rep:'R. Thompson',freq:'Annual'},
+  {id:'CNT-9200',name:'Temple Health - Enterprise',client:'Temple Health',type:'CPO',status:'Active',term:'07/31/2027',annual:'$58,500',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-9042',name:'Bryn Mawr Hospital - Airway',client:'Bryn Mawr Hospital',type:'Airway',status:'Active',term:'06/15/2026',annual:'$8,600',rep:'S. Chen',freq:'Quarterly'},
+  {id:'CNT-9210',name:'Hunterdon Medical - Cart Svc',client:'Hunterdon Medical',type:'Cart',status:'Active',term:'03/31/2027',annual:'$11,200',rep:'K. Davis',freq:'Annual'},
+  {id:'CNT-8930',name:'Chester County - Full Flex',client:'Chester County Hospital',type:'CPO',status:'Active',term:'04/30/2026',annual:'$22,100',rep:'R. Thompson',freq:'Quarterly'},
+  {id:'CNT-9220',name:'Morristown Medical - Shared Risk',client:'Morristown Medical',type:'Shared Risk',status:'Active',term:'08/31/2027',annual:'$33,000',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-9050',name:'Paoli Hospital - Rental + PM',client:'Paoli Hospital',type:'Rental',status:'Active',term:'07/01/2026',annual:'$9,300',rep:'S. Chen',freq:'Quarterly'},
+  {id:'CNT-9230',name:'Overlook Medical - Fuse Svc',client:'Overlook Medical',type:'Fuse',status:'Active',term:'05/15/2027',annual:'$15,700',rep:'K. Davis',freq:'Annual'},
+  {id:'CNT-9100',name:'Lankenau Medical - Capitated',client:'Lankenau Medical',type:'Capitated Service',status:'Active',term:'11/15/2026',annual:'$20,800',rep:'R. Thompson',freq:'Quarterly'},
+  {id:'CNT-9240',name:'Raritan Bay Medical - Cart',client:'Raritan Bay Medical',type:'Cart',status:'Active',term:'06/30/2027',annual:'$14,100',rep:'J. Miller',freq:'Monthly'},
+  {id:'CNT-9065',name:'Riddle Hospital - PM Only',client:'Riddle Hospital',type:'Fuse',status:'Active',term:'08/01/2026',annual:'$5,400',rep:'S. Chen',freq:'Annual'},
+  {id:'CNT-9250',name:'JFK University Med - Enterprise',client:'JFK University Medical',type:'CPO',status:'Active',term:'09/30/2027',annual:'$41,000',rep:'K. Davis',freq:'Quarterly'},
+  {id:'CNT-9115',name:'Phoenixville Hospital - Airway',client:'Phoenixville Hospital',type:'Airway',status:'Active',term:'12/15/2026',annual:'$7,100',rep:'R. Thompson',freq:'Monthly'},
+];
+
+// RENDER CONTRACT LIST
+function renderList(data) {
+  const el = document.getElementById('contractList');
+  el.innerHTML = data.map((c,i) => {
+    const bc = c.status==='Active'?'b-active':c.status==='Expired'?'b-expired':c.status==='Expiring'?'b-pending':'b-draft';
+    return `<div class="list-item${i===0?' selected':''}" onclick="selectContract(this,${i})" data-idx="${i}">
+      <div class="li-top"><span class="li-name">${c.name}</span><span class="li-badge ${bc}">${c.status.toUpperCase()}</span></div>
+      <div class="li-meta"><span>${c.id}</span><span>${c.type}</span><span><b>${c.annual}</b>/yr</span></div>
+      <div class="li-meta"><span>Term: ${c.term}</span><span>${c.rep}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('listCount').textContent = `Showing ${data.length} of ${contracts.length}`;
+}
+
+// SELECT CONTRACT
+function selectContract(el, idx) {
+  document.querySelectorAll('.list-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  const c = contracts[idx];
+  document.getElementById('detailName').textContent = c.name;
+  document.getElementById('detailId').textContent = c.id;
+  const s = document.getElementById('detailStatus');
+  s.textContent = c.status.toUpperCase();
+  s.className = 'dh-status '+(c.status==='Active'?'b-active':c.status==='Expired'?'b-expired':c.status==='Expiring'?'b-pending':'b-draft');
+}
+
+// FILTER CONTRACTS
+function filterContracts(q) {
+  q = q.toLowerCase();
+  const filtered = contracts.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.client.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
+  renderList(filtered);
+}
+
+// STATUS FILTER
+function filterStatus(el, status) {
+  el.closest('.seg-group').querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if(status==='all') renderList(contracts);
+  else if(status==='active') renderList(contracts.filter(c=>c.status==='Active'));
+  else if(status==='expiring') renderList(contracts.filter(c=>c.status==='Expiring'));
+  else if(status==='expired') renderList(contracts.filter(c=>c.status==='Expired'));
+}
+
+// SWITCH TAB (detail)
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('show'));
+  document.querySelectorAll('.tab-bar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const tc = document.getElementById('tab-'+id);
+  if(tc) tc.classList.add('show');
+}
+
+// SWITCH MODULE TAB
+function switchModule(id, el) {
+  document.querySelectorAll('.module-view').forEach(v=>v.classList.remove('show'));
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const mv = document.getElementById('mv-'+id);
+  if(mv) mv.classList.add('show');
+}
+
+// INIT
+renderList(contracts);
+</script>
+</body>
+</html>
