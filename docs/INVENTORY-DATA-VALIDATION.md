@@ -138,12 +138,19 @@ Please confirm the following against the live database:
 
 ---
 
-## Questions for Developer
+## Answers from TSI (Joe Brassell)
 
-1. **Is `lInventoryKey` unique across locations?** Or could the same key exist in both North and South databases?
-2. **Size record ownership**: Are sizes tied to an item+location, or just an item? (i.e., does the same item in North and South share sizes or have separate size records?)
-3. **Real-time stock**: Does `nLevelCurrent` reflect real-time on-hand quantity, or is it a periodic snapshot?
-4. **Part value calculation**: Is `dblPartValue` always `nLevelCurrent × dblUnitCost`, or can it differ?
+1. **`lInventoryKey` is NOT unique across locations.** North's database has a 20-year head start. When South (Nashville) was created, keys started at 1 again. The same key value can exist in both databases pointing to completely different items. **Service location context is always required when querying inventory.**
+
+2. **Sizes are separate per location.** Each location maintains its own size records, bin numbers, and stock levels. This is necessary for inventory audits — South can't reconcile its physical counts if North's products are mixed in. Same item name may appear in both locations, but each has independent size records.
+
+3. **Stock levels (`nLevelCurrent`) are real-time** but need to be audited. The values reflect actual on-hand quantities as tracked by the system, but physical audits are needed to verify accuracy.
+
+4. **Part value is always `qty × cost`** — `dblPartValue = nLevelCurrent × dblUnitCost`. No exceptions.
+
+### Key Implication for Development
+
+**Every inventory API call must include `plServiceLocationKey`.** Without it, you cannot determine which location's data you're working with. The frontend uses a service location dropdown (Upper Chichester = 1, Nashville = 2) and must pass this value on every inventory request.
 
 ---
 
