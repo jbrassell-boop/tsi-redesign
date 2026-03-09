@@ -285,6 +285,51 @@ const API = (() => {
     return get('/Supplier/GetAllSupplierList?plServiceLocationKey=' + (serviceLocationKey || 1));
   }
 
+  // ── Departments (by client) ─────────────────────────
+  async function getDepartmentsByClient(clientKey) {
+    return get('/Client/GetDepartmentList?plClientKey=' + clientKey);
+  }
+
+  // ── Product Sales ─────────────────────────────────
+  async function getInvoiceNumbers(productSaleKey, deptKey, includeCanceled) {
+    return get('/ProductSales/GetAllInvoiceNumber?plProductSaleKey=' + (productSaleKey || 0) +
+      '&plDepartmentKey=' + (deptKey || 0) +
+      '&pbIncludeCanceled=' + (includeCanceled || false));
+  }
+
+  async function getSalesReps() {
+    return get('/ProductSales/GetSalesRep?plSalesRepKey=0&pbIncludeBlank=true&pbIncludeAll=false&psActiveFlag=A&plCompanyKey=0&plSalesRepKeyToInclude=0');
+  }
+
+  async function getInventoryPricing() {
+    return get('/ProductSales/GetAllInventoryPrice?plInventoryPricingListKey=0&pbIncludeBlank=true&pbIncludeInactive=false&plInventoryPricingListKeyToInclude=0');
+  }
+
+  async function addProductSale(data) {
+    return post('/ProductSales/AddProductSales', data);
+  }
+
+  async function updateProductSale(data) {
+    return post('/ProductSales/UpdateProductSale', data);
+  }
+
+  async function addProductSaleInventory(data) {
+    return post('/ProductSales/AddProductSaleInventory', data);
+  }
+
+  async function getProductSaleInventory(productSaleKey) {
+    return get('/ProductSales/GetProductSaleInventory?plProductSaleKey=' + productSaleKey);
+  }
+
+  async function deleteProductSaleInventory(key) {
+    return del('/ProductSales/DeleteProductSaleInventory?plProductSaleInventoryKey=' + key);
+  }
+
+  async function searchProductSales(invoiceNum, poNum, desc) {
+    return get('/ProductSales/ProductSalesSearch?psInvoiceNumber=' + (invoiceNum || '') +
+      '&psPONumber=' + (poNum || '') + '&psDescription2=' + (desc || ''));
+  }
+
   // ═══════════════════════════════════════════════════════
   //  Public Interface
   // ═══════════════════════════════════════════════════════
@@ -331,6 +376,20 @@ const API = (() => {
 
     // Suppliers
     getSuppliers,
+
+    // Product Sales
+    getInvoiceNumbers,
+    getSalesReps,
+    getInventoryPricing,
+    addProductSale,
+    updateProductSale,
+    addProductSaleInventory,
+    getProductSaleInventory,
+    deleteProductSaleInventory,
+    searchProductSales,
+
+    // Departments (by client)
+    getDepartmentsByClient,
 
     // Config
     BASE_URL

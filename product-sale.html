@@ -257,32 +257,22 @@
         <div class="hg-item" style="flex:1.5;">
           <span class="hg-label">Client *</span>
           <select class="fi" id="hdrClient">
-            <option value="" disabled selected>-- Select Client --</option>
-            <option>88th Medical Group</option>
-            <option>A.I.duPont Children Hospital</option>
-            <option>Mercy Health</option>
-            <option>Nashville General Hospital</option>
-            <option>Tift Regional Medical Center</option>
+            <option value="" disabled selected>Loading clients...</option>
           </select>
         </div>
         <div class="hg-item">
           <span class="hg-label">Department *</span>
           <select class="fi" id="hdrDept">
-            <option value="" disabled selected>-- Select Dept --</option>
-            <option>Biomedical Engineering</option>
-            <option>Central Sterile</option>
-            <option>Endoscopy</option>
-            <option>GI Lab</option>
-            <option>Surgery</option>
+            <option value="" disabled selected>-- Select Client first --</option>
           </select>
         </div>
         <div class="hg-item">
           <span class="hg-label">Sales Rep *</span>
-          <select class="fi"><option>Brandi Cook</option><option>John Doe</option></select>
+          <select class="fi" id="hdrSalesRep"><option value="" disabled selected>Loading...</option></select>
         </div>
         <div class="hg-item">
           <span class="hg-label">Price List</span>
-          <select class="fi"><option>-- none --</option><option>Tier 1 Pricing</option></select>
+          <select class="fi" id="hdrPriceList"><option value="0">-- none --</option></select>
         </div>
         <div class="hg-item">
           <span class="hg-label">Quote Date</span>
@@ -537,6 +527,7 @@
   </div><!-- /.main -->
 </div><!-- /.shell -->
 
+<script src="api.js"></script>
 <script>
 const INVENTORY_CATS = [
   "Clamps",
@@ -739,110 +730,150 @@ const INVENTORY_DB = [
   }
 
   // ═══════════════════════════════════════════════════════
-  //  INIT & DEPARTMENT DATA LOAD
+  //  API-WIRED INIT
   // ═══════════════════════════════════════════════════════
-  
-  // Mock Database mapping Departments to physical addresses
-  const DEPT_ADDRESS_MAP = {
-    "Biomedical Engineering": {
-      add1: "800 North Limestone Street",
-      add2: "Suite B-12",
-      city: "Springfield",
-      state: "OH",
-      zip: "45503",
-      email: "invoices.biomed@springfield-medical.org"
-    },
-    "Central Sterile": {
-      add1: "1500 East Medical Center Drive",
-      add2: "Rear Receiving Dock",
-      city: "Nashville",
-      state: "TN",
-      zip: "37232",
-      email: "central.sterile@hca.com"
-    },
-    "Endoscopy": {
-      add1: "2010 West 86th Street",
-      add2: "Outpatient Pavilion",
-      city: "Tampa",
-      state: "FL",
-      zip: "33614",
-      email: "endo-billing@flhealth.org"
-    },
-    "GI Lab": {
-      add1: "5000 University Drive",
-      add2: "Campus Box 8021",
-      city: "Miami",
-      state: "FL",
-      zip: "33146",
-      email: "gi.lab@university.edu"
-    },
-    "Surgery": {
-      add1: "100 Hospital Drive",
-      add2: "Main Operating Room",
-      city: "Tifton",
-      state: "GA",
-      zip: "31794",
-      email: "surgery-accounts@tiftregional.com"
-    }
-  };
 
-  function loadDepartmentAddress(deptName) {
-    const data = DEPT_ADDRESS_MAP[deptName];
-    if (!data) return;
-    
-    // Auto-fill Shipping
-    document.getElementById('shipAdd1').value = data.add1;
-    document.getElementById('shipAdd2').value = data.add2;
-    document.getElementById('shipCity').value = data.city;
-    document.getElementById('shipState').value = data.state;
-    document.getElementById('shipZip').value = data.zip;
-    
-    // Auto-fill Billing (Mocking "Same as Shipping" behavior naturally)
-    document.getElementById('chkSameAsShipping').checked = true;
-    document.getElementById('billAdd1').value = data.add1;
-    document.getElementById('billAdd2').value = data.add2;
-    document.getElementById('billCity').value = data.city;
-    document.getElementById('billState').value = data.state;
-    document.getElementById('billZip').value = data.zip;
-    
-    // The Billing Email is usually specific
-    const emailInput = document.getElementById('billEmail');
-    if(emailInput) emailInput.value = data.email;
+  let allClients = [];       // cached from API
+  let allInventory = [];     // cached from API
+  let serviceLocationKey = 1;
+
+  // ── Populate Client Dropdown ──
+  async function loadClients() {
+    const sel = document.getElementById('hdrClient');
+    try {
+      const data = await API.getAllClients(serviceLocationKey);
+      allClients = Array.isArray(data) ? data : [];
+      sel.innerHTML = '<option value="" disabled selected>-- Select Client --</option>';
+      allClients.forEach(c => {
+        sel.innerHTML += `<option value="${c.lClientKey}">${c.sClientName1}</option>`;
+      });
+      console.log('[PS] Loaded', allClients.length, 'clients from API');
+    } catch (e) {
+      console.warn('[PS] Client API failed, using demo fallback:', e.message);
+      sel.innerHTML = '<option value="" disabled selected>-- Select Client --</option><option value="demo">Demo Client</option>';
+    }
   }
 
-  // Bind the Department dropdown to trigger the address load manually
-  document.getElementById('hdrDept').addEventListener('change', function(e) {
-    loadDepartmentAddress(e.target.value);
+  // ── Populate Departments when Client changes ──
+  async function loadDepartments(clientKey) {
+    const sel = document.getElementById('hdrDept');
+    sel.innerHTML = '<option value="" disabled selected>Loading...</option>';
+    try {
+      const data = await API.getDepartmentsByClient(clientKey);
+      const depts = Array.isArray(data) ? data : [];
+      sel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
+      depts.forEach(d => {
+        sel.innerHTML += `<option value="${d.lDepartmentKey}">${d.sDepartmentName}</option>`;
+      });
+      console.log('[PS] Loaded', depts.length, 'departments for client', clientKey);
+    } catch (e) {
+      console.warn('[PS] Department API failed:', e.message);
+      sel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option><option value="demo">Demo Dept</option>';
+    }
+  }
+
+  // ── Populate Sales Reps ──
+  async function loadSalesReps() {
+    const sel = document.querySelector('#hdrSalesRep');
+    if (!sel) return;
+    try {
+      const data = await API.getSalesReps();
+      const reps = Array.isArray(data) ? data : [];
+      sel.innerHTML = '<option value="" disabled selected>-- Select --</option>';
+      reps.forEach(r => {
+        sel.innerHTML += `<option value="${r.lSalesRepKey}">${r.sSalesRepName || r.sName || 'Rep ' + r.lSalesRepKey}</option>`;
+      });
+      console.log('[PS] Loaded', reps.length, 'sales reps');
+    } catch (e) {
+      console.warn('[PS] Sales rep API failed:', e.message);
+    }
+  }
+
+  // ── Populate Price Lists ──
+  async function loadPriceLists() {
+    const sel = document.querySelector('#hdrPriceList');
+    if (!sel) return;
+    try {
+      const data = await API.getInventoryPricing();
+      const lists = Array.isArray(data) ? data : [];
+      sel.innerHTML = '<option value="0">-- none --</option>';
+      lists.forEach(p => {
+        sel.innerHTML += `<option value="${p.lInventoryPricingListKey}">${p.sPricingListName || p.sDescription || 'List ' + p.lInventoryPricingListKey}</option>`;
+      });
+      console.log('[PS] Loaded', lists.length, 'price lists');
+    } catch (e) {
+      console.warn('[PS] Price list API failed:', e.message);
+    }
+  }
+
+  // ── Load Real Inventory into Picker ──
+  async function loadInventoryFromAPI() {
+    try {
+      const data = await API.getInventoryList({ Pagination: { PageNumber: 1, PageSize: 500 } });
+      const items = Array.isArray(data) ? data : [];
+      // Map API data into our picker format
+      allInventory = items.map(i => ({
+        key: i.lInventoryKey,
+        sku: String(i.lInventoryKey),
+        name: i.sDescription || i.sInventoryName || ('Item ' + i.lInventoryKey),
+        lot: 'Lot: ' + (i.sLotNumber || i.lInventoryKey),
+        price: i.dblUnitCost || i.dblUnitPrice || 0,
+        category: i.sInventoryCategory || i.sCategory || 'General',
+        stock: i.lQuantityOnHand || 0
+      }));
+
+      // Build categories from real data
+      const catSet = new Set(allInventory.map(i => i.category));
+      INVENTORY_CATS.length = 0;
+      [...catSet].sort().forEach(c => INVENTORY_CATS.push(c));
+
+      // Merge into INVENTORY_DB for the picker
+      INVENTORY_DB.length = 0;
+      allInventory.forEach(i => INVENTORY_DB.push(i));
+
+      console.log('[PS] Loaded', allInventory.length, 'inventory items,', INVENTORY_CATS.length, 'categories from API');
+      renderInventoryUI();
+    } catch (e) {
+      console.warn('[PS] Inventory API failed, keeping demo data:', e.message);
+      renderInventoryUI();
+    }
+  }
+
+  // ── Client change handler ──
+  document.getElementById('hdrClient').addEventListener('change', function(e) {
+    const clientKey = e.target.value;
+    if (clientKey && clientKey !== 'demo') {
+      loadDepartments(clientKey);
+    }
   });
 
-  function initializeWorkspace() {
-    const params = new URLSearchParams(window.location.search);
-    const client = params.get('client');
-    const dept = params.get('dept');
-    
+  // ── Init ──
+  async function initializeWorkspace() {
+    // Auth guard
+    if (!API.requireAuth()) return;
+
     // Set today's date
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('hdrOrderDate').value = today;
-    document.getElementById('hdrWoDate').value = today;
-    
-    // Set Client
-    if (client) {
-      document.getElementById('hdrClient').value = client;
-    } else {
-      document.getElementById('hdrClient').value = '88th Medical Group';
-    }
-    
-    // Set Dept and Load Addresses
-    if (dept) {
-      document.getElementById('hdrDept').value = dept;
-      loadDepartmentAddress(dept);
-    } else {
-      document.getElementById('hdrDept').value = 'Biomedical Engineering';
-      loadDepartmentAddress('Biomedical Engineering');
+    if (document.getElementById('hdrWoDate')) document.getElementById('hdrWoDate').value = today;
+
+    // Load all dropdowns in parallel
+    await Promise.all([
+      loadClients(),
+      loadSalesReps(),
+      loadPriceLists(),
+      loadInventoryFromAPI()
+    ]);
+
+    // Show demo badge if using fallback data
+    if (allInventory.length === 0) {
+      const badge = document.createElement('div');
+      badge.style.cssText = 'position:fixed;top:56px;right:16px;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;z-index:999;';
+      badge.textContent = 'DEMO MODE — using sample data';
+      document.body.appendChild(badge);
     }
   }
 
-  // Run init
   initializeWorkspace();
 </script>
 </body>
