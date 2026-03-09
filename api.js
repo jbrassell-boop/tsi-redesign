@@ -4,7 +4,11 @@
 
 const API = (() => {
   // Change this ONE line when going to production
-  const BASE_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  // Netlify proxy: /api/* → totalscopetestapi.mol-tech.com/api/*
+  // This avoids CORS issues since the browser talks to the same origin.
+  // For local dev, fall back to the direct URL.
+  const IS_NETLIFY = location.hostname.includes('netlify.app');
+  const BASE_URL = IS_NETLIFY ? '/api' : 'https://totalscopetestapi.mol-tech.com/api';
 
   // ── Token Management ──────────────────────────────────
   function getToken() {
