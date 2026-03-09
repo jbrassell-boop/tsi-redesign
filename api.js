@@ -138,12 +138,20 @@ const API = (() => {
 
     const res = await fetch(BASE_URL + endpoint, opts);
 
-    // Token expired or invalid — auto-redirect to login
+    // Token expired or invalid
     if (res.status === 401) {
+      // Demo mode — don't redirect, just throw so pages can fall back to demo data
+      if (getToken() === 'demo') {
+        console.warn('[TSI API] 401 on', endpoint, '— demo mode, falling back');
+        const err = new Error('Demo mode — no real API access');
+        err.status = 401;
+        throw err;
+      }
+      // Real token expired — redirect to login
       console.warn('[TSI API] 401 on', endpoint, '— token expired, redirecting');
       clearToken();
       window.location.href = 'login.html?expired=1';
-      return; // halt further execution
+      return;
     }
 
     const envelope = await res.json();
