@@ -92,7 +92,8 @@
     .col-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
     .col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
     .panel{border-radius:8px;overflow:hidden;border:1px solid var(--border-dk);box-shadow:0 1px 4px rgba(0,37,122,.05);display:flex;flex-direction:column}
-    .col-left .panel,.col-right .panel{flex:1}
+    .col-left .panel{flex:1}
+    .col-right .panel{flex:0 0 auto}
     .panel-head{background:#E9EFF9;padding:8px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border)}
     .panel-body{background:#fff;padding:12px 16px;flex:1}
     .fg{display:grid;gap:6px 10px}
@@ -293,9 +294,9 @@
         <div class="ss-chip ss-neutral"><span class="ss-label">Rep</span> <span class="ss-val">Brandi Cook</span></div>
         <div class="ss-chip ss-neutral"><span class="ss-label">Pricing</span> <span class="ss-val">GSA 2014 (Joint)</span></div>
         <div class="ss-chip ss-neutral"><span class="ss-label">Terms</span> <span class="ss-val">Due Upon Receipt</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Depts</span> <span class="ss-val">2</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Contacts</span> <span class="ss-val">3</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Flags</span> <span class="ss-val">1</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Depts</span> <span class="ss-val" id="ss-depts">2</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Contacts</span> <span class="ss-val" id="ss-contacts">3</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Flags</span> <span class="ss-val" id="ss-flags">1</span></div>
         <div style="flex:1"></div>
         <span style="font-size:10px;color:var(--muted)">Modified 03/02/2026 by J. Brassell</span>
       </div>
@@ -383,34 +384,6 @@
                 </div>
               </div>
 
-              <!-- Options -->
-              <div class="panel-section" style="margin-top:6px">
-                <div class="panel-section-label">Options</div>
-                <div class="toggle-row">
-                  <div class="toggle-label">Skip Metrics</div>
-                  <label class="toggle"><input id="ci-skip" type="checkbox"/><span class="toggle-slider"></span></label>
-                </div>
-                <div class="toggle-row">
-                  <div style="display:flex;align-items:center;gap:8px" class="toggle-label">
-                    Open Credit Memo
-                    <span id="cm-balance-badge" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer" onclick="openCreditMemo()"></span>
-                  </div>
-                  <label class="toggle"><input id="ci-credit-memo" type="checkbox" onchange="onCreditMemoToggle(this)"/><span class="toggle-slider"></span></label>
-                </div>
-                <div class="toggle-row">
-                  <div class="toggle-label">National Account</div>
-                  <label class="toggle"><input id="ci-national" type="checkbox"/><span class="toggle-slider"></span></label>
-                </div>
-              </div>
-
-              <!-- Service Locations -->
-              <div class="panel-section">
-                <div class="panel-section-label">Service Locations</div>
-                <div class="chip-group">
-                  <button class="chip on" onclick="this.classList.toggle('on')"><span class="dot"></span> Upper Chichester</button>
-                  <button class="chip" onclick="this.classList.toggle('on')"><span class="dot"></span> Nashville</button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -484,6 +457,36 @@
             </div>
           </div>
 
+          <!-- Options -->
+          <div class="panel">
+            <div class="panel-head">Options</div>
+            <div class="panel-body">
+              <div class="toggle-row">
+                <div class="toggle-label">Skip Metrics</div>
+                <label class="toggle"><input id="ci-skip" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div style="display:flex;align-items:center;gap:8px" class="toggle-label">
+                  Open Credit Memo
+                  <span id="cm-balance-badge" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer" onclick="openCreditMemo()"></span>
+                </div>
+                <label class="toggle"><input id="ci-credit-memo" type="checkbox" onchange="onCreditMemoToggle(this)"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">National Account</div>
+                <label class="toggle"><input id="ci-national" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+
+              <!-- Service Locations -->
+              <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:6px">
+                <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Service Locations</div>
+                <div class="chip-group">
+                  <button class="chip on" onclick="this.classList.toggle('on')"><span class="dot"></span> Upper Chichester</button>
+                  <button class="chip" onclick="this.classList.toggle('on')"><span class="dot"></span> Nashville</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -503,7 +506,7 @@
                 <th>Is Active</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="departments-tbody">
               <tr onclick="window.location='departments.html'">
                 <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">Biomedical Engineering</td>
                 <td>Upper Chichester</td>
@@ -1035,7 +1038,17 @@ const CLIENTS = {
     terms:'Due Upon Receipt', credit:'5,000', billto:'Customer',
     discount:'18%', markup:'42%',
     blindPS3:true, reqTotals:true, blindFinal:true,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Karen Whitfield', title:'Biomedical Director', phone:'+1 (937) 257-7650', fax:'(937) 257-7700', email:'k.whitfield@wpafb.af.mil', active:true},
+      {name:'Sgt. Marcus Tatum', title:'Dept. Coordinator', phone:'+1 (937) 257-1100', fax:'(937) 257-1109', email:'m.tatum@wpafb.af.mil', active:true},
+      {name:'Lisa Orozco', title:'Accounts Payable', phone:'+1 (937) 257-8823', fax:'(937) 257-8800', email:'l.orozco@wpafb.af.mil', active:true},
+      {name:'Col. James Hendrick', title:'Chief, Medical Logistics', phone:'+1 (937) 257-4400', fax:'(937) 257-4401', email:'j.hendrick@wpafb.af.mil', active:false}
+    ],
+    departments:[
+      {name:'Biomedical Engineering', location:'Upper Chichester', active:true},
+      {name:'Endoscopy Unit', location:'Upper Chichester', active:true}
+    ]
   },
   'Tift Regional Medical Center': {
     id:'1084', active:true, name:'Tift Regional Medical Center', unit:'',
@@ -1046,7 +1059,16 @@ const CLIENTS = {
     terms:'Net 30', credit:'10,000', billto:'Customer',
     discount:'0%', markup:'50%',
     blindPS3:false, reqTotals:false, blindFinal:true,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Dr. Sarah Mitchell', title:'GI Lab Director', phone:'+1 (229) 382-7200', fax:'(229) 382-7201', email:'s.mitchell@tiftregional.com', active:true},
+      {name:'Mike Patterson', title:'Biomed Tech', phone:'+1 (229) 382-7150', fax:'(229) 382-0555', email:'m.patterson@tiftregional.com', active:true}
+    ],
+    departments:[
+      {name:'GI Lab', location:'Nashville', active:true},
+      {name:'Surgery', location:'Nashville', active:true},
+      {name:'Central Sterile', location:'Nashville', active:false}
+    ]
   },
   'Nashville General Hospital': {
     id:'2210', active:true, name:'Nashville General Hospital', unit:'',
@@ -1064,6 +1086,15 @@ const CLIENTS = {
        applications:[]},
       {id:'CM-2024-019', date:'11/05/2024', amount:120.00, remaining:0, reason:'Billing error — duplicate invoice', status:'Closed',
        applications:[{date:'11/20/2024', repair:'#R-8774', desc:'PCF-H190L repair', amount:120.00}]},
+    ],
+    contacts:[
+      {name:'Amanda Brooks', title:'Central Sterile Manager', phone:'+1 (615) 341-4200', fax:'(615) 341-4100', email:'a.brooks@nashvillegeneral.org', active:true},
+      {name:'David Chen', title:'Purchasing', phone:'+1 (615) 341-4050', fax:'(615) 341-4100', email:'d.chen@nashvillegeneral.org', active:true}
+    ],
+    departments:[
+      {name:'Endoscopy', location:'Nashville', active:true},
+      {name:'Pulmonology', location:'Nashville', active:true},
+      {name:'Cardiology', location:'Nashville', active:true}
     ]
   },
   'Northside Hospital': {
@@ -1075,7 +1106,15 @@ const CLIENTS = {
     terms:'Net 60', credit:'15,000', billto:'Third Party',
     discount:'5%', markup:'55%',
     blindPS3:false, reqTotals:true, blindFinal:true,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Janet Rivera', title:'Biomed Manager', phone:'+1 (404) 851-8200', fax:'(404) 851-8100', email:'j.rivera@northside.com', active:true},
+      {name:'Tom Nguyen', title:'OR Coordinator', phone:'+1 (404) 851-8300', fax:'(404) 851-8100', email:'t.nguyen@northside.com', active:true}
+    ],
+    departments:[
+      {name:'Biomedical Engineering', location:'Upper Chichester', active:true},
+      {name:'Surgery / OR', location:'Upper Chichester', active:true}
+    ]
   },
   'West Side GI Center': {
     id:'3341', active:false, name:'West Side GI Center', unit:'',
@@ -1086,7 +1125,13 @@ const CLIENTS = {
     terms:'Due Upon Receipt', credit:'2,500', billto:'Customer',
     discount:'0%', markup:'60%',
     blindPS3:false, reqTotals:false, blindFinal:false,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Rachel Kim', title:'Office Manager', phone:'+1 (312) 555-0200', fax:'(312) 555-0193', email:'r.kim@westsidegi.com', active:true}
+    ],
+    departments:[
+      {name:'GI Lab', location:'Upper Chichester', active:true}
+    ]
   },
   'Metro Health Hospital': {
     id:'2755', active:true, name:'Metro Health Hospital', unit:'',
@@ -1097,7 +1142,15 @@ const CLIENTS = {
     terms:'Net 30', credit:'8,000', billto:'Customer',
     discount:'0%', markup:'50%',
     blindPS3:true, reqTotals:true, blindFinal:false,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Diane Foster', title:'Nurse Manager', phone:'+1 (216) 778-7900', fax:'(216) 778-5910', email:'d.foster@metrohealth.org', active:true},
+      {name:'Brian Watts', title:'Supply Chain', phone:'+1 (216) 778-7850', fax:'(216) 778-5910', email:'b.watts@metrohealth.org', active:true}
+    ],
+    departments:[
+      {name:'Endoscopy', location:'Nashville', active:true},
+      {name:'ICU / Critical Care', location:'Nashville', active:true}
+    ]
   },
   'Shreveport Endoscopy Center': {
     id:'1650', active:true, name:'Shreveport Endoscopy Center', unit:'',
@@ -1108,7 +1161,13 @@ const CLIENTS = {
     terms:'Due Upon Receipt', credit:'3,000', billto:'Customer',
     discount:'0%', markup:'55%',
     blindPS3:false, reqTotals:false, blindFinal:true,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Paula Landry', title:'Clinical Director', phone:'+1 (318) 212-4050', fax:'(318) 212-4100', email:'p.landry@shreveportendo.com', active:true}
+    ],
+    departments:[
+      {name:'Endoscopy', location:'Upper Chichester', active:true}
+    ]
   },
   'Tampa Minimally Invasive': {
     id:'3089', active:true, name:'Tampa Minimally Invasive', unit:'Suite 300',
@@ -1119,7 +1178,14 @@ const CLIENTS = {
     terms:'Net 30', credit:'12,000', billto:'Customer',
     discount:'8%', markup:'48%',
     blindPS3:true, reqTotals:false, blindFinal:true,
-    creditMemos:[]
+    creditMemos:[],
+    contacts:[
+      {name:'Carlos Vega', title:'Practice Administrator', phone:'+1 (813) 844-7050', fax:'(813) 844-7001', email:'c.vega@tampamis.com', active:true}
+    ],
+    departments:[
+      {name:'GI Lab', location:'Upper Chichester', active:true},
+      {name:'Surgery / OR', location:'Upper Chichester', active:true}
+    ]
   }
 };
 
@@ -1171,6 +1237,19 @@ function loadClient(c) {
   if (chips[1]) chips[1].textContent = c.pricing || '—';
   if (chips[2]) chips[2].textContent = c.terms || '—';
   renderCreditMemos(c);
+  renderContacts(c);
+  renderDepartments(c);
+  // Update status strip counts
+  const deptCount = (c.departments || []).length;
+  const contactCount = (c.contacts || []).filter(ct => ct.active).length;
+  const flagRows = document.querySelectorAll('#flags-tbody tr:not(#flags-empty-row)');
+  const flagCount = flagRows.length;
+  const ssDepts = document.getElementById('ss-depts');
+  const ssContacts = document.getElementById('ss-contacts');
+  const ssFlags = document.getElementById('ss-flags');
+  if (ssDepts) ssDepts.textContent = deptCount;
+  if (ssContacts) ssContacts.textContent = contactCount;
+  if (ssFlags) ssFlags.textContent = flagCount;
   _dirty = false;
   updateSaveStatus('ready');
 }
@@ -1219,6 +1298,51 @@ function saveFlagMock() {
   modal.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
   document.getElementById('flagModal').classList.remove('open');
   showToast('Flag added.', 'success');
+}
+
+function renderContacts(c) {
+  const tbody = document.getElementById('contacts-tbody');
+  const contacts = c.contacts || [];
+  if (contacts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No contacts on record — click <strong>+ Add</strong> to create one</td></tr>';
+    return;
+  }
+  tbody.innerHTML = contacts.map((ct, i) => {
+    const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
+    const badge = ct.active
+      ? '<span class="badge b-active">Active</span>'
+      : '<span class="badge b-inactive">Inactive</span>';
+    return `<tr${bg}>
+      <td style="font-weight:600">${ct.name}</td>
+      <td style="color:var(--muted)">${ct.title || '—'}</td>
+      <td>${ct.phone || '—'}</td>
+      <td>${ct.fax || '—'}</td>
+      <td>${ct.email || '—'}</td>
+      <td>${badge}</td>
+      <td><button class="edit-btn" onclick="openEditContact(this)">&#9998; Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderDepartments(c) {
+  const container = document.getElementById('departments-tbody');
+  if (!container) return;
+  const depts = c.departments || [];
+  if (depts.length === 0) {
+    container.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--muted)">No departments assigned to this client.</td></tr>';
+    return;
+  }
+  container.innerHTML = depts.map((d, i) => {
+    const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
+    const badge = d.active
+      ? '<span class="badge b-active">Active</span>'
+      : '<span class="badge b-inactive">Inactive</span>';
+    return `<tr onclick="window.location='departments.html'"${bg}>
+      <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">${d.name}</td>
+      <td>${d.location || '—'}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
 }
 
 function onCreditMemoToggle(cb) {
@@ -1427,7 +1551,8 @@ async function saveNewClient() {
     pricing, salesrep:salesRep,
     dist:'Total Scope South', terms:'Due Upon Receipt',
     credit:'5,000', billto:'Customer', discount:'0%', markup:'0%',
-    blindPS3:false, reqTotals:true, blindFinal:false, creditMemos:[]
+    blindPS3:false, reqTotals:true, blindFinal:false, creditMemos:[],
+    contacts:[], departments:[]
   };
 
   CLIENTS[name] = newClient;
@@ -1656,6 +1781,8 @@ function mapApiClient(d) {
     reqTotals: !!d.bReqTotalsOnly,
     blindFinal: !!d.bBlindTotalsOnFinal,
     creditMemos: [], // credit memos are managed separately
+    contacts: d.contacts || [],
+    departments: d.departments || [],
     _raw: d // keep raw for save
   };
 }
@@ -1924,6 +2051,38 @@ document.querySelectorAll('#tab-main input, #tab-main select').forEach(el => {
 document.querySelectorAll('#tab-main .chip').forEach(el => {
   el.addEventListener('click', () => setTimeout(markDirty, 50));
 });
+
+// ── Phone auto-format ────────────────────────────────
+function formatPhone(e) {
+  const input = e.target;
+  const raw = input.value.replace(/\D/g, '');
+  // Strip leading 1 if user typed it
+  const digits = raw.length > 10 && raw[0] === '1' ? raw.slice(1) : raw.slice(0, 10);
+  let formatted = '';
+  if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+  if (digits.length >= 3) formatted += ') ';
+  else { input.value = formatted; return; }
+  formatted += digits.slice(3, 6);
+  if (digits.length >= 6) formatted += '-';
+  formatted += digits.slice(6, 10);
+  if (digits.length === 10) formatted = '+1 ' + formatted;
+  input.value = formatted;
+}
+['ci-phone','ci-fax','add-phone','add-fax','ct-phone','ct-fax'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', formatPhone);
+});
+
+// ── Update flags count when flags change ─────────────
+const flagsTbody = document.getElementById('flags-tbody');
+if (flagsTbody) {
+  const obs = new MutationObserver(() => {
+    const rows = flagsTbody.querySelectorAll('tr:not(#flags-empty-row)');
+    const ssFlags = document.getElementById('ss-flags');
+    if (ssFlags) ssFlags.textContent = rows.length;
+  });
+  obs.observe(flagsTbody, { childList: true });
+}
 
 </script>
 </body>
