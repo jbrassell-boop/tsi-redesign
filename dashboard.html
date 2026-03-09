@@ -654,19 +654,6 @@ async function loadDashboardData(filters) {
       throw new Error('Unexpected API response format');
     }
   } catch (err) {
-    if (err.status === 401) {
-      console.warn('[TSI] 401 — session expired. Redirecting to login.');
-      // Only redirect if we actually have no valid token at all
-      // Give user a chance to see what happened
-      DATA_SOURCE = 'expired';
-      SCOPES = getDemoData();
-      // Show a banner instead of immediately redirecting
-      document.getElementById('recordInfo').innerHTML = '<span style="color:var(--red);font-weight:600">Session expired — <a href="login.html" style="color:var(--navy)">Log in again</a></span>';
-      updateDataSourceBadge();
-      updateStats();
-      renderTable();
-      return;
-    }
     console.warn('[TSI] API call failed, using demo data:', err.message);
     DATA_SOURCE = 'fallback';
     SCOPES = getDemoData();

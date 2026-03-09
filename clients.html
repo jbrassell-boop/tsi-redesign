@@ -1706,10 +1706,6 @@ async function selectClientByKey(key, name) {
       return;
     } catch (e) {
       console.warn('[TSI Clients] Failed to load client detail:', e);
-      if (e.status === 401) {
-        showToast('Session expired — please log in again.', 'error');
-        return;
-      }
     }
   }
   // Fallback to demo
@@ -1823,11 +1819,6 @@ async function initPage() {
     }
   } catch (e) {
     console.warn('[TSI Clients] API unavailable, using demo data:', e.message);
-    if (e.status === 401) {
-      showToast('Session expired — redirecting to login...', 'error');
-      setTimeout(() => window.location.href = 'login.html?expired=1', 1500);
-      return;
-    }
   }
 
   // Fallback to demo data
