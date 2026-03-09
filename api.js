@@ -79,12 +79,16 @@ const API = (() => {
     if (json.statusCode === 200 && json.data) {
       const d = json.data;
       console.log('[TSI Auth] Response data keys:', Object.keys(d));
+      console.log('[TSI Auth] d.token type:', typeof d.token, 'value:', typeof d.token === 'object' ? JSON.stringify(d.token).substring(0,100) : String(d.token).substring(0,50));
 
       // Check authentication result
       if (d.isAuthenticated && d.token) {
-        setToken(d.token);
+        // token may be a string or an object like {token:"eyJ...", ...}
+        const rawToken = (typeof d.token === 'object' && d.token.token) ? d.token.token : d.token;
+        const tokenStr = typeof rawToken === 'string' ? rawToken : String(rawToken);
+        setToken(tokenStr);
         if (d.user) setUser(d.user);
-        console.log('[TSI Auth] Token stored, length:', d.token.length);
+        console.log('[TSI Auth] Token stored, length:', tokenStr.length, 'type:', typeof tokenStr);
         console.log('[TSI Auth] User:', d.user?.sFirstName, d.user?.sLastName, 'Key:', d.user?.lUserKey);
         return { success: true, user: d.user, data: d };
       }
