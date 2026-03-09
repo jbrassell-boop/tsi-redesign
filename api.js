@@ -278,6 +278,14 @@ const API = (() => {
     return get('/Departments/GetAllDepartmentList?plClientKey=' + clientKey);
   }
 
+  async function getAllDepartments(serviceLocationKey) {
+    return get('/Departments/GetAllDepartments?plServiceLocationKey=' + (serviceLocationKey || 1));
+  }
+
+  async function getDepartmentDetail(deptKey) {
+    return get('/Departments/GetDepartmentDetailsByDepartmentId?plDepartmentKey=' + deptKey);
+  }
+
   // ── Repairs ───────────────────────────────────────────
   async function getRepairs(filters) {
     return post('/Repair/GetAllRepairList', filters);
@@ -378,6 +386,8 @@ const API = (() => {
 
     // Departments
     getDepartments,
+    getAllDepartments,
+    getDepartmentDetail,
 
     // Repairs
     getRepairs,
