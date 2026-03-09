@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Inventory | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;background:#f0f2f5;color:#212529}
+    :root{--navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;--muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;--bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;}
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+    .sidebar-brand{padding:12px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .brand-logo{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .brand-logo svg{width:18px;height:18px}
+    .brand-text .t1{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3}
+    .brand-text .t2{font-size:9.5px;color:var(--muted);margin-top:1px}
+    .nav-group{padding:6px 0;flex:1}
+    .sidebar-footer{padding:8px 12px;border-top:1px solid var(--border);color:var(--muted);font-size:9.5px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;color:var(--label);font-size:11.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;user-select:none}
+    .nav-item:hover{background:var(--bg);color:var(--navy)}
+    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:700}
+    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+    .nav-item.active svg{opacity:1}
+    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .topbar{height:48px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}.topbar-welcome strong{color:#fff}
+    .topbar-center{display:flex;flex-direction:column;align-items:center}
+    .topbar-title{color:#fff;font-weight:900;font-size:19px}
+    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
+    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
+    .page-body{flex:1;overflow-y:auto;background:#f0f2f5}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:6px;padding:8px 20px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:5px;font-size:11px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
+    .btn-icon{width:30px;height:30px;padding:0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border-dk);background:#fff;font-family:inherit;transition:all .12s}
+    .btn-icon:hover{border-color:var(--navy);background:var(--bg)}
+    .btn-icon svg{width:14px;height:14px}
+    .btn-navy{background:var(--navy);color:#fff;font-weight:600}
+    .btn-navy:hover{background:#001A5C}
+    .btn-outline{background:#fff;border:1.5px solid var(--border-dk);color:var(--label)}
+    .btn-outline:hover{border-color:var(--navy);color:var(--navy)}
+    .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
+    .btn-danger:hover{background:#FEE2E2}
+    .btn-green{background:#F0FDF4;border:1.5px solid #BBF7D0;color:var(--green);font-weight:600}
+    .btn-green:hover{background:#DCFCE7}
+    .divider{width:1px;height:20px;background:var(--border);margin:0 2px}
+    .sel-bar-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .sel{height:26px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;cursor:pointer;outline:none;transition:border-color .15s;max-width:260px}
+    .sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel)}
+
+    /* TABS */
+    .tab-bar{display:flex;padding:0 14px;background:#DDE6F5;border-bottom:2px solid var(--border-dk);overflow-x:auto}
+    .tab{padding:5px 10px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;user-select:none}
+    .tab:hover{color:var(--navy)}
+    .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
+
+    /* CONTENT */
+    .tab-content{display:none}
+    .tab-content.show{display:flex;flex:1;overflow:hidden}
+    .tab-content.show-block{display:block;padding:14px 20px;overflow-y:auto;flex:1}
+
+    /* PANELS */
+    .panel{border-radius:6px;border:1px solid var(--border-dk);overflow:hidden;box-shadow:0 1px 4px rgba(0,37,122,.05)}
+    .panel-head{background:#E9EFF9;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .panel-body{background:#fff;padding:6px 10px}
+    .fg{display:grid;gap:4px 8px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:1fr 1fr 1fr}
+    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .span2{grid-column:span 2}
+    .ff{display:flex;flex-direction:column;gap:2px}
+    .ff label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .req{color:var(--red)}
+    .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    textarea.inp{height:80px;padding:6px 8px;resize:none;line-height:1.4}
+    select.inp{cursor:pointer}
+    .inp-sm{height:22px;font-size:10.5px;padding:0 5px}
+
+    /* TOGGLES */
+    .toggle-row{display:flex;align-items:center;gap:6px;padding:1px 0}
+    .toggle-label{font-size:11px;color:var(--text)}
+    .toggle{position:relative;width:34px;height:19px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:#CBD5E0;border-radius:10px;cursor:pointer;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--navy)}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
+
+    /* TABLE */
+    .tbl-card{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 6px rgba(0,37,122,.06)}
+    .tbl-head{background:#E9EFF9;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .tbl-title{font-size:11px;font-weight:700;color:var(--navy)}
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:4px 8px;text-align:left;white-space:nowrap}
+    td{padding:3px 8px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF}
+    .badge{display:inline-flex;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600}
+    .b-active{background:#F0FDF4;color:var(--green)}
+    .b-inactive{background:#FEF2F2;color:var(--red)}
+    .b-static{background:#FFF7ED;color:var(--amber)}
+    .edit-btn{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
+    .edit-btn:hover{background:#DBEAFE}
+    .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
+    .del-btn:hover{background:#FEE2E2}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:40px 16px;color:var(--muted)}
+    .empty-state svg{width:36px;height:36px;opacity:.2;margin-bottom:8px}
+    .empty-state p{font-size:13px;font-weight:500}
+
+    /* STATUS STRIP */
+    .status-strip{display:flex;align-items:center;gap:5px;padding:4px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
+    .ss-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
+    .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
+    .ss-chip .ss-val{color:var(--text)}
+    .ss-active{background:#F0FDF4;border-color:#BBF7D0;color:var(--green)}
+    .ss-warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+    .ss-neutral{background:#F8FAFF;border-color:var(--border)}
+    .ss-info{background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)}
+
+    /* ── MASTER-DETAIL SPLIT ── */
+    .split-layout{display:flex;flex:1;overflow:hidden}
+    .split-left{width:260px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .split-left-head{background:#E9EFF9;padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border)}
+    .split-left-search{padding:4px 8px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
+    .split-left-search .row{display:flex;gap:4px;align-items:center}
+    .search-inp{flex:1;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
+    .search-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .btn-xs{height:24px;padding:0 7px;font-size:10px;border-radius:4px;cursor:pointer;border:none;font-family:inherit;font-weight:600}
+    .split-left-list{flex:1;overflow-y:auto}
+    .item-row{padding:3px 8px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text);transition:all .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .item-row:nth-child(even){background:var(--row-alt)}
+    .item-row:hover{background:#D8E6FF}
+    .item-row.selected{background:#FEF3C7;font-weight:600;border-left:3px solid var(--amber)}
+    .split-left-footer{padding:3px 8px;border-top:1px solid var(--border);background:#FAFBFF;display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;color:var(--muted)}
+    .split-left-footer select{height:20px;border:1px solid var(--border);border-radius:3px;font-size:10px;font-family:inherit;padding:0 3px}
+    .page-nav{display:flex;align-items:center;gap:2px}
+    .page-nav button{width:20px;height:20px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--label);transition:all .1s}
+    .page-nav button:hover{border-color:var(--navy);background:var(--bg)}
+    .page-nav input{width:24px;height:20px;border:1px solid var(--border);border-radius:3px;text-align:center;font-size:10px;font-family:inherit}
+
+    .split-right{flex:1;overflow-y:auto;background:#f0f2f5;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+
+    /* INLINE EDIT ROWS */
+    /* ITEM HEADER BAR — dense horizontal strip */
+    .item-header-bar{background:#F8FAFF;border-bottom:1px solid var(--border);padding:5px 10px}
+    .ihb-fields{display:flex;align-items:flex-end;gap:8px}
+    .ihb-field{display:flex;flex-direction:column;gap:1px}
+    .ihb-field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .ihb-field .inp{height:24px;font-size:11px}
+    .ihb-toggles{display:flex;gap:8px;align-items:center;padding-bottom:2px;border-left:1px solid var(--border);margin-left:4px;padding-left:10px}
+    .ihb-toggles .toggle-label{font-size:10px}
+
+    /* SIZES SPLIT — grid left, detail right */
+    .sizes-split{display:flex;flex:1;overflow:hidden;border-top:1px solid var(--border)}
+    .sizes-grid-col{flex:1.4;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+    .sizes-grid-body{flex:1;overflow-y:auto}
+    .size-detail-col{width:280px;flex-shrink:0;display:flex;flex-direction:column;background:#FAFBFF}
+    .sd-head{padding:4px 8px;background:#E9EFF9;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .sd-btn{height:20px;padding:0 6px;font-size:9.5px;font-weight:600;border:1px solid var(--border-dk);background:#fff;color:var(--label);border-radius:4px;cursor:pointer;font-family:inherit;transition:all .1s}
+    .sd-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--bg)}
+    .sd-body{padding:8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+    .sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px}
+    .sd-grid .ff:first-child{grid-column:span 2}
+    .sd-grid .inp{height:24px;font-size:11px}
+    .sd-levels{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .sd-level-box{display:flex;flex-direction:column;align-items:center;gap:1px}
+    .sd-level-label{font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .sd-level-val{font-size:16px;font-weight:800;color:var(--text)}
+    .sd-level-inp{width:100%;height:22px;border:1.5px solid var(--border-dk);border-radius:4px;text-align:center;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none}
+    .sd-level-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .sd-toggles{display:flex;gap:10px}
+    .sd-footer{padding:5px 8px;border-top:1px solid var(--border);display:flex;gap:4px}
+
+    /* BOTTOM ACTION BAR */
+    .inv-action-bar{display:flex;align-items:center;gap:4px;padding:4px 10px;background:#F0F2F5;border-top:1px solid var(--border)}
+
+    .size-row{cursor:pointer}
+    .size-row.selected-size{background:#FEF3C7 !important;font-weight:600}
+    .size-row td{font-size:11px;padding:3px 8px}
+    .inline-inp{height:22px;border:1.5px solid var(--border-dk);border-radius:3px;padding:0 5px;font-size:10.5px;font-family:inherit;color:var(--text);outline:none;width:100%;background:#fff}
+    .inline-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+
+    /* PAGINATION BAR */
+    .pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:3px 10px;background:#FAFBFF;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}
+    .pagination-bar .page-nav{display:flex;align-items:center;gap:3px}
+
+    /* PO SUMMARY STRIP */
+    .po-summary-strip{display:flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
+    .po-ss-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid var(--border);background:#F8FAFF}
+    .po-ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.3px}
+    .po-ss-val{color:var(--text)}
+
+    /* MONO CHIP for part numbers */
+    .mono-chip{font-family:'Cascadia Code',monospace;font-size:10.5px;font-weight:600;color:var(--blue);background:#EFF6FF;padding:1px 5px;border-radius:3px;border:1px solid #BFDBFE;letter-spacing:.3px}
+
+    /* PO TABLE — compact */
+    .po-tbl{width:100%;border-collapse:collapse;border-top:1px solid var(--border)}
+    .po-tbl th{background:#F8FAFC;color:#475569;font-size:9.5px;font-weight:700;padding:6px 10px;text-align:left;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-dk)}
+    .po-tbl td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .po-tbl tbody tr:nth-child(even){background:var(--row-alt)}
+    .po-tbl tbody tr:hover{background:#D8E6FF}
+
+    /* RECEIVE HEADER BAR */
+    .recv-header-bar{background:#F8FAFF;border-bottom:1px solid var(--border);padding:5px 10px}
+    .recv-hb-fields{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+    /* RECEIVE SUMMARY STRIP */
+    .recv-summary-strip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
+
+    /* RECEIVE PROGRESS BAR (big) */
+    .recv-progress-wrap{display:flex;align-items:center;gap:6px;margin-right:6px}
+    .recv-progress-bar{width:80px;height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden}
+    .recv-progress-fill{height:100%;background:var(--green);border-radius:4px;transition:width .3s}
+    .recv-progress-text{font-size:10px;font-weight:700;color:var(--green);white-space:nowrap}
+
+    /* RECEIVE TABLE */
+    .recv-tbl th{font-size:9.5px;padding:4px 8px}
+    .recv-tbl td{padding:3px 8px;font-size:11px}
+    .recv-complete-row{opacity:.6}
+    .recv-complete-row:hover{opacity:1}
+
+    /* MINI PROGRESS BARS (per-row) */
+    .recv-mini-bar{width:40px;height:5px;background:#E5E7EB;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+    .recv-mini-fill{height:100%;background:var(--red);border-radius:3px;transition:width .3s}
+    .recv-mini-partial{background:var(--amber)}
+    .recv-mini-done{background:var(--green)}
+    .recv-clickable:hover{background:#DBEAFE !important}
+
+    /* BOTTOM ACTION BAR */
+    .action-bar{display:flex;align-items:center;gap:6px;padding:6px 20px;background:#DDE6F5;border-top:1px solid var(--border-dk)}
+
+    /* MODAL OVERLAY */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal-box{background:var(--card);border-radius:8px;width:780px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.25);overflow:hidden}
+    .modal-box.sm{width:420px}
+    .modal-header{background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);padding:10px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-header h3{font-size:13px;font-weight:700}
+    .modal-close{width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{background:rgba(255,255,255,.25)}
+    .modal-header-red{background:linear-gradient(120deg,#7F1D1D 0%,var(--red) 100%)}
+    .modal-body{padding:12px 16px;overflow-y:auto;flex:1}
+    .modal-footer{padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px}
+    .btn-cancel{height:28px;padding:0 14px;border-radius:5px;border:1.5px solid var(--border-dk);background:#fff;color:var(--label);font-size:11px;cursor:pointer;font-family:inherit}
+    .btn-cancel:hover{background:var(--bg)}
+    .btn-save{height:28px;padding:0 16px;border-radius:5px;border:none;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+    .btn-save:hover{background:#001A5C}
+
+    /* MODAL TABLES — compact to match main screen */
+    .modal-tbl th{font-size:9.5px;padding:4px 10px}
+    .modal-tbl td{padding:5px 10px;font-size:11px}
+    .modal-tbl .edit-btn,.modal-tbl .del-btn{font-size:9.5px;padding:2px 6px}
+
+    /* CHECKLIST TABLE (batch select modal) */
+    .check-tbl th:first-child, .check-tbl td:first-child{width:32px;text-align:center}
+    .check-tbl input[type=checkbox]{width:14px;height:14px;accent-color:var(--navy)}
+    .check-tbl .qty-inp{width:60px;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;text-align:center;font-size:11px;font-family:inherit}
+
+    /* STOCK HEALTH DOT on item rows */
+    .item-row{display:flex;align-items:center;gap:5px}
+    .stock-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .stock-dot.dot-green{background:var(--green)}
+    .stock-dot.dot-amber{background:var(--amber)}
+    .stock-dot.dot-red{background:var(--red)}
+    .item-name{overflow:hidden;text-overflow:ellipsis}
+    .low-stock-count{font-size:9px;color:var(--red);font-weight:700;margin-left:auto;flex-shrink:0}
+
+    /* LOW STOCK FILTER btn */
+    .btn-filter-low{height:22px;padding:0 7px;font-size:9.5px;border-radius:4px;cursor:pointer;border:1.5px solid #FECACA;background:#FEF2F2;color:var(--red);font-family:inherit;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;gap:3px}
+    .btn-filter-low:hover,.btn-filter-low.active{background:var(--red);color:#fff;border-color:var(--red)}
+    .btn-filter-low svg{width:10px;height:10px}
+
+    /* BATCH MODAL — suggested qty highlight */
+    .qty-suggested{background:#FEF3C7 !important;border-color:var(--amber) !important}
+
+    /* BATCH MODAL — running total bar */
+    .batch-total-bar{display:flex;align-items:center;gap:8px;padding:5px 12px;background:#F0FDF4;border-top:1px solid #BBF7D0;font-size:11px;font-weight:600;color:var(--green)}
+    .batch-total-bar .total-label{color:var(--muted);font-weight:500;text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
+
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left"><div class="topbar-avatar">JB</div><span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span></div>
+      <div class="topbar-center"><div class="topbar-title">Total Scope, Inc.</div><div class="topbar-sub">The Leader in Medical Device Repair</div></div>
+      <div class="topbar-right">Service Location <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select></div>
+    </header>
+
+    <div class="page-body" style="display:flex;flex-direction:column">
+
+      <!-- STATUS STRIP -->
+      <div class="status-strip">
+        <div class="ss-chip ss-info">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/></svg>
+          <span class="ss-label">Items</span> <span class="ss-val">127</span>
+        </div>
+        <div class="ss-chip ss-active">
+          <span class="ss-label">Active</span> <span class="ss-val">118</span>
+        </div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val">9</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Open POs</span> <span class="ss-val">14</span></div>
+        <div class="ss-chip ss-warn">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          3 items below reorder level
+        </div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Pending Receives</span> <span class="ss-val">6</span></div>
+        <div style="flex:1"></div>
+        <span style="font-size:10px;color:var(--muted)">Last sync 03/08/2026 09:14 AM</span>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <div class="tab active" onclick="showInvTab('inventory',this)">Inventory<span class="tab-count">127</span></div>
+        <div class="tab" onclick="showInvTab('po',this)">Purchase Orders<span class="tab-count">14</span></div>
+        <div class="tab" onclick="showInvTab('receive',this)">Receive Inventory<span class="tab-count">6</span></div>
+      </div>
+
+      <!-- ══════════ INVENTORY TAB ══════════ -->
+      <div id="itab-inventory" class="tab-content show">
+        <!-- LEFT PANEL: Item List -->
+        <div class="split-left">
+          <div class="split-left-head">Inventory Items</div>
+          <div class="split-left-search">
+            <input class="search-inp" placeholder="Search items..."/>
+            <div class="row">
+              <div class="toggle-row" style="padding:0;gap:5px">
+                <label class="toggle">
+                  <input type="checkbox"/>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span style="font-size:10px;color:var(--muted)">Inactive</span>
+              </div>
+              <div style="flex:1"></div>
+              <button class="btn-filter-low" id="lowStockBtn" onclick="toggleLowStockFilter()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Low Stock
+              </button>
+              <button class="btn-xs btn-navy" onclick="document.getElementById('addItemModal').classList.add('open')">+ Add</button>
+              <button class="btn-xs btn-outline" style="border:1px solid var(--border-dk);background:#fff;color:var(--label)">Refresh</button>
+            </div>
+          </div>
+          <div class="split-left-list" id="itemList">
+            <div class="item-row selected" data-item="ACHROMAT"><span class="stock-dot dot-green"></span><span class="item-name">ACHROMAT</span></div>
+            <div class="item-row" data-item="ADAPTER / COUPLER"><span class="stock-dot dot-red"></span><span class="item-name">ADAPTER / COUPLER</span><span class="low-stock-count">1</span></div>
+            <div class="item-row" data-item="ANGULATION WIRE SET"><span class="stock-dot dot-green"></span><span class="item-name">ANGULATION WIRE SET</span></div>
+            <div class="item-row" data-item="BATTERIES"><span class="stock-dot dot-green"></span><span class="item-name">BATTERIES</span></div>
+            <div class="item-row" data-item="BENDING SECTION"><span class="stock-dot dot-red"></span><span class="item-name">BENDING SECTION</span><span class="low-stock-count">2</span></div>
+            <div class="item-row" data-item="BIOPSY CAP"><span class="stock-dot dot-green"></span><span class="item-name">BIOPSY CAP</span></div>
+            <div class="item-row" data-item="BIOPSY CHANNEL CYLINDER"><span class="stock-dot dot-green"></span><span class="item-name">BIOPSY CHANNEL CYLINDER</span></div>
+            <div class="item-row" data-item="BODY TUBE ASSY"><span class="stock-dot dot-green"></span><span class="item-name">BODY TUBE ASSY</span></div>
+            <div class="item-row" data-item="C-COVER"><span class="stock-dot dot-green"></span><span class="item-name">C-COVER</span></div>
+            <div class="item-row" data-item="CAMERA"><span class="stock-dot dot-green"></span><span class="item-name">CAMERA</span></div>
+            <div class="item-row" data-item="CCD"><span class="stock-dot dot-red"></span><span class="item-name">CCD</span><span class="low-stock-count">2</span></div>
+            <div class="item-row" data-item="CHAIN LINK"><span class="stock-dot dot-green"></span><span class="item-name">CHAIN LINK</span></div>
+            <div class="item-row" data-item="CLEANING SUPPLIES"><span class="stock-dot dot-green"></span><span class="item-name">CLEANING SUPPLIES</span></div>
+            <div class="item-row" data-item="COIL PIPE"><span class="stock-dot dot-green"></span><span class="item-name">COIL PIPE</span></div>
+            <div class="item-row" data-item="CONNECTING PIN"><span class="stock-dot dot-green"></span><span class="item-name">CONNECTING PIN</span></div>
+            <div class="item-row" data-item="CONTROL BODY"><span class="stock-dot dot-green"></span><span class="item-name">CONTROL BODY</span></div>
+            <div class="item-row" data-item="CONTROL BODY REPAIR"><span class="stock-dot dot-green"></span><span class="item-name">CONTROL BODY REPAIR</span></div>
+            <div class="item-row" data-item="COUPLER"><span class="stock-dot dot-green"></span><span class="item-name">COUPLER</span></div>
+            <div class="item-row" data-item="CURVATURE (FLEX) TUBE"><span class="stock-dot dot-green"></span><span class="item-name">CURVATURE (FLEX) TUBE</span></div>
+            <div class="item-row" data-item="DISTAL END"><span class="stock-dot dot-green"></span><span class="item-name">DISTAL END</span></div>
+            <div class="item-row" data-item="DISTAL TIP"><span class="stock-dot dot-green"></span><span class="item-name">DISTAL TIP</span></div>
+            <div class="item-row" data-item="ELECTRICAL ASSEMBLY"><span class="stock-dot dot-green"></span><span class="item-name">ELECTRICAL ASSEMBLY</span></div>
+            <div class="item-row" data-item="EPOXY"><span class="stock-dot dot-green"></span><span class="item-name">EPOXY</span></div>
+            <div class="item-row" data-item="EYEPIECE"><span class="stock-dot dot-green"></span><span class="item-name">EYEPIECE</span></div>
+            <div class="item-row" data-item="FIBER BUNDLE"><span class="stock-dot dot-green"></span><span class="item-name">FIBER BUNDLE</span></div>
+            <div class="item-row" data-item="FIBER OPTIC"><span class="stock-dot dot-green"></span><span class="item-name">FIBER OPTIC</span></div>
+            <div class="item-row" data-item="FLEX TUBE (INSTRUMENT)"><span class="stock-dot dot-green"></span><span class="item-name">FLEX TUBE (INSTRUMENT)</span></div>
+            <div class="item-row" data-item="FLUID RESISTANT CAP"><span class="stock-dot dot-green"></span><span class="item-name">FLUID RESISTANT CAP</span></div>
+            <div class="item-row" data-item="FORCEP"><span class="stock-dot dot-green"></span><span class="item-name">FORCEP</span></div>
+            <div class="item-row" data-item="GLASS (WINDOW)"><span class="stock-dot dot-green"></span><span class="item-name">GLASS (WINDOW)</span></div>
+            <div class="item-row" data-item="GLUE / ADHESIVE"><span class="stock-dot dot-green"></span><span class="item-name">GLUE / ADHESIVE</span></div>
+            <div class="item-row">GRASPER</div>
+            <div class="item-row">HANDLE ASSEMBLY</div>
+            <div class="item-row">INSERTION TUBE</div>
+            <div class="item-row">INSTRUMENTS PURCHASED</div>
+            <div class="item-row">INTERNAL TUBING</div>
+            <div class="item-row" data-item="INSTRUMENTS PURCHASED"><span class="stock-dot dot-red"></span><span class="item-name">INSTRUMENTS PURCHASED</span><span class="low-stock-count">1</span></div>
+            <div class="item-row" data-item="INSERTION TUBE"><span class="stock-dot dot-amber"></span><span class="item-name">INSERTION TUBE</span></div>
+            <div class="item-row" data-item="JAW SET"><span class="stock-dot dot-green"></span><span class="item-name">JAW SET</span></div>
+            <div class="item-row" data-item="KNOB / DIAL"><span class="stock-dot dot-green"></span><span class="item-name">KNOB / DIAL</span></div>
+            <div class="item-row" data-item="LAMP / BULB"><span class="stock-dot dot-green"></span><span class="item-name">LAMP / BULB</span></div>
+            <div class="item-row" data-item="LENS"><span class="stock-dot dot-green"></span><span class="item-name">LENS</span></div>
+            <div class="item-row" data-item="LIGHT GUIDE"><span class="stock-dot dot-amber"></span><span class="item-name">LIGHT GUIDE</span></div>
+          </div>
+          <div class="split-left-footer">
+            <div style="display:flex;align-items:center;gap:4px">
+              Show
+              <select><option>25</option><option>50</option><option selected>100</option></select>
+            </div>
+            <div class="page-nav">
+              <button title="Previous page">&laquo;</button>
+              <span>Page</span>
+              <input type="number" value="1" min="1"/>
+              <span>of 2</span>
+              <button title="Next page">&raquo;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: Redesigned compact layout -->
+        <div class="split-right" style="gap:0;padding:0;background:#fff">
+
+          <!-- ITEM HEADER BAR — collapsed to single dense strip -->
+          <div class="item-header-bar">
+            <div class="ihb-fields">
+              <div class="ihb-field" style="flex:1.5">
+                <label>Item <span class="req">*</span></label>
+                <input class="inp" value="ACHROMAT"/>
+              </div>
+              <div class="ihb-field" style="flex:1.5">
+                <label>Description</label>
+                <input class="inp" value="Achromat Lens Assembly"/>
+              </div>
+              <div class="ihb-field" style="flex:0.8">
+                <label>Type</label>
+                <select class="inp"><option>Flexible</option><option>Camera</option><option>Instrument</option><option>Rigid</option></select>
+              </div>
+              <div class="ihb-field" style="flex:0.6">
+                <label>Diameter</label>
+                <select class="inp"><option>Small</option><option>Large</option></select>
+              </div>
+              <div class="ihb-toggles">
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Not For Repair</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">No Count Adj</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Skip Pick</span></div>
+              </div>
+              <button class="btn btn-navy" style="height:24px;padding:0 8px;font-size:10px;gap:3px;align-self:flex-end" title="Save Item (Ctrl+S)">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+                Save Item
+              </button>
+            </div>
+          </div>
+
+          <!-- MAIN CONTENT: Sizes Grid (left ~60%) + Size Detail (right ~40%) -->
+          <div class="sizes-split">
+
+            <!-- Sizes Grid -->
+            <div class="sizes-grid-col">
+              <div class="tbl-head" style="padding:3px 8px">
+                <div style="display:flex;align-items:center;gap:5px">
+                  <span class="tbl-title">Sizes</span>
+                  <span class="tab-count" style="font-size:8px">104</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:3px">
+                  <input class="search-inp" placeholder="Search..." style="width:100px"/>
+                  <select class="inp-sm inp" style="width:70px"><option value="">All</option><option>Active</option><option>Inactive</option></select>
+                  <button class="btn-xs btn-navy">+ Add</button>
+                </div>
+              </div>
+              <div class="sizes-grid-body">
+                <table id="sizeGrid">
+                  <thead>
+                    <tr>
+                      <th>Size Description</th>
+                      <th>Desc 2</th>
+                      <th>Bin #</th>
+                      <th style="width:55px">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="size-row selected-size" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="A-12" data-cost="$0.10" data-cur="42" data-min="5" data-max="100" data-reorder="10">
+                      <td>DUR-B</td>
+                      <td></td>
+                      <td>A-12</td>
+                      <td><span class="badge b-active">Active</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="with stop pin" data-desc3="" data-bin="A-13" data-cost="$0.35" data-cur="18" data-min="3" data-max="50" data-reorder="8">
+                      <td>2.70 x 3.55 w/stop</td>
+                      <td>with stop pin</td>
+                      <td>A-13</td>
+                      <td><span class="badge b-active">Active</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="B-04" data-cost="$0.22" data-cur="31" data-min="5" data-max="80" data-reorder="10">
+                      <td>3.0 x 4.0</td>
+                      <td></td>
+                      <td>B-04</td>
+                      <td><span class="badge b-active">Active</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="standard" data-desc3="" data-bin="B-04" data-cost="$0.18" data-cur="55" data-min="10" data-max="120" data-reorder="15">
+                      <td>3.5 x 5.0</td>
+                      <td>standard</td>
+                      <td>B-04</td>
+                      <td><span class="badge b-active">Active</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="C-01" data-cost="$0.45" data-cur="0" data-min="2" data-max="30" data-reorder="5">
+                      <td>4.0 x 6.0</td>
+                      <td></td>
+                      <td>C-01</td>
+                      <td><span class="badge b-inactive">Inactive</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="wide angle" data-desc3="OD 4.5mm" data-bin="C-02" data-cost="$1.20" data-cur="7" data-min="3" data-max="40" data-reorder="8">
+                      <td>4.5 x 7.0</td>
+                      <td>wide angle</td>
+                      <td>C-02</td>
+                      <td><span class="badge b-active">Active</span></td>
+                    </tr>
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="" data-cost="$0.08" data-cur="14" data-min="5" data-max="60" data-reorder="10">
+                      <td>5.0 x 8.0</td>
+                      <td></td>
+                      <td></td>
+                      <td><span class="badge b-static">Static</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination-bar">
+                <span>1–25 of 104</span>
+                <div class="page-nav">
+                  <button>&laquo;</button>
+                  <input type="number" value="1" min="1" style="width:22px;height:18px;border:1px solid var(--border);border-radius:3px;text-align:center;font-size:9px"/>
+                  <span>/ 5</span>
+                  <button>&raquo;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Size Detail (right side) -->
+            <div class="size-detail-col" id="sizeDetailPanel">
+              <div class="sd-head">
+                <span class="tbl-title" id="sdTitle">DUR-B</span>
+                <div style="display:flex;gap:2px">
+                  <button class="sd-btn" onclick="document.getElementById('suppliersModal').classList.add('open')">Suppliers</button>
+                  <button class="sd-btn" onclick="document.getElementById('lotsModal').classList.add('open')">Lots</button>
+                  <button class="sd-btn" onclick="document.getElementById('buildModal').classList.add('open')">Build</button>
+                </div>
+              </div>
+              <div class="sd-body">
+                <div class="sd-grid">
+                  <div class="ff">
+                    <label>Size ID</label>
+                    <input class="inp" id="sdSize" value="DUR-B"/>
+                  </div>
+                  <div class="ff">
+                    <label>Description 2</label>
+                    <input class="inp" id="sdDesc2" value=""/>
+                  </div>
+                  <div class="ff">
+                    <label>Description 3</label>
+                    <input class="inp" id="sdDesc3" value=""/>
+                  </div>
+                  <div class="ff">
+                    <label>Bin Number</label>
+                    <input class="inp" id="sdBin" value="A-12"/>
+                  </div>
+                  <div class="ff">
+                    <label>Unit Cost</label>
+                    <input class="inp" id="sdCost" value="$0.10" style="text-align:right"/>
+                  </div>
+                </div>
+                <div class="sd-levels">
+                  <div class="sd-level-box">
+                    <span class="sd-level-label">Current</span>
+                    <span class="sd-level-val" id="sdCur" style="color:var(--green)">42</span>
+                  </div>
+                  <div class="sd-level-box">
+                    <span class="sd-level-label">Min</span>
+                    <input class="sd-level-inp" id="sdMin" type="number" value="5"/>
+                  </div>
+                  <div class="sd-level-box">
+                    <span class="sd-level-label">Max</span>
+                    <input class="sd-level-inp" id="sdMax" type="number" value="100"/>
+                  </div>
+                  <div class="sd-level-box">
+                    <span class="sd-level-label">Reorder</span>
+                    <input class="sd-level-inp" id="sdReorder" type="number" value="10"/>
+                  </div>
+                </div>
+                <div class="sd-toggles">
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Scan Required</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Always Reorder</span></div>
+                </div>
+              </div>
+              <div class="sd-footer">
+                <button class="btn btn-navy" style="height:24px;padding:0 10px;font-size:10px;gap:3px;flex:1">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+                  Save Size
+                </button>
+                <button class="btn btn-danger" style="height:24px;padding:0 8px;font-size:10px;gap:3px">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Del
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Action Bar — slim strip -->
+          <div class="inv-action-bar">
+            <button class="btn btn-outline" style="gap:3px;height:22px;font-size:10px">Export Items</button>
+            <button class="btn btn-outline" style="gap:3px;height:22px;font-size:10px">Import Items</button>
+            <div class="divider" style="height:14px"></div>
+            <button class="btn btn-outline" style="gap:3px;height:22px;font-size:10px">Export Sizes</button>
+            <button class="btn btn-outline" style="gap:3px;height:22px;font-size:10px">Import Sizes</button>
+            <div class="divider" style="height:14px"></div>
+            <button class="btn btn-outline" style="gap:3px;height:22px;font-size:10px">Export Lots</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-outline" style="height:22px;font-size:10px">Clear Selection</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ PURCHASE ORDERS TAB ══════════ -->
+      <div id="itab-po" class="tab-content">
+        <div class="split-layout">
+          
+          <!-- LEFT PANEL: PO List -->
+          <div class="split-left">
+            <div class="split-left-head">Purchase Orders</div>
+            <div class="split-left-search">
+              <select class="inp" style="height:24px;font-size:10.5px;font-weight:600;margin-bottom:2px" id="poSupplier">
+                <option value="">-- All Suppliers --</option>
+                <option value="testgp" selected>Test GP Supplier</option>
+                <option value="inspira">Inspira Health</option>
+                <option value="tsi">Total Scope Inc.</option>
+                <option value="olympus">Olympus America</option>
+                <option value="thirdfront">Thirdfront International</option>
+              </select>
+              <div class="row">
+                <input class="search-inp" placeholder="Search POs..." style="flex:1"/>
+              </div>
+              <div class="row" style="margin-top:2px">
+                <div class="toggle-row" style="padding:0;gap:4px">
+                  <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+                  <span style="font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:700">Closed</span>
+                </div>
+                <div style="flex:1"></div>
+                <button class="btn-xs btn-navy">+ Draft PO</button>
+              </div>
+            </div>
+            
+            <div class="split-left-list">
+              <!-- PO Item Rows -->
+              <div class="item-row selected" style="display:flex;flex-direction:column;gap:3px;padding:6px 10px;height:auto">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">MP224030092</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--green)">OPEN</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between">
+                  <span>05/25/2023</span>
+                  <span style="font-weight:600;color:var(--text)">$925.06</span>
+                </div>
+              </div>
+              
+              <div class="item-row" style="display:flex;flex-direction:column;gap:3px;padding:6px 10px;height:auto">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2304891</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--muted)">CLOSED</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between">
+                  <span>04/12/2023</span>
+                  <span style="font-weight:600;color:var(--text)">$1,450.20</span>
+                </div>
+              </div>
+
+              <div class="item-row" style="display:flex;flex-direction:column;gap:3px;padding:6px 10px;height:auto;border-left:3px solid var(--amber)">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2306012</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--amber)">DRAFT</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between">
+                  <span>06/01/2023</span>
+                  <span style="font-weight:600;color:var(--text)">$0.00</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="split-left-footer">
+              <div class="page-nav">
+                <button title="Previous page">&laquo;</button>
+                <span>Page</span>
+                <input type="number" value="1" min="1" style="width:24px"/>
+                <span>of 12</span>
+                <button title="Next page">&raquo;</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- RIGHT PANEL: PO Details -->
+          <div class="split-right" style="gap:0;padding:0;background:#fff">
+            
+            <!-- HIGH DENSITY PO HEADER (.fg grid) -->
+            <div class="po-header-bar" style="padding:0">
+              <div class="panel-head" style="background:#F1F5F9;padding:6px 12px">
+                <span>Purchase Order Details</span>
+                <div style="display:flex;gap:4px">
+                  <button class="btn btn-outline" style="height:22px;padding:0 8px;font-size:9.5px">Print</button>
+                  <button class="btn btn-outline" style="height:22px;padding:0 8px;font-size:9.5px">Email Vendor</button>
+                  <button class="btn btn-navy" style="height:22px;padding:0 10px;font-size:9.5px;gap:4px">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+                    Save
+                  </button>
+                </div>
+              </div>
+              <div class="panel-body fg g4" style="border-bottom:1px solid var(--border)">
+                <div class="ff no-bb">
+                  <div class="ff-lbl">PO #</div>
+                  <div class="ff-val" style="padding:0 10px"><span style="font-family:monospace;font-size:13px;font-weight:800;color:var(--navy)">MP224030092</span></div>
+                </div>
+                <div class="ff no-bb">
+                  <div class="ff-lbl">Supplier</div>
+                  <div class="ff-val" style="padding:0 10px"><span class="id-badge" style="font-size:10px;padding:2px 8px">Test GP Supplier</span></div>
+                </div>
+                <div class="ff no-bb">
+                  <div class="ff-lbl">Date</div>
+                  <div class="ff-val"><input class="inp" type="date" value="2023-05-25"/></div>
+                </div>
+                <div class="ff no-br no-bb">
+                  <div class="ff-lbl">Type</div>
+                  <div class="ff-val"><select class="inp"><option selected>Parts</option><option>Services</option><option>Other</option></select></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PO Summary Strip -->
+            <div class="po-summary-strip" style="background:#F8FAFF;padding:6px 12px">
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Total</span>
+                <span class="po-ss-val" style="font-family:monospace;font-size:14px;font-weight:800;color:var(--navy)">$925.06</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Lines</span>
+                <span class="po-ss-val" style="font-weight:700">4</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Units</span>
+                <span class="po-ss-val" style="font-weight:700">7</span>
+              </div>
+              <div class="po-ss-chip" style="border-color:#BBF7D0;background:#F0FDF4">
+                <span class="po-ss-label">Status</span>
+                <span class="po-ss-val" style="color:var(--green);font-weight:700">Open</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Avg Unit</span>
+                <span class="po-ss-val" style="font-family:monospace;font-weight:600">$132.15</span>
+              </div>
+              <div style="flex:1"></div>
+              <div class="cb-inline" style="margin-right:12px;font-weight:600"><input type="checkbox"/> Cancelled</div>
+              <button class="btn btn-navy" style="height:24px;font-size:10px;gap:4px" onclick="document.getElementById('batchSelectModal').classList.add('open')">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Items
+              </button>
+            </div>
+
+            <!-- Inventory On Order Table -->
+            <div style="flex:1;overflow-y:auto">
+              <table class="po-tbl">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Size Desc</th>
+                    <th>Part No.</th>
+                    <th style="text-align:center">Qty</th>
+                    <th style="text-align:right">Unit Cost</th>
+                    <th style="text-align:right">Item Total</th>
+                    <th style="text-align:center">Status</th>
+                    <th style="text-align:center">Technician</th>
+                    <th style="text-align:center">Reorder Man.</th>
+                    <th style="width:70px;text-align:center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:600">INSTRUMENTS PURCHASED</td>
+                    <td style="color:var(--muted)">Adtec Sovereign Grasping FC</td>
+                    <td><span class="mono-chip">PL232R</span></td>
+                    <td style="text-align:center;font-weight:700">2</td>
+                    <td style="text-align:right;font-family:monospace">$145.50</td>
+                    <td style="text-align:right;font-weight:800;font-family:monospace;color:var(--navy)">$291.00</td>
+                    <td style="text-align:center"><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center;color:var(--muted)">Mike Torres</td>
+                    <td style="text-align:center;font-weight:600">5</td>
+                    <td style="text-align:center"><button class="edit-btn" style="padding:3px 8px">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">INSTRUMENTS PURCHASED</td>
+                    <td style="color:var(--muted)">Bipolar Macro Forcep 5mm 31cm</td>
+                    <td><span class="mono-chip">PM403R</span></td>
+                    <td style="text-align:center;font-weight:700">1</td>
+                    <td style="text-align:right;font-family:monospace">$212.00</td>
+                    <td style="text-align:right;font-weight:800;font-family:monospace;color:var(--navy)">$212.00</td>
+                    <td style="text-align:center"><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center;color:var(--muted)">Sarah Chen</td>
+                    <td style="text-align:center;font-weight:600">3</td>
+                    <td style="text-align:center"><button class="edit-btn" style="padding:3px 8px">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">INSTRUMENTS PURCHASED</td>
+                    <td style="color:var(--muted)">Needle Holder 5mm 31cm</td>
+                    <td><span class="mono-chip">PL407R</span></td>
+                    <td style="text-align:center;font-weight:700">3</td>
+                    <td style="text-align:right;font-family:monospace">$98.02</td>
+                    <td style="text-align:right;font-weight:800;font-family:monospace;color:var(--navy)">$294.06</td>
+                    <td style="text-align:center"><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center;color:var(--muted)">Mike Torres</td>
+                    <td style="text-align:center;font-weight:600">5</td>
+                    <td style="text-align:center"><button class="edit-btn" style="padding:3px 8px">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">INSTRUMENTS PURCHASED</td>
+                    <td style="color:var(--muted)">Scissors 5mm 31cm</td>
+                    <td><span class="mono-chip">PK115</span></td>
+                    <td style="text-align:center;font-weight:700">1</td>
+                    <td style="text-align:right;font-family:monospace">$128.00</td>
+                    <td style="text-align:right;font-weight:800;font-family:monospace;color:var(--navy)">$128.00</td>
+                    <td style="text-align:center"><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center;color:var(--muted)">Sarah Chen</td>
+                    <td style="text-align:center;font-weight:600">2</td>
+                    <td style="text-align:center"><button class="edit-btn" style="padding:3px 8px">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="pagination-bar" style="background:#fff">
+              <span>4 line items &bull; 7 total units &bull; PO Total: <strong style="color:var(--navy);font-family:monospace;font-size:12px">$925.06</strong></span>
+              <div class="page-nav">
+                <button title="Previous">&#9664;</button>
+                <span style="font-size:10px;color:var(--muted);padding:0 3px">1 of 1</span>
+                <button title="Next">&#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ RECEIVE INVENTORY TAB ══════════ -->
+      <div id="itab-receive" class="tab-content">
+        <div class="split-layout">
+          
+          <!-- LEFT PANEL: PO Selection List -->
+          <div class="split-left">
+            <div class="split-left-head">Receive Inventory</div>
+            <div class="split-left-search">
+              <select class="inp" style="height:24px;font-size:10.5px;font-weight:600;margin-bottom:2px" id="recvSupplier">
+                <option value="">-- All Suppliers --</option>
+                <option value="spi" selected>Surgical Products Inc.</option>
+                <option value="adtec">Adtec Medical</option>
+                <option value="olympus">Olympus Corporation</option>
+                <option value="storz">Karl Storz Endoscopy</option>
+              </select>
+              <div class="row">
+                <input class="search-inp" placeholder="Search POs..." style="flex:1"/>
+              </div>
+              <div class="row" style="margin-top:2px">
+                <div class="toggle-row" style="padding:0;gap:4px">
+                  <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+                  <span style="font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:700">Closed</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="split-left-list">
+              <!-- PO Item Rows -->
+              <div class="item-row selected" style="display:flex;flex-direction:column;gap:3px;padding:6px 10px;height:auto">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2305078</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--amber)">PARTIAL</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between">
+                  <span>05/25/2023</span>
+                  <span style="font-weight:600;color:var(--text)">4 / 10 Recv</span>
+                </div>
+              </div>
+              
+              <div class="item-row" style="display:flex;flex-direction:column;gap:3px;padding:6px 10px;height:auto;opacity:0.6">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2304891</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--green)">COMPLETE</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between">
+                  <span>04/12/2023</span>
+                  <span style="font-weight:600;color:var(--text)">15 / 15 Recv</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: Receive Content -->
+          <div class="split-right" style="gap:0;padding:0;background:#fff">
+
+            <!-- HIGH DENSITY RECV HEADER -->
+            <div class="po-header-bar" style="padding:0">
+              <div class="panel-head" style="background:#F1F5F9;padding:6px 12px">
+                <span>Receiving Workflow</span>
+                <div style="display:flex;gap:4px">
+                  <button class="btn btn-outline" style="height:22px;padding:0 8px;font-size:9.5px">Print Receiving Report</button>
+                  <button class="btn btn-green" style="height:22px;padding:0 10px;font-size:9.5px;gap:4px" title="Receive all remaining items at full quantity">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Receive All Remaining
+                  </button>
+                </div>
+              </div>
+              <div class="panel-body fg g4" style="border-bottom:1px solid var(--border)">
+                <div class="ff no-bb">
+                  <div class="ff-lbl">PO #</div>
+                  <div class="ff-val" style="padding:0 10px"><span style="font-family:monospace;font-size:13px;font-weight:800;color:var(--navy)">SPI2305078</span></div>
+                </div>
+                <div class="ff no-bb">
+                  <div class="ff-lbl">Supplier</div>
+                  <div class="ff-val" style="padding:0 10px"><span class="id-badge" style="font-size:10px;padding:2px 8px">Surgical Products Inc.</span></div>
+                </div>
+                <div class="ff no-br no-bb">
+                  <div class="ff-lbl">Date</div>
+                  <div class="ff-val" style="padding:0 10px;font-weight:600">05/25/2023</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Receive Summary Strip with progress -->
+            <div class="recv-summary-strip" style="background:#F8FAFF;padding:6px 12px">
+              <div class="recv-progress-wrap" style="flex:1;max-width:200px">
+                <div class="recv-progress-bar">
+                  <div class="recv-progress-fill" style="width:33%"></div>
+                </div>
+                <span class="recv-progress-text" style="font-weight:700;color:var(--navy)">33% Complete</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Total Lines</span>
+                <span class="po-ss-val" style="font-weight:700">6</span>
+              </div>
+              <div class="po-ss-chip" style="border-color:#BBF7D0;background:#F0FDF4">
+                <span class="po-ss-label">Complete</span>
+                <span class="po-ss-val" style="color:var(--green);font-weight:700">2</span>
+              </div>
+              <div class="po-ss-chip" style="border-color:#FDE68A;background:#FFFBEB">
+                <span class="po-ss-label">Partial</span>
+                <span class="po-ss-val" style="color:var(--amber);font-weight:700">1</span>
+              </div>
+              <div class="po-ss-chip" style="border-color:#FECACA;background:#FEF2F2">
+                <span class="po-ss-label">Pending</span>
+                <span class="po-ss-val" style="color:var(--red);font-weight:700">3</span>
+              </div>
+              <div style="flex:1"></div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Ordered</span>
+                <span class="po-ss-val" style="font-weight:700">10</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Received</span>
+                <span class="po-ss-val" style="color:var(--green);font-weight:700">4</span>
+              </div>
+              <div class="po-ss-chip" style="background:#fff">
+                <span class="po-ss-label">Remaining</span>
+                <span class="po-ss-val" style="color:var(--red);font-weight:800">6</span>
+              </div>
+            </div>
+
+            <!-- Receive Table -->
+            <div style="flex:1;overflow-y:auto">
+              <table class="recv-tbl">
+                <thead>
+                  <tr>
+                    <th>Part No.</th>
+                    <th>Item</th>
+                    <th>Size Description</th>
+                    <th style="text-align:center">Ordered</th>
+                    <th style="text-align:center">Received</th>
+                    <th style="text-align:center">Remaining</th>
+                    <th>Status</th>
+                    <th style="text-align:center">Progress</th>
+                    <th style="width:130px;text-align:center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="recv-clickable" onclick="openRecvEdit('PL232R','INSTRUMENTS PURCHASED','Adtec Sovereign Grasping FC','SPI2305078','$145.50',2,0,'59111','N-01')" style="cursor:pointer">
+                    <td><span class="mono-chip">PL232R</span></td>
+                    <td>INSTRUMENTS PURCHASED</td>
+                    <td style="font-size:10.5px">Adtec Sovereign Grasping FC</td>
+                    <td style="text-align:center">2</td>
+                    <td style="text-align:center;font-weight:600">0</td>
+                    <td style="text-align:center;font-weight:700;color:var(--red)">2</td>
+                    <td><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill" style="width:0%"></div></div></td>
+                    <td style="text-align:center">
+                      <button class="btn btn-green" style="height:22px;padding:0 8px;font-size:9.5px;gap:2px">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        Receive
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="recv-complete-row">
+                    <td><span class="mono-chip">PM403R</span></td>
+                    <td>INSTRUMENTS PURCHASED</td>
+                    <td style="font-size:10.5px">Bipolar Macro Forcep 5mm 31cm</td>
+                    <td style="text-align:center">1</td>
+                    <td style="text-align:center;font-weight:600;color:var(--green)">1</td>
+                    <td style="text-align:center;font-weight:700;color:var(--green)">0</td>
+                    <td><span class="badge b-active" style="font-size:10px">Complete</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill recv-mini-done" style="width:100%"></div></div></td>
+                    <td style="text-align:center"><span style="font-size:9.5px;color:var(--muted)">&#10003; Fully received</span></td>
+                  </tr>
+                  <tr class="recv-clickable" onclick="openRecvEdit('PL407R','INSTRUMENTS PURCHASED','Needle Holder 5mm 31cm','SPI2305078','$98.02',3,1,'59112','N-03')" style="cursor:pointer">
+                    <td><span class="mono-chip">PL407R</span></td>
+                    <td>INSTRUMENTS PURCHASED</td>
+                    <td style="font-size:10.5px">Needle Holder 5mm 31cm</td>
+                    <td style="text-align:center">3</td>
+                    <td style="text-align:center;font-weight:600">1</td>
+                    <td style="text-align:center;font-weight:700;color:var(--amber)">2</td>
+                    <td><span class="badge b-static" style="font-size:10px">Partial</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill recv-mini-partial" style="width:33%"></div></div></td>
+                    <td style="text-align:center">
+                      <button class="btn btn-green" style="height:22px;padding:0 8px;font-size:9.5px;gap:2px">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        Receive
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="recv-clickable" onclick="openRecvEdit('PK115','INSTRUMENTS PURCHASED','Scissors 5mm 31cm','SPI2305078','$128.00',1,0,'59113','N-04')" style="cursor:pointer">
+                    <td><span class="mono-chip">PK115</span></td>
+                    <td>INSTRUMENTS PURCHASED</td>
+                    <td style="font-size:10.5px">Scissors 5mm 31cm</td>
+                    <td style="text-align:center">1</td>
+                    <td style="text-align:center;font-weight:600">0</td>
+                    <td style="text-align:center;font-weight:700;color:var(--red)">1</td>
+                    <td><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill" style="width:0%"></div></div></td>
+                    <td style="text-align:center">
+                      <button class="btn btn-green" style="height:22px;padding:0 8px;font-size:9.5px;gap:2px">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        Receive
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="recv-complete-row">
+                    <td><span class="mono-chip">BS-2800</span></td>
+                    <td>BENDING SECTION</td>
+                    <td style="font-size:10.5px">2.8mm Flex Tip Assembly</td>
+                    <td style="text-align:center">2</td>
+                    <td style="text-align:center;font-weight:600;color:var(--green)">2</td>
+                    <td style="text-align:center;font-weight:700;color:var(--green)">0</td>
+                    <td><span class="badge b-active" style="font-size:10px">Complete</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill recv-mini-done" style="width:100%"></div></div></td>
+                    <td style="text-align:center"><span style="font-size:9.5px;color:var(--muted)">&#10003; Fully received</span></td>
+                  </tr>
+                  <tr class="recv-clickable" onclick="openRecvEdit('CCD-160','CCD','CCD Chip Assembly 1/6&quot;','SPI2305078','$340.00',1,0,'59114','J-01')" style="cursor:pointer">
+                    <td><span class="mono-chip">CCD-160</span></td>
+                    <td>CCD</td>
+                    <td style="font-size:10.5px">CCD Chip Assembly 1/6"</td>
+                    <td style="text-align:center">1</td>
+                    <td style="text-align:center;font-weight:600">0</td>
+                    <td style="text-align:center;font-weight:700;color:var(--red)">1</td>
+                    <td><span class="badge b-inactive" style="font-size:10px">Pending</span></td>
+                    <td style="text-align:center"><div class="recv-mini-bar"><div class="recv-mini-fill" style="width:0%"></div></div></td>
+                    <td style="text-align:center">
+                      <button class="btn btn-green" style="height:22px;padding:0 8px;font-size:9.5px;gap:2px">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        Receive
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="pagination-bar" style="background:#fff">
+              <span>6 line items &bull; <strong style="color:var(--green)">2 complete</strong> &bull; <strong style="color:var(--amber)">1 partial</strong> &bull; <strong style="color:var(--red)">3 pending</strong></span>
+              <div class="page-nav">
+                <button title="Previous">&#9664;</button>
+                <span style="font-size:10px;color:var(--muted);padding:0 3px">1 of 1</span>
+                <button title="Next">&#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ═══════ ADD INVENTORY ITEM MODAL ═══════ -->
+<div class="modal-overlay" id="addItemModal">
+  <div class="modal-box sm">
+    <div class="modal-header">
+      <h3>Add Inventory Item</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="gap:10px">
+        <div class="ff">
+          <label>Item Description <span class="req">*</span></label>
+          <input class="inp" placeholder="Enter item description"/>
+        </div>
+        <div class="ff">
+          <label>Instrument Type</label>
+          <select class="inp"><option value="">-- Select --</option><option>Camera</option><option>Flexible</option><option>Instrument</option><option>Rigid</option></select>
+        </div>
+        <div style="display:flex;gap:16px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
+          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Not Used For Repair</span></div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">No Count Adjustment</span></div>
+          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Skip Pick List</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+        Save Item
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BATCH SELECT MODAL (PO Add Items) ═══════ -->
+<div class="modal-overlay" id="batchSelectModal">
+  <div class="modal-box" style="width:820px">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Add Items to Purchase Order — SPI2305078</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:flex;gap:10px;padding:6px 16px;background:#F8FAFF;border-bottom:1px solid var(--border);font-size:10.5px">
+      <div><span style="color:var(--muted)">Supplier:</span> <strong>Surgical Products Inc.</strong></div>
+      <div><span style="color:var(--muted)">Available Items:</span> <strong>10</strong></div>
+      <div><span style="color:var(--muted)">Selected:</span> <strong id="batchSelectedCount" style="color:var(--navy)">0</strong></div>
+      <div style="flex:1"></div>
+      <span style="font-size:9.5px;color:var(--muted)">Check items and set quantities to add to this PO</span>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <!-- Search bar -->
+      <div style="padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:5px;align-items:center">
+        <input class="inp" placeholder="Search by part no., item, or size..." style="flex:1;height:26px;font-size:11px"/>
+        <button class="btn btn-outline" style="height:26px;font-size:10px">Refresh</button>
+        <button class="btn btn-outline" style="height:26px;font-size:10px">Clear</button>
+      </div>
+      <div style="max-height:360px;overflow-y:auto">
+        <table class="check-tbl modal-tbl">
+          <thead>
+            <tr>
+              <th><input type="checkbox" title="Select all"/></th>
+              <th style="width:70px">Order Qty</th>
+              <th>Part Number</th>
+              <th>Vendor SKU</th>
+              <th>Inventory Item</th>
+              <th>Size Description</th>
+              <th style="text-align:center">Reorder Level</th>
+              <th style="text-align:center">Qty Per Unit</th>
+              <th style="text-align:right">Unit Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">PL232R</span></td>
+              <td style="font-size:10px;color:var(--muted)">AD-PL232</td>
+              <td>INSTRUMENTS PURCHASED</td>
+              <td style="font-size:10.5px">Adtec Sovereign Grasping FC</td>
+              <td style="text-align:center">5</td>
+              <td style="text-align:center;font-weight:600">1</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$145.50</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">PM403R</span></td>
+              <td style="font-size:10px;color:var(--muted)">AD-PM403</td>
+              <td>INSTRUMENTS PURCHASED</td>
+              <td style="font-size:10.5px">Bipolar Macro Forcep 5mm 31cm</td>
+              <td style="text-align:center">3</td>
+              <td style="text-align:center;font-weight:600">10</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$212.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">PL407R</span></td>
+              <td style="font-size:10px;color:var(--muted)">AD-PL407</td>
+              <td>INSTRUMENTS PURCHASED</td>
+              <td style="font-size:10.5px">Needle Holder 5mm 31cm</td>
+              <td style="text-align:center">5</td>
+              <td style="text-align:center;font-weight:600">1</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$98.02</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">PK115</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>INSTRUMENTS PURCHASED</td>
+              <td style="font-size:10.5px">Scissors 5mm 31cm</td>
+              <td style="text-align:center;font-weight:600;color:var(--red)">0</td>
+              <td style="text-align:center">2</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$128.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">BS-2800</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>BENDING SECTION</td>
+              <td style="font-size:10.5px">2.8mm Flex Tip Assembly</td>
+              <td style="text-align:center;font-weight:600;color:var(--amber)">2</td>
+              <td style="text-align:center">2</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$85.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">CCD-160</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>CCD</td>
+              <td style="font-size:10.5px">CCD Chip Assembly 1/6"</td>
+              <td style="text-align:center">1</td>
+              <td style="text-align:center;font-weight:600">1</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$340.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">FB-310K</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>FIBER BUNDLE</td>
+              <td style="font-size:10.5px">Coherent Fiber Bundle 3.1mm</td>
+              <td style="text-align:center;font-weight:600;color:var(--green)">5</td>
+              <td style="text-align:center">3</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$175.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">LG-050</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>LIGHT GUIDE</td>
+              <td style="font-size:10.5px">Light Guide Bundle 5.0mm</td>
+              <td style="text-align:center;font-weight:600;color:var(--amber)">2</td>
+              <td style="text-align:center">2</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$95.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">IT-290</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>INSERTION TUBE</td>
+              <td style="font-size:10.5px">Insertion Tube 2.9mm OD</td>
+              <td style="text-align:center;font-weight:600;color:var(--green)">3</td>
+              <td style="text-align:center">1</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$220.00</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"/></td>
+              <td><input class="qty-inp" type="number" value="" min="0" placeholder="0"/></td>
+              <td><span class="mono-chip">DT-400</span></td>
+              <td style="font-size:10px;color:var(--muted)">—</td>
+              <td>DISTAL TIP</td>
+              <td style="font-size:10.5px">Distal Tip Cap 4.0mm</td>
+              <td style="text-align:center;font-weight:600;color:var(--green)">6</td>
+              <td style="text-align:center">4</td>
+              <td style="text-align:right;font-family:monospace;font-size:10.5px">$45.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Running total bar -->
+    <div class="batch-total-bar" id="batchTotalBar">
+      <span class="total-label">Est. PO Total</span>
+      <span id="batchTotalAmt" style="font-size:13px;font-family:monospace;font-weight:800;color:var(--navy)">$0.00</span>
+      <span style="color:var(--muted);font-size:10px;font-weight:400">(<span id="batchTotalItems">0</span> line items)</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" style="height:22px;font-size:10px;border-color:#BBF7D0;color:var(--green)" onclick="autoSuggestQtys()">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg>
+        Auto-Fill Low Stock
+      </button>
+    </div>
+    <div class="modal-footer">
+      <span style="font-size:10px;color:var(--muted);margin-right:auto">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Items at or below reorder level shown in <strong style="color:var(--red)">red</strong> / <strong style="color:var(--amber)">amber</strong>
+      </span>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Add Selected to PO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DELETE PO MODAL ═══════ -->
+<div class="modal-overlay" id="deletePoModal">
+  <div class="modal-box sm">
+    <div class="modal-header modal-header-red">
+      <h3>Delete Purchase Order</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:24px 20px">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" style="margin-bottom:10px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Are you sure you want to delete PO SPI2305078?</p>
+      <p style="font-size:12px;color:var(--muted)">This will remove the purchase order and all associated line items. This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" style="background:var(--red)" onclick="this.closest('.modal-overlay').classList.remove('open')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Delete PO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ RECEIPT EDIT MODAL ═══════ -->
+<div class="modal-overlay" id="recvEditModal">
+  <div class="modal-box sm" style="width:440px">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Receipt of Inventory</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:flex;gap:8px;padding:6px 16px;background:#F8FAFF;border-bottom:1px solid var(--border);font-size:10.5px;align-items:center">
+      <div><span style="color:var(--muted)">Part:</span> <strong id="rePartNo" style="font-family:monospace">PL232R</strong></div>
+      <div><span style="color:var(--muted)">PO:</span> <strong id="rePO">SPI2305078</strong></div>
+      <div style="flex:1"></div>
+      <div><span style="color:var(--muted)">Remaining:</span> <strong id="reRemaining" style="color:var(--red)">2</strong></div>
+    </div>
+    <div class="modal-body" style="padding:10px 16px">
+      <div class="fg" style="gap:6px">
+        <div class="ff">
+          <label>Item Description <span class="req">*</span></label>
+          <input class="inp" id="reItem" value="INSTRUMENTS PURCHASED — Adtec Sovereign Grasping FC" readonly style="background:#F8FAFF;font-weight:500"/>
+        </div>
+        <div class="fg g2" style="gap:6px">
+          <div class="ff">
+            <label>Unit Cost</label>
+            <input class="inp" id="reCost" value="$145.50" readonly style="background:#F8FAFF;text-align:right;font-weight:600;font-family:monospace"/>
+          </div>
+          <div class="ff">
+            <label>Units Received <span class="req">*</span></label>
+            <input class="inp" id="reUnits" type="number" min="0" value="2" style="text-align:center;font-weight:700;font-size:13px"/>
+          </div>
+        </div>
+        <div class="fg g2" style="gap:6px">
+          <div class="ff">
+            <label>Storage Location <span class="req">*</span></label>
+            <select class="inp" id="reStorage">
+              <option value="">-- Select --</option>
+              <option selected>Storage Room</option>
+              <option>Testing Room</option>
+              <option>Prep Center</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label>Expiration Date</label>
+            <input class="inp" type="date" id="reExpDate"/>
+          </div>
+        </div>
+        <div class="fg g2" style="gap:6px">
+          <div class="ff">
+            <label>Lot # <span style="font-size:8px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0">(auto-assigned)</span></label>
+            <div style="display:flex;gap:4px">
+              <input class="inp" id="reLot" value="59111" style="font-family:monospace;font-weight:600;flex:1"/>
+              <button class="btn btn-outline" style="height:26px;font-size:9.5px;padding:0 6px;white-space:nowrap" onclick="this.previousElementSibling.value='';this.previousElementSibling.focus()" title="Override auto-assigned lot number">Override</button>
+            </div>
+          </div>
+          <div class="ff">
+            <label>Bin #</label>
+            <input class="inp" id="reBin" value="N-01" style="font-family:monospace"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <div class="toggle-row" style="gap:5px">
+        <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+        <span class="toggle-label" style="font-size:10.5px">Print Labels</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+        <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SUPPLIERS MODAL ═══════ -->
+<div class="modal-overlay" id="suppliersModal">
+  <div class="modal-box" style="width:640px">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Suppliers — DUR-B</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:flex;gap:10px;padding:6px 16px;background:#F8FAFF;border-bottom:1px solid var(--border);font-size:10.5px">
+      <div><span style="color:var(--muted)">Suppliers:</span> <strong>3</strong></div>
+      <div><span style="color:var(--muted)">Primary:</span> <strong>RepairBy BV</strong></div>
+      <div><span style="color:var(--muted)">Best Price:</span> <strong style="color:var(--green)">$28.50</strong></div>
+      <div style="flex:1"></div>
+      <button class="btn btn-navy" style="height:22px;padding:0 8px;font-size:10px;gap:3px">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Supplier
+      </button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <table class="modal-tbl">
+        <thead>
+          <tr>
+            <th style="width:22px"></th>
+            <th>Supplier</th>
+            <th>Part Number</th>
+            <th>Vendor SKU</th>
+            <th style="text-align:right">Unit Cost</th>
+            <th style="text-align:right">Lead Time</th>
+            <th style="width:80px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><svg width="10" height="10" viewBox="0 0 24 24" fill="var(--amber)" stroke="var(--amber)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg></td>
+            <td style="font-weight:600">RepairBy BV</td>
+            <td><span style="font-family:monospace;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">RP11028</span></td>
+            <td style="color:var(--muted);font-size:10px">—</td>
+            <td style="text-align:right;font-weight:600">$30.00</td>
+            <td style="text-align:right">5 days</td>
+            <td><div style="display:flex;gap:3px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></div></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="font-weight:600">Pentax Medical</td>
+            <td><span style="font-family:monospace;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">PM-DUR-B</span></td>
+            <td style="color:var(--muted);font-size:10px">PMX-90128</td>
+            <td style="text-align:right;font-weight:600">$34.50</td>
+            <td style="text-align:right">7 days</td>
+            <td><div style="display:flex;gap:3px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></div></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="font-weight:600">Olympus Corp.</td>
+            <td><span style="font-family:monospace;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">OLY-ACH-B</span></td>
+            <td style="color:var(--muted);font-size:10px">7X-00341</td>
+            <td style="text-align:right;font-weight:600;color:var(--green)">$28.50</td>
+            <td style="text-align:right">14 days</td>
+            <td><div style="display:flex;gap:3px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer" style="padding:8px 16px">
+      <span style="font-size:10px;color:var(--muted)"><svg width="9" height="9" viewBox="0 0 24 24" fill="var(--amber)" stroke="var(--amber)" stroke-width="2" style="vertical-align:-1px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg> = Primary supplier</span>
+      <div style="flex:1"></div>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LOT #s MODAL ═══════ -->
+<div class="modal-overlay" id="lotsModal">
+  <div class="modal-box" style="width:580px">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Lot Tracking — DUR-B</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:flex;gap:12px;padding:6px 16px;background:#F8FAFF;border-bottom:1px solid var(--border);font-size:10.5px">
+      <div><span style="color:var(--muted)">Active Lots:</span> <strong>2</strong></div>
+      <div><span style="color:var(--muted)">Total On-Hand:</span> <strong style="color:var(--green)">17</strong></div>
+      <div><span style="color:var(--muted)">Depleted:</span> <strong>1</strong></div>
+      <div style="flex:1"></div>
+      <button class="btn btn-navy" style="height:22px;padding:0 8px;font-size:10px;gap:3px">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Lot
+      </button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <table class="modal-tbl">
+        <thead>
+          <tr>
+            <th>Lot #</th>
+            <th>Supplier</th>
+            <th>Date Received</th>
+            <th style="text-align:right">Initial Qty</th>
+            <th style="text-align:right">Remaining</th>
+            <th>Status</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span style="font-family:monospace;font-weight:700;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">59110</span></td>
+            <td>RepairBy BV</td>
+            <td>03/01/2026</td>
+            <td style="text-align:right">15</td>
+            <td style="text-align:right;font-weight:700;color:var(--green)">12</td>
+            <td><span class="badge b-active">Active</span></td>
+            <td style="color:var(--muted)">7 days</td>
+          </tr>
+          <tr>
+            <td><span style="font-family:monospace;font-weight:700;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">57600</span></td>
+            <td>Pentax Medical</td>
+            <td>02/14/2026</td>
+            <td style="text-align:right">10</td>
+            <td style="text-align:right;font-weight:700;color:var(--amber)">5</td>
+            <td><span class="badge b-active">Active</span></td>
+            <td style="color:var(--muted)">22 days</td>
+          </tr>
+          <tr style="opacity:.6">
+            <td><span style="font-family:monospace;font-weight:700;font-size:11px;background:#F0F2F5;padding:1px 5px;border-radius:3px">55200</span></td>
+            <td>RepairBy BV</td>
+            <td>11/08/2025</td>
+            <td style="text-align:right">8</td>
+            <td style="text-align:right;font-weight:700;color:var(--red)">0</td>
+            <td><span class="badge b-inactive">Depleted</span></td>
+            <td style="color:var(--muted)">120 days</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer" style="padding:8px 16px">
+      <span style="font-size:10px;color:var(--muted)">FIFO: oldest lot consumed first</span>
+      <div style="flex:1"></div>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BUILD / ASSEMBLY MODAL ═══════ -->
+<div class="modal-overlay" id="buildModal">
+  <div class="modal-box" style="width:660px">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Build / Assembly — DUR-B</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <!-- Build info strip -->
+    <div style="display:flex;gap:12px;padding:6px 16px;background:#F8FAFF;border-bottom:1px solid var(--border);font-size:10.5px;align-items:center">
+      <div><span style="color:var(--muted)">Build Lot:</span> <strong style="font-family:monospace">59110</strong></div>
+      <div><span style="color:var(--muted)">Components:</span> <strong>3</strong></div>
+      <div><span style="color:var(--muted)">Buildable:</span> <strong style="color:var(--amber)">3 units</strong></div>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" style="height:22px;padding:0 8px;font-size:10px;gap:3px">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Build
+      </button>
+      <button class="btn btn-green" style="height:22px;padding:0 8px;font-size:10px;gap:3px">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Execute Build
+      </button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <table class="modal-tbl">
+        <thead>
+          <tr>
+            <th>Component Item</th>
+            <th>Component Size</th>
+            <th>Bin #</th>
+            <th style="text-align:right">Qty Req</th>
+            <th style="text-align:right">Available</th>
+            <th style="text-align:right">After Build</th>
+            <th style="width:60px">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600">LENS</td>
+            <td>Achromat 2.7mm</td>
+            <td style="color:var(--muted)">A-05</td>
+            <td style="text-align:right">1</td>
+            <td style="text-align:right;font-weight:600;color:var(--green)">24</td>
+            <td style="text-align:right;color:var(--muted)">23</td>
+            <td><span class="badge b-active">OK</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600">EPOXY</td>
+            <td>UV Cure 5ml</td>
+            <td style="color:var(--muted)">D-12</td>
+            <td style="text-align:right">1</td>
+            <td style="text-align:right;font-weight:600;color:var(--green)">18</td>
+            <td style="text-align:right;color:var(--muted)">17</td>
+            <td><span class="badge b-active">OK</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600">BODY TUBE ASSY</td>
+            <td>DUR Housing</td>
+            <td style="color:var(--muted)">B-01</td>
+            <td style="text-align:right">1</td>
+            <td style="text-align:right;font-weight:600;color:var(--amber)">3</td>
+            <td style="text-align:right;color:var(--amber);font-weight:600">2</td>
+            <td><span class="badge b-static" style="background:#FFFBEB;color:var(--amber)">Low</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer" style="padding:8px 16px">
+      <span style="font-size:10px;color:var(--amber);font-weight:600">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        BODY TUBE ASSY will be at reorder level after build
+      </span>
+      <div style="flex:1"></div>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════ INVENTORY ITEM DATA STORE ═══════
+const inventoryData = {
+  'ACHROMAT': {
+    desc: 'Achromat Lens Assembly', type: 'Flexible', diameter: 'Small', active: true, notRepair: true, noCount: false, skipPick: false,
+    sizes: [
+      { name:'DUR-B', desc2:'', desc3:'', bin:'A-12', cost:'$0.10', cur:42, min:5, max:100, reorder:10, status:'Active' },
+      { name:'2.70 x 3.55 w/stop', desc2:'with stop pin', desc3:'', bin:'A-13', cost:'$0.35', cur:18, min:3, max:50, reorder:8, status:'Active' },
+      { name:'3.0 x 4.0', desc2:'', desc3:'', bin:'B-04', cost:'$0.22', cur:31, min:5, max:80, reorder:10, status:'Active' },
+      { name:'3.5 x 5.0', desc2:'standard', desc3:'', bin:'B-04', cost:'$0.18', cur:55, min:10, max:120, reorder:15, status:'Active' },
+      { name:'4.0 x 6.0', desc2:'', desc3:'', bin:'C-01', cost:'$0.45', cur:0, min:2, max:30, reorder:5, status:'Inactive' },
+      { name:'4.5 x 7.0', desc2:'wide angle', desc3:'OD 4.5mm', bin:'C-02', cost:'$1.20', cur:7, min:3, max:40, reorder:8, status:'Active' },
+      { name:'5.0 x 8.0', desc2:'', desc3:'', bin:'', cost:'$0.08', cur:14, min:5, max:60, reorder:10, status:'Static' }
+    ]
+  },
+  'ADAPTER / COUPLER': {
+    desc: 'Adapter & Coupler Components', type: 'Rigid', diameter: 'Large', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'AC-100', desc2:'Universal', desc3:'', bin:'D-01', cost:'$12.50', cur:8, min:2, max:20, reorder:4, status:'Active' },
+      { name:'AC-200', desc2:'Olympus', desc3:'OES series', bin:'D-02', cost:'$18.75', cur:3, min:2, max:15, reorder:3, status:'Active' },
+      { name:'AC-300', desc2:'Storz', desc3:'', bin:'D-03', cost:'$22.00', cur:0, min:1, max:10, reorder:2, status:'Active' }
+    ]
+  },
+  'ANGULATION WIRE SET': {
+    desc: 'Angulation Wire Assemblies', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'AW-28', desc2:'2.8mm OD', desc3:'', bin:'E-05', cost:'$4.50', cur:22, min:5, max:50, reorder:10, status:'Active' },
+      { name:'AW-42', desc2:'4.2mm OD', desc3:'', bin:'E-06', cost:'$5.20', cur:15, min:3, max:40, reorder:8, status:'Active' },
+      { name:'AW-55', desc2:'5.5mm OD', desc3:'standard flex', bin:'E-07', cost:'$6.80', cur:9, min:3, max:30, reorder:6, status:'Active' },
+      { name:'AW-90', desc2:'9.0mm OD', desc3:'colonoscope', bin:'E-08', cost:'$8.40', cur:4, min:2, max:20, reorder:4, status:'Active' },
+      { name:'AW-120', desc2:'12.0mm OD', desc3:'therapeutic', bin:'E-09', cost:'$11.00', cur:2, min:1, max:10, reorder:2, status:'Static' }
+    ]
+  },
+  'BATTERIES': {
+    desc: 'Battery Packs & Cells', type: 'Camera', diameter: 'Small', active: true, notRepair: true, noCount: true, skipPick: false,
+    sizes: [
+      { name:'BAT-CR2', desc2:'CR2 Lithium', desc3:'3V', bin:'F-01', cost:'$1.85', cur:120, min:20, max:200, reorder:40, status:'Active' },
+      { name:'BAT-AA', desc2:'AA Alkaline', desc3:'1.5V', bin:'F-02', cost:'$0.45', cur:85, min:20, max:300, reorder:50, status:'Active' }
+    ]
+  },
+  'BENDING SECTION': {
+    desc: 'Bending Section Assemblies', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'BS-2800', desc2:'2.8mm Flex Tip', desc3:'', bin:'G-01', cost:'$85.00', cur:6, min:2, max:15, reorder:4, status:'Active' },
+      { name:'BS-4200', desc2:'4.2mm Flex Tip', desc3:'', bin:'G-02', cost:'$95.00', cur:4, min:2, max:12, reorder:3, status:'Active' },
+      { name:'BS-5500', desc2:'5.5mm Flex Tip', desc3:'standard', bin:'G-03', cost:'$110.00', cur:3, min:1, max:10, reorder:2, status:'Active' },
+      { name:'BS-9000', desc2:'9.0mm Flex Tip', desc3:'colonoscope', bin:'G-04', cost:'$145.00', cur:1, min:1, max:8, reorder:2, status:'Active' },
+      { name:'BS-1200', desc2:'12.0mm Flex Tip', desc3:'therapeutic', bin:'G-05', cost:'$185.00', cur:0, min:1, max:5, reorder:1, status:'Inactive' }
+    ]
+  },
+  'BIOPSY CAP': {
+    desc: 'Biopsy Channel Caps', type: 'Flexible', diameter: 'Small', active: true, notRepair: true, noCount: false, skipPick: true,
+    sizes: [
+      { name:'BC-STD', desc2:'Standard', desc3:'', bin:'H-01', cost:'$0.65', cur:200, min:50, max:500, reorder:100, status:'Active' },
+      { name:'BC-LG', desc2:'Large bore', desc3:'3.7mm channel', bin:'H-02', cost:'$0.85', cur:90, min:20, max:300, reorder:50, status:'Active' }
+    ]
+  },
+  'BIOPSY CHANNEL CYLINDER': {
+    desc: 'Biopsy Channel Cylinder Parts', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'BCC-28', desc2:'2.8mm', desc3:'', bin:'H-10', cost:'$32.00', cur:5, min:2, max:20, reorder:4, status:'Active' },
+      { name:'BCC-37', desc2:'3.7mm', desc3:'large channel', bin:'H-11', cost:'$38.00', cur:3, min:1, max:15, reorder:3, status:'Active' }
+    ]
+  },
+  'CCD': {
+    desc: 'CCD Chip Assemblies', type: 'Camera', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'CCD-160', desc2:'1/6" Chip', desc3:'', bin:'J-01', cost:'$340.00', cur:2, min:1, max:8, reorder:2, status:'Active' },
+      { name:'CCD-100', desc2:'1/10" Chip', desc3:'micro', bin:'J-02', cost:'$420.00', cur:1, min:1, max:5, reorder:1, status:'Active' },
+      { name:'CCD-250', desc2:'1/4" Chip', desc3:'HD', bin:'J-03', cost:'$580.00', cur:0, min:1, max:4, reorder:1, status:'Active' }
+    ]
+  },
+  'CLEANING SUPPLIES': {
+    desc: 'Cleaning & Sterilization Supplies', type: 'Instrument', diameter: 'Large', active: true, notRepair: true, noCount: true, skipPick: true,
+    sizes: [
+      { name:'CLN-ENZ', desc2:'Enzymatic Cleaner', desc3:'1 gallon', bin:'K-01', cost:'$24.00', cur:12, min:3, max:24, reorder:6, status:'Active' },
+      { name:'CLN-BRS', desc2:'Channel Brush Set', desc3:'5-pack', bin:'K-02', cost:'$8.50', cur:30, min:10, max:50, reorder:15, status:'Active' },
+      { name:'CLN-WPE', desc2:'Lens Wipes', desc3:'100ct box', bin:'K-03', cost:'$6.00', cur:18, min:5, max:40, reorder:10, status:'Active' }
+    ]
+  },
+  'DISTAL TIP': {
+    desc: 'Distal Tip Components', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'DT-280', desc2:'2.8mm Cap', desc3:'', bin:'L-01', cost:'$28.00', cur:8, min:3, max:25, reorder:5, status:'Active' },
+      { name:'DT-400', desc2:'4.0mm Cap', desc3:'', bin:'L-02', cost:'$45.00', cur:5, min:2, max:20, reorder:4, status:'Active' },
+      { name:'DT-550', desc2:'5.5mm Cap', desc3:'standard', bin:'L-03', cost:'$52.00', cur:3, min:2, max:15, reorder:3, status:'Active' }
+    ]
+  },
+  'FIBER BUNDLE': {
+    desc: 'Fiber Optic Bundle Assemblies', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'FB-310K', desc2:'Coherent 3.1mm', desc3:'', bin:'M-01', cost:'$175.00', cur:4, min:2, max:12, reorder:3, status:'Active' },
+      { name:'FB-400K', desc2:'Coherent 4.0mm', desc3:'', bin:'M-02', cost:'$210.00', cur:2, min:1, max:8, reorder:2, status:'Active' },
+      { name:'FB-310I', desc2:'Incoherent 3.1mm', desc3:'illumination', bin:'M-03', cost:'$120.00', cur:6, min:2, max:15, reorder:4, status:'Active' },
+      { name:'FB-500I', desc2:'Incoherent 5.0mm', desc3:'illumination', bin:'M-04', cost:'$145.00', cur:3, min:1, max:10, reorder:2, status:'Active' }
+    ]
+  },
+  'INSTRUMENTS PURCHASED': {
+    desc: 'Purchased Instruments for Resale', type: 'Instrument', diameter: 'Large', active: true, notRepair: true, noCount: false, skipPick: false,
+    sizes: [
+      { name:'Adtec Sovereign Grasping FC', desc2:'', desc3:'', bin:'N-01', cost:'$145.50', cur:3, min:2, max:10, reorder:5, status:'Active' },
+      { name:'Bipolar Macro Forcep 5mm 31cm', desc2:'', desc3:'', bin:'N-02', cost:'$212.00', cur:1, min:1, max:8, reorder:3, status:'Active' },
+      { name:'Needle Holder 5mm 31cm', desc2:'', desc3:'', bin:'N-03', cost:'$98.02', cur:8, min:2, max:15, reorder:5, status:'Active' },
+      { name:'Scissors 5mm 31cm', desc2:'', desc3:'', bin:'N-04', cost:'$128.00', cur:0, min:1, max:10, reorder:2, status:'Active' }
+    ]
+  },
+  'INSERTION TUBE': {
+    desc: 'Insertion Tube Assemblies', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'IT-290', desc2:'2.9mm OD', desc3:'', bin:'P-01', cost:'$220.00', cur:3, min:1, max:8, reorder:2, status:'Active' },
+      { name:'IT-420', desc2:'4.2mm OD', desc3:'', bin:'P-02', cost:'$245.00', cur:2, min:1, max:6, reorder:2, status:'Active' },
+      { name:'IT-550', desc2:'5.5mm OD', desc3:'standard', bin:'P-03', cost:'$280.00', cur:1, min:1, max:5, reorder:1, status:'Active' }
+    ]
+  },
+  'LIGHT GUIDE': {
+    desc: 'Light Guide Bundles', type: 'Flexible', diameter: 'Small', active: true, notRepair: false, noCount: false, skipPick: false,
+    sizes: [
+      { name:'LG-030', desc2:'3.0mm Bundle', desc3:'', bin:'Q-01', cost:'$68.00', cur:5, min:2, max:15, reorder:3, status:'Active' },
+      { name:'LG-050', desc2:'5.0mm Bundle', desc3:'', bin:'Q-02', cost:'$95.00', cur:3, min:1, max:10, reorder:2, status:'Active' }
+    ]
+  }
+};
+
+// Tab switching
+function showInvTab(tabId, el) {
+  document.querySelectorAll('.tab-content').forEach(t => { t.classList.remove('show'); t.classList.remove('show-block'); });
+  const target = document.getElementById('itab-' + tabId);
+  if (target) target.classList.add('show');
+  document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// Select inventory item — updates header bar + rebuilds size grid
+function selectItem(name) {
+  // Highlight in list
+  document.querySelectorAll('.item-row').forEach(r => r.classList.remove('selected'));
+  document.querySelectorAll('.item-row').forEach(r => {
+    if (r.dataset.item === name) r.classList.add('selected');
+  });
+
+  const data = inventoryData[name];
+  if (!data) return;
+
+  // Update header bar fields
+  const headerItem = document.querySelector('.ihb-field:nth-child(1) .inp');
+  const headerDesc = document.querySelector('.ihb-field:nth-child(2) .inp');
+  const headerType = document.querySelector('.ihb-field:nth-child(3) .inp');
+  const headerDiam = document.querySelector('.ihb-field:nth-child(4) .inp');
+  if (headerItem) headerItem.value = name;
+  if (headerDesc) headerDesc.value = data.desc;
+  if (headerType) headerType.value = data.type;
+  if (headerDiam) headerDiam.value = data.diameter;
+
+  // Update toggles
+  const toggles = document.querySelectorAll('.ihb-toggles .toggle input');
+  if (toggles[0]) toggles[0].checked = data.active;
+  if (toggles[1]) toggles[1].checked = data.notRepair;
+  if (toggles[2]) toggles[2].checked = data.noCount;
+  if (toggles[3]) toggles[3].checked = data.skipPick;
+
+  // Rebuild sizes grid
+  const tbody = document.querySelector('#sizeGrid tbody');
+  if (!tbody) return;
+
+  const statusClass = { 'Active':'b-active', 'Inactive':'b-inactive', 'Static':'b-static' };
+  tbody.innerHTML = data.sizes.map((s, i) => {
+    const cls = i === 0 ? 'size-row selected-size' : 'size-row';
+    return `<tr class="${cls}" onclick="selectSizeRow(this)"
+      data-desc2="${s.desc2}" data-desc3="${s.desc3}" data-bin="${s.bin}"
+      data-cost="${s.cost}" data-cur="${s.cur}" data-min="${s.min}"
+      data-max="${s.max}" data-reorder="${s.reorder}">
+      <td>${s.name}</td>
+      <td>${s.desc2}</td>
+      <td>${s.bin}</td>
+      <td><span class="badge ${statusClass[s.status] || 'b-active'}">${s.status}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Update size count
+  const sizeCount = document.querySelector('.sizes-grid-col .tab-count');
+  if (sizeCount) sizeCount.textContent = data.sizes.length;
+  const pagInfo = document.querySelector('.sizes-grid-col .pagination-bar span');
+  if (pagInfo) pagInfo.textContent = '1–' + data.sizes.length + ' of ' + data.sizes.length;
+
+  // Auto-select first size
+  const firstRow = tbody.querySelector('.size-row');
+  if (firstRow) selectSizeRow(firstRow);
+}
+
+// Item list click handler
+document.querySelectorAll('.item-row').forEach(row => {
+  row.addEventListener('click', function() {
+    selectItem(this.dataset.item || this.textContent.trim());
+  });
+});
+
+// Size row selection — populates detail panel on right
+function selectSizeRow(row) {
+  document.querySelectorAll('.size-row').forEach(r => r.classList.remove('selected-size'));
+  row.classList.add('selected-size');
+  const sizeName = row.cells[0]?.textContent || '';
+  document.getElementById('sdTitle').textContent = sizeName;
+  document.getElementById('sdSize').value = sizeName;
+  document.getElementById('sdDesc2').value = row.dataset.desc2 || '';
+  document.getElementById('sdDesc3').value = row.dataset.desc3 || '';
+  document.getElementById('sdBin').value = row.dataset.bin || '';
+  document.getElementById('sdCost').value = row.dataset.cost || '';
+  document.getElementById('sdCur').textContent = row.dataset.cur || '0';
+  document.getElementById('sdMin').value = row.dataset.min || '';
+  document.getElementById('sdMax').value = row.dataset.max || '';
+  document.getElementById('sdReorder').value = row.dataset.reorder || '';
+  // Color current level based on reorder threshold
+  const cur = parseInt(row.dataset.cur) || 0;
+  const reorder = parseInt(row.dataset.reorder) || 0;
+  const curEl = document.getElementById('sdCur');
+  curEl.style.color = cur <= 0 ? 'var(--red)' : cur <= reorder ? 'var(--amber)' : 'var(--green)';
+}
+
+// PO Supplier selection
+function showPOContent() {
+  const sel = document.getElementById('poSupplier');
+  const empty = document.getElementById('poEmpty');
+  const content = document.getElementById('poContent');
+  const poSel = document.getElementById('poSelect');
+  if (sel.value) {
+    empty.style.display = 'none';
+    content.style.display = 'flex';
+    // Populate PO dropdown with demo data
+    poSel.innerHTML = '<option value="spi1" selected>SPI2305078 — 05/25/2023</option><option value="spi2">SPI2304012 — 04/12/2023</option><option value="spi3">SPI2301090 — 01/09/2023</option>';
+  } else {
+    empty.style.display = '';
+    content.style.display = 'none';
+    poSel.innerHTML = '<option value="">-- Select PO --</option>';
+  }
+}
+
+// Receive Supplier selection
+function showRecvContent() {
+  const sel = document.getElementById('recvSupplier');
+  const empty = document.getElementById('recvEmpty');
+  const content = document.getElementById('recvContent');
+  const poSel = document.getElementById('recvPoSelect');
+  if (sel.value) {
+    empty.style.display = 'none';
+    content.style.display = 'flex';
+    poSel.innerHTML = '<option value="spi1" selected>SPI2305078 — 05/25/2023</option>';
+  } else {
+    empty.style.display = '';
+    content.style.display = 'none';
+    poSel.innerHTML = '<option value="">-- Select PO --</option>';
+  }
+}
+
+// (batch select checkbox handling moved to updateBatchTotal below)
+
+// Receipt Edit modal — populate and open
+function openRecvEdit(partNo, item, size, po, cost, ordered, received, lot, bin) {
+  document.getElementById('rePartNo').textContent = partNo;
+  document.getElementById('rePO').textContent = po;
+  const remaining = ordered - received;
+  document.getElementById('reRemaining').textContent = remaining;
+  document.getElementById('reRemaining').style.color = remaining > 0 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('reItem').value = item + ' — ' + size;
+  document.getElementById('reCost').value = cost;
+  document.getElementById('reUnits').value = remaining;
+  document.getElementById('reUnits').max = remaining;
+  document.getElementById('reLot').value = lot;
+  document.getElementById('reBin').value = bin;
+  document.getElementById('recvEditModal').classList.add('open');
+}
+
+// Keyboard navigation for item list
+document.addEventListener('keydown', function(e) {
+  const invTab = document.getElementById('itab-inventory');
+  if (!invTab || !invTab.classList.contains('show')) return;
+  const list = invTab.querySelector('.split-left-list');
+  if (!list) return;
+  const items = Array.from(list.querySelectorAll('.item-row')).filter(r => r.style.display !== 'none');
+  const current = list.querySelector('.item-row.selected');
+  if (!current) return;
+  let idx = items.indexOf(current);
+  if (e.key === 'ArrowDown' && idx < items.length - 1) {
+    e.preventDefault();
+    selectItem(items[idx + 1].dataset.item);
+    items[idx + 1].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp' && idx > 0) {
+    e.preventDefault();
+    selectItem(items[idx - 1].dataset.item);
+    items[idx - 1].scrollIntoView({ block: 'nearest' });
+  }
+});
+
+// ═══════ STOCK HEALTH DOT COMPUTATION ═══════
+// Computes worst-case stock status across all sizes for an item
+function getItemHealth(name) {
+  const data = inventoryData[name];
+  if (!data) return 'green';
+  let worst = 'green';
+  for (const s of data.sizes) {
+    if (s.cur <= 0) return 'red'; // any size empty → red
+    if (s.cur <= s.reorder) worst = worst === 'red' ? 'red' : 'amber';
+  }
+  return worst;
+}
+
+// Update stock dots for items that have data
+function refreshStockDots() {
+  document.querySelectorAll('#itemList .item-row').forEach(row => {
+    const name = row.dataset.item;
+    const data = inventoryData[name];
+    if (!data) return;
+    const dot = row.querySelector('.stock-dot');
+    if (!dot) return;
+    const health = getItemHealth(name);
+    dot.className = 'stock-dot dot-' + health;
+    // Count sizes at/below reorder
+    let lowCount = 0;
+    for (const s of data.sizes) {
+      if (s.cur <= s.reorder) lowCount++;
+    }
+    let badge = row.querySelector('.low-stock-count');
+    if (lowCount > 0 && health !== 'green') {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'low-stock-count';
+        row.appendChild(badge);
+      }
+      badge.textContent = lowCount;
+    } else if (badge) {
+      badge.remove();
+    }
+  });
+}
+
+// ═══════ LOW STOCK FILTER ═══════
+let lowStockActive = false;
+function toggleLowStockFilter() {
+  lowStockActive = !lowStockActive;
+  const btn = document.getElementById('lowStockBtn');
+  btn.classList.toggle('active', lowStockActive);
+  document.querySelectorAll('#itemList .item-row').forEach(row => {
+    if (!lowStockActive) {
+      row.style.display = '';
+      return;
+    }
+    const name = row.dataset.item;
+    const health = getItemHealth(name);
+    row.style.display = (health === 'red' || health === 'amber') ? '' : 'none';
+  });
+}
+
+// ═══════ BATCH SELECT — AUTO-SUGGEST & RUNNING TOTAL ═══════
+function autoSuggestQtys() {
+  const rows = document.querySelectorAll('#batchSelectModal .check-tbl tbody tr');
+  rows.forEach(row => {
+    const curCell = row.cells[6]; // Current column
+    const reorderCell = row.cells[7]; // Reorder column
+    const qtyInp = row.querySelector('.qty-inp');
+    const cb = row.querySelector('input[type=checkbox]');
+    if (!curCell || !reorderCell || !qtyInp) return;
+    const cur = parseInt(curCell.textContent) || 0;
+    const reorder = parseInt(reorderCell.textContent) || 0;
+    if (cur <= reorder) {
+      const suggest = reorder - cur + Math.ceil(reorder * 0.5); // reorder qty + 50% buffer
+      qtyInp.value = suggest;
+      qtyInp.classList.add('qty-suggested');
+      if (cb) cb.checked = true;
+    }
+  });
+  updateBatchTotal();
+}
+
+function updateBatchTotal() {
+  const rows = document.querySelectorAll('#batchSelectModal .check-tbl tbody tr');
+  let total = 0;
+  let items = 0;
+  rows.forEach(row => {
+    const cb = row.querySelector('input[type=checkbox]');
+    const qtyInp = row.querySelector('.qty-inp');
+    const costCell = row.cells[8]; // Unit Cost column
+    if (!cb || !cb.checked || !qtyInp || !costCell) return;
+    const qty = parseInt(qtyInp.value) || 0;
+    if (qty <= 0) return;
+    const cost = parseFloat(costCell.textContent.replace(/[^0-9.]/g, '')) || 0;
+    total += qty * cost;
+    items++;
+  });
+  const amtEl = document.getElementById('batchTotalAmt');
+  const itemsEl = document.getElementById('batchTotalItems');
+  if (amtEl) amtEl.textContent = '$' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (itemsEl) itemsEl.textContent = items;
+  // Update selected count too
+  const countEl = document.getElementById('batchSelectedCount');
+  if (countEl) countEl.textContent = items;
+}
+
+// Wire up batch modal checkboxes and qty inputs for running total
+document.querySelectorAll('#batchSelectModal .check-tbl input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', updateBatchTotal);
+});
+document.querySelectorAll('#batchSelectModal .qty-inp').forEach(inp => {
+  inp.addEventListener('input', updateBatchTotal);
+});
+
+// Init stock dots on load
+refreshStockDots();
+</script>
+</body>
+</html>
