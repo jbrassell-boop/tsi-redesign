@@ -32,6 +32,7 @@
     .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
     .topbar{height:64px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
     .topbar-left{display:flex;align-items:center;gap:10px}
+    #newOrderMenu.open{display:block!important}
     .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
     .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}
     .topbar-welcome strong{color:#fff}
@@ -164,7 +165,7 @@
 
 
     /* ACTION BAR */
-    .action-bar{display:flex;gap:8px;padding:8px 14px;background:#F0F4FA;border:1px solid var(--border-dk);border-radius:5px;margin-top:6px;flex-wrap:wrap;align-items:center;box-shadow:0 1px 4px rgba(0,37,122,.06)}
+    .action-bar{display:flex;gap:20px;padding:8px 14px;background:#F0F4FA;border:1px solid var(--border-dk);border-radius:5px;margin-top:6px;flex-wrap:wrap;align-items:center;box-shadow:0 1px 4px rgba(0,37,122,.06)}
     .action-group{display:flex;flex-direction:column;gap:1px}
     .action-group .lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
     .action-group .val{font-size:13px;font-weight:700;color:var(--navy)}
@@ -255,26 +256,44 @@
     .nwo-results tr.selected td{background:#DBEAFE;font-weight:600}
     .nwo-results .msg-empty{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px;cursor:default}
     .nwo-foot{padding:16px 24px;border-top:1px solid var(--border);background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 12px 12px;overflow:visible;position:relative;gap:12px}
-    .nwo-foot .nwo-create-form{display:none;align-items:center;gap:10px;flex:1}
-    .nwo-foot .nwo-create-form.show{display:flex}
     .nwo-foot .nwo-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+    /* ── Wizard Panel ── */
+    .nwo-wizard{display:none;border-top:1px solid var(--border);background:#FAFBFE;flex-shrink:0;max-height:400px;overflow-y:auto}
+    .nwo-wizard.open{display:block}
+    .nwo-wizard-steps{display:flex;gap:0;padding:12px 24px 0;border-bottom:1px solid var(--border);background:#fff}
+    .nwo-step-tab{padding:8px 16px;font-size:11px;font-weight:700;color:var(--muted);cursor:default;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .nwo-step-tab .step-num{width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+    .nwo-step-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+    .nwo-step-tab.active .step-num{background:var(--navy);color:#fff}
+    .nwo-step-tab.done{color:var(--green)}
+    .nwo-step-tab.done .step-num{background:var(--green);color:#fff}
+    .nwo-step-panel{display:none;padding:16px 24px}
+    .nwo-step-panel.active{display:block}
+    .nwo-wizard-nav{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-top:1px solid var(--border);background:#fff}
+
+    /* Client/Dept/Scope cards */
+    .wiz-card{border:1.5px solid var(--border-dk);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;background:#fff}
+    .wiz-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(46,116,181,.12)}
+    .wiz-card.selected{border-color:var(--navy);background:#EDF2FF;box-shadow:0 2px 8px rgba(0,37,122,.12)}
+    .wiz-card-name{font-size:12px;font-weight:700;color:var(--navy)}
+    .wiz-card-detail{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+    .wiz-card-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px}
+    .wiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;max-height:240px;overflow-y:auto;padding:2px}
+    .wiz-search{width:100%;height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;outline:none;font-family:inherit;margin-bottom:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 9px center}
+    .wiz-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .wiz-empty{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+    .wiz-new-scope{border:1.5px dashed var(--blue);border-radius:8px;padding:14px;background:#F8FAFF;margin-top:8px}
+    .wiz-new-scope .field-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .wiz-new-scope .field-row label{font-size:10px;font-weight:700;color:var(--label);display:block;margin-bottom:2px}
+    .wiz-new-scope .field-row input,.wiz-new-scope .field-row select{height:28px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-size:11px;font-family:inherit;outline:none}
+    .wiz-new-scope .field-row input:focus,.wiz-new-scope .field-row select:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .wiz-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .wiz-summary-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px}
+    .wiz-summary-card h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin:0 0 6px}
+    .wiz-summary-card .val{font-size:12px;font-weight:600;color:var(--navy);line-height:1.5}
     /* Client picker in modal */
-    .nwo-cp{position:relative;width:280px}
-    .nwo-cp-input{width:100%;height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 12px 0 32px;font-size:12px;outline:none;font-family:inherit;transition:border-color .15s;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center}
-    .nwo-cp-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
-    .nwo-cp-dd{position:absolute;bottom:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border-dk);border-bottom:none;border-radius:8px 8px 0 0;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 -8px 24px rgba(0,37,122,.12)}
-    .nwo-cp-dd.open{display:block}
-    .nwo-cp-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;transition:background .1s}
-    .nwo-cp-item:last-child{border-bottom:none}
-    .nwo-cp-item:hover,.nwo-cp-item.highlighted{background:#EDF2FF}
-    .nwo-cp-item-name{font-size:12px;font-weight:600;color:var(--navy)}
-    .nwo-cp-item-detail{font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:8px}
-    .nwo-cp-sel{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:6px 12px;display:none;align-items:center;gap:10px}
-    .nwo-cp-sel.show{display:flex}
-    .nwo-cp-sel-name{font-size:12px;font-weight:700;color:var(--navy)}
-    .nwo-cp-sel-detail{font-size:10px;color:var(--muted)}
-    .nwo-cp-sel-clear{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;margin-left:auto;padding:2px 4px;border-radius:4px;transition:all .1s}
-    .nwo-cp-sel-clear:hover{color:var(--red);background:#FEF2F2}
+    /* Old nwo-cp styles removed — replaced by wizard */
   </style>
 </head>
 <body>
@@ -310,7 +329,14 @@
         <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
       </div>
       <div class="topbar-right">
-        <button onclick="newRepair()" style="background:var(--green);color:#fff;font-weight:700;border:none;padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(22,163,74,.3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Work Order</button>
+        <div style="position:relative" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(22,163,74,.3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
         <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
         Service Location
         <select class="svc-select" id="svcLocation" onchange="reloadRepairs()"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
@@ -830,25 +856,83 @@
         </table>
       </div>
     </div>
-    <div class="nwo-foot">
-      <div class="nwo-create-form" id="nwoCreateForm">
-        <span style="font-size:11px;font-weight:700;color:var(--navy);white-space:nowrap">New Work Order:</span>
-        <div class="nwo-cp" id="nwoCpWrap">
-          <input type="text" class="nwo-cp-input" id="nwoCpInput" placeholder="Type client name, city, or ID..." autocomplete="off"/>
-          <div class="nwo-cp-dd" id="nwoCpDropdown"></div>
-        </div>
-        <div class="nwo-cp-sel" id="nwoCpSelected">
-          <div>
-            <div class="nwo-cp-sel-name" id="nwoCpSelName"></div>
-            <div class="nwo-cp-sel-detail" id="nwoCpSelDetail"></div>
-          </div>
-          <button class="nwo-cp-sel-clear" onclick="nwoClearClient()" title="Change client">&times;</button>
-        </div>
-        <select style="height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;min-width:180px" id="nwoDeptSelect" disabled>
-          <option value="" disabled selected>-- Select Dept --</option>
-        </select>
-        <button class="btn" style="height:34px;padding:0 18px;background:var(--navy);color:#fff;font-weight:700;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap" onclick="nwoStartOrder()">Start Work Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-left:4px"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <!-- WIZARD PANEL (slides in below results) -->
+    <div class="nwo-wizard" id="nwoWizard">
+      <div class="nwo-wizard-steps">
+        <div class="nwo-step-tab active" id="wizTab1"><span class="step-num">1</span> Client</div>
+        <div class="nwo-step-tab" id="wizTab2"><span class="step-num">2</span> Department</div>
+        <div class="nwo-step-tab" id="wizTab3"><span class="step-num">3</span> Scope</div>
+        <div class="nwo-step-tab" id="wizTab4"><span class="step-num">4</span> Confirm</div>
       </div>
+
+      <!-- Step 1: Client -->
+      <div class="nwo-step-panel active" id="wizPanel1">
+        <input type="text" class="wiz-search" id="wizClientSearch" placeholder="Search by client name, city, or ID..." oninput="wizFilterClients(this.value)"/>
+        <div class="wiz-grid" id="wizClientGrid"></div>
+      </div>
+
+      <!-- Step 2: Department -->
+      <div class="nwo-step-panel" id="wizPanel2">
+        <div id="wizClientConfirm" style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+          <div><span style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase">Client</span><br/><span id="wizClientName" style="font-size:12px;font-weight:700;color:var(--navy)"></span> <span id="wizClientAddr" style="font-size:10px;color:var(--muted)"></span></div>
+          <button onclick="wizGoStep(1)" style="background:none;border:none;color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">Change</button>
+        </div>
+        <input type="text" class="wiz-search" id="wizDeptSearch" placeholder="Search departments..." oninput="wizFilterDepts(this.value)"/>
+        <div class="wiz-grid" id="wizDeptGrid"></div>
+      </div>
+
+      <!-- Step 3: Scope -->
+      <div class="nwo-step-panel" id="wizPanel3">
+        <div id="wizDeptConfirm" style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+          <div><span style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase">Client / Department</span><br/><span id="wizDeptBreadcrumb" style="font-size:12px;font-weight:700;color:var(--navy)"></span></div>
+          <button onclick="wizGoStep(2)" style="background:none;border:none;color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">Change</button>
+        </div>
+        <input type="text" class="wiz-search" id="wizScopeSearch" placeholder="Search by serial number or model..." oninput="wizFilterScopes(this.value)"/>
+        <div class="wiz-grid" id="wizScopeGrid"></div>
+        <div class="wiz-new-scope" id="wizNewScopeForm">
+          <div style="display:flex;align-items:center;gap:6px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span style="font-size:11px;font-weight:700;color:var(--navy)">Add New Scope</span>
+            <span style="font-size:10px;color:var(--muted)">(scope not in system yet)</span>
+          </div>
+          <div class="field-row">
+            <div style="flex:1;min-width:140px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
+            <div style="flex:1;min-width:200px"><label>Model / Scope Type *</label><select id="wizNewModel" style="width:100%"><option value="">-- Select Model --</option></select></div>
+            <div style="min-width:110px"><label>Type</label><select id="wizNewRigFlex" style="width:100%"><option value="Flexible">Flexible</option><option value="Rigid">Rigid</option></select></div>
+            <div style="display:flex;align-items:flex-end"><button onclick="wizCreateScope()" style="height:28px;padding:0 14px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Add Scope</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirm -->
+      <div class="nwo-step-panel" id="wizPanel4">
+        <div class="wiz-summary">
+          <div class="wiz-summary-card">
+            <h4>Client</h4>
+            <div class="val" id="wizSumClient">—</div>
+          </div>
+          <div class="wiz-summary-card">
+            <h4>Department</h4>
+            <div class="val" id="wizSumDept">—</div>
+          </div>
+          <div class="wiz-summary-card">
+            <h4>Scope</h4>
+            <div class="val" id="wizSumScope">—</div>
+          </div>
+        </div>
+        <div id="wizOpenRepairWarn" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;font-size:11px;color:#92400E;font-weight:600"></div>
+      </div>
+
+      <div class="nwo-wizard-nav">
+        <button id="wizBtnBack" onclick="wizBack()" style="height:32px;padding:0 16px;border:1.5px solid var(--border-dk);border-radius:6px;background:#fff;color:var(--navy);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:none">Back</button>
+        <div style="flex:1"></div>
+        <button id="wizBtnCancel" onclick="wizCancel()" style="height:32px;padding:0 16px;border:1.5px solid var(--border-dk);border-radius:6px;background:#fff;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">Cancel</button>
+        <button id="wizBtnNext" onclick="wizNext()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none">Next</button>
+        <button id="wizBtnCreate" onclick="wizSubmit()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:none">Create Work Order</button>
+      </div>
+    </div>
+
+    <div class="nwo-foot">
       <div class="nwo-actions" id="nwoActions">
         <button class="btn btn-outline" onclick="closeNWO()">Cancel</button>
         <button class="btn" id="nwoBtnOpen" style="height:34px;padding:0 18px;background:var(--blue);color:#fff;font-weight:600;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none" onclick="nwoOpenSelected()">Open Selected</button>
@@ -886,6 +970,12 @@
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
+
+// New Order dropdown — click outside to close
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('newOrderMenu');
+  if (menu && !e.target.closest('#newOrderWrap')) menu.classList.remove('open');
+});
 
 let _liveMode = false;
 let _currentRepair = null;
@@ -1553,49 +1643,292 @@ document.addEventListener('keydown', function(e) { if ((e.ctrlKey||e.metaKey) &&
 function reloadRepairs() { initPage(); }
 
 // ── New Work Order ──
-// ── New Work Order Modal ──
 let _nwoSelectedRepair = null;
-let _nwoPickedClient = null;
-let _nwoCpHighlight = -1;
+
+// Wizard state
+let _wizStep = 1;
+let _wizClient = null;
+let _wizDept = null;
+let _wizScope = null;
+let _wizScopeTypes = [];
+let _wizDeptScopes = [];
 
 function newRepair() {
   _nwoSelectedRepair = null;
-  _nwoPickedClient = null;
+  _wizClient = null; _wizDept = null; _wizScope = null;
   document.getElementById('nwoSearchWO').value = '';
   document.getElementById('nwoSearchPO').value = '';
   document.getElementById('nwoSearchSerial').value = '';
   document.getElementById('nwoOnlyOpen').checked = true;
   document.getElementById('nwoResults').innerHTML = '<tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>';
-  nwoResetCreate();
+  document.getElementById('nwoWizard').classList.remove('open');
   document.getElementById('nwoActions').style.display = 'flex';
   document.getElementById('nwoBtnOpen').style.opacity = '.5';
   document.getElementById('nwoBtnOpen').style.pointerEvents = 'none';
   document.getElementById('nwoModal').classList.add('open');
 }
-function closeNWO() { document.getElementById('nwoModal').classList.remove('open'); }
-
-function nwoResetCreate() {
-  _nwoPickedClient = null;
-  document.getElementById('nwoCreateForm').classList.remove('show');
-  document.getElementById('nwoCpWrap').style.display = '';
-  document.getElementById('nwoCpInput').value = '';
-  document.getElementById('nwoCpSelected').classList.remove('show');
-  document.getElementById('nwoCpDropdown').classList.remove('open');
-  const ds = document.getElementById('nwoDeptSelect');
-  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
-  ds.disabled = true;
+function closeNWO() {
+  document.getElementById('nwoModal').classList.remove('open');
+  document.getElementById('nwoWizard').classList.remove('open');
 }
 
 function nwoRevealCreate() {
-  if (_nwoSelectedRepair) {
-    // User selected existing — just open it
-    nwoOpenSelected();
+  if (_nwoSelectedRepair) { nwoOpenSelected(); return; }
+  document.getElementById('nwoActions').style.display = 'none';
+  document.getElementById('nwoWizard').classList.add('open');
+  wizGoStep(1);
+  wizRenderClients();
+  document.getElementById('wizClientSearch').value = '';
+  document.getElementById('wizClientSearch').focus();
+}
+
+function wizCancel() {
+  document.getElementById('nwoWizard').classList.remove('open');
+  document.getElementById('nwoActions').style.display = 'flex';
+  _wizClient = null; _wizDept = null; _wizScope = null;
+}
+
+// ── Wizard Navigation ──
+function wizGoStep(step) {
+  _wizStep = step;
+  for (let i = 1; i <= 4; i++) {
+    const tab = document.getElementById('wizTab' + i);
+    const panel = document.getElementById('wizPanel' + i);
+    tab.classList.remove('active', 'done');
+    panel.classList.remove('active');
+    if (i < step) tab.classList.add('done');
+    if (i === step) { tab.classList.add('active'); panel.classList.add('active'); }
+  }
+  document.getElementById('wizBtnBack').style.display = step > 1 ? '' : 'none';
+  document.getElementById('wizBtnNext').style.display = step < 4 ? '' : 'none';
+  document.getElementById('wizBtnCreate').style.display = step === 4 ? '' : 'none';
+  wizUpdateNextBtn();
+}
+
+function wizBack() { if (_wizStep > 1) wizGoStep(_wizStep - 1); }
+
+function wizNext() {
+  if (_wizStep === 1 && _wizClient) { wizGoStep(2); wizRenderDepts(); }
+  else if (_wizStep === 2 && _wizDept) { wizGoStep(3); wizLoadScopes(); }
+  else if (_wizStep === 3 && _wizScope) { wizGoStep(4); wizRenderSummary(); }
+}
+
+function wizUpdateNextBtn() {
+  const btn = document.getElementById('wizBtnNext');
+  let enabled = false;
+  if (_wizStep === 1) enabled = !!_wizClient;
+  if (_wizStep === 2) enabled = !!_wizDept;
+  if (_wizStep === 3) enabled = !!_wizScope;
+  btn.style.opacity = enabled ? '1' : '.5';
+  btn.style.pointerEvents = enabled ? 'all' : 'none';
+}
+
+// ── Step 1: Client Cards ──
+function wizRenderClients(filter) {
+  const q = (filter || '').toLowerCase();
+  const grid = document.getElementById('wizClientGrid');
+  let list = _clients.length ? _clients : [];
+  if (q) {
+    list = list.filter(c => {
+      const name = (c.sClientName1 || c.sClientName || '').toLowerCase();
+      const city = (c.sCity || c.sShipCity || '').toLowerCase();
+      return name.includes(q) || city.includes(q) || String(c.lClientKey).includes(q);
+    });
+  }
+  if (!list.length) { grid.innerHTML = '<div class="wiz-empty">No clients found</div>'; return; }
+  grid.innerHTML = list.slice(0, 60).map(c => {
+    const name = c.sClientName1 || c.sClientName || 'Client ' + c.lClientKey;
+    const addr = [c.sAddress1 || c.sShipAddr1, c.sCity || c.sShipCity, c.sState || c.sShipState].filter(Boolean).join(', ');
+    const deptCount = _departments.filter(d => d.lClientKey == c.lClientKey).length;
+    const sel = _wizClient && _wizClient.lClientKey == c.lClientKey ? ' selected' : '';
+    return '<div class="wiz-card' + sel + '" onclick="wizPickClient(' + c.lClientKey + ')">' +
+      '<div class="wiz-card-name">' + esc(name) + ' <span style="font-size:10px;color:var(--steel);font-weight:600">#' + c.lClientKey + '</span></div>' +
+      '<div class="wiz-card-detail">' + (addr || 'No address on file') + '</div>' +
+      '<div class="wiz-card-detail">' +
+        (c.sPhone || c.sContactPhone || c.sBillPhone ? '<span>' + esc(c.sPhone || c.sContactPhone || c.sBillPhone) + '</span>' : '') +
+        (deptCount ? '<span style="color:var(--green);font-weight:600">' + deptCount + ' dept' + (deptCount > 1 ? 's' : '') + '</span>' : '<span style="color:var(--red)">No departments</span>') +
+      '</div></div>';
+  }).join('');
+}
+
+function wizFilterClients(v) { wizRenderClients(v); }
+
+function wizPickClient(key) {
+  _wizClient = _clients.find(c => c.lClientKey == key) || null;
+  _wizDept = null; _wizScope = null;
+  wizRenderClients(document.getElementById('wizClientSearch').value);
+  wizUpdateNextBtn();
+  // Auto-advance after a short beat
+  setTimeout(() => { if (_wizClient) wizNext(); }, 200);
+}
+
+// ── Step 2: Department Cards ──
+function wizRenderDepts(filter) {
+  if (!_wizClient) return;
+  const q = (filter || '').toLowerCase();
+  const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
+  const clientAddr = [_wizClient.sCity || _wizClient.sShipCity, _wizClient.sState || _wizClient.sShipState].filter(Boolean).join(', ');
+  document.getElementById('wizClientName').textContent = clientName;
+  document.getElementById('wizClientAddr').textContent = clientAddr ? '(' + clientAddr + ')' : '';
+
+  const grid = document.getElementById('wizDeptGrid');
+  let depts = _departments.filter(d => d.lClientKey == _wizClient.lClientKey);
+  if (q) depts = depts.filter(d => (d.sDepartmentName || '').toLowerCase().includes(q));
+
+  if (!depts.length) {
+    grid.innerHTML = '<div class="wiz-empty">' + (q ? 'No matching departments' : 'No departments for this client') + '</div>';
     return;
   }
-  document.getElementById('nwoActions').style.display = 'none';
-  document.getElementById('nwoCreateForm').classList.add('show');
-  document.getElementById('nwoCpInput').focus();
+  grid.innerHTML = depts.map(d => {
+    const name = d.sDepartmentName || d.sDepartmentDesc || 'Dept ' + d.lDepartmentKey;
+    const addr = [d.sAddress1, d.sCity, d.sState].filter(Boolean).join(', ');
+    const sel = _wizDept && _wizDept.lDepartmentKey == d.lDepartmentKey ? ' selected' : '';
+    const active = d.bActive === false ? '<span class="wiz-card-badge" style="background:#FEF2F2;color:var(--red)">Inactive</span>' : '';
+    return '<div class="wiz-card' + sel + '" onclick="wizPickDept(' + d.lDepartmentKey + ')">' +
+      '<div class="wiz-card-name">' + esc(name) + active + ' <span style="font-size:10px;color:var(--steel)">#' + d.lDepartmentKey + '</span></div>' +
+      '<div class="wiz-card-detail">' + (addr || 'No address on file') + '</div>' +
+      (d.sContactName || d.sContactEmail ? '<div class="wiz-card-detail">' + esc(d.sContactName || '') + (d.sContactEmail ? ' &middot; ' + esc(d.sContactEmail) : '') + '</div>' : '') +
+      '</div>';
+  }).join('');
 }
+
+function wizFilterDepts(v) { wizRenderDepts(v); }
+
+function wizPickDept(key) {
+  _wizDept = _departments.find(d => d.lDepartmentKey == key) || null;
+  _wizScope = null;
+  wizRenderDepts(document.getElementById('wizDeptSearch').value);
+  wizUpdateNextBtn();
+  setTimeout(() => { if (_wizDept) wizNext(); }, 200);
+}
+
+// ── Step 3: Scope Picker + New Scope ──
+async function wizLoadScopes() {
+  const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
+  const deptName = _wizDept.sDepartmentName || _wizDept.sDepartmentDesc || '';
+  document.getElementById('wizDeptBreadcrumb').textContent = clientName + ' / ' + deptName;
+
+  const grid = document.getElementById('wizScopeGrid');
+  grid.innerHTML = '<div class="wiz-empty" style="color:var(--blue)">Loading scopes...</div>';
+
+  // Load scope types for the "new scope" dropdown
+  if (!_wizScopeTypes.length) {
+    try { _wizScopeTypes = await API.getScopeTypes(); if (!Array.isArray(_wizScopeTypes)) _wizScopeTypes = []; } catch(e) { _wizScopeTypes = []; }
+    const sel = document.getElementById('wizNewModel');
+    sel.innerHTML = '<option value="">-- Select Model --</option>' +
+      _wizScopeTypes.map(t => '<option value="' + t.lScopeTypeKey + '">' + esc(t.sScopeTypeDesc || t.sScopeTypeName || 'Type ' + t.lScopeTypeKey) + '</option>').join('');
+  }
+
+  // Load existing scopes for this department
+  try {
+    const raw = await API.getAllScopes(_wizDept.lDepartmentKey);
+    _wizDeptScopes = Array.isArray(raw) ? raw : [];
+  } catch(e) {
+    _wizDeptScopes = [];
+  }
+
+  wizRenderScopes();
+}
+
+function wizRenderScopes(filter) {
+  const q = (filter || '').toLowerCase();
+  const grid = document.getElementById('wizScopeGrid');
+  let scopes = _wizDeptScopes;
+  if (q) scopes = scopes.filter(s => {
+    return (s.sSerialNumber || '').toLowerCase().includes(q) ||
+           (s.sScopeTypeDesc || s.sScopeTypeName || '').toLowerCase().includes(q) ||
+           (s.sManufacturerName || '').toLowerCase().includes(q);
+  });
+
+  if (!_wizDeptScopes.length && !q) {
+    grid.innerHTML = '<div class="wiz-empty">No scopes registered for this department. Use <b>Add New Scope</b> below.</div>';
+    return;
+  }
+  if (!scopes.length) { grid.innerHTML = '<div class="wiz-empty">No scopes matching "' + esc(q) + '"</div>'; return; }
+
+  grid.innerHTML = scopes.map(s => {
+    const sn = s.sSerialNumber || '—';
+    const model = s.sScopeTypeDesc || s.sScopeTypeName || '—';
+    const mfr = s.sManufacturerName || '';
+    const type = s.sRigidOrFlexible || '';
+    const sel = _wizScope && _wizScope.lScopeKey == s.lScopeKey ? ' selected' : '';
+    const dead = s.bScopeIsDead ? '<span class="wiz-card-badge" style="background:#FEF2F2;color:var(--red)">Retired</span>' : '';
+    return '<div class="wiz-card' + sel + '" onclick="wizPickScope(' + s.lScopeKey + ')">' +
+      '<div class="wiz-card-name">SN# ' + esc(sn) + dead + '</div>' +
+      '<div class="wiz-card-detail">' + esc(model) + (mfr ? ' &middot; ' + esc(mfr) : '') + (type ? ' &middot; ' + type : '') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function wizFilterScopes(v) { wizRenderScopes(v); }
+
+function wizPickScope(key) {
+  _wizScope = _wizDeptScopes.find(s => s.lScopeKey == key) || null;
+  wizRenderScopes(document.getElementById('wizScopeSearch').value);
+  wizUpdateNextBtn();
+  setTimeout(() => { if (_wizScope) wizNext(); }, 200);
+}
+
+async function wizCreateScope() {
+  const sn = document.getElementById('wizNewSN').value.trim();
+  const modelKey = document.getElementById('wizNewModel').value;
+  const rigFlex = document.getElementById('wizNewRigFlex').value;
+  if (!sn) { showToast('Enter a serial number'); return; }
+  if (!modelKey) { showToast('Select a model / scope type'); return; }
+
+  try {
+    const payload = {
+      plDepartmentKey: _wizDept.lDepartmentKey,
+      psSerialNumber: sn,
+      plScopeTypeKey: parseInt(modelKey),
+      psRigidOrFlexible: rigFlex,
+      pbScopeIsDead: false
+    };
+    const result = await API.addScope(payload);
+    showToast('Scope created', 'success');
+    // Reload scopes and select the new one
+    await wizLoadScopes();
+    // Try to find & select it
+    const newScope = _wizDeptScopes.find(s => s.sSerialNumber === sn);
+    if (newScope) {
+      _wizScope = newScope;
+      wizRenderScopes();
+      wizUpdateNextBtn();
+      setTimeout(() => wizNext(), 300);
+    }
+    document.getElementById('wizNewSN').value = '';
+  } catch(e) {
+    showToast('Failed to create scope: ' + e.message, 'error');
+  }
+}
+
+// ── Step 4: Summary & Confirm ──
+async function wizRenderSummary() {
+  const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
+  const clientAddr = [_wizClient.sAddress1 || _wizClient.sShipAddr1, _wizClient.sCity || _wizClient.sShipCity, _wizClient.sState || _wizClient.sShipState, _wizClient.sZip || _wizClient.sShipZip].filter(Boolean).join(', ');
+  document.getElementById('wizSumClient').innerHTML = esc(clientName) + '<br/><span style="font-size:10px;color:var(--muted);font-weight:400">' + esc(clientAddr || 'No address') + '</span>';
+
+  const deptName = _wizDept.sDepartmentName || _wizDept.sDepartmentDesc || '';
+  const deptAddr = [_wizDept.sAddress1, _wizDept.sCity, _wizDept.sState].filter(Boolean).join(', ');
+  document.getElementById('wizSumDept').innerHTML = esc(deptName) + '<br/><span style="font-size:10px;color:var(--muted);font-weight:400">' + esc(deptAddr || 'No address') + '</span>';
+
+  const scopeSN = _wizScope.sSerialNumber || '—';
+  const scopeModel = _wizScope.sScopeTypeDesc || _wizScope.sScopeTypeName || '—';
+  document.getElementById('wizSumScope').innerHTML = 'SN# ' + esc(scopeSN) + '<br/><span style="font-size:10px;color:var(--muted);font-weight:400">' + esc(scopeModel) + '</span>';
+
+  // Check for open repair on this scope
+  const warn = document.getElementById('wizOpenRepairWarn');
+  warn.style.display = 'none';
+  try {
+    const check = await API.checkOpenRepairForScope(_wizScope.lScopeKey);
+    if (check && (check.lRepairKey || check.bHasOpenRepair)) {
+      warn.style.display = '';
+      warn.innerHTML = 'Warning: This scope already has an open repair (WO# ' + (check.sWorkOrderNumber || check.lRepairKey) + '). You can still create a new one, but verify this is correct.';
+    }
+  } catch(e) { /* ignore */ }
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // Search existing repairs
 async function nwoSearch() {
@@ -1656,7 +1989,7 @@ function nwoSelectRow(tr, repairKey) {
   document.getElementById('nwoBtnOpen').style.opacity = '1';
   document.getElementById('nwoBtnOpen').style.pointerEvents = 'all';
   // Hide create form if visible
-  nwoResetCreate();
+  document.getElementById('nwoWizard').classList.remove('open');
   document.getElementById('nwoActions').style.display = 'flex';
 }
 
@@ -1666,75 +1999,19 @@ function nwoOpenSelected() {
   loadRepair(_nwoSelectedRepair);
 }
 
-// Client picker in modal — uses _clients loaded at init
-function nwoRenderClientDropdown(query) {
-  const dd = document.getElementById('nwoCpDropdown');
-  const q = (query || '').toLowerCase();
-  const source = _clients.length ? _clients : [];
-  const matches = q ? source.filter(c => {
-    const name = (c.sClientName1 || c.sClientName || '').toLowerCase();
-    const id = String(c.lClientKey);
-    return name.includes(q) || id.includes(q);
-  }) : source;
-  _nwoCpHighlight = -1;
+// ── Wizard Submit — Create Work Order ──
+function wizSubmit() {
+  if (!_wizClient || !_wizDept || !_wizScope) { showToast('Complete all steps first'); return; }
 
-  if (!matches.length) {
-    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">No clients found</div>';
-  } else {
-    dd.innerHTML = matches.slice(0, 30).map((c, i) => {
-      const name = c.sClientName1 || c.sClientName || ('Client ' + c.lClientKey);
-      const highlighted = q ? name.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi'), '<strong style="background:#FEFCE8;padding:0 1px">$1</strong>') : name;
-      // Count depts for this client
-      const deptCount = _departments.filter(d => d.lClientKey == c.lClientKey).length;
-      return '<div class="nwo-cp-item" data-idx="' + i + '" data-key="' + c.lClientKey + '" onmousedown="nwoPickClient(' + c.lClientKey + ')">' +
-        '<div class="nwo-cp-item-name">' + highlighted + '</div>' +
-        '<div class="nwo-cp-item-detail"><span style="font-weight:600;color:var(--steel)">#' + c.lClientKey + '</span>' +
-        (deptCount ? '<span style="color:var(--green)">' + deptCount + ' dept' + (deptCount > 1 ? 's' : '') + '</span>' : '') +
-        '</div></div>';
-    }).join('');
-  }
-  dd.classList.add('open');
-}
-
-function nwoPickClient(clientKey) {
-  const c = _clients.find(x => x.lClientKey == clientKey);
-  if (!c) return;
-  _nwoPickedClient = c;
-  document.getElementById('nwoCpInput').value = '';
-  document.getElementById('nwoCpWrap').style.display = 'none';
-  document.getElementById('nwoCpSelName').textContent = c.sClientName1 || c.sClientName || '';
-  document.getElementById('nwoCpSelDetail').textContent = '#' + c.lClientKey;
-  document.getElementById('nwoCpSelected').classList.add('show');
-  document.getElementById('nwoCpDropdown').classList.remove('open');
-  // Populate dept dropdown for this client
-  const depts = _departments.filter(d => d.lClientKey == clientKey);
-  const ds = document.getElementById('nwoDeptSelect');
-  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>' +
-    depts.map(d => '<option value="' + d.lDepartmentKey + '">' + (d.sDepartmentName || 'Dept ' + d.lDepartmentKey) + '</option>').join('');
-  ds.disabled = false;
-}
-
-function nwoClearClient() {
-  _nwoPickedClient = null;
-  document.getElementById('nwoCpSelected').classList.remove('show');
-  document.getElementById('nwoCpWrap').style.display = '';
-  document.getElementById('nwoCpInput').value = '';
-  document.getElementById('nwoCpInput').focus();
-  const ds = document.getElementById('nwoDeptSelect');
-  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
-  ds.disabled = true;
-}
-
-// Start new work order with selected client/dept
-function nwoStartOrder() {
-  if (!_nwoPickedClient) { showToast('Please select a client'); return; }
-  const deptKey = document.getElementById('nwoDeptSelect').value;
-  if (!deptKey) { showToast('Please select a department'); return; }
-
-  const clientKey = _nwoPickedClient.lClientKey;
-  const clientName = _nwoPickedClient.sClientName1 || _nwoPickedClient.sClientName || '';
-  const dept = _departments.find(d => d.lDepartmentKey == deptKey);
-  const deptName = dept ? (dept.sDepartmentName || '') : '';
+  const clientKey = _wizClient.lClientKey;
+  const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
+  const deptKey = _wizDept.lDepartmentKey;
+  const deptName = _wizDept.sDepartmentName || _wizDept.sDepartmentDesc || '';
+  const scopeKey = _wizScope.lScopeKey;
+  const scopeSN = _wizScope.sSerialNumber || '';
+  const scopeModel = _wizScope.sScopeTypeDesc || _wizScope.sScopeTypeName || '';
+  const scopeMfr = _wizScope.sManufacturerName || '';
+  const scopeRF = _wizScope.sRigidOrFlexible || '';
 
   closeNWO();
 
@@ -1751,21 +2028,25 @@ function nwoStartOrder() {
     lRepairStatusID: 1,
     lRepairLevelKey: null, lRepairReasonKey: null,
     lClientKey: clientKey, lDepartmentKey: parseInt(deptKey),
+    lScopeKey: scopeKey,
     lTechnicianKey: null, lSalesRepKey: null, lDeliveryMethodKey: null,
     lPatientSafetyLevelKey: null, lPricingCategoryKey: null, lPaymentTermsKey: null,
     dtDateIn: now.toISOString(),
     dtDateOut: null, dtShipDate: null, dtDeliveryDate: null,
     dtAprRecvd: null, dtReqSent: null, dtLastUpdate: null,
     dtCarrierDeliveryDateGuaranteed: null,
-    sSerialNumber: '', sScopeTypeDesc: '', sRigidOrFlexible: '', nDaysSinceLastIn: 0,
+    sSerialNumber: scopeSN, sScopeTypeDesc: scopeModel, sRigidOrFlexible: scopeRF, nDaysSinceLastIn: 0,
     sComplaintDesc: '', sAngInUp: '', sAngInDown: '', sAngInRight: '', sAngInLeft: '',
     nIncomingEpoxySize: '', sBRJigSize: '', sNotes: '',
     mMaxCharge: 0, dblAmtRepair: 0, dblAmtCostLabor: 0, dblAmtCostMaterial: 0,
     dblAmtShipping: 0, dblAmtCommission: 0, dblOutSourceCost: 0,
     sShipName1: clientName, sShipName2: deptName, sShipAttention: '',
-    sShipAddr1: '', sShipAddr2: '', sShipCity: '', sShipState: '', sShipZip: '',
-    sBillName1: clientName, sBillName2: '', sBillAddr1: '', sBillAddr2: '',
-    sBillCity: '', sBillState: '', sBillZip: '', sBillEmail: '', sBillTo: 'C',
+    sShipAddr1: _wizDept.sAddress1 || '', sShipAddr2: _wizDept.sAddress2 || '',
+    sShipCity: _wizDept.sCity || '', sShipState: _wizDept.sState || '', sShipZip: _wizDept.sZip || '',
+    sBillName1: clientName, sBillName2: '', sBillAddr1: _wizClient.sAddress1 || _wizClient.sBillAddr1 || '',
+    sBillAddr2: _wizClient.sAddress2 || _wizClient.sBillAddr2 || '',
+    sBillCity: _wizClient.sCity || _wizClient.sBillCity || '', sBillState: _wizClient.sState || _wizClient.sBillState || '',
+    sBillZip: _wizClient.sZip || _wizClient.sBillZip || '', sBillEmail: _wizClient.sBillEmail || '', sBillTo: 'C',
     sShipTrackingNumberIn: '', sShipTrackingNumber: '', sShipTrackingNumberVendor: '',
     sRackPosition: '', bTrackingNumberRequired: false, sShipWeight: '',
     sPurchaseOrder: '', sInvoiceNumber: '',
@@ -1783,10 +2064,11 @@ function nwoStartOrder() {
   populateDocuments([]);
   renderFlags([]);
 
-  document.getElementById('hMfr').textContent = '—';
-  document.getElementById('hScopeCat').textContent = '—';
-  document.getElementById('hModel').textContent = '—';
-  document.getElementById('hSerial').textContent = '—';
+  // Populate scope info in header
+  document.getElementById('hMfr').textContent = scopeMfr || '—';
+  document.getElementById('hScopeCat').textContent = _wizScope.sScopeModelCategory || '—';
+  document.getElementById('hModel').textContent = scopeModel || '—';
+  document.getElementById('hSerial').textContent = scopeSN || '—';
   document.getElementById('hCapFFS').textContent = '—';
   document.getElementById('hWithin40').textContent = '—';
   document.getElementById('repairBadge').textContent = '#NEW';
@@ -1805,24 +2087,8 @@ function nwoStartOrder() {
   _dirty = false;
   updateSaveStatus('ready');
   document.getElementById('fComplaint').focus();
-  console.log('[TSI Repairs] New work order created for', clientName, '/', deptName);
+  console.log('[TSI Repairs] New work order:', clientName, '/', deptName, '/ SN#', scopeSN);
 }
-
-// Wire up client picker input events
-(function() {
-  const inp = document.getElementById('nwoCpInput');
-  const dd = document.getElementById('nwoCpDropdown');
-  inp.addEventListener('input', () => nwoRenderClientDropdown(inp.value));
-  inp.addEventListener('focus', () => nwoRenderClientDropdown(inp.value));
-  inp.addEventListener('blur', () => setTimeout(() => dd.classList.remove('open'), 150));
-  inp.addEventListener('keydown', (e) => {
-    const items = dd.querySelectorAll('.nwo-cp-item');
-    if (e.key === 'ArrowDown') { e.preventDefault(); _nwoCpHighlight = Math.min(_nwoCpHighlight+1, items.length-1); items.forEach((it,i)=>it.classList.toggle('highlighted',i===_nwoCpHighlight)); items[_nwoCpHighlight]?.scrollIntoView({block:'nearest'}); }
-    if (e.key === 'ArrowUp') { e.preventDefault(); _nwoCpHighlight = Math.max(_nwoCpHighlight-1, 0); items.forEach((it,i)=>it.classList.toggle('highlighted',i===_nwoCpHighlight)); items[_nwoCpHighlight]?.scrollIntoView({block:'nearest'}); }
-    if (e.key === 'Enter' && _nwoCpHighlight >= 0 && items[_nwoCpHighlight]) { e.preventDefault(); nwoPickClient(parseInt(items[_nwoCpHighlight].dataset.key)); }
-    if (e.key === 'Escape') dd.classList.remove('open');
-  });
-})();
 
 // ── Scope History (by SN#) ──
 let _scopeHistory = [];
