@@ -1994,38 +1994,54 @@ document.addEventListener('click', function(e) {
 async function wizCreateScope() {
   const instTypeKey = document.getElementById('wizNewInstType').value;
   const modelKey = document.getElementById('wizNewModel').value;
+  const modelName = document.getElementById('wizModelSearch').value;
   const sn = document.getElementById('wizNewSN').value.trim();
-  // Map instrument type key to rigid/flexible
   const instType = _wizInstrumentTypes.find(t => (t.sInstrumentTypeKey || t.sInstrumentType) === instTypeKey);
   const rigFlex = instType ? instType.sInstrumentType : 'Flexible';
   if (!instTypeKey) { showToast('Select an instrument type'); return; }
   if (!modelKey) { showToast('Search and select a model'); return; }
   if (!sn) { showToast('Enter a serial number'); return; }
 
-  try {
-    const payload = {
-      plDepartmentKey: _wizDept.lDepartmentKey,
-      psSerialNumber: sn,
-      plScopeTypeKey: parseInt(modelKey),
-      psRigidOrFlexible: rigFlex,
-      pbScopeIsDead: false
-    };
-    const result = await API.addScope(payload);
-    showToast('Scope created', 'success');
-    // Reload scopes and select the new one
-    await wizLoadScopes();
-    // Try to find & select it
-    const newScope = _wizDeptScopes.find(s => s.sSerialNumber === sn);
-    if (newScope) {
-      _wizScope = newScope;
-      wizRenderScopes();
-      wizUpdateNextBtn();
-      setTimeout(() => wizNext(), 300);
-    }
-    document.getElementById('wizNewSN').value = '';
-  } catch(e) {
-    showToast('Failed to create scope: ' + e.message, 'error');
+  let created = false;
+  if (_liveMode) {
+    try {
+      await API.addScope({
+        plDepartmentKey: _wizDept.lDepartmentKey,
+        psSerialNumber: sn,
+        plScopeTypeKey: parseInt(modelKey),
+        psRigidOrFlexible: rigFlex,
+        pbScopeIsDead: false
+      });
+      created = true;
+      showToast('Scope created');
+      await wizLoadScopes();
+      const found = _wizDeptScopes.find(s => s.sSerialNumber === sn);
+      if (found) { _wizScope = found; wizRenderScopes(); wizUpdateNextBtn(); setTimeout(() => wizNext(), 300); }
+    } catch(e) { showToast('API error — adding locally'); }
   }
+
+  if (!created) {
+    const localScope = {
+      lScopeKey: -(Date.now()),
+      lDepartmentKey: _wizDept.lDepartmentKey,
+      sSerialNumber: sn,
+      lScopeTypeKey: parseInt(modelKey),
+      sScopeTypeDesc: modelName,
+      sRigidOrFlexible: rigFlex,
+      sManufacturerName: '',
+      bScopeIsDead: false
+    };
+    _wizDeptScopes.push(localScope);
+    _wizScope = localScope;
+    wizRenderScopes();
+    wizUpdateNextBtn();
+    showToast('Scope added');
+    setTimeout(() => wizNext(), 300);
+  }
+
+  document.getElementById('wizNewSN').value = '';
+  document.getElementById('wizModelSearch').value = '';
+  document.getElementById('wizNewModel').value = '';
 }
 
 // ── Step 4: Summary & Confirm ──
