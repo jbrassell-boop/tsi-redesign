@@ -291,6 +291,46 @@ const API = (() => {
     return post('/Repair/GetAllRepairList', filters);
   }
 
+  async function getRepairList(svcLocationKey) {
+    return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcLocationKey || 1));
+  }
+
+  async function getRepairDetail(repairKey, svcLocationKey) {
+    return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcLocationKey || 1));
+  }
+
+  async function getRepairReasons() {
+    return get('/Repair/GetAllRepairReasons?plRepairReasonKey=0');
+  }
+
+  async function getDeliveryMethods() {
+    return get('/Repair/GetAllDeliveryMethods');
+  }
+
+  async function getAllTechs() {
+    return get('/Repair/GetAllTechs');
+  }
+
+  async function getPatientSafetyLevels() {
+    return get('/Repair/GetAllPatientSafetyLevels');
+  }
+
+  async function getRepairLevels() {
+    return get('/RepairItems/GetRepairLevels');
+  }
+
+  async function getRepairStatuses() {
+    return get('/RepairItems/GetRepairStatus');
+  }
+
+  async function getRepairItems(repairKey) {
+    return post('/RepairItems/GetRepairItemsList', { plRepairKey: repairKey, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {} });
+  }
+
+  async function getRepairInventory(repairKey) {
+    return get('/RepairInventory/GetAllRepairInventoryList?plRepairKey=' + repairKey);
+  }
+
   // ── Scope Models ──────────────────────────────────────
   async function getManufacturers() {
     return post('/ScopeModel/GetAllManufacturersList', {});
@@ -380,13 +420,71 @@ const API = (() => {
     return get('/DistributorName/GetAllDistributorNames');
   }
 
+  // ── Repair Detail Line Items ─────────────────────────
+  async function getRepairDetailItems(repairKey) {
+    return get('/Detail/GetAllRepairDetailsList?plRepairKey=' + repairKey);
+  }
+
+  async function updateRepairItemComment(repairItemTranKey, comment) {
+    return post('/Detail/UpdateRepairItemTranComment', { plRepairItemTranKey: repairItemTranKey, psComment: comment });
+  }
+
+  async function updateRepairItemAmount(repairItemTranKey, amount) {
+    return post('/Detail/UpdateRepairItemTranAmount', { plRepairItemTranKey: repairItemTranKey, pnRepairPrice: amount });
+  }
+
+  async function updateRepairItemApproved(repairItemTranKey, approved) {
+    return post('/Detail/UpdateRepairItemTranApproved', { plRepairItemTranKey: repairItemTranKey, psApproved: approved });
+  }
+
+  async function updateRepairItemPrimary(repairKey, repairItemTranKey) {
+    return post('/Detail/UpdateRepairDetailPrimary', { plRepairKey: repairKey, plRepairItemTranKey: repairItemTranKey });
+  }
+
+  // ── Repair Status History ──────────────────────────────
+  async function getRepairStatusHistory(repairKey) {
+    return get('/StatusTran/GetAllRepairStatusesList?plRepairKey=' + repairKey);
+  }
+
+  // ── Documents ──────────────────────────────────────────
+  async function getDocuments(ownerKey, categoryKey, categoryTypeKey) {
+    let url = '/Documents/GetAllDocumentsList?plDocumentKey=0&plOwnerKey=' + ownerKey;
+    if (categoryKey) url += '&plDocumentCategoryKey=' + categoryKey;
+    if (categoryTypeKey) url += '&plDocumentCategoryTypeKey=' + categoryTypeKey;
+    return get(url);
+  }
+
+  async function addDocument(data) {
+    return post('/Documents/AddDocuments', data);
+  }
+
+  async function updateDocument(data) {
+    return post('/Documents/UpdateDocuments', data);
+  }
+
+  async function deleteDocument(documentKey) {
+    return del('/Documents/DeleteDocuments?plDocumentKey=' + documentKey);
+  }
+
+  async function downloadDocument(fileName) {
+    return get('/Documents/DownloadDocument?sDocumentFileName=' + encodeURIComponent(fileName));
+  }
+
   // ── Flags ─────────────────────────────────────────────
+  async function getFlagsByOwner(ownerKey, flagTypeKey) {
+    return get('/Flag/GetFlagList?plOwnerKey=' + ownerKey + '&plFlagTypeKey=' + (flagTypeKey || 0));
+  }
+
   async function getFlagsByClient(clientKey) {
     return get('/Flag/GetFlagList?plClientKey=' + clientKey);
   }
 
   async function addFlag(data) {
     return post('/Flag/AddFlag', data);
+  }
+
+  async function updateFlag(data) {
+    return post('/Flag/UpdateFlag', data);
   }
 
   async function deleteFlag(flagKey) {
@@ -434,6 +532,29 @@ const API = (() => {
 
     // Repairs
     getRepairs,
+    getRepairList,
+    getRepairDetail,
+    getRepairReasons,
+    getDeliveryMethods,
+    getAllTechs,
+    getPatientSafetyLevels,
+    getRepairLevels,
+    getRepairStatuses,
+    getRepairItems,
+    getRepairInventory,
+    getRepairDetailItems,
+    updateRepairItemComment,
+    updateRepairItemAmount,
+    updateRepairItemApproved,
+    updateRepairItemPrimary,
+    getRepairStatusHistory,
+
+    // Documents
+    getDocuments,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    downloadDocument,
 
     // Scope Models
     getManufacturers,
@@ -462,8 +583,10 @@ const API = (() => {
     updateContact,
 
     // Flags
+    getFlagsByOwner,
     getFlagsByClient,
     addFlag,
+    updateFlag,
     deleteFlag,
 
     // Lookups / Reference
