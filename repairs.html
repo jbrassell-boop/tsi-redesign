@@ -2791,7 +2791,16 @@ async function initPage() {
     loadScopeHistory();
   }
 }
-initPage();
+initPage().then(() => {
+  // Check URL params for auto-actions from other pages
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get('action');
+  if (action === 'new' || action === 'endocart') {
+    // Clean URL so refresh doesn't re-trigger
+    window.history.replaceState({}, '', 'repairs.html');
+    newRepair();
+  }
+});
 initItemContextMenu();
 </script>
 
