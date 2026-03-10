@@ -1226,17 +1226,33 @@ function loadClient(c) {
   lbl.textContent = c.active ? 'Yes' : 'No';
   lbl.style.color = c.active ? 'var(--green)' : 'var(--red)';
   setChk('ci-skip', c.skip); setChk('ci-credit-memo', c.creditMemo); setChk('ci-national', c.national);
-  setOpt('def-pricing', c.pricing); setOpt('def-salesrep', c.salesrep);
-  setOpt('def-dist', c.dist); setOpt('def-terms', c.terms);
-  setOpt('def-credit', c.credit); setOpt('def-billto', c.billto);
-  setVal('def-discount', c.discount); setVal('def-markup', c.markup);
-  setChk('def-blind-ps3', c.blindPS3); setChk('def-req-totals', c.reqTotals); setChk('def-blind-final', c.blindFinal);
+  if (_liveMode && c._raw) {
+    const r = c._raw;
+    // Set by key value (dropdowns now use API keys as option values)
+    setVal('def-salesrep', r.lSalesRepKey || '');
+    setVal('def-pricing', r.lPricingCategoryKey || '');
+    setVal('def-terms', r.lPaymentTermsKey || '');
+    setVal('def-credit', r.lCreditLimitKey || '');
+    setVal('def-dist', r.lDistributorKey || '');
+    setVal('def-billto', c.billto);
+    setVal('def-discount', c.discount);
+    setVal('def-markup', c.markup);
+    setChk('def-blind-ps3', c.blindPS3);
+    setChk('def-req-totals', c.reqTotals);
+    setChk('def-blind-final', c.blindFinal);
+  } else {
+    setOpt('def-pricing', c.pricing); setOpt('def-salesrep', c.salesrep);
+    setOpt('def-dist', c.dist); setOpt('def-terms', c.terms);
+    setOpt('def-credit', c.credit); setOpt('def-billto', c.billto);
+    setVal('def-discount', c.discount); setVal('def-markup', c.markup);
+    setChk('def-blind-ps3', c.blindPS3); setChk('def-req-totals', c.reqTotals); setChk('def-blind-final', c.blindFinal);
+  }
   // Update status strip chips
   const chips = document.querySelectorAll('.status-strip .ss-chip .ss-val');
   if (chips[0]) chips[0].textContent = c.salesrep || '—';
   if (chips[1]) chips[1].textContent = c.pricing || '—';
   if (chips[2]) chips[2].textContent = c.terms || '—';
-  // If live mode, map API departments/contacts onto the client object
+  // If live mode, map API departments onto the client object
   if (_liveMode && _allDepartments.length > 0) {
     const clientKey = parseInt(document.querySelector('.client-select').value);
     const clientDepts = _allDepartments.filter(d => d.lClientKey === clientKey);
@@ -1248,23 +1264,22 @@ function loadClient(c) {
       active: d.bActive !== false,
       key: d.lDepartmentKey
     }));
-
-    // Extract contacts from departments
-    c.contacts = clientDepts
-      .filter(d => d.sContactFirst || d.sContactLast)
-      .map(d => ({
-        name: ((d.sContactFirst || '') + ' ' + (d.sContactLast || '')).trim(),
-        title: d.sDepartmentName || '',
-        phone: d.sContactPhoneNumber || '',
-        fax: d.sContactFaxNumber || '',
-        email: d.sContactEMail || '',
-        active: true
-      }));
   }
 
   renderCreditMemos(c);
-  renderContacts(c);
+  // Load contacts from API in live mode, otherwise use demo data
+  if (_liveMode) {
+    const clientKey = parseInt(document.querySelector('.client-select').value);
+    loadContactsFromAPI(clientKey);
+  } else {
+    renderContacts(c);
+  }
   renderDepartments(c);
+  // Load flags from API in live mode
+  if (_liveMode) {
+    const clientKey = parseInt(document.querySelector('.client-select').value);
+    loadFlagsFromAPI(clientKey);
+  }
   // Update status strip counts
   const deptCount = (c.departments || []).length;
   const contactCount = (c.contacts || []).filter(ct => ct.active).length;
@@ -1283,7 +1298,70 @@ function loadClient(c) {
 let _currentClientName = '88th Medical Group';
 let _currentClientData = null; // Holds current loaded client for live mode
 
-function saveFlagMock() {
+async function saveFlagMock() {
+  // ── Live mode: save to API ──
+  if (_liveMode) {
+    const text = document.getElementById('flag-text').value.trim();
+    if (!text) { showToast('Flag message is required.', 'error'); document.getElementById('flag-text').focus(); return; }
+
+    const modal = document.getElementById('flagModal');
+    const chips = modal.querySelectorAll('.chip.on');
+
+    const clientKey = parseInt(document.querySelector('.client-select').value);
+    const user = API.getUser();
+
+    const payload = {
+      plFlagTypeKey: 1,
+      plOwnerKey: clientKey,
+      psFlag: text,
+      pbVisibleOnDI: false,
+      pbVisibleOnBlank: false,
+      psInstrumentType: '',
+      plFlagKey: 0,
+      isflexible: false,
+      isRigid: false,
+      isInstrument: false,
+      isCamera: false,
+      dandI: false,
+      req: false,
+      approval: false,
+      invoice: false,
+      loanerOut: false,
+      bookingLoaner: false,
+      plFlagLocationKey: 0,
+      plCreated_UserKey: user?.lUserKey || 0
+    };
+
+    // Parse chip selections
+    chips.forEach(c => {
+      const lbl = c.textContent.trim();
+      if (lbl === 'Flexible') payload.isflexible = true;
+      if (lbl === 'Rigid') payload.isRigid = true;
+      if (lbl === 'Instrument') payload.isInstrument = true;
+      if (lbl === 'Camera') payload.isCamera = true;
+      if (lbl === 'D&I') payload.dandI = true;
+      if (lbl === 'Requisition') payload.req = true;
+      if (lbl === 'Upon Approval') payload.approval = true;
+      if (lbl === 'Invoice') payload.invoice = true;
+      if (lbl === 'Booking Loaner') payload.bookingLoaner = true;
+      if (lbl === 'D&I Form') payload.pbVisibleOnDI = true;
+      if (lbl === 'Blank Inspection') payload.pbVisibleOnBlank = true;
+    });
+
+    try {
+      await API.addFlag(payload);
+      document.getElementById('flag-text').value = '';
+      modal.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+      document.getElementById('flagModal').classList.remove('open');
+      showToast('Flag added.', 'success');
+      loadFlagsFromAPI(clientKey);
+    } catch (e) {
+      showToast('Add flag failed: ' + e.message, 'error');
+    }
+    return;
+  }
+
+  // ── Demo mode: mock save ──
   const text = document.getElementById('flag-text').value.trim();
   if(!text) { showToast('Flag message is required.', 'error'); document.getElementById('flag-text').focus(); return; }
 
@@ -1326,6 +1404,51 @@ function saveFlagMock() {
   showToast('Flag added.', 'success');
 }
 
+async function loadFlagsFromAPI(clientKey) {
+  try {
+    const flags = await API.getFlagsByClient(clientKey);
+    _currentFlags = Array.isArray(flags) ? flags : [];
+    renderFlagsFromAPI(_currentFlags);
+    const countEl = document.getElementById('ss-flags');
+    if (countEl) countEl.textContent = _currentFlags.length;
+  } catch (e) {
+    console.warn('[TSI Clients] Flag API failed:', e.message);
+  }
+}
+
+function renderFlagsFromAPI(flags) {
+  const tbody = document.getElementById('flags-tbody');
+  if (!flags || flags.length === 0) {
+    tbody.innerHTML = '<tr id="flags-empty-row"><td colspan="4" style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px;opacity:.3">\u{1F6A9}</div>No flags on record \u2014 click <strong>+ Add</strong> to create one</td></tr>';
+    return;
+  }
+  tbody.innerHTML = flags.map((f, i) => {
+    const bg = i % 2 !== 0 ? ' style="background:#f9fbff"' : '';
+    const instrTypes = f.sInstrumentTypes || '<span style="color:var(--muted)">All</span>';
+    const locations = f.sLocations || '<span style="color:var(--muted)">\u2014</span>';
+    return `<tr${bg} data-flag-key="${f.lFlagKey}">
+      <td style="padding:9px 14px;font-size:12.5px">${instrTypes}</td>
+      <td style="padding:9px 14px;font-size:12.5px">${locations}</td>
+      <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${f.sFlag || ''}</td>
+      <td style="padding:9px 14px">
+        <button onclick="deleteFlagAPI(${f.lFlagKey})" style="background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Remove</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function deleteFlagAPI(flagKey) {
+  if (!confirm('Remove this flag?')) return;
+  try {
+    await API.deleteFlag(flagKey);
+    showToast('Flag removed.', 'success');
+    const clientKey = parseInt(document.querySelector('.client-select').value);
+    loadFlagsFromAPI(clientKey);
+  } catch (e) {
+    showToast('Delete failed: ' + e.message, 'error');
+  }
+}
+
 function renderContacts(c) {
   const tbody = document.getElementById('contacts-tbody');
   const contacts = c.contacts || [];
@@ -1348,6 +1471,58 @@ function renderContacts(c) {
       <td><button class="edit-btn" onclick="openEditContact(this)">&#9998; Edit</button></td>
     </tr>`;
   }).join('');
+}
+
+async function loadContactsFromAPI(clientKey) {
+  try {
+    const contacts = await API.getContactsByClient(clientKey);
+    const list = Array.isArray(contacts) ? contacts : [];
+    _currentContacts = list;
+    renderContactsFromAPI(list);
+    // Update status strip
+    const countEl = document.getElementById('ss-contacts');
+    if (countEl) countEl.textContent = list.filter(c => c.bActive !== false).length;
+  } catch (e) {
+    console.warn('[TSI Clients] Contact API failed:', e.message);
+  }
+}
+
+function renderContactsFromAPI(contacts) {
+  const tbody = document.getElementById('contacts-tbody');
+  if (!contacts || contacts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No contacts on record — click <strong>+ Add</strong> to create one</td></tr>';
+    return;
+  }
+  tbody.innerHTML = contacts.map((c, i) => {
+    const name = ((c.sContactFirst || '') + ' ' + (c.sContactLast || '')).trim() || c.contactName || '';
+    const badge = c.bActive !== false ? '<span class="badge b-active">Active</span>' : '<span class="badge b-inactive">Inactive</span>';
+    const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
+    return `<tr${bg} data-contact-key="${c.lContactKey}">
+      <td style="font-weight:600">${name}</td>
+      <td style="color:var(--muted)">${c.bBillingContact ? 'Billing Contact' : ''}</td>
+      <td>${c.sContactPhoneNumber || '—'}</td>
+      <td>${c.sContactFaxNumber || '—'}</td>
+      <td>${c.sContactEMail || '—'}</td>
+      <td>${badge}</td>
+      <td><button class="edit-btn" onclick="openEditContactAPI(${c.lContactKey})">&#9998; Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openEditContactAPI(contactKey) {
+  const contact = _currentContacts.find(c => c.lContactKey === contactKey);
+  if (!contact) return;
+  _editContactKey = contactKey;
+  _editContactRow = null; // don't use DOM-based editing
+  document.getElementById('contact-modal-title').textContent = 'Edit Contact';
+  document.getElementById('ct-firstname').value = contact.sContactFirst || '';
+  document.getElementById('ct-lastname').value = contact.sContactLast || '';
+  document.getElementById('ct-title').value = '';
+  document.getElementById('ct-phone').value = contact.sContactPhoneNumber || '';
+  document.getElementById('ct-fax').value = contact.sContactFaxNumber || '';
+  document.getElementById('ct-email').value = contact.sContactEMail || '';
+  document.getElementById('ct-active').checked = contact.bActive !== false;
+  document.getElementById('contactModal').classList.add('open');
 }
 
 function renderDepartments(c) {
@@ -1607,6 +1782,7 @@ let _editContactRow = null;
 
 function openAddContact() {
   _editContactRow = null;
+  _editContactKey = null;
   document.getElementById('contact-modal-title').textContent = 'Add Contact';
   document.getElementById('ct-firstname').value = '';
   document.getElementById('ct-lastname').value = '';
@@ -1633,10 +1809,44 @@ function openEditContact(btn) {
   document.getElementById('contactModal').classList.add('open');
 }
 
-function saveContact() {
+async function saveContact() {
   const first = document.getElementById('ct-firstname').value.trim();
   const last = document.getElementById('ct-lastname').value.trim();
   if(!first || !last) { showToast('First and last name are required.', 'error'); document.getElementById('ct-firstname').focus(); return; }
+
+  // Live mode — save via API
+  if (_liveMode) {
+    const clientKey = parseInt(document.querySelector('.client-select').value);
+    const payload = {
+      psContactFirst: first,
+      psContactLast: last,
+      psContactPhoneNumber: document.getElementById('ct-phone').value.trim(),
+      psContactFaxNumber: document.getElementById('ct-fax').value.trim(),
+      psContactEmail: document.getElementById('ct-email').value.trim(),
+      pbActive: document.getElementById('ct-active').checked,
+      pbBillingContact: false,
+      pbUseForReqEmail: false,
+      plOwnerKey: clientKey,
+      plContactOwnerType: 1  // 1 = client-level contact
+    };
+
+    try {
+      if (_editContactKey) {
+        payload.plContactKey = _editContactKey;
+        await API.updateContact(payload);
+        showToast('Contact updated.', 'success');
+      } else {
+        await API.addContact(payload);
+        showToast('Contact added.', 'success');
+      }
+      document.getElementById('contactModal').classList.remove('open');
+      loadContactsFromAPI(clientKey);
+    } catch (e) {
+      showToast('Save failed: ' + e.message, 'error');
+    }
+    return;
+  }
+
   const name = first + ' ' + last;
   const title = document.getElementById('ct-title').value.trim() || '—';
   const phone = document.getElementById('ct-phone').value.trim() || '—';
@@ -1751,6 +1961,9 @@ function selectClient(row, name, id) {
 let _liveMode = false;
 let _clientList = []; // [{lClientKey, sClientName1}]
 let _allDepartments = []; // cached departments for current service location
+let _currentContacts = [];
+let _editContactKey = null;
+let _currentFlags = [];
 
 function showDataBadge(live) {
   const b = document.getElementById('dataBadge');
@@ -1919,6 +2132,63 @@ async function changeServiceLocation(locKey) {
   }
 }
 
+// ── Lookup Dropdowns ──────────────────────────────────
+async function loadLookupDropdowns() {
+  try {
+    const [reps, pricing, terms, limits, dists] = await Promise.all([
+      API.getAllSalesReps(),
+      API.getAllPricingCategories(),
+      API.getAllPaymentTerms(),
+      API.getAllCreditLimits(),
+      API.getAllDistributors()
+    ]);
+
+    // Sales Reps
+    populateSelect('def-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.repName })));
+    populateSelect('add-dept-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.repName })), true);
+
+    // Pricing Categories
+    populateSelect('def-pricing', (pricing || []).filter(p => p.bActive !== false).map(p => ({ value: p.lPricingCategoryKey, text: p.sPricingDescription })));
+    populateSelect('add-dept-pricing', (pricing || []).filter(p => p.bActive !== false).map(p => ({ value: p.lPricingCategoryKey, text: p.sPricingDescription })), true);
+
+    // Payment Terms
+    populateSelect('def-terms', (terms || []).map(t => ({ value: t.lPaymentTermsKey, text: t.sTermsDesc })));
+
+    // Credit Limits
+    populateSelect('def-credit', (limits || []).map(l => ({ value: l.lSystemCodesKey, text: l.sItemText })));
+
+    // Distributors
+    populateSelect('def-dist', (dists || []).filter(d => d.bActive !== false).map(d => ({ value: d.lDistributorKey, text: d.sDistName1 })));
+
+    console.log('[TSI Clients] Loaded lookup dropdowns');
+  } catch (e) {
+    console.warn('[TSI Clients] Lookup load failed:', e.message);
+  }
+}
+
+function populateSelect(id, options, addBlank) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+  if (addBlank) sel.innerHTML = '<option value="">— Select —</option>';
+  options.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.value;
+    opt.textContent = o.text;
+    sel.appendChild(opt);
+  });
+  // Try to restore previous value
+  if (currentVal) {
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value == currentVal || sel.options[i].textContent === currentVal) {
+        sel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+}
+
 // Save client to API
 async function saveClientToAPI() {
   updateSaveStatus('saving');
@@ -1951,11 +2221,11 @@ async function saveClientToAPI() {
     pbSkipMetrics: document.getElementById('ci-skip').checked,
     pbOpenCreditMemo: document.getElementById('ci-credit-memo').checked,
     pbNationalAccount: document.getElementById('ci-national').checked,
-    psPricingCategory: document.getElementById('def-pricing').value,
-    psSalesRepName: document.getElementById('def-salesrep').value,
-    psDistributor: document.getElementById('def-dist').value,
-    psPaymentTerms: document.getElementById('def-terms').value,
-    psCreditLimit: document.getElementById('def-credit').value,
+    plSalesRepKey: parseInt(document.getElementById('def-salesrep').value) || 0,
+    plPricingCategoryKey: parseInt(document.getElementById('def-pricing').value) || 0,
+    plPaymentTermsKey: parseInt(document.getElementById('def-terms').value) || 0,
+    plCreditLimitKey: parseInt(document.getElementById('def-credit').value) || 0,
+    plDistributorKey: parseInt(document.getElementById('def-dist').value) || 0,
     psBillTo: document.getElementById('def-billto').value,
     pdblDiscount: parseFloat(document.getElementById('def-discount').value) || 0,
     pdblMarkup: parseFloat(document.getElementById('def-markup').value) || 0,
@@ -2061,6 +2331,9 @@ async function initPage() {
         console.warn('[TSI Clients] Could not load departments:', e.message);
         _allDepartments = [];
       }
+
+      // Load reference dropdowns
+      loadLookupDropdowns();
 
       // Update dropdown handler for live mode
       const sel = document.querySelector('.client-select');

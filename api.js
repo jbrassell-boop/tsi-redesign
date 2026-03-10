@@ -310,6 +310,19 @@ const API = (() => {
     return get('/Client/GetDepartmentList?plClientKey=' + clientKey);
   }
 
+  // ── Contacts ──────────────────────────────────────
+  async function getContactsByClient(clientKey) {
+    return get('/Contacts/GetContactsList?plContactKey=0&plClientKey=' + clientKey + '&plDepartmentKey=0&plDistributorKey=0');
+  }
+
+  async function addContact(data) {
+    return post('/Contacts/AddContacts', data);
+  }
+
+  async function updateContact(data) {
+    return post('/Contacts/UpdateContacts', data);
+  }
+
   // ── Product Sales ─────────────────────────────────
   async function getInvoiceNumbers(productSaleKey, deptKey, includeCanceled) {
     return get('/ProductSales/GetAllInvoiceNumber?plProductSaleKey=' + (productSaleKey || 0) +
@@ -348,6 +361,36 @@ const API = (() => {
   async function searchProductSales(invoiceNum, poNum, desc) {
     return get('/ProductSales/ProductSalesSearch?psInvoiceNumber=' + (invoiceNum || '') +
       '&psPONumber=' + (poNum || '') + '&psDescription2=' + (desc || ''));
+  }
+
+  // ── Lookups / Reference ─────────────────────────────
+  async function getAllSalesReps() {
+    return get('/SalesRepNames/GetAllSalesRepNames');
+  }
+  async function getAllPricingCategories() {
+    return get('/PricingCategory/GetAllPricingCategories');
+  }
+  async function getAllPaymentTerms() {
+    return get('/PaymentTerms/GetAllPaymentTerms');
+  }
+  async function getAllCreditLimits() {
+    return get('/CreditLimit/GetAllCreditLimits');
+  }
+  async function getAllDistributors() {
+    return get('/DistributorName/GetAllDistributorNames');
+  }
+
+  // ── Flags ─────────────────────────────────────────────
+  async function getFlagsByClient(clientKey) {
+    return get('/Flag/GetFlagList?plClientKey=' + clientKey);
+  }
+
+  async function addFlag(data) {
+    return post('/Flag/AddFlag', data);
+  }
+
+  async function deleteFlag(flagKey) {
+    return del('/Flag/DeleteFlag?plFlagKey=' + flagKey);
   }
 
   // ═══════════════════════════════════════════════════════
@@ -412,6 +455,23 @@ const API = (() => {
 
     // Departments (by client)
     getDepartmentsByClient,
+
+    // Contacts
+    getContactsByClient,
+    addContact,
+    updateContact,
+
+    // Flags
+    getFlagsByClient,
+    addFlag,
+    deleteFlag,
+
+    // Lookups / Reference
+    getAllSalesReps,
+    getAllPricingCategories,
+    getAllPaymentTerms,
+    getAllCreditLimits,
+    getAllDistributors,
 
     // Config
     BASE_URL
