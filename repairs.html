@@ -1916,7 +1916,41 @@ async function wizOnInstTypeChange() {
     _wizFilteredModels = Array.isArray(raw) ? raw.filter(t => t.sScopeTypeDesc) : [];
     _wizFilteredModels.sort((a, b) => (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''));
   } catch(e) {
-    _wizFilteredModels = [];
+    // Demo fallback — common scope models
+    const demoModels = {
+      Flexible: [
+        {lScopeTypeKey:1,sScopeTypeDesc:'GIF-H190 Gastroscope'},{lScopeTypeKey:2,sScopeTypeDesc:'GIF-HQ190 Gastroscope'},
+        {lScopeTypeKey:3,sScopeTypeDesc:'GIF-H180 Gastroscope'},{lScopeTypeKey:4,sScopeTypeDesc:'GIF-XP190N Gastroscope'},
+        {lScopeTypeKey:5,sScopeTypeDesc:'CF-HQ190L Colonoscope'},{lScopeTypeKey:6,sScopeTypeDesc:'CF-H190L Colonoscope'},
+        {lScopeTypeKey:7,sScopeTypeDesc:'CF-H180AL Colonoscope'},{lScopeTypeKey:8,sScopeTypeDesc:'PCF-H190L Colonoscope'},
+        {lScopeTypeKey:9,sScopeTypeDesc:'BF-H190 Bronchoscope'},{lScopeTypeKey:10,sScopeTypeDesc:'BF-1TH190 Bronchoscope'},
+        {lScopeTypeKey:11,sScopeTypeDesc:'TJF-Q190V Duodenoscope'},{lScopeTypeKey:12,sScopeTypeDesc:'JF-140R Duodenoscope'},
+        {lScopeTypeKey:13,sScopeTypeDesc:'SIF-H190 Enteroscope'},{lScopeTypeKey:14,sScopeTypeDesc:'URF-V2 Ureteroscope'},
+        {lScopeTypeKey:15,sScopeTypeDesc:'CYF-VHA Cystoscope'},{lScopeTypeKey:16,sScopeTypeDesc:'ENF-VH Rhinolaryngoscope'},
+        {lScopeTypeKey:17,sScopeTypeDesc:'EC-3890Li Colonoscope (Pentax)'},{lScopeTypeKey:18,sScopeTypeDesc:'EG-3890TK Gastroscope (Pentax)'},
+        {lScopeTypeKey:19,sScopeTypeDesc:'EG-760R Gastroscope (Fujifilm)'},{lScopeTypeKey:20,sScopeTypeDesc:'EC-760R Colonoscope (Fujifilm)'}
+      ],
+      Rigid: [
+        {lScopeTypeKey:101,sScopeTypeDesc:'30110AA 0° Laparoscope'},{lScopeTypeKey:102,sScopeTypeDesc:'30120AA 30° Laparoscope'},
+        {lScopeTypeKey:103,sScopeTypeDesc:'26046AA Resectoscope'},{lScopeTypeKey:104,sScopeTypeDesc:'26120BA Cystoscope'},
+        {lScopeTypeKey:105,sScopeTypeDesc:'7230AA Arthroscope 4mm'},{lScopeTypeKey:106,sScopeTypeDesc:'7230BA Arthroscope 2.7mm'},
+        {lScopeTypeKey:107,sScopeTypeDesc:'10320AA Sinuscope'},{lScopeTypeKey:108,sScopeTypeDesc:'8934.301 Hysteroscope'},
+        {lScopeTypeKey:109,sScopeTypeDesc:'8706.402 Choledochoscope'},{lScopeTypeKey:110,sScopeTypeDesc:'8672.401 Ureteroscope'}
+      ],
+      Camera: [
+        {lScopeTypeKey:201,sScopeTypeDesc:'OTV-S190 Camera Head'},{lScopeTypeKey:202,sScopeTypeDesc:'OTV-S300 Camera Head'},
+        {lScopeTypeKey:203,sScopeTypeDesc:'CH-S190-XZ-Q Camera Head'},{lScopeTypeKey:204,sScopeTypeDesc:'Stryker 1588 Camera Head'},
+        {lScopeTypeKey:205,sScopeTypeDesc:'Stryker 1688 Camera Head'}
+      ],
+      Instrument: [
+        {lScopeTypeKey:301,sScopeTypeDesc:'FB-25K-1 Biopsy Forceps'},{lScopeTypeKey:302,sScopeTypeDesc:'FG-47L-1 Grasping Forceps'},
+        {lScopeTypeKey:303,sScopeTypeDesc:'SD-230U-25 Snare'},{lScopeTypeKey:304,sScopeTypeDesc:'KD-611L Needle Knife'},
+        {lScopeTypeKey:305,sScopeTypeDesc:'FS-410QR Injection Needle'}
+      ]
+    };
+    const instTypeFull = _wizInstrumentTypes.find(t => (t.sInstrumentTypeKey || t.sInstrumentType) === instType);
+    const typeName = instTypeFull ? instTypeFull.sInstrumentType : instType;
+    _wizFilteredModels = demoModels[typeName] || demoModels.Flexible || [];
   }
 
   document.getElementById('wizModelCount').textContent = '(' + _wizFilteredModels.length + ')';
