@@ -286,5 +286,123 @@
     </div>
   </div>
 </div>
+
+<script src="api.js"></script>
+<script>
+(function() {
+  // ── Auth Guard ──
+  if (!API.requireAuth()) throw new Error('redirect');
+
+  // ── Demo Badge (no API controller for Onsite Services) ──
+  const badge = document.createElement('div');
+  badge.style.cssText = 'position:fixed;top:56px;right:16px;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;z-index:999;';
+  badge.textContent = 'DEMO MODE \u2014 no Onsite Services API yet';
+  document.body.appendChild(badge);
+
+  // ── User Info in Topbar ──
+  const user = API.getUser();
+  if (user) {
+    const name = (user.sFirstName || '') + ' ' + (user.sLastName || '');
+    const initials = ((user.sFirstName||'')[0]||'') + ((user.sLastName||'')[0]||'');
+    document.querySelector('.topbar-avatar').textContent = initials.toUpperCase();
+    document.querySelector('.topbar-welcome').innerHTML = 'Welcome, <strong>' + name.trim() + '</strong>';
+  }
+
+  // ── Demo Data for Job Selection ──
+  const jobs = [
+    {
+      id: 'JOB-4022', client: 'Halifax Medical Center', tech: 'Mike Robinson', status: 'In Progress',
+      date: '2026-03-09', time: '08:30', scopes: '12',
+      notes: 'Conducted quarterly onsite inspection for the GI Lab. 10 flexible scopes inspected. 2 marked for major repair (fluid invasion). Cleanliness scores generally high, but noted wear on angulation cables for CF-H190 unit #304.',
+      equipment: [
+        { model: 'GIF-H190', serial: '3801442', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
+        { model: 'CF-H185L', serial: '2918371', type: 'Flexible', status: 'Failed', statusClass: '', statusStyle: 'background:#FFE4E6;color:#BE123C;border:1px solid #FDA4AF', action: 'Send to Lab', actionClass: 'color:var(--red);font-weight:600' },
+        { model: 'EG-760Z', serial: '4450188', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'Clean Lens', actionClass: '' }
+      ]
+    },
+    {
+      id: 'JOB-4025', client: 'Tift Regional Medical', tech: 'Sarah Lewis', status: 'Scheduled',
+      date: '2026-03-10', time: '09:00', scopes: '8',
+      notes: 'Scheduled quarterly scope inspection for the Endoscopy Suite. Pre-visit checklist completed. Contact: Dr. Martinez, GI Director.',
+      equipment: [
+        { model: 'GIF-HQ190', serial: '5102938', type: 'Flexible', status: 'Pending', statusClass: 'status-scheduled', action: 'Inspect', actionClass: '' },
+        { model: 'CF-HQ190I', serial: '5102940', type: 'Flexible', status: 'Pending', statusClass: 'status-scheduled', action: 'Inspect', actionClass: '' }
+      ]
+    },
+    {
+      id: 'JOB-3998', client: 'Northside Hospital', tech: 'Mike Robinson', status: 'Completed',
+      date: '2026-03-08', time: '07:45', scopes: '15',
+      notes: 'Completed full onsite service. All 15 scopes inspected and logged. 1 duodenoscope flagged for elevated bacterial count — sent for reprocessing audit. Client satisfied with turnaround.',
+      equipment: [
+        { model: 'TJF-Q190V', serial: '4401221', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
+        { model: 'GIF-H190', serial: '4401225', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
+        { model: 'EC-760R', serial: '4401230', type: 'Flexible', status: 'Failed', statusClass: '', statusStyle: 'background:#FFE4E6;color:#BE123C;border:1px solid #FDA4AF', action: 'Reprocessing Audit', actionClass: 'color:var(--red);font-weight:600' },
+        { model: 'CF-H190DL', serial: '4401233', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' }
+      ]
+    }
+  ];
+
+  const listItems = document.querySelectorAll('.list-item');
+  const jobInfoPanel = document.querySelectorAll('.panel-card')[1]; // Job Information card
+  const equipPanel = document.querySelectorAll('.panel-card')[2];   // Equipment card
+  const searchInput = document.querySelector('.inp-search');
+
+  function selectJob(index) {
+    const job = jobs[index];
+    if (!job) return;
+
+    // Update list selection
+    listItems.forEach((el, i) => el.classList.toggle('selected', i === index));
+
+    // Update Job Information panel header
+    jobInfoPanel.querySelector('.panel-head').textContent = 'Job Information: ' + job.id;
+
+    // Update form fields
+    const inputs = jobInfoPanel.querySelectorAll('.inp');
+    inputs[0].value = job.client;          // Hospital
+    // Tech select
+    const techSelect = inputs[1];
+    for (let o = 0; o < techSelect.options.length; o++) {
+      techSelect.options[o].selected = techSelect.options[o].text === job.tech;
+    }
+    // Status select
+    const statusSelect = inputs[2];
+    for (let o = 0; o < statusSelect.options.length; o++) {
+      statusSelect.options[o].selected = statusSelect.options[o].text === job.status;
+    }
+    inputs[3].value = job.date;            // Date
+    inputs[4].value = job.time;            // Time
+    inputs[5].value = job.scopes;          // Scopes
+    inputs[6].value = job.notes;           // Notes textarea
+
+    // Update Equipment table
+    const tbody = equipPanel.querySelector('tbody');
+    tbody.innerHTML = job.equipment.map(eq => {
+      const statusSpan = eq.statusClass
+        ? '<span class="c-status ' + eq.statusClass + '">' + eq.status + '</span>'
+        : '<span class="c-status" style="' + (eq.statusStyle||'') + '">' + eq.status + '</span>';
+      const actionTd = eq.actionClass
+        ? '<td style="' + eq.actionClass + '">' + eq.action + '</td>'
+        : '<td>' + eq.action + '</td>';
+      return '<tr><td>' + eq.model + '</td><td style="font-weight:600;color:var(--blue)">' + eq.serial + '</td><td>' + eq.type + '</td><td>' + statusSpan + '</td>' + actionTd + '</tr>';
+    }).join('');
+  }
+
+  // Click handlers on list items
+  listItems.forEach((el, i) => {
+    el.addEventListener('click', () => selectJob(i));
+  });
+
+  // Search filter
+  searchInput.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    listItems.forEach((el, i) => {
+      const text = el.textContent.toLowerCase();
+      el.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+
+})();
+</script>
 </body>
 </html>

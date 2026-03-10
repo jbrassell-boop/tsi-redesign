@@ -232,19 +232,19 @@
       <!-- TOOLBAR -->
       <div class="toolbar">
         <span class="sel-bar-label">Client :</span>
-        <select class="sel" style="min-width:220px">
+        <select class="sel" style="min-width:220px" id="selClient">
           <option>88th Medical Group</option>
           <option>Tift Regional Medical Center</option>
           <option>Nashville General Hospital</option>
         </select>
         <span class="sel-bar-label" style="margin-left:4px">Department :</span>
-        <select class="sel" style="min-width:200px">
+        <select class="sel" style="min-width:200px" id="selDept">
           <option>Biomedical Engineering</option>
           <option>Vaibhav Test</option>
         </select>
-        <span class="id-badge">#5001</span>
+        <span class="id-badge" id="deptIdBadge">#5001</span>
         <div class="divider"></div>
-        <button class="btn btn-outline" title="New Department" style="gap:4px">
+        <button class="btn btn-outline" title="New Department" style="gap:4px" id="btnNewDept">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New
         </button>
@@ -253,12 +253,12 @@
           Copy
         </button>
         <div style="flex:1"></div>
-        <button class="btn btn-danger" onclick="document.getElementById('deleteModal').classList.add('open')" style="gap:4px">
+        <button class="btn btn-danger" id="btnOpenDelete" style="gap:4px">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           Delete
         </button>
         <div class="divider"></div>
-        <button class="btn btn-navy" style="gap:4px" title="Ctrl+S">
+        <button class="btn btn-navy" style="gap:4px" title="Ctrl+S" id="btnSaveDept">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
           Save
           <span style="font-size:9px;opacity:.6;font-weight:400;margin-left:2px">Ctrl+S</span>
@@ -305,58 +305,58 @@
               <div class="fg g2">
                 <div class="ff span2">
                   <label>Name <span class="req">*</span></label>
-                  <input class="inp" value="Biomedical Engineering"/>
+                  <input class="inp" id="fDeptName" value="Biomedical Engineering"/>
                 </div>
                 <div class="ff">
                   <label>Customer Since</label>
-                  <input class="inp" type="date" value="2021-06-09"/>
+                  <input class="inp" id="fCustomerSince" type="date" value="2021-06-09"/>
                 </div>
                 <div class="ff" style="justify-content:flex-end">
                   <label>Active</label>
                   <div class="toggle-row" style="padding:0">
-                    <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
-                    <span style="font-size:11px;color:var(--green);font-weight:600">Yes</span>
+                    <label class="toggle"><input type="checkbox" id="fActive" checked/><span class="toggle-slider"></span></label>
+                    <span id="fActiveLabel" style="font-size:11px;color:var(--green);font-weight:600">Yes</span>
                   </div>
                 </div>
                 <div class="ff">
                   <label>Sales Rep</label>
-                  <select class="inp"><option>Brandi Cook</option><option>Bernie DeLacy</option><option>Brian Kenney</option><option>Debbie Hightower</option><option>Fausto Guillermo</option><option>Giuseppe Gambino</option><option>House Account</option><option>Maria Mercanti</option><option>Meghan Wright</option><option>Ryan George</option><option>Timothy Reilly</option></select>
+                  <select class="inp" id="fSalesRep"><option>Brandi Cook</option><option>Bernie DeLacy</option><option>Brian Kenney</option><option>Debbie Hightower</option><option>Fausto Guillermo</option><option>Giuseppe Gambino</option><option>House Account</option><option>Maria Mercanti</option><option>Meghan Wright</option><option>Ryan George</option><option>Timothy Reilly</option></select>
                 </div>
                 <div class="ff">
                   <label>Additional CS</label>
-                  <select class="inp"><option>Aesculap Inc.</option><option>BSC CAP</option><option>BSC CPO</option><option>BSC FFS</option><option>Cogentix Medical</option><option>Endoscopy Suite Partners</option><option>VSI Industrial</option><option>None</option></select>
+                  <select class="inp" id="fAdditionalCS"><option>Aesculap Inc.</option><option>BSC CAP</option><option>BSC CPO</option><option>BSC FFS</option><option>Cogentix Medical</option><option>Endoscopy Suite Partners</option><option>VSI Industrial</option><option>None</option></select>
                 </div>
                 <div class="ff">
                   <label>National Acct</label>
-                  <select class="inp"><option value="">-- Select --</option><option>Covenant Health</option><option>HCA Healthcare</option><option>LifePoint Health</option><option>Partners Healthcare</option><option>Vizient</option></select>
+                  <select class="inp" id="fNationalAcct"><option value="">-- Select --</option><option>Covenant Health</option><option>HCA Healthcare</option><option>LifePoint Health</option><option>Partners Healthcare</option><option>Vizient</option></select>
                 </div>
                 <div class="ff">
                   <label>Pricing Category</label>
-                  <select class="inp"><option>GSA 2014 (Joint)</option><option>Commercial 2021</option><option>Disabled Vet</option><option>GSA/ECAT 2022</option><option>Hospital 2020 Standard</option><option>HPG 2022 Joint</option><option>Partners Cooperative (Joint)</option><option>Surgical Solutions 2023</option><option>Vizient</option><option>Vizient Tier 2</option><option>Vizient Tier 3</option></select>
+                  <select class="inp" id="fPricingCategory"><option>GSA 2014 (Joint)</option><option>Commercial 2021</option><option>Disabled Vet</option><option>GSA/ECAT 2022</option><option>Hospital 2020 Standard</option><option>HPG 2022 Joint</option><option>Partners Cooperative (Joint)</option><option>Surgical Solutions 2023</option><option>Vizient</option><option>Vizient Tier 2</option><option>Vizient Tier 3</option></select>
                 </div>
                 <div class="ff">
                   <label>Reporting Group</label>
-                  <select class="inp"><option>GSA</option><option>HPG</option><option>Magnet</option><option>MedAsset</option><option>Novation</option><option>Premier</option><option>Vizient</option><option>Vizient Carts</option></select>
+                  <select class="inp" id="fReportingGroup"><option>GSA</option><option>HPG</option><option>Magnet</option><option>MedAsset</option><option>Novation</option><option>Premier</option><option>Vizient</option><option>Vizient Carts</option></select>
                 </div>
                 <div class="ff">
                   <label>Shipping Carrier</label>
-                  <select class="inp"><option>UPS</option><option>FedEx</option></select>
+                  <select class="inp" id="fShippingCarrier"><option>UPS</option><option>FedEx</option></select>
                 </div>
                 <div class="ff">
                   <label>Default Shipping</label>
-                  <input class="inp" type="number" step="0.01" value="77.77" style="text-align:right"/>
+                  <input class="inp" id="fDefaultShipping" type="number" step="0.01" value="77.77" style="text-align:right"/>
                 </div>
                 <div class="ff">
                   <label>Discount %</label>
-                  <input class="inp" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
+                  <input class="inp" id="fDiscount" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
                 </div>
                 <div class="ff">
                   <label>Markup %</label>
-                  <input class="inp" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
+                  <input class="inp" id="fMarkup" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
                 </div>
                 <div class="ff span2">
                   <div class="toggle-row" style="padding:0">
-                    <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+                    <label class="toggle"><input type="checkbox" id="fAcquisitions" checked/><span class="toggle-slider"></span></label>
                     <span class="toggle-label">Acquisitions Dept</span>
                   </div>
                 </div>
@@ -366,15 +366,15 @@
               <div class="cb-section">
                 <div class="cb-section-label">Options</div>
                 <div class="cb-grid">
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Consumption On Req</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Enforce Scope Type Filtering</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Product ID</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show UA Or NWT</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Show Itemized Descriptions</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Open Credit Memo</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Email New Repairs</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Member Board Of Advisors</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Tracking # Required</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowConsumption"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Consumption On Req</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fEnforceScopeType" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Enforce Scope Type Filtering</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowProductID"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Product ID</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowUAOrNWT"/><span class="toggle-slider"></span></label><span class="toggle-label">Show UA Or NWT</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowItemizedDesc" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Show Itemized Descriptions</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fOpenCreditMemo"/><span class="toggle-slider"></span></label><span class="toggle-label">Open Credit Memo</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fEmailNewRepairs"/><span class="toggle-slider"></span></label><span class="toggle-label">Email New Repairs</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fMemberBOA"/><span class="toggle-slider"></span></label><span class="toggle-label">Member Board Of Advisors</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fTrackingRequired"/><span class="toggle-slider"></span></label><span class="toggle-label">Tracking # Required</span></div>
                 </div>
               </div>
 
@@ -382,8 +382,8 @@
               <div class="cb-section">
                 <div class="cb-section-label">Service Locations</div>
                 <div style="display:flex;gap:16px">
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Upper Chichester</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Nashville</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fSvcLocUC" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Upper Chichester</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fSvcLocNash"/><span class="toggle-slider"></span></label><span class="toggle-label">Nashville</span></div>
                 </div>
               </div>
             </div>
@@ -397,33 +397,33 @@
               <div class="fg" style="gap:10px">
                 <div class="ff">
                   <label>Cleaning System</label>
-                  <select class="inp"><option>Evotech</option><option>Medivator</option><option>Steris</option></select>
+                  <select class="inp" id="fCleaningSystem"><option>Evotech</option><option>Medivator</option><option>Steris</option></select>
                 </div>
                 <div class="ff">
                   <label>Chemical Germicide</label>
-                  <select class="inp"><option>Cidex OPA</option><option>CIDEX OPA-C</option></select>
+                  <select class="inp" id="fChemicalGermicide"><option>Cidex OPA</option><option>CIDEX OPA-C</option></select>
                 </div>
                 <div class="ff">
                   <label>Manufacturer</label>
-                  <select class="inp"><option>Olympus</option><option>Fujifilm</option><option>Pentax</option><option>Karl Storz</option><option>Stryker</option></select>
+                  <select class="inp" id="fManufacturer"><option>Olympus</option><option>Fujifilm</option><option>Pentax</option><option>Karl Storz</option><option>Stryker</option></select>
                 </div>
                 <div class="ff">
                   <label>Competition</label>
-                  <select class="inp"><option>IMS</option><option>Healthmark</option><option>Medline</option><option>None</option></select>
+                  <select class="inp" id="fCompetition"><option>IMS</option><option>Healthmark</option><option>Medline</option><option>None</option></select>
                 </div>
                 <div class="fg g2" style="gap:10px">
                   <div class="ff">
                     <label># of Procedures</label>
-                    <input class="inp" type="number" value="777"/>
+                    <input class="inp" id="fProcedures" type="number" value="777"/>
                   </div>
                   <div class="ff">
                     <label>Bed Size</label>
-                    <input class="inp" type="number" value="777"/>
+                    <input class="inp" id="fBedSize" type="number" value="777"/>
                   </div>
                 </div>
                 <div class="ff">
                   <label>Type</label>
-                  <select class="inp"><option>Large</option><option>Medium</option><option>Small</option></select>
+                  <select class="inp" id="fDeptType"><option>Large</option><option>Medium</option><option>Small</option></select>
                 </div>
               </div>
             </div>
@@ -432,7 +432,7 @@
           <div class="panel">
             <div class="panel-head">Notes</div>
             <div class="panel-body">
-              <textarea class="inp" style="height:140px">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</textarea>
+              <textarea class="inp" id="fNotes" style="height:140px">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</textarea>
             </div>
           </div>
         </div>
@@ -558,7 +558,7 @@
           <div class="tbl-head">
             <span class="tbl-title">Scopes</span>
             <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:11px;color:var(--muted)">16 instruments &bull; 5 with active contract</span>
+              <span id="scopesSummary" style="font-size:11px;color:var(--muted)">16 instruments &bull; 5 with active contract</span>
               <button class="btn btn-outline" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="window.location='scope-model.html'">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Manage in Scopes
@@ -567,7 +567,7 @@
           </div>
           <table class="readonly-tbl">
             <thead><tr><th>Model</th><th>Serial Number</th><th>Instrument Type</th><th>Avg Daily Uses</th><th>Current Contract</th></tr></thead>
-            <tbody>
+            <tbody id="tbodyScopes">
               <tr><td>GF-UE160-AL5</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1011439</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:#92400E;font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
               <tr><td>BF 1T240</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1030608</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:#92400E;font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
               <tr><td>A22002A</td><td style="color:var(--blue);font-weight:600;cursor:pointer">020612</td><td>Rigid</td><td style="color:var(--muted)">N/A</td><td></td></tr>
@@ -595,7 +595,7 @@
           <div class="tbl-head"><span class="tbl-title">GPO's</span><button class="btn btn-navy" onclick="document.getElementById('gpoModal').classList.add('open')">+ Add</button></div>
           <table>
             <thead><tr><th>GPO</th><th>Effective Date</th><th>End Date</th><th>GPO ID</th><th>GLN</th><th>Reporting Group</th><th>Company</th><th style="width:70px"></th></tr></thead>
-            <tbody>
+            <tbody id="tbodyGPOs">
               <tr><td colspan="8" class="empty-state">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
                 <div>No GPO's on record</div>
@@ -609,8 +609,8 @@
       <div id="dtab-scopetypes" class="tab-content show-block" style="display:none">
         <div class="shuttle">
           <div class="shuttle-panel">
-            <div class="shuttle-head">Assigned Scope Types <span style="font-size:11px;font-weight:500;color:var(--muted)">(3)</span></div>
-            <div class="shuttle-body">
+            <div class="shuttle-head">Assigned Scope Types <span id="scopeTypesAssignedCount" style="font-size:11px;font-weight:500;color:var(--muted)">(3)</span></div>
+            <div class="shuttle-body" id="scopeTypesAssigned">
               <div class="shuttle-row"><span>ENF GP</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
               <div class="shuttle-row"><span>GIF H180</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
               <div class="shuttle-row"><span>CF H185</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
@@ -618,8 +618,8 @@
           </div>
           <div class="shuttle-panel">
             <div class="shuttle-head">Available Scope Types</div>
-            <div class="shuttle-search"><input placeholder="Search scope types..." /></div>
-            <div class="shuttle-body">
+            <div class="shuttle-search"><input id="scopeTypesSearch" placeholder="Search scope types..." /></div>
+            <div class="shuttle-body" id="scopeTypesAvailable">
               <div class="shuttle-row"><span>.12 mm Forcep</span><button class="shuttle-add" title="Add">+</button></div>
               <div class="shuttle-row"><span>.86100N Insert</span><button class="shuttle-add" title="Add">+</button></div>
               <div class="shuttle-row"><span>00121 Flexible Forcep</span><button class="shuttle-add" title="Add">+</button></div>
@@ -651,8 +651,8 @@
       <div id="dtab-subgroups" class="tab-content show-block" style="display:none">
         <div class="shuttle">
           <div class="shuttle-panel">
-            <div class="shuttle-head">Assigned Sub Groups <span style="font-size:11px;font-weight:500;color:var(--muted)">(5)</span></div>
-            <div class="shuttle-body">
+            <div class="shuttle-head">Assigned Sub Groups <span id="subGroupsAssignedCount" style="font-size:11px;font-weight:500;color:var(--muted)">(5)</span></div>
+            <div class="shuttle-body" id="subGroupsAssigned">
               <div class="shuttle-row"><span>Canadian Discount</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
               <div class="shuttle-row"><span>Cen-Med</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
               <div class="shuttle-row"><span>CHI URO Discount</span><button class="shuttle-remove" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
@@ -662,8 +662,8 @@
           </div>
           <div class="shuttle-panel">
             <div class="shuttle-head">Available Sub Groups</div>
-            <div class="shuttle-search"><input placeholder="Search sub groups..." /></div>
-            <div class="shuttle-body">
+            <div class="shuttle-search"><input id="subGroupsSearch" placeholder="Search sub groups..." /></div>
+            <div class="shuttle-body" id="subGroupsAvailable">
               <div class="shuttle-row"><span>Amsurg</span><button class="shuttle-add" title="Add">+</button></div>
               <div class="shuttle-row"><span>Boston Scientific</span><button class="shuttle-add" title="Add">+</button></div>
               <div class="shuttle-row"><span>GE Healthcare</span><button class="shuttle-add" title="Add">+</button></div>
@@ -690,13 +690,13 @@
           <div class="tbl-head">
             <div style="display:flex;align-items:center;gap:10px">
               <span class="tbl-title">Contacts</span>
-              <span style="font-size:10.5px;color:var(--muted)">Billing: <strong style="color:var(--text)">Stephen Stephanopolus</strong></span>
+              <span id="contactsBillingSummary" style="font-size:10.5px;color:var(--muted)">Billing: <strong style="color:var(--text)">Stephen Stephanopolus</strong></span>
             </div>
             <button class="btn btn-navy" onclick="openContactModal()">+ Add</button>
           </div>
           <table>
             <thead><tr><th>Contact</th><th>Phone</th><th>Fax</th><th>Email</th><th>Billing Contact</th><th>Status</th><th style="width:100px"></th></tr></thead>
-            <tbody>
+            <tbody id="tbodyContacts">
               <tr>
                 <td style="font-weight:600">Stephen Stephanopolus</td>
                 <td>+1 (215) 666-6666</td>
@@ -726,7 +726,7 @@
           <div class="tbl-head"><span class="tbl-title">Documents</span><button class="btn btn-navy" onclick="document.getElementById('documentModal').classList.add('open')">+ Add</button></div>
           <table>
             <thead><tr><th>Document Name</th><th>Uploaded Date</th><th>Document Type</th><th style="width:130px"></th></tr></thead>
-            <tbody>
+            <tbody id="tbodyDocuments">
               <tr>
                 <td style="color:var(--blue);font-weight:600">Document 1 test</td>
                 <td>04/11/2025</td>
@@ -750,7 +750,7 @@
           <div class="tbl-head"><span class="tbl-title">Model Max Charges</span><button class="btn btn-navy" onclick="document.getElementById('maxChargeModal').classList.add('open')">+ Add</button></div>
           <table>
             <thead><tr><th>Model</th><th>Instrument Type</th><th>Size</th><th style="text-align:right">Max Charges</th><th style="width:100px"></th></tr></thead>
-            <tbody>
+            <tbody id="tbodyMaxCharges">
               <tr><td>11009BC1</td><td>Flexible</td><td>Small</td><td style="text-align:right;font-weight:700;color:var(--navy)">$2,395.00</td><td style="display:flex;gap:6px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td></tr>
               <tr><td>11101CM</td><td>Flexible</td><td>Small</td><td style="text-align:right;font-weight:700;color:var(--navy)">$9,999.00</td><td style="display:flex;gap:6px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td></tr>
               <tr><td>11101 VNS</td><td>Flexible</td><td>Small</td><td style="text-align:right;font-weight:700;color:var(--navy)">$2,200.00</td><td style="display:flex;gap:6px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td></tr>
@@ -775,7 +775,7 @@
       <button class="modal-close" onclick="document.getElementById('deleteModal').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:12px;color:var(--text);line-height:1.6">Are you sure you want to permanently delete <strong>Biomedical Engineering</strong> from <strong>88th Medical Group</strong>? All associated contacts, documents, and charge overrides will also be removed.</p>
+      <p id="deleteConfirmText" style="font-size:12px;color:var(--text);line-height:1.6">Are you sure you want to permanently delete this department? All associated contacts, documents, and charge overrides will also be removed.</p>
       <div style="margin-top:14px">
         <label style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Type department name to confirm</label>
         <input class="inp" placeholder="Biomedical Engineering" style="border-color:#FECACA"/>
@@ -783,7 +783,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" style="background:var(--red)" onclick="document.getElementById('deleteModal').classList.remove('open')">Yes, Delete</button>
+      <button class="btn-save" style="background:var(--red)" id="btnConfirmDelete">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -825,7 +825,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('contactModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="document.getElementById('contactModal').classList.remove('open')">
+      <button class="btn-save" id="btnSaveContact">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Save Contact
       </button>
@@ -949,7 +949,9 @@
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
+/* ── Tab switching (preserved) ────────────────────────── */
 function showDeptTab(name,el){
   ['main','addresses','scopes','gpos','scopetypes','subgroups','contacts','documents','maxcharges'].forEach(t=>{
     const el2=document.getElementById('dtab-'+t);
@@ -961,11 +963,938 @@ function showDeptTab(name,el){
   el.classList.add('active');
 }
 
+/* ── Contact modal (preserved) ────────────────────────── */
 function openContactModal(mode){
   const title=document.getElementById('contact-modal-title');
   title.textContent=mode==='edit'?'Edit Contact':'Add Contact';
   document.getElementById('contactModal').classList.add('open');
 }
+
+/* ══════════════════════════════════════════════════════════
+   API WIRING — dual-mode: real API first, demo fallback
+   ══════════════════════════════════════════════════════════ */
+(async function(){
+  try {
+    if (!API.requireAuth()) throw new Error('redirect');
+  } catch(e){ return; }
+
+  // State
+  let allClients = [];
+  let allDepartments = [];
+  let currentDeptKey = null;
+  let isDemo = false;
+
+  const $  = id => document.getElementById(id);
+  const qs = s  => document.querySelector(s);
+
+  /* ── Helper: show demo badge ───────────────────────── */
+  function showDemoBadge(){
+    if(document.getElementById('demoBadge')) return;
+    isDemo = true;
+    const b = document.createElement('div');
+    b.id = 'demoBadge';
+    b.style.cssText = 'position:fixed;top:8px;right:8px;z-index:9999;background:#FFFBEB;border:1.5px solid #FDE68A;color:#92400E;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;font-family:Inter,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.12)';
+    b.textContent = 'DEMO MODE';
+    document.body.appendChild(b);
+  }
+
+  /* ── Helper: show live data badge ────────────────── */
+  function showLiveBadge(){
+    if(document.getElementById('demoBadge')) return;
+    const b = document.createElement('div');
+    b.id = 'demoBadge';
+    b.style.cssText = 'position:fixed;top:8px;right:8px;z-index:9999;background:#F0FDF4;border:1.5px solid #BBF7D0;color:#16A34A;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;font-family:Inter,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.12)';
+    b.textContent = 'LIVE DATA';
+    document.body.appendChild(b);
+    setTimeout(()=>{ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(()=>b.remove(),600); }, 4000);
+  }
+
+  /* ── Autosave status indicator ────────────────────── */
+  let saveTimer = null;
+  let currentDeptData = null;
+
+  function showSaveStatus(text, color){
+    let el = document.getElementById('saveStatus');
+    if(!el){
+      el = document.createElement('span');
+      el.id = 'saveStatus';
+      el.style.cssText = 'font-size:10px;font-weight:600;margin-left:8px;transition:all .2s';
+      const saveBtn = document.querySelector('.btn-navy');
+      if(saveBtn && saveBtn.parentElement) saveBtn.parentElement.insertBefore(el, saveBtn.nextSibling);
+    }
+    el.textContent = text;
+    el.style.color = color;
+  }
+
+  /* ── Helper: set select value by text match ─────────── */
+  function setSelectByText(sel, text){
+    if(!sel || !text) return;
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].text === text || sel.options[i].value === text || sel.options[i].value == text){
+        sel.selectedIndex = i; return;
+      }
+    }
+  }
+
+  /* ── Helper: set select value by key ────────────────── */
+  function setSelectByValue(sel, val){
+    if(!sel || val===undefined || val===null) return;
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value == val){
+        sel.selectedIndex = i; return;
+      }
+    }
+  }
+
+  /* ── Helper: format date for display ────────────────── */
+  function fmtDate(dtStr){
+    if(!dtStr) return '';
+    const d = new Date(dtStr);
+    if(isNaN(d)) return dtStr;
+    return (d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+d.getFullYear();
+  }
+
+  /* ── Helper: format date for input[type=date] ──────── */
+  function isoDate(dtStr){
+    if(!dtStr) return '';
+    const d = new Date(dtStr);
+    if(isNaN(d)) return '';
+    return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+  }
+
+  /* ── Helper: format currency ────────────────────────── */
+  function fmtMoney(v){
+    const n = parseFloat(v);
+    if(isNaN(n)) return '$0.00';
+    return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  /* ── Helper: shuttle row HTML ───────────────────────── */
+  const removeIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+
+  /* ── Load clients into dropdown ─────────────────────── */
+  async function loadClients(){
+    try {
+      allClients = await API.getAllClients(1);
+      if(!Array.isArray(allClients)) allClients = [];
+      const sel = $('selClient');
+      sel.innerHTML = '<option value="">-- Select Client --</option>';
+      allClients.sort((a,b)=>(a.sClientName1||'').localeCompare(b.sClientName1||''));
+      allClients.forEach(c=>{
+        const o = document.createElement('option');
+        o.value = c.lClientKey;
+        o.textContent = c.sClientName1 || ('Client #'+c.lClientKey);
+        sel.appendChild(o);
+      });
+    } catch(e){
+      console.warn('[Dept] Could not load clients:', e.message);
+      showDemoBadge();
+    }
+  }
+
+  /* ── Load departments for selected client ──────────── */
+  async function loadDepartments(clientKey){
+    try {
+      allDepartments = await API.getAllDepartments(1);
+      if(!Array.isArray(allDepartments)) allDepartments = [];
+      // Also try svc location 2
+      try {
+        const d2 = await API.getAllDepartments(2);
+        if(Array.isArray(d2)) allDepartments = allDepartments.concat(d2);
+      } catch(e2){}
+      // Filter to this client
+      const depts = allDepartments.filter(d => d.lClientKey == clientKey);
+      const sel = $('selDept');
+      sel.innerHTML = '<option value="">-- Select Department --</option>';
+      depts.sort((a,b)=>(a.sDepartmentName||'').localeCompare(b.sDepartmentName||''));
+      depts.forEach(d=>{
+        const o = document.createElement('option');
+        o.value = d.lDepartmentKey;
+        o.textContent = d.sDepartmentName || ('Dept #'+d.lDepartmentKey);
+        sel.appendChild(o);
+      });
+      // Auto-select first
+      if(depts.length > 0){
+        sel.value = depts[0].lDepartmentKey;
+        await loadDepartmentDetail(depts[0].lDepartmentKey);
+      }
+    } catch(e){
+      console.warn('[Dept] Could not load departments:', e.message);
+      showDemoBadge();
+    }
+  }
+
+  /* ── Load full department detail ────────────────────── */
+  async function loadDepartmentDetail(deptKey){
+    currentDeptKey = deptKey;
+    $('deptIdBadge').textContent = '#' + deptKey;
+
+    try {
+      const d = await API.getDepartmentDetail(deptKey);
+      populateMainTab(d);
+    } catch(e){
+      console.warn('[Dept] Detail load failed:', e.message);
+      showDemoBadge();
+    }
+
+    // Load sub-tabs in parallel (non-blocking)
+    loadScopes(deptKey);
+    loadGPOs(deptKey);
+    loadScopeTypes(deptKey);
+    loadSubGroups(deptKey);
+    loadContacts(deptKey);
+    loadDocuments(deptKey);
+    loadMaxCharges(deptKey);
+  }
+
+  /* ── Populate Main tab form from API data ──────────── */
+  function populateMainTab(d){
+    if(!d) return;
+    // Department info
+    const f = (id,val) => { const el=$(id); if(el) el.value = val ?? ''; };
+    f('fDeptName', d.sDepartmentName);
+    f('fCustomerSince', isoDate(d.dtCustomerSince));
+    if($('fActive')) $('fActive').checked = !!d.bActive;
+    if($('fActiveLabel')) {
+      $('fActiveLabel').textContent = d.bActive ? 'Yes' : 'No';
+      $('fActiveLabel').style.color = d.bActive ? 'var(--green)' : 'var(--red)';
+    }
+
+    // Dropdowns — try to populate with API lookup data, then set value
+    loadSalesRepDropdown(d.lSalesRepKey);
+    loadPricingCategoryDropdown(d.lPricingCategoryKey);
+    setSelectByText($('fShippingCarrier'), d.sShippingCarrier);
+    setSelectByText($('fAdditionalCS'), d.sAdditionalCS);
+    setSelectByText($('fNationalAcct'), d.sNationalAccount);
+    setSelectByText($('fReportingGroup'), d.sReportingGroup);
+
+    f('fDefaultShipping', d.dblDefaultShipping ?? d.dblShippingCharge ?? '');
+    f('fDiscount', d.dblDiscount ?? '');
+    f('fMarkup', d.dblMarkup ?? '');
+
+    // Toggles
+    const chk = (id,val) => { const el=$(id); if(el) el.checked = !!val; };
+    chk('fAcquisitions', d.bAcquisitionsDept);
+    chk('fShowConsumption', d.bShowConsumptionOnReq);
+    chk('fEnforceScopeType', d.bEnforceScopeTypeFiltering);
+    chk('fShowProductID', d.bShowProductID);
+    chk('fShowUAOrNWT', d.bShowUAOrNWT);
+    chk('fShowItemizedDesc', d.bShowItemizedDescriptions);
+    chk('fOpenCreditMemo', d.bOpenCreditMemo);
+    chk('fEmailNewRepairs', d.bEmailNewRepairs);
+    chk('fMemberBOA', d.bMemberBoardOfAdvisors);
+    chk('fTrackingRequired', d.bTrackingRequired);
+
+    // Service locations
+    chk('fSvcLocUC', d.bServiceLocationUC ?? d.bUpperChichester);
+    chk('fSvcLocNash', d.bServiceLocationNash ?? d.bNashville);
+
+    // Profile panel
+    setSelectByText($('fCleaningSystem'), d.sCleaningSystem);
+    setSelectByText($('fChemicalGermicide'), d.sChemicalGermicide);
+    setSelectByText($('fManufacturer'), d.sManufacturer);
+    setSelectByText($('fCompetition'), d.sCompetition);
+    f('fProcedures', d.lProcedures ?? d.lNumberOfProcedures ?? '');
+    f('fBedSize', d.lBedSize ?? '');
+    setSelectByText($('fDeptType'), d.sDepartmentType ?? d.sType);
+    f('fNotes', d.mNotes ?? d.sNotes ?? '');
+
+    // Addresses tab
+    populateAddresses(d);
+
+    // Store for autosave reference
+    currentDeptData = d;
+
+    // Status strip
+    updateStatusStrip(d);
+  }
+
+  /* ── Load sales rep dropdown from API ──────────────── */
+  async function loadSalesRepDropdown(selectedKey){
+    try {
+      const reps = await API.getAllSalesReps();
+      if(!Array.isArray(reps)) return;
+      const sel = $('fSalesRep');
+      sel.innerHTML = '<option value="">-- Select --</option>';
+      reps.forEach(r=>{
+        const o = document.createElement('option');
+        o.value = r.lSalesRepKey;
+        o.textContent = (r.sFirstName||'')+' '+(r.sLastName||'');
+        sel.appendChild(o);
+      });
+      setSelectByValue(sel, selectedKey);
+    } catch(e){ console.warn('[Dept] SalesRep dropdown:', e.message); }
+  }
+
+  /* ── Load pricing category dropdown from API ───────── */
+  async function loadPricingCategoryDropdown(selectedKey){
+    try {
+      const cats = await API.getAllPricingCategories({activeOnly:false,defaultFirst:false});
+      if(!Array.isArray(cats)) return;
+      const sel = $('fPricingCategory');
+      sel.innerHTML = '<option value="">-- Select --</option>';
+      cats.forEach(c=>{
+        const o = document.createElement('option');
+        o.value = c.lPricingCategoryKey;
+        o.textContent = c.sPricingCategoryDesc || c.sPricingCategoryName || ('Cat #'+c.lPricingCategoryKey);
+        sel.appendChild(o);
+      });
+      setSelectByValue(sel, selectedKey);
+    } catch(e){ console.warn('[Dept] PricingCategory dropdown:', e.message); }
+  }
+
+  /* ── Update status strip ────────────────────────────── */
+  function updateStatusStrip(d){
+    const strip = qs('.status-strip');
+    if(!strip) return;
+    strip.innerHTML = '';
+
+    // Active chip
+    const activeChip = document.createElement('div');
+    activeChip.className = 'ss-chip ' + (d.bActive ? 'ss-active' : 'ss-warn');
+    activeChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> ' + (d.bActive ? 'Active' : 'Inactive');
+    strip.appendChild(activeChip);
+
+    // Sales rep
+    if(d.sSalesRepName || d.sSalesRep){
+      const c = document.createElement('div');
+      c.className = 'ss-chip ss-neutral';
+      c.innerHTML = '<span class="ss-label">Rep</span> <span class="ss-val">'+(d.sSalesRepName||d.sSalesRep||'')+'</span>';
+      strip.appendChild(c);
+    }
+    // Pricing
+    if(d.sPricingCategoryDesc || d.sPricingCategory){
+      const c = document.createElement('div');
+      c.className = 'ss-chip ss-neutral';
+      c.innerHTML = '<span class="ss-label">Pricing</span> <span class="ss-val">'+(d.sPricingCategoryDesc||d.sPricingCategory||'')+'</span>';
+      strip.appendChild(c);
+    }
+    // Carrier
+    if(d.sShippingCarrier){
+      const c = document.createElement('div');
+      c.className = 'ss-chip ss-neutral';
+      c.innerHTML = '<span class="ss-label">Carrier</span> <span class="ss-val">'+d.sShippingCarrier+'</span>';
+      strip.appendChild(c);
+    }
+    // Spacer + modified
+    const spacer = document.createElement('div');
+    spacer.style.flex = '1';
+    strip.appendChild(spacer);
+    if(d.dtModified || d.dtLastModified){
+      const m = document.createElement('span');
+      m.style.cssText = 'font-size:10px;color:var(--muted)';
+      m.textContent = 'Modified ' + fmtDate(d.dtModified||d.dtLastModified) + (d.sModifiedBy ? ' by '+d.sModifiedBy : '');
+      strip.appendChild(m);
+    }
+  }
+
+  /* ── Tab badge updater ──────────────────────────────── */
+  function setTabCount(tabName, count){
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t=>{
+      const onclick = t.getAttribute('onclick') || '';
+      if(onclick.includes("'"+tabName+"'")){
+        let badge = t.querySelector('.tab-count');
+        if(count > 0){
+          if(!badge){ badge = document.createElement('span'); badge.className='tab-count'; t.appendChild(badge); }
+          badge.textContent = count;
+        } else if(badge){ badge.remove(); }
+      }
+    });
+  }
+
+  /* ═══ TAB DATA LOADERS ═══════════════════════════════ */
+
+  /* ── Scopes tab ─────────────────────────────────────── */
+  async function loadScopes(deptKey){
+    try {
+      const scopes = await API.getAllScopes(deptKey);
+      if(!Array.isArray(scopes)) return;
+      setTabCount('scopes', scopes.length);
+      const tbody = $('tbodyScopes');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      $('scopesSummary').textContent = scopes.length + ' instruments';
+      scopes.forEach(s=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+(s.sScopeTypeDesc||s.sModelDescription||'')+'</td>'+
+          '<td style="color:var(--blue);font-weight:600;cursor:pointer">'+(s.sSerialNumber||'')+'</td>'+
+          '<td>'+(s.sInstrumentType||'')+'</td>'+
+          '<td style="color:var(--muted)">'+(s.lAvgDailyUses||'N/A')+'</td>'+
+          '<td>'+(s.sContractName ? '<span style="color:#92400E;font-weight:600">'+s.sContractName+'</span>' : '')+'</td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e){ console.warn('[Dept] Scopes:', e.message); }
+  }
+
+  /* ── GPOs tab ───────────────────────────────────────── */
+  async function loadGPOs(deptKey){
+    try {
+      const gpos = await API.getDepartmentGPOList(deptKey);
+      if(!Array.isArray(gpos)) return;
+      setTabCount('gpos', gpos.length);
+      const tbody = $('tbodyGPOs');
+      if(!tbody) return;
+      if(gpos.length === 0){
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><div>No GPO\'s on record</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      gpos.forEach(g=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+(g.sGPO||g.sGPOName||'')+'</td>'+
+          '<td>'+(fmtDate(g.dtEffectiveDate)||'')+'</td>'+
+          '<td>'+(fmtDate(g.dtEndDate)||'')+'</td>'+
+          '<td>'+(g.sGPOID||'')+'</td>'+
+          '<td>'+(g.sGLN||'')+'</td>'+
+          '<td>'+(g.sReportingGroup||'')+'</td>'+
+          '<td>'+(g.sCompany||'')+'</td>'+
+          '<td><button class="edit-btn">Edit</button></td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e){ console.warn('[Dept] GPOs:', e.message); }
+  }
+
+  /* ── Scope Types shuttle ────────────────────────────── */
+  async function loadScopeTypes(deptKey){
+    try {
+      const [assigned, available] = await Promise.all([
+        API.getDepartmentScopeTypes(deptKey),
+        API.getAvailableDepartmentScopeTypes(deptKey)
+      ]);
+
+      // Assigned
+      const aArr = Array.isArray(assigned) ? assigned : [];
+      setTabCount('scopetypes', aArr.length);
+      $('scopeTypesAssignedCount').textContent = '('+aArr.length+')';
+      const aBody = $('scopeTypesAssigned');
+      aBody.innerHTML = '';
+      aArr.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'shuttle-row';
+        row.innerHTML = '<span>'+(s.sScopeTypeDesc||s.sScopeTypeName||'')+'</span><button class="shuttle-remove" title="Remove" data-key="'+s.lScopeTypeKey+'">'+removeIcon+'</button>';
+        aBody.appendChild(row);
+      });
+
+      // Available
+      const bArr = Array.isArray(available) ? available : [];
+      const bBody = $('scopeTypesAvailable');
+      bBody.innerHTML = '';
+      bArr.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'shuttle-row';
+        row.innerHTML = '<span>'+(s.sScopeTypeDesc||s.sScopeTypeName||'')+'</span><button class="shuttle-add" title="Add" data-key="'+s.lScopeTypeKey+'">+</button>';
+        bBody.appendChild(row);
+      });
+
+      // Search filter
+      const search = $('scopeTypesSearch');
+      if(search){
+        search.oninput = function(){
+          const q = this.value.toLowerCase();
+          bBody.querySelectorAll('.shuttle-row').forEach(r=>{
+            r.style.display = r.querySelector('span').textContent.toLowerCase().includes(q) ? '' : 'none';
+          });
+        };
+      }
+    } catch(e){ console.warn('[Dept] ScopeTypes:', e.message); }
+  }
+
+  /* ── Sub Groups shuttle ─────────────────────────────── */
+  async function loadSubGroups(deptKey){
+    try {
+      const [assigned, available] = await Promise.all([
+        API.getSubGroups(deptKey),
+        API.getSubGroupsAvailable(deptKey)
+      ]);
+
+      const aArr = Array.isArray(assigned) ? assigned : [];
+      setTabCount('subgroups', aArr.length);
+      $('subGroupsAssignedCount').textContent = '('+aArr.length+')';
+      const aBody = $('subGroupsAssigned');
+      aBody.innerHTML = '';
+      aArr.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'shuttle-row';
+        row.innerHTML = '<span>'+(s.sSubGroupName||s.sSubGroupDesc||'')+'</span><button class="shuttle-remove" title="Remove" data-key="'+s.lSubGroupKey+'">'+removeIcon+'</button>';
+        aBody.appendChild(row);
+      });
+
+      const bArr = Array.isArray(available) ? available : [];
+      const bBody = $('subGroupsAvailable');
+      bBody.innerHTML = '';
+      bArr.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'shuttle-row';
+        row.innerHTML = '<span>'+(s.sSubGroupName||s.sSubGroupDesc||'')+'</span><button class="shuttle-add" title="Add" data-key="'+s.lSubGroupKey+'">+</button>';
+        bBody.appendChild(row);
+      });
+
+      const search = $('subGroupsSearch');
+      if(search){
+        search.oninput = function(){
+          const q = this.value.toLowerCase();
+          bBody.querySelectorAll('.shuttle-row').forEach(r=>{
+            r.style.display = r.querySelector('span').textContent.toLowerCase().includes(q) ? '' : 'none';
+          });
+        };
+      }
+    } catch(e){ console.warn('[Dept] SubGroups:', e.message); }
+  }
+
+  /* ── Contacts tab ───────────────────────────────────── */
+  async function loadContacts(deptKey){
+    try {
+      const contacts = await API.getContactsByDepartment(deptKey);
+      if(!Array.isArray(contacts)) return;
+      setTabCount('contacts', contacts.length);
+      const tbody = $('tbodyContacts');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      // Find billing contact for summary
+      const billing = contacts.find(c => c.bBillingContact);
+      const billSum = $('contactsBillingSummary');
+      if(billSum) billSum.innerHTML = billing
+        ? 'Billing: <strong style="color:var(--text)">'+(billing.sContactFirst||'')+' '+(billing.sContactLast||'')+'</strong>'
+        : '';
+
+      contacts.forEach((c,idx)=>{
+        const name = ((c.sContactFirst||'')+' '+(c.sContactLast||'')).trim();
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td style="font-weight:600">'+name+'</td>'+
+          '<td>'+(c.sContactPhoneNumber||c.sPhone||'')+'</td>'+
+          '<td>'+(c.sContactFaxNumber||c.sFax||'')+'</td>'+
+          '<td>'+(c.sContactEmail||c.sEmail||'')+'</td>'+
+          '<td>'+(c.bBillingContact ? '<span class="badge b-active">Active</span>' : '')+'</td>'+
+          '<td>'+(c.bActive!==false ? '<span class="badge b-active">Active</span>' : '<span class="badge" style="color:var(--muted)">Inactive</span>')+'</td>'+
+          '<td style="display:flex;gap:6px"><button class="edit-btn" data-cidx="'+idx+'">Edit</button><button class="del-btn" data-ckey="'+(c.lContactKey||'')+'">Del</button></td>';
+        tbody.appendChild(tr);
+      });
+
+      // Wire edit/delete buttons
+      tbody.querySelectorAll('.edit-btn').forEach(btn=>{
+        btn.addEventListener('click', function(){
+          const cidx = parseInt(this.dataset.cidx);
+          openContactModal('edit', contacts[cidx]);
+        });
+      });
+      tbody.querySelectorAll('.del-btn').forEach(btn=>{
+        btn.addEventListener('click', async function(){
+          const ckey = this.dataset.ckey;
+          if(!ckey || !confirm('Delete this contact?')) return;
+          try {
+            // API may not have deleteContact — try using update with inactive
+            await API.updateContact({ plContactKey: parseInt(ckey), pbActive: false });
+            if(currentDeptKey) await loadContacts(currentDeptKey);
+          } catch(err){ console.error('[Dept] Delete contact:', err.message); alert('Could not delete contact.'); }
+        });
+      });
+    } catch(e){ console.warn('[Dept] Contacts:', e.message); }
+  }
+
+  /* ── Documents tab ──────────────────────────────────── */
+  async function loadDocuments(deptKey){
+    try {
+      const docs = await API.getDocuments(deptKey);
+      if(!Array.isArray(docs)) return;
+      setTabCount('documents', docs.length);
+      const tbody = $('tbodyDocuments');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      if(docs.length === 0){
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div>No documents on record</div></td></tr>';
+        return;
+      }
+      docs.forEach(d=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td style="color:var(--blue);font-weight:600">'+(d.sDocumentName||d.sFileName||'')+'</td>'+
+          '<td>'+fmtDate(d.dtUploadedDate||d.dtCreated)+'</td>'+
+          '<td>'+(d.sDocumentType||d.sDocumentCategoryDesc||'')+'</td>'+
+          '<td style="display:flex;gap:6px"><button class="edit-btn">View</button><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e){ console.warn('[Dept] Documents:', e.message); }
+  }
+
+  /* ── Model Max Charges tab ──────────────────────────── */
+  async function loadMaxCharges(deptKey){
+    try {
+      const charges = await API.getModelMaxCharges(deptKey);
+      if(!Array.isArray(charges)) return;
+      setTabCount('maxcharges', charges.length);
+      const tbody = $('tbodyMaxCharges');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      if(charges.length === 0){
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div>No max charges on record</div></td></tr>';
+        return;
+      }
+      charges.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+(c.sScopeTypeDesc||c.sModelDescription||'')+'</td>'+
+          '<td>'+(c.sInstrumentType||'')+'</td>'+
+          '<td>'+(c.sSize||'')+'</td>'+
+          '<td style="text-align:right;font-weight:700;color:var(--navy)">'+fmtMoney(c.dblMaxCharge||c.dblMaxCharges||0)+'</td>'+
+          '<td style="display:flex;gap:6px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e){ console.warn('[Dept] MaxCharges:', e.message); }
+  }
+
+  /* ═══ SAVE / CRUD OPERATIONS ═════════════════════════ */
+
+  /* ── Collect form data into API payload ──────────── */
+  function collectDepartmentPayload(){
+    return {
+      plDepartmentKey: currentDeptKey || 0,
+      plClientKey: parseInt($('selClient').value) || 0,
+      psDepartmentName: $('fDeptName').value || '',
+      pdtCustomerSince: $('fCustomerSince').value || null,
+      pbActive: $('fActive').checked,
+      plSalesRepKey: parseInt($('fSalesRep').value) || 0,
+      plPricingCategoryKey: parseInt($('fPricingCategory').value) || 0,
+      psShippingCarrier: $('fShippingCarrier').options[$('fShippingCarrier').selectedIndex]?.text || '',
+      psAdditionalCS: $('fAdditionalCS').options[$('fAdditionalCS').selectedIndex]?.text || '',
+      psNationalAccount: $('fNationalAcct').value || '',
+      psReportingGroup: $('fReportingGroup').options[$('fReportingGroup').selectedIndex]?.text || '',
+      pdblDefaultShipping: parseFloat($('fDefaultShipping').value) || 0,
+      pdblDiscount: parseFloat($('fDiscount').value) || 0,
+      pdblMarkup: parseFloat($('fMarkup').value) || 0,
+      pbAcquisitionsDept: $('fAcquisitions').checked,
+      pbShowConsumptionOnReq: $('fShowConsumption').checked,
+      pbEnforceScopeTypeFiltering: $('fEnforceScopeType').checked,
+      pbShowProductID: $('fShowProductID').checked,
+      pbShowUAOrNWT: $('fShowUAOrNWT').checked,
+      pbShowItemizedDescriptions: $('fShowItemizedDesc').checked,
+      pbOpenCreditMemo: $('fOpenCreditMemo').checked,
+      pbEmailNewRepairs: $('fEmailNewRepairs').checked,
+      pbMemberBoardOfAdvisors: $('fMemberBOA').checked,
+      pbTrackingRequired: $('fTrackingRequired').checked,
+      pbUpperChichester: $('fSvcLocUC').checked,
+      pbNashville: $('fSvcLocNash').checked,
+      // Profile
+      psCleaningSystem: $('fCleaningSystem').options[$('fCleaningSystem').selectedIndex]?.text || '',
+      psChemicalGermicide: $('fChemicalGermicide').options[$('fChemicalGermicide').selectedIndex]?.text || '',
+      psManufacturer: $('fManufacturer').options[$('fManufacturer').selectedIndex]?.text || '',
+      psCompetition: $('fCompetition').options[$('fCompetition').selectedIndex]?.text || '',
+      plProcedures: parseInt($('fProcedures').value) || 0,
+      plBedSize: parseInt($('fBedSize').value) || 0,
+      psDepartmentType: $('fDeptType').options[$('fDeptType').selectedIndex]?.text || '',
+      pmNotes: $('fNotes').value || ''
+    };
+  }
+
+  /* ── Save department ─────────────────────────────── */
+  async function saveDepartment(){
+    if(!currentDeptKey || isDemo) return;
+    showSaveStatus('Saving...', 'var(--amber)');
+    try {
+      const payload = collectDepartmentPayload();
+      await API.updateDepartment(payload);
+      const now = new Date();
+      showSaveStatus('Saved at ' + now.toLocaleTimeString(), 'var(--green)');
+    } catch(e){
+      console.error('[Dept] Save failed:', e.message);
+      showSaveStatus('Save failed', 'var(--red)');
+    }
+  }
+
+  /* ── Autosave: debounced on field change ─────────── */
+  function triggerAutosave(){
+    if(!currentDeptKey || isDemo) return;
+    showSaveStatus('Unsaved', 'var(--amber)');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveDepartment, 1500);
+  }
+
+  // Attach autosave to all form fields in main tab
+  function wireAutosave(){
+    const fields = document.querySelectorAll('#dtab-main input, #dtab-main select, #dtab-main textarea');
+    fields.forEach(f=>{
+      if(f.id === 'selClient' || f.id === 'selDept') return; // skip dropdowns
+      f.addEventListener('change', triggerAutosave);
+      if(f.tagName === 'INPUT' && f.type !== 'checkbox' && f.type !== 'date') f.addEventListener('input', triggerAutosave);
+      if(f.tagName === 'TEXTAREA') f.addEventListener('input', triggerAutosave);
+    });
+  }
+
+  /* ── New department ──────────────────────────────── */
+  async function createNewDepartment(){
+    const clientKey = parseInt($('selClient').value);
+    if(!clientKey){ alert('Please select a client first.'); return; }
+    const name = prompt('Enter new department name:');
+    if(!name || !name.trim()) return;
+    try {
+      const payload = {
+        plClientKey: clientKey,
+        psDepartmentName: name.trim(),
+        pbActive: true,
+        plServiceLocationKey: 1
+      };
+      const result = await API.addDepartment(payload);
+      console.log('[Dept] Created:', result);
+      // Reload departments for this client
+      await loadDepartments(clientKey);
+      // Select the new one if possible
+      const newKey = result?.lDepartmentKey;
+      if(newKey){
+        $('selDept').value = newKey;
+        await loadDepartmentDetail(newKey);
+      }
+    } catch(e){
+      console.error('[Dept] Create failed:', e.message);
+      alert('Could not create department: ' + e.message);
+    }
+  }
+
+  /* ── Delete department ───────────────────────────── */
+  async function confirmDeleteDepartment(){
+    if(!currentDeptKey || isDemo) return;
+    const confirmInput = document.querySelector('#deleteModal .inp');
+    const expectedName = $('fDeptName').value;
+    if(confirmInput && confirmInput.value !== expectedName){
+      alert('Please type the department name to confirm deletion.');
+      return;
+    }
+    try {
+      await API.deleteDepartment(currentDeptKey);
+      document.getElementById('deleteModal').classList.remove('open');
+      // Reload departments
+      const clientKey = $('selClient').value;
+      if(clientKey) await loadDepartments(clientKey);
+    } catch(e){
+      console.error('[Dept] Delete failed:', e.message);
+      alert('Could not delete department: ' + e.message);
+    }
+  }
+
+  /* ═══ SHUTTLE BUTTON WIRING ════════════════════════ */
+
+  // Scope Types — add/remove
+  document.addEventListener('click', async function(e){
+    // Scope Type add
+    const addBtn = e.target.closest('#scopeTypesAvailable .shuttle-add');
+    if(addBtn && currentDeptKey){
+      const key = addBtn.dataset.key;
+      try {
+        await API.addDepartmentScopeTypes({ plDepartmentKey: currentDeptKey, plScopeTypeKey: parseInt(key) });
+        await loadScopeTypes(currentDeptKey);
+      } catch(err){ console.error('[Dept] Add scope type:', err.message); }
+      return;
+    }
+    // Scope Type remove
+    const remBtn = e.target.closest('#scopeTypesAssigned .shuttle-remove');
+    if(remBtn && currentDeptKey){
+      const key = remBtn.dataset.key;
+      try {
+        await API.deleteDepartmentScopeTypes(key);
+        await loadScopeTypes(currentDeptKey);
+      } catch(err){ console.error('[Dept] Remove scope type:', err.message); }
+      return;
+    }
+    // Sub Group add
+    const sgAddBtn = e.target.closest('#subGroupsAvailable .shuttle-add');
+    if(sgAddBtn && currentDeptKey){
+      const key = sgAddBtn.dataset.key;
+      try {
+        await API.addDepartmentSubGroups({ plDepartmentKey: currentDeptKey, plSubGroupKey: parseInt(key) });
+        await loadSubGroups(currentDeptKey);
+      } catch(err){ console.error('[Dept] Add sub group:', err.message); }
+      return;
+    }
+    // Sub Group remove
+    const sgRemBtn = e.target.closest('#subGroupsAssigned .shuttle-remove');
+    if(sgRemBtn && currentDeptKey){
+      const key = sgRemBtn.dataset.key;
+      try {
+        await API.deleteDepartmentSubGroups(key);
+        await loadSubGroups(currentDeptKey);
+      } catch(err){ console.error('[Dept] Remove sub group:', err.message); }
+      return;
+    }
+  });
+
+  /* ═══ CONTACT MODAL WIRING ═════════════════════════ */
+  let editingContactKey = null;
+
+  // Override openContactModal to populate for edit
+  window.openContactModal = function(mode, contactData){
+    editingContactKey = null;
+    const title = document.getElementById('contact-modal-title');
+    const modal = document.getElementById('contactModal');
+    const inputs = modal.querySelectorAll('.inp');
+    const toggles = modal.querySelectorAll('.toggle input');
+
+    if(mode === 'edit' && contactData){
+      title.textContent = 'Edit Contact';
+      editingContactKey = contactData.lContactKey;
+      inputs[0].value = contactData.sContactFirst || '';
+      inputs[1].value = contactData.sContactLast || '';
+      inputs[2].value = contactData.sContactPhoneNumber || contactData.sPhone || '';
+      inputs[3].value = contactData.sContactFaxNumber || contactData.sFax || '';
+      inputs[4].value = contactData.sContactEmail || contactData.sEmail || '';
+      if(toggles[0]) toggles[0].checked = contactData.bActive !== false;
+      if(toggles[1]) toggles[1].checked = !!contactData.bBillingContact;
+    } else {
+      title.textContent = 'Add Contact';
+      inputs.forEach(i => i.value = '');
+      if(toggles[0]) toggles[0].checked = true;
+      if(toggles[1]) toggles[1].checked = false;
+    }
+    modal.classList.add('open');
+  };
+
+  /* ── Save contact from modal ─────────────────────── */
+  async function saveContact(){
+    const modal = document.getElementById('contactModal');
+    const inputs = modal.querySelectorAll('.inp');
+    const toggles = modal.querySelectorAll('.toggle input');
+    const payload = {
+      plDepartmentKey: currentDeptKey || 0,
+      plClientKey: parseInt($('selClient').value) || 0,
+      psContactFirst: inputs[0].value || '',
+      psContactLast: inputs[1].value || '',
+      psContactPhoneNumber: inputs[2].value || '',
+      psContactFaxNumber: inputs[3].value || '',
+      psContactEmail: inputs[4].value || '',
+      pbActive: toggles[0] ? toggles[0].checked : true,
+      pbBillingContact: toggles[1] ? toggles[1].checked : false
+    };
+    try {
+      if(editingContactKey){
+        payload.plContactKey = editingContactKey;
+        await API.updateContact(payload);
+      } else {
+        await API.addContact(payload);
+      }
+      modal.classList.remove('open');
+      if(currentDeptKey) await loadContacts(currentDeptKey);
+    } catch(e){
+      console.error('[Dept] Save contact failed:', e.message);
+      alert('Could not save contact: ' + e.message);
+    }
+  }
+
+  /* ═══ ADDRESSES TAB POPULATION ═════════════════════ */
+  function populateAddresses(d){
+    if(!d) return;
+    const addrBodies = document.querySelectorAll('#dtab-addresses .addr-body');
+    if(addrBodies.length < 2) return;
+
+    // Billing address fields
+    const bInputs = addrBodies[0].querySelectorAll('.inp');
+    if(bInputs.length >= 10){
+      bInputs[0].value = d.sBillingName1 || d.sBillToName1 || '';
+      bInputs[1].value = d.sBillingName2 || d.sBillToName2 || '';
+      bInputs[2].value = d.sBillingAddress1 || d.sBillToAddress1 || '';
+      bInputs[3].value = d.sBillingAddress2 || d.sBillToAddress2 || '';
+      bInputs[4].value = d.sBillingZip || d.sBillToZip || '';
+      bInputs[5].value = d.sBillingCity || d.sBillToCity || '';
+      setSelectByText(bInputs[6], d.sBillingState || d.sBillToState || '');
+      bInputs[7].value = d.sBillingEmailName || '';
+      bInputs[8].value = d.sBillingEmail || d.sBillToEmail || '';
+      bInputs[9].value = d.sBillingPhone || d.sBillToPhone || '';
+      if(bInputs[10]) bInputs[10].value = d.sBillingFax || d.sBillToFax || '';
+    }
+
+    // Shipping address fields
+    const sInputs = addrBodies[1].querySelectorAll('.inp');
+    if(sInputs.length >= 8){
+      sInputs[0].value = d.sShippingName1 || d.sShipToName1 || '';
+      sInputs[1].value = d.sShippingName2 || d.sShipToName2 || '';
+      sInputs[2].value = d.sShippingAddress1 || d.sShipToAddress1 || '';
+      sInputs[3].value = d.sShippingAddress2 || d.sShipToAddress2 || '';
+      sInputs[4].value = d.sShippingZip || d.sShipToZip || '';
+      sInputs[5].value = d.sShippingCity || d.sShipToCity || '';
+      setSelectByText(sInputs[6], d.sShippingState || d.sShipToState || '');
+      sInputs[7].value = d.sShippingPhone || d.sShipToPhone || '';
+      if(sInputs[8]) sInputs[8].value = d.sShippingFax || d.sShipToFax || '';
+    }
+  }
+
+  /* ═══ EVENT WIRING ═══════════════════════════════════ */
+
+  $('selClient').addEventListener('change', function(){
+    const key = this.value;
+    if(!key) return;
+    loadDepartments(key);
+  });
+
+  $('selDept').addEventListener('change', function(){
+    const key = this.value;
+    if(!key) return;
+    loadDepartmentDetail(key);
+  });
+
+  // Active toggle label sync
+  if($('fActive')){
+    $('fActive').addEventListener('change', function(){
+      const lbl = $('fActiveLabel');
+      if(lbl){
+        lbl.textContent = this.checked ? 'Yes' : 'No';
+        lbl.style.color = this.checked ? 'var(--green)' : 'var(--red)';
+      }
+      triggerAutosave();
+    });
+  }
+
+  // Wire autosave to form fields
+  wireAutosave();
+
+  // Wire toolbar buttons
+  const btnNew = $('btnNewDept');
+  if(btnNew) btnNew.addEventListener('click', createNewDepartment);
+
+  const btnSave = $('btnSaveDept');
+  if(btnSave) btnSave.addEventListener('click', saveDepartment);
+
+  const btnOpenDel = $('btnOpenDelete');
+  if(btnOpenDel) btnOpenDel.addEventListener('click', function(){
+    const deptName = $('fDeptName').value || 'this department';
+    const clientName = $('selClient').options[$('selClient').selectedIndex]?.text || '';
+    const txt = $('deleteConfirmText');
+    if(txt) txt.innerHTML = 'Are you sure you want to permanently delete <strong>'+deptName+'</strong>' + (clientName ? ' from <strong>'+clientName+'</strong>' : '') + '? All associated contacts, documents, and charge overrides will also be removed.';
+    const confirmInp = document.querySelector('#deleteModal .inp');
+    if(confirmInp){ confirmInp.placeholder = deptName; confirmInp.value = ''; }
+    document.getElementById('deleteModal').classList.add('open');
+  });
+
+  const btnDel = $('btnConfirmDelete');
+  if(btnDel) btnDel.addEventListener('click', confirmDeleteDepartment);
+
+  const btnSaveContact = $('btnSaveContact');
+  if(btnSaveContact) btnSaveContact.addEventListener('click', saveContact);
+
+  // Ctrl+S shortcut
+  document.addEventListener('keydown', function(e){
+    if((e.ctrlKey || e.metaKey) && e.key === 's'){
+      e.preventDefault();
+      saveDepartment();
+    }
+  });
+
+  /* ═══ INIT ═══════════════════════════════════════════ */
+  try {
+    await loadClients();
+    // If clients loaded, auto-select first client
+    const sel = $('selClient');
+    if(sel.options.length > 1 && !isDemo){
+      sel.selectedIndex = 1;
+      await loadDepartments(sel.value);
+      showLiveBadge();
+    }
+  } catch(e){
+    console.warn('[Dept] Init failed, keeping demo HTML:', e.message);
+    showDemoBadge();
+  }
+
+})();
 </script>
 </body>
 </html>

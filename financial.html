@@ -126,62 +126,61 @@
     <div class="page-body">
       <div class="breadcrumb"><span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Financial</span></div>
 
+      <!-- DATA BADGE -->
+      <div id="dataBadge" style="display:none;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;position:fixed;top:72px;right:24px;z-index:99"></div>
+
       <!-- SUBNAV -->
-      <div class="subnav">
-        <div class="subnav-tab active">Outstanding Invoices</div>
-        <div class="subnav-tab">Drafts</div>
-        <div class="subnav-tab">Clients on Hold</div>
-        <div class="subnav-tab">Revenue Distribution</div>
-        <div class="subnav-tab">GL Accounts</div>
+      <div class="subnav" id="subnav">
+        <div class="subnav-tab active" data-tab="outstanding">Outstanding Invoices</div>
+        <div class="subnav-tab" data-tab="drafts">Drafts</div>
+        <div class="subnav-tab" data-tab="hold">Clients on Hold</div>
+        <div class="subnav-tab" data-tab="payments">Invoice Payments</div>
+        <div class="subnav-tab" data-tab="gl">GL Accounts</div>
       </div>
 
       <!-- STAT CARDS -->
-      <div class="stat-row">
+      <div class="stat-row" id="statRow">
         <div class="stat-card">
           <div class="lbl">Total A/R</div>
-          <div class="val" style="color:var(--navy)">$29,200</div>
+          <div class="val" id="statTotalAR" style="color:var(--navy)">—</div>
           <div class="sub">Open invoices</div>
         </div>
         <div class="stat-card">
           <div class="lbl">Overdue</div>
-          <div class="val" style="color:var(--red)">$11,050</div>
+          <div class="val" id="statOverdue" style="color:var(--red)">—</div>
           <div class="sub">Past due date</div>
         </div>
         <div class="stat-card">
           <div class="lbl">Avg Aging</div>
-          <div class="val" style="color:var(--amber)">28 days</div>
+          <div class="val" id="statAvgAging" style="color:var(--amber)">—</div>
           <div class="sub">Open invoices</div>
         </div>
         <div class="stat-card">
           <div class="lbl">Paid MTD</div>
-          <div class="val" style="color:var(--green)">$13,580</div>
-          <div class="sub">Feb 2026</div>
+          <div class="val" id="statPaidMTD" style="color:var(--green)">—</div>
+          <div class="sub" id="statPaidPeriod">This month</div>
         </div>
       </div>
 
       <!-- FILTER -->
-      <div class="filter-row">
+      <div class="filter-row" id="filterRow">
         <div class="filter-left">
-          <input class="inp" placeholder="Search invoices…" style="width:260px"/>
-          <select class="inp" style="width:150px;cursor:pointer">
+          <input class="inp" id="filterSearch" placeholder="Search invoices…" style="width:260px"/>
+          <select class="inp" id="filterStatus" style="width:150px;cursor:pointer">
             <option value="">All Statuses</option>
             <option>Unpaid</option><option>Partial</option><option>Overdue</option><option>Paid</option>
           </select>
-          <select class="inp" style="width:180px;cursor:pointer">
+          <select class="inp" id="filterClient" style="width:180px;cursor:pointer">
             <option value="">All Clients</option>
-            <option>88th Medical Group</option>
-            <option>Tift Regional Medical Center</option>
-            <option>Nashville General Hospital</option>
-            <option>West Side GI Center</option>
           </select>
         </div>
-        <button class="btn btn-navy">+ New Invoice</button>
+        <button class="btn btn-navy" id="btnNewInvoice">+ New Invoice</button>
       </div>
 
       <!-- TABLE -->
       <div class="tbl-wrap">
         <table>
-          <thead>
+          <thead id="dataHead">
             <tr>
               <th>Invoice #</th>
               <th>Client</th>
@@ -193,82 +192,337 @@
               <th style="width:80px"></th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td style="color:var(--blue);font-weight:600">INV-2026-0284</td>
-              <td>88th Medical Group</td>
-              <td style="text-align:right;font-weight:700;color:var(--navy)">$2,840.00</td>
-              <td style="color:var(--muted)">02/25/2026</td>
-              <td>03/25/2026</td>
-              <td style="text-align:right;color:var(--muted)">9d</td>
-              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr>
-              <td style="color:var(--blue);font-weight:600">INV-2026-0271</td>
-              <td>Tift Regional Medical Center</td>
-              <td style="text-align:right;font-weight:700;color:var(--navy)">$5,120.00</td>
-              <td style="color:var(--muted)">02/18/2026</td>
-              <td>03/18/2026</td>
-              <td style="text-align:right;color:var(--muted)">16d</td>
-              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr>
-              <td style="color:var(--blue);font-weight:600">INV-2026-0258</td>
-              <td>Nashville General Hospital</td>
-              <td style="text-align:right;font-weight:700;color:var(--navy)">$3,650.00</td>
-              <td style="color:var(--muted)">02/10/2026</td>
-              <td>03/10/2026</td>
-              <td style="text-align:right;color:var(--amber);font-weight:600">24d</td>
-              <td><span class="badge" style="background:#FFFBEB;color:var(--amber)">Partial</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr style="background:#FEF9F9">
-              <td style="color:var(--blue);font-weight:600">INV-2026-0241</td>
-              <td>West Side GI Center</td>
-              <td style="text-align:right;font-weight:700;color:var(--red)">$9,300.00</td>
-              <td style="color:var(--muted)">01/31/2026</td>
-              <td style="color:var(--red);font-weight:600">03/01/2026</td>
-              <td style="text-align:right;color:var(--red);font-weight:700">34d</td>
-              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr>
-              <td style="color:var(--blue);font-weight:600">INV-2026-0229</td>
-              <td>Northside Hospital</td>
-              <td style="text-align:right;font-weight:700;color:var(--green)">$4,480.00</td>
-              <td style="color:var(--muted)">01/22/2026</td>
-              <td style="color:var(--muted)">02/21/2026</td>
-              <td style="text-align:right;color:var(--muted)">43d</td>
-              <td><span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr>
-              <td style="color:var(--blue);font-weight:600">INV-2026-0215</td>
-              <td>Metro Health Hospital</td>
-              <td style="text-align:right;font-weight:700;color:var(--green)">$2,100.00</td>
-              <td style="color:var(--muted)">01/15/2026</td>
-              <td style="color:var(--muted)">02/14/2026</td>
-              <td style="text-align:right;color:var(--muted)">50d</td>
-              <td><span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-            <tr style="background:#FEF9F9">
-              <td style="color:var(--blue);font-weight:600">INV-2026-0198</td>
-              <td>Shreveport Endoscopy Center</td>
-              <td style="text-align:right;font-weight:700;color:var(--red)">$1,750.00</td>
-              <td style="color:var(--muted)">01/08/2026</td>
-              <td style="color:var(--red);font-weight:600">02/07/2026</td>
-              <td style="text-align:right;color:var(--red);font-weight:700">57d</td>
-              <td><span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span></td>
-              <td style="text-align:right"><button class="edit-btn">View</button></td>
-            </tr>
-          </tbody>
+          <tbody id="dataBody"></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
+<script src="api.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ── Auth guard ──────────────────────────────────────────
+  if (!API.requireAuth()) throw new Error('redirect');
+
+  // ── State ───────────────────────────────────────────────
+  let activeTab = 'outstanding';
+  let rows = [];
+  let isLive = false;
+  let searchTimer = null;
+
+  // ── DOM refs ────────────────────────────────────────────
+  const body      = document.getElementById('dataBody');
+  const head      = document.getElementById('dataHead');
+  const badge     = document.getElementById('dataBadge');
+  const statAR    = document.getElementById('statTotalAR');
+  const statOver  = document.getElementById('statOverdue');
+  const statAging = document.getElementById('statAvgAging');
+  const statPaid  = document.getElementById('statPaidMTD');
+  const statPeriod= document.getElementById('statPaidPeriod');
+  const filterSearch = document.getElementById('filterSearch');
+  const filterStatus = document.getElementById('filterStatus');
+  const filterClient = document.getElementById('filterClient');
+  const filterRow    = document.getElementById('filterRow');
+  const statRow      = document.getElementById('statRow');
+
+  // ── Data badge ──────────────────────────────────────────
+  function showBadge(live) {
+    badge.style.display = 'inline-block';
+    if (live) { badge.textContent = 'Live Data'; badge.style.background = '#F0FDF4'; badge.style.color = '#16A34A'; badge.style.border = '1px solid #BBF7D0'; }
+    else      { badge.textContent = 'Demo Data'; badge.style.background = '#FFFBEB'; badge.style.color = '#92400E'; badge.style.border = '1px solid #FDE68A'; }
+  }
+
+  // ── Helpers ─────────────────────────────────────────────
+  function fmt$(v) { return '$' + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }); }
+  function agingDays(d) { if (!d) return 0; const dt = new Date(d); return isNaN(dt) ? 0 : Math.max(0, Math.round((Date.now() - dt) / 86400000)); }
+  function esc(s) { const el = document.createElement('span'); el.textContent = s || ''; return el.innerHTML; }
+
+  function statusBadge(st) {
+    const s = (st || '').toLowerCase();
+    if (s.includes('paid') && !s.includes('un'))     return '<span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span>';
+    if (s.includes('partial'))                        return '<span class="badge" style="background:#FFFBEB;color:var(--amber)">Partial</span>';
+    if (s.includes('overdue') || s.includes('past'))  return '<span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>';
+    if (s.includes('draft'))                          return '<span class="badge" style="background:#F0F4FF;color:var(--blue)">Draft</span>';
+    if (s.includes('hold'))                           return '<span class="badge" style="background:#FEF2F2;color:var(--red)">On Hold</span>';
+    return '<span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span>';
+  }
+
+  function agingColor(days) {
+    if (days > 30) return 'color:var(--red);font-weight:700';
+    if (days > 14) return 'color:var(--amber);font-weight:600';
+    return 'color:var(--muted)';
+  }
+
+  function amtColor(status) {
+    const s = (status || '').toLowerCase();
+    if (s.includes('paid') && !s.includes('un')) return 'var(--green)';
+    if (s.includes('overdue') || s.includes('past')) return 'var(--red)';
+    return 'var(--navy)';
+  }
+
+  // ── Unwrap API response ─────────────────────────────────
+  function unwrap(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.dataSource)) return data.dataSource;
+    if (data && Array.isArray(data.data)) return data.data;
+    return [];
+  }
+
+  // ── Tab headers ─────────────────────────────────────────
+  const HEADERS = {
+    outstanding: '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Issued</th><th>Due Date</th><th style="text-align:right">Aging</th><th>Status</th><th style="width:80px"></th></tr>',
+    drafts:      '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Created</th><th>Status</th><th style="width:80px"></th></tr>',
+    hold:        '<tr><th>Client</th><th>Department</th><th>On Hold Since</th><th>Reason</th><th style="width:100px"></th></tr>',
+    payments:    '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment Date</th><th>Method</th><th style="width:80px"></th></tr>',
+    gl:          '<tr><th>Account #</th><th>Account Name</th><th>Type</th><th>Description</th><th style="width:80px"></th></tr>'
+  };
+
+  // ── Demo data sets ──────────────────────────────────────
+  const DEMO = {
+    outstanding: [
+      { sInvoiceNumber:'INV-2026-0284', sClientName1:'88th Medical Group', dblAmount:2840, dtIssuedDate:'2026-02-25', dtDueDate:'2026-03-25', sStatus:'Unpaid', lInvoiceKey:284 },
+      { sInvoiceNumber:'INV-2026-0271', sClientName1:'Tift Regional Medical Center', dblAmount:5120, dtIssuedDate:'2026-02-18', dtDueDate:'2026-03-18', sStatus:'Unpaid', lInvoiceKey:271 },
+      { sInvoiceNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblAmount:3650, dtIssuedDate:'2026-02-10', dtDueDate:'2026-03-10', sStatus:'Partial', lInvoiceKey:258 },
+      { sInvoiceNumber:'INV-2026-0241', sClientName1:'West Side GI Center', dblAmount:9300, dtIssuedDate:'2026-01-31', dtDueDate:'2026-03-01', sStatus:'Overdue', lInvoiceKey:241 },
+      { sInvoiceNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblAmount:4480, dtIssuedDate:'2026-01-22', dtDueDate:'2026-02-21', sStatus:'Paid', lInvoiceKey:229 },
+      { sInvoiceNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblAmount:2100, dtIssuedDate:'2026-01-15', dtDueDate:'2026-02-14', sStatus:'Paid', lInvoiceKey:215 },
+      { sInvoiceNumber:'INV-2026-0198', sClientName1:'Shreveport Endoscopy Center', dblAmount:1750, dtIssuedDate:'2026-01-08', dtDueDate:'2026-02-07', sStatus:'Overdue', lInvoiceKey:198 }
+    ],
+    drafts: [
+      { sInvoiceNumber:'DRF-2026-0050', sClientName1:'88th Medical Group', dblAmount:1200, dtCreatedDate:'2026-03-05', sStatus:'Draft', lInvoiceKey:50 },
+      { sInvoiceNumber:'DRF-2026-0049', sClientName1:'Nashville General Hospital', dblAmount:3400, dtCreatedDate:'2026-03-02', sStatus:'Draft', lInvoiceKey:49 }
+    ],
+    hold: [
+      { sClientName1:'West Side GI Center', sDepartmentName:'Endoscopy', dtOnHoldDate:'2026-02-15', sReason:'Past due > 60 days', lClientKey:41 },
+      { sClientName1:'Shreveport Endoscopy Center', sDepartmentName:'GI Lab', dtOnHoldDate:'2026-01-20', sReason:'Billing dispute', lClientKey:55 }
+    ],
+    payments: [
+      { sInvoiceNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblAmount:4480, dtPaymentDate:'2026-02-20', sPaymentMethod:'ACH', lInvoicePaymentID:10 },
+      { sInvoiceNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblAmount:2100, dtPaymentDate:'2026-02-13', sPaymentMethod:'Check', lInvoicePaymentID:11 },
+      { sInvoiceNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblAmount:2000, dtPaymentDate:'2026-03-01', sPaymentMethod:'ACH', lInvoicePaymentID:12 }
+    ],
+    gl: [
+      { sAccountNumber:'1000', sAccountName:'Cash', sType:'Asset', sDescription:'Operating cash account', lGLAccountKey:1 },
+      { sAccountNumber:'1200', sAccountName:'Accounts Receivable', sType:'Asset', sDescription:'Trade receivables', lGLAccountKey:2 },
+      { sAccountNumber:'4000', sAccountName:'Repair Revenue', sType:'Revenue', sDescription:'Income from repair services', lGLAccountKey:3 },
+      { sAccountNumber:'4100', sAccountName:'Product Sales Revenue', sType:'Revenue', sDescription:'Income from product sales', lGLAccountKey:4 },
+      { sAccountNumber:'5000', sAccountName:'Cost of Goods Sold', sType:'Expense', sDescription:'Parts and materials', lGLAccountKey:5 }
+    ]
+  };
+
+  // ── Load data per tab ───────────────────────────────────
+  async function loadTab(tab) {
+    activeTab = tab;
+    head.innerHTML = HEADERS[tab] || HEADERS.outstanding;
+
+    // Show/hide filters and stats based on tab
+    const showFilters = (tab === 'outstanding' || tab === 'drafts' || tab === 'payments');
+    filterRow.style.display = showFilters ? '' : 'none';
+    statRow.style.display = (tab === 'outstanding') ? '' : 'none';
+
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
+
+    try {
+      let raw;
+      const pg = { Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} };
+      switch (tab) {
+        case 'outstanding': raw = await API.getOutstandingInvoices(pg); break;
+        case 'drafts':      raw = await API.getDraftInvoices(pg); break;
+        case 'hold':        raw = await API.getClientsOnHold(pg); break;
+        case 'payments':    raw = await API.getInvoicePayments(pg); break;
+        case 'gl':          raw = await API.getGLAccounts(); break;
+      }
+      rows = unwrap(raw);
+      isLive = true;
+      showBadge(true);
+    } catch (e) {
+      console.warn('[TSI Financial] API unavailable, using demo data:', e.message);
+      rows = DEMO[tab] || [];
+      isLive = false;
+      showBadge(false);
+    }
+
+    if (tab === 'outstanding') updateStats();
+    populateClientFilter();
+    renderRows();
+  }
+
+  // ── Update stat cards ───────────────────────────────────
+  function updateStats() {
+    const open = rows.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
+    const overdue = rows.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
+    const paid = rows.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s.includes('paid') && !s.includes('un'); });
+
+    const totalAR = open.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
+    const totalOverdue = overdue.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
+    const totalPaid = paid.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
+
+    let totalAgingDays = 0, agingCount = 0;
+    open.forEach(r => {
+      const d = agingDays(r.dtIssuedDate || r.dtInvoiceDate);
+      if (d > 0) { totalAgingDays += d; agingCount++; }
+    });
+
+    statAR.textContent = fmt$(totalAR);
+    statOver.textContent = fmt$(totalOverdue);
+    statAging.textContent = agingCount ? Math.round(totalAgingDays / agingCount) + ' days' : '0 days';
+    statPaid.textContent = fmt$(totalPaid);
+
+    const now = new Date();
+    statPeriod.textContent = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+
+  // ── Populate client dropdown ────────────────────────────
+  function populateClientFilter() {
+    const clients = [...new Set(rows.map(r => r.sClientName1 || r.sClientName || '').filter(Boolean))].sort();
+    filterClient.innerHTML = '<option value="">All Clients</option>' + clients.map(c => '<option>' + esc(c) + '</option>').join('');
+  }
+
+  // ── Filter logic ────────────────────────────────────────
+  function getFiltered() {
+    const q = (filterSearch.value || '').toLowerCase();
+    const st = (filterStatus.value || '').toLowerCase();
+    const cl = filterClient.value || '';
+    return rows.filter(r => {
+      const name = (r.sClientName1 || r.sClientName || '').toLowerCase();
+      const inv = (r.sInvoiceNumber || r.sAccountNumber || r.sAccountName || '').toLowerCase();
+      const status = (r.sStatus || '').toLowerCase();
+      if (q && !name.includes(q) && !inv.includes(q)) return false;
+      if (st && !status.includes(st)) return false;
+      if (cl && (r.sClientName1 || r.sClientName || '') !== cl) return false;
+      return true;
+    });
+  }
+
+  // ── Render rows ─────────────────────────────────────────
+  function renderRows() {
+    const data = getFiltered();
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+      return;
+    }
+
+    switch (activeTab) {
+      case 'outstanding': renderOutstanding(data); break;
+      case 'drafts':      renderDrafts(data); break;
+      case 'hold':        renderHold(data); break;
+      case 'payments':    renderPayments(data); break;
+      case 'gl':          renderGL(data); break;
+    }
+  }
+
+  function renderOutstanding(data) {
+    body.innerHTML = data.map(r => {
+      const days = agingDays(r.dtIssuedDate || r.dtInvoiceDate);
+      const st = r.sStatus || 'Unpaid';
+      const isOverdue = st.toLowerCase().includes('overdue');
+      return '<tr' + (isOverdue ? ' style="background:#FEF9F9"' : '') + '>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber) + '</td>' +
+        '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:' + amtColor(st) + '">' + fmt$(r.dblAmount || r.dblInvoiceAmount) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtIssuedDate || r.dtInvoiceDate) + '</td>' +
+        '<td' + (isOverdue ? ' style="color:var(--red);font-weight:600"' : '') + '>' + fmtDate(r.dtDueDate) + '</td>' +
+        '<td style="text-align:right;' + agingColor(days) + '">' + days + 'd</td>' +
+        '<td>' + statusBadge(st) + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="viewInvoice(' + (r.lInvoiceKey || 0) + ')">View</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderDrafts(data) {
+    body.innerHTML = data.map(r => {
+      return '<tr>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber) + '</td>' +
+        '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--navy)">' + fmt$(r.dblAmount || r.dblInvoiceAmount) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtCreatedDate || r.dtIssuedDate) + '</td>' +
+        '<td>' + statusBadge('Draft') + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="viewInvoice(' + (r.lInvoiceKey || 0) + ')">Edit</button>' +
+        ' <button class="edit-btn" style="background:#FEF2F2;color:var(--red)" onclick="deleteDraft(' + (r.lInvoiceKey || 0) + ')">Del</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderHold(data) {
+    body.innerHTML = data.map(r => {
+      return '<tr>' +
+        '<td style="font-weight:600">' + esc(r.sClientName1 || r.sClientName) + '</td>' +
+        '<td>' + esc(r.sDepartmentName || '') + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtOnHoldDate || r.dtHoldDate) + '</td>' +
+        '<td>' + esc(r.sReason || r.sHoldReason || '') + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="releaseHold(' + (r.lClientKey || 0) + ')">Release</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderPayments(data) {
+    body.innerHTML = data.map(r => {
+      return '<tr>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber) + '</td>' +
+        '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--green)">' + fmt$(r.dblAmount || r.dblPaymentAmount) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtPaymentDate) + '</td>' +
+        '<td>' + esc(r.sPaymentMethod || r.sMethod || '') + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="viewInvoice(' + (r.lInvoiceKey || 0) + ')">View</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderGL(data) {
+    body.innerHTML = data.map(r => {
+      return '<tr>' +
+        '<td style="font-weight:600">' + esc(r.sAccountNumber || r.sGLAccountNumber || '') + '</td>' +
+        '<td>' + esc(r.sAccountName || r.sGLAccountName || '') + '</td>' +
+        '<td>' + esc(r.sType || r.sAccountType || '') + '</td>' +
+        '<td style="color:var(--muted)">' + esc(r.sDescription || '') + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="editGL(' + (r.lGLAccountKey || 0) + ')">Edit</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ── Global action stubs ─────────────────────────────────
+  window.viewInvoice = function(key) {
+    console.log('[TSI Financial] View invoice:', key);
+    // TODO: open detail panel or modal
+  };
+  window.deleteDraft = async function(key) {
+    if (!confirm('Delete this draft invoice?')) return;
+    try { await API.deleteDraftInvoice(key); loadTab('drafts'); }
+    catch (e) { console.warn('Delete failed:', e.message); }
+  };
+  window.releaseHold = async function(clientKey) {
+    if (!confirm('Release hold on this client?')) return;
+    try { await API.clientUpdateOnHold({ plClientKey: clientKey, pbOnHold: false }); loadTab('hold'); }
+    catch (e) { console.warn('Release failed:', e.message); }
+  };
+  window.editGL = function(key) {
+    console.log('[TSI Financial] Edit GL account:', key);
+  };
+
+  // ── Wire sub-nav tabs ──────────────────────────────────
+  document.querySelectorAll('.subnav-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.subnav-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      loadTab(this.dataset.tab);
+    });
+  });
+
+  // ── Wire filters ───────────────────────────────────────
+  filterSearch.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(renderRows, 200);
+  });
+  filterStatus.addEventListener('change', renderRows);
+  filterClient.addEventListener('change', renderRows);
+
+  // ── Init ───────────────────────────────────────────────
+  loadTab('outstanding');
+
+})();
+</script>
 </body>
 </html>

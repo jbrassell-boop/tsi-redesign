@@ -207,7 +207,7 @@
     .mrt tbody tr.selected{background:#EDF2FF;outline:2px solid var(--navy);outline-offset:-2px}
     .msg-empty{padding:40px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic}
     
-    .modal-footer{padding:16px 24px;border-top:1px solid var(--border);background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 12px 12px;overflow:hidden;gap:12px}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--border);background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 12px 12px;overflow:visible;gap:12px;position:relative}
     .mf-left{display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .2s;transform:translateX(-10px);flex:1}
     .mf-left.show{opacity:1;pointer-events:all;transform:translateX(0)}
     .mf-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
@@ -1415,14 +1415,14 @@ cpInput.addEventListener('keydown', (e) => {
 
 function revealNewOrderForm() {
   if (selectedHistoricalDevice) {
-    // User selected an existing device from the table. Proceed with those inherited details immediately.
-    const url = new URL('product-sale.html', window.location.href);
+    // User selected an existing device from the table — open in repairs page
+    const url = new URL('repairs.html', window.location.href);
     url.searchParams.set('client', selectedHistoricalDevice.client);
     url.searchParams.set('dept', selectedHistoricalDevice.dept);
     window.location.href = url.href;
     return;
   }
-  
+
   // They are creating a completely new record. Reveal the new form side, hide the action buttons.
   document.getElementById('primaryActionRow').style.display = 'none';
   document.getElementById('newDeviceForm').classList.add('show');
@@ -1437,8 +1437,8 @@ function submitNewWorkspace() {
     return;
   }
   
-  // Validated! Proceed to workspace with parameters.
-  const url = new URL('product-sale.html', window.location.href);
+  // Validated! Proceed to repairs page with parameters.
+  const url = new URL('repairs.html', window.location.href);
   url.searchParams.set('client', client);
   url.searchParams.set('dept', dept);
   window.location.href = url.href;

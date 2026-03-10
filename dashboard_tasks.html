@@ -202,6 +202,7 @@
         <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
         <div class="topbar-avatar">JB</div>
         <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+        <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
@@ -405,11 +406,21 @@
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
 // ═══════════════════════════════════════════════════════
 //  TASKS DATA
 // ═══════════════════════════════════════════════════════
-const TASKS = [
+let TASKS = [];
+let _taskTypes = [];
+let _taskPriorities = [];
+let _taskStatuses = [];
+let _isDemo = false;
+
+const DEMO_TASKS = [
   {id:1,date:'03/07/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',type:'Loaner Request',priority:'Urgent',status:'Not Started',models:'GIF-H190, CF-H185L',notes:'Need loaner ASAP — both scopes in repair. Patient backlog building.'},
   {id:2,date:'03/06/2026',client:'Nashville General Hospital',dept:'GI Lab',type:'Repair Approved',priority:'High',status:'In Process',models:'',notes:'PO received. Begin repair on CF-H185L immediately.'},
   {id:3,date:'03/05/2026',client:'Metro Health Hospital',dept:'Sterile Processing',type:'Loaner Request',priority:'High',status:'Not Started',models:'BF-UC180F',notes:'CCD repair on hold — client needs loaner while waiting for parts.'},
@@ -423,6 +434,125 @@ const TASKS = [
   {id:11,date:'02/20/2026',client:'Phoebe Putney Memorial',dept:'Surgery',type:'Loaner Wait List',priority:'Low',status:'Not Completed',models:'GIF-Q165',notes:'Client cancelled loaner request — purchased backup scope.'},
   {id:12,date:'02/15/2026',client:'CaroMont Regional Medical',dept:'Operating Room',type:'Loaner Wait List',priority:'Normal',status:'Not Completed',models:'GIF-H190',notes:'Quote dispute unresolved. Task on hold pending Joseph review.'},
 ];
+
+// ── Data badge ──
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) { b.textContent = 'Live Data'; b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0'; }
+  else { b.textContent = 'Demo Data'; b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A'; }
+}
+
+// ── Map API task record → local flat object ──
+function mapApiTask(r) {
+  // API uses Hungarian notation: s=string, l=int, b=bool, dt=date
+  const dt = r.dtCreatedDate || r.dtTaskDate || r.dtDateCreated || '';
+  let dateStr = '';
+  if (dt) {
+    const d = new Date(dt);
+    if (!isNaN(d)) dateStr = String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0') + '/' + d.getFullYear();
+  }
+  return {
+    id: r.lTaskKey || r.lTaskId || 0,
+    date: dateStr,
+    client: r.sClientName || r.sClientName1 || '',
+    dept: r.sDepartmentName || r.sDeptName || '',
+    type: r.sTaskTypeName || r.sTaskType || '',
+    priority: r.sPriorityName || r.sTaskPriority || r.sPriority || '',
+    status: r.sStatusName || r.sTaskStatus || r.sStatus || '',
+    models: r.sModels || r.sRequestedModels || r.sLoanerModels || '',
+    notes: r.sNotes || r.sTaskNotes || r.mNotes || '',
+    customerMsg: r.sCustomerMessage || r.mCustomerMessage || '',
+    // Preserve raw keys for save operations
+    _lTaskKey: r.lTaskKey || 0,
+    _lClientKey: r.lClientKey || 0,
+    _lDepartmentKey: r.lDepartmentKey || 0,
+    _lTaskTypeKey: r.lTaskTypeKey || 0,
+    _lTaskPriorityKey: r.lTaskPriorityKey || 0,
+    _lTaskStatusKey: r.lTaskStatusKey || 0,
+  };
+}
+
+// ── Load tasks from API ──
+async function loadTasks() {
+  try {
+    const data = await API.getTasks({
+      Pagination: { PageNumber: 1, PageSize: 500 },
+      Filters: {}
+    });
+    const raw = Array.isArray(data) ? data : [];
+    TASKS = raw.map(mapApiTask);
+    _isDemo = false;
+    console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from API');
+    showDataBadge(true);
+  } catch (e) {
+    console.warn('[TSI Tasks] API unavailable, using demo data:', e.message);
+    TASKS = [...DEMO_TASKS];
+    _isDemo = true;
+    showDataBadge(false);
+  }
+  renderTasks();
+}
+
+// ── Load dropdown lookups from API ──
+async function loadTaskTypes() {
+  try {
+    const data = await API.getTaskTypes();
+    _taskTypes = Array.isArray(data) ? data : [];
+    console.log('[TSI Tasks] Loaded', _taskTypes.length, 'task types');
+    const sel = document.getElementById('taskType');
+    sel.innerHTML = '<option value="">Select type\u2026</option>';
+    _taskTypes.forEach(t => {
+      const key = t.lTaskTypeKey || t.lTaskTypesKey || t.lKey || 0;
+      const name = t.sTaskTypeName || t.sName || t.sDescription || '';
+      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+    });
+  } catch (e) {
+    console.warn('[TSI Tasks] Could not load task types:', e.message);
+    // Keep hardcoded options as fallback — they're already in the HTML
+  }
+}
+
+async function loadTaskPriorities() {
+  try {
+    const data = await API.getTaskPriorities(true);
+    _taskPriorities = Array.isArray(data) ? data : [];
+    console.log('[TSI Tasks] Loaded', _taskPriorities.length, 'priorities');
+    const sel = document.getElementById('taskPriority');
+    sel.innerHTML = '';
+    _taskPriorities.forEach(p => {
+      const key = p.lTaskPriorityKey || p.lPriorityKey || p.lKey || 0;
+      const name = p.sPriorityName || p.sName || p.sDescription || '';
+      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+    });
+    // Default to Normal if available
+    const normalOpt = [...sel.options].find(o => /normal/i.test(o.text));
+    if (normalOpt) normalOpt.selected = true;
+  } catch (e) {
+    console.warn('[TSI Tasks] Could not load priorities:', e.message);
+  }
+}
+
+async function loadTaskStatuses() {
+  try {
+    const data = await API.getTaskStatuses(true, true);
+    _taskStatuses = Array.isArray(data) ? data : [];
+    console.log('[TSI Tasks] Loaded', _taskStatuses.length, 'statuses');
+    const sel = document.getElementById('taskStatus');
+    sel.innerHTML = '';
+    _taskStatuses.forEach(s => {
+      const key = s.lTaskStatusKey || s.lStatusKey || s.lKey || 0;
+      const name = s.sStatusName || s.sName || s.sDescription || '';
+      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+    });
+    // Default to Not Started if available
+    const nsOpt = [...sel.options].find(o => /not started/i.test(o.text));
+    if (nsOpt) nsOpt.selected = true;
+  } catch (e) {
+    console.warn('[TSI Tasks] Could not load statuses:', e.message);
+  }
+}
 
 // ═══════════════════════════════════════════════════════
 //  STATE & HELPERS
@@ -520,8 +650,13 @@ function resetDrawerForm() {
   document.getElementById('taskClient').value = '';
   document.getElementById('taskDept').value = '';
   document.getElementById('taskType').value = '';
-  document.getElementById('taskPriority').value = 'Normal';
-  document.getElementById('taskStatus').value = 'Not Started';
+  // Default priority to Normal, status to Not Started (by text match since values may be keys)
+  const priSel = document.getElementById('taskPriority');
+  const normalOpt = [...priSel.options].find(o => /normal/i.test(o.text));
+  if (normalOpt) priSel.value = normalOpt.value; else priSel.selectedIndex = 0;
+  const stsSel = document.getElementById('taskStatus');
+  const nsOpt = [...stsSel.options].find(o => /not started/i.test(o.text));
+  if (nsOpt) stsSel.value = nsOpt.value; else stsSel.selectedIndex = 0;
   document.getElementById('taskCustomerMsg').value = '';
   document.getElementById('taskNotes').value = '';
   // Reset loaner lines to one empty row
@@ -547,9 +682,32 @@ function openEditTask(id) {
   document.getElementById('taskId').value = task.id;
   document.getElementById('taskClient').value = task.client;
   document.getElementById('taskDept').value = task.dept;
-  document.getElementById('taskType').value = task.type;
-  document.getElementById('taskPriority').value = task.priority;
-  document.getElementById('taskStatus').value = task.status;
+  // For API mode, set by key; for demo, set by text
+  const typeSel = document.getElementById('taskType');
+  if (task._lTaskTypeKey) {
+    typeSel.value = String(task._lTaskTypeKey);
+  } else {
+    // Demo mode — match by text
+    const opt = [...typeSel.options].find(o => o.text === task.type);
+    if (opt) typeSel.value = opt.value;
+    else typeSel.value = task.type;
+  }
+  const priSel = document.getElementById('taskPriority');
+  if (task._lTaskPriorityKey) {
+    priSel.value = String(task._lTaskPriorityKey);
+  } else {
+    const opt = [...priSel.options].find(o => o.text === task.priority);
+    if (opt) priSel.value = opt.value;
+    else priSel.value = task.priority;
+  }
+  const stsSel = document.getElementById('taskStatus');
+  if (task._lTaskStatusKey) {
+    stsSel.value = String(task._lTaskStatusKey);
+  } else {
+    const opt = [...stsSel.options].find(o => o.text === task.status);
+    if (opt) stsSel.value = opt.value;
+    else stsSel.value = task.status;
+  }
   document.getElementById('taskNotes').value = task.notes || '';
   document.getElementById('taskCustomerMsg').value = task.customerMsg || '';
   // Populate loaner lines from models string
@@ -588,17 +746,19 @@ function removeLoanerLine(btn) {
   }
 }
 
-function saveTask() {
+async function saveTask() {
   // Validate
   let valid = true;
   const client = document.getElementById('taskClient').value.trim();
-  const type = document.getElementById('taskType').value;
+  const typeVal = document.getElementById('taskType').value;
+  const typeSel = document.getElementById('taskType');
+  const typeText = typeSel.options[typeSel.selectedIndex]?.text || typeVal;
   document.getElementById('fClient').classList.toggle('invalid', !client);
-  document.getElementById('fType').classList.toggle('invalid', !type);
-  if (!client || !type) { valid = false; }
+  document.getElementById('fType').classList.toggle('invalid', !typeVal);
+  if (!client || !typeVal) { valid = false; }
 
   // Check if loaner type needs at least one model
-  const isLoanerType = /loaner/i.test(type);
+  const isLoanerType = /loaner/i.test(typeText);
   const lines = document.getElementById('loanerLines').querySelectorAll('.loaner-line');
   const models = [];
   lines.forEach(line => {
@@ -614,24 +774,62 @@ function saveTask() {
 
   if (!valid) return;
 
+  const priSel = document.getElementById('taskPriority');
+  const stsSel = document.getElementById('taskStatus');
+  const priText = priSel.options[priSel.selectedIndex]?.text || priSel.value;
+  const stsText = stsSel.options[stsSel.selectedIndex]?.text || stsSel.value;
+
+  const editId = document.getElementById('taskId').value;
+
+  // Try API save
+  if (!_isDemo) {
+    try {
+      const apiPayload = {
+        psClientName1: client,
+        psDepartmentName: document.getElementById('taskDept').value.trim(),
+        plTaskTypeKey: parseInt(typeVal) || 0,
+        plTaskPriorityKey: parseInt(priSel.value) || 0,
+        plTaskStatusKey: parseInt(stsSel.value) || 0,
+        psModels: models.join(', '),
+        psCustomerMessage: document.getElementById('taskCustomerMsg').value.trim(),
+        psNotes: document.getElementById('taskNotes').value.trim(),
+      };
+
+      if (editId) {
+        const existing = TASKS.find(t => t.id === parseInt(editId));
+        apiPayload.plTaskKey = existing?._lTaskKey || parseInt(editId);
+        await API.updateTask(apiPayload);
+        console.log('[TSI Tasks] Updated task', apiPayload.plTaskKey);
+      } else {
+        await API.addTask(apiPayload);
+        console.log('[TSI Tasks] Added new task');
+      }
+
+      closeDrawer();
+      await loadTasks(); // Reload from API
+      return;
+    } catch (e) {
+      console.warn('[TSI Tasks] API save failed, applying locally:', e.message);
+      // Fall through to local update
+    }
+  }
+
+  // Local/demo mode save
   const taskData = {
     client,
     dept: document.getElementById('taskDept').value.trim(),
-    type,
-    priority: document.getElementById('taskPriority').value,
-    status: document.getElementById('taskStatus').value,
+    type: typeText,
+    priority: priText,
+    status: stsText,
     models: models.join(', '),
     customerMsg: document.getElementById('taskCustomerMsg').value.trim(),
     notes: document.getElementById('taskNotes').value.trim(),
   };
 
-  const editId = document.getElementById('taskId').value;
   if (editId) {
-    // Update existing
     const task = TASKS.find(t => t.id === parseInt(editId));
     if (task) Object.assign(task, taskData);
   } else {
-    // Add new
     const maxId = TASKS.reduce((max, t) => Math.max(max, t.id), 0);
     const today = new Date();
     const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' + String(today.getDate()).padStart(2,'0') + '/' + today.getFullYear();
@@ -642,8 +840,24 @@ function saveTask() {
   renderTasks();
 }
 
-function deleteTask(id) {
+async function deleteTask(id) {
   if (!confirm('Delete this task?')) return;
+
+  // Try API delete
+  if (!_isDemo) {
+    try {
+      const task = TASKS.find(t => t.id === id);
+      const taskKey = task?._lTaskKey || id;
+      await API.deleteTask(taskKey);
+      console.log('[TSI Tasks] Deleted task', taskKey);
+      await loadTasks(); // Reload from API
+      return;
+    } catch (e) {
+      console.warn('[TSI Tasks] API delete failed, removing locally:', e.message);
+    }
+  }
+
+  // Local/demo fallback
   const idx = TASKS.findIndex(t => t.id === id);
   if (idx >= 0) { TASKS.splice(idx, 1); renderTasks(); }
 }
@@ -680,7 +894,15 @@ document.getElementById('taskSearch').addEventListener('input', function() {
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
-renderTasks();
+(async function init() {
+  // Load dropdown lookups and task data in parallel
+  await Promise.all([
+    loadTaskTypes(),
+    loadTaskPriorities(),
+    loadTaskStatuses(),
+    loadTasks()
+  ]);
+})();
 </script>
 </body>
 </html>

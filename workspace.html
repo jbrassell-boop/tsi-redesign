@@ -153,8 +153,8 @@
       <div class="topbar-right">
         Service Location
         <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
-        <div class="topbar-avatar">JB</div>
-        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+        <div class="topbar-avatar" id="topbarAvatar">JB</div>
+        <span class="topbar-welcome" id="topbarWelcome">Welcome, <strong>Joseph Brassell</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
@@ -170,23 +170,24 @@
         <div class="workspace-main">
           <div class="card">
             <div class="card-head">
-              <span class="title">My Tasks — <span style="color:#B71234">5 open</span></span>
-              <span style="font-size:11px;color:#8896AA">Today: Sat, Mar 7, 2026</span>
+              <span class="title" id="taskCardTitle">My Tasks — <span style="color:#B71234">5 open</span></span>
+              <span style="font-size:11px;color:#8896AA" id="taskCardDate">Today: Sat, Mar 7, 2026</span>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="taskListContainer">
 
               <!-- Add task -->
-              <div class="add-task-row">
-                <input type="text" placeholder="Add a new task…"/>
-                <select><option>High</option><option selected>Medium</option><option>Low</option></select>
-                <input type="date" style="height:36px;border:1.5px solid #DDE3EE;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/>
-                <button>+ Add</button>
+              <div class="add-task-row" id="addTaskRow">
+                <input type="text" id="newTaskText" placeholder="Add a new task…"/>
+                <select id="newTaskPriority"><option value="3">High</option><option value="2" selected>Medium</option><option value="1">Low</option></select>
+                <input type="date" id="newTaskDue" style="height:36px;border:1.5px solid #DDE3EE;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/>
+                <button id="addTaskBtn">+ Add</button>
               </div>
 
+              <div id="taskItems">
               <!-- Overdue -->
-              <div class="section-label" style="color:#B71234;border-bottom-color:#FECACA">🔴 Overdue</div>
+              <div class="section-label" style="color:#B71234;border-bottom-color:#FECACA">Overdue</div>
               <div class="task-item high">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">Recover NI26004421 loaner from LN-002 — overdue</div>
                   <div class="task-meta"><span class="task-due">Due 03/06/2026</span><span class="badge b-high">High</span></div>
@@ -194,16 +195,16 @@
               </div>
 
               <!-- Due today -->
-              <div class="section-label" style="color:#D97706;border-bottom-color:#FDE68A">🟡 Due Today</div>
+              <div class="section-label" style="color:#D97706;border-bottom-color:#FDE68A">Due Today</div>
               <div class="task-item high">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">QC review: Tift Regional complaint QC-2026-041</div>
                   <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-high">High</span></div>
                 </div>
               </div>
               <div class="task-item medium">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">Invoice Shreveport Endoscopy — OS-2026-003</div>
                   <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-med">Medium</span></div>
@@ -211,30 +212,30 @@
               </div>
 
               <!-- Upcoming -->
-              <div class="section-label">📋 Upcoming</div>
+              <div class="section-label">Upcoming</div>
               <div class="task-item high">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">Follow up: Nashville General — contract renewal signature</div>
                   <div class="task-meta"><span class="task-due">Due 03/08/2026</span><span class="badge b-high">High</span></div>
                 </div>
               </div>
               <div class="task-item medium">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">Request CCD chip ETA from ChipTech — BF-UC180F</div>
                   <div class="task-meta"><span class="task-due">Due 03/09/2026</span><span class="badge b-med">Medium</span></div>
                 </div>
               </div>
               <div class="task-item high">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">Price increase letter — West Calcasieu Cameron</div>
                   <div class="task-meta"><span class="task-due">Due 03/10/2026</span><span class="badge b-high">High</span></div>
                 </div>
               </div>
               <div class="task-item medium">
-                <div class="task-check">☐</div>
+                <div class="task-check"></div>
                 <div style="flex:1">
                   <div class="task-text">DVMSS: VISN 4 BPA post-mortem debrief notes</div>
                   <div class="task-meta"><span class="task-due">Due 03/12/2026</span><span class="badge b-med">Medium</span></div>
@@ -242,10 +243,11 @@
               </div>
 
               <!-- Done -->
-              <div class="section-label">✅ Completed</div>
+              <div class="section-label">Completed</div>
               <div class="task-item done" style="display:flex;align-items:center;gap:12px;padding:8px 16px">
-                <div class="task-check checked">✓</div>
+                <div class="task-check checked">&#10003;</div>
                 <div class="task-text done">Update West Side GI capitation dashboard</div>
+              </div>
               </div>
 
             </div>
@@ -257,49 +259,49 @@
 
           <!-- Quick Stats -->
           <div class="card" style="margin-bottom:16px">
-            <div class="card-head"><span class="title">Quick Stats</span></div>
-            <div style="padding:14px 16px">
+            <div class="card-head"><span class="title">Quick Stats</span><span id="dataBadge" style="display:none;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600"></span></div>
+            <div style="padding:14px 16px" id="statsContainer">
               <div class="stat-row alert">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">🔧</div>
+                  <div class="stat-icon" style="background:#FEF2F2">&#128295;</div>
                   <span class="stat-label">Repairs In Progress</span>
                 </div>
-                <span class="stat-val">12</span>
+                <span class="stat-val" id="statRepairs">12</span>
               </div>
               <div class="stat-row warn">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">↺</div>
-                  <span class="stat-label">Overdue Loaners</span>
+                  <div class="stat-icon" style="background:#FFFBEB">&#8634;</div>
+                  <span class="stat-label">Open Tasks</span>
                 </div>
-                <span class="stat-val">2</span>
+                <span class="stat-val" id="statTasks">2</span>
               </div>
               <div class="stat-row warn">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">▤</div>
+                  <div class="stat-icon" style="background:#FFFBEB">&#9636;</div>
                   <span class="stat-label">Contracts Up for Renewal</span>
                 </div>
-                <span class="stat-val">3</span>
+                <span class="stat-val" id="statContracts">3</span>
               </div>
               <div class="stat-row alert">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">✓</div>
+                  <div class="stat-icon" style="background:#FEF2F2">&#10003;</div>
                   <span class="stat-label">Open QC Events</span>
                 </div>
-                <span class="stat-val">3</span>
+                <span class="stat-val" id="statQC">3</span>
               </div>
               <div class="stat-row" style="border-color:var(--border)">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#E8EDF5">◈</div>
+                  <div class="stat-icon" style="background:#E8EDF5">&#9672;</div>
                   <span class="stat-label">Pending Invoices</span>
                 </div>
-                <span class="stat-val" style="font-size:15px">$31,240</span>
+                <span class="stat-val" id="statInvoices" style="font-size:15px">$31,240</span>
               </div>
               <div class="stat-row good">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">📈</div>
+                  <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
                   <span class="stat-label">Revenue MTD</span>
                 </div>
-                <span class="stat-val" style="font-size:15px">$84,600</span>
+                <span class="stat-val" id="statRevenue" style="font-size:15px">$84,600</span>
               </div>
             </div>
           </div>
@@ -308,9 +310,9 @@
           <div class="card">
             <div class="card-head">
               <span class="title">Recent Notifications</span>
-              <span style="background:#B71234;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 new</span>
+              <span id="notifBadge" style="background:#B71234;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 new</span>
             </div>
-            <div>
+            <div id="notifList">
               <div class="email-item unread">
                 <div style="display:flex;align-items:center;justify-content:space-between">
                   <span class="email-from"><span class="unread-dot"></span>Tift Regional Medical Center</span>
@@ -354,5 +356,249 @@
     </div>
   </div>
 </div>
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+let _liveMode = false;
+let _tasks = [];
+
+// ── Data Badge ──
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) { b.textContent = 'Live Data'; b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0'; }
+  else { b.textContent = 'Demo Data'; b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A'; }
+}
+
+// ── User Info ──
+function updateUserInfo() {
+  const user = API.getUser();
+  if (!user) return;
+  const name = (user.sFirstName || '') + ' ' + (user.sLastName || '');
+  const initials = ((user.sFirstName||'')[0]||'') + ((user.sLastName||'')[0]||'');
+  document.getElementById('topbarAvatar').textContent = initials.toUpperCase();
+  document.getElementById('topbarWelcome').innerHTML = 'Welcome, <strong>' + name.trim() + '</strong>';
+}
+
+// ── Date Helpers ──
+function fmtDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  return isNaN(d) ? v : d.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
+}
+function toDateInput(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  return isNaN(d) ? '' : d.toISOString().split('T')[0];
+}
+function todayStr() {
+  const d = new Date();
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+
+// ── Normalize task from API ──
+function normalizeTask(r) {
+  return {
+    key: r.lTaskKey || 0,
+    text: r.sNotes || r.sTaskNotes || r.mNotes || r.sDescription || '',
+    client: r.sClientName || r.sClientName1 || '',
+    dept: r.sDepartmentName || r.sDeptName || '',
+    type: r.sTaskTypeName || r.sTaskType || '',
+    priority: r.sPriorityName || r.sTaskPriority || r.sPriority || 'Normal',
+    status: r.sStatusName || r.sTaskStatus || r.sStatus || '',
+    dueDate: r.dtDueDate || r.dtDue || r.dtTaskDate || '',
+    models: r.sModels || r.sRequestedModels || '',
+    _raw: r
+  };
+}
+
+// ── Categorize tasks by date ──
+function categorizeTasks(tasks) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const overdue = [], today = [], upcoming = [], completed = [];
+  const closedStatuses = ['Request Fulfilled','Closed Duplicate','Unable to Fulfill','Request Declined','Not Completed','Completed','Complete','Closed'];
+
+  tasks.forEach(t => {
+    if (closedStatuses.some(s => s.toLowerCase() === (t.status||'').toLowerCase())) {
+      completed.push(t);
+      return;
+    }
+    if (!t.dueDate) { upcoming.push(t); return; }
+    const due = new Date(t.dueDate);
+    due.setHours(0,0,0,0);
+    if (due < now) overdue.push(t);
+    else if (due.getTime() === now.getTime()) today.push(t);
+    else upcoming.push(t);
+  });
+  return { overdue, today, upcoming, completed };
+}
+
+// ── Priority helpers ──
+function priorityClass(p) {
+  if (/urgent|high/i.test(p)) return 'high';
+  if (/medium|normal/i.test(p)) return 'medium';
+  return '';
+}
+function priorityBadge(p) {
+  if (/urgent|high/i.test(p)) return '<span class="badge b-high">' + p + '</span>';
+  if (/medium|normal/i.test(p)) return '<span class="badge b-med">' + p + '</span>';
+  return '<span class="badge" style="background:#F0F4F8;color:#64748B">' + p + '</span>';
+}
+
+// ── Render task list ──
+function renderTasks(tasks) {
+  const container = document.getElementById('taskItems');
+  const { overdue, today, upcoming, completed } = categorizeTasks(tasks);
+  const openCount = overdue.length + today.length + upcoming.length;
+
+  // Update card title
+  document.getElementById('taskCardTitle').innerHTML = 'My Tasks &mdash; <span style="color:#B71234">' + openCount + ' open</span>';
+  document.getElementById('taskCardDate').textContent = 'Today: ' + todayStr();
+
+  let html = '';
+
+  function renderGroup(label, items, labelStyle) {
+    if (items.length === 0) return '';
+    let h = '<div class="section-label"' + (labelStyle ? ' style="' + labelStyle + '"' : '') + '>' + label + '</div>';
+    items.forEach(t => {
+      const cls = priorityClass(t.priority);
+      const desc = t.text || (t.client ? t.client + (t.type ? ' — ' + t.type : '') : 'Task #' + t.key);
+      h += '<div class="task-item ' + cls + '" data-key="' + t.key + '">';
+      h += '<div class="task-check"></div>';
+      h += '<div style="flex:1">';
+      h += '<div class="task-text">' + desc + '</div>';
+      h += '<div class="task-meta">';
+      if (t.dueDate) h += '<span class="task-due">Due ' + fmtDate(t.dueDate) + '</span>';
+      if (t.client) h += '<span class="task-due" style="margin-left:6px">' + t.client + '</span>';
+      h += priorityBadge(t.priority);
+      h += '</div></div></div>';
+    });
+    return h;
+  }
+
+  html += renderGroup('Overdue', overdue, 'color:#B71234;border-bottom-color:#FECACA');
+  html += renderGroup('Due Today', today, 'color:#D97706;border-bottom-color:#FDE68A');
+  html += renderGroup('Upcoming', upcoming);
+
+  if (completed.length > 0) {
+    html += '<div class="section-label">Completed</div>';
+    completed.forEach(t => {
+      const desc = t.text || (t.client ? t.client + (t.type ? ' — ' + t.type : '') : 'Task #' + t.key);
+      html += '<div class="task-item done" style="display:flex;align-items:center;gap:12px;padding:8px 16px">';
+      html += '<div class="task-check checked">&#10003;</div>';
+      html += '<div class="task-text done">' + desc + '</div>';
+      html += '</div>';
+    });
+  }
+
+  if (tasks.length === 0) {
+    html = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No tasks found.</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// ── Add Task ──
+document.getElementById('addTaskBtn').addEventListener('click', async () => {
+  const text = document.getElementById('newTaskText').value.trim();
+  if (!text) return;
+  const priSel = document.getElementById('newTaskPriority');
+  const dueVal = document.getElementById('newTaskDue').value;
+
+  if (_liveMode) {
+    try {
+      await API.addTask({
+        psNotes: text,
+        plTaskPriorityKey: parseInt(priSel.value) || 2,
+        pdtDueDate: dueVal || null
+      });
+      document.getElementById('newTaskText').value = '';
+      document.getElementById('newTaskDue').value = '';
+      await loadTasks();
+      return;
+    } catch (e) {
+      console.warn('[Workspace] Add task API error:', e.message);
+    }
+  }
+  // Demo fallback — add locally
+  const priText = priSel.options[priSel.selectedIndex].text;
+  _tasks.unshift({
+    key: Date.now(),
+    text: text,
+    client: '',
+    dept: '',
+    type: '',
+    priority: priText,
+    status: 'Not Started',
+    dueDate: dueVal || '',
+    models: ''
+  });
+  document.getElementById('newTaskText').value = '';
+  document.getElementById('newTaskDue').value = '';
+  renderTasks(_tasks);
+});
+
+// ── Load Tasks from API ──
+async function loadTasks() {
+  const data = await API.getTasks({
+    Pagination: { PageNumber: 1, PageSize: 200 },
+    Filters: {}
+  });
+  const list = Array.isArray(data) ? data : (data?.items || data?.list || []);
+  _tasks = list.map(normalizeTask);
+  console.log('[Workspace] Loaded', _tasks.length, 'tasks from API');
+  renderTasks(_tasks);
+  // Update open tasks stat
+  const { overdue, today, upcoming } = categorizeTasks(_tasks);
+  document.getElementById('statTasks').textContent = String(overdue.length + today.length + upcoming.length);
+}
+
+// ── Load Dashboard Stats ──
+async function loadStats() {
+  try {
+    const svcKey = parseInt(document.querySelector('.svc-select').value === 'Nashville' ? '2' : '1') || 1;
+    const data = await API.getDashboardScopes({ plServiceLocationKey: svcKey });
+    const list = Array.isArray(data) ? data : (data?.items || data?.list || []);
+    // Count repairs in progress
+    const inProgress = list.filter(r => {
+      const sts = (r.sStatus || r.sStatusName || '').toLowerCase();
+      return sts.includes('in progress') || sts.includes('in process') || sts.includes('open');
+    }).length;
+    if (inProgress > 0) document.getElementById('statRepairs').textContent = String(inProgress);
+    console.log('[Workspace] Dashboard scopes loaded:', list.length, 'repairs in progress:', inProgress);
+  } catch (e) {
+    console.warn('[Workspace] Dashboard stats error:', e.message);
+    // Keep demo values
+  }
+}
+
+// ── Init ──
+(async function init() {
+  updateUserInfo();
+
+  // Set today's date
+  document.getElementById('taskCardDate').textContent = 'Today: ' + todayStr();
+
+  try {
+    // Load tasks from API
+    await loadTasks();
+    _liveMode = true;
+    showDataBadge(true);
+
+    // Also load dashboard stats (non-blocking)
+    loadStats();
+
+  } catch (e) {
+    console.warn('[Workspace] API error, using demo data:', e.message);
+    _liveMode = false;
+    showDataBadge(false);
+    // Keep existing demo HTML — it's already in taskItems
+  }
+})();
+</script>
 </body>
 </html>

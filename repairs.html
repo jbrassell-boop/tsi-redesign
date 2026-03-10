@@ -41,8 +41,8 @@
     .svc-select option{color:#1A202C;background:#fff}
 
     /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:6px;padding:5px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-shrink:0}
-    .btn{display:inline-flex;align-items:center;gap:3px;height:24px;padding:0 10px;border-radius:4px;font-size:10px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
+    .toolbar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-shrink:0}
+    .btn{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 12px;border-radius:4px;font-size:11px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
     .btn svg{width:11px;height:11px}
     .btn-navy{background:var(--navy);color:#fff;font-weight:600}
     .btn-navy:hover{background:#001A5C}
@@ -54,12 +54,12 @@
     .btn-danger:hover{background:#FEE2E2}
     .divider{width:1px;height:24px;background:var(--border);margin:0 4px}
     .sel-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
-    .sel-select{height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--navy);font-weight:600;background:#fff;cursor:pointer;outline:none;min-width:160px;transition:border-color .15s}
+    .sel-select{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--navy);font-weight:600;background:#fff;cursor:pointer;outline:none;min-width:160px;transition:border-color .15s}
     .sel-select:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.09)}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel)}
 
     /* STATUS STRIP */
-    .status-strip{display:flex;align-items:center;gap:5px;padding:3px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+    .status-strip{display:flex;align-items:center;gap:6px;padding:5px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
     .ss-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
     .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:8.5px;letter-spacing:.3px}
     .ss-chip .ss-val{color:var(--text)}
@@ -78,42 +78,62 @@
 
     /* DETAIL PANEL */
     .repair-detail{flex:1;display:flex;flex-direction:column;overflow:hidden}
-    .detail-scroll{flex:1;overflow-y:auto;padding:0}
+    .detail-scroll{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column}
 
     /* REFERENCE STRIP — compact read-only context */
-    .ref-strip{display:flex;align-items:center;gap:10px;padding:4px 10px;background:#fff;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;flex-wrap:wrap}
-    .ref-item{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--label);white-space:nowrap}
-    .ref-item b{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
-    .ref-val{font-weight:600;color:var(--navy)}
-    .ref-input{height:20px;border:1px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:10.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;width:90px}
-    .ref-input:focus{border-color:var(--blue)}
+    .ref-strip{display:grid;grid-template-columns:repeat(7,1fr);align-items:center;padding:7px 14px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;border-left:3px solid var(--navy)}
+    .ref-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--label);white-space:nowrap}
+    .ref-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
+    .ref-val{font-weight:700;color:var(--navy)}
+    .ref-input{height:24px;border:1px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--white);outline:none;width:100px}
+    .ref-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+
+    /* SCOPE HISTORY — dropdown off SN# */
+    .history-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;padding:0 5px;margin-left:4px;cursor:pointer;line-height:1}
+    .scope-history-panel{display:none;position:absolute;top:100%;left:0;z-index:500;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 6px 24px rgba(0,37,122,.18);width:520px;max-height:300px;overflow:hidden;margin-top:4px}
+    .scope-history-panel.open{display:block}
+    .scope-history-panel .sh-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;font-size:11px;font-weight:700}
+    .scope-history-panel .sh-header .sh-close{cursor:pointer;opacity:.7;font-size:16px;line-height:1}
+    .scope-history-panel .sh-header .sh-close:hover{opacity:1}
+    .scope-history-panel .sh-body{overflow-y:auto;max-height:240px}
+    table.sh-table{width:100%;border-collapse:collapse}
+    table.sh-table th{background:#F0F4FA;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;padding:5px 10px;text-align:left;letter-spacing:.3px;position:sticky;top:0}
+    table.sh-table td{padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
+    table.sh-table tr:hover td{background:#EFF6FF}
+    table.sh-table .current-row td{background:#DBEAFE;font-weight:600}
+    table.sh-table .wo-link{color:var(--blue);font-weight:600}
+    table.sh-table .status-pill{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600}
 
     /* FLAGS BAR */
-    .flags-bar{display:flex;align-items:center;gap:5px;padding:4px 10px;background:#FFF8E1;border:1px solid #F0C040;border-radius:4px;min-height:24px;flex-wrap:wrap;margin-bottom:6px}
-    .flag-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;background:#FEF3C7;color:#92400E;border:1px solid #F0C040}
+    .flags-bar{display:flex;align-items:flex-start;gap:5px;padding:6px 12px;background:#FFFBEB;border:1px solid #F0C040;border-left:3px solid #D97706;border-radius:5px;min-height:26px;flex-wrap:wrap;flex-shrink:0;margin-bottom:6px}
+    .flag-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:500;background:#FEF3C7;color:#92400E;border:1px solid #F0C040}
 
     /* TABS */
     .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0;padding:0 10px}
-    .tab{padding:6px 12px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .12s;white-space:nowrap}
+    .tab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .12s;white-space:nowrap}
     .tab:hover{color:var(--blue)}
     .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
 
+    /* CONTENTEDITABLE COMPLAINT */
+    [contenteditable]:focus{border-color:var(--navy) !important;box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    [contenteditable]:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none}
+
     /* TAB PANES */
-    .tab-pane{display:none;padding:8px 10px}
-    .tab-pane.active{display:block}
+    .tab-pane{display:none;padding:10px 14px;flex-direction:column;background:var(--bg)}
+    .tab-pane.active{display:flex}
 
     /* SECTION CARDS */
-    .section-card{background:var(--white);border:1px solid var(--border);border-radius:5px;margin-bottom:6px;overflow:hidden}
-    .section-head{background:#E9EFF9;color:var(--navy);padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-    .section-body{padding:6px 10px}
-    .form-grid{display:grid;gap:4px 8px}
+    .section-card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,37,122,.06)}
+    .section-head{background:linear-gradient(135deg,#E3EAF6 0%,#EDF1F9 100%);color:var(--navy);padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 14px}
+    .form-grid{display:grid;gap:8px 12px}
     .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
-    .field{display:flex;flex-direction:column;gap:1px}
-    .field label{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
-    .field input,.field select,.field textarea{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 5px;font-size:11.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .15s;width:100%}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .15s;width:100%}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
     .field input.ro{background:var(--gray-bg);color:var(--muted)}
-    .field textarea{height:auto;resize:vertical;padding:4px 5px}
+    .field textarea{height:auto;resize:vertical;padding:6px 8px}
     .span2{grid-column:span 2}.span3{grid-column:span 3}.span4{grid-column:span 4}
 
     /* TOGGLE */
@@ -121,59 +141,70 @@
     .toggle input{opacity:0;width:0;height:0}
     .toggle .slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:18px;transition:.2s}
     .toggle .slider::before{content:'';position:absolute;height:14px;width:14px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.2s}
-    .toggle input:checked+.slider{background:var(--green)}
+    .toggle input:checked+.slider{background:var(--navy)}
     .toggle input:checked+.slider::before{transform:translateX(16px)}
 
     /* REPAIR ITEMS TABLE */
     table.items{width:100%;border-collapse:collapse}
-    table.items th{background:var(--navy);color:#fff;font-size:9px;padding:4px 6px;text-align:left;font-weight:600;white-space:nowrap}
-    table.items td{padding:3px 6px;font-size:10.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+    table.items th{background:var(--navy);color:#fff;font-size:9.5px;padding:6px 14px;text-align:left;font-weight:600;white-space:nowrap}
+    table.items td{padding:5px 14px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
     table.items tbody tr:nth-child(even){background:var(--row-alt)}
     table.items tbody tr:hover{background:#dce8f7}
     table.items tbody tr.selected-row{background:#C8D8F0;outline:2px solid var(--blue)}
 
+    /* CONTEXT MENU */
+    .ctx-menu{position:fixed;z-index:9999;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 4px 16px rgba(0,37,122,.18);padding:4px 0;min-width:160px;display:none}
+    .ctx-menu.open{display:block}
+    .ctx-menu-item{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:11px;cursor:pointer;color:var(--text);transition:background .1s}
+    .ctx-menu-item:hover{background:var(--bg)}
+    .ctx-menu-item.danger{color:var(--red)}
+    .ctx-menu-item.danger:hover{background:#FEF2F2}
+    .ctx-menu-item svg{width:13px;height:13px;flex-shrink:0}
+    .ctx-menu-sep{height:1px;background:var(--border);margin:3px 0}
+
+
     /* ACTION BAR */
-    .action-bar{display:flex;gap:6px;padding:6px 10px;background:var(--gray-bg);border:1px solid var(--border);border-radius:4px;margin-top:4px;flex-wrap:wrap;align-items:center}
+    .action-bar{display:flex;gap:8px;padding:8px 14px;background:#F0F4FA;border:1px solid var(--border-dk);border-radius:5px;margin-top:6px;flex-wrap:wrap;align-items:center;box-shadow:0 1px 4px rgba(0,37,122,.06)}
     .action-group{display:flex;flex-direction:column;gap:1px}
-    .action-group .lbl{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase}
-    .action-group .val{font-size:12px;font-weight:700;color:var(--navy)}
+    .action-group .lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .action-group .val{font-size:13px;font-weight:700;color:var(--navy)}
     .action-group .val.green{color:var(--green)}
     .action-group .val.red{color:var(--red)}
 
     /* ADDRESS BLOCKS */
-    .addr-block{background:var(--gray-bg);border:1px solid var(--border);border-radius:5px;padding:6px 10px}
-    .addr-block .addr-title{font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;margin-bottom:4px;letter-spacing:.3px}
+    .addr-block{background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px}
+    .addr-block .addr-title{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;margin-bottom:6px;letter-spacing:.4px}
 
     /* EXPENSE GRID */
-    .expense-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-    .expense-col .exp-row{display:flex;justify-content:space-between;align-items:center;padding:4px 10px;border-bottom:1px solid var(--border)}
+    .expense-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .expense-col .exp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;border-bottom:1px solid var(--border)}
     .expense-col .exp-row:last-child{border-bottom:none}
-    .expense-col .exp-label{font-size:10px;font-weight:600;color:var(--label)}
-    .expense-col .exp-val{font-size:11px;font-weight:700;color:var(--navy)}
+    .expense-col .exp-label{font-size:11px;font-weight:600;color:var(--label)}
+    .expense-col .exp-val{font-size:12px;font-weight:700;color:var(--navy)}
 
     .empty-state{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px}
 
     /* SEGMENTED CONTROL — Internal/External, Ops/Tech toggles */
     .seg-bar{display:inline-flex;border:1px solid var(--border-dk);border-radius:4px;overflow:hidden;margin-bottom:6px}
-    .seg-btn{padding:3px 12px;font-size:10px;font-weight:600;cursor:pointer;background:#fff;color:var(--label);border:none;border-right:1px solid var(--border-dk);font-family:inherit;transition:all .12s}
+    .seg-btn{padding:4px 14px;font-size:10.5px;font-weight:600;cursor:pointer;background:#fff;color:var(--label);border:none;border-right:1px solid var(--border-dk);font-family:inherit;transition:all .12s}
     .seg-btn:last-child{border-right:none}
     .seg-btn.active{background:var(--navy);color:#fff}
 
     /* AUDIT / STATUS TABLE */
     table.audit{width:100%;border-collapse:collapse}
-    table.audit th{background:var(--navy);color:#fff;font-size:9px;padding:4px 8px;text-align:left;font-weight:600;white-space:nowrap}
-    table.audit td{padding:3px 8px;font-size:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+    table.audit th{background:var(--navy);color:#fff;font-size:9.5px;padding:6px 10px;text-align:left;font-weight:600;white-space:nowrap}
+    table.audit td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
     table.audit tbody tr:nth-child(even){background:var(--row-alt)}
     table.audit tbody tr:hover{background:#dce8f7}
 
     /* DOCUMENT LIST */
     .doc-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden}
-    .doc-grid .dg-head{background:var(--navy);color:#fff;font-size:9px;padding:4px 8px;font-weight:600}
-    .doc-grid .dg-cell{padding:4px 8px;font-size:10px;border-bottom:1px solid var(--border);display:flex;align-items:center}
+    .doc-grid .dg-head{background:var(--navy);color:#fff;font-size:9.5px;padding:6px 10px;font-weight:600}
+    .doc-grid .dg-cell{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);display:flex;align-items:center}
     .doc-grid .dg-cell:nth-child(8n+5),.doc-grid .dg-cell:nth-child(8n+6),.doc-grid .dg-cell:nth-child(8n+7),.doc-grid .dg-cell:nth-child(8n+8){background:var(--row-alt)}
 
     /* DROP ZONE */
-    .drop-zone{border:2px dashed var(--border-dk);border-radius:6px;padding:16px;text-align:center;color:var(--muted);font-size:10px;cursor:pointer;transition:all .15s}
+    .drop-zone{border:2px dashed var(--border-dk);border-radius:6px;padding:20px;text-align:center;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s}
     .drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:#EFF6FF;color:var(--blue)}
 
     /* ITEM PICKER OVERLAY */
@@ -186,6 +217,7 @@
     .picker-list{flex:1;overflow-y:auto;padding:0}
     .picker-item{display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
     .picker-item:hover{background:var(--bg)}
+    .picker-item.pi-selected{background:#F0FDF4}
     .picker-item .pi-code{font-size:9px;color:var(--muted);font-family:monospace;min-width:30px}
     .picker-item .pi-desc{flex:1;color:var(--text)}
     .picker-item .pi-type{font-size:9px;color:var(--steel);background:var(--bg);padding:1px 6px;border-radius:3px}
@@ -193,6 +225,56 @@
     ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:#f1f1f1}
     ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
+
+    /* NEW WORK ORDER MODAL */
+    .nwo-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9998;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px)}
+    .nwo-overlay.open{opacity:1;pointer-events:all}
+    .nwo-modal{background:#fff;border-radius:12px;width:1050px;max-width:98vw;box-shadow:0 24px 72px rgba(0,37,122,.25);overflow:hidden;transform:translateY(15px);transition:transform .2s;display:flex;flex-direction:column;max-height:90vh}
+    .nwo-overlay.open .nwo-modal{transform:translateY(0)}
+    .nwo-head{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);border-radius:12px 12px 0 0;flex-shrink:0}
+    .nwo-head h2{font-size:15px;color:#fff;font-weight:800;display:flex;align-items:center;gap:8px}
+    .nwo-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;transition:all .1s}
+    .nwo-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .nwo-close svg{width:18px;height:18px}
+    .nwo-body{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .nwo-search{padding:24px 32px;border-bottom:1px solid var(--border);background:#fff;display:flex;gap:40px;flex-shrink:0;justify-content:center}
+    .nwo-search .ms-col{display:flex;flex-direction:column;gap:8px}
+    .nwo-search .ms-row{display:flex;align-items:center;gap:8px}
+    .nwo-search .ms-label{font-size:11px;font-weight:600;color:var(--label);min-width:55px;text-align:right}
+    .nwo-search .ms-input{height:30px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 10px;font-size:12px;width:180px;outline:none;font-family:inherit}
+    .nwo-search .ms-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .nwo-search .ms-chk-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--label);cursor:pointer}
+    .nwo-btn-row{padding:8px 32px;border-bottom:1px solid var(--border);display:flex;gap:8px;justify-content:center}
+    .nwo-btn-row .btn-search{height:30px;padding:0 24px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+    .nwo-btn-row .btn-search:hover{background:var(--blue)}
+    .nwo-results{flex:1;overflow:auto;background:#fff;padding:16px 32px}
+    .nwo-results table{width:100%;border-collapse:collapse}
+    .nwo-results th{background:var(--bg);font-size:9.5px;font-weight:700;color:var(--label);text-transform:uppercase;letter-spacing:.3px;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border-dk);white-space:nowrap;position:sticky;top:0;z-index:1}
+    .nwo-results td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
+    .nwo-results tr:hover td{background:#EDF2FF}
+    .nwo-results tr.selected td{background:#DBEAFE;font-weight:600}
+    .nwo-results .msg-empty{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px;cursor:default}
+    .nwo-foot{padding:16px 24px;border-top:1px solid var(--border);background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 12px 12px;overflow:visible;position:relative;gap:12px}
+    .nwo-foot .nwo-create-form{display:none;align-items:center;gap:10px;flex:1}
+    .nwo-foot .nwo-create-form.show{display:flex}
+    .nwo-foot .nwo-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+    /* Client picker in modal */
+    .nwo-cp{position:relative;width:280px}
+    .nwo-cp-input{width:100%;height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 12px 0 32px;font-size:12px;outline:none;font-family:inherit;transition:border-color .15s;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center}
+    .nwo-cp-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .nwo-cp-dd{position:absolute;bottom:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border-dk);border-bottom:none;border-radius:8px 8px 0 0;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 -8px 24px rgba(0,37,122,.12)}
+    .nwo-cp-dd.open{display:block}
+    .nwo-cp-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;transition:background .1s}
+    .nwo-cp-item:last-child{border-bottom:none}
+    .nwo-cp-item:hover,.nwo-cp-item.highlighted{background:#EDF2FF}
+    .nwo-cp-item-name{font-size:12px;font-weight:600;color:var(--navy)}
+    .nwo-cp-item-detail{font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:8px}
+    .nwo-cp-sel{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:6px 12px;display:none;align-items:center;gap:10px}
+    .nwo-cp-sel.show{display:flex}
+    .nwo-cp-sel-name{font-size:12px;font-weight:700;color:var(--navy)}
+    .nwo-cp-sel-detail{font-size:10px;color:var(--muted)}
+    .nwo-cp-sel-clear{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;margin-left:auto;padding:2px 4px;border-radius:4px;transition:all .1s}
+    .nwo-cp-sel-clear:hover{color:var(--red);background:#FEF2F2}
   </style>
 </head>
 <body>
@@ -228,6 +310,7 @@
         <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
       </div>
       <div class="topbar-right">
+        <button onclick="newRepair()" style="background:var(--green);color:#fff;font-weight:700;border:none;padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(22,163,74,.3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Work Order</button>
         <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
         Service Location
         <select class="svc-select" id="svcLocation" onchange="reloadRepairs()"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
@@ -244,7 +327,6 @@
       <span class="sel-label">Department :</span>
       <select class="sel-select" id="selDept" style="min-width:200px" onchange="onDeptChange()"></select>
       <span class="id-badge" id="repairBadge">#—</span>
-      <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New</button>
       <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
       <div style="flex:1"></div>
       <button class="btn btn-danger" style="gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
@@ -287,107 +369,109 @@
             <div class="tab" data-tab="documents">Documents</div>
           </div>
 
-          <!-- ═══ PAGE 1: SCOPE IN ═══ -->
-          <div class="tab-pane active" id="pane-scopein">
-
-            <!-- REFERENCE STRIP: Repair + Scope info (read-only context) -->
+          <!-- PERSISTENT CONTEXT — visible on all tabs -->
+          <div style="padding:6px 14px 0;background:var(--bg);flex-shrink:0">
             <div class="ref-strip">
               <span class="ref-item"><b>WO</b> <span id="hWO" class="ref-val">—</span></span>
               <span class="ref-item"><b>Date</b> <input type="date" id="hDateIn" class="ref-input" onchange="markDirty()"/></span>
               <span class="ref-item"><b>Client</b> <span id="hClient" class="ref-val">—</span></span>
               <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
-              <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:100px" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:110px" onchange="markDirty()"></select></span>
+              <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:150px" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:60px" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:160px" onchange="markDirty()"></select></span>
             </div>
-            <div class="ref-strip" style="background:#F0F4FA;border-top:none">
+            <div class="ref-strip" style="border-top:none;margin-top:-4px">
               <span class="ref-item"><b>Mfr</b> <span id="hMfr" class="ref-val">—</span></span>
               <span class="ref-item"><b>Category</b> <span id="hScopeCat" class="ref-val">—</span></span>
               <span class="ref-item"><b>Model</b> <span id="hModel" class="ref-val">—</span></span>
-              <span class="ref-item"><b>SN#</b> <span id="hSerial" class="ref-val">—</span></span>
+              <span class="ref-item" style="position:relative"><b>SN#</b> <span id="hSerial" class="ref-val" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick="toggleScopeHistory()" title="Click for repair history">—</span><span id="hHistoryCount" class="history-badge" style="display:none" onclick="toggleScopeHistory()">0</span>
+                <div class="scope-history-panel" id="scopeHistoryPanel"></div>
+              </span>
               <span class="ref-item"><b>Cap/FFS</b> <span id="hCapFFS" class="ref-val">—</span></span>
               <span class="ref-item"><b>Days Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
               <span class="ref-item"><b>40d</b> <span id="hWithin40" class="ref-val">—</span></span>
             </div>
-
-            <!-- FLAGS -->
+            <div class="ref-strip" style="border-top:none;margin-top:-4px;border-left-color:var(--steel)">
+              <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
+              <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
+              <span class="ref-item"><b>Date In</b> <span class="ref-val" id="hDateInRO2">—</span></span>
+              <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
+              <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
+              <span></span>
+            </div>
+            <!-- COMPLAINT STRIP — customer's incoming complaint, persistent across tabs -->
+            <div style="display:flex;align-items:stretch;gap:0;margin-bottom:4px;background:#FFF8F0;border:1px solid #F0D4A8;border-left:3px solid var(--amber);border-radius:5px;overflow:hidden">
+              <div style="display:flex;align-items:center;padding:0 10px;background:rgba(217,119,6,.06);border-right:1px solid #F0D4A8;flex-shrink:0">
+                <span style="font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">Complaint</span>
+              </div>
+              <div id="fComplaint" contenteditable="true" style="flex:1;font-size:11.5px;font-family:'Inter',Arial,sans-serif;line-height:1.4;color:var(--text);padding:6px 10px;outline:none;min-height:28px;max-height:60px;overflow-y:auto" oninput="markDirty()" data-placeholder="Customer complaint..."></div>
+            </div>
             <div class="flags-bar" id="flagsBar">
               <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase">FLAGS</span>
             </div>
+          </div>
 
-            <!-- DATA ENTRY: Complaint + Reason/Level/Angulation in two columns -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-              <!-- LEFT: Complaint + Reason/Charge -->
-              <div>
-                <div class="section-card">
-                  <div class="section-head">Customer Complaint</div>
-                  <div class="section-body" style="padding:4px 8px">
-                    <textarea rows="2" id="fComplaint" style="width:100%;font-size:11px" onchange="markDirty()" placeholder="Issue reported by client..."></textarea>
-                  </div>
-                </div>
-                <div class="section-card">
-                  <div class="section-body">
-                    <div class="form-grid" style="grid-template-columns:1fr 1fr">
-                      <div class="field"><label>Repair Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
-                      <div class="field"><label>Repair Level</label><select id="hRepairLevel" onchange="markDirty()"></select></div>
-                      <div class="field"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly/></div>
-                      <div class="field" style="display:grid;grid-template-columns:1fr auto;gap:4px"><label>Override</label><div style="display:flex;gap:4px"><input id="fMaxOverride" onchange="markDirty()"/><button class="btn btn-outline" style="height:24px;padding:0 8px;font-size:9px" onclick="resetMaxCharge()">Reset</button></div></div>
-                      <div class="field"><label>PS Level</label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
-                    </div>
-                  </div>
+          <!-- ═══ PAGE 1: SCOPE IN ═══ -->
+          <div class="tab-pane active" id="pane-scopein">
+
+            <!-- ASSESSMENT — reason, level, angulation, notes -->
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start">
+              <div class="field" style="min-width:130px"><label>Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:110px"><label>Level</label><select id="hRepairLevel" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:110px"><label>PS Level</label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
+              <div style="width:1px;height:28px;background:var(--border);align-self:flex-end;margin:0 2px;flex-shrink:0"></div>
+              <div class="field" style="width:62px"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:62px"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:62px"><label>Right</label><input id="fAngInRight" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:62px"><label>Left</label><input id="fAngInLeft" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:62px"><label>Epoxy</label><input id="fEpoxyIn" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:62px"><label>BR Jig</label><input id="fBRJig" style="text-align:center" onchange="markDirty()"/></div>
+              <div style="width:1px;height:28px;background:var(--border);align-self:flex-end;margin:0 2px;flex-shrink:0"></div>
+              <button class="btn btn-outline" style="align-self:flex-end">Slips</button>
+              <button class="btn btn-outline" style="align-self:flex-end">Amend</button>
+              <button class="btn btn-outline" style="align-self:flex-end">Defects</button>
+              <button class="btn btn-outline" style="align-self:flex-end">Techs</button>
+              <button class="btn btn-outline" style="align-self:flex-end">Inventory</button>
+            </div>
+
+            <!-- ★ REPAIR ITEMS TABLE — the main work area ★ -->
+            <div class="section-card" style="margin-top:0;flex:1;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,37,122,.1);border-color:var(--border-dk)">
+              <div class="section-head" style="background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;padding:8px 14px;font-size:11px">
+                Repair Items
+                <div style="display:flex;gap:4px;margin-left:auto">
+                  <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="approveAllItems()">Approve All</button>
+                  <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="unapproveAllItems()">Unapprove All</button>
+                  <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="openItemPicker()">+ Add Item</button>
                 </div>
               </div>
-              <!-- RIGHT: Angulation + Epoxy -->
-              <div>
-                <div class="section-card">
-                  <div class="section-head">Angulation In</div>
-                  <div class="section-body">
-                    <div class="form-grid g4">
-                      <div class="field"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
-                      <div class="field"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
-                      <div class="field"><label>Right</label><input id="fAngInRight" style="text-align:center" onchange="markDirty()"/></div>
-                      <div class="field"><label>Left</label><input id="fAngInLeft" style="text-align:center" onchange="markDirty()"/></div>
-                    </div>
-                    <div class="form-grid g2" style="margin-top:4px">
-                      <div class="field"><label>Incoming Epoxy</label><input id="fEpoxyIn" onchange="markDirty()"/></div>
-                      <div class="field"><label>BR Jig Size</label><input id="fBRJig" onchange="markDirty()"/></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="section-card">
-                  <div class="section-head">Comments</div>
-                  <div class="section-body" style="padding:4px 8px">
-                    <textarea rows="2" id="fScopeNotes" style="width:100%;font-size:11px" onchange="markDirty()" placeholder="Scope-in notes..."></textarea>
-                  </div>
-                </div>
+              <div style="flex:1;overflow-y:auto;min-height:120px">
+                <table class="items" id="repairItemsTable">
+                  <thead style="position:sticky;top:0;z-index:1">
+                    <tr>
+                      <th style="width:80px">TSI Code</th>
+                      <th>Repair Item</th>
+                      <th style="width:55px;text-align:center">UA/NWT</th>
+                      <th style="width:55px;text-align:center">W/N/C/A</th>
+                      <th style="width:48px;text-align:center">Appr</th>
+                      <th style="width:85px;text-align:right">Amount</th>
+                      <th style="width:75px">Tech 1</th>
+                      <th style="width:75px">Tech 2</th>
+                      <th style="width:42px;text-align:center">Pri</th>
+                      <th>Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody id="repairItemsBody">
+                    <tr><td colspan="10" class="empty-state">No repair items</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <!-- REPAIR ITEMS TABLE (the main work area) -->
-            <div class="section-card" style="margin-top:2px">
-              <div class="section-head">
-                Repair Items
-                <button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 8px" onclick="openItemPicker()">+ Add Item</button>
-              </div>
-              <table class="items" id="repairItemsTable">
-                <thead>
-                  <tr>
-                    <th>TSI Code</th>
-                    <th>Repair Item</th>
-                    <th style="width:50px;text-align:center">UA/NWT</th>
-                    <th style="width:50px;text-align:center">W/N/C/A</th>
-                    <th style="width:45px;text-align:center">Appr</th>
-                    <th style="width:75px;text-align:right">Amount</th>
-                    <th style="width:60px">Tech 1</th>
-                    <th style="width:60px">Tech 2</th>
-                    <th style="width:40px;text-align:center">Pri</th>
-                    <th>Comments</th>
-                  </tr>
-                </thead>
-                <tbody id="repairItemsBody">
-                  <tr><td colspan="10" class="empty-state">No repair items</td></tr>
-                </tbody>
-              </table>
+            <!-- NOTES -->
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:4px">
+              <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;flex-shrink:0">Notes</span>
+              <input id="fScopeNotes" onchange="markDirty()" placeholder="Scope-in notes..." style="flex:1;height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);background:var(--white);outline:none"/>
             </div>
 
             <!-- TOTALS + ACTIONS (sticky footer feel) -->
@@ -395,16 +479,13 @@
               <div class="action-group"><div class="lbl">Approved</div><div class="val green" id="aTotalApproved">$0.00</div></div>
               <div class="action-group"><div class="lbl">Unapproved</div><div class="val red" id="aTotalUnapproved">$0.00</div></div>
               <div class="action-group"><div class="lbl">Consumption</div><div class="val" id="aTotalConsumption">$0.00</div></div>
-              <div class="divider" style="height:30px;margin:0 6px"></div>
-              <button class="btn btn-outline">Slips</button>
-              <button class="btn btn-outline">Amend</button>
-              <button class="btn btn-outline">Defects</button>
-              <button class="btn btn-outline">Techs</button>
-              <button class="btn btn-outline">Inventory</button>
               <div style="flex:1"></div>
-              <div class="field" style="width:120px"><label>Out Vendor</label><input id="fOutVendor" onchange="markDirty()"/></div>
-              <div class="field" style="width:120px"><label>Out Tracking</label><input id="fOutTracking" onchange="markDirty()"/></div>
-              <div class="field" style="width:80px"><label>Out Cost</label><input id="fOutCost" onchange="markDirty()"/></div>
+              <div class="field" style="width:105px"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly/></div>
+              <div class="field" style="width:105px"><label>Override</label><input id="fMaxOverride" onchange="markDirty()" placeholder="—"/></div>
+              <div class="divider" style="height:30px;margin:0 4px"></div>
+              <div class="field" style="min-width:160px;flex:1"><label>Out Vendor</label><input id="fOutVendor" onchange="markDirty()"/></div>
+              <div class="field" style="min-width:180px;flex:1"><label>Out Tracking</label><input id="fOutTracking" onchange="markDirty()"/></div>
+              <div class="field" style="width:105px"><label>Out Cost</label><input id="fOutCost" onchange="markDirty()"/></div>
             </div>
 
           </div><!-- /pane-scopein -->
@@ -412,53 +493,55 @@
           <!-- ═══ PAGE 2: DETAILS ═══ -->
           <div class="tab-pane" id="pane-details">
 
-            <!-- TOP: TAT + Key Dates as ref-strip -->
-            <div class="ref-strip">
-              <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
-              <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
-              <span class="ref-item"><b>Date In</b> <span class="ref-val" id="hDateInRO2">—</span></span>
-              <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
-              <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
-            </div>
+            <!-- 3-COLUMN LAYOUT: Settings | Shipping | Billing -->
+            <div style="display:grid;grid-template-columns:380px 1fr 1fr;gap:8px">
 
-            <div style="display:grid;grid-template-columns:240px 1fr 1fr;gap:6px">
-
-              <!-- LEFT: Settings + Requisition merged -->
-              <div class="section-card">
-                <div class="section-head">Settings</div>
-                <div class="section-body">
-                  <div class="form-grid" style="grid-template-columns:1fr">
-                    <div class="field"><label>Pricing Category</label><select id="fPricingCat" onchange="markDirty()"></select></div>
+              <!-- LEFT: Settings — all the billing/order/toggle fields stacked -->
+              <div class="section-card" style="margin-bottom:0">
+                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
+                  Settings
+                  <div style="display:flex;gap:4px">
+                    <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">Labels</button>
+                    <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">GP</button>
+                  </div>
+                </div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
+                    <div class="field"><label>Pricing Cat</label><select id="fPricingCat" onchange="markDirty()"></select></div>
                     <div class="field"><label>Discount %</label><input id="fDiscount" onchange="markDirty()"/></div>
-                    <div class="field"><label>Reporting Group</label><input id="fReportGroup" onchange="markDirty()"/></div>
                     <div class="field"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"></select></div>
                     <div class="field"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"></select></div>
                     <div class="field"><label>Bill To</label><select id="fBillTo" onchange="markDirty()"><option value="C">Customer</option><option value="D">Distributor</option></select></div>
                     <div class="field"><label>Distributor</label><select id="fDistributor" onchange="markDirty()"></select></div>
-                    <div class="field"><label>Shipping Cost</label><input id="fShipCost" onchange="markDirty()"/></div>
+                    <div class="field"><label>Ship Cost</label><input id="fShipCost" onchange="markDirty()"/></div>
+                    <div class="field"><label>Report Group</label><input id="fReportGroup" onchange="markDirty()"/></div>
                     <div class="field"><label>Requisition</label><input id="fRequisition" onchange="markDirty()"/></div>
                     <div class="field"><label>Approval Name</label><input id="fApprName" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Inbound Tracking</label><input id="fTrackIn" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
                   </div>
-                  <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px">
-                    <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispAmounts" onchange="markDirty()"/><span class="slider"></span></label>Itemized Amounts</label>
-                    <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispDescrip" onchange="markDirty()"/><span class="slider"></span></label>Itemized Descriptions</label>
-                    <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispComp" onchange="markDirty()"/><span class="slider"></span></label>Customer Complaint</label>
+                  <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
+                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispAmounts" onchange="markDirty()"/><span class="slider"></span></label>Itemized Amounts</label>
+                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispDescrip" onchange="markDirty()"/><span class="slider"></span></label>Itemized Descriptions</label>
+                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispComp" onchange="markDirty()"/><span class="slider"></span></label>Customer Complaint</label>
                   </div>
                 </div>
               </div>
 
               <!-- CENTER: Shipping Address -->
-              <div class="addr-block">
-                <div class="addr-title">Shipping Address</div>
-                <div class="form-grid" style="grid-template-columns:1fr">
-                  <div class="field"><label>Name 1</label><input id="fShipName1" onchange="markDirty()"/></div>
-                  <div class="field"><label>Name 2 / Dept</label><input id="fShipName2" onchange="markDirty()"/></div>
-                  <div class="field"><label>Attention</label><input id="fShipAttn" onchange="markDirty()"/></div>
-                  <div class="field"><label>Address 1</label><input id="fShipAddr1" onchange="markDirty()"/></div>
-                  <div class="field"><label>Address 2</label><input id="fShipAddr2" onchange="markDirty()"/></div>
-                  <div class="form-grid g3">
-                    <div class="field"><label>City</label><input id="fShipCity" onchange="markDirty()"/></div>
+              <div class="section-card" style="margin-bottom:0">
+                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
+                  Shipping Address
+                  <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)" onclick="copyShipFromClient()">Copy from Client</button>
+                </div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
+                    <div class="field span2"><label>Name 1</label><input id="fShipName1" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Name 2 / Dept</label><input id="fShipName2" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Attention</label><input id="fShipAttn" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Address 1</label><input id="fShipAddr1" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Address 2</label><input id="fShipAddr2" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>City</label><input id="fShipCity" onchange="markDirty()"/></div>
                     <div class="field"><label>State</label><input id="fShipState" onchange="markDirty()"/></div>
                     <div class="field"><label>Zip</label><input id="fShipZip" onchange="markDirty()"/></div>
                   </div>
@@ -466,64 +549,51 @@
               </div>
 
               <!-- RIGHT: Billing Address -->
-              <div class="addr-block">
-                <div class="addr-title">Billing Address</div>
-                <div class="form-grid" style="grid-template-columns:1fr">
-                  <div class="field"><label>Name 1</label><input id="fBillName1" onchange="markDirty()"/></div>
-                  <div class="field"><label>Name 2</label><input id="fBillName2" onchange="markDirty()"/></div>
-                  <div class="field"><label>Address 1</label><input id="fBillAddr1" onchange="markDirty()"/></div>
-                  <div class="field"><label>Address 2</label><input id="fBillAddr2" onchange="markDirty()"/></div>
-                  <div class="form-grid g3">
-                    <div class="field"><label>City</label><input id="fBillCity" onchange="markDirty()"/></div>
+              <div class="section-card" style="margin-bottom:0">
+                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
+                  Billing Address
+                  <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)" onclick="copyBillFromShip()">Same as Shipping</button>
+                </div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
+                    <div class="field span2"><label>Name 1</label><input id="fBillName1" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Name 2</label><input id="fBillName2" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Address 1</label><input id="fBillAddr1" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Address 2</label><input id="fBillAddr2" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>City</label><input id="fBillCity" onchange="markDirty()"/></div>
                     <div class="field"><label>State</label><input id="fBillState" onchange="markDirty()"/></div>
                     <div class="field"><label>Zip</label><input id="fBillZip" onchange="markDirty()"/></div>
+                    <div class="field span2"><label>Email</label><input id="fBillEmail" onchange="markDirty()"/></div>
                   </div>
-                  <div class="field"><label>Email</label><input id="fBillEmail" onchange="markDirty()"/></div>
                 </div>
               </div>
             </div>
 
-            <!-- BOTTOM: Inbound + Integration — compact single row -->
-            <div style="display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:4px">
-              <div class="section-card" style="margin-bottom:0">
-                <div class="section-head">Inbound</div>
-                <div class="section-body">
-                  <div class="form-grid" style="grid-template-columns:1fr 200px">
-                    <div class="field"><label>Inbound Tracking</label><input id="fTrackIn" onchange="markDirty()"/></div>
-                    <div class="field"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
-                  </div>
-                </div>
-              </div>
-              <div style="display:flex;gap:4px;align-items:center;padding-top:14px">
-                <button class="btn btn-outline" style="height:24px">Labels</button>
-                <button class="btn btn-outline" style="height:24px">Integrate to GP</button>
-              </div>
-            </div>
           </div><!-- /pane-details -->
 
           <!-- ═══ PAGE 3: OUTGOING ═══ -->
           <div class="tab-pane" id="pane-outgoing">
 
-            <!-- Angulation Out — compact ref-style row -->
-            <div class="ref-strip">
-              <span class="ref-item" style="font-weight:700;color:var(--navy);font-size:10px">ANG OUT</span>
-              <span class="ref-item"><b>Up</b> <input id="fAngOutUp" class="ref-input" style="width:50px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Down</b> <input id="fAngOutDown" class="ref-input" style="width:50px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Right</b> <input id="fAngOutRight" class="ref-input" style="width:50px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Left</b> <input id="fAngOutLeft" class="ref-input" style="width:50px;text-align:center" onchange="markDirty()"/></span>
+            <!-- Angulation Out — uses same ref-strip style -->
+            <div class="ref-strip" style="justify-content:flex-start;gap:16px;border-left-color:var(--steel)">
+              <span class="ref-item" style="font-weight:700;color:var(--navy);font-size:10.5px">ANGULATION OUT</span>
+              <span class="ref-item"><b>Up</b> <input id="fAngOutUp" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Down</b> <input id="fAngOutDown" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Right</b> <input id="fAngOutRight" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
+              <span class="ref-item"><b>Left</b> <input id="fAngOutLeft" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 
-              <!-- LEFT: Package + Shipment merged -->
+              <!-- LEFT: Package + Shipment -->
               <div class="section-card">
-                <div class="section-head">Package &amp; Shipment <button class="btn btn-blue" style="height:20px;padding:0 12px;font-size:9px;margin-left:auto">Create Label</button></div>
-                <div class="section-body">
-                  <div class="form-grid g2">
+                <div class="section-head">Package &amp; Shipment <button class="btn btn-blue" style="height:24px;padding:0 12px;font-size:10px;margin-left:auto">Create Label</button></div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div class="form-grid g2" style="gap:6px 10px">
                     <div class="field"><label>Package Type</label><select id="fPackageType" onchange="markDirty()"><option>Standard Box</option><option>Custom Case</option></select></div>
                     <div class="field"><label>Weight</label><input id="fShipWeight" onchange="markDirty()"/></div>
                     <div class="field"><label>Ship to Name</label><input id="fShipToName" onchange="markDirty()"/></div>
-                    <div class="field" style="flex-direction:row;align-items:center;gap:5px;padding-top:12px"><label class="toggle"><input type="checkbox" id="fTrackRequired" onchange="markDirty()"/><span class="slider"></span></label><span style="font-size:9px;font-weight:600">Tracking Req</span></div>
+                    <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><label class="toggle"><input type="checkbox" id="fTrackRequired" onchange="markDirty()"/><span class="slider"></span></label><span style="font-size:10px;font-weight:600">Tracking Req</span></div>
                     <div class="field"><label>Ship Date</label><input type="date" id="fShipDate" onchange="markDirty()"/></div>
                     <div class="field"><label>Outbound Svc Level</label><input id="fOutSvcLevel" onchange="markDirty()"/></div>
                     <div class="field span2"><label>Outbound Tracking</label><input id="fTrackOut" onchange="markDirty()"/></div>
@@ -538,30 +608,30 @@
               <div>
                 <div class="section-card">
                   <div class="section-head">Invoice</div>
-                  <div class="section-body">
-                    <div class="form-grid" style="grid-template-columns:1fr 1fr auto">
+                  <div class="section-body" style="padding:8px 12px">
+                    <div class="form-grid" style="grid-template-columns:1fr 1fr auto;gap:6px 10px">
                       <div class="field"><label>Invoice #</label><input id="fInvoiceNum" class="ro" readonly/></div>
                       <div class="field"><label>Invoice Date</label><input type="date" id="fInvoiceDate" onchange="markDirty()"/></div>
-                      <div class="field" style="justify-content:end"><button class="btn btn-outline" style="height:24px">Email</button></div>
+                      <div class="field" style="justify-content:end"><button class="btn btn-outline">Email</button></div>
                     </div>
-                    <div style="display:flex;gap:4px;margin-top:4px">
-                      <button class="btn btn-blue" style="height:24px;flex:1">Draft Invoice</button>
-                      <button class="btn btn-danger" style="height:24px;flex:1">Void Invoice</button>
+                    <div style="display:flex;gap:6px;margin-top:8px">
+                      <button class="btn btn-blue" style="flex:1">Draft Invoice</button>
+                      <button class="btn btn-danger" style="flex:1">Void Invoice</button>
                     </div>
                   </div>
                 </div>
 
-                <!-- Accessories — inline 3-col -->
+                <!-- Accessories -->
                 <div class="section-card">
                   <div class="section-head">Accessories Included</div>
-                  <div class="section-body" style="padding:4px 10px">
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 12px">
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCase" onchange="markDirty()"/><span class="slider"></span></label>Case</label>
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCap" onchange="markDirty()"/><span class="slider"></span></label>Cap</label>
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclWaterCap" onchange="markDirty()"/><span class="slider"></span></label>Water Res Cap</label>
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclVideoPlug" onchange="markDirty()"/><span class="slider"></span></label>Video Plug</label>
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclMouthpiece" onchange="markDirty()"/><span class="slider"></span></label>Mouthpiece</label>
-                      <label style="font-size:9px;display:flex;align-items:center;gap:5px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclAngleKnob" onchange="markDirty()"/><span class="slider"></span></label>Angle Knob</label>
+                  <div class="section-body" style="padding:8px 12px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px">
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCase" onchange="markDirty()"/><span class="slider"></span></label>Case</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCap" onchange="markDirty()"/><span class="slider"></span></label>Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclWaterCap" onchange="markDirty()"/><span class="slider"></span></label>Water Res Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclVideoPlug" onchange="markDirty()"/><span class="slider"></span></label>Video Plug</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclMouthpiece" onchange="markDirty()"/><span class="slider"></span></label>Mouthpiece</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclAngleKnob" onchange="markDirty()"/><span class="slider"></span></label>Angle Knob</label>
                     </div>
                   </div>
                 </div>
@@ -575,7 +645,7 @@
               <div class="section-card">
                 <div class="section-head">Expenses</div>
                 <div class="expense-col">
-                  <div class="exp-row"><span class="exp-label">Expense (Total)</span><span class="exp-val" id="eExpense">$0.00</span></div>
+                  <div class="exp-row" style="background:#F0F4FA;font-weight:700"><span class="exp-label" style="font-size:11px">Expense (Total)</span><span class="exp-val" id="eExpense" style="font-size:13px">$0.00</span></div>
                   <div class="exp-row"><span class="exp-label">Labor</span><span class="exp-val" id="eLabor">$0.00</span></div>
                   <div class="exp-row"><span class="exp-label">Inventory</span><span class="exp-val" id="eInventory">$0.00</span></div>
                   <div class="exp-row"><span class="exp-label">Shipping</span><span class="exp-val" id="eShipping">$0.00</span></div>
@@ -587,9 +657,9 @@
               <div class="section-card">
                 <div class="section-head">Revenue &amp; Margin</div>
                 <div class="expense-col">
-                  <div class="exp-row"><span class="exp-label">Repair Margin</span><span class="exp-val" id="eMargin">$0.00</span></div>
+                  <div class="exp-row" style="background:#F0FDF4"><span class="exp-label" style="font-size:11px;font-weight:700">Revenue</span><span class="exp-val" id="eRevenue" style="color:var(--green);font-size:13px">$0.00</span></div>
                   <div class="exp-row"><span class="exp-label">Total Expense</span><span class="exp-val" id="eTotalExp">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Revenue</span><span class="exp-val green" id="eRevenue" style="color:var(--green)">$0.00</span></div>
+                  <div class="exp-row" style="background:#F0F4FA"><span class="exp-label" style="font-weight:700">Repair Margin</span><span class="exp-val" id="eMargin" style="font-size:13px">$0.00</span></div>
                   <div class="exp-row"><span class="exp-label">Margin %</span><span class="exp-val" id="eMarginPct">0%</span></div>
                 </div>
               </div>
@@ -598,73 +668,79 @@
 
           <!-- ═══ PAGE 5: COMMENTS ═══ -->
           <div class="tab-pane" id="pane-comments">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
-              <div class="seg-bar">
-                <button class="seg-btn active" onclick="setCommentType(this,'internal')">Internal</button>
-                <button class="seg-btn" onclick="setCommentType(this,'external')">External</button>
+            <div class="section-card" style="flex:1;display:flex;flex-direction:column">
+              <div class="section-head" style="justify-content:flex-start;gap:16px">
+                <span>Comments</span>
+                <div class="seg-bar" style="margin:0">
+                  <button class="seg-btn active" onclick="setCommentType(this,'internal')">Internal</button>
+                  <button class="seg-btn" onclick="setCommentType(this,'external')">External</button>
+                </div>
+                <div class="seg-bar" style="margin:0">
+                  <button class="seg-btn active" onclick="setCommentSubtype(this,'rework')">Rework</button>
+                  <button class="seg-btn" onclick="setCommentSubtype(this,'blind')">Blind</button>
+                </div>
+                <div class="seg-bar" style="margin:0">
+                  <span style="font-size:9px;font-weight:600;color:var(--navy);padding:3px 8px">D&I:</span>
+                  <button class="seg-btn active" onclick="setCommentDI(this,'rolling')">Rolling</button>
+                  <button class="seg-btn" onclick="setCommentDI(this,'oneoff')">One-Off</button>
+                </div>
               </div>
-              <div class="seg-bar">
-                <button class="seg-btn active" onclick="setCommentSubtype(this,'rework')">Rework</button>
-                <button class="seg-btn" onclick="setCommentSubtype(this,'blind')">Blind</button>
-              </div>
-              <div class="seg-bar">
-                <span style="font-size:9px;font-weight:600;color:var(--muted);padding:3px 8px">D&I:</span>
-                <button class="seg-btn active" onclick="setCommentDI(this,'rolling')">Rolling</button>
-                <button class="seg-btn" onclick="setCommentDI(this,'oneoff')">One-Off</button>
+              <div class="section-body" style="flex:1;padding:0">
+                <textarea id="fRepairComments" style="width:100%;height:100%;min-height:200px;border:none;border-radius:0;padding:10px 14px;font-size:12px;font-family:'Inter',Arial,sans-serif;line-height:1.6;resize:none;outline:none;color:var(--text)" onchange="markDirty()" placeholder="Enter comments..."></textarea>
               </div>
             </div>
-            <textarea id="fRepairComments" rows="12" style="width:100%;border:1px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:vertical;outline:none" onchange="markDirty()" placeholder="Enter comments..."></textarea>
           </div><!-- /pane-comments -->
 
           <!-- ═══ PAGE 6: INVENTORY (Parts Consumed) ═══ -->
           <div class="tab-pane" id="pane-inventory">
-            <div class="section-card" style="margin-bottom:0">
-              <div class="section-head">Parts Used
+            <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column">
+              <div class="section-head" style="background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;padding:8px 14px;font-size:11px">
+                Parts Used
                 <div style="display:flex;gap:4px;margin-left:auto">
-                  <button class="btn btn-navy" style="height:20px;font-size:9px" onclick="addInventoryRow()">+ Add</button>
-                  <button class="btn btn-outline" style="height:20px;font-size:9px" onclick="postInventory()">Post</button>
+                  <button class="btn" style="height:24px;font-size:10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="addInventoryRow()">+ Add</button>
+                  <button class="btn" style="height:24px;font-size:10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="postInventory()">Post</button>
                 </div>
               </div>
-              <div style="overflow-x:auto">
+              <div style="flex:1;overflow-y:auto">
                 <table class="items" id="invTable">
-                  <thead><tr>
-                    <th style="width:90px">Lot #</th>
-                    <th style="width:50px">Qty</th>
+                  <thead style="position:sticky;top:0;z-index:1"><tr>
+                    <th style="width:150px">Lot #</th>
+                    <th style="width:55px">Qty</th>
                     <th>Item Description</th>
                     <th>Size</th>
-                    <th style="width:50px">Posted</th>
+                    <th style="width:60px">Posted</th>
                     <th style="width:40px"></th>
                   </tr></thead>
                   <tbody id="invBody">
-                    <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px;font-size:10px">No parts recorded</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-size:11px">No parts recorded</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
             <!-- Quick-add bar -->
-            <div class="action-bar" style="margin-top:4px">
-              <div class="field" style="flex:0 0 120px"><label>Lot Number</label><input id="invLot" placeholder="Lot #"/></div>
-              <div class="field" style="flex:0 0 60px"><label>Qty</label><input id="invQty" type="number" value="1" min="1"/></div>
-              <button class="btn btn-navy" style="height:24px;margin-top:12px" onclick="addInventoryRow()">Add</button>
-              <button class="btn btn-outline" style="height:24px;margin-top:12px" onclick="clearInventoryInputs()">Clear</button>
+            <div class="action-bar" style="margin-top:6px">
+              <div class="field" style="flex:0 0 180px"><label>Lot Number</label><input id="invLot" placeholder="Lot #"/></div>
+              <div class="field" style="flex:0 0 80px"><label>Qty</label><input id="invQty" type="number" value="1" min="1"/></div>
+              <button class="btn btn-navy" style="margin-top:12px" onclick="addInventoryRow()">Add</button>
+              <button class="btn btn-outline" style="margin-top:12px" onclick="clearInventoryInputs()">Clear</button>
             </div>
           </div><!-- /pane-inventory -->
 
           <!-- ═══ PAGE 7: STATUS (Audit Trail) ═══ -->
           <div class="tab-pane" id="pane-status">
-            <div class="section-card" style="margin-bottom:0">
-              <div class="section-head">Repair History</div>
-              <div style="overflow-x:auto">
+            <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column">
+              <div class="section-head" style="background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;padding:8px 14px;font-size:11px">Status History</div>
+              <div style="flex:1;overflow-y:auto">
                 <table class="audit" id="statusTable">
-                  <thead><tr>
+                  <thead style="position:sticky;top:0;z-index:1"><tr>
                     <th>Description</th>
-                    <th style="width:140px">Date / Time</th>
-                    <th style="width:110px">User</th>
+                    <th style="width:165px">Date / Time</th>
+                    <th style="width:130px">User</th>
                     <th style="width:60px">Voided</th>
                     <th>Comments</th>
                   </tr></thead>
                   <tbody id="statusBody">
-                    <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;font-size:10px">No status history</td></tr>
+                    <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-size:11px">No status history</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -673,33 +749,34 @@
 
           <!-- ═══ PAGE 8: DOCUMENTS ═══ -->
           <div class="tab-pane" id="pane-documents">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <div class="seg-bar">
-                <button class="seg-btn active" onclick="setDocFilter(this,'incoming')">Incoming</button>
-                <button class="seg-btn" onclick="setDocFilter(this,'outgoing')">Outgoing</button>
-                <button class="seg-btn" onclick="setDocFilter(this,'paperwork')">Paperwork</button>
+            <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column">
+              <div class="section-head" style="background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;padding:8px 14px;font-size:11px;gap:12px">
+                Documents
+                <div class="seg-bar" style="margin:0;border-color:rgba(255,255,255,.3)">
+                  <button class="seg-btn active" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.2)" onclick="setDocFilter(this,'incoming')">Incoming</button>
+                  <button class="seg-btn" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="setDocFilter(this,'outgoing')">Outgoing</button>
+                  <button class="seg-btn" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="setDocFilter(this,'paperwork')">Paperwork</button>
+                </div>
+                <div style="margin-left:auto;display:flex;gap:4px">
+                  <button class="btn" style="height:24px;font-size:10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="captureDoc()">Capture</button>
+                  <button class="btn" style="height:24px;font-size:10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="addDoc()">Add File</button>
+                </div>
               </div>
-              <div style="margin-left:auto;display:flex;gap:4px">
-                <button class="btn btn-navy" style="height:24px" onclick="captureDoc()">Capture</button>
-                <button class="btn btn-outline" style="height:24px" onclick="addDoc()">Add File</button>
-              </div>
-            </div>
-            <div class="section-card" style="margin-bottom:0">
-              <div style="overflow-x:auto">
+              <div style="flex:1;overflow-y:auto">
                 <table class="audit" id="docTable">
-                  <thead><tr>
+                  <thead style="position:sticky;top:0;z-index:1"><tr>
                     <th>Document</th>
-                    <th style="width:120px">Date Uploaded</th>
-                    <th style="width:60px">View</th>
-                    <th style="width:60px">Remove</th>
+                    <th style="width:155px">Date Uploaded</th>
+                    <th style="width:70px">View</th>
+                    <th style="width:70px">Remove</th>
                   </tr></thead>
                   <tbody id="docBody">
-                    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;font-size:10px">No documents uploaded</td></tr>
+                    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:11px">No documents uploaded</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
-            <div class="drop-zone" style="margin-top:6px" id="docDropZone">
+            <div class="drop-zone" style="margin-top:8px" id="docDropZone">
               Drop files here or click to upload
               <input type="file" id="docFileInput" style="display:none" multiple/>
             </div>
@@ -709,6 +786,77 @@
     </div><!-- /repair-detail -->
   </div><!-- /main -->
 </div><!-- /shell -->
+
+<!-- NEW WORK ORDER MODAL -->
+<div class="nwo-overlay" id="nwoModal" onclick="if(event.target===this)closeNWO()">
+  <div class="nwo-modal">
+    <div class="nwo-head">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Repair Search</h2>
+      <button class="nwo-close" onclick="closeNWO()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="nwo-body">
+      <div class="nwo-search">
+        <div class="ms-col">
+          <div class="ms-row"><span class="ms-label">W.O. #</span><input type="text" class="ms-input" id="nwoSearchWO"/></div>
+          <div class="ms-row"><span class="ms-label">P.O. #</span><input type="text" class="ms-input" id="nwoSearchPO"/></div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-row"><span class="ms-label">Serial #</span><input type="text" class="ms-input" id="nwoSearchSerial"/></div>
+          <div class="ms-row"><span class="ms-label"></span><label class="ms-chk-item"><input type="checkbox" id="nwoOnlyOpen" checked/> <span>Only Open Repairs</span></label></div>
+        </div>
+        <div class="ms-col">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label class="ms-chk-item"><input type="checkbox" id="nwoInclInactive"/> <span style="color:var(--muted)">Include Inactive Clients/Departments</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="nwo-btn-row">
+        <button class="btn-search" onclick="nwoSearch()">Search</button>
+      </div>
+      <div class="nwo-results">
+        <table>
+          <thead><tr>
+            <th style="width:20%">Client</th>
+            <th style="width:16%">Department</th>
+            <th style="width:14%">Work Order</th>
+            <th style="width:12%">Date In</th>
+            <th style="width:12%">Model</th>
+            <th style="width:16%">Serial Number</th>
+            <th style="width:10%">P.O. #</th>
+          </tr></thead>
+          <tbody id="nwoResults">
+            <tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="nwo-foot">
+      <div class="nwo-create-form" id="nwoCreateForm">
+        <span style="font-size:11px;font-weight:700;color:var(--navy);white-space:nowrap">New Work Order:</span>
+        <div class="nwo-cp" id="nwoCpWrap">
+          <input type="text" class="nwo-cp-input" id="nwoCpInput" placeholder="Type client name, city, or ID..." autocomplete="off"/>
+          <div class="nwo-cp-dd" id="nwoCpDropdown"></div>
+        </div>
+        <div class="nwo-cp-sel" id="nwoCpSelected">
+          <div>
+            <div class="nwo-cp-sel-name" id="nwoCpSelName"></div>
+            <div class="nwo-cp-sel-detail" id="nwoCpSelDetail"></div>
+          </div>
+          <button class="nwo-cp-sel-clear" onclick="nwoClearClient()" title="Change client">&times;</button>
+        </div>
+        <select style="height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;min-width:180px" id="nwoDeptSelect" disabled>
+          <option value="" disabled selected>-- Select Dept --</option>
+        </select>
+        <button class="btn" style="height:34px;padding:0 18px;background:var(--navy);color:#fff;font-weight:700;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap" onclick="nwoStartOrder()">Start Work Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-left:4px"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="nwo-actions" id="nwoActions">
+        <button class="btn btn-outline" onclick="closeNWO()">Cancel</button>
+        <button class="btn" id="nwoBtnOpen" style="height:34px;padding:0 18px;background:var(--blue);color:#fff;font-weight:600;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none" onclick="nwoOpenSelected()">Open Selected</button>
+        <button class="btn" style="height:34px;padding:0 18px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px" onclick="nwoRevealCreate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create New</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- REPAIR ITEM PICKER OVERLAY -->
 <div class="picker-overlay" id="itemPicker" onclick="if(event.target===this)closeItemPicker()">
@@ -723,6 +871,13 @@
     </div>
     <div class="picker-list" id="itemPickerList">
       <div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Loading catalog...</div>
+    </div>
+    <div class="picker-footer" id="pickerFooter" style="display:none;padding:8px 12px;border-top:1px solid var(--border);background:#F0F4FA;align-items:center;justify-content:space-between">
+      <span id="pickerSelectedCount" style="font-size:11px;font-weight:600;color:var(--navy)">0 selected</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" onclick="clearPickerSelections()">Clear</button>
+        <button class="btn" style="background:var(--green);color:#fff;font-weight:600" onclick="addSelectedItems()">Add Items</button>
+      </div>
     </div>
   </div>
 </div>
@@ -802,13 +957,14 @@ async function loadRepair(repairKey) {
     updateSaveStatus('ready');
     populateDetail(d);
 
-    // Load sub-tabs in parallel (non-blocking)
+    // Load sub-tabs + scope history in parallel (non-blocking)
     Promise.all([
       loadRepairItems(repairKey),
       loadRepairInventory(repairKey),
       loadRepairStatusHistory(repairKey),
       loadRepairDocuments(repairKey),
       loadRepairFlags(repairKey),
+      loadScopeHistory(),
     ]).catch(e => console.warn('[TSI Repairs] Sub-tab load error:', e.message));
   } catch (e) {
     console.warn('[TSI Repairs] Detail load failed:', e.message);
@@ -922,7 +1078,7 @@ function populateDetail(d) {
   document.getElementById('hDateOutRO').textContent = d.dtDateOut ? fmtDate(d.dtDateOut) : '—';
 
   // ── SCOPE IN TAB ──
-  document.getElementById('fComplaint').value = d.sComplaintDesc || '';
+  document.getElementById('fComplaint').textContent = d.sComplaintDesc || '';
   setSelectVal('fRepairReason', d.lRepairReasonKey);
   document.getElementById('fMaxCharge').value = d.mMaxCharge ? fmtMoney(d.mMaxCharge) : '';
   document.getElementById('fMaxOverride').value = '';
@@ -1066,14 +1222,14 @@ function renderRepairItems(ds) {
     return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')">' +
       '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
       '<td>' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sUANWT||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sFixType||item.sWNCA||'') + '</td>' +
+      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: UA / NWT / —"><span style="' + uanwtStyle(item.sUANWT) + '">' + (item.sUANWT||'—') + '</span></td>' +
+      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: W / N / C / A / —"><span style="' + wncaStyle(item.sFixType||item.sWNCA) + '">' + (item.sFixType||item.sWNCA||'—') + '</span></td>' +
       '<td style="text-align:center;' + apprClass + '">' + appr + '</td>' +
       '<td style="text-align:right">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
       '<td>' + (item.sTechInits||item.sTech1||'') + '</td>' +
       '<td>' + (item.sTech2Inits||item.sTech2||'') + '</td>' +
       '<td style="text-align:center;' + (pri==='Y'?'font-weight:700;color:var(--navy)':'') + '">' + pri + '</td>' +
-      '<td style="font-size:10px;color:var(--muted)">' + (item.sComments||'') + '</td></tr>';
+      '<td style="font-size:10px;color:var(--red);font-weight:500">' + (item.sComments||'') + '</td></tr>';
   }).join('');
   updateItemTotals();
 }
@@ -1096,9 +1252,129 @@ function selectItemRow(tr, idx) {
   _selectedItemIdx = idx;
 }
 
-// ── Item Picker ──
+// ── Right-click context menu for repair items ──
+let _ctxItemIdx = -1;
+function initItemContextMenu() {
+  const tbody = document.getElementById('repairItemsBody');
+  tbody.addEventListener('contextmenu', function(e) {
+    const tr = e.target.closest('tr');
+    if (!tr || tr.querySelector('.empty-state')) return;
+    e.preventDefault();
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    _ctxItemIdx = rows.indexOf(tr);
+    if (_ctxItemIdx < 0) return;
+    selectItemRow(tr, _ctxItemIdx);
+    const menu = document.getElementById('itemCtxMenu');
+    const item = _repairItems[_ctxItemIdx];
+    document.getElementById('ctxItemLabel').textContent = (item.sItemDescription || item.sTSICode || 'Item #' + (_ctxItemIdx + 1));
+    // Toggle approved text
+    const apprEl = document.getElementById('ctxToggleApproved');
+    apprEl.querySelector('.ctx-text').textContent = item.sApproved === 'Y' ? 'Mark Unapproved' : 'Mark Approved';
+    // Toggle primary text
+    const priEl = document.getElementById('ctxTogglePrimary');
+    priEl.querySelector('.ctx-text').textContent = item.sPrimaryRepair === 'Y' ? 'Unset Primary' : 'Set as Primary';
+    // Position menu
+    menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+    menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+    menu.classList.add('open');
+  });
+  document.addEventListener('click', function() {
+    document.getElementById('itemCtxMenu').classList.remove('open');
+  });
+  document.addEventListener('contextmenu', function(e) {
+    if (!e.target.closest('#repairItemsBody')) {
+      document.getElementById('itemCtxMenu').classList.remove('open');
+    }
+  });
+}
+
+function approveAllItems() {
+  if (!_repairItems.length) return;
+  _repairItems.forEach(item => item.sApproved = 'Y');
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+function unapproveAllItems() {
+  if (!_repairItems.length) return;
+  _repairItems.forEach(item => item.sApproved = 'N');
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+
+// ── Click-to-cycle for UA/NWT and W/N/C/A ──
+const _uanwtCycle = ['UA','NWT',''];
+const _uanwtLabels = {UA:'User Abuse',NWT:'Normal Wear & Tear','':'—'};
+function cycleUANWT(idx) {
+  const item = _repairItems[idx];
+  if (!item) return;
+  const cur = item.sUANWT || '';
+  const pos = _uanwtCycle.indexOf(cur);
+  item.sUANWT = _uanwtCycle[(pos + 1) % _uanwtCycle.length];
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+function uanwtStyle(v) {
+  if (v === 'UA') return 'background:#FEF2F2;color:var(--red);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'NWT') return 'background:#FFFBEB;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  return 'color:var(--muted);font-size:10px';
+}
+
+const _wncaCycle = ['W','N','C','A',''];
+const _wncaLabels = {W:'Warranty',N:'Non-conformance',C:'Customer Service',A:'Amendment','':'—'};
+function cycleWNCA(idx) {
+  const item = _repairItems[idx];
+  if (!item) return;
+  const cur = item.sFixType || item.sWNCA || '';
+  const pos = _wncaCycle.indexOf(cur);
+  const next = _wncaCycle[(pos + 1) % _wncaCycle.length];
+  item.sFixType = next;
+  item.sWNCA = next;
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+function wncaStyle(v) {
+  if (v === 'W') return 'background:#F0FDF4;color:var(--green);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'N') return 'background:#FEF2F2;color:var(--red);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'C') return 'background:#EFF6FF;color:var(--blue);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'A') return 'background:#FFFBEB;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  return 'color:var(--muted);font-size:10px';
+}
+
+function ctxToggleApproved() {
+  if (_ctxItemIdx < 0 || !_repairItems[_ctxItemIdx]) return;
+  _repairItems[_ctxItemIdx].sApproved = _repairItems[_ctxItemIdx].sApproved === 'Y' ? 'N' : 'Y';
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+
+function ctxTogglePrimary() {
+  if (_ctxItemIdx < 0 || !_repairItems[_ctxItemIdx]) return;
+  const wasPrimary = _repairItems[_ctxItemIdx].sPrimaryRepair === 'Y';
+  // Clear all primary flags first
+  _repairItems.forEach(item => item.sPrimaryRepair = 'N');
+  // Toggle: if it was already primary, leave all cleared; otherwise set this one
+  if (!wasPrimary) _repairItems[_ctxItemIdx].sPrimaryRepair = 'Y';
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+
+function ctxDeleteItem() {
+  if (_ctxItemIdx < 0 || !_repairItems[_ctxItemIdx]) return;
+  const desc = _repairItems[_ctxItemIdx].sItemDescription || '';
+  _repairItems.splice(_ctxItemIdx, 1);
+  _ctxItemIdx = -1;
+  _selectedItemIdx = -1;
+  renderRepairItems(_repairItems);
+  markDirty();
+  console.log('[TSI] Deleted repair item:', desc);
+}
+
+// ── Item Picker (multi-select) ──
 let _itemCatalog = [], _itemCatalogFiltered = [];
+let _pickerSelected = new Set(); // keys of selected items
 async function openItemPicker() {
+  _pickerSelected.clear();
+  updatePickerFooter();
   document.getElementById('itemPicker').classList.add('open');
   document.getElementById('itemPickerSearch').value = '';
   document.getElementById('itemPickerSearch').focus();
@@ -1137,38 +1413,75 @@ function renderPickerList(items) {
     list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">No items found</div>';
     return;
   }
-  // Show max 200 for performance
   const shown = items.slice(0, 200);
-  list.innerHTML = shown.map(item =>
-    '<div class="picker-item" onclick="pickRepairItem(' + item.lRepairItemKey + ')">' +
-    '<span class="pi-code">' + (item.lRepairItemKey || '') + '</span>' +
+  list.innerHTML = shown.map(item => {
+    const key = item.lRepairItemKey;
+    const checked = _pickerSelected.has(key);
+    return '<div class="picker-item' + (checked ? ' pi-selected' : '') + '" onclick="togglePickerItem(' + key + ',this)">' +
+    '<span style="width:18px;height:18px;border:1.5px solid ' + (checked ? 'var(--green)' : 'var(--border-dk)') + ';border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:' + (checked ? 'var(--green)' : '#fff') + ';transition:all .12s">' +
+    (checked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '') + '</span>' +
+    '<span class="pi-code">' + (key || '') + '</span>' +
     '<span class="pi-desc">' + (item.sItemDescription || '') + '</span>' +
     '<span class="pi-type">' + (item.sInstrumentType || '') + '</span>' +
-    '</div>'
-  ).join('') + (items.length > 200 ? '<div style="text-align:center;padding:8px;color:var(--muted);font-size:10px">Showing 200 of ' + items.length + ' — refine your search</div>' : '');
+    '</div>';
+  }).join('') + (items.length > 200 ? '<div style="text-align:center;padding:8px;color:var(--muted);font-size:10px">Showing 200 of ' + items.length + ' — refine your search</div>' : '');
+  updatePickerFooter();
 }
 
-function pickRepairItem(repairItemKey) {
-  const item = _itemCatalog.find(x => x.lRepairItemKey === repairItemKey);
-  if (!item) return;
-  // Add to local list (API add endpoint not yet available)
-  _repairItems.push({
-    lRepairItemKey: item.lRepairItemKey,
-    sItemDescription: item.sItemDescription,
-    sApproved: 'N',
-    dblRepairPrice: 0,
-    sTechInits: '',
-    sTech2Inits: '',
-    sPrimaryRepair: '',
-    sFixType: '',
-    sUANWT: 'N',
-    sComments: '',
-    sTSICode: ''
+function togglePickerItem(key, el) {
+  if (_pickerSelected.has(key)) {
+    _pickerSelected.delete(key);
+    el.classList.remove('pi-selected');
+  } else {
+    _pickerSelected.add(key);
+    el.classList.add('pi-selected');
+  }
+  // Re-render the checkbox in this row
+  const cb = el.querySelector('span:first-child');
+  const checked = _pickerSelected.has(key);
+  cb.style.borderColor = checked ? 'var(--green)' : 'var(--border-dk)';
+  cb.style.background = checked ? 'var(--green)' : '#fff';
+  cb.innerHTML = checked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+  updatePickerFooter();
+}
+
+function updatePickerFooter() {
+  const count = _pickerSelected.size;
+  const footer = document.getElementById('pickerFooter');
+  footer.style.display = count > 0 ? 'flex' : 'none';
+  document.getElementById('pickerSelectedCount').textContent = count + ' item' + (count !== 1 ? 's' : '') + ' selected';
+}
+
+function clearPickerSelections() {
+  _pickerSelected.clear();
+  // Re-render current list
+  const term = document.getElementById('itemPickerSearch').value.trim().toLowerCase();
+  renderPickerList(term ? _itemCatalogFiltered : _itemCatalog);
+}
+
+function addSelectedItems() {
+  if (!_pickerSelected.size) return;
+  _pickerSelected.forEach(key => {
+    const item = _itemCatalog.find(x => x.lRepairItemKey === key);
+    if (!item) return;
+    _repairItems.push({
+      lRepairItemKey: item.lRepairItemKey,
+      sItemDescription: item.sItemDescription,
+      sApproved: 'N',
+      dblRepairPrice: 0,
+      sTechInits: '',
+      sTech2Inits: '',
+      sPrimaryRepair: '',
+      sFixType: '',
+      sUANWT: '',
+      sComments: '',
+      sTSICode: ''
+    });
   });
   renderRepairItems(_repairItems);
   closeItemPicker();
   markDirty();
-  console.log('[TSI] Added repair item:', item.sItemDescription, '(key:', repairItemKey, ') — local only, no API add endpoint yet');
+  console.log('[TSI] Added', _pickerSelected.size, 'repair items — local only');
 }
 
 function resetMaxCharge() {
@@ -1177,6 +1490,22 @@ function resetMaxCharge() {
     document.getElementById('fMaxCharge').value = _currentRepair.mMaxCharge ? fmtMoney(_currentRepair.mMaxCharge) : '';
     markDirty();
   }
+}
+
+// ── Address copy helpers ──
+function copyShipFromClient() {
+  // TODO: pull from client record when wired
+  console.log('[TSI] Copy shipping from client — not yet wired');
+}
+function copyBillFromShip() {
+  document.getElementById('fBillName1').value = document.getElementById('fShipName1').value;
+  document.getElementById('fBillName2').value = document.getElementById('fShipName2').value;
+  document.getElementById('fBillAddr1').value = document.getElementById('fShipAddr1').value;
+  document.getElementById('fBillAddr2').value = document.getElementById('fShipAddr2').value;
+  document.getElementById('fBillCity').value = document.getElementById('fShipCity').value;
+  document.getElementById('fBillState').value = document.getElementById('fShipState').value;
+  document.getElementById('fBillZip').value = document.getElementById('fShipZip').value;
+  markDirty();
 }
 
 // ── Autosave ──
@@ -1188,6 +1517,13 @@ async function autoSave() {
   _dirty = false;
   updateSaveStatus('saved');
 }
+function showToast(msg, ms) {
+  let t = document.getElementById('tsiToast');
+  if (!t) { t = document.createElement('div'); t.id = 'tsiToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;font-family:inherit;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._tid); t._tid = setTimeout(() => { t.style.opacity = '0'; }, ms || 3000);
+}
+
 function updateSaveStatus(state) {
   const wrap = document.getElementById('saveStatus');
   const icon = document.getElementById('saveIcon');
@@ -1215,6 +1551,376 @@ function onDeptChange() { /* future: load repairs for this dept */ }
 document.addEventListener('keydown', function(e) { if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); if (_dirty) autoSave(); } });
 
 function reloadRepairs() { initPage(); }
+
+// ── New Work Order ──
+// ── New Work Order Modal ──
+let _nwoSelectedRepair = null;
+let _nwoPickedClient = null;
+let _nwoCpHighlight = -1;
+
+function newRepair() {
+  _nwoSelectedRepair = null;
+  _nwoPickedClient = null;
+  document.getElementById('nwoSearchWO').value = '';
+  document.getElementById('nwoSearchPO').value = '';
+  document.getElementById('nwoSearchSerial').value = '';
+  document.getElementById('nwoOnlyOpen').checked = true;
+  document.getElementById('nwoResults').innerHTML = '<tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>';
+  nwoResetCreate();
+  document.getElementById('nwoActions').style.display = 'flex';
+  document.getElementById('nwoBtnOpen').style.opacity = '.5';
+  document.getElementById('nwoBtnOpen').style.pointerEvents = 'none';
+  document.getElementById('nwoModal').classList.add('open');
+}
+function closeNWO() { document.getElementById('nwoModal').classList.remove('open'); }
+
+function nwoResetCreate() {
+  _nwoPickedClient = null;
+  document.getElementById('nwoCreateForm').classList.remove('show');
+  document.getElementById('nwoCpWrap').style.display = '';
+  document.getElementById('nwoCpInput').value = '';
+  document.getElementById('nwoCpSelected').classList.remove('show');
+  document.getElementById('nwoCpDropdown').classList.remove('open');
+  const ds = document.getElementById('nwoDeptSelect');
+  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
+  ds.disabled = true;
+}
+
+function nwoRevealCreate() {
+  if (_nwoSelectedRepair) {
+    // User selected existing — just open it
+    nwoOpenSelected();
+    return;
+  }
+  document.getElementById('nwoActions').style.display = 'none';
+  document.getElementById('nwoCreateForm').classList.add('show');
+  document.getElementById('nwoCpInput').focus();
+}
+
+// Search existing repairs
+async function nwoSearch() {
+  const tbody = document.getElementById('nwoResults');
+  const woQ = document.getElementById('nwoSearchWO').value.trim().toLowerCase();
+  const serQ = document.getElementById('nwoSearchSerial').value.trim().toLowerCase();
+  const poQ = document.getElementById('nwoSearchPO').value.trim().toLowerCase();
+
+  _nwoSelectedRepair = null;
+  document.getElementById('nwoBtnOpen').style.opacity = '.5';
+  document.getElementById('nwoBtnOpen').style.pointerEvents = 'none';
+
+  if (!woQ && !serQ && !poQ) {
+    tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">Please enter a W.O. #, Serial #, or P.O. # to search.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '<tr><td colspan="7" class="msg-empty" style="color:var(--blue)">Searching...</td></tr>';
+
+  try {
+    const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+    const list = await API.getRepairList(svcKey);
+    let results = Array.isArray(list) ? list : [];
+
+    // Filter
+    results = results.filter(r => {
+      const matchWO = woQ ? (r.sWorkOrderNumber || '').toLowerCase().includes(woQ) : true;
+      const matchSer = serQ ? (r.sSerialNumber || '').toLowerCase().includes(serQ) : true;
+      const matchPO = poQ ? (r.sPurchaseOrder || '').toLowerCase().includes(poQ) : true;
+      return matchWO && matchSer && matchPO;
+    });
+
+    if (!results.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">No matching repairs found. Click <b>Create New</b> below to start a fresh work order.</td></tr>';
+    } else {
+      tbody.innerHTML = results.slice(0, 50).map(r =>
+        '<tr onclick="nwoSelectRow(this,' + r.lRepairKey + ')">' +
+        '<td style="font-weight:600">' + (r.sClientName || r.sShipName1 || '—') + '</td>' +
+        '<td>' + (r.sDepartmentName || r.sShipName2 || '—') + '</td>' +
+        '<td><code style="font-size:10px">' + (r.sWorkOrderNumber || '') + '</code></td>' +
+        '<td>' + fmtDate(r.dtDateIn) + '</td>' +
+        '<td>' + (r.sScopeTypeDesc || r.sModel || '—') + '</td>' +
+        '<td>' + (r.sSerialNumber || '—') + '</td>' +
+        '<td>' + (r.sPurchaseOrder || '') + '</td>' +
+        '</tr>'
+      ).join('');
+    }
+  } catch (e) {
+    // Demo fallback
+    tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">Search unavailable in demo mode. Click <b>Create New</b> to start a fresh work order.</td></tr>';
+  }
+}
+
+function nwoSelectRow(tr, repairKey) {
+  document.querySelectorAll('#nwoResults tr').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+  _nwoSelectedRepair = repairKey;
+  document.getElementById('nwoBtnOpen').style.opacity = '1';
+  document.getElementById('nwoBtnOpen').style.pointerEvents = 'all';
+  // Hide create form if visible
+  nwoResetCreate();
+  document.getElementById('nwoActions').style.display = 'flex';
+}
+
+function nwoOpenSelected() {
+  if (!_nwoSelectedRepair) return;
+  closeNWO();
+  loadRepair(_nwoSelectedRepair);
+}
+
+// Client picker in modal — uses _clients loaded at init
+function nwoRenderClientDropdown(query) {
+  const dd = document.getElementById('nwoCpDropdown');
+  const q = (query || '').toLowerCase();
+  const source = _clients.length ? _clients : [];
+  const matches = q ? source.filter(c => {
+    const name = (c.sClientName1 || c.sClientName || '').toLowerCase();
+    const id = String(c.lClientKey);
+    return name.includes(q) || id.includes(q);
+  }) : source;
+  _nwoCpHighlight = -1;
+
+  if (!matches.length) {
+    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">No clients found</div>';
+  } else {
+    dd.innerHTML = matches.slice(0, 30).map((c, i) => {
+      const name = c.sClientName1 || c.sClientName || ('Client ' + c.lClientKey);
+      const highlighted = q ? name.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi'), '<strong style="background:#FEFCE8;padding:0 1px">$1</strong>') : name;
+      // Count depts for this client
+      const deptCount = _departments.filter(d => d.lClientKey == c.lClientKey).length;
+      return '<div class="nwo-cp-item" data-idx="' + i + '" data-key="' + c.lClientKey + '" onmousedown="nwoPickClient(' + c.lClientKey + ')">' +
+        '<div class="nwo-cp-item-name">' + highlighted + '</div>' +
+        '<div class="nwo-cp-item-detail"><span style="font-weight:600;color:var(--steel)">#' + c.lClientKey + '</span>' +
+        (deptCount ? '<span style="color:var(--green)">' + deptCount + ' dept' + (deptCount > 1 ? 's' : '') + '</span>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+  dd.classList.add('open');
+}
+
+function nwoPickClient(clientKey) {
+  const c = _clients.find(x => x.lClientKey == clientKey);
+  if (!c) return;
+  _nwoPickedClient = c;
+  document.getElementById('nwoCpInput').value = '';
+  document.getElementById('nwoCpWrap').style.display = 'none';
+  document.getElementById('nwoCpSelName').textContent = c.sClientName1 || c.sClientName || '';
+  document.getElementById('nwoCpSelDetail').textContent = '#' + c.lClientKey;
+  document.getElementById('nwoCpSelected').classList.add('show');
+  document.getElementById('nwoCpDropdown').classList.remove('open');
+  // Populate dept dropdown for this client
+  const depts = _departments.filter(d => d.lClientKey == clientKey);
+  const ds = document.getElementById('nwoDeptSelect');
+  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>' +
+    depts.map(d => '<option value="' + d.lDepartmentKey + '">' + (d.sDepartmentName || 'Dept ' + d.lDepartmentKey) + '</option>').join('');
+  ds.disabled = false;
+}
+
+function nwoClearClient() {
+  _nwoPickedClient = null;
+  document.getElementById('nwoCpSelected').classList.remove('show');
+  document.getElementById('nwoCpWrap').style.display = '';
+  document.getElementById('nwoCpInput').value = '';
+  document.getElementById('nwoCpInput').focus();
+  const ds = document.getElementById('nwoDeptSelect');
+  ds.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
+  ds.disabled = true;
+}
+
+// Start new work order with selected client/dept
+function nwoStartOrder() {
+  if (!_nwoPickedClient) { showToast('Please select a client'); return; }
+  const deptKey = document.getElementById('nwoDeptSelect').value;
+  if (!deptKey) { showToast('Please select a department'); return; }
+
+  const clientKey = _nwoPickedClient.lClientKey;
+  const clientName = _nwoPickedClient.sClientName1 || _nwoPickedClient.sClientName || '';
+  const dept = _departments.find(d => d.lDepartmentKey == deptKey);
+  const deptName = dept ? (dept.sDepartmentName || '') : '';
+
+  closeNWO();
+
+  // Generate temp WO number
+  const now = new Date();
+  const ts = String(now.getFullYear()).slice(2) +
+    String(now.getMonth()+1).padStart(2,'0') +
+    String(now.getDate()).padStart(2,'0');
+  const seq = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+
+  _currentRepair = {
+    lRepairKey: 0,
+    sWorkOrderNumber: 'NEW-' + ts + '-' + seq,
+    lRepairStatusID: 1,
+    lRepairLevelKey: null, lRepairReasonKey: null,
+    lClientKey: clientKey, lDepartmentKey: parseInt(deptKey),
+    lTechnicianKey: null, lSalesRepKey: null, lDeliveryMethodKey: null,
+    lPatientSafetyLevelKey: null, lPricingCategoryKey: null, lPaymentTermsKey: null,
+    dtDateIn: now.toISOString(),
+    dtDateOut: null, dtShipDate: null, dtDeliveryDate: null,
+    dtAprRecvd: null, dtReqSent: null, dtLastUpdate: null,
+    dtCarrierDeliveryDateGuaranteed: null,
+    sSerialNumber: '', sScopeTypeDesc: '', sRigidOrFlexible: '', nDaysSinceLastIn: 0,
+    sComplaintDesc: '', sAngInUp: '', sAngInDown: '', sAngInRight: '', sAngInLeft: '',
+    nIncomingEpoxySize: '', sBRJigSize: '', sNotes: '',
+    mMaxCharge: 0, dblAmtRepair: 0, dblAmtCostLabor: 0, dblAmtCostMaterial: 0,
+    dblAmtShipping: 0, dblAmtCommission: 0, dblOutSourceCost: 0,
+    sShipName1: clientName, sShipName2: deptName, sShipAttention: '',
+    sShipAddr1: '', sShipAddr2: '', sShipCity: '', sShipState: '', sShipZip: '',
+    sBillName1: clientName, sBillName2: '', sBillAddr1: '', sBillAddr2: '',
+    sBillCity: '', sBillState: '', sBillZip: '', sBillEmail: '', sBillTo: 'C',
+    sShipTrackingNumberIn: '', sShipTrackingNumber: '', sShipTrackingNumberVendor: '',
+    sRackPosition: '', bTrackingNumberRequired: false, sShipWeight: '',
+    sPurchaseOrder: '', sInvoiceNumber: '',
+    sDisplayItemAmount: 'Y', sDisplayItemDescription: 'Y', sDisplayCustomerComplaint: 'N',
+    sIncludesCaseYN: 'N', sIncludesCapYN: 'N', sIncludesWaterResCapYN: 'N',
+    sIncludesVideoPlugYN: 'N', sIncludesMouthpieceYN: 'N', sIncludesAngleKnobYN: 'N',
+    sReqAprTotalsOnly: '', sApprName: '', lDistributorKey: 0,
+    mComments: '', mCommentsHidden: '', mCommentsRework: '', mCommentsDisIns: '', mCommentsISO: ''
+  };
+
+  populateDetail(_currentRepair);
+  renderRepairItems([]);
+  populateInventory([]);
+  populateStatus([]);
+  populateDocuments([]);
+  renderFlags([]);
+
+  document.getElementById('hMfr').textContent = '—';
+  document.getElementById('hScopeCat').textContent = '—';
+  document.getElementById('hModel').textContent = '—';
+  document.getElementById('hSerial').textContent = '—';
+  document.getElementById('hCapFFS').textContent = '—';
+  document.getElementById('hWithin40').textContent = '—';
+  document.getElementById('repairBadge').textContent = '#NEW';
+
+  // Set client/dept in toolbar
+  document.getElementById('selClient').value = clientKey;
+  onClientChange();
+  document.getElementById('selDept').value = deptKey;
+
+  // Jump to Scope In tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-tab="scopein"]').classList.add('active');
+  document.getElementById('pane-scopein').classList.add('active');
+
+  _dirty = false;
+  updateSaveStatus('ready');
+  document.getElementById('fComplaint').focus();
+  console.log('[TSI Repairs] New work order created for', clientName, '/', deptName);
+}
+
+// Wire up client picker input events
+(function() {
+  const inp = document.getElementById('nwoCpInput');
+  const dd = document.getElementById('nwoCpDropdown');
+  inp.addEventListener('input', () => nwoRenderClientDropdown(inp.value));
+  inp.addEventListener('focus', () => nwoRenderClientDropdown(inp.value));
+  inp.addEventListener('blur', () => setTimeout(() => dd.classList.remove('open'), 150));
+  inp.addEventListener('keydown', (e) => {
+    const items = dd.querySelectorAll('.nwo-cp-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); _nwoCpHighlight = Math.min(_nwoCpHighlight+1, items.length-1); items.forEach((it,i)=>it.classList.toggle('highlighted',i===_nwoCpHighlight)); items[_nwoCpHighlight]?.scrollIntoView({block:'nearest'}); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); _nwoCpHighlight = Math.max(_nwoCpHighlight-1, 0); items.forEach((it,i)=>it.classList.toggle('highlighted',i===_nwoCpHighlight)); items[_nwoCpHighlight]?.scrollIntoView({block:'nearest'}); }
+    if (e.key === 'Enter' && _nwoCpHighlight >= 0 && items[_nwoCpHighlight]) { e.preventDefault(); nwoPickClient(parseInt(items[_nwoCpHighlight].dataset.key)); }
+    if (e.key === 'Escape') dd.classList.remove('open');
+  });
+})();
+
+// ── Scope History (by SN#) ──
+let _scopeHistory = [];
+function toggleScopeHistory() {
+  const panel = document.getElementById('scopeHistoryPanel');
+  if (panel.classList.contains('open')) { panel.classList.remove('open'); return; }
+  loadScopeHistory();
+  panel.classList.add('open');
+}
+function closeScopeHistory() {
+  document.getElementById('scopeHistoryPanel').classList.remove('open');
+}
+
+async function loadScopeHistory() {
+  const sn = document.getElementById('hSerial').textContent;
+  if (!sn || sn === '—') return;
+  const panel = document.getElementById('scopeHistoryPanel');
+  const currentKey = _currentRepair ? _currentRepair.lRepairKey : 0;
+
+  // Try API first — search repair list filtered by SN
+  if (_liveMode) {
+    try {
+      const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+      const list = await API.getRepairList(svcKey);
+      const arr = Array.isArray(list) ? list : [];
+      _scopeHistory = arr.filter(r => r.sSerialNumber === sn)
+        .sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
+    } catch (e) { console.warn('[TSI] History lookup failed:', e.message); }
+  }
+
+  // Demo fallback
+  if (!_scopeHistory.length) {
+    _scopeHistory = [
+      { lRepairKey:26601, sWorkOrderNumber:'NI26006601', dtDateIn:'2026-03-05', sRepairStatus:'In Repair', sRepairLevel:'Major', sComplaintDesc:'Fluid invasion — CCD replacement, distal end rebuild', dblAmtRepair:2875.00 },
+      { lRepairKey:25842, sWorkOrderNumber:'NI25008842', dtDateIn:'2025-11-12', sRepairStatus:'Completed', sRepairLevel:'Mid Level', sComplaintDesc:'Angulation loss on up/down axis — cable replacement', dblAmtRepair:1450.00 },
+      { lRepairKey:25103, sWorkOrderNumber:'NI25003103', dtDateIn:'2025-06-20', sRepairStatus:'Completed', sRepairLevel:'Minor', sComplaintDesc:'Routine maintenance — leak test, clean & inspect', dblAmtRepair:485.00 },
+      { lRepairKey:24587, sWorkOrderNumber:'NI24009587', dtDateIn:'2024-12-03', sRepairStatus:'Completed', sRepairLevel:'Major', sComplaintDesc:'Image quality degradation — light guide bundle replacement', dblAmtRepair:2100.00 },
+      { lRepairKey:24012, sWorkOrderNumber:'NI24004012', dtDateIn:'2024-05-15', sRepairStatus:'Completed', sRepairLevel:'Minor', sComplaintDesc:'Bending rubber replacement — cosmetic wear', dblAmtRepair:650.00 },
+      { lRepairKey:23301, sWorkOrderNumber:'NR23003001', dtDateIn:'2023-08-22', sRepairStatus:'Completed', sRepairLevel:'Mid Level', sComplaintDesc:'Fluid invasion — reseal bending section', dblAmtRepair:1875.00 }
+    ];
+  }
+
+  // Update badge count
+  const badge = document.getElementById('hHistoryCount');
+  const priorCount = _scopeHistory.filter(r => r.lRepairKey !== currentKey).length;
+  if (priorCount > 0) { badge.textContent = priorCount; badge.style.display = 'inline-flex'; }
+  else { badge.style.display = 'none'; }
+
+  renderScopeHistory(currentKey);
+}
+
+function renderScopeHistory(currentKey) {
+  const panel = document.getElementById('scopeHistoryPanel');
+  const sn = document.getElementById('hSerial').textContent;
+
+  function statusColor(s) {
+    if (s === 'Completed' || s === 'Shipped') return 'background:#DCFCE7;color:#166534';
+    if (s === 'In Repair') return 'background:#DBEAFE;color:#1E40AF';
+    if (s === 'Waiting for Approval') return 'background:#FEF3C7;color:#92400E';
+    return 'background:#F3F4F6;color:#4B5563';
+  }
+
+  panel.innerHTML =
+    '<div class="sh-header"><span>Repair History — SN# ' + sn + ' (' + _scopeHistory.length + ' repairs)</span><span class="sh-close" onclick="closeScopeHistory()">&times;</span></div>' +
+    '<div class="sh-body"><table class="sh-table"><thead><tr>' +
+    '<th>Work Order</th><th>Date In</th><th>Status</th><th>Level</th><th>Description</th><th style="text-align:right">Amount</th>' +
+    '</tr></thead><tbody>' +
+    _scopeHistory.map(r => {
+      const isCurrent = r.lRepairKey === currentKey;
+      return '<tr class="' + (isCurrent ? 'current-row' : '') + '" onclick="jumpToRepair(' + r.lRepairKey + ')">' +
+        '<td class="wo-link">' + (r.sWorkOrderNumber || '') + (isCurrent ? ' <span style="font-size:8px;color:var(--muted)">(current)</span>' : '') + '</td>' +
+        '<td>' + fmtDate(r.dtDateIn) + '</td>' +
+        '<td><span class="status-pill" style="' + statusColor(r.sRepairStatus) + '">' + (r.sRepairStatus || '') + '</span></td>' +
+        '<td>' + (r.sRepairLevel || '') + '</td>' +
+        '<td style="font-size:10px;color:var(--label);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.sComplaintDesc || '') + '</td>' +
+        '<td style="text-align:right;font-weight:600">' + fmtMoney(r.dblAmtRepair || 0) + '</td></tr>';
+    }).join('') +
+    '</tbody></table></div>';
+}
+
+function jumpToRepair(repairKey) {
+  closeScopeHistory();
+  if (_liveMode) {
+    loadRepair(repairKey);
+  } else {
+    // Demo mode — show inline toast instead of alert
+    console.log('[TSI] Would load repair:', repairKey);
+    showToast('Repair #' + repairKey + ' — demo mode, only current repair loaded');
+  }
+}
+
+// Close history panel when clicking outside
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('scopeHistoryPanel');
+  if (panel && panel.classList.contains('open') && !e.target.closest('.scope-history-panel') && !e.target.closest('#hSerial') && !e.target.closest('#hHistoryCount')) {
+    closeScopeHistory();
+  }
+});
 
 // ── Comments Tab ──
 // Legacy maps: Internal=mComments, External=mCommentsHidden, Rework=mCommentsRework, D&I=mCommentsDisIns, ISO=mCommentsISO
@@ -1412,15 +2118,293 @@ async function initPage() {
     console.warn('[TSI Repairs] API error:', e.message);
     _liveMode = false;
     showDataBadge(false);
-    // Demo fallback
-    _currentRepair = { lRepairKey:1, sWorkOrderNumber:'NR23003001', sComplaintDesc:'Cable Loose - Retroflex Issue', dtDateIn:'2023-01-03T00:00:00' };
-    document.getElementById('hWO').textContent = _currentRepair.sWorkOrderNumber;
-    document.getElementById('hDateIn').value = toDateInput(_currentRepair.dtDateIn);
-    document.getElementById('fComplaint').value = _currentRepair.sComplaintDesc;
+
+    // ── RICH DEMO DATA ──
+    // Populate lookups with demo values so dropdowns work
+    _statuses = [
+      {lRepairStatusID:1, sRepairStatus:'Evaluation'},
+      {lRepairStatusID:2, sRepairStatus:'Waiting for Approval'},
+      {lRepairStatusID:3, sRepairStatus:'In Repair'},
+      {lRepairStatusID:4, sRepairStatus:'Drying'},
+      {lRepairStatusID:5, sRepairStatus:'Quality Check'},
+      {lRepairStatusID:6, sRepairStatus:'Completed'},
+      {lRepairStatusID:7, sRepairStatus:'Shipped'}
+    ];
+    _levels = [
+      {lRepairLevelKey:1, sRepairLevel:'Minor'},
+      {lRepairLevelKey:2, sRepairLevel:'Mid Level'},
+      {lRepairLevelKey:3, sRepairLevel:'Major'},
+      {lRepairLevelKey:4, sRepairLevel:'Inspection Only'}
+    ];
+    _repairReasons = [
+      {lRepairReasonKey:1, sRepairReason:'Mechanical Failure'},
+      {lRepairReasonKey:2, sRepairReason:'Fluid Invasion'},
+      {lRepairReasonKey:3, sRepairReason:'Image Quality'},
+      {lRepairReasonKey:4, sRepairReason:'Angulation Loss'},
+      {lRepairReasonKey:5, sRepairReason:'Routine Maintenance'},
+      {lRepairReasonKey:6, sRepairReason:'Physical Damage'}
+    ];
+    _safetyLevels = [
+      {lPatientSafetyLevelKey:1, sPatientSafetyLevel:'PS1 - Safe'},
+      {lPatientSafetyLevelKey:2, sPatientSafetyLevel:'PS2 - Marginal'},
+      {lPatientSafetyLevelKey:3, sPatientSafetyLevel:'PS3 - Unsafe'}
+    ];
+    _techs = [
+      {lTechnicianKey:1, sTechName:'Rob Martinez'},
+      {lTechnicianKey:2, sTechName:'Tim Johnson'},
+      {lTechnicianKey:3, sTechName:'Marcus Powell'},
+      {lTechnicianKey:4, sTechName:'Kevin Brooks'}
+    ];
+    _salesReps = [
+      {lSalesRepNameKey:1, sSalesRepName:'John Smith'},
+      {lSalesRepNameKey:2, sSalesRepName:'Sarah Williams'},
+      {lSalesRepNameKey:3, sSalesRepName:'Mike Davis'}
+    ];
+    _deliveryMethods = [
+      {lDeliveryMethodKey:1, sDeliveryDesc:'FedEx Priority Overnight'},
+      {lDeliveryMethodKey:2, sDeliveryDesc:'FedEx Ground'},
+      {lDeliveryMethodKey:3, sDeliveryDesc:'UPS Next Day Air'},
+      {lDeliveryMethodKey:4, sDeliveryDesc:'Customer Pickup'}
+    ];
+    _pricingCategories = [
+      {lPricingCategoryKey:1, sPricingCategory:'Standard'},
+      {lPricingCategoryKey:2, sPricingCategory:'Contract - Tier A'},
+      {lPricingCategoryKey:3, sPricingCategory:'Contract - Tier B'},
+      {lPricingCategoryKey:4, sPricingCategory:'Cap/FFS'}
+    ];
+    _paymentTerms = [
+      {lPaymentTermsKey:1, sPaymentTerms:'Net 30'},
+      {lPaymentTermsKey:2, sPaymentTerms:'Net 45'},
+      {lPaymentTermsKey:3, sPaymentTerms:'Net 60'},
+      {lPaymentTermsKey:4, sPaymentTerms:'Due on Receipt'}
+    ];
+    _clients = [
+      {lClientKey:5, sClientName1:'Tift Regional Medical Center'},
+      {lClientKey:12, sClientName1:'Emory University Hospital'},
+      {lClientKey:18, sClientName1:'Piedmont Healthcare'},
+      {lClientKey:23, sClientName1:'WellStar Kennestone Hospital'}
+    ];
+    _departments = [
+      {lDepartmentKey:10, lClientKey:5, sDepartmentName:'Endoscopy'},
+      {lDepartmentKey:11, lClientKey:5, sDepartmentName:'Pulmonology'},
+      {lDepartmentKey:20, lClientKey:12, sDepartmentName:'GI Lab'},
+      {lDepartmentKey:21, lClientKey:12, sDepartmentName:'Surgery'}
+    ];
+
+    // Populate all dropdowns
+    const clientSel = document.getElementById('selClient');
+    clientSel.innerHTML = '<option value="">— Select Client —</option>';
+    _clients.forEach(c => { const o = document.createElement('option'); o.value = c.lClientKey; o.textContent = c.sClientName1; clientSel.appendChild(o); });
+    populateSelect('hRepairStatus', _statuses, 'lRepairStatusID', 'sRepairStatus', true);
+    populateSelect('hRepairLevel', _levels, 'lRepairLevelKey', 'sRepairLevel', true);
+    populateSelect('fRepairReason', _repairReasons, 'lRepairReasonKey', 'sRepairReason', true);
+    populateSelect('fPSLevelIn', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevel', false);
+    populateSelect('fSalesRep', _salesReps, 'lSalesRepNameKey', 'sSalesRepName', true);
+    populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingCategory', true);
+    populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sPaymentTerms', true);
+
+    // Full demo repair record
+    _currentRepair = {
+      lRepairKey: 26601,
+      sWorkOrderNumber: 'NI26006601',
+      lRepairStatusID: 3,
+      lRepairLevelKey: 3,
+      lRepairReasonKey: 2,
+      lClientKey: 5,
+      lDepartmentKey: 10,
+      lTechnicianKey: 1,
+      lSalesRepKey: 2,
+      lDeliveryMethodKey: 1,
+      lPatientSafetyLevelKey: 2,
+      lPricingCategoryKey: 2,
+      lPaymentTermsKey: 1,
+
+      // Dates
+      dtDateIn: '2026-03-05T08:30:00',
+      dtDateOut: null,
+      dtShipDate: null,
+      dtDeliveryDate: null,
+      dtAprRecvd: '2026-03-06T14:22:00',
+      dtReqSent: '2026-03-05T16:00:00',
+      dtLastUpdate: '2026-03-10T09:15:00',
+      dtCarrierDeliveryDateGuaranteed: null,
+
+      // Scope info
+      sSerialNumber: '2801442',
+      sScopeTypeDesc: 'GIF-H190',
+      sRigidOrFlexible: 'Flexible',
+      nDaysSinceLastIn: 127,
+
+      // Intake
+      sComplaintDesc: 'Fluid invasion detected during leak test. Image degradation noted — foggy output and intermittent pixel dropout on left side. Angulation cable tension loose on up/down axis. Client reports issue worsened over past 2 weeks.',
+      sAngInUp: '185',
+      sAngInDown: '175',
+      sAngInRight: '155',
+      sAngInLeft: '148',
+      nIncomingEpoxySize: 3,
+      sBRJigSize: '9.8',
+      sNotes: 'Scope arrived with minor exterior scuffing on insertion tube near bending section. Case included, cap missing. Water resistance cap cracked — replaced on intake.',
+
+      // Financial
+      mMaxCharge: 3500.00,
+      dblAmtRepair: 2875.00,
+      dblAmtCostLabor: 680.00,
+      dblAmtCostMaterial: 412.50,
+      dblAmtShipping: 45.00,
+      dblAmtCommission: 143.75,
+      dblOutSourceCost: 0,
+
+      // Shipping address
+      sShipName1: 'Tift Regional Medical Center',
+      sShipName2: 'Endoscopy Department',
+      sShipAttention: 'Linda Harper, Service Mgr',
+      sShipAddr1: '901 E 18th Street',
+      sShipAddr2: 'Building C, Suite 200',
+      sShipCity: 'Tifton',
+      sShipState: 'GA',
+      sShipZip: '31794',
+
+      // Billing address
+      sBillName1: 'Tift Regional Medical Center',
+      sBillName2: 'Accounts Payable',
+      sBillAddr1: '901 E 18th Street',
+      sBillAddr2: 'Admin Building, 1st Floor',
+      sBillCity: 'Tifton',
+      sBillState: 'GA',
+      sBillZip: '31794',
+      sBillEmail: 'ap@tiftregional.com',
+      sBillTo: 'C',
+
+      // Tracking
+      sShipTrackingNumberIn: '1Z999AA10312456784',
+      sShipTrackingNumber: '',
+      sShipTrackingNumberVendor: '',
+      sRackPosition: 'B-14',
+      bTrackingNumberRequired: true,
+      sShipWeight: '',
+      sPurchaseOrder: 'PO-2026-03-1147',
+      sInvoiceNumber: '',
+
+      // Display toggles
+      sDisplayItemAmount: 'Y',
+      sDisplayItemDescription: 'Y',
+      sDisplayCustomerComplaint: 'N',
+
+      // Accessories
+      sIncludesCaseYN: 'Y',
+      sIncludesCapYN: 'N',
+      sIncludesWaterResCapYN: 'Y',
+      sIncludesVideoPlugYN: 'Y',
+      sIncludesMouthpieceYN: 'N',
+      sIncludesAngleKnobYN: 'Y',
+
+      // Requisition
+      sReqAprTotalsOnly: 'REQ-2026-0447',
+      sApprName: 'Dr. Patricia Owens',
+      lDistributorKey: 0,
+
+      // Comments
+      mComments: 'Fluid invasion confirmed — full distal end rebuild required. CCD replacement authorized per Linda Harper phone approval 3/6. Parts ordered from Olympus — ETA 3/8.\n\nUpdate 3/8: Parts received. Rob M. beginning distal end teardown.\nUpdate 3/9: CCD installed, light guide bundle inspected — minor fraying noted, client declined replacement at this time.\nUpdate 3/10: Reassembly in progress, epoxy cure overnight.',
+      mCommentsHidden: 'Customer has been notified of repair status via email on 3/6 and 3/8. Estimated completion 3/12. Linda Harper approved up to $3,500 max charge.',
+      mCommentsRework: '',
+      mCommentsDisIns: 'D&I inspection completed 3/5. Fluid invasion path identified: cracked water resistance cap allowed moisture ingress through bending section seal. No evidence of impact damage — normal wear failure.',
+      mCommentsISO: ''
+    };
+
+    // Populate the full UI
+    populateDetail(_currentRepair);
     document.getElementById('repairBadge').textContent = '#DEMO';
+
+    // Demo repair line items
+    renderRepairItems([
+      { lRepairItemTranKey:1001, lRepairItemKey:312, sTSICode:'CCD-190', sItemDescription:'CCD Replacement (GIF-H190)', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:1450.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'Y', sComments:'OEM Olympus CCD module' },
+      { lRepairItemTranKey:1002, lRepairItemKey:245, sTSICode:'BND-DIS', sItemDescription:'Bending Section — Distal End Rebuild', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:680.00, sTechInits:'RM', sTech2Inits:'TJ', sPrimaryRepair:'N', sComments:'Full teardown & reseal' },
+      { lRepairItemTranKey:1003, lRepairItemKey:189, sTSICode:'WRC-CAP', sItemDescription:'Water Resistance Cap Replacement', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:125.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Cracked on intake — no charge to client' },
+      { lRepairItemTranKey:1004, lRepairItemKey:156, sTSICode:'EPX-STD', sItemDescription:'Epoxy Application — Standard', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:85.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'' },
+      { lRepairItemTranKey:1005, lRepairItemKey:401, sTSICode:'INS-INS', sItemDescription:'Insertion Tube — Inspect & Clean', sUANWT:'', sFixType:'N', sApproved:'Y', dblRepairPrice:175.00, sTechInits:'TJ', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Minor scuffing noted, functional' },
+      { lRepairItemTranKey:1006, lRepairItemKey:422, sTSICode:'LGB-INS', sItemDescription:'Light Guide Bundle — Inspection', sUANWT:'', sFixType:'N', sApproved:'Y', dblRepairPrice:120.00, sTechInits:'TJ', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Minor fraying — client declined replace' },
+      { lRepairItemTranKey:1007, lRepairItemKey:510, sTSICode:'ANG-CAL', sItemDescription:'Angulation Calibration & Adjustment', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:150.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Cable tension reset to spec' },
+      { lRepairItemTranKey:1008, lRepairItemKey:550, sTSICode:'LKT-FNL', sItemDescription:'Final Leak Test & QC Verification', sUANWT:'', sFixType:'A', sApproved:'N', dblRepairPrice:90.00, sTechInits:'MP', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Pending — in drying phase' }
+    ]);
+
+    // Demo inventory (parts consumed)
+    populateInventory([
+      { sLotNumber:'LOT-2026-0089', lQuantity:1, sItemDescription:'CCD Module — Olympus GIF-H190 OEM', sSize:'Standard', sPosted:'Y' },
+      { sLotNumber:'LOT-2026-0112', lQuantity:2, sItemDescription:'Bending Rubber — Distal End', sSize:'9.8mm', sPosted:'Y' },
+      { sLotNumber:'LOT-2025-0847', lQuantity:1, sItemDescription:'Water Resistance Cap — GIF-H Series', sSize:'Standard', sPosted:'Y' },
+      { sLotNumber:'LOT-2026-0034', lQuantity:1, sItemDescription:'Epoxy Kit — Standard Application', sSize:'5ml', sPosted:'N' },
+      { sLotNumber:'LOT-2026-0091', lQuantity:3, sItemDescription:'O-Ring Seal — Distal End', sSize:'9.8mm', sPosted:'Y' },
+      { sLotNumber:'LOT-2025-0723', lQuantity:1, sItemDescription:'Angulation Wire Set — Up/Down', sSize:'GIF-H190', sPosted:'N' }
+    ]);
+
+    // Demo status history
+    populateStatus([
+      { sDescription:'Received / Intake', dtDateTime:'2026-03-05T08:30:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'Scope received via FedEx Priority' },
+      { sDescription:'Evaluation', dtDateTime:'2026-03-05T10:15:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Leak test positive — fluid invasion confirmed' },
+      { sDescription:'D&I Inspection', dtDateTime:'2026-03-05T14:00:00', sUserName:'Tim Johnson', sVoided:'', sComments:'Disassembly & inspection complete' },
+      { sDescription:'Waiting for Approval', dtDateTime:'2026-03-05T16:30:00', sUserName:'System', sVoided:'', sComments:'Repair estimate sent to client — $2,875' },
+      { sDescription:'Approval Received', dtDateTime:'2026-03-06T14:22:00', sUserName:'System', sVoided:'', sComments:'Phone approval from Linda Harper' },
+      { sDescription:'Parts Ordered', dtDateTime:'2026-03-06T15:00:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'CCD module ordered from Olympus — ETA 3/8' },
+      { sDescription:'Parts Received', dtDateTime:'2026-03-08T09:45:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'CCD module received, QC passed' },
+      { sDescription:'In Repair', dtDateTime:'2026-03-08T10:00:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Distal end rebuild started' },
+      { sDescription:'In Repair', dtDateTime:'2026-03-09T11:30:00', sUserName:'Rob Martinez', sVoided:'', sComments:'CCD installed, light guide inspected' },
+      { sDescription:'In Repair', dtDateTime:'2026-03-10T08:00:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Reassembly — epoxy cure in progress' }
+    ]);
+
+    // Demo documents
+    populateDocuments([
+      { sDocumentName:'Intake_Photo_Front.jpg', dtDateUploaded:'2026-03-05T08:45:00' },
+      { sDocumentName:'Intake_Photo_DistalEnd.jpg', dtDateUploaded:'2026-03-05T08:46:00' },
+      { sDocumentName:'Leak_Test_Report.pdf', dtDateUploaded:'2026-03-05T10:30:00' },
+      { sDocumentName:'DI_Inspection_Worksheet.pdf', dtDateUploaded:'2026-03-05T14:15:00' },
+      { sDocumentName:'Repair_Estimate_26601.pdf', dtDateUploaded:'2026-03-05T16:30:00' },
+      { sDocumentName:'Client_Approval_Email.pdf', dtDateUploaded:'2026-03-06T14:30:00' },
+      { sDocumentName:'CCD_Module_QC_Certificate.pdf', dtDateUploaded:'2026-03-08T09:50:00' }
+    ]);
+
+    // Demo flags
+    renderFlags([
+      { sFlag:'Fluid invasion confirmed — full distal end rebuild required' },
+      { sFlag:'CCD replacement authorized by Linda Harper on 3/6' },
+      { sFlag:'Rush repair — 5 day turnaround per contract terms' },
+      { sFlag:'Client on Tier A contract pricing — do not exceed $3,500 max' },
+      { sFlag:'Parts on order from Olympus, ETA 3/8 — hold repair until received' }
+    ]);
+
+    // Set scope info (spans, not inputs)
+    document.getElementById('hMfr').textContent = 'Olympus';
+    document.getElementById('hScopeCat').textContent = 'Gastroscope';
+    document.getElementById('hModel').textContent = 'GIF-H190';
+    document.getElementById('hSerial').textContent = '2801442';
+    document.getElementById('hCapFFS').textContent = 'Contract';
+    document.getElementById('hWithin40').textContent = 'No';
+
+    // Load history badge for this SN#
+    loadScopeHistory();
   }
 }
 initPage();
+initItemContextMenu();
 </script>
+
+<!-- Context menu for repair items -->
+<div id="itemCtxMenu" class="ctx-menu">
+  <div style="padding:5px 14px 4px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px" id="ctxItemLabel">Item</div>
+  <div class="ctx-menu-sep"></div>
+  <div id="ctxToggleApproved" class="ctx-menu-item" onclick="ctxToggleApproved()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <span class="ctx-text">Mark Approved</span>
+  </div>
+  <div id="ctxTogglePrimary" class="ctx-menu-item" onclick="ctxTogglePrimary()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span class="ctx-text">Set as Primary</span>
+  </div>
+  <div class="ctx-menu-sep"></div>
+  <div class="ctx-menu-item danger" onclick="ctxDeleteItem()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <span class="ctx-text">Delete Item</span>
+  </div>
+</div>
+
 </body>
 </html>

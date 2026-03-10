@@ -763,8 +763,9 @@ const INVENTORY_DB = [
     const sel = document.getElementById('hdrDept');
     sel.innerHTML = '<option value="" disabled selected>Loading...</option>';
     try {
-      const data = await API.getDepartmentsByClient(clientKey);
-      const depts = Array.isArray(data) ? data : [];
+      const allDepts = await API.getAllDepartments();
+      const all = Array.isArray(allDepts) ? allDepts : [];
+      const depts = all.filter(d => d.lClientKey == clientKey);
       sel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
       depts.forEach(d => {
         sel.innerHTML += `<option value="${d.lDepartmentKey}">${d.sDepartmentName}</option>`;

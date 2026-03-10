@@ -252,6 +252,7 @@
         Service Location <select class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
         <div class="topbar-avatar">JB</div>
         <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+        <span class="save-indicator" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#A7F3D0"></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
@@ -938,7 +939,7 @@
           <div class="panel-body" style="padding:0">
             <table>
               <thead><tr><th>Contract Type</th><th>Contract Name</th><th>Client</th><th>Sales Rep</th><th>Created</th><th>Status</th></tr></thead>
-              <tbody>
+              <tbody id="pendingContractsBody">
                 <tr><td>Fuse</td><td>Regional Medical - Full Service 2026</td><td>Regional Medical Center</td><td>R. Thompson</td><td>03/02/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
                 <tr><td>CPO</td><td>St. Mary's Hospital - Capitated</td><td>St. Mary's Hospital</td><td>J. Miller</td><td>02/28/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
                 <tr><td>Shared Risk</td><td>Valley Health - Shared Risk Pilot</td><td>Valley Health System</td><td>S. Chen</td><td>02/15/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
@@ -1034,122 +1035,882 @@
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
-// CONTRACT DATA
-const contracts = [
-  {id:'CNT-9022',name:'88th Medical Group - Capitated',client:'88th Medical Group',type:'CPO',status:'Active',term:'11/14/2026',annual:'$22,400',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-8841',name:'Halifax Medical - Preventive Maint',client:'Halifax Medical',type:'Fuse',status:'Active',term:'08/22/2026',annual:'$14,500',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-7720',name:'Wills Eye - Full Service (Rigid)',client:'Wills Eye Hospital',type:'CPO',status:'Expired',term:'01/15/2026',annual:'$9,800',rep:'S. Chen',freq:'Monthly'},
-  {id:'CNT-9105',name:'Tift Regional - Flexible Service',client:'Tift Regional Medical',type:'Capitated Service',status:'Active',term:'12/31/2026',annual:'$31,000',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9110',name:'Memorial Health - Cart Service',client:'Memorial Health System',type:'Cart',status:'Active',term:'03/31/2027',annual:'$18,750',rep:'K. Davis',freq:'Annual'},
-  {id:'CNT-8990',name:'St. Luke\'s - Airway Mgmt',client:'St. Luke\'s University',type:'Airway',status:'Active',term:'06/30/2026',annual:'$8,200',rep:'R. Thompson',freq:'Quarterly'},
-  {id:'CNT-9045',name:'Christiana Care - Shared Risk',client:'Christiana Care Health',type:'Shared Risk',status:'Active',term:'09/15/2026',annual:'$42,000',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-8875',name:'Lehigh Valley - Rental Fleet',client:'Lehigh Valley Health',type:'Rental',status:'Active',term:'04/20/2026',annual:'$11,600',rep:'S. Chen',freq:'Monthly'},
-  {id:'CNT-7680',name:'Jefferson - Capitated (Expired)',client:'Jefferson Health',type:'CPO',status:'Expired',term:'12/01/2025',annual:'$27,500',rep:'K. Davis',freq:'Annual'},
-  {id:'CNT-9088',name:'Geisinger - Comprehensive Svc',client:'Geisinger Health',type:'Fuse',status:'Active',term:'10/01/2026',annual:'$38,200',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9120',name:'HCA Florida - Flex PM',client:'HCA Florida',type:'Capitated Service',status:'Active',term:'02/28/2027',annual:'$15,400',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-8950',name:'Bayhealth - Full Service',client:'Bayhealth Medical',type:'CPO',status:'Expiring',term:'04/15/2026',annual:'$19,800',rep:'S. Chen',freq:'Quarterly'},
-  {id:'CNT-9015',name:'Penn Medicine - Camera Fleet',client:'Penn Medicine',type:'Cart',status:'Active',term:'07/31/2026',annual:'$24,100',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-7755',name:'Main Line Health - Labor Only',client:'Main Line Health',type:'CPO',status:'Expired',term:'02/28/2026',annual:'$6,500',rep:'K. Davis',freq:'Quarterly'},
-  {id:'CNT-9135',name:'Virtua Health - Fuse Agreement',client:'Virtua Health',type:'Fuse',status:'Active',term:'01/15/2027',annual:'$21,300',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-8910',name:'Crozer Health - Rental + PM',client:'Crozer Health',type:'Rental',status:'Expiring',term:'04/30/2026',annual:'$13,200',rep:'S. Chen',freq:'Monthly'},
-  {id:'CNT-9078',name:'AtlantiCare - Capitated Svc',client:'AtlantiCare',type:'Capitated Service',status:'Active',term:'11/30/2026',annual:'$16,900',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9140',name:'Cooper University - Shared Risk',client:'Cooper University Health',type:'Shared Risk',status:'Active',term:'05/31/2027',annual:'$35,400',rep:'K. Davis',freq:'Annual'},
-  {id:'CNT-7801',name:'Tower Health - PM Only (Exp)',client:'Tower Health',type:'Fuse',status:'Expired',term:'11/30/2025',annual:'$7,200',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-9060',name:'WellSpan Health - Full Flex',client:'WellSpan Health',type:'CPO',status:'Active',term:'08/15/2026',annual:'$29,500',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9095',name:'Inspira Health - Airway Svc',client:'Inspira Health',type:'Airway',status:'Active',term:'10/31/2026',annual:'$9,400',rep:'S. Chen',freq:'Monthly'},
-  {id:'CNT-8985',name:'Holy Redeemer - Cart Rental',client:'Holy Redeemer Health',type:'Cart',status:'Expiring',term:'05/15/2026',annual:'$12,700',rep:'K. Davis',freq:'Quarterly'},
-  {id:'CNT-9150',name:'UPMC - Enterprise Capitated',client:'UPMC',type:'Capitated Service',status:'Active',term:'12/31/2027',annual:'$86,000',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-9025',name:'Nemours - Pediatric Flex',client:'Nemours Children\'s',type:'Fuse',status:'Active',term:'09/30/2026',annual:'$11,800',rep:'R. Thompson',freq:'Quarterly'},
-  {id:'CNT-8940',name:'Shore Medical - Shared Risk',client:'Shore Medical Center',type:'Shared Risk',status:'Expiring',term:'06/01/2026',annual:'$14,300',rep:'S. Chen',freq:'Annual'},
-  {id:'CNT-9165',name:'Doylestown Health - Full Svc',client:'Doylestown Health',type:'CPO',status:'Active',term:'03/15/2027',annual:'$17,600',rep:'K. Davis',freq:'Quarterly'},
-  {id:'CNT-9035',name:'Einstein Healthcare - Rental',client:'Einstein Healthcare',type:'Rental',status:'Active',term:'07/15/2026',annual:'$10,500',rep:'R. Thompson',freq:'Monthly'},
-  {id:'CNT-9170',name:'Hackensack Meridian - Enterprise',client:'Hackensack Meridian',type:'CPO',status:'Active',term:'06/30/2027',annual:'$72,000',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9055',name:'Capital Health - Airway PM',client:'Capital Health',type:'Airway',status:'Active',term:'08/31/2026',annual:'$7,800',rep:'S. Chen',freq:'Annual'},
-  {id:'CNT-8920',name:'Beebe Healthcare - Flex Svc',client:'Beebe Healthcare',type:'Fuse',status:'Active',term:'05/20/2026',annual:'$13,100',rep:'K. Davis',freq:'Quarterly'},
-  {id:'CNT-9180',name:'Reading Hospital - Cart Fleet',client:'Reading Hospital',type:'Cart',status:'Active',term:'02/15/2027',annual:'$20,400',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-9070',name:'ChristianaCare - Rigid Svc',client:'ChristianaCare',type:'CPO',status:'Active',term:'09/01/2026',annual:'$25,800',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-9185',name:'RWJ Barnabas - Shared Risk',client:'RWJ Barnabas Health',type:'Shared Risk',status:'Active',term:'04/30/2027',annual:'$45,000',rep:'S. Chen',freq:'Quarterly'},
-  {id:'CNT-8960',name:'Grand View Health - Rental',client:'Grand View Health',type:'Rental',status:'Expiring',term:'04/10/2026',annual:'$8,900',rep:'K. Davis',freq:'Monthly'},
-  {id:'CNT-9190',name:'Abington Hospital - Capitated',client:'Abington Hospital',type:'Capitated Service',status:'Active',term:'01/31/2027',annual:'$19,200',rep:'J. Miller',freq:'Quarterly'},
-  {id:'CNT-9080',name:'Deborah Heart - PM Flex',client:'Deborah Heart & Lung',type:'Fuse',status:'Active',term:'10/15/2026',annual:'$6,700',rep:'R. Thompson',freq:'Annual'},
-  {id:'CNT-9200',name:'Temple Health - Enterprise',client:'Temple Health',type:'CPO',status:'Active',term:'07/31/2027',annual:'$58,500',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-9042',name:'Bryn Mawr Hospital - Airway',client:'Bryn Mawr Hospital',type:'Airway',status:'Active',term:'06/15/2026',annual:'$8,600',rep:'S. Chen',freq:'Quarterly'},
-  {id:'CNT-9210',name:'Hunterdon Medical - Cart Svc',client:'Hunterdon Medical',type:'Cart',status:'Active',term:'03/31/2027',annual:'$11,200',rep:'K. Davis',freq:'Annual'},
-  {id:'CNT-8930',name:'Chester County - Full Flex',client:'Chester County Hospital',type:'CPO',status:'Active',term:'04/30/2026',annual:'$22,100',rep:'R. Thompson',freq:'Quarterly'},
-  {id:'CNT-9220',name:'Morristown Medical - Shared Risk',client:'Morristown Medical',type:'Shared Risk',status:'Active',term:'08/31/2027',annual:'$33,000',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-9050',name:'Paoli Hospital - Rental + PM',client:'Paoli Hospital',type:'Rental',status:'Active',term:'07/01/2026',annual:'$9,300',rep:'S. Chen',freq:'Quarterly'},
-  {id:'CNT-9230',name:'Overlook Medical - Fuse Svc',client:'Overlook Medical',type:'Fuse',status:'Active',term:'05/15/2027',annual:'$15,700',rep:'K. Davis',freq:'Annual'},
-  {id:'CNT-9100',name:'Lankenau Medical - Capitated',client:'Lankenau Medical',type:'Capitated Service',status:'Active',term:'11/15/2026',annual:'$20,800',rep:'R. Thompson',freq:'Quarterly'},
-  {id:'CNT-9240',name:'Raritan Bay Medical - Cart',client:'Raritan Bay Medical',type:'Cart',status:'Active',term:'06/30/2027',annual:'$14,100',rep:'J. Miller',freq:'Monthly'},
-  {id:'CNT-9065',name:'Riddle Hospital - PM Only',client:'Riddle Hospital',type:'Fuse',status:'Active',term:'08/01/2026',annual:'$5,400',rep:'S. Chen',freq:'Annual'},
-  {id:'CNT-9250',name:'JFK University Med - Enterprise',client:'JFK University Medical',type:'CPO',status:'Active',term:'09/30/2027',annual:'$41,000',rep:'K. Davis',freq:'Quarterly'},
-  {id:'CNT-9115',name:'Phoenixville Hospital - Airway',client:'Phoenixville Hospital',type:'Airway',status:'Active',term:'12/15/2026',annual:'$7,100',rep:'R. Thompson',freq:'Monthly'},
-];
+// ═══════════════════════════════════════════════════════
+//  Contracts Page — API-wired with demo fallback
+// ═══════════════════════════════════════════════════════
 
-// RENDER CONTRACT LIST
+// ── Auth Guard ────────────────────────────────────────
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ── State ─────────────────────────────────────────────
+let contracts = [];           // Normalised contract rows (list)
+let filteredContracts = [];   // Current view after filters
+let selectedContractKey = 0;  // Currently selected lContractKey
+let DATA_SOURCE = 'demo';     // 'api' or 'demo'
+let contractTypes = [];       // Lookup: contract types
+let servicePlanTerms = [];    // Lookup: service plan terms
+let contractClients = [];     // Lookup: clients for dropdown
+let currentStatusFilter = 'all';
+
+// ── Demo Data (fallback) ──────────────────────────────
+function getDemoContracts() {
+  return [
+    {lContractKey:9022,sContractName:'88th Medical Group - Capitated',sClientName1:'88th Medical Group',sContractType:'CPO',sContractStatus:'Active',dtEndDate:'2026-11-14',dblAnnualValue:22400,sSalesRepName:'J. Miller',sInvoiceFrequency:'Quarterly',dtStartDate:'2025-11-14',sPurchaseOrder:'PO-2025-1184',sPaymentTerms:'Net 30'},
+    {lContractKey:8841,sContractName:'Halifax Medical - Preventive Maint',sClientName1:'Halifax Medical',sContractType:'Fuse',sContractStatus:'Active',dtEndDate:'2026-08-22',dblAnnualValue:14500,sSalesRepName:'R. Thompson',sInvoiceFrequency:'Annual',dtStartDate:'2025-08-22'},
+    {lContractKey:7720,sContractName:'Wills Eye - Full Service (Rigid)',sClientName1:'Wills Eye Hospital',sContractType:'CPO',sContractStatus:'Expired',dtEndDate:'2026-01-15',dblAnnualValue:9800,sSalesRepName:'S. Chen',sInvoiceFrequency:'Monthly',dtStartDate:'2025-01-15'},
+    {lContractKey:9105,sContractName:'Tift Regional - Flexible Service',sClientName1:'Tift Regional Medical',sContractType:'Capitated Service',sContractStatus:'Active',dtEndDate:'2026-12-31',dblAnnualValue:31000,sSalesRepName:'J. Miller',sInvoiceFrequency:'Quarterly',dtStartDate:'2025-12-31'},
+    {lContractKey:9110,sContractName:'Memorial Health - Cart Service',sClientName1:'Memorial Health System',sContractType:'Cart',sContractStatus:'Active',dtEndDate:'2027-03-31',dblAnnualValue:18750,sSalesRepName:'K. Davis',sInvoiceFrequency:'Annual',dtStartDate:'2026-03-31'},
+    {lContractKey:8990,sContractName:'St. Luke\'s - Airway Mgmt',sClientName1:'St. Luke\'s University',sContractType:'Airway',sContractStatus:'Active',dtEndDate:'2026-06-30',dblAnnualValue:8200,sSalesRepName:'R. Thompson',sInvoiceFrequency:'Quarterly',dtStartDate:'2025-06-30'},
+    {lContractKey:9045,sContractName:'Christiana Care - Shared Risk',sClientName1:'Christiana Care Health',sContractType:'Shared Risk',sContractStatus:'Active',dtEndDate:'2026-09-15',dblAnnualValue:42000,sSalesRepName:'J. Miller',sInvoiceFrequency:'Monthly',dtStartDate:'2025-09-15'},
+    {lContractKey:8875,sContractName:'Lehigh Valley - Rental Fleet',sClientName1:'Lehigh Valley Health',sContractType:'Rental',sContractStatus:'Active',dtEndDate:'2026-04-20',dblAnnualValue:11600,sSalesRepName:'S. Chen',sInvoiceFrequency:'Monthly',dtStartDate:'2025-04-20'},
+    {lContractKey:7680,sContractName:'Jefferson - Capitated (Expired)',sClientName1:'Jefferson Health',sContractType:'CPO',sContractStatus:'Expired',dtEndDate:'2025-12-01',dblAnnualValue:27500,sSalesRepName:'K. Davis',sInvoiceFrequency:'Annual',dtStartDate:'2024-12-01'},
+    {lContractKey:9088,sContractName:'Geisinger - Comprehensive Svc',sClientName1:'Geisinger Health',sContractType:'Fuse',sContractStatus:'Active',dtEndDate:'2026-10-01',dblAnnualValue:38200,sSalesRepName:'J. Miller',sInvoiceFrequency:'Quarterly',dtStartDate:'2025-10-01'},
+    {lContractKey:9120,sContractName:'HCA Florida - Flex PM',sClientName1:'HCA Florida',sContractType:'Capitated Service',sContractStatus:'Active',dtEndDate:'2027-02-28',dblAnnualValue:15400,sSalesRepName:'R. Thompson',sInvoiceFrequency:'Annual',dtStartDate:'2026-02-28'},
+    {lContractKey:8950,sContractName:'Bayhealth - Full Service',sClientName1:'Bayhealth Medical',sContractType:'CPO',sContractStatus:'Expiring',dtEndDate:'2026-04-15',dblAnnualValue:19800,sSalesRepName:'S. Chen',sInvoiceFrequency:'Quarterly',dtStartDate:'2025-04-15'},
+  ];
+}
+
+function getDemoPendingContracts() {
+  return [
+    {lPendingContractKey:1,sContractType:'Fuse',sContractName:'Regional Medical - Full Service 2026',sClientName1:'Regional Medical Center',sSalesRepName:'R. Thompson',dtCreated:'2026-03-02',sContractStatus:'Pending'},
+    {lPendingContractKey:2,sContractType:'CPO',sContractName:'St. Mary\'s Hospital - Capitated',sClientName1:'St. Mary\'s Hospital',sSalesRepName:'J. Miller',dtCreated:'2026-02-28',sContractStatus:'Pending'},
+    {lPendingContractKey:3,sContractType:'Shared Risk',sContractName:'Valley Health - Shared Risk Pilot',sClientName1:'Valley Health System',sSalesRepName:'S. Chen',dtCreated:'2026-02-15',sContractStatus:'Pending'},
+  ];
+}
+
+// ── Utility ───────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return (dt.getMonth()+1).toString().padStart(2,'0') + '/' + dt.getDate().toString().padStart(2,'0') + '/' + dt.getFullYear();
+}
+
+function fmtCurrency(v) {
+  if (v == null) return '$0';
+  const n = typeof v === 'string' ? parseFloat(v.replace(/[^0-9.-]/g,'')) : v;
+  if (isNaN(n)) return '$0';
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function fmtCurrencyFull(v) {
+  if (v == null) return '$0.00';
+  const n = typeof v === 'string' ? parseFloat(v.replace(/[^0-9.-]/g,'')) : v;
+  if (isNaN(n)) return '$0.00';
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function deriveStatus(c) {
+  // If the API provides a status string, use it; otherwise derive from dates
+  if (c.sContractStatus) return c.sContractStatus;
+  if (!c.dtEndDate) return 'Active';
+  const end = new Date(c.dtEndDate);
+  const now = new Date();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  if (end < now) return 'Expired';
+  if (end - now < thirtyDays) return 'Expiring';
+  return 'Active';
+}
+
+function statusBadgeClass(status) {
+  const s = (status||'').toLowerCase();
+  if (s === 'active') return 'b-active';
+  if (s === 'expired') return 'b-expired';
+  if (s === 'expiring') return 'b-pending';
+  return 'b-draft';
+}
+
+function showToast(msg, isError) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:6px;font-size:11px;font-weight:600;z-index:99999;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = isError ? '#FEE2E2' : '#00257A';
+  t.style.color = isError ? '#B71234' : '#fff';
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// ── Data Source Badge ─────────────────────────────────
+function updateDataSourceBadge() {
+  const indicator = document.querySelector('.save-indicator');
+  if (!indicator) return;
+  if (DATA_SOURCE === 'api') {
+    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Live Data';
+    indicator.style.color = '#A7F3D0';
+  } else {
+    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data';
+    indicator.style.color = '#FDE68A';
+  }
+}
+
+// ── Render Contract List ──────────────────────────────
 function renderList(data) {
+  filteredContracts = data;
   const el = document.getElementById('contractList');
-  el.innerHTML = data.map((c,i) => {
-    const bc = c.status==='Active'?'b-active':c.status==='Expired'?'b-expired':c.status==='Expiring'?'b-pending':'b-draft';
-    return `<div class="list-item${i===0?' selected':''}" onclick="selectContract(this,${i})" data-idx="${i}">
-      <div class="li-top"><span class="li-name">${c.name}</span><span class="li-badge ${bc}">${c.status.toUpperCase()}</span></div>
-      <div class="li-meta"><span>${c.id}</span><span>${c.type}</span><span><b>${c.annual}</b>/yr</span></div>
-      <div class="li-meta"><span>Term: ${c.term}</span><span>${c.rep}</span></div>
-    </div>`;
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div class="empty-state">No contracts found</div>';
+    document.getElementById('listCount').textContent = 'Showing 0 of ' + contracts.length;
+    return;
+  }
+  el.innerHTML = data.map((c, i) => {
+    const status = deriveStatus(c);
+    const bc = statusBadgeClass(status);
+    const key = c.lContractKey || 0;
+    const annual = fmtCurrency(c.dblAnnualValue || c.dblContractTotal);
+    return '<div class="list-item' + (i === 0 ? ' selected' : '') + '" onclick="selectContract(this,' + key + ')" data-key="' + key + '">' +
+      '<div class="li-top"><span class="li-name">' + (c.sContractName || '(Unnamed)') + '</span><span class="li-badge ' + bc + '">' + status.toUpperCase() + '</span></div>' +
+      '<div class="li-meta"><span>CNT-' + key + '</span><span>' + (c.sContractType || '') + '</span><span><b>' + annual + '</b>/yr</span></div>' +
+      '<div class="li-meta"><span>Term: ' + fmtDate(c.dtEndDate) + '</span><span>' + (c.sSalesRepName || '') + '</span></div>' +
+    '</div>';
   }).join('');
-  document.getElementById('listCount').textContent = `Showing ${data.length} of ${contracts.length}`;
+  document.getElementById('listCount').textContent = 'Showing ' + data.length + ' of ' + contracts.length;
+
+  // Auto-select first
+  if (data.length > 0) {
+    const firstKey = data[0].lContractKey || 0;
+    selectContract(el.querySelector('.list-item'), firstKey);
+  }
 }
 
-// SELECT CONTRACT
-function selectContract(el, idx) {
-  document.querySelectorAll('.list-item').forEach(i=>i.classList.remove('selected'));
-  el.classList.add('selected');
-  const c = contracts[idx];
-  document.getElementById('detailName').textContent = c.name;
-  document.getElementById('detailId').textContent = c.id;
-  const s = document.getElementById('detailStatus');
-  s.textContent = c.status.toUpperCase();
-  s.className = 'dh-status '+(c.status==='Active'?'b-active':c.status==='Expired'?'b-expired':c.status==='Expiring'?'b-pending':'b-draft');
+// ── Select Contract (load detail) ─────────────────────
+async function selectContract(el, contractKey) {
+  document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  selectedContractKey = contractKey;
+
+  // Find contract in list data for header
+  const c = contracts.find(x => x.lContractKey === contractKey);
+  if (c) {
+    const status = deriveStatus(c);
+    document.getElementById('detailName').textContent = c.sContractName || '(Unnamed)';
+    document.getElementById('detailId').textContent = 'CNT-' + contractKey;
+    const s = document.getElementById('detailStatus');
+    s.textContent = status.toUpperCase();
+    s.className = 'dh-status ' + statusBadgeClass(status);
+
+    // Update status strip
+    updateStatusStrip(c);
+  }
+
+  // Load full detail from API
+  try {
+    const detail = await API.getContractById(contractKey);
+    if (detail) {
+      console.log('[Contracts] Detail loaded for key=' + contractKey, detail);
+      populateSpecsTab(detail);
+      populateAddressTab(detail);
+    }
+  } catch (err) {
+    console.warn('[Contracts] Could not load detail for key=' + contractKey + ':', err.message);
+    if (c) {
+      populateSpecsTab(c);
+    }
+  }
+
+  // Load sub-tab data in parallel
+  loadDepartmentsTab(contractKey);
+  loadScopesTab(contractKey);
+  loadRepairsTab(contractKey);
+  loadAmendmentsTab(contractKey);
+  loadInvoicesTab(contractKey);
+  loadReportCardTab(contractKey);
+  loadExpenseTab(contractKey);
+  loadCoverageTab(contractKey);
+  loadDocumentsTab(contractKey);
+
+  // Reset to Specifications tab
+  const specsTab = document.querySelector('.tab-bar .tab');
+  if (specsTab) switchTab('specs', specsTab);
 }
 
-// FILTER CONTRACTS
+// ── Status Strip ──────────────────────────────────────
+function updateStatusStrip(c) {
+  const strip = document.querySelector('.status-strip');
+  if (!strip) return;
+  const status = deriveStatus(c);
+  const statusClass = status === 'Active' ? 'ss-active' : status === 'Expired' ? 'ss-warn' : 'ss-info';
+  strip.innerHTML =
+    '<div class="ss-chip ' + statusClass + '"><span class="ss-label">Status</span><span class="ss-val">' + status + '</span></div>' +
+    '<div class="ss-chip ss-neutral"><span class="ss-label">Type</span><span class="ss-val">' + (c.sContractType || '—') + '</span></div>' +
+    '<div class="ss-chip ss-neutral"><span class="ss-label">Frequency</span><span class="ss-val">' + (c.sInvoiceFrequency || '—') + '</span></div>' +
+    '<div class="ss-chip ss-info"><span class="ss-label">Annual</span><span class="ss-val">' + fmtCurrency(c.dblAnnualValue || c.dblContractTotal) + '</span></div>' +
+    '<div class="ss-chip ss-neutral"><span class="ss-label">Term</span><span class="ss-val">' + fmtDate(c.dtEndDate) + '</span></div>' +
+    '<div class="ss-chip ss-neutral"><span class="ss-label">Sales Rep</span><span class="ss-val">' + (c.sSalesRepName || '—') + '</span></div>';
+}
+
+// ── Populate Specifications Tab ───────────────────────
+function populateSpecsTab(d) {
+  const tab = document.getElementById('tab-specs');
+  if (!tab) return;
+
+  // Contract info fields
+  const inputs = tab.querySelectorAll('.inp');
+  // Map fields by position in the form grid
+  const fields = [
+    {val: d.sContractName},                          // Contract Name
+    {val: d.sContractType, type: 'select'},          // Contract Type
+    {val: d.sClientName1 || d.sClientName},          // Client
+    {val: d.sSalesRepName, type: 'select'},          // Sales Rep
+    {val: d.sPurchaseOrder || d.sPONumber || ''},     // Purchase Order
+    {val: d.sInvoiceFrequency, type: 'select'},      // Invoice Frequency
+    {val: d.sPaymentTerms, type: 'select'},          // Payment Terms
+  ];
+
+  // Try to set the contract name input
+  const nameInp = tab.querySelector('.panel:first-child .inp');
+  if (nameInp) nameInp.value = d.sContractName || '';
+
+  // Set date fields
+  const dateInputs = tab.querySelectorAll('input[type="date"]');
+  if (dateInputs[0] && d.dtStartDate) {
+    const sd = new Date(d.dtStartDate);
+    if (!isNaN(sd)) dateInputs[0].value = sd.toISOString().split('T')[0];
+  }
+  if (dateInputs[1] && d.dtEndDate) {
+    const ed = new Date(d.dtEndDate);
+    if (!isNaN(ed)) dateInputs[1].value = ed.toISOString().split('T')[0];
+  }
+
+  // Contract total / annual value
+  const financialInputs = tab.querySelectorAll('.col-r .panel:first-child .inp:not([type="date"]):not(select)');
+  if (financialInputs.length >= 2) {
+    financialInputs[0].value = fmtCurrencyFull(d.dblContractTotal || d.dblAnnualValue);
+    financialInputs[1].value = fmtCurrencyFull(d.dblAnnualValue || d.dblContractTotal);
+  }
+
+  // Notes textarea
+  const notesArea = tab.querySelector('.col-l .panel:nth-child(2) textarea');
+  if (notesArea) notesArea.value = d.mContractNotes || d.mNotes || '';
+
+  // Toggle options
+  const toggles = tab.querySelectorAll('.col-r .toggle input');
+  if (toggles[0]) toggles[0].checked = !!d.bAutoRenew;
+  if (toggles[1]) toggles[1].checked = !!d.bSendRenewalReminder;
+  if (toggles[2]) toggles[2].checked = !!d.bClientPortal;
+  if (toggles[3]) toggles[3].checked = !!d.bRequirePO;
+}
+
+// ── Populate Address Tab ──────────────────────────────
+function populateAddressTab(d) {
+  const tab = document.getElementById('tab-address');
+  if (!tab) return;
+  const panels = tab.querySelectorAll('.panel');
+
+  // Billing address (left panel)
+  if (panels[0]) {
+    const inputs = panels[0].querySelectorAll('.inp');
+    if (inputs[0]) inputs[0].value = d.sBillAddress1 || d.sAddress1 || '';
+    if (inputs[1]) inputs[1].value = d.sBillAddress2 || d.sAddress2 || '';
+    if (inputs[2]) inputs[2].value = d.sBillCity || d.sCity || '';
+    // State is a select
+    if (inputs[4]) inputs[4].value = d.sBillZip || d.sZip || '';
+  }
+
+  // Shipping address (right panel)
+  if (panels[1]) {
+    const inputs = panels[1].querySelectorAll('.inp');
+    if (inputs[0]) inputs[0].value = d.sShipAddress1 || d.sBillAddress1 || d.sAddress1 || '';
+    if (inputs[1]) inputs[1].value = d.sShipAddress2 || d.sBillAddress2 || d.sAddress2 || '';
+    if (inputs[2]) inputs[2].value = d.sShipCity || d.sBillCity || d.sCity || '';
+    if (inputs[4]) inputs[4].value = d.sShipZip || d.sBillZip || d.sZip || '';
+  }
+}
+
+// ── Departments Tab ───────────────────────────────────
+async function loadDepartmentsTab(contractKey) {
+  const tab = document.getElementById('tab-departments');
+  if (!tab) return;
+  try {
+    const [assigned, available] = await Promise.all([
+      API.getContractDepartments(0, contractKey, 0),
+      API.getContractDepartmentsAvailable(contractKey)
+    ]);
+
+    const assignedList = tab.querySelector('.transfer-box:first-child .transfer-list');
+    const availableList = tab.querySelector('.transfer-box:last-child .transfer-list');
+    const assignedArr = Array.isArray(assigned) ? assigned : [];
+    const availableArr = Array.isArray(available) ? available : [];
+
+    if (assignedList) {
+      tab.querySelector('.transfer-box:first-child .transfer-head span:last-child').textContent = assignedArr.length + ' assigned';
+      assignedList.innerHTML = assignedArr.map(d =>
+        '<div class="transfer-item" data-key="' + (d.lContractDepartmentKey || d.lDepartmentKey || 0) + '">' + (d.sDepartmentName || d.sDeptName || '(unnamed)') + '</div>'
+      ).join('') || '<div class="empty-state">No departments assigned</div>';
+    }
+
+    if (availableList) {
+      tab.querySelector('.transfer-box:last-child .transfer-head span:last-child').textContent = availableArr.length + ' available';
+      availableList.innerHTML = availableArr.map(d =>
+        '<div class="transfer-item" data-key="' + (d.lDepartmentKey || 0) + '">' + (d.sDepartmentName || d.sDeptName || '(unnamed)') + '</div>'
+      ).join('') || '<div class="empty-state">No departments available</div>';
+    }
+  } catch (err) {
+    console.warn('[Contracts] Departments load failed:', err.message);
+  }
+}
+
+// ── Scopes Tab ────────────────────────────────────────
+async function loadScopesTab(contractKey) {
+  const tab = document.getElementById('tab-scopes');
+  if (!tab) return;
+  try {
+    const data = await API.getContractScopes({
+      plContractKey: contractKey,
+      Pagination: { PageNumber: 1, PageSize: 500 },
+      Filters: {}
+    });
+    const scopes = Array.isArray(data) ? data : (data && data.list) ? data.list : [];
+
+    const coveredPanel = tab.querySelector('.panel:first-child');
+    if (coveredPanel) {
+      coveredPanel.querySelector('.panel-head span').textContent = 'Covered Scopes (' + scopes.length + ')';
+      const tbody = coveredPanel.querySelector('tbody');
+      if (tbody) {
+        tbody.innerHTML = scopes.map(s =>
+          '<tr>' +
+            '<td style="font-weight:600;color:var(--blue)">' + (s.sSerialNumber || s.sSerial || '—') + '</td>' +
+            '<td>' + (s.sModelName || s.sModel || '—') + '</td>' +
+            '<td>' + (s.sManufacturerName || s.sManufacturer || '—') + '</td>' +
+            '<td>' + (s.sCoverageType || s.sCoverage || '—') + '</td>' +
+            '<td>' + fmtDate(s.dtEffectiveDate || s.dtStartDate) + '</td>' +
+          '</tr>'
+        ).join('') || '<tr><td colspan="5" class="empty-state">No scopes on this contract</td></tr>';
+      }
+    }
+
+    // Update tab count badge
+    const scopeTab = document.querySelector('.tab-bar .tab:nth-child(4) .tab-count');
+    if (scopeTab) scopeTab.textContent = scopes.length;
+  } catch (err) {
+    console.warn('[Contracts] Scopes load failed:', err.message);
+  }
+}
+
+// ── Repairs Tab ───────────────────────────────────────
+async function loadRepairsTab(contractKey) {
+  const tab = document.getElementById('tab-repairs');
+  if (!tab) return;
+  try {
+    const data = await API.getContractRepairsList(contractKey);
+    const repairs = Array.isArray(data) ? data : [];
+
+    const tbody = tab.querySelector('tbody');
+    if (tbody) {
+      tab.querySelector('.panel-head span').textContent = 'Repair History (' + repairs.length + ')';
+      tbody.innerHTML = repairs.map(r => {
+        const statusColor = (r.sRepairStatus || '').toLowerCase().includes('complete') ? 'var(--green)' :
+                           (r.sRepairStatus || '').toLowerCase().includes('repair') ? 'var(--amber)' : 'var(--muted)';
+        return '<tr>' +
+          '<td style="font-weight:600;color:var(--blue)">' + (r.sWorkOrderNumber || r.sWONumber || '—') + '</td>' +
+          '<td>' + (r.sSerialNumber || '—') + '</td>' +
+          '<td>' + (r.sModelName || '—') + '</td>' +
+          '<td>' + (r.sRepairType || '—') + '</td>' +
+          '<td>' + fmtDate(r.dtDateIn || r.dtReceivedDate) + '</td>' +
+          '<td><span style="color:' + statusColor + ';font-weight:600">' + (r.sRepairStatus || '—') + '</span></td>' +
+          '<td>' + fmtCurrency(r.dblTotalCost || r.dblAmount || 0) + '</td>' +
+          '<td>' + (r.sTechnicianName || r.sPrimaryTech || '—') + '</td>' +
+        '</tr>';
+      }).join('') || '<tr><td colspan="8" class="empty-state">No repairs for this contract</td></tr>';
+    }
+
+    // Update tab count badge
+    const repairTab = document.querySelector('.tab-bar .tab:nth-child(5) .tab-count');
+    if (repairTab) repairTab.textContent = repairs.length;
+  } catch (err) {
+    console.warn('[Contracts] Repairs load failed:', err.message);
+  }
+}
+
+// ── Amendments Tab ────────────────────────────────────
+async function loadAmendmentsTab(contractKey) {
+  const tab = document.getElementById('tab-amendments');
+  if (!tab) return;
+  try {
+    const data = await API.getContractAmendments(contractKey);
+    const amendments = Array.isArray(data) ? data : [];
+
+    const tbody = tab.querySelector('.panel:first-child tbody');
+    if (tbody) {
+      tbody.innerHTML = amendments.map(a =>
+        '<tr>' +
+          '<td style="font-weight:600">' + (a.sAmendmentNumber || 'AMD-' + (a.lAmendmentKey || '?')) + '</td>' +
+          '<td>' + fmtDate(a.dtAmendmentDate || a.dtCreated) + '</td>' +
+          '<td>' + (a.sAmendmentType || '—') + '</td>' +
+          '<td>' + (a.sDescription || a.mNotes || '—') + '</td>' +
+          '<td><button class="btn btn-outline" style="height:20px;font-size:9px">View</button></td>' +
+        '</tr>'
+      ).join('') || '<tr><td colspan="5" class="empty-state">No amendments</td></tr>';
+    }
+  } catch (err) {
+    console.warn('[Contracts] Amendments load failed:', err.message);
+  }
+}
+
+// ── Invoices Tab ──────────────────────────────────────
+async function loadInvoicesTab(contractKey) {
+  const tab = document.getElementById('tab-invoices-detail');
+  if (!tab) return;
+  try {
+    const data = await API.getContractInvoices({
+      plContractKey: contractKey,
+      Pagination: { PageNumber: 1, PageSize: 200 },
+      Filters: {}
+    });
+    const invoices = Array.isArray(data) ? data : (data && data.list) ? data.list : [];
+
+    const tbody = tab.querySelector('tbody');
+    if (tbody) {
+      tab.querySelector('.panel-head span').textContent = 'Invoices (' + invoices.length + ')';
+      tbody.innerHTML = invoices.map(inv => {
+        const statusColor = (inv.sInvoiceStatus || '').toLowerCase().includes('paid') ? 'var(--green)' : 'var(--amber)';
+        return '<tr>' +
+          '<td style="font-weight:600;color:var(--blue)">' + (inv.sInvoiceNumber || 'INV-' + (inv.lInvoiceKey || '?')) + '</td>' +
+          '<td>' + fmtDate(inv.dtInvoiceDate) + '</td>' +
+          '<td>' + (inv.sDepartmentName || '—') + '</td>' +
+          '<td>' + fmtCurrencyFull(inv.dblInvoiceAmount || inv.dblAmount) + '</td>' +
+          '<td><span style="color:' + statusColor + ';font-weight:600">' + (inv.sInvoiceStatus || '—') + '</span></td>' +
+        '</tr>';
+      }).join('') || '<tr><td colspan="5" class="empty-state">No invoices</td></tr>';
+    }
+
+    // Update tab count badge
+    const invTab = document.querySelector('.tab-bar .tab:nth-child(9) .tab-count');
+    if (invTab) invTab.textContent = invoices.length;
+  } catch (err) {
+    console.warn('[Contracts] Invoices load failed:', err.message);
+  }
+}
+
+// ── Report Card Tab ───────────────────────────────────
+async function loadReportCardTab(contractKey) {
+  const tab = document.getElementById('tab-reportcard');
+  if (!tab) return;
+  try {
+    const data = await API.getContractReportCard(contractKey);
+    if (data) {
+      const kpis = tab.querySelectorAll('.kpi-val');
+      if (kpis[0]) kpis[0].textContent = fmtCurrency(data.dblContractTotal || data.dblAnnualValue);
+      if (kpis[1]) kpis[1].textContent = fmtCurrency(data.dblRevenue);
+      if (kpis[2]) kpis[2].textContent = fmtCurrency(data.dblConsumption || data.dblTotalConsumption);
+      if (kpis[3]) kpis[3].textContent = (data.dblMargin != null ? data.dblMargin.toFixed(1) + '%' : '—');
+      if (kpis[4]) kpis[4].textContent = fmtCurrency(data.dblExpenses || data.dblTotalExpenses);
+
+      // Efficiency rating
+      const effDiv = tab.querySelector('.col-l .panel:first-child .panel-body div');
+      if (effDiv && data.dblEfficiency != null) {
+        effDiv.textContent = data.dblEfficiency.toFixed(1) + '%';
+      }
+
+      // Contract index fields (expenses)
+      const expenseInputs = tab.querySelectorAll('.col-l .panel:nth-child(2) .inp');
+      if (expenseInputs[0]) expenseInputs[0].value = fmtCurrencyFull(data.dblTotalExpenses || data.dblExpenses);
+      if (expenseInputs[1]) expenseInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
+      if (expenseInputs[2]) expenseInputs[2].value = data.dblExpenseIndex != null ? data.dblExpenseIndex.toFixed(3) : '—';
+      if (expenseInputs[3]) expenseInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
+
+      // Contract index fields (consumption)
+      const consInputs = tab.querySelectorAll('.col-r .panel:first-child .inp');
+      if (consInputs[0]) consInputs[0].value = fmtCurrencyFull(data.dblTotalConsumption || data.dblConsumption);
+      if (consInputs[1]) consInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
+      if (consInputs[2]) consInputs[2].value = data.dblConsumptionIndex != null ? data.dblConsumptionIndex.toFixed(3) : '—';
+      if (consInputs[3]) consInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
+    }
+  } catch (err) {
+    console.warn('[Contracts] Report card load failed:', err.message);
+  }
+}
+
+// ── Expense Tab ───────────────────────────────────────
+async function loadExpenseTab(contractKey) {
+  const tab = document.getElementById('tab-expense');
+  if (!tab) return;
+  try {
+    const data = await API.getContractExpenseBreakdown(contractKey);
+    const items = Array.isArray(data) ? data : [];
+
+    const tbody = tab.querySelector('.col-l tbody');
+    if (tbody && items.length > 0) {
+      tbody.innerHTML = items.map(e =>
+        '<tr><td>' + (e.sMonth || e.sPeriod || '—') + '</td><td>' + fmtCurrency(e.dblExpenseAmount || e.dblAmount) + '</td></tr>'
+      ).join('');
+    }
+  } catch (err) {
+    console.warn('[Contracts] Expense breakdown load failed:', err.message);
+  }
+}
+
+// ── Coverage Tab ──────────────────────────────────────
+async function loadCoverageTab(contractKey) {
+  try {
+    const data = await API.getContractCoverageCounts(contractKey);
+    if (data) {
+      console.log('[Contracts] Coverage counts:', data);
+    }
+  } catch (err) {
+    console.warn('[Contracts] Coverage counts load failed:', err.message);
+  }
+}
+
+// ── Documents Tab ─────────────────────────────────────
+async function loadDocumentsTab(contractKey) {
+  const tab = document.getElementById('tab-documents');
+  if (!tab) return;
+  try {
+    const data = await API.get('/Documents/GetAllDocumentsList?plOwnerKey=' + contractKey);
+    const docs = Array.isArray(data) ? data : [];
+
+    const tbody = tab.querySelector('tbody');
+    if (tbody) {
+      tab.querySelector('.panel-head span').textContent = 'Documents (' + docs.length + ')';
+      tbody.innerHTML = docs.map(d => {
+        const ext = (d.sFileName || '').split('.').pop().toLowerCase();
+        const color = ext === 'pdf' ? 'var(--red)' : ext === 'xlsx' || ext === 'xls' ? 'var(--green)' : 'var(--blue)';
+        return '<tr>' +
+          '<td><svg viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' + (d.sFileName || d.sDocumentName || '(unnamed)') + '</td>' +
+          '<td>' + fmtDate(d.dtCreated || d.dtUploadDate) + '</td>' +
+          '<td>' + (d.sDocumentType || d.sType || '—') + '</td>' +
+          '<td><button class="btn btn-outline" style="height:20px;font-size:9px" onclick="downloadDocument(' + (d.lDocumentKey || 0) + ')">Download</button></td>' +
+        '</tr>';
+      }).join('') || '<tr><td colspan="4" class="empty-state">No documents</td></tr>';
+    }
+
+    // Update tab count badge
+    const docTab = document.querySelector('.tab-bar .tab:nth-child(11) .tab-count');
+    if (docTab) docTab.textContent = docs.length;
+  } catch (err) {
+    console.warn('[Contracts] Documents load failed:', err.message);
+  }
+}
+
+async function downloadDocument(docKey) {
+  try {
+    const data = await API.get('/Documents/DownloadDocument?plDocumentKey=' + docKey);
+    if (data && data.sFileBase64) {
+      const link = document.createElement('a');
+      link.href = 'data:application/octet-stream;base64,' + data.sFileBase64;
+      link.download = data.sFileName || 'document';
+      link.click();
+    } else {
+      showToast('Download not available', true);
+    }
+  } catch (err) {
+    showToast('Download failed: ' + err.message, true);
+  }
+}
+
+// ── Filter Contracts ──────────────────────────────────
 function filterContracts(q) {
-  q = q.toLowerCase();
-  const filtered = contracts.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.client.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
-  renderList(filtered);
+  q = (q || '').toLowerCase();
+  const filtered = contracts.filter(c =>
+    (c.sContractName || '').toLowerCase().includes(q) ||
+    String(c.lContractKey).includes(q) ||
+    (c.sClientName1 || '').toLowerCase().includes(q) ||
+    (c.sContractType || '').toLowerCase().includes(q) ||
+    (c.sSalesRepName || '').toLowerCase().includes(q)
+  );
+  applyStatusFilter(filtered);
 }
 
-// STATUS FILTER
+function applyStatusFilter(data) {
+  let result = data || contracts;
+  if (currentStatusFilter !== 'all') {
+    result = result.filter(c => {
+      const s = deriveStatus(c).toLowerCase();
+      return s === currentStatusFilter;
+    });
+  }
+  renderList(result);
+}
+
+// ── Status Filter (segmented buttons) ─────────────────
 function filterStatus(el, status) {
-  el.closest('.seg-group').querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('on'));
+  el.closest('.seg-group').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
-  if(status==='all') renderList(contracts);
-  else if(status==='active') renderList(contracts.filter(c=>c.status==='Active'));
-  else if(status==='expiring') renderList(contracts.filter(c=>c.status==='Expiring'));
-  else if(status==='expired') renderList(contracts.filter(c=>c.status==='Expired'));
+  currentStatusFilter = status;
+  const q = (document.getElementById('contractSearch') || {}).value || '';
+  filterContracts(q);
 }
 
-// SWITCH TAB (detail)
+function updateStatusCounts() {
+  const btns = document.querySelectorAll('#mv-open .seg-group .seg-btn .cnt');
+  if (btns.length < 4) return;
+  const all = contracts.length;
+  const active = contracts.filter(c => deriveStatus(c) === 'Active').length;
+  const expiring = contracts.filter(c => deriveStatus(c) === 'Expiring').length;
+  const expired = contracts.filter(c => deriveStatus(c) === 'Expired').length;
+  btns[0].textContent = '(' + all + ')';
+  btns[1].textContent = '(' + active + ')';
+  btns[2].textContent = '(' + expiring + ')';
+  btns[3].textContent = '(' + expired + ')';
+}
+
+// ── Switch Tab (detail) ──────────────────────────────
 function switchTab(id, el) {
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('show'));
-  document.querySelectorAll('.tab-bar .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('show'));
+  document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const tc = document.getElementById('tab-'+id);
-  if(tc) tc.classList.add('show');
+  const tc = document.getElementById('tab-' + id);
+  if (tc) tc.classList.add('show');
 }
 
-// SWITCH MODULE TAB
+// ── Switch Module Tab ─────────────────────────────────
 function switchModule(id, el) {
-  document.querySelectorAll('.module-view').forEach(v=>v.classList.remove('show'));
-  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.module-view').forEach(v => v.classList.remove('show'));
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const mv = document.getElementById('mv-'+id);
-  if(mv) mv.classList.add('show');
+  const mv = document.getElementById('mv-' + id);
+  if (mv) mv.classList.add('show');
+
+  // Lazy-load pending contracts when switching to that tab
+  if (id === 'pending') loadPendingContracts();
 }
 
-// INIT
-renderList(contracts);
+// ── Pending Contracts ─────────────────────────────────
+async function loadPendingContracts() {
+  const tbody = document.querySelector('#mv-pending tbody');
+  if (!tbody) return;
+  try {
+    const data = await API.getPendingContracts({
+      Pagination: { PageNumber: 1, PageSize: 200 },
+      Filters: {}
+    });
+    const pending = Array.isArray(data) ? data : (data && data.list) ? data.list : [];
+    const countEl = document.querySelector('#mv-pending .panel-head span');
+    if (countEl) countEl.textContent = 'Pending Contracts (' + pending.length + ')';
+
+    tbody.innerHTML = pending.map(p =>
+      '<tr>' +
+        '<td>' + (p.sContractType || '—') + '</td>' +
+        '<td>' + (p.sContractName || p.sPendingContractName || '—') + '</td>' +
+        '<td>' + (p.sClientName1 || p.sClientName || '—') + '</td>' +
+        '<td>' + (p.sSalesRepName || '—') + '</td>' +
+        '<td>' + fmtDate(p.dtCreated || p.dtDateCreated) + '</td>' +
+        '<td><span class="li-badge b-pending">PENDING</span></td>' +
+      '</tr>'
+    ).join('') || '<tr><td colspan="6" class="empty-state">No pending contracts</td></tr>';
+  } catch (err) {
+    console.warn('[Contracts] Pending contracts load failed:', err.message);
+  }
+}
+
+// ── Load Lookup Dropdowns ─────────────────────────────
+async function loadLookups() {
+  try {
+    const [types, terms, clients] = await Promise.all([
+      API.getContractTypes(true).catch(() => []),
+      API.getContractServicePlanTerms(true).catch(() => []),
+      API.getContractClients(false).catch(() => [])
+    ]);
+
+    contractTypes = Array.isArray(types) ? types : [];
+    servicePlanTerms = Array.isArray(terms) ? terms : [];
+    contractClients = Array.isArray(clients) ? clients : [];
+
+    // Populate contract type dropdowns
+    if (contractTypes.length > 0) {
+      document.querySelectorAll('select.inp').forEach(sel => {
+        const label = sel.closest('.ff')?.querySelector('label');
+        if (label && label.textContent.toLowerCase().includes('contract type')) {
+          const currentVal = sel.value;
+          sel.innerHTML = '<option>-- Select --</option>' + contractTypes.map(t =>
+            '<option value="' + (t.lContractTypeKey || '') + '">' + (t.sContractTypeName || t.sContractType || '') + '</option>'
+          ).join('');
+          sel.value = currentVal;
+        }
+      });
+    }
+
+    // Populate client dropdown in new contract modal
+    if (contractClients.length > 0) {
+      const clientSel = document.querySelector('#newContractModal select.inp');
+      // Find the client select (3rd select-like field, after Contract Type)
+      const selects = document.querySelectorAll('#newContractModal select.inp');
+      selects.forEach(sel => {
+        const label = sel.closest('.ff')?.querySelector('label');
+        if (label && label.textContent.toLowerCase().includes('client')) {
+          sel.innerHTML = '<option>-- Select Client --</option>' + contractClients.map(c =>
+            '<option value="' + (c.lClientKey || '') + '">' + (c.sClientName1 || c.sClientName || '') + '</option>'
+          ).join('');
+        }
+      });
+    }
+
+    console.log('[Contracts] Lookups loaded — types:', contractTypes.length, 'terms:', servicePlanTerms.length, 'clients:', contractClients.length);
+  } catch (err) {
+    console.warn('[Contracts] Lookups load failed:', err.message);
+  }
+}
+
+// ── CRUD: Save Contract ───────────────────────────────
+async function saveContract() {
+  if (!selectedContractKey) { showToast('No contract selected', true); return; }
+
+  const tab = document.getElementById('tab-specs');
+  if (!tab) return;
+
+  const nameInp = tab.querySelector('.panel:first-child .inp');
+  const dateInputs = tab.querySelectorAll('input[type="date"]');
+  const notesArea = tab.querySelector('.col-l .panel:nth-child(2) textarea');
+  const toggles = tab.querySelectorAll('.col-r .toggle input');
+
+  const payload = {
+    plContractKey: selectedContractKey,
+    psContractName: nameInp ? nameInp.value : '',
+    pdtStartDate: dateInputs[0] ? dateInputs[0].value : '',
+    pdtEndDate: dateInputs[1] ? dateInputs[1].value : '',
+    pmContractNotes: notesArea ? notesArea.value : '',
+    pbAutoRenew: toggles[0] ? toggles[0].checked : false,
+    pbSendRenewalReminder: toggles[1] ? toggles[1].checked : false,
+    pbClientPortal: toggles[2] ? toggles[2].checked : false,
+    pbRequirePO: toggles[3] ? toggles[3].checked : false,
+  };
+
+  try {
+    await API.updateContract(payload);
+    showToast('Contract saved successfully');
+    // Refresh list
+    await loadContracts();
+  } catch (err) {
+    showToast('Save failed: ' + err.message, true);
+  }
+}
+
+// ── CRUD: Create Contract ─────────────────────────────
+async function createContract() {
+  const modal = document.getElementById('newContractModal');
+  const inputs = modal.querySelectorAll('.inp');
+  const selects = modal.querySelectorAll('select.inp');
+
+  // Gather field values by label text
+  const fields = {};
+  modal.querySelectorAll('.ff').forEach(ff => {
+    const label = ff.querySelector('label');
+    const inp = ff.querySelector('.inp');
+    if (!label || !inp) return;
+    const key = label.textContent.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    fields[key] = inp.value;
+  });
+
+  const payload = {
+    psContractName: fields.contractname || '',
+    plContractTypeKey: parseInt(fields.contracttype) || 0,
+    plClientKey: parseInt(fields.client) || 0,
+    pdtStartDate: fields.startdate || '',
+    pdtEndDate: fields.enddate || '',
+    pmContractNotes: fields.notes || '',
+    psPurchaseOrder: fields.purchaseorder || '',
+  };
+
+  if (!payload.psContractName) {
+    showToast('Contract name is required', true);
+    return;
+  }
+
+  try {
+    await API.addContract(payload);
+    showToast('Contract created successfully');
+    modal.classList.remove('open');
+    await loadContracts();
+  } catch (err) {
+    showToast('Create failed: ' + err.message, true);
+  }
+}
+
+// ── CRUD: Delete Contract ─────────────────────────────
+async function deleteContract() {
+  if (!selectedContractKey) { showToast('No contract selected', true); return; }
+  if (!confirm('Delete contract CNT-' + selectedContractKey + '? This cannot be undone.')) return;
+
+  try {
+    await API.deleteContract(selectedContractKey);
+    showToast('Contract deleted');
+    selectedContractKey = 0;
+    await loadContracts();
+  } catch (err) {
+    showToast('Delete failed: ' + err.message, true);
+  }
+}
+
+// ── Wire Save / Create Buttons ────────────────────────
+function wireButtons() {
+  // Save buttons in detail header and toolbar
+  document.querySelectorAll('.dh-actions .btn-navy, #mv-open > .toolbar .btn-navy:last-child').forEach(btn => {
+    if (btn.textContent.trim().includes('Save')) {
+      btn.onclick = saveContract;
+    }
+  });
+
+  // Create Contract button in modal
+  const createBtn = document.querySelector('#newContractModal .btn-save');
+  if (createBtn) createBtn.onclick = createContract;
+}
+
+// ── Load Contracts (main init) ────────────────────────
+async function loadContracts() {
+  try {
+    const data = await API.getContractsList({
+      Pagination: { PageNumber: 1, PageSize: 500 },
+      Filters: {}
+    });
+
+    let list = [];
+    if (Array.isArray(data)) {
+      list = data;
+    } else if (data && Array.isArray(data.list)) {
+      list = data.list;
+    } else if (data && Array.isArray(data.contracts)) {
+      list = data.contracts;
+    }
+
+    if (list.length > 0) {
+      contracts = list;
+      DATA_SOURCE = 'api';
+      console.log('[Contracts] Loaded ' + contracts.length + ' contracts from API');
+    } else {
+      throw new Error('Empty API response');
+    }
+  } catch (err) {
+    console.warn('[Contracts] API call failed, using demo data:', err.message);
+    DATA_SOURCE = 'demo';
+    contracts = getDemoContracts();
+  }
+
+  updateDataSourceBadge();
+  updateStatusCounts();
+
+  // Update list header count
+  const listHeadCount = document.querySelector('.list-head span:last-child');
+  if (listHeadCount) listHeadCount.textContent = contracts.length + ' records';
+
+  renderList(contracts);
+}
+
+// ── Topbar: user info + service location ──────────────
+function initTopbar() {
+  const user = API.getUser ? API.getUser() : null;
+  if (user) {
+    const avatar = document.querySelector('.topbar-avatar');
+    const welcome = document.querySelector('.topbar-welcome strong');
+    if (avatar) avatar.textContent = (user.sFirstName || 'U')[0] + (user.sLastName || '')[0];
+    if (welcome) welcome.textContent = (user.sFirstName || '') + ' ' + (user.sLastName || '');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+initTopbar();
+wireButtons();
+loadContracts();
+loadLookups();
 </script>
 </body>
 </html>

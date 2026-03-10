@@ -296,19 +296,20 @@
       <div class="status-strip">
         <div class="ss-chip ss-info">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M8 11h6M11 8v6"/></svg>
-          <span class="ss-label">Models</span> <span class="ss-val">186</span>
+          <span class="ss-label">Models</span> <span class="ss-val" id="kpiTotal">186</span>
         </div>
-        <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val">172</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val">14</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val">98</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val">67</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Camera</span> <span class="ss-val">21</span></div>
-        <div class="ss-chip ss-warn">
+        <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val" id="kpiActive">172</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="kpiInactive">14</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val" id="kpiFlexible">98</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val" id="kpiRigid">67</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Camera</span> <span class="ss-val" id="kpiCamera">21</span></div>
+        <div class="ss-chip ss-warn" id="kpiWarnChip">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          5 missing specs
+          <span id="kpiMissing">5 missing specs</span>
         </div>
         <div style="flex:1"></div>
-        <span style="font-size:10px;color:var(--muted)">Last sync 03/08/2026 09:14 AM</span>
+        <span id="demoBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
+        <span style="font-size:10px;color:var(--muted)" id="lastSync">Last sync 03/08/2026 09:14 AM</span>
       </div>
 
       <!-- FILTER BAR -->
@@ -322,7 +323,7 @@
         </div>
         <div class="divider"></div>
         <div class="toggle-row">
-          <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+          <label class="toggle"><input type="checkbox" id="showInactiveToggle" onchange="applyFilters()"/><span class="toggle-slider"></span></label>
           <span class="toggle-label">Inactive</span>
         </div>
         <div style="flex:1"></div>
@@ -351,7 +352,7 @@
         <div class="split-left">
           <div class="split-left-head">
             Scope Models
-            <span class="tab-count" style="font-size:8px">186</span>
+            <span class="tab-count" style="font-size:8px" id="modelCount">186</span>
           </div>
           <div class="split-left-search">
             <input class="search-inp" id="modelSearch" placeholder="Search models..." oninput="filterModels()"/>
@@ -468,8 +469,8 @@
             </div>
           </div>
           <div class="split-left-footer">
-            <span>19 models shown</span>
-            <span style="font-size:9px">Page 1 of 10</span>
+            <span id="modelShown">19 models shown</span>
+            <span style="font-size:9px" id="modelPage">Page 1 of 10</span>
           </div>
         </div>
 
@@ -496,11 +497,11 @@
                 <select class="inp" id="hdrMfg"><option>ACMI</option><option>EndoChoice</option><option>Fujinon</option><option>Fujifilm</option><option>Karl Storz</option><option>Machida</option><option selected>Olympus</option><option>Pentax</option><option>Richard Wolf</option><option>Smith & Nephew</option><option>Stryker</option><option>Vision Sciences</option></select>
               </div>
               <div class="rb-toggles">
-                <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
-                <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Insp Req'd</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="hdrActive" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="hdrInspReqd" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Insp Req'd</span></div>
               </div>
-              <span class="mono-chip" style="align-self:flex-end;margin-bottom:2px">MDL-0042</span>
-              <button class="btn btn-navy" style="height:24px;padding:0 8px;font-size:10px;gap:3px;align-self:flex-end">
+              <span class="mono-chip" style="align-self:flex-end;margin-bottom:2px" id="hdrKey">MDL-0042</span>
+              <button class="btn btn-navy" style="height:24px;padding:0 8px;font-size:10px;gap:3px;align-self:flex-end" id="saveModelBtn" onclick="saveModel()">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
                 Save
               </button>
@@ -511,23 +512,23 @@
           <div class="kpi-strip">
             <div class="kpi-chip">
               <span class="kpi-label">Field Volume</span>
-              <span class="kpi-val">4,192</span>
+              <span class="kpi-val" id="detailVolume">4,192</span>
             </div>
             <div class="kpi-chip">
               <span class="kpi-label">Avg Turnaround</span>
-              <span class="kpi-val">12.4 <span style="font-size:9px;font-weight:600;color:var(--muted)">days</span></span>
+              <span class="kpi-val" id="detailTurnaround">12.4 <span style="font-size:9px;font-weight:600;color:var(--muted)">days</span></span>
             </div>
             <div class="kpi-chip">
               <span class="kpi-label">Avg Margin</span>
-              <span class="kpi-val green">62%</span>
+              <span class="kpi-val green" id="detailMargin">62%</span>
             </div>
             <div class="kpi-chip">
               <span class="kpi-label">Repair Items</span>
-              <span class="kpi-val">12</span>
+              <span class="kpi-val" id="detailRepairItemCount">12</span>
             </div>
             <div class="kpi-chip" style="border-right:none">
               <span class="kpi-label">Linked Parts</span>
-              <span class="kpi-val">18</span>
+              <span class="kpi-val" id="detailLinkedParts">18</span>
             </div>
           </div>
 
@@ -549,39 +550,39 @@
                   <div class="dense-form">
                     <div class="df-row">
                       <div class="df-lbl">Video / Image</div>
-                      <div class="df-val"><select class="inp"><option>Fiber</option><option>Hybrid</option><option selected>Video</option><option>Ultrasound</option><option>Screen on Scope</option><option>N/A</option></select></div>
+                      <div class="df-val"><select class="inp" id="specVideoImage"><option>Fiber</option><option>Hybrid</option><option selected>Video</option><option>Ultrasound</option><option>Screen on Scope</option><option>N/A</option></select></div>
                       <div class="df-lbl df-sep" style="width:100px">Image Sensor</div>
-                      <div class="df-val"><select class="inp"><option>CCD</option><option selected>CMOS</option></select></div>
+                      <div class="df-val"><select class="inp" id="specImageSensor"><option>CCD</option><option selected>CMOS</option></select></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Processors</div>
-                      <div class="df-val"><input class="inp" value="CV-190, EVIS EXERA III"/></div>
+                      <div class="df-val"><input class="inp" id="specProcessors" value="CV-190, EVIS EXERA III"/></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Light Sources</div>
-                      <div class="df-val"><input class="inp" value="CLV-190"/></div>
+                      <div class="df-val"><input class="inp" id="specLightSources" value="CLV-190"/></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Avg Days In</div>
-                      <div class="df-val"><input class="inp" type="number" value="" placeholder="e.g. 14"/></div>
+                      <div class="df-val"><input class="inp" id="specAvgDaysIn" type="number" value="" placeholder="e.g. 14"/></div>
                       <div class="df-lbl df-sep" style="width:100px">Exp Multiplier</div>
-                      <div class="df-val"><input class="inp" type="number" value="" step="0.01" placeholder="1.25"/></div>
+                      <div class="df-val"><input class="inp" id="specExpMultiplier" type="number" value="" step="0.01" placeholder="1.25"/></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Contract Cost</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" type="text" value="" placeholder="0.00"/></div>
+                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specContractCost" type="text" value="" placeholder="0.00"/></div>
                       <div class="df-lbl df-sep" style="width:100px">Max Charge</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" type="text" value="" placeholder="0.00"/></div>
+                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specMaxCharge" type="text" value="" placeholder="0.00"/></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">GL Account</div>
-                      <div class="df-val"><input class="inp" value=""/></div>
+                      <div class="df-val"><input class="inp" id="specGLAccount" value=""/></div>
                     </div>
                   </div>
                   <div class="cb-strip">
                     <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Overrides</span>
-                    <label class="cb-item"><input type="checkbox"> Force On Portal</label>
-                    <label class="cb-item"><input type="checkbox"> Skip Portal</label>
+                    <label class="cb-item"><input type="checkbox" id="specForceOnPortal"> Force On Portal</label>
+                    <label class="cb-item"><input type="checkbox" id="specSkipPortal"> Skip Portal</label>
                   </div>
                 </div>
               </div>
@@ -593,32 +594,32 @@
                   <div class="dense-form">
                     <div class="df-row">
                       <div class="df-lbl">Ins. Length</div>
-                      <div class="df-val"><input class="inp" type="number" value="1030"/><span class="df-unit">mm</span></div>
+                      <div class="df-val"><input class="inp" id="specInsLength" type="number" value="1030"/><span class="df-unit">mm</span></div>
                       <div class="df-lbl df-sep" style="width:100px">Ins. Diameter</div>
-                      <div class="df-val"><input class="inp" type="number" value="9.2" step="0.1"/><span class="df-unit">mm</span></div>
+                      <div class="df-val"><input class="inp" id="specInsDiameter" type="number" value="9.2" step="0.1"/><span class="df-unit">mm</span></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Channel Size</div>
-                      <div class="df-val"><input class="inp" type="number" value="2.8" step="0.1"/><span class="df-unit">mm</span></div>
+                      <div class="df-val"><input class="inp" id="specChannelSize" type="number" value="2.8" step="0.1"/><span class="df-unit">mm</span></div>
                       <div class="df-lbl df-sep" style="width:100px">Field of View</div>
-                      <div class="df-val"><input class="inp" type="number" value="140"/><span class="df-unit">deg</span></div>
+                      <div class="df-val"><input class="inp" id="specFieldOfView" type="number" value="140"/><span class="df-unit">deg</span></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Dir. of View</div>
-                      <div class="df-val"><input class="inp" type="text" value="Forward"/></div>
+                      <div class="df-val"><input class="inp" id="specDirOfView" type="text" value="Forward"/></div>
                       <div class="df-lbl df-sep" style="width:100px">Depth of Field</div>
-                      <div class="df-val" style="gap:2px"><input class="inp" type="number" value="2" style="text-align:right;max-width:50px"/><span style="color:var(--muted);font-weight:700">–</span><input class="inp" type="number" value="100" style="max-width:50px"/><span class="df-unit">mm</span></div>
+                      <div class="df-val" style="gap:2px"><input class="inp" id="specDepthMin" type="number" value="2" style="text-align:right;max-width:50px"/><span style="color:var(--muted);font-weight:700">–</span><input class="inp" id="specDepthMax" type="number" value="100" style="max-width:50px"/><span class="df-unit">mm</span></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Epoxy (Avg)</div>
-                      <div class="df-val"><input class="inp" type="number" value="" step="0.01" placeholder=""/></div>
+                      <div class="df-val"><input class="inp" id="specEpoxyAvg" type="number" value="" step="0.01" placeholder=""/></div>
                       <div class="df-lbl df-sep" style="width:100px">Max Epoxy</div>
-                      <div class="df-val"><input class="inp" type="number" value="" step="0.01" placeholder=""/></div>
+                      <div class="df-val"><input class="inp" id="specEpoxyMax" type="number" value="" step="0.01" placeholder=""/></div>
                     </div>
                   </div>
                   <div class="cb-strip" style="gap:6px">
                     <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Verification</span>
-                    <label class="cb-item"><input type="checkbox"> Unable To Verify</label>
+                    <label class="cb-item"><input type="checkbox" id="specUnableToVerify"> Unable To Verify</label>
                     <div class="divider" style="height:16px"></div>
                     <span style="font-size:9.5px;font-weight:700;color:var(--muted)">By</span>
                     <input class="inp" type="text" value="" placeholder="Initials" style="width:50px;height:20px;padding:0 4px;font-size:10px"/>
@@ -633,29 +634,29 @@
                 <div class="panel-head">Angulation Range</div>
                 <div class="panel-body" style="padding:0">
                   <div class="cb-strip" style="border-top:none">
-                    <label class="cb-item"><input type="checkbox" checked> Up/Down</label>
-                    <label class="cb-item"><input type="checkbox" checked> Left/Right</label>
-                    <label class="cb-item"><input type="checkbox"> Broken Fibers</label>
+                    <label class="cb-item"><input type="checkbox" id="specAngUpDown" checked> Up/Down</label>
+                    <label class="cb-item"><input type="checkbox" id="specAngLeftRight" checked> Left/Right</label>
+                    <label class="cb-item"><input type="checkbox" id="specBrokenFibers"> Broken Fibers</label>
                   </div>
                   <div class="ang-grid">
                     <div class="ang-cell">
                       <span class="ang-dir">Up</span>
-                      <span class="ang-val">210</span>
+                      <span class="ang-val" id="specAngUp">210</span>
                       <span class="ang-unit">deg</span>
                     </div>
                     <div class="ang-cell">
                       <span class="ang-dir">Down</span>
-                      <span class="ang-val">90</span>
+                      <span class="ang-val" id="specAngDown">90</span>
                       <span class="ang-unit">deg</span>
                     </div>
                     <div class="ang-cell">
                       <span class="ang-dir">Left</span>
-                      <span class="ang-val">100</span>
+                      <span class="ang-val" id="specAngLeft">100</span>
                       <span class="ang-unit">deg</span>
                     </div>
                     <div class="ang-cell">
                       <span class="ang-dir">Right</span>
-                      <span class="ang-val">100</span>
+                      <span class="ang-val" id="specAngRight">100</span>
                       <span class="ang-unit">deg</span>
                     </div>
                   </div>
@@ -672,28 +673,28 @@
                   <div class="dense-form">
                     <div class="df-row">
                       <div class="df-lbl">Base Eval Fee</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" type="text" value="350.00"/></div>
+                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specEvalFee" type="text" value="350.00"/></div>
                     </div>
                     <div class="df-row">
                       <div class="df-lbl">Est Turnaround</div>
-                      <div class="df-val"><input class="inp" type="number" value="10"/><span class="df-unit">days</span></div>
+                      <div class="df-val"><input class="inp" id="specEstTurnaround" type="number" value="10"/><span class="df-unit">days</span></div>
                     </div>
                   </div>
                   <div class="tier-strip">
                     <div class="tier-box tier-minor" style="background:#F0FDF4">
                       <span class="tier-label">Minor</span>
-                      <span class="tier-val">$1,800</span>
-                      <span style="font-size:8.5px;color:var(--muted)">6 mo warranty</span>
+                      <span class="tier-val" id="specMinorPrice">$1,800</span>
+                      <span style="font-size:8.5px;color:var(--muted)" id="specMinorWarranty">6 mo warranty</span>
                     </div>
                     <div class="tier-box tier-mid" style="background:#FFFBEB">
                       <span class="tier-label">Mid</span>
-                      <span class="tier-val">$4,200</span>
-                      <span style="font-size:8.5px;color:var(--muted)">6 mo warranty</span>
+                      <span class="tier-val" id="specMidPrice">$4,200</span>
+                      <span style="font-size:8.5px;color:var(--muted)" id="specMidWarranty">6 mo warranty</span>
                     </div>
                     <div class="tier-box tier-major" style="background:#FEF2F2">
                       <span class="tier-label">Major</span>
-                      <span class="tier-val">$7,500</span>
-                      <span style="font-size:8.5px;color:var(--muted)">12 mo warranty</span>
+                      <span class="tier-val" id="specMajorPrice">$7,500</span>
+                      <span style="font-size:8.5px;color:var(--muted)" id="specMajorWarranty">12 mo warranty</span>
                     </div>
                   </div>
                 </div>
@@ -708,7 +709,7 @@
                 <div class="panel-body" style="padding:0">
                   <table>
                     <thead><tr><th style="font-size:9px">Location</th><th style="font-size:9px">Flag</th><th style="width:36px"></th></tr></thead>
-                    <tbody>
+                    <tbody id="specFlagsBody">
                       <tr>
                         <td style="font-size:10px;color:var(--muted)">D&I, Approval</td>
                         <td style="color:var(--red);font-weight:600;font-size:10.5px">Check connector type before CCD quote</td>
@@ -728,7 +729,7 @@
               <div class="panel">
                 <div class="panel-head">Notes</div>
                 <div class="panel-body">
-                  <textarea class="inp" style="height:60px;resize:vertical">Close-focus capable. NBI compatible. Waterproof per IEC 60529 (IPX8).</textarea>
+                  <textarea class="inp" id="specNotes" style="height:60px;resize:vertical">Close-focus capable. NBI compatible. Waterproof per IEC 60529 (IPX8).</textarea>
                 </div>
               </div>
             </div>
@@ -739,7 +740,7 @@
             <div style="flex:1;min-width:0">
               <div class="panel" style="box-shadow:none;border-radius:0">
                 <div class="panel-head" style="border-radius:0">
-                  <span>Repair Items — GIF-H190</span>
+                  <span id="repairItemsTitle">Repair Items — GIF-H190</span>
                   <button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addRepairModal').classList.add('open')">+ Add Item</button>
                 </div>
                 <div style="overflow-y:auto;max-height:calc(100vh - 320px)">
@@ -761,7 +762,7 @@
                         <th class="center" style="font-size:9px">Warn</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="repairItemsBody">
                       <tr>
                         <td style="font-weight:600;color:var(--navy)">CCD / CMOS Sensor Replacement</td>
                         <td class="center mono">240</td><td class="center mono" style="color:var(--amber)">200</td>
@@ -946,13 +947,13 @@
             <div style="flex:1;min-width:0">
               <div class="panel" style="box-shadow:none;border-radius:0">
                 <div class="panel-head" style="border-radius:0">
-                  <span>Flags — GIF-H190</span>
+                  <span id="flagsTitle">Flags — GIF-H190</span>
                   <button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addFlagModal').classList.add('open')">+ Add Flag</button>
                 </div>
                 <div style="overflow-y:auto">
                   <table>
                     <thead><tr><th>Instrument Type</th><th>Location</th><th>Flag Text</th><th style="width:50px">Action</th></tr></thead>
-                    <tbody>
+                    <tbody id="flagsBody">
                       <tr>
                         <td>Flexible</td>
                         <td>D&I, Approval</td>
@@ -1352,17 +1353,39 @@
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
-// Tab switching
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ═══════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════
+let allModels = [];       // full model list from API
+let allManufacturers = []; // manufacturer lookup
+let selectedScopeTypeKey = null;
+let currentDetail = null; // detail record for selected model
+let currentFilter = 'all'; // instrument type filter
+let isDemoMode = false;
+
+// ═══════════════════════════════════════════════════════
+//  Tab switching
+// ═══════════════════════════════════════════════════════
 function switchTab(id, el) {
   document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('show'); c.classList.remove('show-block'); });
   document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   const tc = document.getElementById('tab-' + id);
   if (tc) tc.classList.add('show');
+  // Lazy-load tab data when switching
+  if (id === 'repair-items' && selectedScopeTypeKey && !isDemoMode) loadRepairItems(selectedScopeTypeKey);
+  if (id === 'inventory' && selectedScopeTypeKey && !isDemoMode) loadInventory(selectedScopeTypeKey);
+  if (id === 'flags' && selectedScopeTypeKey && !isDemoMode) loadFlags(selectedScopeTypeKey);
 }
 
-// Select model from left list
+// ═══════════════════════════════════════════════════════
+//  Select model from left list (click or keyboard)
+// ═══════════════════════════════════════════════════════
 function selectModel(row) {
   document.querySelectorAll('.model-row').forEach(r => r.classList.remove('selected'));
   row.classList.add('selected');
@@ -1370,16 +1393,32 @@ function selectModel(row) {
   const desc = row.querySelector('.mr-desc')?.textContent || '';
   document.getElementById('hdrModel').value = name;
   document.getElementById('hdrDesc').value = desc;
+
+  // If wired to API, load detail
+  const key = row.dataset.scopeTypeKey;
+  if (key && !isDemoMode) {
+    selectedScopeTypeKey = parseInt(key);
+    loadModelDetail(selectedScopeTypeKey);
+  }
 }
 
-// Inventory drill-down
+// ═══════════════════════════════════════════════════════
+//  Inventory drill-down
+// ═══════════════════════════════════════════════════════
 function selectRepairItem(row, name) {
   document.querySelectorAll('#invRepairList tr').forEach(r => r.classList.remove('selected'));
   row.classList.add('selected');
   document.getElementById('invTitle').textContent = 'Inventory — ' + name;
+  // If wired, load inventory for this repair item
+  const riKey = row.dataset.repairItemKey;
+  if (riKey && selectedScopeTypeKey && !isDemoMode) {
+    loadInventoryForRepairItem(selectedScopeTypeKey, parseInt(riKey));
+  }
 }
 
-// Filter models by search
+// ═══════════════════════════════════════════════════════
+//  Filter models by search
+// ═══════════════════════════════════════════════════════
 function filterModels() {
   const q = document.getElementById('modelSearch').value.toLowerCase();
   document.querySelectorAll('#modelList .model-row').forEach(row => {
@@ -1387,7 +1426,12 @@ function filterModels() {
     const desc = (row.querySelector('.mr-desc')?.textContent || '').toLowerCase();
     row.style.display = (!q || name.includes(q) || desc.includes(q)) ? '' : 'none';
   });
-  // Hide empty group headers
+  updateGroupVisibility();
+  updateModelCount();
+}
+
+// Hide empty group headers
+function updateGroupVisibility() {
   document.querySelectorAll('#modelList .model-group-head').forEach(hdr => {
     let next = hdr.nextElementSibling;
     let hasVisible = false;
@@ -1399,27 +1443,37 @@ function filterModels() {
   });
 }
 
-// Instrument type filter (left panel)
+function updateModelCount() {
+  const visible = document.querySelectorAll('#modelList .model-row').length;
+  const shown = document.querySelectorAll('#modelList .model-row:not([style*="display: none"])').length;
+  document.getElementById('modelShown').textContent = shown + ' models shown';
+}
+
+// ═══════════════════════════════════════════════════════
+//  Instrument type filter (filter bar segmented buttons)
+// ═══════════════════════════════════════════════════════
 function switchInstrType(type, el) {
   document.querySelectorAll('#instrTypeGroup .seg-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  document.querySelectorAll('#modelList .model-row').forEach(row => {
-    if (type === 'all') { row.style.display = ''; return; }
-    row.style.display = row.dataset.type === type ? '' : 'none';
-  });
-  // Hide empty group headers
-  document.querySelectorAll('#modelList .model-group-head').forEach(hdr => {
-    let next = hdr.nextElementSibling;
-    let hasVisible = false;
-    while (next && !next.classList.contains('model-group-head')) {
-      if (next.style.display !== 'none') hasVisible = true;
-      next = next.nextElementSibling;
-    }
-    hdr.style.display = hasVisible ? '' : 'none';
-  });
+  currentFilter = type;
+  applyFilters();
 }
 
-// Keyboard navigation for model list
+function applyFilters() {
+  const showInactive = document.getElementById('showInactiveToggle').checked;
+  document.querySelectorAll('#modelList .model-row').forEach(row => {
+    const typeMatch = currentFilter === 'all' || row.dataset.type === currentFilter;
+    const isActive = row.dataset.active !== 'false';
+    const activeMatch = showInactive || isActive;
+    row.style.display = (typeMatch && activeMatch) ? '' : 'none';
+  });
+  updateGroupVisibility();
+  updateModelCount();
+}
+
+// ═══════════════════════════════════════════════════════
+//  Keyboard navigation for model list
+// ═══════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
   const list = document.getElementById('modelList');
   if (!list) return;
@@ -1557,6 +1611,536 @@ function createNewModel() {
   if (el) el.addEventListener('input', validateNewModel);
   if (el) el.addEventListener('change', validateNewModel);
 });
+
+// ═══════════════════════════════════════════════════════
+//  API WIRING — Dual-mode pattern
+// ═══════════════════════════════════════════════════════
+
+function showBadge(live) {
+  const b = document.getElementById('demoBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) { b.textContent = 'Live Data'; b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0'; }
+  else { b.textContent = 'Demo Data'; b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A'; }
+}
+
+function showDemo() {
+  isDemoMode = true;
+  showBadge(false);
+  console.log('[Scope Model] Running in demo mode with hardcoded data');
+}
+
+function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }
+function money(n) { return n == null ? '—' : '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function v(val) { return val == null || val === '' ? '' : val; }
+
+// ── Render model list grouped by manufacturer ──────────
+function renderModelList(models) {
+  const list = document.getElementById('modelList');
+  // Group by manufacturer
+  const groups = {};
+  models.forEach(m => {
+    const mfr = m.sManufacturerName || 'Unknown';
+    if (!groups[mfr]) groups[mfr] = [];
+    groups[mfr].push(m);
+  });
+
+  // Sort manufacturers alphabetically
+  const sortedMfrs = Object.keys(groups).sort();
+  let html = '';
+  sortedMfrs.forEach(mfr => {
+    const items = groups[mfr];
+    html += '<div class="model-group-head">' + mfr + ' (' + items.length + ')</div>';
+    items.forEach(m => {
+      const isActive = m.bActive !== false;
+      const typeLabel = m.sRigidOrFlexible === 'R' ? 'Rigid' : m.sRigidOrFlexible === 'C' ? 'Camera' : 'Flexible';
+      const badgeClass = isActive ? 'mr-badge-active' : 'mr-badge-inactive';
+      const badgeText = isActive ? 'Active' : 'Inactive';
+      html += '<div class="model-row" data-model="' + (m.sScopeTypeDesc||'') + '" data-type="' + (m.sRigidOrFlexible||'F') + '" data-scope-type-key="' + m.lScopeTypeKey + '" data-active="' + isActive + '" onclick="selectModel(this)">';
+      html += '  <div class="mr-name">' + (m.sScopeTypeDesc||'') + '</div>';
+      html += '  <div class="mr-desc">' + (m.sScopeModelCategory||'') + '</div>';
+      html += '  <div class="mr-meta"><span class="mr-badge ' + badgeClass + '">' + badgeText + '</span><span style="font-size:9px;color:var(--muted)">' + typeLabel + '</span></div>';
+      html += '</div>';
+    });
+  });
+  list.innerHTML = html;
+
+  // Update KPI strip
+  const total = models.length;
+  const active = models.filter(m => m.bActive !== false).length;
+  const inactive = total - active;
+  const flexible = models.filter(m => m.sRigidOrFlexible === 'F').length;
+  const rigid = models.filter(m => m.sRigidOrFlexible === 'R').length;
+  const camera = models.filter(m => m.sRigidOrFlexible === 'C').length;
+  document.getElementById('kpiTotal').textContent = fmt(total);
+  document.getElementById('kpiActive').textContent = fmt(active);
+  document.getElementById('kpiInactive').textContent = fmt(inactive);
+  document.getElementById('kpiFlexible').textContent = fmt(flexible);
+  document.getElementById('kpiRigid').textContent = fmt(rigid);
+  document.getElementById('kpiCamera').textContent = fmt(camera);
+  document.getElementById('modelCount').textContent = total;
+  document.getElementById('modelShown').textContent = total + ' models shown';
+  document.getElementById('modelPage').textContent = '';
+  document.getElementById('lastSync').textContent = 'Loaded ' + new Date().toLocaleString();
+
+  // Select first model
+  const firstRow = list.querySelector('.model-row');
+  if (firstRow) {
+    selectModel(firstRow);
+  }
+}
+
+// ── Load model detail ─────────────────────────────────
+async function loadModelDetail(scopeTypeKey) {
+  try {
+    const detail = await API.getScopeModelDetail(scopeTypeKey);
+    currentDetail = detail;
+    populateDetail(detail);
+    // Load avg days and epoxy avg
+    loadDetailKPIs(scopeTypeKey);
+  } catch(e) {
+    console.warn('[Scope Model] Detail load error:', e.message);
+  }
+}
+
+function populateDetail(d) {
+  // Header bar
+  document.getElementById('hdrModel').value = v(d.sScopeTypeDesc);
+  document.getElementById('hdrDesc').value = v(d.sScopeTypeDescription || d.sScopeModelCategory || '');
+  document.getElementById('hdrKey').textContent = 'MDL-' + String(d.lScopeTypeKey).padStart(4, '0');
+  document.getElementById('hdrActive').checked = d.bActive !== false;
+  document.getElementById('hdrInspReqd').checked = d.bInspectionRequired !== false;
+
+  // Category dropdown
+  const catSel = document.getElementById('hdrCategory');
+  if (catSel) {
+    const catVal = d.sScopeModelCategory || '';
+    for (let i = 0; i < catSel.options.length; i++) {
+      if (catSel.options[i].text === catVal) { catSel.selectedIndex = i; break; }
+    }
+  }
+  // Manufacturer dropdown
+  const mfgSel = document.getElementById('hdrMfg');
+  if (mfgSel) {
+    const mfgVal = d.sManufacturerName || '';
+    for (let i = 0; i < mfgSel.options.length; i++) {
+      if (mfgSel.options[i].text === mfgVal) { mfgSel.selectedIndex = i; break; }
+    }
+  }
+
+  // Configuration
+  setSelectByText('specVideoImage', d.sVideoImages || '');
+  setSelectByText('specImageSensor', d.sDiType || '');
+  document.getElementById('specProcessors').value = v(d.sProcessors);
+  document.getElementById('specLightSources').value = v(d.sLightSource);
+  document.getElementById('specAvgDaysIn').value = v(d.lAvgDaysIn);
+  document.getElementById('specExpMultiplier').value = v(d.dblExpenseMultiplier);
+  document.getElementById('specContractCost').value = v(d.dblContractCost);
+  document.getElementById('specMaxCharge').value = v(d.dblMaxCharge);
+  document.getElementById('specGLAccount').value = v(d.sGLAccount);
+  document.getElementById('specForceOnPortal').checked = !!d.bForceOnPortal;
+  document.getElementById('specSkipPortal').checked = !!d.bSkipPortal;
+
+  // Physical Specs
+  document.getElementById('specInsLength').value = v(d.dblLength);
+  document.getElementById('specInsDiameter').value = v(d.sDiameter || d.dblDiameter);
+  document.getElementById('specChannelSize').value = v(d.dblChannelSize);
+  document.getElementById('specFieldOfView').value = v(d.dblFieldOfView);
+  document.getElementById('specDirOfView').value = v(d.sDirectionOfView);
+  document.getElementById('specDepthMin').value = v(d.dblDepthOfFieldMin);
+  document.getElementById('specDepthMax').value = v(d.dblDepthOfFieldMax);
+  document.getElementById('specEpoxyAvg').value = v(d.dblEpoxyAvg);
+  document.getElementById('specEpoxyMax').value = v(d.dblEpoxyMax);
+
+  // Angulation
+  document.getElementById('specAngUp').textContent = v(d.dblAngulationUp) || '—';
+  document.getElementById('specAngDown').textContent = v(d.dblAngulationDown) || '—';
+  document.getElementById('specAngLeft').textContent = v(d.dblAngulationLeft) || '—';
+  document.getElementById('specAngRight').textContent = v(d.dblAngulationRight) || '—';
+
+  // Pricing
+  document.getElementById('specEvalFee').value = v(d.dblEvaluationFee);
+  document.getElementById('specEstTurnaround').value = v(d.lEstTurnaround);
+  document.getElementById('specMinorPrice').textContent = money(d.dblMinorPrice);
+  document.getElementById('specMidPrice').textContent = money(d.dblMidPrice);
+  document.getElementById('specMajorPrice').textContent = money(d.dblMajorPrice);
+  document.getElementById('specMinorWarranty').textContent = (d.lMinorWarranty || 6) + ' mo warranty';
+  document.getElementById('specMidWarranty').textContent = (d.lMidWarranty || 6) + ' mo warranty';
+  document.getElementById('specMajorWarranty').textContent = (d.lMajorWarranty || 12) + ' mo warranty';
+
+  // Notes
+  document.getElementById('specNotes').value = v(d.sNotes || d.mNotes || '');
+
+  // Update tab titles
+  document.getElementById('repairItemsTitle').textContent = 'Repair Items — ' + (d.sScopeTypeDesc||'');
+  document.getElementById('flagsTitle').textContent = 'Flags — ' + (d.sScopeTypeDesc||'');
+}
+
+function setSelectByText(id, text) {
+  const sel = document.getElementById(id);
+  if (!sel || !text) return;
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].text.toLowerCase() === text.toLowerCase()) { sel.selectedIndex = i; return; }
+  }
+}
+
+// ── Detail KPIs (avg days, epoxy) ──────────────────────
+async function loadDetailKPIs(scopeTypeKey) {
+  try {
+    const [avgDays, epoxyAvg] = await Promise.allSettled([
+      API.getScopeTypeAvgDays(scopeTypeKey),
+      API.getScopeTypeEpoxyAvg(scopeTypeKey)
+    ]);
+    if (avgDays.status === 'fulfilled' && avgDays.value) {
+      const days = avgDays.value.dblAvgDays || avgDays.value;
+      document.getElementById('detailTurnaround').innerHTML = (typeof days === 'number' ? days.toFixed(1) : days) + ' <span style="font-size:9px;font-weight:600;color:var(--muted)">days</span>';
+    }
+    if (epoxyAvg.status === 'fulfilled' && epoxyAvg.value) {
+      const ep = epoxyAvg.value.dblEpoxyAvg || epoxyAvg.value;
+      if (typeof ep === 'number') {
+        document.getElementById('specEpoxyAvg').value = ep.toFixed(2);
+      }
+    }
+  } catch(e) { /* non-critical */ }
+}
+
+// ── Load Repair Items tab ─────────────────────────────
+async function loadRepairItems(scopeTypeKey) {
+  try {
+    const items = await API.getScopeTypeRepairItems({ plScopeTypeKey: scopeTypeKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
+    const data = Array.isArray(items) ? items : (items?.data || items?.items || []);
+    renderRepairItems(data);
+    document.getElementById('detailRepairItemCount').textContent = data.length;
+    // Update tab badge
+    const tab = document.querySelector('.tab-bar .tab:nth-child(2) .tab-count');
+    if (tab) tab.textContent = data.length;
+  } catch(e) {
+    console.warn('[Scope Model] Repair items load error:', e.message);
+  }
+}
+
+function renderRepairItems(items) {
+  const tbody = document.getElementById('repairItemsBody');
+  if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No repair items assigned</td></tr>'; return; }
+  tbody.innerHTML = items.map(item => {
+    const desc = item.sRepairItemDescription || item.sDescription || '—';
+    const l3Time = item.lLevel3Time || item.dblLevel3CompletionTime;
+    const l3Warn = item.lLevel3Warn || item.dblLevel3WarningTime;
+    const l2Time = item.lLevel2Time || item.dblLevel2CompletionTime;
+    const l2Warn = item.lLevel2Warn || item.dblLevel2WarningTime;
+    const l1Time = item.lLevel1Time || item.dblLevel1CompletionTime;
+    const l1Warn = item.lLevel1Warn || item.dblLevel1WarningTime;
+    return '<tr>'
+      + '<td style="font-weight:600;color:var(--navy)">' + desc + '</td>'
+      + '<td class="center mono">' + (l3Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l3Warn || '—') + '</td>'
+      + '<td class="center mono">' + (l2Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l2Warn || '—') + '</td>'
+      + '<td class="center mono">' + (l1Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l1Warn || '—') + '</td>'
+      + '<td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ── Load Inventory tab ────────────────────────────────
+async function loadInventory(scopeTypeKey) {
+  try {
+    // Load repair items for the left list first
+    const items = await API.getScopeTypeRepairItems({ plScopeTypeKey: scopeTypeKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
+    const data = Array.isArray(items) ? items : (items?.data || items?.items || []);
+    const invList = document.getElementById('invRepairList');
+    if (data.length) {
+      invList.innerHTML = data.map((item, i) => {
+        const desc = item.sRepairItemDescription || item.sDescription || '—';
+        const riKey = item.lRepairItemKey || item.lScopeTypeRepairItemKey || 0;
+        return '<tr' + (i === 0 ? ' class="selected"' : '') + ' data-repair-item-key="' + riKey + '" onclick="selectRepairItem(this,\'' + desc.replace(/'/g, "\\'") + '\')">'
+          + '<td' + (i === 0 ? ' style="font-weight:600;color:var(--navy)"' : '') + '>' + desc + '</td></tr>';
+      }).join('');
+      // Load inventory for first item
+      const firstKey = data[0].lRepairItemKey || data[0].lScopeTypeRepairItemKey;
+      if (firstKey) loadInventoryForRepairItem(scopeTypeKey, firstKey);
+      document.getElementById('invTitle').textContent = 'Inventory — ' + (data[0].sRepairItemDescription || data[0].sDescription || '');
+    }
+  } catch(e) {
+    console.warn('[Scope Model] Inventory tab load error:', e.message);
+  }
+}
+
+async function loadInventoryForRepairItem(scopeTypeKey, repairItemKey) {
+  try {
+    const inv = await API.getScopeTypeRepairItemInventory({ plScopeTypeKey: scopeTypeKey, plRepairItemKey: repairItemKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
+    const data = Array.isArray(inv) ? inv : (inv?.data || inv?.items || []);
+    renderInventoryTable(data);
+    document.getElementById('detailLinkedParts').textContent = data.length;
+    const tab = document.querySelector('.tab-bar .tab:nth-child(3) .tab-count');
+    if (tab) tab.textContent = data.length;
+  } catch(e) {
+    console.warn('[Scope Model] Inventory load error:', e.message);
+  }
+}
+
+function renderInventoryTable(items) {
+  const tbody = document.getElementById('invBody');
+  if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No inventory linked</td></tr>'; return; }
+  tbody.innerHTML = items.map(item => {
+    const partNum = item.sInventorySizeDesc || item.sPartNumber || item.sInventoryDesc || '—';
+    const desc = item.sDescription || item.sInventoryDesc || '—';
+    const supplier = item.sSupplierName || '—';
+    const onHand = item.lQuantityOnHand != null ? item.lQuantityOnHand : '—';
+    const minQty = item.lMinQty != null ? item.lMinQty : '—';
+    const cost = item.dblUnitCost != null ? money(item.dblUnitCost) : '—';
+    const lastOrdered = item.dtLastOrdered ? new Date(item.dtLastOrdered).toLocaleDateString() : '—';
+    const qtyColor = onHand > (minQty||0) ? 'var(--green)' : onHand > 0 ? 'var(--amber)' : 'var(--red)';
+    return '<tr>'
+      + '<td><span class="mono-chip">' + partNum + '</span></td>'
+      + '<td>' + desc + '</td>'
+      + '<td>' + supplier + '</td>'
+      + '<td class="center" style="font-weight:600;color:' + qtyColor + '">' + onHand + '</td>'
+      + '<td class="center">' + minQty + '</td>'
+      + '<td style="font-family:monospace;font-size:10.5px">' + cost + '</td>'
+      + '<td style="font-size:10.5px;color:var(--muted)">' + lastOrdered + '</td>'
+      + '<td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px">&#10005;</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ── Load Flags ────────────────────────────────────────
+async function loadFlags(scopeTypeKey) {
+  try {
+    const flags = await API.getFlagsByOwner(scopeTypeKey);
+    const data = Array.isArray(flags) ? flags : (flags?.data || []);
+    renderFlags(data);
+    const tab = document.querySelector('.tab-bar .tab:nth-child(4) .tab-count');
+    if (tab) tab.textContent = data.length;
+  } catch(e) {
+    console.warn('[Scope Model] Flags load error:', e.message);
+  }
+}
+
+function renderFlags(flags) {
+  // Flags tab
+  const tbody = document.getElementById('flagsBody');
+  if (!flags.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No flags</td></tr>';
+  } else {
+    tbody.innerHTML = flags.map(f => {
+      const instrType = f.sInstrumentType || 'Flexible';
+      const location = f.sFlagLocation || f.sLocation || '—';
+      const text = f.sFlagText || f.sFlag || '—';
+      const fKey = f.lFlagKey || 0;
+      return '<tr>'
+        + '<td>' + instrType + '</td>'
+        + '<td>' + location + '</td>'
+        + '<td style="color:var(--red);font-weight:600">' + text + '</td>'
+        + '<td class="center"><button class="edit-btn" style="font-size:9px">Edit</button> <button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="deleteFlag(' + fKey + ',this)">&#10005;</button></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  // Also update the inline flags in specs tab
+  const specFlagsBody = document.getElementById('specFlagsBody');
+  if (!flags.length) {
+    specFlagsBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:10px">No flags</td></tr>';
+  } else {
+    specFlagsBody.innerHTML = flags.map(f => {
+      const location = f.sFlagLocation || f.sLocation || '—';
+      const text = f.sFlagText || f.sFlag || '—';
+      const fKey = f.lFlagKey || 0;
+      return '<tr>'
+        + '<td style="font-size:10px;color:var(--muted)">' + location + '</td>'
+        + '<td style="color:var(--red);font-weight:600;font-size:10.5px">' + text + '</td>'
+        + '<td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="deleteFlag(' + fKey + ',this)">&#10005;</button></td>'
+        + '</tr>';
+    }).join('');
+  }
+}
+
+async function deleteFlag(flagKey, btn) {
+  if (!confirm('Delete this flag?')) return;
+  try {
+    await API.deleteFlag(flagKey);
+    btn.closest('tr').remove();
+  } catch(e) {
+    // Fallback: just remove from DOM
+    btn.closest('tr').remove();
+  }
+}
+
+// ── Save model ────────────────────────────────────────
+async function saveModel() {
+  if (isDemoMode || !selectedScopeTypeKey) return;
+  const btn = document.getElementById('saveModelBtn');
+  btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg> Saving...';
+  btn.disabled = true;
+
+  const data = {
+    lScopeTypeKey: selectedScopeTypeKey,
+    sScopeTypeDesc: document.getElementById('hdrModel').value,
+    sScopeModelCategory: document.getElementById('hdrCategory').value,
+    sManufacturerName: document.getElementById('hdrMfg').options[document.getElementById('hdrMfg').selectedIndex]?.text || '',
+    bActive: document.getElementById('hdrActive').checked,
+    bInspectionRequired: document.getElementById('hdrInspReqd').checked,
+    sRigidOrFlexible: currentDetail?.sRigidOrFlexible || 'F',
+    sVideoImages: document.getElementById('specVideoImage').value,
+    sDiType: document.getElementById('specImageSensor').value,
+    sProcessors: document.getElementById('specProcessors').value,
+    sLightSource: document.getElementById('specLightSources').value,
+    lAvgDaysIn: parseInt(document.getElementById('specAvgDaysIn').value) || null,
+    dblExpenseMultiplier: parseFloat(document.getElementById('specExpMultiplier').value) || null,
+    dblContractCost: parseFloat(document.getElementById('specContractCost').value) || null,
+    dblMaxCharge: parseFloat(document.getElementById('specMaxCharge').value) || null,
+    sGLAccount: document.getElementById('specGLAccount').value,
+    bForceOnPortal: document.getElementById('specForceOnPortal').checked,
+    bSkipPortal: document.getElementById('specSkipPortal').checked,
+    dblLength: parseFloat(document.getElementById('specInsLength').value) || null,
+    sDiameter: document.getElementById('specInsDiameter').value,
+    dblChannelSize: parseFloat(document.getElementById('specChannelSize').value) || null,
+    dblFieldOfView: parseFloat(document.getElementById('specFieldOfView').value) || null,
+    sDirectionOfView: document.getElementById('specDirOfView').value,
+    dblDepthOfFieldMin: parseFloat(document.getElementById('specDepthMin').value) || null,
+    dblDepthOfFieldMax: parseFloat(document.getElementById('specDepthMax').value) || null,
+    dblEpoxyAvg: parseFloat(document.getElementById('specEpoxyAvg').value) || null,
+    dblEpoxyMax: parseFloat(document.getElementById('specEpoxyMax').value) || null,
+    dblEvaluationFee: parseFloat(document.getElementById('specEvalFee').value) || null,
+    lEstTurnaround: parseInt(document.getElementById('specEstTurnaround').value) || null,
+    sNotes: document.getElementById('specNotes').value
+  };
+
+  // Preserve fields from current detail that we don't edit
+  if (currentDetail) {
+    data.lManufacturerKey = currentDetail.lManufacturerKey;
+    data.lScopeModelCategoryKey = currentDetail.lScopeModelCategoryKey;
+    data.lVideoImagesKey = currentDetail.lVideoImagesKey;
+    data.lDiTypeKey = currentDetail.lDiTypeKey;
+  }
+
+  try {
+    await API.addUpdateScopeType(data);
+    btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Saved!';
+    setTimeout(() => {
+      btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Save';
+      btn.disabled = false;
+    }, 1500);
+  } catch(e) {
+    console.error('[Scope Model] Save error:', e.message);
+    btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Save';
+    btn.disabled = false;
+    alert('Save failed: ' + e.message);
+  }
+}
+
+// ── Create new model (wired) ──────────────────────────
+const _origCreateNewModel = createNewModel;
+createNewModel = async function() {
+  if (isDemoMode) { _origCreateNewModel(); return; }
+  const name = document.getElementById('nmName').value.trim();
+  if (!name) return;
+
+  const data = {
+    lScopeTypeKey: 0,
+    sScopeTypeDesc: name,
+    sScopeModelCategory: document.getElementById('nmCategory').value,
+    sRigidOrFlexible: document.getElementById('nmType').value,
+    bActive: true,
+    bInspectionRequired: true,
+    sVideoImages: document.getElementById('nmVideo').value,
+    sDiType: document.getElementById('nmSensor').value,
+    sProcessors: document.getElementById('nmProcessors').value,
+    sLightSource: document.getElementById('nmLightSources').value,
+    dblLength: parseFloat(document.getElementById('nmInsLen').value) || null,
+    sDiameter: document.getElementById('nmInsDiam').value,
+    dblChannelSize: parseFloat(document.getElementById('nmChannel').value) || null,
+    dblFieldOfView: parseFloat(document.getElementById('nmFOV').value) || null,
+    sDirectionOfView: document.getElementById('nmDirView').value,
+    dblDepthOfFieldMin: parseFloat(document.getElementById('nmDepthMin').value) || null,
+    dblDepthOfFieldMax: parseFloat(document.getElementById('nmDepthMax').value) || null,
+    dblEvaluationFee: parseFloat(document.getElementById('nmEvalFee').value.replace(/,/g,'')) || null,
+    lEstTurnaround: parseInt(document.getElementById('nmTurnaround').value) || null,
+    dblAngulationUp: parseFloat(document.getElementById('nmAngUp').value) || null,
+    dblAngulationDown: parseFloat(document.getElementById('nmAngDn').value) || null,
+    dblAngulationLeft: parseFloat(document.getElementById('nmAngLt').value) || null,
+    dblAngulationRight: parseFloat(document.getElementById('nmAngRt').value) || null,
+    sNotes: document.getElementById('nmNotes').value
+  };
+
+  try {
+    await API.addUpdateScopeType(data);
+    document.getElementById('newModelModal').classList.remove('open');
+    // Reload model list
+    initPage();
+  } catch(e) {
+    console.error('[Scope Model] Create error:', e.message);
+    alert('Create failed: ' + e.message);
+  }
+};
+
+// ── Initialize page ───────────────────────────────────
+async function initPage() {
+  try {
+    // Load models and manufacturers in parallel
+    const [modelsResult, mfgResult] = await Promise.allSettled([
+      API.getScopeModels({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: {} }),
+      API.getManufacturers()
+    ]);
+
+    if (modelsResult.status === 'rejected') throw modelsResult.reason;
+
+    const models = modelsResult.value;
+    allModels = Array.isArray(models) ? models : (models?.data || models?.items || []);
+
+    if (mfgResult.status === 'fulfilled') {
+      allManufacturers = Array.isArray(mfgResult.value) ? mfgResult.value : (mfgResult.value?.data || []);
+      // Populate manufacturer dropdowns if we got data
+      if (allManufacturers.length) {
+        populateManufacturerDropdowns(allManufacturers);
+      }
+    }
+
+    if (!allModels.length) throw new Error('No models returned');
+    isDemoMode = false;
+    showBadge(true);
+    renderModelList(allModels);
+    console.log('[Scope Model] Loaded', allModels.length, 'models from API');
+
+  } catch(e) {
+    console.warn('[Scope Model] API load failed, using demo data:', e.message);
+    showDemo();
+  }
+}
+
+function populateManufacturerDropdowns(mfrs) {
+  const selectors = ['hdrMfg', 'nmMfg'];
+  selectors.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    // Clear and rebuild
+    sel.innerHTML = '<option value="">-- Select --</option>';
+    mfrs.forEach(m => {
+      const name = m.sManufacturerName || m.sName || '';
+      if (!name) return;
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+    // Restore selection
+    if (current) sel.value = current;
+  });
+}
+
+// ── Display user info from token ─────────────────────
+function displayUserInfo() {
+  const user = API.getUser();
+  if (user) {
+    const avatar = document.querySelector('.topbar-avatar');
+    const welcome = document.querySelector('.topbar-welcome');
+    if (avatar && user.sFirstName) avatar.textContent = (user.sFirstName[0] || '') + (user.sLastName?.[0] || '');
+    if (welcome && user.sFirstName) welcome.innerHTML = 'Welcome, <strong>' + user.sFirstName + ' ' + (user.sLastName||'') + '</strong>';
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────
+displayUserInfo();
+initPage();
 </script>
 </body>
 </html>
