@@ -10,7 +10,12 @@ const API = (() => {
 
   // ── Token Management ──────────────────────────────────
   function getToken() {
-    return localStorage.getItem('tsi_token');
+    const token = localStorage.getItem('tsi_token');
+    return token;
+  }
+
+  function isDemoMode() {
+    return getToken() === 'demo';
   }
 
   function setToken(token) {
@@ -145,7 +150,7 @@ const API = (() => {
     // Token expired or invalid
     if (res.status === 401) {
       // Demo mode — don't redirect, just throw so pages can fall back to demo data
-      if (getToken() === 'demo') {
+      if (isDemoMode()) {
         console.warn('[TSI API] 401 on', endpoint, '— demo mode, falling back');
         const err = new Error('Demo mode — no real API access');
         err.status = 401;
@@ -548,6 +553,54 @@ const API = (() => {
   async function changeUserPassword(data) { return post('/UserManagement/ChangeUserPassword', data); }
   async function forgotPassword(data) { return post('/UserManagement/ForgotPassword', data); }
 
+  async function logout() {
+    clearToken();
+    window.location.href = 'login.html';
+  }
+
+  // ── UI Helpers (Topbar, Sidebar, Demo Mode) ───────────
+  const UI = {
+    init: function() {
+      this.updateUserInfo();
+      this.updateDemoBadge();
+      this.setupNewOrderDropdown();
+    },
+    updateUserInfo: function() {
+      const user = getUser();
+      if (user) {
+        const avatar = document.querySelector('.topbar-avatar');
+        const welcome = document.querySelector('.topbar-welcome');
+        if (avatar) avatar.textContent = (user.sFirstName?.[0] || '') + (user.sLastName?.[0] || '');
+        if (welcome) welcome.innerHTML = 'Welcome back, <strong>' + (user.sFirstName || 'User') + '</strong>';
+      }
+    },
+    updateDemoBadge: function(status) {
+      const indicator = document.querySelector('.save-indicator') || document.getElementById('saveIndicator');
+      if (!indicator) return;
+      if (isDemoMode()) {
+        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data';
+        indicator.style.display = 'inline-flex';
+        indicator.style.alignItems = 'center';
+        indicator.style.color = '#FDE68A';
+        indicator.style.fontSize = '11px';
+        indicator.style.fontWeight = '600';
+      } else if (status === 'api') {
+        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Live Data';
+        indicator.style.display = 'inline-flex';
+        indicator.style.alignItems = 'center';
+        indicator.style.color = '#A7F3D0';
+        indicator.style.fontSize = '11px';
+        indicator.style.fontWeight = '600';
+      }
+    },
+    setupNewOrderDropdown: function() {
+      document.addEventListener('click', function(e) {
+        const menu = document.getElementById('newOrderMenu');
+        if (menu && !e.target.closest('#newOrderWrap')) menu.classList.remove('open');
+      });
+    }
+  };
+
   // ── AdminManageStaff (4) ──────────────────────────────
   async function getJobTypes(data) { return post('/AdminManageStaff/GetJobTypes', data); }
   async function getAllStaff(jobTypeKey, includeInactive) { return get('/AdminManageStaff/GetAllStaff?plJobTypeKey=' + (jobTypeKey||0) + '&pbIncludeInactive=' + (includeInactive||false)); }
@@ -581,7 +634,7 @@ const API = (() => {
     // Auth & Core
     login, logout, isLoggedIn, requireAuth, getToken, getUser,
     get, post, del,
-    verifyOtp,
+    verifyOtp, UI,
 
     // Dashboard
     getDashboardScopes,
@@ -745,6 +798,7 @@ const API = (() => {
     getDevTodoList, addDevTodoItem, getDevTodoStatuses, getDevTodoPriorities,
 
     // Config
-    BASE_URL
+    BASE_URL,
+    isDemoMode
   };
 })();

@@ -40,6 +40,8 @@
     .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
     .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
     .svc-select option{color:#1A202C;background:#fff}
+    .save-indicator{display:none;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);white-space:nowrap;color:#FDE68A}
+    .save-indicator svg{width:13px;height:13px}
 
     /* TOOLBAR */
     .toolbar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-shrink:0}
@@ -82,7 +84,7 @@
     .detail-scroll{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column}
 
     /* REFERENCE STRIP — compact read-only context */
-    .ref-strip{display:grid;grid-template-columns:repeat(7,1fr);align-items:center;padding:7px 14px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;border-left:3px solid var(--navy)}
+    .ref-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding:7px 14px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;border-left:3px solid var(--navy)}
     .ref-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--label);white-space:nowrap}
     .ref-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
     .ref-val{font-weight:700;color:var(--navy)}
@@ -329,19 +331,20 @@
         <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
       </div>
       <div class="topbar-right">
-        <div style="position:relative" id="newOrderWrap">
-          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(22,163,74,.3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
-          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
           </div>
         </div>
-        <span id="dataBadge" style="display:none;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700"></span>
+        <div class="save-indicator"></div>
+        <span style="opacity:0.5; margin: 0 4px;">|</span>
         Service Location
         <select class="svc-select" id="svcLocation" onchange="reloadRepairs()"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
         <div class="topbar-avatar">JB</div>
-        <span class="topbar-welcome">Welcome, <strong>Joseph Brassell</strong></span>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
@@ -405,8 +408,6 @@
               <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:150px" onchange="markDirty()"/></span>
               <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:60px" onchange="markDirty()"/></span>
               <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:160px" onchange="markDirty()"></select></span>
-            </div>
-            <div class="ref-strip" style="border-top:none;margin-top:-4px">
               <span class="ref-item"><b>Mfr</b> <span id="hMfr" class="ref-val">—</span></span>
               <span class="ref-item"><b>Category</b> <span id="hScopeCat" class="ref-val">—</span></span>
               <span class="ref-item"><b>Model</b> <span id="hModel" class="ref-val">—</span></span>
@@ -416,8 +417,6 @@
               <span class="ref-item"><b>Cap/FFS</b> <span id="hCapFFS" class="ref-val">—</span></span>
               <span class="ref-item"><b>Days Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
               <span class="ref-item"><b>40d</b> <span id="hWithin40" class="ref-val">—</span></span>
-            </div>
-            <div class="ref-strip" style="border-top:none;margin-top:-4px;border-left-color:var(--steel)">
               <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
               <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
               <span class="ref-item"><b>Date In</b> <span class="ref-val" id="hDateInRO2">—</span></span>
@@ -993,11 +992,9 @@ let _statuses = [], _levels = [], _deliveryMethods = [], _techs = [], _safetyLev
 let _repairReasons = [], _salesReps = [], _pricingCategories = [], _paymentTerms = [];
 
 function showDataBadge(live) {
-  const b = document.getElementById('dataBadge');
+  const b = document.getElementById('demoBadge');
   if (!b) return;
-  b.style.display = 'inline-block';
-  if (live) { b.textContent = 'Live Data'; b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0'; }
-  else { b.textContent = 'Demo Data'; b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A'; }
+  b.style.display = live ? 'none' : 'flex';
 }
 
 function updateUserInfo() {
@@ -2502,24 +2499,48 @@ async function initPage() {
     populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingCategory', true);
     populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sPaymentTerms', true);
 
-    _liveMode = true;
-    showDataBadge(true);
+    _liveMode = !API.isDemoMode();
+    
+    // Sync Demo Badge
+    const db = document.getElementById('demoBadge');
+    if (db) db.style.display = API.isDemoMode() ? 'flex' : 'none';
+
     console.log('[TSI Repairs] Lookups loaded. Clients:', _clients.length, 'Departments:', _departments.length);
 
-    // If a repair key was passed, load it immediately
+    // Handle URL parameters for direct actions
     if (requestedKey) {
       await loadRepair(parseInt(requestedKey));
     } else {
-      // Load the most recent repair as a default view
-      try {
-        const recentList = await API.getRepairList(svcKey);
-        const arr = Array.isArray(recentList) ? recentList : [];
-        arr.sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
-        if (arr.length) {
-          await loadRepair(arr[0].lRepairKey);
+      const action = params.get('action');
+      const clientName = params.get('client');
+      const deptName = params.get('dept');
+
+      if (action === 'new' || action === 'endocart' || clientName || deptName) {
+        newRepair();
+        if (clientName) {
+          const c = _clients.find(x => (x.sClientName1 || x.sClientName || '').toLowerCase() === clientName.toLowerCase());
+          if (c) {
+            wizPickClient(c.lClientKey);
+            if (deptName) {
+              // Wait for depts to be available (rendered by wizPickClient via wizNext)
+              setTimeout(() => {
+                const d = _departments.find(x => (x.sDepartmentName || '').toLowerCase() === deptName.toLowerCase() && x.lClientKey === c.lClientKey);
+                if (d) wizPickDept(d.lDepartmentKey);
+              }, 300);
+            }
+          }
         }
-      } catch (e2) {
-        console.warn('[TSI Repairs] Could not load recent repair:', e2.message);
+      } else {
+        try {
+          const recentList = await API.getRepairList(svcKey);
+          const arr = Array.isArray(recentList) ? recentList : [];
+          arr.sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
+          if (arr.length) {
+            await loadRepair(arr[0].lRepairKey);
+          }
+        } catch (e2) {
+          console.warn('[TSI Repairs] Could not load recent repair:', e2.message);
+        }
       }
     }
   } catch (e) {
@@ -2792,14 +2813,7 @@ async function initPage() {
   }
 }
 initPage().then(() => {
-  // Check URL params for auto-actions from other pages
-  const params = new URLSearchParams(window.location.search);
-  const action = params.get('action');
-  if (action === 'new' || action === 'endocart') {
-    // Clean URL so refresh doesn't re-trigger
-    window.history.replaceState({}, '', 'repairs.html');
-    newRepair();
-  }
+  API.UI.init();
 });
 initItemContextMenu();
 </script>

@@ -673,37 +673,12 @@ async function loadDashboardData(filters) {
   }
 
   // Update the topbar to show data source
-  updateDataSourceBadge();
+  API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'fallback');
   updateStats();
   renderTable();
 }
 
-function updateDataSourceBadge() {
-  const indicator = document.querySelector('.save-indicator');
-  if (!indicator) return;
-  if (DATA_SOURCE === 'api') {
-    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Live Data';
-    indicator.style.color = '#A7F3D0';
-  } else {
-    indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data (API unavailable)';
-    indicator.style.color = '#FDE68A';
-  }
-}
-
-// Populate topbar user info from token
-function updateUserInfo() {
-  const user = API.getUser();
-  if (user) {
-    const avatar = document.querySelector('.topbar-avatar');
-    const welcome = document.querySelector('.topbar-welcome');
-    if (avatar && user.sFirstName) {
-      avatar.textContent = (user.sFirstName?.[0] || '') + (user.sLastName?.[0] || '');
-    }
-    if (welcome && user.sFirstName) {
-      welcome.innerHTML = 'Welcome back, <strong>' + user.sFirstName + '</strong>';
-    }
-  }
-}
+// ── Demo Data & User Info centralized in API.UI ──
 
 // Demo data fallback — keeps the page functional if API is unreachable
 function getDemoData() {
@@ -1470,7 +1445,7 @@ function changeServiceLocation() {
 // ═══════════════════════════════════════════════════════
 //  INIT — load from API, then render
 // ═══════════════════════════════════════════════════════
-updateUserInfo();
+API.UI.init();
 loadDashboardData();
 </script>
 </body>
