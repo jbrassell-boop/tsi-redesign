@@ -896,12 +896,14 @@
             <span style="font-size:10px;color:var(--muted)">(scope not in system yet)</span>
           </div>
           <div class="field-row">
-            <div style="min-width:150px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
-            <div style="flex:1;min-width:200px"><label>Model *</label><select id="wizNewModel" onchange="wizOnModelChange()" style="width:100%" disabled><option value="">-- Select Instrument Type first --</option></select></div>
-            <div style="min-width:100px"><label>Type</label><input type="text" id="wizNewRigFlex" style="width:100%;background:#f5f7fa;color:var(--muted)" readonly value="—"/></div>
-          </div>
-          <div class="field-row" style="margin-top:4px">
-            <div style="flex:1;min-width:180px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
+            <div style="min-width:140px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
+            <div style="flex:2;min-width:250px;position:relative">
+              <label>Model * <span id="wizModelCount" style="font-weight:400;color:var(--muted)"></span></label>
+              <input type="text" id="wizModelSearch" placeholder="Type to search models..." oninput="wizFilterModels(this.value)" onfocus="wizFilterModels(this.value)" style="width:100%" disabled/>
+              <div id="wizModelDropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1.5px solid var(--border-dk);border-top:none;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:200;box-shadow:0 8px 24px rgba(0,37,122,.12)"></div>
+              <input type="hidden" id="wizNewModel" value=""/>
+            </div>
+            <div style="min-width:180px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
             <div style="display:flex;align-items:flex-end"><button onclick="wizCreateScope()" style="height:28px;padding:0 14px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Add Scope</button></div>
           </div>
         </div>
@@ -1815,29 +1817,21 @@ async function wizLoadScopes() {
   const grid = document.getElementById('wizScopeGrid');
   grid.innerHTML = '<div class="wiz-empty" style="color:var(--blue)">Loading scopes...</div>';
 
-  // Load instrument types + full model catalog for cascading dropdowns
+  // Load instrument types for cascading dropdowns
   if (!_wizInstrumentTypes.length) {
     try { const r = await API.getInstrumentTypes(); _wizInstrumentTypes = Array.isArray(r) ? r : []; } catch(e) { _wizInstrumentTypes = []; }
+    // Filter out blank entries
+    _wizInstrumentTypes = _wizInstrumentTypes.filter(t => t.sInstrumentType);
     const instSel = document.getElementById('wizNewInstType');
     instSel.innerHTML = '<option value="">-- Select --</option>' +
-      _wizInstrumentTypes.map(t => {
-        const name = t.sInstrumentType || t.sDescription || t.sName || ('Type ' + (t.lInstrumentTypeKey || ''));
-        return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
-      }).join('');
+      _wizInstrumentTypes.map(t => '<option value="' + esc(t.sInstrumentTypeKey || t.sInstrumentType) + '">' + esc(t.sInstrumentType) + '</option>').join('');
   }
-  if (!_wizScopeTypes.length) {
-    try {
-      const raw = await API.getScopeModels({ Pagination: { PageNumber: 1, PageSize: 1000 }, Filters: {} });
-      _wizScopeTypes = Array.isArray(raw) ? raw : [];
-    } catch(e) {
-      try { _wizScopeTypes = await API.getScopeTypes(); if (!Array.isArray(_wizScopeTypes)) _wizScopeTypes = []; } catch(e2) { _wizScopeTypes = []; }
-    }
-    _wizScopeTypes.sort((a, b) => (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''));
-  }
-  // Reset dropdowns
-  document.getElementById('wizNewModel').innerHTML = '<option value="">-- Select Instrument Type first --</option>';
-  document.getElementById('wizNewModel').disabled = true;
-  document.getElementById('wizNewRigFlex').value = '—';
+  // Reset form
+  document.getElementById('wizNewModel').value = '';
+  document.getElementById('wizModelSearch').value = '';
+  document.getElementById('wizModelSearch').disabled = true;
+  document.getElementById('wizModelDropdown').style.display = 'none';
+  document.getElementById('wizModelCount').textContent = '';
   document.getElementById('wizNewInstType').value = '';
   document.getElementById('wizNewSN').value = '';
 
@@ -1891,54 +1885,87 @@ function wizPickScope(key) {
   setTimeout(() => { if (_wizScope) wizNext(); }, 200);
 }
 
-// ── Cascading dropdowns: Instrument Type → Model → Type ──
-function wizOnInstTypeChange() {
+// ── Cascading: Instrument Type → Model (searchable) ──
+let _wizFilteredModels = [];
+
+async function wizOnInstTypeChange() {
   const instType = document.getElementById('wizNewInstType').value;
-  const modelSel = document.getElementById('wizNewModel');
-  document.getElementById('wizNewRigFlex').value = '—';
+  const searchInp = document.getElementById('wizModelSearch');
+  const dd = document.getElementById('wizModelDropdown');
+
+  document.getElementById('wizNewModel').value = '';
+  searchInp.value = '';
+  dd.style.display = 'none';
+  _wizFilteredModels = [];
 
   if (!instType) {
-    modelSel.innerHTML = '<option value="">-- Select Instrument Type first --</option>';
-    modelSel.disabled = true;
+    searchInp.disabled = true;
+    searchInp.placeholder = 'Select Instrument Type first...';
+    document.getElementById('wizModelCount').textContent = '';
     return;
   }
 
-  // Filter models by instrument type (check multiple possible field names)
-  const filtered = _wizScopeTypes.filter(t => {
-    const it = t.sInstrumentType || t.sScopeModelCategory || t.sCategory || '';
-    return it.toLowerCase() === instType.toLowerCase();
-  });
+  searchInp.disabled = true;
+  searchInp.placeholder = 'Loading models...';
 
-  modelSel.disabled = false;
-  if (!filtered.length) {
-    modelSel.innerHTML = '<option value="">No models for ' + esc(instType) + '</option>';
+  // Load scope type names filtered by instrument type
+  try {
+    const instTypeFull = _wizInstrumentTypes.find(t => (t.sInstrumentTypeKey || t.sInstrumentType) === instType);
+    const typeName = instTypeFull ? instTypeFull.sInstrumentType : instType;
+    const raw = await API.getScopeTypeNames(typeName);
+    _wizFilteredModels = Array.isArray(raw) ? raw.filter(t => t.sScopeTypeDesc) : [];
+    _wizFilteredModels.sort((a, b) => (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''));
+  } catch(e) {
+    _wizFilteredModels = [];
+  }
+
+  document.getElementById('wizModelCount').textContent = '(' + _wizFilteredModels.length + ')';
+  searchInp.disabled = false;
+  searchInp.placeholder = 'Type to search ' + _wizFilteredModels.length + ' models...';
+  searchInp.focus();
+}
+
+function wizFilterModels(query) {
+  const dd = document.getElementById('wizModelDropdown');
+  const q = (query || '').toLowerCase();
+  let matches = _wizFilteredModels;
+  if (q) matches = matches.filter(t => (t.sScopeTypeDesc || '').toLowerCase().includes(q));
+
+  if (!matches.length) {
+    dd.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted);font-size:11px">' + (q ? 'No models matching "' + esc(q) + '"' : 'No models available') + '</div>';
   } else {
-    modelSel.innerHTML = '<option value="">-- Select Model (' + filtered.length + ') --</option>' +
-      filtered.map(t => {
-        const desc = t.sScopeTypeDesc || t.sScopeTypeName || 'Model ' + t.lScopeTypeKey;
-        const mfr = t.sManufacturerName ? ' (' + t.sManufacturerName + ')' : '';
-        return '<option value="' + t.lScopeTypeKey + '">' + esc(desc + mfr) + '</option>';
-      }).join('');
+    dd.innerHTML = matches.slice(0, 80).map(t => {
+      const desc = t.sScopeTypeDesc || 'Model ' + t.lScopeTypeKey;
+      const sel = document.getElementById('wizNewModel').value == t.lScopeTypeKey;
+      return '<div onmousedown="wizPickModel(' + t.lScopeTypeKey + ',\'' + esc(desc).replace(/'/g, "\\'") + '\')" style="padding:6px 10px;font-size:11px;cursor:pointer;border-bottom:1px solid #f0f2f5;' + (sel ? 'background:#EDF2FF;font-weight:600' : '') + '" onmouseover="this.style.background=\'#EDF2FF\'" onmouseout="this.style.background=\'' + (sel ? '#EDF2FF' : '') + '\'">' + esc(desc) + '</div>';
+    }).join('') + (matches.length > 80 ? '<div style="padding:6px 10px;font-size:10px;color:var(--muted);text-align:center">Showing 80 of ' + matches.length + ' — type to narrow</div>' : '');
   }
+  dd.style.display = 'block';
 }
 
-function wizOnModelChange() {
-  const modelKey = document.getElementById('wizNewModel').value;
-  const rfField = document.getElementById('wizNewRigFlex');
-  if (!modelKey) { rfField.value = '—'; return; }
-  const model = _wizScopeTypes.find(t => t.lScopeTypeKey == modelKey);
-  if (model) {
-    rfField.value = model.sRigidOrFlexible || '—';
-  }
+function wizPickModel(key, name) {
+  document.getElementById('wizNewModel').value = key;
+  document.getElementById('wizModelSearch').value = name;
+  document.getElementById('wizModelDropdown').style.display = 'none';
 }
+
+// Close model dropdown on blur
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#wizModelSearch') && !e.target.closest('#wizModelDropdown')) {
+    const dd = document.getElementById('wizModelDropdown');
+    if (dd) dd.style.display = 'none';
+  }
+});
 
 async function wizCreateScope() {
-  const sn = document.getElementById('wizNewSN').value.trim();
+  const instTypeKey = document.getElementById('wizNewInstType').value;
   const modelKey = document.getElementById('wizNewModel').value;
-  const model = _wizScopeTypes.find(t => t.lScopeTypeKey == modelKey);
-  const rigFlex = model ? (model.sRigidOrFlexible || 'Flexible') : 'Flexible';
-  if (!document.getElementById('wizNewInstType').value) { showToast('Select an instrument type'); return; }
-  if (!modelKey) { showToast('Select a model'); return; }
+  const sn = document.getElementById('wizNewSN').value.trim();
+  // Map instrument type key to rigid/flexible
+  const instType = _wizInstrumentTypes.find(t => (t.sInstrumentTypeKey || t.sInstrumentType) === instTypeKey);
+  const rigFlex = instType ? instType.sInstrumentType : 'Flexible';
+  if (!instTypeKey) { showToast('Select an instrument type'); return; }
+  if (!modelKey) { showToast('Search and select a model'); return; }
   if (!sn) { showToast('Enter a serial number'); return; }
 
   try {
