@@ -1811,12 +1811,25 @@ async function wizLoadScopes() {
   const grid = document.getElementById('wizScopeGrid');
   grid.innerHTML = '<div class="wiz-empty" style="color:var(--blue)">Loading scopes...</div>';
 
-  // Load scope types for the "new scope" dropdown
+  // Load scope models for the "new scope" dropdown
   if (!_wizScopeTypes.length) {
-    try { _wizScopeTypes = await API.getScopeTypes(); if (!Array.isArray(_wizScopeTypes)) _wizScopeTypes = []; } catch(e) { _wizScopeTypes = []; }
+    try {
+      // Try the full model catalog first (POST with pagination)
+      const raw = await API.getScopeModels({ Pagination: { PageNumber: 1, PageSize: 1000 }, Filters: {} });
+      _wizScopeTypes = Array.isArray(raw) ? raw : [];
+    } catch(e) {
+      // Fallback to simple scope types list
+      try { _wizScopeTypes = await API.getScopeTypes(); if (!Array.isArray(_wizScopeTypes)) _wizScopeTypes = []; } catch(e2) { _wizScopeTypes = []; }
+    }
+    // Sort by description
+    _wizScopeTypes.sort((a, b) => (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''));
     const sel = document.getElementById('wizNewModel');
-    sel.innerHTML = '<option value="">-- Select Model --</option>' +
-      _wizScopeTypes.map(t => '<option value="' + t.lScopeTypeKey + '">' + esc(t.sScopeTypeDesc || t.sScopeTypeName || 'Type ' + t.lScopeTypeKey) + '</option>').join('');
+    sel.innerHTML = '<option value="">-- Select Model (' + _wizScopeTypes.length + ') --</option>' +
+      _wizScopeTypes.map(t => {
+        const desc = t.sScopeTypeDesc || t.sScopeTypeName || 'Type ' + t.lScopeTypeKey;
+        const mfr = t.sManufacturerName ? ' (' + t.sManufacturerName + ')' : '';
+        return '<option value="' + t.lScopeTypeKey + '">' + esc(desc + mfr) + '</option>';
+      }).join('');
   }
 
   // Load existing scopes for this department
