@@ -896,9 +896,12 @@
             <span style="font-size:10px;color:var(--muted)">(scope not in system yet)</span>
           </div>
           <div class="field-row">
-            <div style="flex:1;min-width:140px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
-            <div style="flex:1;min-width:200px"><label>Model / Scope Type *</label><select id="wizNewModel" style="width:100%"><option value="">-- Select Model --</option></select></div>
-            <div style="min-width:110px"><label>Type</label><select id="wizNewRigFlex" style="width:100%"><option value="Flexible">Flexible</option><option value="Rigid">Rigid</option></select></div>
+            <div style="min-width:150px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
+            <div style="flex:1;min-width:200px"><label>Model *</label><select id="wizNewModel" onchange="wizOnModelChange()" style="width:100%" disabled><option value="">-- Select Instrument Type first --</option></select></div>
+            <div style="min-width:100px"><label>Type</label><input type="text" id="wizNewRigFlex" style="width:100%;background:#f5f7fa;color:var(--muted)" readonly value="—"/></div>
+          </div>
+          <div class="field-row" style="margin-top:4px">
+            <div style="flex:1;min-width:180px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
             <div style="display:flex;align-items:flex-end"><button onclick="wizCreateScope()" style="height:28px;padding:0 14px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Add Scope</button></div>
           </div>
         </div>
@@ -1651,6 +1654,7 @@ let _wizClient = null;
 let _wizDept = null;
 let _wizScope = null;
 let _wizScopeTypes = [];
+let _wizInstrumentTypes = [];
 let _wizDeptScopes = [];
 
 function newRepair() {
@@ -1811,26 +1815,31 @@ async function wizLoadScopes() {
   const grid = document.getElementById('wizScopeGrid');
   grid.innerHTML = '<div class="wiz-empty" style="color:var(--blue)">Loading scopes...</div>';
 
-  // Load scope models for the "new scope" dropdown
+  // Load instrument types + full model catalog for cascading dropdowns
+  if (!_wizInstrumentTypes.length) {
+    try { const r = await API.getInstrumentTypes(); _wizInstrumentTypes = Array.isArray(r) ? r : []; } catch(e) { _wizInstrumentTypes = []; }
+    const instSel = document.getElementById('wizNewInstType');
+    instSel.innerHTML = '<option value="">-- Select --</option>' +
+      _wizInstrumentTypes.map(t => {
+        const name = t.sInstrumentType || t.sDescription || t.sName || ('Type ' + (t.lInstrumentTypeKey || ''));
+        return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
+      }).join('');
+  }
   if (!_wizScopeTypes.length) {
     try {
-      // Try the full model catalog first (POST with pagination)
       const raw = await API.getScopeModels({ Pagination: { PageNumber: 1, PageSize: 1000 }, Filters: {} });
       _wizScopeTypes = Array.isArray(raw) ? raw : [];
     } catch(e) {
-      // Fallback to simple scope types list
       try { _wizScopeTypes = await API.getScopeTypes(); if (!Array.isArray(_wizScopeTypes)) _wizScopeTypes = []; } catch(e2) { _wizScopeTypes = []; }
     }
-    // Sort by description
     _wizScopeTypes.sort((a, b) => (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''));
-    const sel = document.getElementById('wizNewModel');
-    sel.innerHTML = '<option value="">-- Select Model (' + _wizScopeTypes.length + ') --</option>' +
-      _wizScopeTypes.map(t => {
-        const desc = t.sScopeTypeDesc || t.sScopeTypeName || 'Type ' + t.lScopeTypeKey;
-        const mfr = t.sManufacturerName ? ' (' + t.sManufacturerName + ')' : '';
-        return '<option value="' + t.lScopeTypeKey + '">' + esc(desc + mfr) + '</option>';
-      }).join('');
   }
+  // Reset dropdowns
+  document.getElementById('wizNewModel').innerHTML = '<option value="">-- Select Instrument Type first --</option>';
+  document.getElementById('wizNewModel').disabled = true;
+  document.getElementById('wizNewRigFlex').value = '—';
+  document.getElementById('wizNewInstType').value = '';
+  document.getElementById('wizNewSN').value = '';
 
   // Load existing scopes for this department
   try {
@@ -1882,12 +1891,55 @@ function wizPickScope(key) {
   setTimeout(() => { if (_wizScope) wizNext(); }, 200);
 }
 
+// ── Cascading dropdowns: Instrument Type → Model → Type ──
+function wizOnInstTypeChange() {
+  const instType = document.getElementById('wizNewInstType').value;
+  const modelSel = document.getElementById('wizNewModel');
+  document.getElementById('wizNewRigFlex').value = '—';
+
+  if (!instType) {
+    modelSel.innerHTML = '<option value="">-- Select Instrument Type first --</option>';
+    modelSel.disabled = true;
+    return;
+  }
+
+  // Filter models by instrument type (check multiple possible field names)
+  const filtered = _wizScopeTypes.filter(t => {
+    const it = t.sInstrumentType || t.sScopeModelCategory || t.sCategory || '';
+    return it.toLowerCase() === instType.toLowerCase();
+  });
+
+  modelSel.disabled = false;
+  if (!filtered.length) {
+    modelSel.innerHTML = '<option value="">No models for ' + esc(instType) + '</option>';
+  } else {
+    modelSel.innerHTML = '<option value="">-- Select Model (' + filtered.length + ') --</option>' +
+      filtered.map(t => {
+        const desc = t.sScopeTypeDesc || t.sScopeTypeName || 'Model ' + t.lScopeTypeKey;
+        const mfr = t.sManufacturerName ? ' (' + t.sManufacturerName + ')' : '';
+        return '<option value="' + t.lScopeTypeKey + '">' + esc(desc + mfr) + '</option>';
+      }).join('');
+  }
+}
+
+function wizOnModelChange() {
+  const modelKey = document.getElementById('wizNewModel').value;
+  const rfField = document.getElementById('wizNewRigFlex');
+  if (!modelKey) { rfField.value = '—'; return; }
+  const model = _wizScopeTypes.find(t => t.lScopeTypeKey == modelKey);
+  if (model) {
+    rfField.value = model.sRigidOrFlexible || '—';
+  }
+}
+
 async function wizCreateScope() {
   const sn = document.getElementById('wizNewSN').value.trim();
   const modelKey = document.getElementById('wizNewModel').value;
-  const rigFlex = document.getElementById('wizNewRigFlex').value;
+  const model = _wizScopeTypes.find(t => t.lScopeTypeKey == modelKey);
+  const rigFlex = model ? (model.sRigidOrFlexible || 'Flexible') : 'Flexible';
+  if (!document.getElementById('wizNewInstType').value) { showToast('Select an instrument type'); return; }
+  if (!modelKey) { showToast('Select a model'); return; }
   if (!sn) { showToast('Enter a serial number'); return; }
-  if (!modelKey) { showToast('Select a model / scope type'); return; }
 
   try {
     const payload = {
