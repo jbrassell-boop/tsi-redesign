@@ -420,6 +420,15 @@ const API = (() => {
     return get('/DistributorName/GetAllDistributorNames');
   }
 
+  // ── Repair Items Master Catalog ─────────────────────
+  async function getRepairItemsCatalog(rigidOrFlexible) {
+    return get('/RepairItems/GetAllRepairItems?psRigidOrFlexible=' + (rigidOrFlexible || 'Flexible'));
+  }
+
+  async function getRepairItemDetail(repairItemKey) {
+    return get('/RepairItems/GetRepairItemsBylRepairItemKey?plRepairItemKey=' + repairItemKey);
+  }
+
   // ── Repair Detail Line Items ─────────────────────────
   async function getRepairDetailItems(repairKey) {
     return get('/Detail/GetAllRepairDetailsList?plRepairKey=' + repairKey);
@@ -542,6 +551,8 @@ const API = (() => {
     getRepairStatuses,
     getRepairItems,
     getRepairInventory,
+    getRepairItemsCatalog,
+    getRepairItemDetail,
     getRepairDetailItems,
     updateRepairItemComment,
     updateRepairItemAmount,

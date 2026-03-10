@@ -176,6 +176,20 @@
     .drop-zone{border:2px dashed var(--border-dk);border-radius:6px;padding:16px;text-align:center;color:var(--muted);font-size:10px;cursor:pointer;transition:all .15s}
     .drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:#EFF6FF;color:var(--blue)}
 
+    /* ITEM PICKER OVERLAY */
+    .picker-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center}
+    .picker-overlay.open{display:flex}
+    .picker-panel{background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);width:560px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden}
+    .picker-header{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg)}
+    .picker-header input{flex:1;height:28px;border:1px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;outline:none}
+    .picker-header input:focus{border-color:var(--blue)}
+    .picker-list{flex:1;overflow-y:auto;padding:0}
+    .picker-item{display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+    .picker-item:hover{background:var(--bg)}
+    .picker-item .pi-code{font-size:9px;color:var(--muted);font-family:monospace;min-width:30px}
+    .picker-item .pi-desc{flex:1;color:var(--text)}
+    .picker-item .pi-type{font-size:9px;color:var(--steel);background:var(--bg);padding:1px 6px;border-radius:3px}
+
     ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:#f1f1f1}
     ::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
@@ -353,7 +367,7 @@
             <div class="section-card" style="margin-top:2px">
               <div class="section-head">
                 Repair Items
-                <button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 8px">+ Add Item</button>
+                <button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 8px" onclick="openItemPicker()">+ Add Item</button>
               </div>
               <table class="items" id="repairItemsTable">
                 <thead>
@@ -696,6 +710,23 @@
   </div><!-- /main -->
 </div><!-- /shell -->
 
+<!-- REPAIR ITEM PICKER OVERLAY -->
+<div class="picker-overlay" id="itemPicker" onclick="if(event.target===this)closeItemPicker()">
+  <div class="picker-panel">
+    <div class="picker-header">
+      <input type="text" id="itemPickerSearch" placeholder="Search repair items..." oninput="filterItemPicker(this.value)"/>
+      <div class="seg-bar" style="margin:0">
+        <button class="seg-btn active" onclick="loadItemCatalog(this,'Flexible')">Flexible</button>
+        <button class="seg-btn" onclick="loadItemCatalog(this,'Rigid')">Rigid</button>
+      </div>
+      <button class="btn btn-outline" style="height:28px" onclick="closeItemPicker()">✕</button>
+    </div>
+    <div class="picker-list" id="itemPickerList">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Loading catalog...</div>
+    </div>
+  </div>
+</div>
+
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -1003,27 +1034,141 @@ function populateDetail(d) {
 
 // ── Repair Items ──
 async function loadRepairItems(repairKey) {
+  // Try Detail endpoint first (gives editable fields), fall back to RepairItems
   try {
-    const items = await API.getRepairItems(repairKey);
-    const ds = items?.dataSource || (Array.isArray(items) ? items : []);
-    const tbody = document.getElementById('repairItemsBody');
-    if (!ds.length) {
-      tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No repair items for this work order</td></tr>';
-      return;
+    let ds = [];
+    try {
+      const detail = await API.getRepairDetailItems(repairKey);
+      ds = Array.isArray(detail) ? detail : (detail?.dataSource || []);
+    } catch (e1) {
+      // Fallback to RepairItems endpoint
+      const items = await API.getRepairItems(repairKey);
+      ds = items?.dataSource || (Array.isArray(items) ? items : []);
     }
-    tbody.innerHTML = ds.map(item =>
-      '<tr><td><code style="font-size:10px">' + (item.sRepairCode||'') + '</code></td>' +
-      '<td>' + (item.sDescription||item.sRepairItem||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sUANWT||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sWNCA||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sApproved||'') + '</td>' +
-      '<td style="text-align:right">' + fmtMoney(item.mAmount||item.dblAmount||0) + '</td>' +
-      '<td>' + (item.sTech1||'') + '</td>' +
-      '<td>' + (item.sTech2||'') + '</td>' +
-      '<td style="text-align:center">' + (item.sPrimary||'') + '</td>' +
-      '<td style="font-size:10px;color:var(--muted)">' + (item.sComments||'') + '</td></tr>'
-    ).join('');
+    renderRepairItems(ds);
   } catch (e) { console.warn('[TSI Repairs] Items load:', e.message); }
+}
+
+let _repairItems = []; // current work order line items
+function renderRepairItems(ds) {
+  _repairItems = ds || [];
+  const tbody = document.getElementById('repairItemsBody');
+  if (!_repairItems.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No repair items for this work order</td></tr>';
+    updateItemTotals();
+    return;
+  }
+  tbody.innerHTML = _repairItems.map((item, i) => {
+    const key = item.lRepairItemTranKey || '';
+    const appr = item.sApproved || '';
+    const apprClass = appr === 'Y' ? 'color:var(--green);font-weight:700' : appr === 'N' ? 'color:var(--red)' : '';
+    const pri = item.sPrimaryRepair || '';
+    return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')">' +
+      '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
+      '<td>' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</td>' +
+      '<td style="text-align:center">' + (item.sUANWT||'') + '</td>' +
+      '<td style="text-align:center">' + (item.sFixType||item.sWNCA||'') + '</td>' +
+      '<td style="text-align:center;' + apprClass + '">' + appr + '</td>' +
+      '<td style="text-align:right">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
+      '<td>' + (item.sTechInits||item.sTech1||'') + '</td>' +
+      '<td>' + (item.sTech2Inits||item.sTech2||'') + '</td>' +
+      '<td style="text-align:center;' + (pri==='Y'?'font-weight:700;color:var(--navy)':'') + '">' + pri + '</td>' +
+      '<td style="font-size:10px;color:var(--muted)">' + (item.sComments||'') + '</td></tr>';
+  }).join('');
+  updateItemTotals();
+}
+
+function updateItemTotals() {
+  let approved = 0, unapproved = 0;
+  _repairItems.forEach(item => {
+    const amt = parseFloat(item.dblRepairPrice || item.mAmount || item.dblAmount || 0);
+    if (item.sApproved === 'Y') approved += amt;
+    else unapproved += amt;
+  });
+  document.getElementById('aTotalApproved').textContent = fmtMoney(approved);
+  document.getElementById('aTotalUnapproved').textContent = fmtMoney(unapproved);
+}
+
+let _selectedItemIdx = -1;
+function selectItemRow(tr, idx) {
+  document.querySelectorAll('#repairItemsBody tr').forEach(r => r.classList.remove('selected-row'));
+  tr.classList.add('selected-row');
+  _selectedItemIdx = idx;
+}
+
+// ── Item Picker ──
+let _itemCatalog = [], _itemCatalogFiltered = [];
+async function openItemPicker() {
+  document.getElementById('itemPicker').classList.add('open');
+  document.getElementById('itemPickerSearch').value = '';
+  document.getElementById('itemPickerSearch').focus();
+  if (!_itemCatalog.length) await loadItemCatalog(null, 'Flexible');
+  else renderPickerList(_itemCatalog);
+}
+function closeItemPicker() { document.getElementById('itemPicker').classList.remove('open'); }
+
+async function loadItemCatalog(btn, type) {
+  if (btn) toggleSegBtn(btn);
+  document.getElementById('itemPickerList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Loading ' + type + ' items...</div>';
+  try {
+    const data = await API.getRepairItemsCatalog(type);
+    _itemCatalog = Array.isArray(data) ? data : [];
+    _itemCatalog.sort((a, b) => (a.sItemDescription || '').localeCompare(b.sItemDescription || ''));
+    console.log('[TSI] Item catalog loaded:', _itemCatalog.length, type, 'items');
+    renderPickerList(_itemCatalog);
+  } catch (e) {
+    document.getElementById('itemPickerList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:11px">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+function filterItemPicker(q) {
+  const term = q.toLowerCase().trim();
+  if (!term) { renderPickerList(_itemCatalog); return; }
+  _itemCatalogFiltered = _itemCatalog.filter(item =>
+    (item.sItemDescription || '').toLowerCase().includes(term) ||
+    String(item.lRepairItemKey || '').includes(term)
+  );
+  renderPickerList(_itemCatalogFiltered);
+}
+
+function renderPickerList(items) {
+  const list = document.getElementById('itemPickerList');
+  if (!items.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">No items found</div>';
+    return;
+  }
+  // Show max 200 for performance
+  const shown = items.slice(0, 200);
+  list.innerHTML = shown.map(item =>
+    '<div class="picker-item" onclick="pickRepairItem(' + item.lRepairItemKey + ')">' +
+    '<span class="pi-code">' + (item.lRepairItemKey || '') + '</span>' +
+    '<span class="pi-desc">' + (item.sItemDescription || '') + '</span>' +
+    '<span class="pi-type">' + (item.sInstrumentType || '') + '</span>' +
+    '</div>'
+  ).join('') + (items.length > 200 ? '<div style="text-align:center;padding:8px;color:var(--muted);font-size:10px">Showing 200 of ' + items.length + ' — refine your search</div>' : '');
+}
+
+function pickRepairItem(repairItemKey) {
+  const item = _itemCatalog.find(x => x.lRepairItemKey === repairItemKey);
+  if (!item) return;
+  // Add to local list (API add endpoint not yet available)
+  _repairItems.push({
+    lRepairItemKey: item.lRepairItemKey,
+    sItemDescription: item.sItemDescription,
+    sApproved: 'N',
+    dblRepairPrice: 0,
+    sTechInits: '',
+    sTech2Inits: '',
+    sPrimaryRepair: '',
+    sFixType: '',
+    sUANWT: 'N',
+    sComments: '',
+    sTSICode: ''
+  });
+  renderRepairItems(_repairItems);
+  closeItemPicker();
+  markDirty();
+  console.log('[TSI] Added repair item:', item.sItemDescription, '(key:', repairItemKey, ') — local only, no API add endpoint yet');
 }
 
 function resetMaxCharge() {
