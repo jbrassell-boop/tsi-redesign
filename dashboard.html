@@ -400,7 +400,7 @@
               <th style="width:110px;cursor:pointer">Work Order <span class="sort">↕</span></th>
               <th style="cursor:pointer">Scope Type <span class="sort">↕</span></th>
               <th style="width:80px;cursor:pointer">Serial # <span class="sort">↕</span></th>
-              <th style="width:55px;text-align:center;cursor:pointer">Days In <span class="sort">↕</span></th>
+              <th style="width:72px;text-align:center;cursor:pointer">TAT / SLA <span class="sort">↕</span></th>
               <th style="cursor:pointer">Repair Status <span class="sort">↕</span></th>
               <th style="width:90px;cursor:pointer">Date Approved <span class="sort">↕</span></th>
               <th style="width:90px;cursor:pointer">Est Delivery <span class="sort">↕</span></th>
@@ -657,14 +657,14 @@ async function loadDashboardData(filters) {
 // Demo data fallback — keeps the page functional if API is unreachable
 function getDemoData() {
   return [
-    {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered.',quoted:895,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
-    {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair.',quoted:640,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete.',quoted:380,invoice:'INV-26-0455',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx.',quoted:620,invoice:'INV-26-0430',cat:'F',size:'L',src:'inhouse',hot:false},
-    {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold.',quoted:1800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
+    {dateIn:'03/05/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',wo:'NI26006601',type:'GIF-H190',serial:'3801442',daysIn:3,sla:5,status:'In Repair',dateApproved:'03/06/2026',estDel:'03/14/2026',approved:485,tech:'Rob',notes:'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',quoted:650,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/04/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006587',type:'CF-H185L',serial:'2918371',daysIn:4,sla:5,status:'Waiting for Approval',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',quoted:1250,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/03/2026',client:'88th Medical Group',dept:'Biomedical Engineering',wo:'NI26006574',type:'CF-HQ190L',serial:'3912087',daysIn:5,sla:7,status:'In Repair',dateApproved:'03/04/2026',estDel:'03/15/2026',approved:480,tech:'Tom',notes:'Insertion tube kink damage. Mid-level repair in progress.',quoted:480,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'03/01/2026',client:'Metro Health Hospital',dept:'Sterile Processing',wo:'NI26006541',type:'BF-UC180F',serial:'3615290',daysIn:7,sla:5,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'CCD chip — no image. Part backordered.',quoted:895,invoice:'',cat:'F',size:'L',src:'inhouse',hot:true},
+    {dateIn:'02/28/2026',client:'Northside Hospital',dept:'Surgery',wo:'NI26006530',type:'EG-760Z',serial:'4450188',daysIn:8,sla:7,status:'In Repair',dateApproved:'03/01/2026',estDel:'03/12/2026',approved:640,tech:'Tom',notes:'Universal cord leak. Major repair.',quoted:640,invoice:'',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'02/20/2026',client:'West Bozeman Surgery Center',dept:'Endoscopy',wo:'NI26006445',type:'CF-H185L',serial:'3290118',daysIn:16,sla:5,status:'Ready to Ship',dateApproved:'02/21/2026',estDel:'03/07/2026',approved:380,tech:'Tom',notes:'Suction cylinder repair. QC complete.',quoted:380,invoice:'INV-26-0455',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'02/14/2026',client:'Nashville General Hospital',dept:'GI Lab',wo:'NI26006398',type:'CF-H185L',serial:'2918371',daysIn:22,sla:5,status:'Shipped',dateApproved:'02/16/2026',estDel:'03/05/2026',approved:620,tech:'Tom',notes:'Repair complete. Shipped via FedEx.',quoted:620,invoice:'INV-26-0430',cat:'F',size:'L',src:'inhouse',hot:false},
+    {dateIn:'01/10/2026',client:'Coliseum Medical Center',dept:'GI Lab',wo:'NI26006110',type:'GIF-Q165',serial:'3290405',daysIn:57,sla:5,status:'On Hold',dateApproved:'',estDel:'',approved:0,tech:'',notes:'Client requested hold.',quoted:1800,invoice:'',cat:'F',size:'S',src:'inhouse',hot:false},
   ];
 }
 
@@ -702,13 +702,16 @@ function badgeClass(s) {
   if (/invoiced/i.test(s)) return 'b-invoiced';
   return 'b-inrepair';
 }
-function daysClass(d) {
-  if (d >= 90) return 'days-crit';
-  if (d >= 14) return 'days-warn';
+function daysClass(daysIn, sla) {
+  const remaining = (sla || 5) - daysIn;
+  if (remaining < 0) return 'days-crit';   // breached
+  if (remaining <= 1) return 'days-warn';  // due today or 1 day left
   return 'days-ok';
 }
-function rowClass(status, daysIn) {
-  if (/hold/i.test(status) || daysIn >= 90) return 'urgent';
+function rowClass(status, daysIn, sla) {
+  const remaining = (sla || 5) - daysIn;
+  if (remaining < 0) return 'urgent';
+  if (/hold/i.test(status) || remaining <= 1) return 'attention';
   if (/waiting/i.test(status) || /inspection/i.test(status)) return 'attention';
   return '';
 }
@@ -724,7 +727,7 @@ function calcStats() {
   const inHouse = open.length;
   const waiting = open.filter(s=>/waiting/i.test(s.status)).length;
   const inRepair = open.filter(s=>/in repair/i.test(s.status)).length;
-  const overdue = open.filter(s=>/hold/i.test(s.status) || s.daysIn>=90).length;
+  const overdue = open.filter(s => s.daysIn > (s.sla || 5)).length;
   const ready = open.filter(s=>/ready/i.test(s.status)).length;
   const loaners = open.filter(s=>/loaner/i.test(s.client)).length;
   const shipped = SCOPES.filter(s=>/shipped/i.test(s.status)).length; // total shipped, for the chip
@@ -773,7 +776,7 @@ function getFiltered() {
   if (activeFilter === 'inHouse') { /* no filter, show all */ }
   else if (activeFilter === 'waiting') list = list.filter(s=>/waiting/i.test(s.status));
   else if (activeFilter === 'inRepair') list = list.filter(s=>/in repair/i.test(s.status));
-  else if (activeFilter === 'overdue') list = list.filter(s=>/hold/i.test(s.status) || s.daysIn>=90);
+  else if (activeFilter === 'overdue') list = list.filter(s => s.daysIn > (s.sla || 5));
   else if (activeFilter === 'ready') list = list.filter(s=>/ready/i.test(s.status));
   else if (activeFilter === 'loaners') list = list.filter(s=>/loaner/i.test(s.client));
   else if (activeFilter === 'shipped') list = list.filter(s=>/shipped/i.test(s.status));
@@ -836,8 +839,13 @@ function updateSortHeaders() {
 //  RENDER TABLE
 // ═══════════════════════════════════════════════════════
 function renderRow(s) {
-  const rc = rowClass(s.status, s.daysIn);
+  const sla = s.sla || 5;
+  const rc = rowClass(s.status, s.daysIn, sla);
   const hotBadge = s.hot ? '<span class="hot-flag">HOT</span>' : '';
+  const tatCls = daysClass(s.daysIn, sla);
+  const tatLabel = s.daysIn != null
+    ? `<span class="${tatCls}">${s.daysIn}d</span><span style="color:var(--border-dk);font-size:10px"> / ${sla}d</span>`
+    : '—';
   return `<tr class="row-main ${rc}">
       <td>${s.dateIn}</td>
       <td style="font-weight:500">${s.client}${hotBadge}</td>
@@ -845,7 +853,7 @@ function renderRow(s) {
       <td><a class="wo-link" href="#" onclick="event.preventDefault();alert('Opening WO ${s.wo}')">${s.wo}</a></td>
       <td>${s.type}</td>
       <td>${s.serial}</td>
-      <td style="text-align:center"><span class="${daysClass(s.daysIn)}">${s.daysIn||'N/A'}</span></td>
+      <td style="text-align:center;white-space:nowrap">${tatLabel}</td>
       <td><span class="badge ${badgeClass(s.status)}">${s.status}</span></td>
       <td style="color:var(--muted)">${s.dateApproved||'—'}</td>
       <td style="color:var(--muted)">${s.estDel||'—'}</td>
