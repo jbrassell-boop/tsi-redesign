@@ -1493,7 +1493,7 @@ async function loadDocumentsTab(contractKey) {
   const tab = document.getElementById('tab-documents');
   if (!tab) return;
   try {
-    const data = await API.get('/Documents/GetAllDocumentsList?plOwnerKey=' + contractKey);
+    const data = await API.getDocuments(contractKey);
     const docs = Array.isArray(data) ? data : [];
 
     const tbody = tab.querySelector('tbody');
@@ -1521,7 +1521,7 @@ async function loadDocumentsTab(contractKey) {
 
 async function downloadDocument(docKey) {
   try {
-    const data = await API.get('/Documents/DownloadDocument?plDocumentKey=' + docKey);
+    const data = await API.downloadDocument(docKey);
     if (data && data.sFileBase64) {
       const link = document.createElement('a');
       link.href = 'data:application/octet-stream;base64,' + data.sFileBase64;

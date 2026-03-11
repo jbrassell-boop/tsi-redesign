@@ -517,7 +517,7 @@ const API = (() => {
   async function addDocument(data) { return post('/Documents/AddDocuments', data); }
   async function updateDocument(data) { return post('/Documents/UpdateDocuments', data); }
   async function deleteDocument(key) { return del('/Documents/DeleteDocuments?plDocumentKey=' + key); }
-  async function downloadDocument(fileName) { return get('/Documents/DownloadDocument?sDocumentFileName=' + encodeURIComponent(fileName)); }
+  async function downloadDocument(keyOrName) { const param = typeof keyOrName === 'number' ? 'plDocumentKey=' + keyOrName : 'sDocumentFileName=' + encodeURIComponent(keyOrName); return get('/Documents/DownloadDocument?' + param); }
 
   // ── Flags (4) ─────────────────────────────────────────
   async function getFlagsByOwner(ownerKey, flagTypeKey) { return get('/Flag/GetFlagList?plOwnerKey=' + ownerKey + '&plFlagTypeKey=' + (flagTypeKey||0)); }
