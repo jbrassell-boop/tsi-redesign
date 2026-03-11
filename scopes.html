@@ -3,71 +3,158 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Scopes | TSI Redesign</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* ── PAGE-SPECIFIC: Scopes ── */
-    .split-layout{display:flex;flex:1;overflow:hidden}
-    .col-left{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
-    .col-right{width:310px;display:flex;flex-direction:column;overflow:hidden;background:#fff}
+    /* ── PAGE-SPECIFIC: Scopes Cockpit ── */
 
-    /* List panel */
-    .filter-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0}
-    .inp-search{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 8px center;transition:border-color .15s;flex:1}
-    .inp-search:focus{border-color:var(--navy)}
-    .filter-sel{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:130px}
-    .filter-sel:focus{border-color:var(--navy)}
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED}
 
-    /* Scope list table */
-    .scope-list{flex:1;overflow-y:auto}
-    .scope-list table{width:100%;border-collapse:collapse}
-    .scope-list th{background:#F0F4FA;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;padding:5px 10px;text-align:left;letter-spacing:.3px;position:sticky;top:0;border-bottom:1px solid var(--border)}
-    .scope-list td{padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
-    .scope-list tr:hover td{background:#EFF6FF}
-    .scope-list tr.selected td{background:#DBEAFE}
-    .scope-list .sn{font-weight:600;color:var(--navy)}
-    .scope-list .badge-dead{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;background:#FEE2E2;color:#991B1B}
-    .scope-list .badge-loaner{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;background:#EDE9FE;color:#5B21B6}
-    .scope-list .badge-active{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;background:#D1FAE5;color:#065F46}
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+    .filter-dd:focus{border-color:var(--navy)}
 
-    /* Detail panel */
-    .detail-header{padding:10px 14px;border-bottom:1px solid var(--border);background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;flex-shrink:0}
-    .detail-header .sn-label{font-size:13px;font-weight:700}
-    .detail-header .dept-label{font-size:10.5px;opacity:.75;margin-top:1px}
-    .detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:12px;gap:8px}
-    .detail-empty svg{width:36px;height:36px;opacity:.3}
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .sn-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .sn-link:hover{text-decoration:underline}
 
-    .dtabs{display:flex;border-bottom:1px solid var(--border);background:#F8FAFF;flex-shrink:0}
-    .dtab{padding:7px 12px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-active{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-inactive{background:#F3F4F6;color:var(--steel);border-color:#CFD8DC}
+    .b-loaner{background:#EDE7F6;color:#5E35B1;border-color:#B39DDB}
+    .b-flex{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-rigid{background:#F0FDF4;color:var(--green);border-color:#BBF7D0}
+    .b-camera{background:#FDF4FF;color:#7C3AED;border-color:#DDD6FE}
+    .b-inst{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+
+    /* Heat indicators */
+    .heat-red{color:var(--red);font-weight:700}
+    .heat-amber{color:var(--amber);font-weight:600}
+    .heat-green{color:var(--green);font-weight:500}
+    .heat-ok{color:var(--muted)}
+
+    /* Open WO dot */
+    .wo-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+    .wo-open{background:var(--red)}
+    .wo-closed{background:#BBF7D0;border:1px solid #81C784}
+    .wo-unknown{background:var(--border);border:1px solid var(--border-dk)}
+
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
+
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
+
+    /* ── Slide-Out Drawer ── */
+    .scope-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .scope-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
     .dtab:hover{color:var(--blue)}
     .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
-    .dpane{display:none;flex:1;overflow-y:auto;padding:12px 14px;flex-direction:column;gap:10px}
+    .dpane{display:none;flex:1;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
     .dpane.active{display:flex}
 
-    .section-card{background:#fff;border:1px solid var(--border);border-radius:5px;overflow:hidden}
-    .section-head{background:#F0F4FA;padding:5px 10px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
-    .section-body{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
     .field{display:flex;flex-direction:column;gap:2px}
     .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
     .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
-    .field textarea{height:56px;padding:6px 8px;resize:none}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
     .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
-    .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-    .row-inline{display:flex;align-items:center;gap:8px}
-    .toggle-row{display:flex;align-items:center;gap:8px;padding:2px 0}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+    .toggle-row{display:flex;align-items:center;gap:10px;padding:3px 0}
+    .toggle{position:relative;width:38px;height:21px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#CBD5E0;border-radius:11px;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.18s}
+    .toggle input:checked + .toggle-slider{background:var(--navy)}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(17px)}
     .toggle-label{font-size:11px;color:var(--text)}
 
-    /* Repair history in detail */
     .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
-    .mini-table th{background:#F0F4FA;padding:4px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
     .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
     .mini-table tr:hover td{background:#EFF6FF;cursor:pointer}
     .wo-link{color:var(--blue);font-weight:600}
 
-    /* Save row */
-    .detail-footer{padding:8px 14px;border-top:1px solid var(--border);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    #saveStatus{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px}
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    #drawerSaveStatus{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .save-saving{animation:pulse .8s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:500px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
   </style>
 </head>
 <body>
@@ -121,7 +208,7 @@
         <span id="dataBadge" class="data-badge"></span>
         <span style="opacity:0.5;margin:0 4px">|</span>
         Service Location
-        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation(this.value)">
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
           <option value="1">Upper Chichester</option>
           <option value="2">Nashville</option>
         </select>
@@ -131,178 +218,241 @@
       </div>
     </header>
 
+    <!-- PAGE BODY -->
     <div class="page-body">
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">🔬</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Scopes</div></div>
+        </div>
+        <div class="stat-chip" id="kpiActive" onclick="chipFilter('active')">
+          <div class="s-icon" style="background:#E8F5E9">✓</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiActiveVal">0</div><div class="s-lbl">Active</div></div>
+        </div>
+        <div class="stat-chip" id="kpiInactive" onclick="chipFilter('inactive')">
+          <div class="s-icon" style="background:#FEF2F2">✕</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiInactiveVal">0</div><div class="s-lbl">Inactive</div></div>
+        </div>
+        <div class="stat-chip" id="kpiLoaners" onclick="chipFilter('loaner')">
+          <div class="s-icon" style="background:#FDF4FF">↺</div>
+          <div class="s-data"><div class="s-val s-purple" id="kpiLoanerVal">0</div><div class="s-lbl">Loaners</div></div>
+        </div>
+        <div class="stat-chip" id="kpiRepair" onclick="chipFilter('inrepair')">
+          <div class="s-icon" style="background:#FFFBEB">🔧</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiRepairVal">0</div><div class="s-lbl">In Repair</div></div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
       <div class="toolbar">
-        <button class="btn btn-navy" onclick="openAddModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <button class="btn btn-navy" onclick="openAddModal()" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Scope
         </button>
-        <div id="saveStatus"></div>
-      </div>
-
-      <div class="status-strip" id="statusStrip" style="display:none">
-        <span class="ss-chip ss-info" id="statusTotal">0 scopes</span>
-      </div>
-
-      <div class="split-layout">
-        <!-- LEFT: Scope List -->
-        <div class="col-left">
-          <div class="filter-bar">
-            <select class="filter-sel" id="filterClient" onchange="loadDeptFilter()" style="min-width:160px">
-              <option value="">— Select Client —</option>
-            </select>
-            <select class="filter-sel" id="filterDept" onchange="loadScopesForDept()" style="min-width:160px">
-              <option value="">— Select Department —</option>
-            </select>
-            <input class="inp-search" id="searchInput" placeholder="Search serial, model..." oninput="filterScopes()" style="flex:1"/>
-            <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);white-space:nowrap;cursor:pointer">
-              <input type="checkbox" id="filterIncDead" onchange="filterScopes()"/> Inc. Inactive
-            </label>
-          </div>
-          <div class="scope-list">
-            <table>
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Serial #</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="scopeListBody">
-                <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">Select a client and department to load scopes</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Type</span>
+        <div class="seg-group" id="segType">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('type','',this)">All</button>
+          <button class="seg-btn" data-val="F" onclick="setSegFilter('type','F',this)">Flexible</button>
+          <button class="seg-btn" data-val="R" onclick="setSegFilter('type','R',this)">Rigid</button>
+          <button class="seg-btn" data-val="C" onclick="setSegFilter('type','C',this)">Camera</button>
+          <button class="seg-btn" data-val="I" onclick="setSegFilter('type','I',this)">Instrument</button>
         </div>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Status</span>
+        <div class="seg-group" id="segStatus">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+          <button class="seg-btn" data-val="active" onclick="setSegFilter('status','active',this)">Active</button>
+          <button class="seg-btn" data-val="inactive" onclick="setSegFilter('status','inactive',this)">Inactive</button>
+          <button class="seg-btn" data-val="loaner" onclick="setSegFilter('status','loaner',this)">Loaner</button>
+        </div>
+        <div class="filter-sep"></div>
+        <select class="filter-dd" id="filterClient" onchange="onClientChange()">
+          <option value="">All Clients</option>
+        </select>
+        <select class="filter-dd" id="filterDept" onchange="onDeptChange()">
+          <option value="">All Departments</option>
+        </select>
+        <input class="search-input" id="searchInput" placeholder="Search serial, model, client…" oninput="debounceSearch()" style="margin-left:auto"/>
+      </div>
 
-        <!-- RIGHT: Scope Detail -->
-        <div class="col-right">
-          <div id="detailEmpty" class="detail-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-            <span>Select a scope to view details</span>
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:100px" onclick="sortBy('sSerialNumber')">Serial # <span class="sort"></span></th>
+              <th onclick="sortBy('sScopeTypeDesc')">Model / Type <span class="sort"></span></th>
+              <th style="width:85px" onclick="sortBy('sInstrumentType')">Type <span class="sort"></span></th>
+              <th onclick="sortBy('sClientName')">Client <span class="sort"></span></th>
+              <th onclick="sortBy('sDepartmentName')">Department <span class="sort"></span></th>
+              <th style="width:80px" onclick="sortBy('_status')">Status <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortBy('dtLastRepair')">Last Repair <span class="sort"></span></th>
+              <th style="width:70px;text-align:center" onclick="sortBy('_daysSince')">Days <span class="sort"></span></th>
+              <th style="width:60px;text-align:center" onclick="sortBy('_hasOpenWO')">WO <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="scopesTbody">
+            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">Loading scopes…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">0 records</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select" id="rowsSelect" onchange="changePageSize()">
+              <option>15</option><option selected>25</option><option>50</option><option>All</option>
+            </select>
           </div>
-          <div id="detailPanel" style="display:none;flex-direction:column;flex:1;overflow:hidden">
-            <div class="detail-header">
-              <div class="sn-label" id="detailSN">—</div>
-              <div class="dept-label" id="detailDept">—</div>
-            </div>
-            <div class="dtabs">
-              <div class="dtab active" onclick="switchDTab('overview',this)">Overview</div>
-              <div class="dtab" onclick="switchDTab('repairs',this)">Repairs</div>
-              <div class="dtab" onclick="switchDTab('comments',this)">Comments</div>
-            </div>
-
-            <!-- Overview Tab -->
-            <div class="dpane active" id="dpane-overview">
-              <div class="section-card">
-                <div class="section-head">Identification</div>
-                <div class="section-body">
-                  <div class="g2">
-                    <div class="field"><label>Serial Number</label><input id="fSerialNumber" oninput="markDirty()"/></div>
-                    <div class="field"><label>Scope Key</label><input id="fScopeKey" readonly/></div>
-                  </div>
-                  <div class="g2">
-                    <div class="field">
-                      <label>Instrument Type</label>
-                      <select id="fInstrumentType" onchange="markDirty()">
-                        <option value="">— Select —</option>
-                        <option value="F">Flexible</option>
-                        <option value="R">Rigid</option>
-                        <option value="C">Camera</option>
-                        <option value="I">Instrument</option>
-                      </select>
-                    </div>
-                    <div class="field"><label>UPC</label><input id="fUPC" oninput="markDirty()"/></div>
-                  </div>
-                  <div class="field"><label>Scope Model</label><input id="fScopeModel" readonly placeholder="—"/></div>
-                  <div class="field"><label>Location</label><input id="fLocation" oninput="markDirty()" placeholder="e.g. OR Suite 3"/></div>
-                </div>
-              </div>
-              <div class="section-card">
-                <div class="section-head">Status</div>
-                <div class="section-body">
-                  <div class="toggle-row">
-                    <label class="toggle"><input type="checkbox" id="fIsLoaner" onchange="markDirty()"/><span class="toggle-slider"></span></label>
-                    <span class="toggle-label">Loaner Scope</span>
-                  </div>
-                  <div class="field"><label>Loaner Rack Position</label><input id="fRackPos" oninput="markDirty()" placeholder="e.g. A-12"/></div>
-                  <div class="toggle-row">
-                    <label class="toggle"><input type="checkbox" id="fIsDead" onchange="markDirty()"/><span class="toggle-slider"></span></label>
-                    <span class="toggle-label">Mark as Inactive</span>
-                  </div>
-                </div>
-              </div>
-              <div class="section-card">
-                <div class="section-head">Assignment</div>
-                <div class="section-body">
-                  <div class="field"><label>Department</label><input id="fDeptName" readonly/></div>
-                  <div class="field"><label>Contract #</label><input id="fContractNum" readonly placeholder="—"/></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Repairs Tab -->
-            <div class="dpane" id="dpane-repairs">
-              <div class="section-card">
-                <div class="section-head">Repair History</div>
-                <div class="section-body" style="padding:0">
-                  <table class="mini-table">
-                    <thead><tr><th>WO #</th><th>In Date</th><th>Status</th></tr></thead>
-                    <tbody id="repairHistoryBody">
-                      <tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">No repairs found</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Comments Tab -->
-            <div class="dpane" id="dpane-comments">
-              <div class="section-card">
-                <div class="section-head">General Comments</div>
-                <div class="section-body">
-                  <textarea id="fComments" style="height:80px;height:80px;padding:6px 8px;resize:none;width:100%;box-sizing:border-box" oninput="markDirty()" placeholder="Internal notes about this scope..."></textarea>
-                </div>
-              </div>
-              <div class="section-card">
-                <div class="section-head">Dis/Inspection Comments</div>
-                <div class="section-body">
-                  <textarea id="fCommentsDisIns" style="height:80px;padding:6px 8px;resize:none;width:100%;box-sizing:border-box" oninput="markDirty()" placeholder="Disassembly / inspection notes..."></textarea>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-footer">
-              <span id="saveStatus2"></span>
-              <div style="display:flex;gap:6px">
-                <button class="btn btn-outline" onclick="deleteScope()" style="color:var(--red);border-color:var(--red)">Delete</button>
-                <button class="btn btn-navy" onclick="saveScope()">Save</button>
-              </div>
-            </div>
-          </div>
+          <div class="pagination" id="paginationBtns"></div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
-<!-- Add Scope Modal -->
-<div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)closeAddModal()">
-  <div class="modal" style="width:480px">
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('repairs')"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repair History</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('newWO')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Create Work Order</div>
+  <div class="ctx-item" onclick="ctxAction('toggleDead')"><svg viewBox="0 0 24 24"><path d="M18.36 6.64A9 9 0 0 1 20.77 15M2 12a10 10 0 0 0 18 6"/><circle cx="12" cy="12" r="1"/></svg><span id="ctxDeadLabel">Mark Inactive</span></div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete Scope</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- SCOPE DETAIL DRAWER -->
+<div class="scope-drawer" id="scopeDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerSN">—</div>
+      <div class="dh-sub" id="drawerSub">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="dtab" onclick="switchTab('repairs',this)">Repairs</div>
+    <div class="dtab" onclick="switchTab('comments',this)">Comments</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="dpane active" id="dpane-overview">
+    <div class="section-card">
+      <div class="section-head">Identification</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Serial Number</label><input id="fSerialNumber" oninput="markDirty()"/></div>
+          <div class="field"><label>Scope Key</label><input id="fScopeKey" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>Instrument Type</label>
+            <select id="fInstrumentType" onchange="markDirty()">
+              <option value="">— Select —</option>
+              <option value="F">Flexible</option>
+              <option value="R">Rigid</option>
+              <option value="C">Camera</option>
+              <option value="I">Instrument</option>
+            </select>
+          </div>
+          <div class="field"><label>UPC</label><input id="fUPC" oninput="markDirty()"/></div>
+        </div>
+        <div class="field"><label>Scope Model</label><input id="fScopeModel" readonly placeholder="—"/></div>
+        <div class="field"><label>Location</label><input id="fLocation" oninput="markDirty()" placeholder="e.g. OR Suite 3"/></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head">Status</div>
+      <div class="section-body">
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="fIsLoaner" onchange="markDirty()"/><span class="toggle-slider"></span></label>
+          <span class="toggle-label">Loaner Scope</span>
+        </div>
+        <div class="field"><label>Loaner Rack Position</label><input id="fRackPos" oninput="markDirty()" placeholder="e.g. A-12"/></div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="fIsDead" onchange="markDirty()"/><span class="toggle-slider"></span></label>
+          <span class="toggle-label">Mark as Inactive</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head">Assignment</div>
+      <div class="section-body">
+        <div class="field"><label>Department</label><input id="fDeptName" readonly/></div>
+        <div class="field"><label>Contract #</label><input id="fContractNum" readonly placeholder="—"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Repairs Tab -->
+  <div class="dpane" id="dpane-repairs">
+    <div class="section-card">
+      <div class="section-head">Repair History</div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>WO #</th><th>In Date</th><th>Status</th></tr></thead>
+          <tbody id="repairHistoryBody">
+            <tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">Select a scope</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Tab -->
+  <div class="dpane" id="dpane-comments">
+    <div class="section-card">
+      <div class="section-head">General Comments</div>
+      <div class="section-body">
+        <textarea class="field" id="fComments" style="height:80px;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:none;width:100%;box-sizing:border-box;outline:none" oninput="markDirty()" placeholder="Internal notes about this scope..."></textarea>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head">Dis/Inspection Comments</div>
+      <div class="section-body">
+        <textarea class="field" id="fCommentsDisIns" style="height:80px;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:none;width:100%;box-sizing:border-box;outline:none" oninput="markDirty()" placeholder="Disassembly / inspection notes..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span id="drawerSaveStatus"></span>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline" onclick="confirmDelete()" style="color:var(--red);border-color:var(--red)">Delete</button>
+      <button class="btn btn-navy" onclick="saveScope()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SCOPE MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
     <div class="modal-header">
       <span class="modal-title">Add Scope</span>
       <button class="modal-close" onclick="closeAddModal()">&times;</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px">
+    <div class="modal-body">
       <div class="field"><label>Department *</label>
-        <select id="mDept">
+        <select id="mDept" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
           <option value="">— Select Department —</option>
         </select>
       </div>
-      <div class="field"><label>Serial Number *</label><input id="mSerial" placeholder="e.g. 1234567"/></div>
+      <div class="field"><label>Serial Number *</label><input id="mSerial" placeholder="e.g. 1234567" style="height:30px"/></div>
       <div class="g2">
         <div class="field"><label>Instrument Type *</label>
-          <select id="mInstType" onchange="loadModalModels()">
+          <select id="mInstType" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
             <option value="">— Select —</option>
             <option value="F">Flexible</option>
             <option value="R">Rigid</option>
@@ -310,7 +460,7 @@
             <option value="I">Instrument</option>
           </select>
         </div>
-        <div class="field"><label>UPC</label><input id="mUPC" placeholder="Optional"/></div>
+        <div class="field"><label>UPC</label><input id="mUPC" placeholder="Optional" style="height:30px"/></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -323,24 +473,32 @@
 <script src="api.js"></script>
 <script>
 // ── Auth guard ──────────────────────────────────────────
-try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') { window.location='login.html'; } }
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
 
 // ── State ───────────────────────────────────────────────
-let scopes = [];
+let allScopes = [];
 let filteredScopes = [];
+let displayScopes = [];
 let selectedScopeKey = null;
 let isDirty = false;
+let isLive = false;
+let svcKey = 1;
 let allClients = [];
 let allDepts = [];
-let svcKey = 1;
-let isLive = false;
-let currentDeptKey = 0;
+let currentPage = 1;
+let pageSize = 25;
+let sortCol = '';
+let sortDir = 'asc';
+let filters = { type:'', status:'', clientKey:0, deptKey:0, search:'' };
+let ctxScopeKey = null;
+let _saveTimer = null;
 
 // ── Demo data ───────────────────────────────────────────
 function getDemoClients() {
   return [
     {lClientKey:1, psClientName1:'Memorial Hospital'},
-    {lClientKey:2, psClientName1:'City General'},
+    {lClientKey:2, psClientName1:'City General Medical'},
+    {lClientKey:3, psClientName1:'Northside Surgery Center'},
   ];
 }
 function getDemoDepts() {
@@ -348,107 +506,64 @@ function getDemoDepts() {
     {lDepartmentKey:10, psDepartmentName:'Endoscopy', lClientKey:1},
     {lDepartmentKey:11, psDepartmentName:'Urology', lClientKey:1},
     {lDepartmentKey:12, psDepartmentName:'GI Lab', lClientKey:2},
+    {lDepartmentKey:13, psDepartmentName:'Pulmonology', lClientKey:2},
+    {lDepartmentKey:14, psDepartmentName:'Surgical Suite', lClientKey:3},
   ];
 }
-function getDemoScopes(deptKey) {
-  const all = [
-    { lScopeKey:1001, sSerialNumber:'GIF-H1234', sScopeTypeDesc:'Olympus GIF-H180', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'GI Lab', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'Annual PM due Q3.', pmCommentsDisIns:'' },
-    { lScopeKey:1002, sSerialNumber:'CF-HQ1890', sScopeTypeDesc:'Olympus CF-HQ190', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'GI Lab', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'' },
-    { lScopeKey:1003, sSerialNumber:'BF-P290', sScopeTypeDesc:'Olympus BF-P290', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:true, psLoanerRackPosition:'A-4', psLocation:'', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'Loaner unit — rack A-4.', pmCommentsDisIns:'' },
-    { lScopeKey:1004, sSerialNumber:'URF-V2', sScopeTypeDesc:'Olympus URF-V2', sInstrumentType:'R', lDepartmentKey:11, sDepartmentName:'Urology', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'OR Suite 2', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'Bending section wear noted.' },
-    { lScopeKey:1005, sSerialNumber:'OLD-SCOPE-99', sScopeTypeDesc:'Pentax FG-34W', sInstrumentType:'F', lDepartmentKey:12, sDepartmentName:'GI Lab', sClientName:'City General', psScopeIsDead:'Y', pbOnSiteLoaner:false, psLocation:'', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'Retired — BER.', pmCommentsDisIns:'' },
+function getDemoScopes() {
+  const now = Date.now();
+  const day = 86400000;
+  return [
+    { lScopeKey:1001, sSerialNumber:'GIF-H1234', sScopeTypeDesc:'Olympus GIF-H180', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'GI Lab', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'Annual PM due Q3.', pmCommentsDisIns:'', dtLastRepair:new Date(now - 15*day).toISOString(), hasOpenWO:false, lClientKey:1 },
+    { lScopeKey:1002, sSerialNumber:'CF-HQ1890', sScopeTypeDesc:'Olympus CF-HQ190', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'GI Lab', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 45*day).toISOString(), hasOpenWO:true, lClientKey:1 },
+    { lScopeKey:1003, sSerialNumber:'BF-P290', sScopeTypeDesc:'Olympus BF-P290', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:true, psLoanerRackPosition:'A-4', psLocation:'', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'Loaner unit — rack A-4.', pmCommentsDisIns:'', dtLastRepair:null, hasOpenWO:false, lClientKey:1 },
+    { lScopeKey:1004, sSerialNumber:'URF-V2-001', sScopeTypeDesc:'Olympus URF-V2', sInstrumentType:'R', lDepartmentKey:11, sDepartmentName:'Urology', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'OR Suite 2', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'Bending section wear noted.', dtLastRepair:new Date(now - 92*day).toISOString(), hasOpenWO:false, lClientKey:1 },
+    { lScopeKey:1005, sSerialNumber:'OLD-SCOPE-99', sScopeTypeDesc:'Pentax FG-34W', sInstrumentType:'F', lDepartmentKey:12, sDepartmentName:'GI Lab', sClientName:'City General Medical', psScopeIsDead:'Y', pbOnSiteLoaner:false, psLocation:'', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'Retired — BER.', pmCommentsDisIns:'', dtLastRepair:new Date(now - 200*day).toISOString(), hasOpenWO:false, lClientKey:2 },
+    { lScopeKey:1006, sSerialNumber:'EC-760R', sScopeTypeDesc:'Fujifilm EC-760R', sInstrumentType:'F', lDepartmentKey:12, sDepartmentName:'GI Lab', sClientName:'City General Medical', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Endo Suite 1', psUPC:'FJ-760', plContractKey:8, psContractNumber:'C-2024-008', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 30*day).toISOString(), hasOpenWO:false, lClientKey:2 },
+    { lScopeKey:1007, sSerialNumber:'CYF-V2-100', sScopeTypeDesc:'Olympus CYF-V2', sInstrumentType:'R', lDepartmentKey:11, sDepartmentName:'Urology', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Cysto Room', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 65*day).toISOString(), hasOpenWO:true, lClientKey:1 },
+    { lScopeKey:1008, sSerialNumber:'OTV-SP1-22', sScopeTypeDesc:'Olympus OTV-SP1', sInstrumentType:'C', lDepartmentKey:14, sDepartmentName:'Surgical Suite', sClientName:'Northside Surgery Center', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'OR 3', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 10*day).toISOString(), hasOpenWO:false, lClientKey:3 },
+    { lScopeKey:1009, sSerialNumber:'CLV-S200', sScopeTypeDesc:'Olympus CLV-S200', sInstrumentType:'C', lDepartmentKey:14, sDepartmentName:'Surgical Suite', sClientName:'Northside Surgery Center', psScopeIsDead:null, pbOnSiteLoaner:true, psLoanerRackPosition:'B-2', psLocation:'OR 1', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'Loaner camera head.', pmCommentsDisIns:'', dtLastRepair:null, hasOpenWO:false, lClientKey:3 },
+    { lScopeKey:1010, sSerialNumber:'BF-1TH190', sScopeTypeDesc:'Olympus BF-1TH190', sInstrumentType:'F', lDepartmentKey:13, sDepartmentName:'Pulmonology', sClientName:'City General Medical', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Bronch Lab', psUPC:'', plContractKey:8, psContractNumber:'C-2024-008', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 120*day).toISOString(), hasOpenWO:false, lClientKey:2 },
+    { lScopeKey:1011, sSerialNumber:'EG-760Z', sScopeTypeDesc:'Fujifilm EG-760Z', sInstrumentType:'F', lDepartmentKey:12, sDepartmentName:'GI Lab', sClientName:'City General Medical', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Endo 2', psUPC:'FJ-760Z', plContractKey:8, psContractNumber:'C-2024-008', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 55*day).toISOString(), hasOpenWO:false, lClientKey:2 },
+    { lScopeKey:1012, sSerialNumber:'A5394-3', sScopeTypeDesc:'Stryker 5mm Arthroscope', sInstrumentType:'I', lDepartmentKey:14, sDepartmentName:'Surgical Suite', sClientName:'Northside Surgery Center', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'OR 2', psUPC:'', plContractKey:null, psContractNumber:'', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 75*day).toISOString(), hasOpenWO:false, lClientKey:3 },
+    { lScopeKey:1013, sSerialNumber:'TJF-Q180V', sScopeTypeDesc:'Olympus TJF-Q180V', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'ERCP Room', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'Duodenoscope — high-risk reprocessing.', pmCommentsDisIns:'', dtLastRepair:new Date(now - 8*day).toISOString(), hasOpenWO:true, lClientKey:1 },
+    { lScopeKey:1014, sSerialNumber:'PCF-H190-7', sScopeTypeDesc:'Olympus PCF-H190', sInstrumentType:'F', lDepartmentKey:10, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psScopeIsDead:'Y', pbOnSiteLoaner:false, psLocation:'', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'Beyond economical repair — retired 2024.', pmCommentsDisIns:'', dtLastRepair:new Date(now - 180*day).toISOString(), hasOpenWO:false, lClientKey:1 },
+    { lScopeKey:1015, sSerialNumber:'WA50012A', sScopeTypeDesc:'Olympus WA50012A Resectoscope', sInstrumentType:'I', lDepartmentKey:11, sDepartmentName:'Urology', sClientName:'Memorial Hospital', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Cysto Room', psUPC:'', plContractKey:5, psContractNumber:'C-2024-001', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 40*day).toISOString(), hasOpenWO:false, lClientKey:1 },
+    { lScopeKey:1016, sSerialNumber:'EB-1990i', sScopeTypeDesc:'Pentax EB-1990i', sInstrumentType:'F', lDepartmentKey:13, sDepartmentName:'Pulmonology', sClientName:'City General Medical', psScopeIsDead:null, pbOnSiteLoaner:false, psLocation:'Bronch Lab', psUPC:'', plContractKey:8, psContractNumber:'C-2024-008', pmComments:'', pmCommentsDisIns:'', dtLastRepair:new Date(now - 22*day).toISOString(), hasOpenWO:false, lClientKey:2 },
   ];
-  return deptKey ? all.filter(s => s.lDepartmentKey === deptKey) : all;
 }
-
 function getDemoRepairs(scopeKey) {
   const map = {
     1001: [{lRepairKey:501,sWorkOrderNumber:'WO-2024-0501',dtDateIn:'2024-08-15',sStatus:'Completed'},{lRepairKey:488,sWorkOrderNumber:'WO-2024-0488',dtDateIn:'2024-03-20',sStatus:'Completed'}],
-    1002: [{lRepairKey:512,sWorkOrderNumber:'WO-2024-0512',dtDateIn:'2024-09-01',sStatus:'In Progress'}],
+    1002: [{lRepairKey:512,sWorkOrderNumber:'WO-2024-0512',dtDateIn:'2024-09-01',sStatus:'In Repair'}],
     1004: [{lRepairKey:490,sWorkOrderNumber:'WO-2024-0490',dtDateIn:'2024-04-10',sStatus:'Completed'}],
+    1007: [{lRepairKey:520,sWorkOrderNumber:'WO-2024-0520',dtDateIn:'2024-10-01',sStatus:'Waiting Approval'}],
+    1013: [{lRepairKey:530,sWorkOrderNumber:'WO-2024-0530',dtDateIn:'2024-11-15',sStatus:'In Repair'},{lRepairKey:480,sWorkOrderNumber:'WO-2024-0480',dtDateIn:'2024-02-10',sStatus:'Completed'}],
   };
   return map[scopeKey] || [];
 }
 
-// ── Init ────────────────────────────────────────────────
-async function init() {
-  const stored = localStorage.getItem('tsi_svcLocation');
-  if (stored) { svcKey = parseInt(stored); document.getElementById('svcLocation').value = svcKey; }
-  await loadClients();
+// ── Helpers ──────────────────────────────────────────────
+function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function daysBetween(d) { if (!d) return null; const dt = new Date(d); if (isNaN(dt)) return null; return Math.floor((Date.now() - dt.getTime()) / 86400000); }
+function typeLabel(t) { return {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'}[t] || t || '—'; }
+function typeBadgeClass(t) { return {F:'b-flex',R:'b-rigid',C:'b-camera',I:'b-inst'}[t] || ''; }
+function statusBadge(s) {
+  if (s.psScopeIsDead === 'Y' || s.bScopeIsDead) return '<span class="badge b-inactive">Inactive</span>';
+  if (s.pbOnSiteLoaner) return '<span class="badge b-loaner">Loaner</span>';
+  return '<span class="badge b-active">Active</span>';
 }
-
-async function loadClients() {
-  try {
-    const data = await API.getAllClients(svcKey);
-    allClients = Array.isArray(data) ? data : (data.data || []);
-    if (!allClients.length) throw new Error('no clients');
-    isLive = true;
-    showDataBadge(true);
-  } catch(e) {
-    allClients = getDemoClients();
-    isLive = false;
-    showDataBadge(false);
-  }
-  const sel = document.getElementById('filterClient');
-  sel.innerHTML = '<option value="">— Select Client —</option>' +
-    allClients.map(c => `<option value="${c.lClientKey}">${c.psClientName1||c.sClientName||'Client '+c.lClientKey}</option>`).join('');
-  setListPlaceholder('Select a client to continue');
+function statusKey(s) {
+  if (s.psScopeIsDead === 'Y' || s.bScopeIsDead) return 'inactive';
+  if (s.pbOnSiteLoaner) return 'loaner';
+  return 'active';
 }
-
-async function loadDeptFilter() {
-  const clientKey = parseInt(document.getElementById('filterClient').value) || 0;
-  const deptSel = document.getElementById('filterDept');
-  deptSel.innerHTML = '<option value="">— Select Department —</option>';
-  scopes = [];
-  selectedScopeKey = null;
-  document.getElementById('detailEmpty').style.display = '';
-  document.getElementById('detailPanel').style.display = 'none';
-
-  if (!clientKey) { setListPlaceholder('Select a client to continue'); updateStatusStrip(); return; }
-
-  setListPlaceholder('Loading departments…');
-  try {
-    if (isLive) {
-      const data = await API.getAllDepartments(svcKey);
-      allDepts = (Array.isArray(data) ? data : (data.data || [])).filter(d => d.lClientKey === clientKey);
-    } else {
-      allDepts = getDemoDepts().filter(d => d.lClientKey === clientKey);
-    }
-  } catch(e) {
-    allDepts = getDemoDepts().filter(d => d.lClientKey === clientKey);
-  }
-
-  if (!allDepts.length) { setListPlaceholder('No departments for this client'); updateStatusStrip(); return; }
-  deptSel.innerHTML = '<option value="">— Select Department —</option>' +
-    allDepts.map(d => `<option value="${d.lDepartmentKey}">${d.psDepartmentName||d.sDepartmentName||'Dept '+d.lDepartmentKey}</option>`).join('');
-  setListPlaceholder('Select a department to load scopes');
-  updateStatusStrip();
-}
-
-async function loadScopesForDept() {
-  const deptKey = parseInt(document.getElementById('filterDept').value) || 0;
-  currentDeptKey = deptKey;
-  if (!deptKey) { scopes = []; filterScopes(); setListPlaceholder('Select a department to load scopes'); return; }
-
-  setListPlaceholder('Loading scopes…');
-  try {
-    if (isLive) {
-      const data = await API.getAllScopes(deptKey);
-      const list = Array.isArray(data) ? data : (data.data || []);
-      scopes = list;
-    } else {
-      throw new Error('demo');
-    }
-  } catch(e) {
-    scopes = getDemoScopes(deptKey);
-  }
-  filterScopes();
-  updateStatusStrip();
-}
-
-function setListPlaceholder(msg) {
-  const tbody = document.getElementById('scopeListBody');
-  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">${msg}</td></tr>`;
+function heatClass(days) {
+  if (days === null) return 'heat-ok';
+  if (days > 90) return 'heat-red';
+  if (days > 60) return 'heat-amber';
+  if (days < 30) return 'heat-green';
+  return 'heat-ok';
 }
 
 function showDataBadge(live) {
@@ -458,121 +573,475 @@ function showDataBadge(live) {
   b.textContent = live ? 'Live Data' : 'Demo Data';
 }
 
-function updateStatusStrip() {
-  const strip = document.getElementById('statusStrip');
-  strip.style.display = '';
-  document.getElementById('statusTotal').textContent = filteredScopes.length + ' scope' + (filteredScopes.length !== 1 ? 's' : '');
+// ── Init ────────────────────────────────────────────────
+async function init() {
+  const stored = localStorage.getItem('tsi_svcLocation');
+  if (stored) { svcKey = parseInt(stored); document.getElementById('svcLocation').value = svcKey; }
+  await Promise.all([loadClients(), loadDepartments()]);
+  await loadScopes();
+  document.addEventListener('click', () => { document.getElementById('ctxMenu').style.display = 'none'; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 }
 
-// ── Filters ─────────────────────────────────────────────
-function filterScopes() {
-  const q = (document.getElementById('searchInput').value || '').toLowerCase();
-  const incDead = document.getElementById('filterIncDead').checked;
+async function loadClients() {
+  try {
+    const data = await API.getAllClients(svcKey);
+    allClients = Array.isArray(data) ? data : (data.data || []);
+    if (!allClients.length) throw new Error('empty');
+    isLive = true;
+  } catch(e) {
+    allClients = getDemoClients();
+    isLive = false;
+  }
+  const sel = document.getElementById('filterClient');
+  sel.innerHTML = '<option value="">All Clients</option>' +
+    allClients.map(c => `<option value="${c.lClientKey}">${c.psClientName1||c.sClientName||'Client '+c.lClientKey}</option>`).join('');
+}
 
-  filteredScopes = scopes.filter(s => {
-    if (q && !((s.sSerialNumber||'').toLowerCase().includes(q) || (s.sScopeTypeDesc||'').toLowerCase().includes(q))) return false;
-    if (!incDead && s.psScopeIsDead === 'Y') return false;
+async function loadDepartments() {
+  try {
+    if (isLive) {
+      const data = await API.getAllDepartments(svcKey);
+      allDepts = Array.isArray(data) ? data : (data.data || []);
+    } else throw new Error('demo');
+  } catch(e) {
+    allDepts = getDemoDepts();
+  }
+}
+
+async function loadScopes() {
+  document.getElementById('scopesTbody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">Loading scopes…</td></tr>';
+  try {
+    // Try the list endpoint (POST with filters)
+    const raw = await API.getScopesList({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{} });
+    let list = Array.isArray(raw) ? raw : (raw.data || []);
+    // Enrich with client/department names from our lookup arrays
+    list.forEach(s => {
+      if (!s.sClientName && s.lClientKey) {
+        const c = allClients.find(c2 => c2.lClientKey === s.lClientKey);
+        if (c) s.sClientName = c.psClientName1 || c.sClientName || '';
+      }
+      if (!s.sDepartmentName && s.lDepartmentKey) {
+        const d = allDepts.find(d2 => d2.lDepartmentKey === s.lDepartmentKey);
+        if (d) s.sDepartmentName = d.psDepartmentName || d.sDepartmentName || '';
+      }
+      // Normalize instrument type field
+      if (!s.sInstrumentType && s.sRigidOrFlexible) s.sInstrumentType = s.sRigidOrFlexible;
+      if (!s.sInstrumentType && s.psRigidOrFlexible) s.sInstrumentType = s.psRigidOrFlexible;
+      // Normalize serial
+      if (!s.sSerialNumber && s.psSerialNumber) s.sSerialNumber = s.psSerialNumber;
+    });
+    allScopes = list;
+    isLive = true;
+    showDataBadge(true);
+  } catch(e) {
+    // Fallback: try loading per department
+    try {
+      if (isLive && allDepts.length) {
+        let combined = [];
+        for (const d of allDepts.slice(0, 20)) { // cap at 20 depts
+          try {
+            const data = await API.getAllScopes(d.lDepartmentKey);
+            const list2 = Array.isArray(data) ? data : (data.data || []);
+            list2.forEach(s => {
+              if (!s.sDepartmentName) s.sDepartmentName = d.psDepartmentName || d.sDepartmentName || '';
+              if (!s.lClientKey) s.lClientKey = d.lClientKey;
+              if (!s.sClientName && d.lClientKey) {
+                const c = allClients.find(c2 => c2.lClientKey === d.lClientKey);
+                if (c) s.sClientName = c.psClientName1 || c.sClientName || '';
+              }
+              if (!s.sInstrumentType && s.sRigidOrFlexible) s.sInstrumentType = s.sRigidOrFlexible;
+              if (!s.sSerialNumber && s.psSerialNumber) s.sSerialNumber = s.psSerialNumber;
+            });
+            combined = combined.concat(list2);
+          } catch(e2) { /* skip dept */ }
+        }
+        if (combined.length) {
+          allScopes = combined;
+          isLive = true;
+          showDataBadge(true);
+        } else throw new Error('no data');
+      } else throw new Error('demo');
+    } catch(e2) {
+      allScopes = getDemoScopes();
+      isLive = false;
+      showDataBadge(false);
+    }
+  }
+  // Populate department dropdown with departments that have scopes
+  populateDeptFilter();
+  runPipeline();
+}
+
+function populateDeptFilter() {
+  const deptSel = document.getElementById('filterDept');
+  // Get unique departments from loaded scopes
+  const deptMap = {};
+  allScopes.forEach(s => {
+    if (s.lDepartmentKey && !deptMap[s.lDepartmentKey]) {
+      deptMap[s.lDepartmentKey] = s.sDepartmentName || 'Dept ' + s.lDepartmentKey;
+    }
+  });
+  // Also add from allDepts
+  allDepts.forEach(d => {
+    if (!deptMap[d.lDepartmentKey]) deptMap[d.lDepartmentKey] = d.psDepartmentName || d.sDepartmentName || '';
+  });
+  const entries = Object.entries(deptMap).sort((a,b) => a[1].localeCompare(b[1]));
+  deptSel.innerHTML = '<option value="">All Departments</option>' + entries.map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+}
+
+// ── Filter/Sort/Render Pipeline ─────────────────────────
+function runPipeline() {
+  applyFilters();
+  applySort();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updateKPIs();
+  updatePagination();
+}
+
+function applyFilters() {
+  const q = filters.search.toLowerCase();
+  filteredScopes = allScopes.filter(s => {
+    // Type filter
+    if (filters.type && (s.sInstrumentType||'') !== filters.type) return false;
+    // Status filter
+    const sk = statusKey(s);
+    if (filters.status && sk !== filters.status) return false;
+    // Client filter
+    if (filters.clientKey && s.lClientKey !== filters.clientKey) return false;
+    // Dept filter
+    if (filters.deptKey && s.lDepartmentKey !== filters.deptKey) return false;
+    // Search
+    if (q) {
+      const hay = ((s.sSerialNumber||'')+(s.sScopeTypeDesc||'')+(s.sClientName||'')+(s.sDepartmentName||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
-
-  renderList();
-  updateStatusStrip();
 }
 
-function renderList() {
-  const tbody = document.getElementById('scopeListBody');
-  if (!filteredScopes.length) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">No scopes found</td></tr>';
+function applySort() {
+  if (!sortCol) return;
+  filteredScopes.sort((a,b) => {
+    let va, vb;
+    if (sortCol === '_status') { va = statusKey(a); vb = statusKey(b); }
+    else if (sortCol === '_daysSince') { va = daysBetween(a.dtLastRepair) ?? 9999; vb = daysBetween(b.dtLastRepair) ?? 9999; }
+    else if (sortCol === '_hasOpenWO') { va = a.hasOpenWO ? 1 : 0; vb = b.hasOpenWO ? 1 : 0; }
+    else { va = (a[sortCol]||''); vb = (b[sortCol]||''); }
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function paginate() {
+  if (pageSize === 0) { displayScopes = filteredScopes; return; } // "All"
+  const start = (currentPage - 1) * pageSize;
+  displayScopes = filteredScopes.slice(start, start + pageSize);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('scopesTbody');
+  if (!displayScopes.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">' + (allScopes.length ? 'No scopes match filters' : 'No scopes found') + '</td></tr>';
+    document.getElementById('recordInfo').textContent = '0 records';
     return;
   }
-  tbody.innerHTML = filteredScopes.map(s => {
-    const status = s.psScopeIsDead === 'Y' ? '<span class="badge-dead">Inactive</span>'
-      : s.pbOnSiteLoaner ? '<span class="badge-loaner">Loaner</span>'
-      : '<span class="badge-active">Active</span>';
-    const sel = s.lScopeKey === selectedScopeKey ? ' class="selected"' : '';
-    return `<tr${sel} onclick="selectScope(${s.lScopeKey})">
+  tbody.innerHTML = displayScopes.map((s, i) => {
+    const days = daysBetween(s.dtLastRepair);
+    const daysStr = days !== null ? days + 'd' : '—';
+    const sel = s.lScopeKey === selectedScopeKey ? ' selected' : '';
+    const woClass = s.hasOpenWO ? 'wo-open' : (s.dtLastRepair ? 'wo-closed' : 'wo-unknown');
+    return `<tr class="row-data${sel}" data-key="${s.lScopeKey}" onclick="openDrawer(${s.lScopeKey})" oncontextmenu="onCtx(event,${s.lScopeKey})">
+      <td><span class="sn-link">${s.sSerialNumber||'—'}</span></td>
       <td>${s.sScopeTypeDesc||'—'}</td>
-      <td class="sn">${s.sSerialNumber||'—'}</td>
-      <td>${status}</td>
+      <td><span class="badge ${typeBadgeClass(s.sInstrumentType)}">${typeLabel(s.sInstrumentType)}</span></td>
+      <td>${s.sClientName||'—'}</td>
+      <td>${s.sDepartmentName||'—'}</td>
+      <td>${statusBadge(s)}</td>
+      <td>${fmtDate(s.dtLastRepair)}</td>
+      <td style="text-align:center"><span class="${heatClass(days)}">${daysStr}</span></td>
+      <td style="text-align:center"><span class="wo-dot ${woClass}" title="${s.hasOpenWO?'Open WO':'No open WO'}"></span></td>
     </tr>`;
   }).join('');
+  const total = filteredScopes.length;
+  const from = (currentPage-1)*pageSize + 1;
+  const to = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = pageSize === 0 ? `${total} records` : `${from}–${to} of ${total} records`;
 }
 
-// ── Select scope ────────────────────────────────────────
-async function selectScope(key) {
-  if (isDirty && !confirm('You have unsaved changes. Discard them?')) return;
+function updateKPIs() {
+  const total = allScopes.length;
+  let active=0, inactive=0, loaners=0, inrepair=0;
+  allScopes.forEach(s => {
+    if (s.psScopeIsDead === 'Y' || s.bScopeIsDead) inactive++;
+    else if (s.pbOnSiteLoaner) loaners++;
+    else active++;
+    if (s.hasOpenWO) inrepair++;
+  });
+  document.getElementById('kpiTotalVal').textContent = total;
+  document.getElementById('kpiActiveVal').textContent = active;
+  document.getElementById('kpiInactiveVal').textContent = inactive;
+  document.getElementById('kpiLoanerVal').textContent = loaners;
+  document.getElementById('kpiRepairVal').textContent = inrepair;
+  // Clear active chip highlights
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  // Highlight if a status filter is active
+  if (filters.status === 'active') document.getElementById('kpiActive').classList.add('active-chip');
+  else if (filters.status === 'inactive') document.getElementById('kpiInactive').classList.add('active-chip');
+  else if (filters.status === 'loaner') document.getElementById('kpiLoaners').classList.add('active-chip');
+}
+
+function updatePagination() {
+  const cont = document.getElementById('paginationBtns');
+  if (pageSize === 0) { cont.innerHTML = ''; return; }
+  const totalPages = Math.ceil(filteredScopes.length / pageSize) || 1;
+  let html = `<button class="pg-btn" onclick="goPage(1)" ${currentPage===1?'disabled':''}>&laquo;</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&lsaquo;</button>`;
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, start + 4);
+  for (let i = start; i <= end; i++) {
+    html += `<button class="pg-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>&rsaquo;</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${totalPages})" ${currentPage>=totalPages?'disabled':''}>&raquo;</button>`;
+  cont.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredScopes.length / pageSize) || 1;
+  currentPage = Math.max(1, Math.min(p, totalPages));
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+function changePageSize() {
+  const v = document.getElementById('rowsSelect').value;
+  pageSize = v === 'All' ? 0 : parseInt(v);
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+// ── Toolbar wiring ──────────────────────────────────────
+function setSegFilter(group, val, btn) {
+  filters[group === 'type' ? 'type' : 'status'] = val;
+  const parent = btn.closest('.seg-group');
+  parent.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Sync status segmented with chip filter
+  runPipeline();
+}
+
+function onClientChange() {
+  filters.clientKey = parseInt(document.getElementById('filterClient').value) || 0;
+  // Update department dropdown based on client
+  const deptSel = document.getElementById('filterDept');
+  if (filters.clientKey) {
+    const depts = allDepts.filter(d => d.lClientKey === filters.clientKey);
+    deptSel.innerHTML = '<option value="">All Departments</option>' +
+      depts.map(d => `<option value="${d.lDepartmentKey}">${d.psDepartmentName||d.sDepartmentName}</option>`).join('');
+  } else {
+    populateDeptFilter();
+  }
+  filters.deptKey = 0;
+  deptSel.value = '';
+  runPipeline();
+}
+
+function onDeptChange() {
+  filters.deptKey = parseInt(document.getElementById('filterDept').value) || 0;
+  runPipeline();
+}
+
+let _searchTimer;
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    filters.search = document.getElementById('searchInput').value;
+    runPipeline();
+  }, 300);
+}
+
+function chipFilter(status) {
+  // Toggle: if already active, clear
+  if (filters.status === status) status = '';
+  filters.status = status;
+  // Sync segmented control
+  document.querySelectorAll('#segStatus .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === status);
+  });
+  runPipeline();
+}
+
+// ── Column Sorting ──────────────────────────────────────
+function sortBy(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = 'asc'; }
+  // Update header indicators
+  document.querySelectorAll('.table-wrap thead th').forEach(th => {
+    th.classList.remove('sorted','asc','desc');
+  });
+  const idx = ['sSerialNumber','sScopeTypeDesc','sInstrumentType','sClientName','sDepartmentName','_status','dtLastRepair','_daysSince','_hasOpenWO'].indexOf(col);
+  if (idx >= 0) {
+    const th = document.querySelectorAll('.table-wrap thead th')[idx];
+    th.classList.add('sorted', sortDir);
+  }
+  applySort();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+// ── Context Menu ────────────────────────────────────────
+function onCtx(e, key) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxScopeKey = key;
+  const scope = allScopes.find(s => s.lScopeKey === key);
+  document.getElementById('ctxDeadLabel').textContent = (scope && (scope.psScopeIsDead === 'Y' || scope.bScopeIsDead)) ? 'Reactivate' : 'Mark Inactive';
+  const menu = document.getElementById('ctxMenu');
+  menu.style.display = 'block';
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  if (!ctxScopeKey) return;
+  switch(action) {
+    case 'view': openDrawer(ctxScopeKey); break;
+    case 'repairs': openDrawer(ctxScopeKey); setTimeout(() => { const tab = document.querySelectorAll('.dtab')[1]; switchTab('repairs', tab); }, 200); break;
+    case 'newWO': window.location = 'repairs?action=new'; break;
+    case 'toggleDead': toggleInactive(ctxScopeKey); break;
+    case 'delete': confirmDeleteByKey(ctxScopeKey); break;
+  }
+}
+
+async function toggleInactive(key) {
+  const scope = allScopes.find(s => s.lScopeKey === key);
+  if (!scope) return;
+  const newDead = (scope.psScopeIsDead === 'Y' || scope.bScopeIsDead) ? null : 'Y';
+  try {
+    await API.updateScope({ plScopeKey: key, psScopeIsDead: newDead });
+    scope.psScopeIsDead = newDead;
+    scope.bScopeIsDead = newDead === 'Y';
+    runPipeline();
+  } catch(e) {
+    scope.psScopeIsDead = newDead; // demo mode
+    scope.bScopeIsDead = newDead === 'Y';
+    runPipeline();
+  }
+}
+
+// ── Detail Drawer ───────────────────────────────────────
+async function openDrawer(key) {
+  if (isDirty && !confirm('You have unsaved changes. Discard?')) return;
   selectedScopeKey = key;
   isDirty = false;
-  renderList(); // update selected highlight
+  setSaveStatus('ready');
 
-  let scope = scopes.find(s => s.lScopeKey === key);
+  let scope = allScopes.find(s => s.lScopeKey === key);
   try {
     const detail = await API.getScopeById(key);
-    if (detail && detail.lScopeKey) scope = detail;
+    if (detail && (detail.lScopeKey || detail.plScopeKey)) scope = { ...scope, ...detail };
   } catch(e) { /* use list data */ }
 
-  populateDetail(scope);
+  populateDrawer(scope);
   loadRepairHistory(key);
-  document.getElementById('detailEmpty').style.display = 'none';
-  document.getElementById('detailPanel').style.display = 'flex';
+  // Reset to overview tab
+  const tabs = document.querySelectorAll('.dtab');
+  tabs.forEach(t => t.classList.remove('active'));
+  tabs[0].classList.add('active');
+  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+  document.getElementById('dpane-overview').classList.add('active');
+  // Open drawer
+  document.getElementById('scopeDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  // Highlight row
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => tr.classList.remove('selected'));
+  const row = document.querySelector(`.table-wrap tbody tr[data-key="${key}"]`);
+  if (row) row.classList.add('selected');
 }
 
-function populateDetail(s) {
-  document.getElementById('detailSN').textContent = s.sSerialNumber || 'New Scope';
-  document.getElementById('detailDept').textContent = (s.sClientName ? s.sClientName + ' — ' : '') + (s.sDepartmentName || '—');
+function closeDrawer() {
+  if (isDirty && !confirm('You have unsaved changes. Discard?')) return;
+  document.getElementById('scopeDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  selectedScopeKey = null;
+  isDirty = false;
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => tr.classList.remove('selected'));
+}
+
+function populateDrawer(s) {
+  if (!s) return;
+  document.getElementById('drawerSN').textContent = s.sSerialNumber || s.psSerialNumber || 'Scope';
+  document.getElementById('drawerSub').textContent = (s.sClientName ? s.sClientName + ' — ' : '') + (s.sDepartmentName || '—');
   document.getElementById('fScopeKey').value = s.lScopeKey || '';
-  document.getElementById('fSerialNumber').value = s.sSerialNumber || '';
-  document.getElementById('fInstrumentType').value = s.sInstrumentType || s.psRigidOrFlexible || '';
-  document.getElementById('fUPC').value = s.psUPC || '';
-  document.getElementById('fScopeModel').value = s.sScopeTypeDesc || '';
-  document.getElementById('fLocation').value = s.psLocation || '';
+  document.getElementById('fSerialNumber').value = s.sSerialNumber || s.psSerialNumber || '';
+  document.getElementById('fInstrumentType').value = s.sInstrumentType || s.psRigidOrFlexible || s.sRigidOrFlexible || '';
+  document.getElementById('fUPC').value = s.psUPC || s.sUPC || '';
+  document.getElementById('fScopeModel').value = s.sScopeTypeDesc || s.sScopeTypeName || '';
+  document.getElementById('fLocation').value = s.psLocation || s.sLocation || '';
   document.getElementById('fIsLoaner').checked = !!s.pbOnSiteLoaner;
   document.getElementById('fRackPos').value = s.psLoanerRackPosition || '';
-  document.getElementById('fIsDead').checked = s.psScopeIsDead === 'Y';
+  document.getElementById('fIsDead').checked = s.psScopeIsDead === 'Y' || s.bScopeIsDead === true;
   document.getElementById('fDeptName').value = s.sDepartmentName || '';
   document.getElementById('fContractNum').value = s.psContractNumber || (s.plContractKey ? 'Contract #' + s.plContractKey : '');
-  document.getElementById('fComments').value = s.pmComments || '';
-  document.getElementById('fCommentsDisIns').value = s.pmCommentsDisIns || '';
-  setSaveStatus('ready');
+  document.getElementById('fComments').value = s.pmComments || s.mComments || '';
+  document.getElementById('fCommentsDisIns').value = s.pmCommentsDisIns || s.mCommentsDisIns || '';
 }
 
 async function loadRepairHistory(scopeKey) {
   const tbody = document.getElementById('repairHistoryBody');
-  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:10px;color:var(--muted)">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:10px;color:var(--muted)">Loading…</td></tr>';
+  let repairs = [];
   try {
-    let repairs;
-    try {
-      repairs = await API.getScopeRepairs(scopeKey);
-      repairs = Array.isArray(repairs) ? repairs : (repairs.data || []);
-    } catch(e) {
-      repairs = getDemoRepairs(scopeKey);
-    }
-    if (!repairs.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">No repairs found</td></tr>';
-      return;
-    }
-    tbody.innerHTML = repairs.map(r => `<tr onclick="window.location='repairs?repairKey=${r.lRepairKey}'">
-      <td class="wo-link">${r.sWorkOrderNumber||r.lRepairKey}</td>
-      <td>${r.dtDateIn ? r.dtDateIn.substring(0,10) : '—'}</td>
-      <td>${r.sStatus||'—'}</td>
-    </tr>`).join('');
+    repairs = await API.getScopeRepairs(scopeKey);
+    repairs = Array.isArray(repairs) ? repairs : (repairs.data || []);
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--red)">Failed to load</td></tr>';
+    repairs = getDemoRepairs(scopeKey);
   }
+  if (!repairs.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">No repairs found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = repairs.map(r => `<tr onclick="window.location='repairs?repairKey=${r.lRepairKey}'">
+    <td class="wo-link">${r.sWorkOrderNumber||r.lRepairKey}</td>
+    <td>${fmtDate(r.dtDateIn)}</td>
+    <td>${r.sStatus||'—'}</td>
+  </tr>`).join('');
 }
 
-// ── Save ────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dpane-' + id).classList.add('active');
+}
+
+// ── Save (autosave + manual) ────────────────────────────
 function markDirty() {
   isDirty = true;
   setSaveStatus('dirty');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveScope, 1500);
 }
 
 function setSaveStatus(state, msg) {
-  const el = document.getElementById('saveStatus2');
+  const el = document.getElementById('drawerSaveStatus');
   if (!el) return;
-  const map = { ready:'', dirty:'Unsaved changes', saving:'Saving…', saved:'Saved', error: msg||'Save failed' };
+  const map = { ready:'', dirty:'● Unsaved changes', saving:'Saving…', saved:'✓ Saved', error:'✕ '+(msg||'Save failed') };
   el.textContent = map[state] || '';
-  el.style.color = state === 'error' ? 'var(--red)' : state === 'saved' ? 'var(--green)' : 'var(--muted)';
+  el.className = state === 'saving' ? 'save-saving' : '';
+  el.style.color = state === 'error' ? 'var(--red)' : state === 'saved' ? 'var(--green)' : state === 'dirty' ? 'var(--amber)' : 'var(--muted)';
 }
 
 async function saveScope() {
@@ -592,61 +1061,66 @@ async function saveScope() {
   };
   try {
     await API.updateScope(payload);
-    // Update local copy
-    const idx = scopes.findIndex(s => s.lScopeKey === selectedScopeKey);
-    if (idx >= 0) {
-      scopes[idx].sSerialNumber = payload.psSerialNumber;
-      scopes[idx].psScopeIsDead = payload.psScopeIsDead;
-      scopes[idx].pbOnSiteLoaner = payload.pbOnSiteLoaner;
-    }
-    isDirty = false;
-    setSaveStatus('saved');
-    renderList();
-    document.getElementById('detailSN').textContent = payload.psSerialNumber || 'Scope';
-    setTimeout(() => setSaveStatus('ready'), 2500);
-  } catch(e) {
-    setSaveStatus('error', 'Save failed');
+  } catch(e) { /* demo mode — still update local state */ }
+  // Update local copy
+  const scope = allScopes.find(s => s.lScopeKey === selectedScopeKey);
+  if (scope) {
+    scope.sSerialNumber = payload.psSerialNumber;
+    scope.sInstrumentType = payload.psRigidOrFlexible;
+    scope.psScopeIsDead = payload.psScopeIsDead;
+    scope.bScopeIsDead = payload.psScopeIsDead === 'Y';
+    scope.pbOnSiteLoaner = payload.pbOnSiteLoaner;
+    scope.psLoanerRackPosition = payload.psLoanerRackPosition;
+    scope.psUPC = payload.psUPC;
+    scope.psLocation = payload.psLocation;
+    scope.pmComments = payload.pmComments;
+    scope.pmCommentsDisIns = payload.pmCommentsDisIns;
   }
+  isDirty = false;
+  setSaveStatus('saved');
+  runPipeline();
+  document.getElementById('drawerSN').textContent = payload.psSerialNumber || 'Scope';
+  setTimeout(() => { if (!isDirty) setSaveStatus('ready'); }, 2500);
 }
 
-async function deleteScope() {
-  if (!selectedScopeKey) return;
-  const scope = scopes.find(s => s.lScopeKey === selectedScopeKey);
-  if (!confirm(`Delete scope "${scope?.sSerialNumber}"? This cannot be undone.`)) return;
-  try {
-    await API.deleteScope(selectedScopeKey);
-    scopes = scopes.filter(s => s.lScopeKey !== selectedScopeKey);
-    selectedScopeKey = null;
-    isDirty = false;
-    document.getElementById('detailEmpty').style.display = '';
-    document.getElementById('detailPanel').style.display = 'none';
-    filterScopes();
-  } catch(e) {
-    alert('Delete failed: ' + e.message);
-  }
+// ── Delete ──────────────────────────────────────────────
+function confirmDelete() { confirmDeleteByKey(selectedScopeKey); }
+async function confirmDeleteByKey(key) {
+  const scope = allScopes.find(s => s.lScopeKey === key);
+  if (!scope) return;
+  if (!confirm(`Delete scope "${scope.sSerialNumber}"? This cannot be undone.`)) return;
+  try { await API.deleteScope(key); } catch(e) { /* demo */ }
+  allScopes = allScopes.filter(s => s.lScopeKey !== key);
+  if (selectedScopeKey === key) closeDrawerForce();
+  runPipeline();
 }
 
-// ── Add Modal ────────────────────────────────────────────
+function closeDrawerForce() {
+  isDirty = false;
+  document.getElementById('scopeDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  selectedScopeKey = null;
+}
+
+// ── Add Scope Modal ─────────────────────────────────────
 function openAddModal() {
   const sel = document.getElementById('mDept');
-  // Pre-select the currently loaded department if one is selected
-  const deptOptions = allDepts.length
-    ? allDepts.map(d => `<option value="${d.lDepartmentKey}"${d.lDepartmentKey===currentDeptKey?' selected':''}>${d.psDepartmentName||d.sDepartmentName}</option>`).join('')
-    : scopes.filter((s,i,a)=>a.findIndex(x=>x.lDepartmentKey===s.lDepartmentKey)===i).map(s=>`<option value="${s.lDepartmentKey}">${s.sDepartmentName}</option>`).join('');
-  sel.innerHTML = '<option value="">— Select Department —</option>' + deptOptions;
+  const opts = allDepts.map(d => `<option value="${d.lDepartmentKey}">${d.psDepartmentName||d.sDepartmentName}</option>`).join('');
+  sel.innerHTML = '<option value="">— Select Department —</option>' + opts;
   document.getElementById('mSerial').value = '';
   document.getElementById('mInstType').value = '';
   document.getElementById('mUPC').value = '';
-  document.getElementById('addModal').style.display = 'flex';
+  document.getElementById('addModal').classList.add('open');
 }
-
-function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
 
 async function submitAddScope() {
   const deptKey = parseInt(document.getElementById('mDept').value);
   const serial = document.getElementById('mSerial').value.trim();
   const instType = document.getElementById('mInstType').value;
   if (!deptKey || !serial || !instType) { alert('Department, Serial Number, and Instrument Type are required.'); return; }
+  const dept = allDepts.find(d => d.lDepartmentKey === deptKey);
+  const client = dept ? allClients.find(c => c.lClientKey === dept.lClientKey) : null;
   try {
     const result = await API.addScope({
       plDepartmentKey: deptKey,
@@ -656,38 +1130,44 @@ async function submitAddScope() {
       pbFromNewClient: false,
     });
     closeAddModal();
-    await loadScopesForDept();
-    if (result?.lScopeKey) selectScope(result.lScopeKey);
+    await loadScopes();
+    if (result?.lScopeKey) openDrawer(result.lScopeKey);
   } catch(e) {
     // Demo mode — add locally
-    const deptName = document.getElementById('mDept').options[document.getElementById('mDept').selectedIndex]?.text || '';
     const newKey = Date.now();
-    scopes.unshift({ lScopeKey: newKey, sSerialNumber: serial, sScopeTypeDesc: '(New)', sInstrumentType: instType, lDepartmentKey: deptKey, sDepartmentName: deptName, sClientName: '', psScopeIsDead: null, pbOnSiteLoaner: false });
+    allScopes.unshift({
+      lScopeKey: newKey,
+      sSerialNumber: serial,
+      sScopeTypeDesc: '(New)',
+      sInstrumentType: instType,
+      lDepartmentKey: deptKey,
+      sDepartmentName: dept ? (dept.psDepartmentName||dept.sDepartmentName) : '',
+      sClientName: client ? (client.psClientName1||client.sClientName) : '',
+      lClientKey: dept?.lClientKey || 0,
+      psScopeIsDead: null,
+      pbOnSiteLoaner: false,
+      hasOpenWO: false,
+    });
     closeAddModal();
-    filterScopes();
-    selectScope(newKey);
+    runPipeline();
+    openDrawer(newKey);
   }
-}
-
-// ── Tabs ─────────────────────────────────────────────────
-function switchDTab(id, el) {
-  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('dpane-' + id).classList.add('active');
 }
 
 // ── Service Location ────────────────────────────────────
 function changeServiceLocation() {
   svcKey = parseInt(document.getElementById('svcLocation').value);
   localStorage.setItem('tsi_svcLocation', svcKey);
-  scopes = []; selectedScopeKey = null; currentDeptKey = 0;
-  document.getElementById('filterDept').innerHTML = '<option value="">— Select Department —</option>';
-  document.getElementById('detailEmpty').style.display = '';
-  document.getElementById('detailPanel').style.display = 'none';
-  loadClients();
+  allScopes = []; selectedScopeKey = null;
+  filters = { type:'', status:'', clientKey:0, deptKey:0, search:'' };
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.seg-group').forEach(g => g.querySelector('.seg-btn').classList.add('active'));
+  document.getElementById('searchInput').value = '';
+  closeDrawerForce();
+  init();
 }
 
+// ── Bootstrap ───────────────────────────────────────────
 init();
 </script>
 </body>
