@@ -329,7 +329,7 @@ const API = (() => {
 
   // ── Repair (10) ───────────────────────────────────────
   async function getRepairs(filters) { return post('/Repair/GetAllRepairList', filters); }
-  async function getRepairList(svcKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
+  async function getRepairList(svcKey, deptKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=' + (deptKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairDetail(repairKey, svcKey) { return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairScopes(deptKey, scopeKey, repairKey, svcKey) { return get('/Repair/GetAllrepairsScopes?plDepartmentKey=' + (deptKey||0) + '&plScopeKey=' + (scopeKey||0) + '&plRepairKey=' + (repairKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairReasons() { return get('/Repair/GetAllRepairReasons?plRepairReasonKey=0'); }
