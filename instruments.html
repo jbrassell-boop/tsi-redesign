@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Instruments | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC: Instruments ── */
+    .page-body{overflow:hidden;display:flex;flex-direction:column}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
+    .seg-group{display:inline-flex;border:1.5px solid var(--border-dk);border-radius:5px;overflow:hidden;background:#fff}
+    .seg-btn{padding:0 10px;height:24px;border:none;background:transparent;color:var(--label);font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit;border-right:1px solid var(--border-dk);transition:all .12s}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn:hover:not(.active){background:var(--bg);color:var(--navy)}
+    .seg-btn.active{background:var(--navy);color:#fff}
+    .search-inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);outline:none;width:200px;transition:border-color .15s}
+    .search-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+
+    /* MASTER-DETAIL SPLIT — table left, 310px right */
+    .split-layout{display:flex;flex:1;overflow:hidden}
+    .split-left{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff}
+    .split-right{width:310px;flex-shrink:0;background:#F8FAFF;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+
+    /* TABLE AREA */
+    .table-wrap{flex:1;overflow-y:auto}
+    table.inst-table{width:100%;border-collapse:collapse}
+    table.inst-table thead th{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:6px 10px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:2}
+    table.inst-table tbody td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle;cursor:pointer}
+    table.inst-table tbody tr:nth-child(even){background:var(--row-alt)}
+    table.inst-table tbody tr:hover{background:#D8E6FF}
+    table.inst-table tbody tr.selected{background:#FEF3C7;border-left:3px solid var(--amber)}
+    table.inst-table tbody tr.selected td:first-child{padding-left:7px}
+    .col-code{width:130px;font-family:monospace;font-size:10.5px;font-weight:600;color:var(--blue)}
+    .col-name{font-weight:600;color:var(--navy)}
+    .col-cat{color:var(--label);font-size:10.5px}
+    .col-charge{text-align:right;font-weight:600;color:var(--text)}
+    .col-status{width:80px;text-align:center}
+
+    /* STATUS STRIP */
+    .status-strip{display:flex;align-items:center;gap:6px;padding:4px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+    .ss-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:5px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
+    .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.3px}
+    .ss-chip .ss-val{color:var(--text)}
+
+    /* LEFT PANEL FOOTER */
+    .table-footer{padding:4px 10px;border-top:1px solid var(--border);background:#FAFBFF;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);flex-shrink:0}
+    .page-nav{display:flex;align-items:center;gap:2px}
+    .page-nav button{width:20px;height:20px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--label);transition:all .1s}
+    .page-nav button:hover{border-color:var(--navy);background:var(--bg)}
+    .page-nav input{width:28px;height:20px;border:1px solid var(--border);border-radius:3px;text-align:center;font-size:10px;font-family:inherit}
+    .tbl-footer-left{display:flex;align-items:center;gap:4px}
+    .tbl-footer-left select{height:20px;border:1px solid var(--border);border-radius:3px;font-size:10px;font-family:inherit;padding:0 3px}
+
+    /* RIGHT PANEL — DETAIL */
+    .detail-header{padding:8px 12px;border-bottom:1px solid var(--border);background:#F0F4FA}
+    .detail-title{font-size:13px;font-weight:800;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .detail-subtitle{font-size:10px;color:var(--muted);margin-top:1px}
+    .detail-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);gap:8px;padding:24px}
+    .detail-empty svg{width:40px;height:40px;opacity:.18}
+    .detail-empty p{font-size:12px;font-weight:500;text-align:center}
+
+    /* DETAIL FIELDS */
+    .df-section-title{font-size:9px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.7px;padding-bottom:4px;border-bottom:1px solid var(--border);margin-bottom:6px}
+    .df-row{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+    .df-row label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .df-row .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .df-row .inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .df-row .inp.ro{background:#F7F9FC;color:var(--muted);cursor:default}
+    select.inp{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+    .inp-prefix-wrap{position:relative;display:flex;align-items:center}
+    .inp-prefix{position:absolute;left:8px;font-size:11.5px;font-weight:600;color:var(--muted);pointer-events:none;z-index:1}
+    .inp-prefix-wrap .inp{padding-left:18px}
+
+    /* TOGGLE ROW (inline, no bottom border variant) */
+    .toggle-inline{display:flex;align-items:center;gap:8px;padding:4px 0}
+    .toggle-inline .toggle-label{font-size:11px;color:var(--text)}
+    .toggle{position:relative;width:34px;height:19px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:#CBD5E0;border-radius:10px;cursor:pointer;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--navy)}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
+
+    /* DETAIL FOOTER */
+    .detail-footer{padding:8px 12px;border-top:1px solid var(--border);background:#F0F4FA;display:flex;gap:6px;justify-content:flex-end;flex-shrink:0}
+
+    /* MANUFACTURER READ-ONLY BLOCK */
+    .mfr-block{background:#fff;border:1px solid var(--border);border-radius:5px;padding:6px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+    .mfr-item{display:flex;flex-direction:column;gap:0}
+    .mfr-item .mfr-lbl{font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .mfr-item .mfr-val{font-size:11px;font-weight:600;color:var(--text)}
+    .mfr-item .mfr-val.empty{color:var(--muted);font-weight:400;font-style:italic}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:40px 16px;color:var(--muted)}
+    .empty-state svg{width:36px;height:36px;opacity:.2;margin-bottom:8px}
+    .empty-state p{font-size:13px;font-weight:500}
+
+    /* BADGE OVERRIDES */
+    .b-active-sm{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center}
+    .b-inactive-sm{background:#F3F4F6;color:var(--muted);border:1px solid #E5E7EB;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center}
+
+    /* TOOLBAR SEARCH */
+    .toolbar-search{display:flex;align-items:center;gap:0}
+    .toolbar-search .search-inp{width:180px;border-radius:4px 0 0 4px}
+    .toolbar-search .btn-search{height:26px;padding:0 8px;border:1.5px solid var(--border-dk);border-left:none;border-radius:0 4px 4px 0;background:#fff;cursor:pointer;display:flex;align-items:center;color:var(--label);transition:all .12s}
+    .toolbar-search .btn-search:hover{border-color:var(--navy);background:var(--bg);color:var(--navy)}
+
+    /* SAVE INDICATOR (topbar) */
+    #saveIndicator{display:none;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#FDE68A;white-space:nowrap}
+    #saveIndicator.show{display:flex}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='development-list.html'" onclick="window.location='loaners.html'" onclick="window.location='acquisitions.html'" onclick="window.location='repair-items.html'" onclick="window.location='workspace.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        My Workspace
+      </div>
+      <div class="nav-item" onclick="window.location='dashboard.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="window.location='clients.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </div>
+      <div class="nav-item" onclick="window.location='departments.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        Departments
+      </div>
+      <div class="nav-item" onclick="window.location='repairs.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Repairs
+      </div>
+      <div class="nav-item" onclick="window.location='inventory.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>
+        Inventory
+      </div>
+      <div class="nav-item" onclick="window.location='suppliers.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Suppliers
+      </div>
+      <div class="nav-item" onclick="window.location='scopes.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Scopes
+      </div>
+      <div class="nav-item" onclick="window.location='scope-model.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>
+        Scope Model
+      </div>
+      <div class="nav-item" onclick="window.location='repair-items.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        Repair Items
+      </div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Instruments
+      </div>
+      <div class="nav-item" onclick="window.location='contracts.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+        Contracts
+      </div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Acquisitions
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Carts
+      </div>
+      <div class="nav-item" onclick="window.location='loaners.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        Loaners
+      </div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        Onsite Services
+      </div>
+      <div class="nav-item" onclick="window.location='product-sale.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Product Sale
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Quality
+      </div>
+      <div class="nav-item" onclick="window.location='financial.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Financial
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports/Extracts
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Administration
+      </div>
+      <div class="nav-item" onclick="window.location='development-list.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Development List
+      </div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg>
+              <div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div>
+            </a>
+          </div>
+        </div>
+        <div id="saveIndicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+          <span id="saveIndicatorText">Saving...</span>
+        </div>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        <span>Service Location:</span>
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <span id="dataBadge" class="data-badge"></span>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" style="gap:4px" onclick="openAddModal()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Instrument
+        </button>
+        <div class="divider"></div>
+        <div class="toolbar-search">
+          <input class="search-inp" id="instrSearch" placeholder="Search instruments..." oninput="applyFilters()"/>
+          <button class="btn-search" onclick="applyFilters()" title="Search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div class="seg-group" id="statusFilter">
+          <button class="seg-btn active" data-val="active" onclick="setStatusFilter('active',this)">Active</button>
+          <button class="seg-btn" data-val="all" onclick="setStatusFilter('all',this)">All</button>
+          <button class="seg-btn" data-val="inactive" onclick="setStatusFilter('inactive',this)">Inactive</button>
+        </div>
+        <div style="flex:1"></div>
+        <span style="font-size:10px;color:var(--muted)" id="instrCountLabel">0 instruments</span>
+      </div>
+
+      <!-- STATUS STRIP -->
+      <div class="status-strip">
+        <div class="ss-chip" style="background:#F8FAFF"><span class="ss-label">Total</span>&nbsp;<span class="ss-val" id="statTotal">0</span></div>
+        <div class="ss-chip" style="background:#F0FDF4;border-color:#BBF7D0"><span class="ss-label">Active</span>&nbsp;<span class="ss-val" style="color:var(--green)" id="statActive">0</span></div>
+        <div class="ss-chip" style="background:#FEF2F2;border-color:#FECACA"><span class="ss-label">Inactive</span>&nbsp;<span class="ss-val" style="color:var(--red)" id="statInactive">0</span></div>
+        <div class="ss-chip" style="background:#EFF6FF;border-color:#BFDBFE"><span class="ss-label">Categories</span>&nbsp;<span class="ss-val" style="color:var(--blue)" id="statCats">0</span></div>
+      </div>
+
+      <!-- SPLIT LAYOUT -->
+      <div class="split-layout">
+
+        <!-- LEFT — instruments table -->
+        <div class="split-left">
+          <div class="table-wrap">
+            <table class="inst-table">
+              <thead>
+                <tr>
+                  <th style="width:130px">Item Code</th>
+                  <th>Instrument Name</th>
+                  <th style="width:160px">Category</th>
+                  <th style="width:100px;text-align:right">Max Charge</th>
+                  <th style="width:80px;text-align:center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="instrTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Loading instruments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <div class="tbl-footer-left">
+              <span>Show</span>
+              <select id="pageSize" onchange="changePageSize()"><option>25</option><option>50</option><option>100</option></select>
+              <span>of <span id="totalCount">0</span></span>
+            </div>
+            <div class="page-nav">
+              <button title="Previous page" onclick="prevPage()">&#9664;</button>
+              <input type="number" value="1" min="1" id="pageInput" onchange="goToPage(this.value)" style="width:32px"/>
+              <span style="font-size:9px;color:var(--muted)" id="totalPages">/1</span>
+              <button title="Next page" onclick="nextPage()">&#9654;</button>
+            </div>
+          </div>
+        </div><!-- /split-left -->
+
+        <!-- RIGHT — instrument detail -->
+        <div class="split-right" id="detailPanel">
+          <div id="detailEmpty" class="detail-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <p>Select an instrument<br/>to view or edit details</p>
+          </div>
+          <div id="detailContent" style="display:none;flex-direction:column;overflow:hidden;flex:1">
+            <div class="detail-header">
+              <div class="detail-title" id="detailName">—</div>
+              <div class="detail-subtitle" id="detailSubtitle"></div>
+            </div>
+            <div class="detail-body">
+              <div>
+                <div class="df-section-title">Instrument Details</div>
+                <div class="df-row">
+                  <label>Instrument Name <span style="color:var(--red)">*</span></label>
+                  <input class="inp" id="fName" placeholder="Enter instrument name" oninput="onDetailChange()"/>
+                </div>
+                <div class="df-row">
+                  <label>Item Code</label>
+                  <input class="inp" id="fItemCode" placeholder="e.g. OLY-GIF-H180" style="font-family:monospace;font-size:10.5px" oninput="onDetailChange()"/>
+                </div>
+                <div class="df-row">
+                  <label>Category</label>
+                  <select class="inp" id="fCategory" onchange="onDetailChange()">
+                    <option value="">-- Select Category --</option>
+                  </select>
+                </div>
+                <div class="df-row">
+                  <label>Max Charge</label>
+                  <div class="inp-prefix-wrap">
+                    <span class="inp-prefix">$</span>
+                    <input class="inp" id="fMaxCharge" type="number" min="0" step="0.01" placeholder="0.00" style="text-align:right;font-weight:600" oninput="onDetailChange()"/>
+                  </div>
+                </div>
+                <div class="df-row" style="margin-bottom:0">
+                  <label>Status</label>
+                  <div class="toggle-inline">
+                    <label class="toggle"><input type="checkbox" id="fActive" onchange="onDetailChange()"/><span class="toggle-slider"></span></label>
+                    <span class="toggle-label" id="fActiveLabel">Active</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="mfrSection">
+                <div class="df-section-title">Manufacturer Info</div>
+                <div class="mfr-block" id="mfrBlock">
+                  <div class="mfr-item"><span class="mfr-lbl">Manufacturer</span><span class="mfr-val empty" id="mfrName">—</span></div>
+                  <div class="mfr-item"><span class="mfr-lbl">Mfr Key</span><span class="mfr-val empty" id="mfrKey">—</span></div>
+                  <div class="mfr-item"><span class="mfr-lbl">Scope Type Key</span><span class="mfr-val empty" id="mfrScopeTypeKey">—</span></div>
+                  <div class="mfr-item"><span class="mfr-lbl">Created</span><span class="mfr-val empty" id="mfrCreated">—</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="detail-footer">
+              <button class="btn btn-danger" style="height:26px;font-size:10.5px;gap:3px;padding:0 9px" id="btnDelete" onclick="confirmDeleteInstrument()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete
+              </button>
+              <button class="btn btn-outline" style="height:26px;font-size:10.5px" onclick="cancelDetail()">Cancel</button>
+              <button class="btn btn-navy" style="height:26px;font-size:10.5px;gap:3px" id="btnSave" onclick="saveInstrument()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+                Save
+              </button>
+            </div>
+          </div>
+        </div><!-- /split-right -->
+
+      </div><!-- /split-layout -->
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ═══════ ADD INSTRUMENT MODAL ═══════ -->
+<div class="modal-overlay" id="addInstrumentModal">
+  <div class="modal-box sm">
+    <div class="modal-header">
+      <h3 style="font-size:13px">Add Instrument</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="gap:7px">
+        <div class="ff">
+          <label>Instrument Name <span class="req">*</span></label>
+          <input class="inp" id="addName" placeholder="e.g. Olympus GIF-H180"/>
+        </div>
+        <div class="ff">
+          <label>Item Code</label>
+          <input class="inp" id="addItemCode" placeholder="e.g. OLY-GIF-H180" style="font-family:monospace;font-size:10.5px"/>
+        </div>
+        <div class="ff">
+          <label>Category</label>
+          <select class="inp" id="addCategory">
+            <option value="">-- Select Category --</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Max Charge</label>
+          <div class="inp-prefix-wrap">
+            <span class="inp-prefix">$</span>
+            <input class="inp" id="addMaxCharge" type="number" min="0" step="0.01" placeholder="0.00" style="text-align:right"/>
+          </div>
+        </div>
+        <div class="ff">
+          <label>Status</label>
+          <div class="toggle-inline" style="padding:3px 0">
+            <label class="toggle"><input type="checkbox" id="addActive" checked/><span class="toggle-slider"></span></label>
+            <span style="font-size:11px;color:var(--text)">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="addInstrument()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+        Save Instrument
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DELETE CONFIRM MODAL ═══════ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box sm">
+    <div class="modal-header modal-header-red">
+      <h3 style="font-size:13px">Delete Instrument</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:24px 20px">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" style="margin-bottom:10px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px" id="deleteConfirmName">Delete this instrument?</p>
+      <p style="font-size:12px;color:var(--muted)">This will permanently remove the instrument record. This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" style="background:var(--red)" onclick="deleteInstrument()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message === 'redirect') window.location = 'login.html'; }
+
+// ══════════════════════════════════════════════════════════
+//  Instruments — API-wired with demo fallback
+// ══════════════════════════════════════════════════════════
+
+let _liveMode = false;
+let _allInstruments = [];
+let _filteredInstruments = [];
+let _categories = [];
+let _currentInstrument = null;
+let _currentPage = 1;
+let _statusFilter = 'active';
+let _isDirty = false;
+
+// ── Demo Data ─────────────────────────────────────────────
+const demoCategories = [
+  { plScopeCategoryKey: 1, sScopeCategory: 'Flexible Endoscope' },
+  { plScopeCategoryKey: 2, sScopeCategory: 'Rigid Endoscope' },
+  { plScopeCategoryKey: 3, sScopeCategory: 'Camera System' }
+];
+
+const demoInstruments = [
+  { plScopeTypeKey: 101, pInstrument: 'Olympus GIF-H180', psItemCode: 'OLY-GIF-H180', plScopeCategoryKey: 1, sScopeCategory: 'Flexible Endoscope', pmMaxCharge: 850.00, psStatus: true },
+  { plScopeTypeKey: 102, pInstrument: 'Olympus CF-HQ190', psItemCode: 'OLY-CF-HQ190', plScopeCategoryKey: 1, sScopeCategory: 'Flexible Endoscope', pmMaxCharge: 950.00, psStatus: true },
+  { plScopeTypeKey: 103, pInstrument: 'Pentax FG-34W', psItemCode: 'PEN-FG-34W', plScopeCategoryKey: 1, sScopeCategory: 'Flexible Endoscope', pmMaxCharge: 700.00, psStatus: true },
+  { plScopeTypeKey: 104, pInstrument: 'Storz 26003AA', psItemCode: 'STZ-26003AA', plScopeCategoryKey: 2, sScopeCategory: 'Rigid Endoscope', pmMaxCharge: 400.00, psStatus: true },
+  { plScopeTypeKey: 105, pInstrument: 'Stryker 1488', psItemCode: 'STR-1488', plScopeCategoryKey: 3, sScopeCategory: 'Camera System', pmMaxCharge: 1200.00, psStatus: false }
+];
+
+// ── Helpers ───────────────────────────────────────────────
+function formatCurrency(v) {
+  const n = parseFloat(v) || 0;
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return (dt.getMonth()+1).toString().padStart(2,'0') + '/' +
+         dt.getDate().toString().padStart(2,'0') + '/' + dt.getFullYear();
+}
+
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  if (live) {
+    b.textContent = 'Live Data';
+    b.style.cssText = 'background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap';
+  } else {
+    b.textContent = 'Demo Data';
+    b.style.cssText = 'background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap';
+  }
+}
+
+function showSaving(text) {
+  const ind = document.getElementById('saveIndicator');
+  document.getElementById('saveIndicatorText').textContent = text || 'Saving...';
+  ind.classList.add('show');
+}
+
+function hideSaving() {
+  document.getElementById('saveIndicator').classList.remove('show');
+}
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+});
+
+async function loadData() {
+  await Promise.all([loadCategories(), loadInstruments()]);
+}
+
+async function loadCategories() {
+  try {
+    const data = await API.getInstrumentScopeCategories();
+    if (data && Array.isArray(data) && data.length > 0) {
+      _categories = data;
+      _liveMode = true;
+      populateCategoryDropdowns();
+      return;
+    }
+  } catch (e) {
+    console.warn('[TSI Instruments] Categories load failed:', e.message);
+  }
+  _categories = demoCategories;
+  populateCategoryDropdowns();
+}
+
+async function loadInstruments() {
+  try {
+    const payload = {
+      pagination: { PageNumber: 1, PageSize: 1000 },
+      filters: {},
+      plScopeTypeKey: 0,
+      pbIncludeInactive: true
+    };
+    const data = await API.getInstrumentsList(payload);
+    if (data && Array.isArray(data) && data.length > 0) {
+      _allInstruments = data;
+      _liveMode = true;
+      showDataBadge(true);
+      applyFilters();
+      return;
+    }
+  } catch (e) {
+    console.warn('[TSI Instruments] List load failed:', e.message);
+  }
+  // Demo fallback
+  _allInstruments = demoInstruments.slice();
+  showDataBadge(false);
+  applyFilters();
+}
+
+function populateCategoryDropdowns() {
+  const opts = '<option value="">-- Select Category --</option>' +
+    _categories.map(c => '<option value="' + c.plScopeCategoryKey + '">' + escHtml(c.sScopeCategory) + '</option>').join('');
+  document.getElementById('fCategory').innerHTML = opts;
+  document.getElementById('addCategory').innerHTML = opts;
+}
+
+// ── Filtering ─────────────────────────────────────────────
+function setStatusFilter(val, el) {
+  _statusFilter = val;
+  document.querySelectorAll('#statusFilter .seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = (document.getElementById('instrSearch').value || '').toLowerCase().trim();
+  _filteredInstruments = _allInstruments.filter(inst => {
+    // Status filter
+    if (_statusFilter === 'active' && !inst.psStatus) return false;
+    if (_statusFilter === 'inactive' && inst.psStatus) return false;
+    // Search
+    if (search) {
+      const hay = [
+        inst.pInstrument || '',
+        inst.psItemCode || '',
+        inst.sScopeCategory || getCategoryName(inst.plScopeCategoryKey)
+      ].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  _currentPage = 1;
+  updateStats();
+  renderTable();
+}
+
+function updateStats() {
+  const total = _allInstruments.length;
+  const active = _allInstruments.filter(i => i.psStatus).length;
+  const inactive = total - active;
+  const cats = new Set(_allInstruments.map(i => i.plScopeCategoryKey).filter(Boolean)).size;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statActive').textContent = active;
+  document.getElementById('statInactive').textContent = inactive;
+  document.getElementById('statCats').textContent = cats;
+}
+
+// ── Table Render ──────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('instrTableBody');
+  const pageSize = parseInt(document.getElementById('pageSize').value) || 25;
+  const totalItems = _filteredInstruments.length;
+  const totalPg = Math.max(1, Math.ceil(totalItems / pageSize));
+  if (_currentPage > totalPg) _currentPage = totalPg;
+  const start = (_currentPage - 1) * pageSize;
+  const page = _filteredInstruments.slice(start, start + pageSize);
+
+  document.getElementById('totalCount').textContent = totalItems;
+  document.getElementById('totalPages').textContent = '/' + totalPg;
+  document.getElementById('pageInput').value = _currentPage;
+  document.getElementById('pageInput').max = totalPg;
+  document.getElementById('instrCountLabel').textContent = totalItems + ' instrument' + (totalItems !== 1 ? 's' : '');
+
+  if (page.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px 10px;color:var(--muted)">No instruments found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = page.map(inst => {
+    const catName = inst.sScopeCategory || getCategoryName(inst.plScopeCategoryKey) || '—';
+    const charge = inst.pmMaxCharge != null ? formatCurrency(inst.pmMaxCharge) : '—';
+    const isSelected = _currentInstrument && _currentInstrument.plScopeTypeKey === inst.plScopeTypeKey;
+    const statusBadge = inst.psStatus
+      ? '<span class="b-active-sm">Active</span>'
+      : '<span class="b-inactive-sm">Inactive</span>';
+    return '<tr class="' + (isSelected ? 'selected' : '') + '" onclick="selectInstrument(' + inst.plScopeTypeKey + ', this)">' +
+      '<td class="col-code">' + escHtml(inst.psItemCode || '—') + '</td>' +
+      '<td class="col-name">' + escHtml(inst.pInstrument || '—') + '</td>' +
+      '<td class="col-cat">' + escHtml(catName) + '</td>' +
+      '<td class="col-charge">' + charge + '</td>' +
+      '<td class="col-status">' + statusBadge + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ── Pagination ────────────────────────────────────────────
+function prevPage() { if (_currentPage > 1) { _currentPage--; renderTable(); } }
+function nextPage() {
+  const pageSize = parseInt(document.getElementById('pageSize').value) || 25;
+  const totalPg = Math.max(1, Math.ceil(_filteredInstruments.length / pageSize));
+  if (_currentPage < totalPg) { _currentPage++; renderTable(); }
+}
+function goToPage(p) { _currentPage = Math.max(1, parseInt(p) || 1); renderTable(); }
+function changePageSize() { _currentPage = 1; renderTable(); }
+
+// ── Select Instrument ─────────────────────────────────────
+async function selectInstrument(key, rowEl) {
+  // Highlight row
+  document.querySelectorAll('.inst-table tbody tr').forEach(r => r.classList.remove('selected'));
+  if (rowEl) rowEl.classList.add('selected');
+
+  // Find in list
+  const inst = _allInstruments.find(i => i.plScopeTypeKey === key);
+  if (!inst) return;
+  _currentInstrument = inst;
+  _isDirty = false;
+
+  populateDetail(inst);
+
+  // Try to load additional detail from API
+  if (_liveMode) {
+    try {
+      const detail = await API.getInstrumentDetail(key);
+      if (detail) {
+        const d = Array.isArray(detail) ? detail[0] : detail;
+        populateMfrBlock(d);
+      }
+    } catch (e) {
+      console.warn('[TSI Instruments] Detail load failed:', e.message);
+      populateMfrBlock(inst);
+    }
+  } else {
+    populateMfrBlock(inst);
+  }
+}
+
+function populateDetail(inst) {
+  // Show content panel
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'flex';
+
+  // Header
+  document.getElementById('detailName').textContent = inst.pInstrument || '—';
+  const catName = inst.sScopeCategory || getCategoryName(inst.plScopeCategoryKey) || '';
+  document.getElementById('detailSubtitle').textContent = catName;
+
+  // Fields
+  document.getElementById('fName').value = inst.pInstrument || '';
+  document.getElementById('fItemCode').value = inst.psItemCode || '';
+  setSelectValue('fCategory', inst.plScopeCategoryKey);
+  document.getElementById('fMaxCharge').value = inst.pmMaxCharge != null ? inst.pmMaxCharge : '';
+  const activeEl = document.getElementById('fActive');
+  activeEl.checked = !!inst.psStatus;
+  document.getElementById('fActiveLabel').textContent = inst.psStatus ? 'Active' : 'Inactive';
+
+  _isDirty = false;
+}
+
+function populateMfrBlock(d) {
+  const setVal = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (v) {
+      el.textContent = v;
+      el.classList.remove('empty');
+    } else {
+      el.textContent = '—';
+      el.classList.add('empty');
+    }
+  };
+  setVal('mfrName', d.sManufacturerName || d.sManufacturer || null);
+  setVal('mfrKey', d.plManufacturerKey ? String(d.plManufacturerKey) : null);
+  setVal('mfrScopeTypeKey', d.plScopeTypeKey ? String(d.plScopeTypeKey) : null);
+  setVal('mfrCreated', d.dtCreated ? formatDate(d.dtCreated) : null);
+}
+
+// ── Detail change tracking ────────────────────────────────
+function onDetailChange() {
+  _isDirty = true;
+  const isActive = document.getElementById('fActive').checked;
+  document.getElementById('fActiveLabel').textContent = isActive ? 'Active' : 'Inactive';
+}
+
+function cancelDetail() {
+  if (_currentInstrument) {
+    populateDetail(_currentInstrument);
+  }
+  _isDirty = false;
+}
+
+// ── Save Instrument ───────────────────────────────────────
+async function saveInstrument() {
+  if (!_currentInstrument) return;
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { alert('Instrument name is required.'); document.getElementById('fName').focus(); return; }
+
+  const payload = {
+    plScopeTypeKey: _currentInstrument.plScopeTypeKey,
+    pInstrument: name,
+    psStatus: document.getElementById('fActive').checked,
+    psItemCode: document.getElementById('fItemCode').value.trim() || '',
+    plScopeCategoryKey: parseInt(document.getElementById('fCategory').value) || null,
+    plManufacturerKey: _currentInstrument.plManufacturerKey || null,
+    pmMaxCharge: parseFloat(document.getElementById('fMaxCharge').value) || null
+  };
+
+  showSaving('Saving...');
+
+  try {
+    if (_liveMode) {
+      await API.updateInstruments(payload);
+    }
+  } catch (e) {
+    console.warn('[TSI Instruments] Save failed:', e.message);
+  }
+
+  // Update local record
+  const idx = _allInstruments.findIndex(i => i.plScopeTypeKey === _currentInstrument.plScopeTypeKey);
+  if (idx !== -1) {
+    _allInstruments[idx] = Object.assign({}, _allInstruments[idx], {
+      pInstrument: payload.pInstrument,
+      psStatus: payload.psStatus,
+      psItemCode: payload.psItemCode,
+      plScopeCategoryKey: payload.plScopeCategoryKey,
+      pmMaxCharge: payload.pmMaxCharge,
+      sScopeCategory: getCategoryName(payload.plScopeCategoryKey)
+    });
+    _currentInstrument = _allInstruments[idx];
+  }
+
+  hideSaving();
+  _isDirty = false;
+  applyFilters();
+  // Re-select row after re-render
+  setTimeout(() => {
+    const rows = document.querySelectorAll('.inst-table tbody tr');
+    rows.forEach(r => {
+      if (r.onclick && r.textContent.includes(payload.psItemCode || payload.pInstrument)) {
+        r.classList.add('selected');
+      }
+    });
+  }, 50);
+}
+
+// ── Add Instrument ────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('addName').value = '';
+  document.getElementById('addItemCode').value = '';
+  document.getElementById('addCategory').value = '';
+  document.getElementById('addMaxCharge').value = '';
+  document.getElementById('addActive').checked = true;
+  document.getElementById('addInstrumentModal').classList.add('open');
+  setTimeout(() => document.getElementById('addName').focus(), 100);
+}
+
+async function addInstrument() {
+  const name = document.getElementById('addName').value.trim();
+  if (!name) { alert('Instrument name is required.'); document.getElementById('addName').focus(); return; }
+
+  const payload = {
+    pInstrument: name,
+    psStatus: document.getElementById('addActive').checked,
+    psItemCode: document.getElementById('addItemCode').value.trim() || '',
+    plScopeCategoryKey: parseInt(document.getElementById('addCategory').value) || null,
+    pmMaxCharge: parseFloat(document.getElementById('addMaxCharge').value) || null
+  };
+
+  showSaving('Adding...');
+  document.getElementById('addInstrumentModal').classList.remove('open');
+
+  let newKey = Date.now(); // demo fallback key
+  try {
+    if (_liveMode) {
+      const res = await API.addInstrument(payload);
+      if (res && res.plScopeTypeKey) newKey = res.plScopeTypeKey;
+    }
+  } catch (e) {
+    console.warn('[TSI Instruments] Add failed:', e.message);
+  }
+
+  const newInst = Object.assign({ plScopeTypeKey: newKey }, payload, {
+    sScopeCategory: getCategoryName(payload.plScopeCategoryKey)
+  });
+  _allInstruments.unshift(newInst);
+  hideSaving();
+  applyFilters();
+  // Select the new record
+  _currentInstrument = newInst;
+  populateDetail(newInst);
+  populateMfrBlock(newInst);
+}
+
+// ── Delete Instrument ─────────────────────────────────────
+function confirmDeleteInstrument() {
+  if (!_currentInstrument) return;
+  document.getElementById('deleteConfirmName').textContent =
+    'Delete "' + (_currentInstrument.pInstrument || 'this instrument') + '"?';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+async function deleteInstrument() {
+  if (!_currentInstrument) return;
+  document.getElementById('deleteModal').classList.remove('open');
+  showSaving('Deleting...');
+
+  try {
+    if (_liveMode) {
+      // No dedicated delete endpoint in RepairItemInstruments — soft-delete via status update
+      await API.updateInstruments({
+        plScopeTypeKey: _currentInstrument.plScopeTypeKey,
+        pInstrument: _currentInstrument.pInstrument,
+        psStatus: false,
+        psItemCode: _currentInstrument.psItemCode || '',
+        plScopeCategoryKey: _currentInstrument.plScopeCategoryKey || null,
+        plManufacturerKey: _currentInstrument.plManufacturerKey || null,
+        pmMaxCharge: _currentInstrument.pmMaxCharge || null
+      });
+    }
+  } catch (e) {
+    console.warn('[TSI Instruments] Delete/deactivate failed:', e.message);
+  }
+
+  _allInstruments = _allInstruments.filter(i => i.plScopeTypeKey !== _currentInstrument.plScopeTypeKey);
+  _currentInstrument = null;
+  _isDirty = false;
+
+  // Hide detail panel
+  document.getElementById('detailEmpty').style.display = '';
+  document.getElementById('detailContent').style.display = 'none';
+
+  hideSaving();
+  applyFilters();
+}
+
+// ── Service Location ──────────────────────────────────────
+function changeServiceLocation() {
+  loadInstruments();
+}
+
+// ── Utility ───────────────────────────────────────────────
+function getCategoryName(key) {
+  if (!key) return '';
+  const cat = _categories.find(c => c.plScopeCategoryKey === key || c.plScopeCategoryKey === parseInt(key));
+  return cat ? cat.sScopeCategory : '';
+}
+
+function setSelectValue(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (let i = 0; i < el.options.length; i++) {
+    if (el.options[i].value == val || el.options[i].value === String(val)) {
+      el.selectedIndex = i;
+      return;
+    }
+  }
+  el.selectedIndex = 0;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close New Order menu on outside click
+document.addEventListener('click', e => {
+  const menu = document.getElementById('newOrderMenu');
+  const wrap = document.getElementById('newOrderWrap');
+  if (menu && wrap && !wrap.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>

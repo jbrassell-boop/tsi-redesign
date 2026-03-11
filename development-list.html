@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Development List | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC OVERRIDES ── */
+    .page-body{overflow:hidden;display:flex;flex-direction:column}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
+    .filter-search{height:28px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 10px 0 28px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='5.5' cy='5.5' r='4.5'/%3E%3Cline x1='9' y1='9' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat 8px center;outline:none;width:200px;transition:border-color .15s}
+    .filter-search:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .filter-sel{height:28px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;cursor:pointer;outline:none;transition:border-color .15s}
+    .filter-sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+
+    /* STATUS STRIP */
+    .status-strip{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+    .ss-chip{display:flex;align-items:center;gap:6px;padding:5px 14px;border-right:1px solid var(--border);font-size:11px;white-space:nowrap}
+    .ss-chip:last-child{border-right:none}
+    .ss-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .ss-val{font-size:13px;font-weight:800;color:var(--navy)}
+
+    /* SPLIT LAYOUT */
+    .split-layout{display:flex;flex:1;overflow:hidden}
+
+    /* LEFT PANEL — item list */
+    .split-left{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border-dk)}
+    .list-head{background:#E9EFF9;padding:5px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .list-wrap{flex:1;overflow-y:auto}
+    .list-footer{padding:4px 10px;border-top:1px solid var(--border);background:#FAFBFF;font-size:10px;color:var(--muted);flex-shrink:0}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;min-width:600px}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:var(--navy);color:#fff;font-size:10px;font-weight:600;padding:7px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th:last-child{border-right:none}
+    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tbody tr{cursor:pointer;transition:background .08s}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF}
+    tbody tr.selected{background:#FEF3C7 !important;border-left:3px solid var(--amber)}
+    .col-num{width:42px;text-align:right;font-size:10px;font-weight:700;color:var(--muted)}
+    .col-title{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--navy)}
+    .col-target{white-space:nowrap;font-size:11px;color:var(--label)}
+    .col-assignee{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+
+    /* PRIORITY BADGES */
+    .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+    .pri-high{background:#FEE2E2;color:#B91C1C;border:1px solid #FECACA}
+    .pri-medium{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+    .pri-low{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
+
+    /* STATUS BADGES */
+    .st-open{background:#DBEAFE;color:#1D4ED8;border:1px solid #BFDBFE}
+    .st-inprogress{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+    .st-done{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
+    .st-cancelled{background:#F3F4F6;color:#6B7280;border:1px solid #D1D5DB}
+
+    /* RIGHT PANEL — detail */
+    .split-right{width:310px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;background:#fff}
+    .detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:var(--muted);text-align:center;gap:8px}
+    .detail-empty svg{width:40px;height:40px;opacity:.18}
+    .detail-empty p{font-size:11.5px;font-weight:500}
+    .detail-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+    /* DETAIL HEADER */
+    .detail-hdr{background:#F0F4FA;border-bottom:1px solid var(--border);padding:7px 10px;display:flex;align-items:flex-start;gap:6px;flex-shrink:0}
+    .detail-hdr-title{flex:1;font-size:12px;font-weight:800;color:var(--navy);line-height:1.3;word-break:break-word}
+    .detail-hdr-badge{flex-shrink:0}
+
+    /* DETAIL TABS */
+    .detail-tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;padding:0 8px}
+    .detail-tab{padding:7px 12px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap}
+    .detail-tab:hover{color:var(--blue)}
+    .detail-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+
+    /* DETAIL BODY */
+    .detail-body{flex:1;overflow-y:auto;padding:10px}
+
+    /* FORM FIELDS (detail panel) */
+    .ff{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
+    .ff label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .ff input,.ff select,.ff textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .ff textarea{height:72px;padding:6px 8px;resize:vertical}
+    .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .ff input[readonly]{background:#F8FAFF;color:var(--label);cursor:default}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+
+    /* DETAIL FOOTER */
+    .detail-footer{border-top:1px solid var(--border);padding:8px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;background:#FAFBFF}
+    .quick-actions{display:flex;gap:4px;flex-wrap:wrap}
+
+    /* ACTIVITY TAB */
+    .activity-empty{text-align:center;padding:24px;color:var(--muted);font-size:11px}
+    .activity-item{border-bottom:1px solid var(--border);padding:7px 0;font-size:11px;color:var(--text)}
+    .activity-item:last-child{border-bottom:none}
+    .activity-meta{font-size:9.5px;color:var(--muted);margin-top:3px}
+
+    /* ADD MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#fff;border-radius:8px;box-shadow:0 16px 48px rgba(0,37,122,.22);width:560px;max-width:96vw;display:flex;flex-direction:column;max-height:90vh}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#E9EFF9;border-bottom:1px solid var(--border);border-radius:8px 8px 0 0;flex-shrink:0}
+    .modal-header h3{font-size:13px;font-weight:700;color:var(--navy);margin:0}
+    .modal-close{width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;line-height:1;transition:all .1s}
+    .modal-close:hover{background:var(--bg);color:var(--navy)}
+    .modal-body{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
+    .modal-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:#FAFBFF;border-radius:0 0 8px 8px;flex-shrink:0}
+    .btn-cancel{height:30px;padding:0 14px;border:1.5px solid var(--border-dk);border-radius:5px;background:#fff;font-size:11.5px;font-weight:600;color:var(--label);cursor:pointer;font-family:inherit;transition:all .12s}
+    .btn-cancel:hover{border-color:var(--navy);color:var(--navy)}
+    .btn-save{height:30px;padding:0 16px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:background .12s}
+    .btn-save:hover{background:#001A5E}
+    .btn-save:disabled{opacity:.5;cursor:not-allowed}
+    .req{color:var(--red)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;pointer-events:none}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <span id="dataBadge" class="data-badge"></span>
+        <div class="save-indicator"></div>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.7)">Service Location</span>
+        <select class="svc-select" id="svcLocation">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar" id="topbarAvatar">JB</div>
+        <span class="topbar-welcome" id="topbarWelcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" style="gap:5px" onclick="openAddModal()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Item
+        </button>
+        <div class="divider"></div>
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Development Backlog</span>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <input class="filter-search" type="text" id="filterSearch" placeholder="Search items..." oninput="applyFilters()"/>
+        <span class="filter-label">Status:</span>
+        <select class="filter-sel" id="filterStatus" onchange="applyFilters()">
+          <option value="">All Statuses</option>
+        </select>
+        <span class="filter-label">Priority:</span>
+        <select class="filter-sel" id="filterPriority" onchange="applyFilters()">
+          <option value="">All Priorities</option>
+        </select>
+        <div style="flex:1"></div>
+        <span style="font-size:10.5px;color:var(--muted)" id="filterCount"></span>
+      </div>
+
+      <!-- STATUS STRIP -->
+      <div class="status-strip">
+        <div class="ss-chip"><span class="ss-label">Total</span><span class="ss-val" id="statTotal">0</span></div>
+        <div class="ss-chip" style="background:#DBEAFE;border-color:#BFDBFE"><span class="ss-label">Open</span><span class="ss-val" style="color:#1D4ED8" id="statOpen">0</span></div>
+        <div class="ss-chip" style="background:#FEF3C7;border-color:#FDE68A"><span class="ss-label">In Progress</span><span class="ss-val" style="color:#92400E" id="statInProgress">0</span></div>
+        <div class="ss-chip" style="background:#DCFCE7;border-color:#BBF7D0"><span class="ss-label">Done</span><span class="ss-val" style="color:#166534" id="statDone">0</span></div>
+        <div class="ss-chip" style="background:#F3F4F6;border-color:#D1D5DB"><span class="ss-label">Cancelled</span><span class="ss-val" style="color:#6B7280" id="statCancelled">0</span></div>
+        <div class="ss-chip" style="background:#FEE2E2;border-color:#FECACA"><span class="ss-label">High Priority</span><span class="ss-val" style="color:#B91C1C" id="statHighPri">0</span></div>
+      </div>
+
+      <!-- SPLIT LAYOUT -->
+      <div class="split-layout">
+
+        <!-- LEFT — Item List -->
+        <div class="split-left">
+          <div class="list-head">
+            <span>Items</span>
+            <span style="font-size:9px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0" id="listCount">0 records</span>
+          </div>
+          <div class="list-wrap">
+            <table id="itemTable">
+              <thead>
+                <tr>
+                  <th class="col-num">#</th>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Target</th>
+                  <th>Assignee</th>
+                </tr>
+              </thead>
+              <tbody id="itemTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="list-footer" id="listFooter">Loading...</div>
+        </div>
+
+        <!-- RIGHT — Detail Panel -->
+        <div class="split-right" id="detailPane">
+          <div class="detail-empty" id="detailEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <p>Select an item to view details</p>
+          </div>
+          <div class="detail-panel" id="detailPanel" style="display:none">
+            <div class="detail-hdr" id="detailHdr">
+              <div class="detail-hdr-title" id="detailHdrTitle"></div>
+              <div class="detail-hdr-badge" id="detailHdrBadge"></div>
+            </div>
+            <div class="detail-tabs">
+              <div class="detail-tab active" onclick="switchDetailTab('details', this)">Details</div>
+              <div class="detail-tab" onclick="switchDetailTab('activity', this)">Activity</div>
+            </div>
+            <div class="detail-body" id="detailBodyDetails">
+              <div class="ff">
+                <label>Title <span class="req">*</span></label>
+                <input type="text" id="dTitle"/>
+              </div>
+              <div class="ff">
+                <label>Description / Item</label>
+                <textarea id="dItem" style="height:80px"></textarea>
+              </div>
+              <div class="fg2">
+                <div class="ff">
+                  <label>Priority</label>
+                  <select id="dPriority"></select>
+                </div>
+                <div class="ff">
+                  <label>Status</label>
+                  <select id="dStatus"></select>
+                </div>
+              </div>
+              <div class="fg2">
+                <div class="ff">
+                  <label>Target Year</label>
+                  <select id="dYear">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                  </select>
+                </div>
+                <div class="ff">
+                  <label>Quarter</label>
+                  <select id="dQuarter">
+                    <option value="1">Q1</option>
+                    <option value="2">Q2</option>
+                    <option value="3">Q3</option>
+                    <option value="4">Q4</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ff">
+                <label>Assigned To</label>
+                <input type="text" id="dAssignee" readonly/>
+              </div>
+              <div class="fg2">
+                <div class="ff">
+                  <label>Request Date</label>
+                  <input type="date" id="dRequestDate"/>
+                </div>
+                <div class="ff">
+                  <label>Completion Date</label>
+                  <input type="date" id="dCompletionDate"/>
+                </div>
+              </div>
+            </div>
+            <div class="detail-body" id="detailBodyActivity" style="display:none">
+              <div id="activityList"><div class="activity-empty">No activity recorded.</div></div>
+            </div>
+            <div class="detail-footer">
+              <div class="quick-actions" id="quickActions"></div>
+              <div style="display:flex;gap:6px;justify-content:flex-end">
+                <button class="btn btn-outline" style="height:28px;font-size:11px" onclick="cancelDetailEdit()">Discard</button>
+                <button class="btn btn-navy" style="height:28px;font-size:11px;gap:4px" onclick="saveDetail()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add Development Item</h3>
+      <button class="modal-close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ff">
+        <label>Title <span class="req">*</span></label>
+        <input type="text" id="mTitle" placeholder="Brief title for this item..."/>
+      </div>
+      <div class="ff">
+        <label>Description / Item</label>
+        <textarea id="mItem" style="height:80px" placeholder="Describe the work to be done..."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px">
+        <div class="ff">
+          <label>Priority <span class="req">*</span></label>
+          <select id="mPriority"></select>
+        </div>
+        <div class="ff">
+          <label>Status</label>
+          <select id="mStatus"></select>
+        </div>
+        <div class="ff">
+          <label>Target Year</label>
+          <select id="mYear">
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Quarter</label>
+          <select id="mQuarter">
+            <option value="1">Q1</option>
+            <option value="2">Q2</option>
+            <option value="3">Q3</option>
+            <option value="4">Q4</option>
+          </select>
+        </div>
+      </div>
+      <div class="ff">
+        <label>Request Date</label>
+        <input type="date" id="mRequestDate"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-save" id="mSaveBtn" onclick="submitAddItem()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+        Add Item
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if(e.message==='redirect') window.location='login.html'; }
+
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let ALL_ITEMS    = [];
+let STATUSES     = [];
+let PRIORITIES   = [];
+let FILTERED     = [];
+let SELECTED_ID  = null;
+let IS_DEMO      = false;
+
+// ═══════════════════════════════════════
+//  DEMO DATA
+// ═══════════════════════════════════════
+const demoStatuses = [
+  {plToDoStatusID:1, psStatus:'Open'},
+  {plToDoStatusID:2, psStatus:'In Progress'},
+  {plToDoStatusID:3, psStatus:'Done'},
+  {plToDoStatusID:4, psStatus:'Cancelled'}
+];
+
+const demoPriorities = [
+  {plToDoPriorityKey:1, psPriority:'High'},
+  {plToDoPriorityKey:2, psPriority:'Medium'},
+  {plToDoPriorityKey:3, psPriority:'Low'}
+];
+
+const demoItems = [
+  {plToDoID:1, psToDoTitle:'Build Scopes page', psToDoItem:'Create scopes.html with full CRUD using the Scopes API controller.', plToDoStatusID:2, plToDoPriorityKey:1, plRequestedDeliveryYear:2025, plRequestedDeliveryQuarter:1, psAssigneeName:'Joseph Brassell', pdtToDoRequestDate:'2025-01-01', pdtToDoCompletionDate:null},
+  {plToDoID:2, psToDoTitle:'Wire Repair Items page', psToDoItem:'Build repair-items.html connected to RepairItems controller.', plToDoStatusID:1, plToDoPriorityKey:1, plRequestedDeliveryYear:2025, plRequestedDeliveryQuarter:1, psAssigneeName:'Joseph Brassell', pdtToDoRequestDate:'2025-01-15', pdtToDoCompletionDate:null},
+  {plToDoID:3, psToDoTitle:'Acquisitions module', psToDoItem:'Build acquisitions page with In-House, Consigned, Sold tabs.', plToDoStatusID:1, plToDoPriorityKey:2, plRequestedDeliveryYear:2025, plRequestedDeliveryQuarter:2, psAssigneeName:'Joseph Brassell', pdtToDoRequestDate:'2025-02-01', pdtToDoCompletionDate:null},
+  {plToDoID:4, psToDoTitle:'Loaner tracking integration', psToDoItem:'Link dashboard task loaners to the Loaners page.', plToDoStatusID:1, plToDoPriorityKey:2, plRequestedDeliveryYear:2025, plRequestedDeliveryQuarter:2, psAssigneeName:'Joseph Brassell', pdtToDoRequestDate:'2025-02-10', pdtToDoCompletionDate:null},
+  {plToDoID:5, psToDoTitle:'Reports/Extracts module', psToDoItem:'Build reports page with export functionality.', plToDoStatusID:1, plToDoPriorityKey:3, plRequestedDeliveryYear:2025, plRequestedDeliveryQuarter:3, psAssigneeName:'', pdtToDoRequestDate:'2025-03-01', pdtToDoCompletionDate:null},
+];
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) {
+    b.textContent = 'Live Data';
+    b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0';
+  } else {
+    b.textContent = 'Demo Data';
+    b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A';
+  }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? '#DC2626' : '#00257A';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function getPriorityBadge(key) {
+  const p = PRIORITIES.find(x => x.plToDoPriorityKey === key);
+  const name = p ? p.psPriority : key;
+  const cls = name === 'High' ? 'pri-high' : name === 'Medium' ? 'pri-medium' : 'pri-low';
+  return '<span class="badge ' + cls + '">' + name + '</span>';
+}
+
+function getStatusBadge(id) {
+  const s = STATUSES.find(x => x.plToDoStatusID === id);
+  const name = s ? s.psStatus : id;
+  const cls = name === 'Open' ? 'st-open' : name === 'In Progress' ? 'st-inprogress' : name === 'Done' ? 'st-done' : 'st-cancelled';
+  return '<span class="badge ' + cls + '">' + name + '</span>';
+}
+
+function formatDate(dt) {
+  if (!dt) return '';
+  const d = new Date(dt);
+  if (isNaN(d)) return '';
+  return (d.getMonth()+1).toString().padStart(2,'0') + '/' + d.getDate().toString().padStart(2,'0') + '/' + d.getFullYear();
+}
+
+function toInputDate(dt) {
+  if (!dt) return '';
+  const d = new Date(dt);
+  if (isNaN(d)) return '';
+  return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════
+async function loadLookups() {
+  try {
+    const [statusData, priData] = await Promise.all([
+      API.getDevTodoStatuses(),
+      API.getDevTodoPriorities()
+    ]);
+    STATUSES   = Array.isArray(statusData) ? statusData : demoStatuses;
+    PRIORITIES = Array.isArray(priData)    ? priData    : demoPriorities;
+  } catch(e) {
+    console.warn('[DevList] Using demo lookups:', e.message || e);
+    STATUSES   = demoStatuses;
+    PRIORITIES = demoPriorities;
+  }
+  populateLookupSelects();
+}
+
+function populateLookupSelects() {
+  // Filter bar
+  const fStatus   = document.getElementById('filterStatus');
+  const fPriority = document.getElementById('filterPriority');
+  fStatus.innerHTML   = '<option value="">All Statuses</option>';
+  fPriority.innerHTML = '<option value="">All Priorities</option>';
+  STATUSES.forEach(s   => { fStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
+  PRIORITIES.forEach(p => { fPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+
+  // Detail selects
+  const dStatus   = document.getElementById('dStatus');
+  const dPriority = document.getElementById('dPriority');
+  dStatus.innerHTML   = '';
+  dPriority.innerHTML = '';
+  STATUSES.forEach(s   => { dStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
+  PRIORITIES.forEach(p => { dPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+
+  // Modal selects
+  const mStatus   = document.getElementById('mStatus');
+  const mPriority = document.getElementById('mPriority');
+  mStatus.innerHTML   = '';
+  mPriority.innerHTML = '';
+  STATUSES.forEach(s   => { mStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
+  PRIORITIES.forEach(p => { mPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+}
+
+async function loadItems() {
+  try {
+    const raw = await API.getDevTodoList({
+      plToDoID: 0,
+      psToDoStatusIDs: '',
+      prmIncludeDetails: false,
+      plToDoPriorityKey: '',
+      plAssigneeUserKey: ''
+    });
+    ALL_ITEMS = Array.isArray(raw) ? raw : [];
+    IS_DEMO   = false;
+    showDataBadge(true);
+    console.log('[DevList] Loaded', ALL_ITEMS.length, 'items from API');
+  } catch(e) {
+    console.warn('[DevList] API unavailable, using demo data:', e.message || e);
+    ALL_ITEMS = demoItems.map(x => Object.assign({}, x));
+    IS_DEMO   = true;
+    showDataBadge(false);
+  }
+  applyFilters();
+}
+
+// ═══════════════════════════════════════
+//  FILTER + RENDER
+// ═══════════════════════════════════════
+function applyFilters() {
+  const q    = (document.getElementById('filterSearch').value || '').toLowerCase();
+  const st   = document.getElementById('filterStatus').value;
+  const pr   = document.getElementById('filterPriority').value;
+
+  FILTERED = ALL_ITEMS.filter(item => {
+    const title = (item.psToDoTitle || '').toLowerCase();
+    const desc  = (item.psToDoItem  || '').toLowerCase();
+    const matchQ  = !q  || title.includes(q) || desc.includes(q);
+    const matchSt = !st || String(item.plToDoStatusID)   === st;
+    const matchPr = !pr || String(item.plToDoPriorityKey) === pr;
+    return matchQ && matchSt && matchPr;
+  });
+
+  renderTable();
+  updateStatStrip();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('itemTableBody');
+  const cnt   = document.getElementById('listCount');
+  const foot  = document.getElementById('listFooter');
+  const fcnt  = document.getElementById('filterCount');
+
+  if (FILTERED.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">' +
+      (ALL_ITEMS.length === 0 ? 'No items yet. Click <b>Add Item</b> to create one.' : 'No items match the current filters.') +
+      '</td></tr>';
+    cnt.textContent  = '0 records';
+    foot.textContent = '0 records shown';
+    fcnt.textContent = '';
+    return;
+  }
+
+  cnt.textContent  = FILTERED.length + ' record' + (FILTERED.length !== 1 ? 's' : '');
+  foot.textContent = 'Showing ' + FILTERED.length + ' of ' + ALL_ITEMS.length + ' items';
+  fcnt.textContent = FILTERED.length + ' of ' + ALL_ITEMS.length + ' shown';
+
+  tbody.innerHTML = FILTERED.map((item, idx) => {
+    const id       = item.plToDoID;
+    const title    = escHtml(item.psToDoTitle || '(Untitled)');
+    const priBadge = getPriorityBadge(item.plToDoPriorityKey);
+    const stBadge  = getStatusBadge(item.plToDoStatusID);
+    const target   = (item.plRequestedDeliveryYear || '') + (item.plRequestedDeliveryQuarter ? ' Q' + item.plRequestedDeliveryQuarter : '');
+    const assignee = escHtml(item.psAssigneeName || '—');
+    const selClass = SELECTED_ID === id ? ' selected' : '';
+    return '<tr class="' + selClass + '" onclick="selectItem(' + id + ')" data-id="' + id + '">' +
+      '<td class="col-num">' + (idx+1) + '</td>' +
+      '<td class="col-title" title="' + title + '">' + title + '</td>' +
+      '<td>' + priBadge + '</td>' +
+      '<td>' + stBadge  + '</td>' +
+      '<td class="col-target">' + escHtml(target) + '</td>' +
+      '<td class="col-assignee" title="' + assignee + '">' + assignee + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function updateStatStrip() {
+  const items = ALL_ITEMS;
+  document.getElementById('statTotal').textContent      = items.length;
+  document.getElementById('statOpen').textContent       = items.filter(x => x.plToDoStatusID === 1).length;
+  document.getElementById('statInProgress').textContent = items.filter(x => x.plToDoStatusID === 2).length;
+  document.getElementById('statDone').textContent       = items.filter(x => x.plToDoStatusID === 3).length;
+  document.getElementById('statCancelled').textContent  = items.filter(x => x.plToDoStatusID === 4).length;
+  document.getElementById('statHighPri').textContent    = items.filter(x => x.plToDoPriorityKey === 1).length;
+}
+
+// ═══════════════════════════════════════
+//  DETAIL PANEL
+// ═══════════════════════════════════════
+function selectItem(id) {
+  SELECTED_ID = id;
+  // Update row highlight
+  document.querySelectorAll('#itemTableBody tr').forEach(tr => {
+    tr.classList.toggle('selected', parseInt(tr.dataset.id) === id);
+  });
+
+  const item = ALL_ITEMS.find(x => x.plToDoID === id);
+  if (!item) return;
+
+  document.getElementById('detailEmpty').style.display  = 'none';
+  document.getElementById('detailPanel').style.display  = 'flex';
+
+  // Header
+  document.getElementById('detailHdrTitle').textContent = item.psToDoTitle || '(Untitled)';
+  document.getElementById('detailHdrBadge').innerHTML   = getStatusBadge(item.plToDoStatusID);
+
+  // Fields
+  document.getElementById('dTitle').value          = item.psToDoTitle    || '';
+  document.getElementById('dItem').value           = item.psToDoItem     || '';
+  document.getElementById('dPriority').value       = item.plToDoPriorityKey  || '';
+  document.getElementById('dStatus').value         = item.plToDoStatusID || '';
+  document.getElementById('dYear').value           = item.plRequestedDeliveryYear    || 2026;
+  document.getElementById('dQuarter').value        = item.plRequestedDeliveryQuarter || 1;
+  document.getElementById('dAssignee').value       = item.psAssigneeName || '';
+  document.getElementById('dRequestDate').value    = toInputDate(item.pdtToDoRequestDate);
+  document.getElementById('dCompletionDate').value = toInputDate(item.pdtToDoCompletionDate);
+
+  // Quick actions — status transitions
+  renderQuickActions(item);
+
+  // Switch to Details tab
+  switchDetailTab('details', document.querySelector('.detail-tab'));
+
+  // Load activity
+  loadActivity(id);
+}
+
+function renderQuickActions(item) {
+  const el = document.getElementById('quickActions');
+  el.innerHTML = '';
+  const statusId = item.plToDoStatusID;
+  // Show contextual quick-action buttons
+  if (statusId !== 2) {
+    const b = document.createElement('button');
+    b.className = 'btn btn-outline';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#EFF6FF;border-color:#BFDBFE;color:#1D4ED8';
+    b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Mark In Progress';
+    b.onclick = () => quickStatusChange(item.plToDoID, 2);
+    el.appendChild(b);
+  }
+  if (statusId !== 3) {
+    const b = document.createElement('button');
+    b.className = 'btn btn-outline';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#DCFCE7;border-color:#BBF7D0;color:#166534';
+    b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Mark Done';
+    b.onclick = () => quickStatusChange(item.plToDoID, 3);
+    el.appendChild(b);
+  }
+  if (statusId !== 4) {
+    const b = document.createElement('button');
+    b.className = 'btn btn-outline';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#F3F4F6;border-color:#D1D5DB;color:#6B7280';
+    b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel';
+    b.onclick = () => quickStatusChange(item.plToDoID, 4);
+    el.appendChild(b);
+  }
+}
+
+function switchDetailTab(name, clickedEl) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  if (clickedEl) clickedEl.classList.add('active');
+  document.getElementById('detailBodyDetails').style.display  = name === 'details'  ? 'block' : 'none';
+  document.getElementById('detailBodyActivity').style.display = name === 'activity' ? 'block' : 'none';
+}
+
+async function loadActivity(id) {
+  const el = document.getElementById('activityList');
+  el.innerHTML = '<div class="activity-empty">Loading...</div>';
+  try {
+    const raw = await API.getDevTodoDetails(id);
+    const items = Array.isArray(raw) ? raw : [];
+    if (items.length === 0) {
+      el.innerHTML = '<div class="activity-empty">No activity recorded.</div>';
+      return;
+    }
+    el.innerHTML = items.map(a => {
+      const txt  = escHtml(a.psDetail || a.psNote || a.psComment || '');
+      const meta = formatDate(a.pdtDetail || a.pdtCreated || '') + (a.psUserName ? ' &bull; ' + escHtml(a.psUserName) : '');
+      return '<div class="activity-item">' + txt + (meta ? '<div class="activity-meta">' + meta + '</div>' : '') + '</div>';
+    }).join('');
+  } catch(e) {
+    console.warn('[DevList] Could not load activity:', e.message || e);
+    el.innerHTML = '<div class="activity-empty">Activity not available' + (IS_DEMO ? ' in demo mode' : '') + '.</div>';
+  }
+}
+
+function cancelDetailEdit() {
+  if (SELECTED_ID) selectItem(SELECTED_ID);
+}
+
+async function saveDetail() {
+  const id = SELECTED_ID;
+  if (!id) return;
+
+  const title = document.getElementById('dTitle').value.trim();
+  if (!title) { showToast('Title is required.', true); return; }
+
+  const payload = {
+    plToDoID:                id,
+    psToDoTitle:             title,
+    psToDoItem:              document.getElementById('dItem').value.trim(),
+    plToDoPriorityKey:       parseInt(document.getElementById('dPriority').value) || 1,
+    plToDoStatusID:          parseInt(document.getElementById('dStatus').value)   || 1,
+    plRequestedDeliveryYear:     parseInt(document.getElementById('dYear').value)    || 2026,
+    plRequestedDeliveryQuarter:  parseInt(document.getElementById('dQuarter').value) || 1,
+    pdtToDoCompletionDate:   document.getElementById('dCompletionDate').value || null,
+    pdtToDoRequestDate:      document.getElementById('dRequestDate').value || null,
+    plUserKey:               2,
+    plAssigneeUserKey:       2
+  };
+
+  if (IS_DEMO) {
+    const idx = ALL_ITEMS.findIndex(x => x.plToDoID === id);
+    if (idx !== -1) Object.assign(ALL_ITEMS[idx], payload);
+    showToast('Saved (demo mode)');
+    applyFilters();
+    selectItem(id);
+    return;
+  }
+
+  try {
+    await API.addDevTodoItem(payload);
+    showToast('Changes saved.');
+    await loadItems();
+    selectItem(id);
+  } catch(e) {
+    showToast('Save failed: ' + (e.message || 'Unknown error'), true);
+  }
+}
+
+async function quickStatusChange(id, statusId) {
+  if (IS_DEMO) {
+    const idx = ALL_ITEMS.findIndex(x => x.plToDoID === id);
+    if (idx !== -1) ALL_ITEMS[idx].plToDoStatusID = statusId;
+    showToast('Status updated (demo mode)');
+    applyFilters();
+    selectItem(id);
+    return;
+  }
+  try {
+    await API.updateDevTodoStatus({plToDoID: id, plStatusID: statusId});
+    showToast('Status updated.');
+    await loadItems();
+    selectItem(id);
+  } catch(e) {
+    showToast('Update failed: ' + (e.message || 'Unknown error'), true);
+  }
+}
+
+// ═══════════════════════════════════════
+//  ADD MODAL
+// ═══════════════════════════════════════
+function openAddModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('mTitle').value       = '';
+  document.getElementById('mItem').value        = '';
+  document.getElementById('mRequestDate').value = today;
+  document.getElementById('mYear').value        = new Date().getFullYear();
+  document.getElementById('mQuarter').value     = Math.ceil((new Date().getMonth()+1)/3);
+  if (STATUSES.length)   document.getElementById('mStatus').value   = STATUSES[0].plToDoStatusID;
+  if (PRIORITIES.length) document.getElementById('mPriority').value = PRIORITIES[0].plToDoPriorityKey;
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(() => document.getElementById('mTitle').focus(), 80);
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+
+async function submitAddItem() {
+  const title = document.getElementById('mTitle').value.trim();
+  if (!title) { showToast('Title is required.', true); document.getElementById('mTitle').focus(); return; }
+
+  const btn = document.getElementById('mSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const today = new Date().toISOString().split('T')[0];
+  const payload = {
+    plToDoID:                  null,
+    pdtToDoRequestDate:        document.getElementById('mRequestDate').value || today,
+    plUserKey:                 2,
+    psToDoTitle:               title,
+    psToDoItem:                document.getElementById('mItem').value.trim(),
+    pdtToDoCompletionDate:     null,
+    plToDoStatusID:            parseInt(document.getElementById('mStatus').value)   || 1,
+    plRequestedDeliveryYear:   parseInt(document.getElementById('mYear').value)     || 2026,
+    plRequestedDeliveryQuarter:parseInt(document.getElementById('mQuarter').value)  || 1,
+    plToDoPriorityKey:         parseInt(document.getElementById('mPriority').value) || 1,
+    plAssigneeUserKey:         2
+  };
+
+  if (IS_DEMO) {
+    const newId = Math.max(0, ...ALL_ITEMS.map(x => x.plToDoID)) + 1;
+    ALL_ITEMS.push(Object.assign({}, payload, {plToDoID: newId, psAssigneeName: 'Joseph Brassell'}));
+    showToast('Item added (demo mode)');
+    closeAddModal();
+    applyFilters();
+    selectItem(newId);
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Add Item';
+    return;
+  }
+
+  try {
+    await API.addDevTodoItem(payload);
+    showToast('Item added successfully.');
+    closeAddModal();
+    await loadItems();
+  } catch(e) {
+    showToast('Failed to add item: ' + (e.message || 'Unknown error'), true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Add Item';
+  }
+}
+
+// ═══════════════════════════════════════
+//  CLOSE MODAL ON OVERLAY CLICK
+// ═══════════════════════════════════════
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+(async function init() {
+  try { API.UI.init(); } catch(e) {}
+  await loadLookups();
+  await loadItems();
+})();
+</script>
+</body>
+</html>

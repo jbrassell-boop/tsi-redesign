@@ -624,6 +624,8 @@ const API = (() => {
   // ── DevelopmentList (13) — Dev todo tracker ───────────
   async function getDevTodoList(data) { return post('/DevelopmentList/GetDevelopmentTodoList', data); }
   async function addDevTodoItem(data) { return post('/DevelopmentList/AddDevelopmentTodoItem', data); }
+  async function updateDevTodoStatus(data) { return post('/DevelopmentList/DevelopmentToDoUpdatedStatus', data); }
+  async function getDevTodoDetails(id) { return get('/DevelopmentList/GetAllTodoDetails?plToDoID=' + id); }
   async function getDevTodoStatuses() { return get('/DevelopmentList/GetAllTodoStatuses'); }
   async function getDevTodoPriorities() { return get('/DevelopmentList/GetAllTodoPriorities'); }
 
@@ -795,7 +797,8 @@ const API = (() => {
     getSecurityGroups, getSecurityGroupMenuItems, getUserSecurityGroups,
 
     // Dev Todo
-    getDevTodoList, addDevTodoItem, getDevTodoStatuses, getDevTodoPriorities,
+    getDevTodoList, addDevTodoItem, updateDevTodoStatus, getDevTodoDetails,
+    getDevTodoStatuses, getDevTodoPriorities,
 
     // Config
     BASE_URL,

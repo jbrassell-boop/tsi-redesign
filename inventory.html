@@ -4,129 +4,53 @@
   <meta charset="UTF-8"/>
   <title>Inventory | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;background:#f0f2f5;color:#212529}
-    :root{--navy:#00257A;--blue:#2E74B5;--red:#B71234;--green:#16A34A;--amber:#D97706;--steel:#44697D;--muted:#8896AA;--label:#4A5568;--text:#1A202C;--border:#DDE3EE;--border-dk:#B8C8E0;--bg:#E8EDF5;--card:#FFFFFF;--row-alt:#E6EEFB;}
-    .shell{display:flex;height:100vh;overflow:hidden}
-    .sidebar{width:208px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-    .sidebar-brand{padding:12px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-    .brand-logo{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .brand-logo svg{width:18px;height:18px}
-    .brand-text .t1{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3}
-    .brand-text .t2{font-size:9.5px;color:var(--muted);margin-top:1px}
-    .nav-group{padding:6px 0;flex:1}
-    .sidebar-footer{padding:8px 12px;border-top:1px solid var(--border);color:var(--muted);font-size:9.5px}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;color:var(--label);font-size:11.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;user-select:none}
-    .nav-item:hover{background:var(--bg);color:var(--navy)}
-    .nav-item.active{background:#DDE6F5;color:var(--navy);border-left-color:var(--navy);font-weight:700}
-    .nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
-    .nav-item.active svg{opacity:1}
-    .main{display:flex;flex-direction:column;flex:1;overflow:hidden}
-    .topbar{height:64px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,37,122,.18)}
-    .topbar-left{display:flex;align-items:center;gap:10px}
-    .topbar-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
-    .topbar-welcome{color:rgba(255,255,255,.75);font-size:13px}.topbar-welcome strong{color:#fff}
-    .topbar-center{display:flex;flex-direction:column;align-items:center}
-    .topbar-title{color:#fff;font-weight:900;font-size:19px}
-    .topbar-sub{color:#9DABE2;font-size:9.5px;letter-spacing:2px;text-transform:uppercase}
-    .topbar-right{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12px}
-    .svc-select{height:32px;padding:0 10px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
-    .svc-select option{color:#1A202C;background:#fff}
-    .page-body{flex:1;overflow-y:auto;background:#f0f2f5}
+    /* ── PAGE-SPECIFIC: Inventory ── */
 
-    /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:6px;padding:8px 20px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:5px;font-size:11px;cursor:pointer;border:none;font-family:inherit;font-weight:500;transition:all .12s}
-    .btn-icon{width:30px;height:30px;padding:0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border-dk);background:#fff;font-family:inherit;transition:all .12s}
-    .btn-icon:hover{border-color:var(--navy);background:var(--bg)}
-    .btn-icon svg{width:14px;height:14px}
-    .btn-navy{background:var(--navy);color:#fff;font-weight:600}
-    .btn-navy:hover{background:#001A5C}
-    .btn-outline{background:#fff;border:1.5px solid var(--border-dk);color:var(--label)}
-    .btn-outline:hover{border-color:var(--navy);color:var(--navy)}
-    .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
-    .btn-danger:hover{background:#FEE2E2}
+    /* Extra button variants not in shared styles */
     .btn-green{background:#F0FDF4;border:1.5px solid #BBF7D0;color:var(--green);font-weight:600}
     .btn-green:hover{background:#DCFCE7}
-    .divider{width:1px;height:20px;background:var(--border);margin:0 2px}
+
+    /* Toolbar extras */
     .sel-bar-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
     .sel{height:26px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;cursor:pointer;outline:none;transition:border-color .15s;max-width:260px}
     .sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel)}
 
-    /* TABS */
-    .tab-bar{display:flex;padding:0 14px;background:#DDE6F5;border-bottom:2px solid var(--border-dk);overflow-x:auto}
-    .tab{padding:5px 10px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;user-select:none}
-    .tab:hover{color:var(--navy)}
-    .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    /* Tab count badge */
     .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
 
-    /* CONTENT */
-    .tab-content{display:none}
+    /* Tab content overrides for inventory split layout */
     .tab-content.show{display:flex;flex:1;overflow:hidden}
     .tab-content.show-block{display:block;padding:14px 20px;overflow-y:auto;flex:1}
 
-    /* PANELS */
-    .panel{border-radius:6px;border:1px solid var(--border-dk);overflow:hidden;box-shadow:0 1px 4px rgba(0,37,122,.05)}
-    .panel-head{background:#E9EFF9;padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-    .panel-body{background:#fff;padding:6px 10px}
-    .fg{display:grid;gap:4px 8px}
-    .g2{grid-template-columns:1fr 1fr}
-    .g3{grid-template-columns:1fr 1fr 1fr}
+    /* Grid helper: 4-col */
     .g4{grid-template-columns:1fr 1fr 1fr 1fr}
-    .span2{grid-column:span 2}
-    .ff{display:flex;flex-direction:column;gap:2px}
-    .ff label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-    .req{color:var(--red)}
-    .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
-    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
-    textarea.inp{height:80px;padding:6px 8px;resize:none;line-height:1.4}
-    select.inp{cursor:pointer}
+
+    /* Small input variant */
     .inp-sm{height:22px;font-size:10.5px;padding:0 5px}
 
-    /* TOGGLES */
-    .toggle-row{display:flex;align-items:center;gap:6px;padding:1px 0}
-    .toggle-label{font-size:11px;color:var(--text)}
-    .toggle{position:relative;width:34px;height:19px;flex-shrink:0}
-    .toggle input{opacity:0;width:0;height:0}
-    .toggle-slider{position:absolute;inset:0;background:#CBD5E0;border-radius:10px;cursor:pointer;transition:.18s}
-    .toggle-slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-    .toggle input:checked+.toggle-slider{background:var(--navy)}
-    .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
-
-    /* TABLE */
-    .tbl-card{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 6px rgba(0,37,122,.06)}
-    .tbl-head{background:#E9EFF9;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-    .tbl-title{font-size:11px;font-weight:700;color:var(--navy)}
-    table{width:100%;border-collapse:collapse}
-    th{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:6px 10px;text-align:left;white-space:nowrap}
-    td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
-    tbody tr:nth-child(even){background:var(--row-alt)}
-    tbody tr:hover{background:#D8E6FF}
-    .badge{display:inline-flex;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600}
-    .b-active{background:#F0FDF4;color:var(--green)}
+    /* Page-specific badge variants */
     .b-inactive{background:#FEF2F2;color:var(--red)}
     .b-static{background:#FFF7ED;color:var(--amber)}
-    .edit-btn{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
+
+    /* Edit/delete button variants */
     .edit-btn:hover{background:#DBEAFE}
     .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
     .del-btn:hover{background:#FEE2E2}
+
+    /* Compact table head (inventory-specific) */
+    .tbl-head{background:#E9EFF9;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .tbl-title{font-size:11px;font-weight:700;color:var(--navy)}
 
     /* EMPTY STATE */
     .empty-state{text-align:center;padding:40px 16px;color:var(--muted)}
     .empty-state svg{width:36px;height:36px;opacity:.2;margin-bottom:8px}
     .empty-state p{font-size:13px;font-weight:500}
 
-    /* STATUS STRIP */
-    .status-strip{display:flex;align-items:center;gap:5px;padding:4px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
-    .ss-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
-    .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
-    .ss-chip .ss-val{color:var(--text)}
-    .ss-active{background:#F0FDF4;border-color:#BBF7D0;color:var(--green)}
-    .ss-warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
-    .ss-neutral{background:#F8FAFF;border-color:var(--border)}
-    .ss-info{background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)}
+    /* Modal width override (780px vs default 680px) */
+    .modal-box{width:780px}
 
     /* ── MASTER-DETAIL SPLIT ── */
     .split-layout{display:flex;flex:1;overflow:hidden}
@@ -240,23 +164,6 @@
     /* BOTTOM ACTION BAR */
     .action-bar{display:flex;align-items:center;gap:6px;padding:6px 20px;background:#DDE6F5;border-top:1px solid var(--border-dk)}
 
-    /* MODAL OVERLAY */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-    .modal-overlay.open{opacity:1;pointer-events:all}
-    .modal-box{background:var(--card);border-radius:8px;width:780px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.25);overflow:hidden}
-    .modal-box.sm{width:420px}
-    .modal-header{background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);padding:10px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between}
-    .modal-header h3{font-size:13px;font-weight:700}
-    .modal-close{width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    .modal-close:hover{background:rgba(255,255,255,.25)}
-    .modal-header-red{background:linear-gradient(120deg,#7F1D1D 0%,var(--red) 100%)}
-    .modal-body{padding:12px 16px;overflow-y:auto;flex:1}
-    .modal-footer{padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px}
-    .btn-cancel{height:28px;padding:0 14px;border-radius:5px;border:1.5px solid var(--border-dk);background:#fff;color:var(--label);font-size:11px;cursor:pointer;font-family:inherit}
-    .btn-cancel:hover{background:var(--bg)}
-    .btn-save{height:28px;padding:0 16px;border-radius:5px;border:none;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
-    .btn-save:hover{background:#001A5C}
-
     /* MODAL TABLES — compact to match main screen */
     .modal-tbl th{font-size:9.5px;padding:4px 10px}
     .modal-tbl td{padding:5px 10px;font-size:11px}
@@ -288,7 +195,6 @@
     .batch-total-bar{display:flex;align-items:center;gap:8px;padding:5px 12px;background:#F0FDF4;border-top:1px solid #BBF7D0;font-size:11px;font-weight:600;color:var(--green)}
     .batch-total-bar .total-label{color:var(--muted);font-weight:500;text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
 
-    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:#bbb;border-radius:3px}
   </style>
 </head>
 <body>
@@ -311,14 +217,21 @@
       <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
       <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
       <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
-      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
       <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
       <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
     </div>
     <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
@@ -339,6 +252,7 @@
         </div>
         <div class="save-indicator"></div>
         <span style="opacity:0.5; margin: 0 4px;">|</span>
+        <span id="dataBadge" class="data-badge"></span>
         Service Location
         <select class="svc-select" id="svcLocation"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
         <div class="topbar-avatar">JB</div>

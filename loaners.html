@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Loaners | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* PAGE BODY — flex column */
+    .page-body{display:flex;flex-direction:column;overflow:hidden}
+
+    /* BREADCRUMB */
+    .breadcrumb{display:flex;align-items:center;gap:8px;padding:10px 16px 0;flex-shrink:0}
+    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+    .sep{color:var(--border)}
+    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* STAT STRIP */
+    .stat-strip{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid var(--border);cursor:default;transition:background .1s;min-width:0}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip.alert{background:#FEF9F9}
+    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .stat-chip .s-data{min-width:0}
+    .stat-chip .s-val{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .stat-chip .s-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-red{color:var(--red)}.s-amber{color:var(--amber)}.s-green{color:var(--green)}.s-navy{color:var(--navy)}
+
+    /* SUBNAV */
+    .subnav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:2px solid var(--border);padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk)}
+    .toolbar-search{display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .toolbar-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .tb-btn{height:30px;padding:0 12px;border:1px solid var(--border-dk);border-radius:6px;font-size:11px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--label);display:flex;align-items:center;gap:4px;font-weight:500}
+    .tb-btn:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .btn-add{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .btn-add:hover{background:#1A3F8F;color:#fff;border-color:#1A3F8F}
+
+    /* DATA TABLE */
+    .table-wrap{flex:1;overflow:auto;position:relative}
+    table{width:100%;border-collapse:collapse;min-width:800px}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th:last-child{border-right:none}
+    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:#D8E6FF;cursor:pointer}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .badge-out{background:#FEF9F9;color:#C62828;border:1px solid #EF9A9A}
+    .badge-returned{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .badge-reserved{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .badge-available{background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB}
+    .badge-loaner{background:#FFFBEB;color:#B45309;border:1px solid #FDE68A}
+
+    /* ACTION BUTTONS */
+    .row-action{width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all .1s}
+    .row-action:hover{background:var(--bg);color:var(--navy)}
+    .row-action.danger:hover{color:var(--red);background:#FEF2F2}
+    .row-action svg{width:14px;height:14px}
+
+    /* TABLE FOOTER */
+    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .record-info{font-size:11px;color:var(--muted)}
+    .record-info strong{color:var(--text)}
+
+    /* RACK POSITION CHIP */
+    .rack-chip{display:inline-block;background:#E9EFF9;color:var(--navy);border:1px solid var(--border-dk);border-radius:4px;font-size:10px;font-weight:700;padding:1px 7px;letter-spacing:.5px;font-family:monospace}
+
+    /* DRAWER */
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+    .drawer-overlay.open{opacity:1;pointer-events:auto}
+    .drawer{position:fixed;top:0;right:0;width:440px;height:100vh;background:var(--card);z-index:51;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+    .drawer.open{transform:translateX(0)}
+    .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:#E9EFF9;flex-shrink:0}
+    .drawer-header h3{font-size:14px;font-weight:700;color:var(--navy);margin:0}
+    .drawer-close{width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;transition:all .1s}
+    .drawer-close:hover{background:var(--bg);color:var(--navy)}
+    .drawer-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+    .field{display:flex;flex-direction:column;gap:3px}
+    .field label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .field input,.field select,.field textarea{height:32px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);outline:none;background:var(--card)}
+    .field textarea{height:72px;padding:8px 10px;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .field.invalid input,.field.invalid select{border-color:var(--red)}
+    .field .field-error{font-size:10px;color:var(--red);font-weight:500;display:none}
+    .field.invalid .field-error{display:block}
+    .field-row{display:flex;gap:12px}
+    .field-row .field{flex:1}
+    .drawer-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0}
+    .btn-cancel{height:28px;padding:0 16px;border:1px solid var(--border-dk);border-radius:6px;background:var(--card);font-size:12px;font-family:inherit;color:var(--label);cursor:pointer;font-weight:500}
+    .btn-cancel:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .btn-save{height:28px;padding:0 20px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600}
+    .btn-save:hover{background:#1A3F8F}
+
+    /* DETAIL READ-ONLY FIELDS */
+    .detail-row{display:flex;gap:0;border-bottom:1px solid var(--border);padding:8px 0}
+    .detail-row:last-child{border-bottom:none}
+    .detail-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;width:130px;flex-shrink:0;padding-top:1px}
+    .detail-val{font-size:12px;color:var(--text);font-weight:500;flex:1}
+    .detail-section{background:#F7F8FC;border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column}
+    .detail-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <div class="save-indicator"></div>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation"><option value="1">Upper Chichester</option><option value="2">Nashville</option></select>
+        <span id="dataBadge" class="data-badge"></span>
+        <div class="topbar-avatar" id="topbarAvatar">JB</div>
+        <span class="topbar-welcome" id="topbarWelcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb"><span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Loaners</span></div>
+
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip alert">
+          <div class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2" style="width:16px;height:16px"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <div class="s-data"><div class="s-val s-red" id="statOut">—</div><div class="s-lbl">Out on Loan</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="statPending">—</div><div class="s-lbl">Pending Return</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="s-data"><div class="s-val s-green" id="statAvailable">—</div><div class="s-lbl">Available</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EDE7F6"><svg viewBox="0 0 24 24" fill="none" stroke="#5E35B1" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="statTaskLoaners">—</div><div class="s-lbl">Task Assignments</div></div>
+        </div>
+      </div>
+
+      <!-- SUBNAV TABS -->
+      <div class="subnav" id="subnav">
+        <div class="subnav-tab active" data-tab="task">Task Loaners</div>
+        <div class="subnav-tab" data-tab="active">Active Loaners</div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar" id="toolbar">
+        <div class="filter-group" id="taskFilters">
+          <span class="filter-label">Status</span>
+          <div class="seg-group" id="taskStatusFilter">
+            <button class="seg-btn active" data-status="All">All</button>
+            <button class="seg-btn" data-status="Out">Out</button>
+            <button class="seg-btn" data-status="Returned">Returned</button>
+          </div>
+        </div>
+        <div class="filter-sep" id="taskFilterSep"></div>
+        <div class="toolbar-search">
+          <input class="search-input" id="searchInput" type="text" placeholder="Search loaners…"/>
+        </div>
+        <div class="toolbar-right">
+          <button class="tb-btn btn-add" id="btnLogLoaner" onclick="openAddDrawer()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Log Loaner
+          </button>
+        </div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead id="tableHead">
+            <tr id="taskHead">
+              <th style="width:120px">Task #</th>
+              <th>Scope Type / Model</th>
+              <th style="width:100px">Serial #</th>
+              <th style="width:60px;text-align:center">Qty</th>
+              <th>Department</th>
+              <th>Client</th>
+              <th style="width:80px;text-align:center">Rack Pos.</th>
+              <th style="width:60px;text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">Loading…</div>
+        <div></div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- LOG LOANER DRAWER (Task Loaners tab) -->
+<div class="drawer" id="loanerDrawer">
+  <div class="drawer-header">
+    <h3 id="drawerTitle">Log Task Loaner</h3>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="editKey" value=""/>
+    <div class="field-row">
+      <div class="field" id="fTaskKey">
+        <label>Task Key</label>
+        <input type="number" id="loanerTaskKey" placeholder="Task ID…" min="1"/>
+        <span class="field-error">Task key is required</span>
+      </div>
+      <div class="field" id="fQty">
+        <label>Quantity</label>
+        <input type="number" id="loanerQty" value="1" min="1" max="99"/>
+        <span class="field-error">Quantity must be at least 1</span>
+      </div>
+    </div>
+    <div class="field" id="fScopeType">
+      <label>Scope Type / Model</label>
+      <select id="loanerScopeType">
+        <option value="">Select scope type…</option>
+      </select>
+      <span class="field-error">Scope type is required</span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:-8px">
+      If the model you need is not listed, it may not be flagged as a loaner scope. Contact your administrator.
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
+    <button class="btn-save" onclick="saveLoaner()">Save</button>
+  </div>
+</div>
+
+<!-- DETAIL DRAWER (row click — both tabs) -->
+<div class="drawer" id="detailDrawer">
+  <div class="drawer-header">
+    <h3 id="detailTitle">Loaner Detail</h3>
+    <button class="drawer-close" onclick="closeDetailDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body" id="detailBody"></div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" onclick="closeDetailDrawer()">Close</button>
+    <button class="btn-save" id="btnDetailEdit" onclick="openEditFromDetail()" style="display:none">Edit</button>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ═══════════════════════════════════════════════════════
+//  DEMO DATA
+// ═══════════════════════════════════════════════════════
+const demoTaskLoaners = [
+  {plTaskScopeTypeKey:1, plTaskKey:101, sTaskNumber:'TASK-2024-0101', plScopeTypeKey:50, sScopeTypeDesc:'Olympus GIF-H180', sSerialNumber:'LOAN-001', plQuantity:1, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psLoanerRackPosition:'A-1', _status:'Out'},
+  {plTaskScopeTypeKey:2, plTaskKey:102, sTaskNumber:'TASK-2024-0102', plScopeTypeKey:51, sScopeTypeDesc:'Olympus CF-HQ190', sSerialNumber:'LOAN-002', plQuantity:1, sDepartmentName:'GI Lab', sClientName:'City General', psLoanerRackPosition:'A-2', _status:'Out'},
+  {plTaskScopeTypeKey:3, plTaskKey:103, sTaskNumber:'TASK-2024-0103', plScopeTypeKey:52, sScopeTypeDesc:'Olympus BF-P290', sSerialNumber:'LOAN-003', plQuantity:2, sDepartmentName:'Pulmonology', sClientName:'Regional Medical', psLoanerRackPosition:'B-1', _status:'Out'},
+  {plTaskScopeTypeKey:4, plTaskKey:98,  sTaskNumber:'TASK-2024-0098', plScopeTypeKey:49, sScopeTypeDesc:'Olympus GIF-Q165', sSerialNumber:'LOAN-004', plQuantity:1, sDepartmentName:'Surgery',    sClientName:'Metro Health Hospital', psLoanerRackPosition:'C-3', _status:'Returned'},
+  {plTaskScopeTypeKey:5, plTaskKey:95,  sTaskNumber:'TASK-2024-0095', plScopeTypeKey:48, sScopeTypeDesc:'Olympus PCF-H190L', sSerialNumber:'LOAN-005', plQuantity:1, sDepartmentName:'Endoscopy',  sClientName:'Northside Hospital', psLoanerRackPosition:'B-4', _status:'Returned'},
+];
+
+const demoActiveLoaners = [
+  {lScopeKey:1001, sSerialNumber:'LOAN-001', sScopeTypeDesc:'Olympus GIF-H180',  sDepartmentName:'Endoscopy',  sClientName:'Memorial Hospital',    psLoanerRackPosition:'A-1', pbOnSiteLoaner:true},
+  {lScopeKey:1002, sSerialNumber:'LOAN-002', sScopeTypeDesc:'Olympus CF-HQ190',  sDepartmentName:'GI Lab',     sClientName:'City General',          psLoanerRackPosition:'A-2', pbOnSiteLoaner:true},
+  {lScopeKey:1003, sSerialNumber:'LOAN-003', sScopeTypeDesc:'Olympus BF-P290',   sDepartmentName:'Pulmonology', sClientName:'Regional Medical',     psLoanerRackPosition:'B-1', pbOnSiteLoaner:true},
+  {lScopeKey:1004, sSerialNumber:'LOAN-004', sScopeTypeDesc:'Olympus GIF-Q165',  sDepartmentName:'Surgery',    sClientName:'Metro Health Hospital',  psLoanerRackPosition:'C-3', pbOnSiteLoaner:true},
+  {lScopeKey:1005, sSerialNumber:'LOAN-005', sScopeTypeDesc:'Olympus PCF-H190L', sDepartmentName:'Endoscopy',  sClientName:'Northside Hospital',     psLoanerRackPosition:'B-4', pbOnSiteLoaner:true},
+  {lScopeKey:1006, sSerialNumber:'LOAN-006', sScopeTypeDesc:'Olympus GIF-XP190N', sDepartmentName:'',          sClientName:'',                       psLoanerRackPosition:'D-1', pbOnSiteLoaner:true},
+  {lScopeKey:1007, sSerialNumber:'LOAN-007', sScopeTypeDesc:'Olympus CF-HQ190I', sDepartmentName:'',           sClientName:'',                       psLoanerRackPosition:'D-2', pbOnSiteLoaner:true},
+];
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let activeTab = 'task';
+let taskRows = [];
+let activeRows = [];
+let scopeTypeOptions = []; // from API or fallback
+let isDemo = false;
+let taskStatusFilter = 'All';
+let searchTerm = '';
+let currentDetailRow = null;
+let searchTimer = null;
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function esc(s) {
+  const el = document.createElement('span');
+  el.textContent = s == null ? '' : String(s);
+  return el.innerHTML;
+}
+
+function unwrap(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.dataSource)) return data.dataSource;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
+}
+
+function statusBadge(s) {
+  if (!s || s === 'Out') return '<span class="badge badge-out">Out</span>';
+  if (s === 'Returned')  return '<span class="badge badge-returned">Returned</span>';
+  if (s === 'Reserved')  return '<span class="badge badge-reserved">Reserved</span>';
+  return '<span class="badge badge-available">Available</span>';
+}
+
+function loanerBadge() {
+  return '<span class="badge badge-loaner">Loaner</span>';
+}
+
+function rackChip(pos) {
+  if (!pos) return '<span style="color:var(--muted)">—</span>';
+  return '<span class="rack-chip">' + esc(pos) + '</span>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  STAT STRIP
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  const outCount    = taskRows.filter(r => r._status === 'Out').length;
+  const pendingCount = taskRows.filter(r => r._status === 'Out').length;
+  const availCount  = activeRows.filter(r => !r.sClientName && !r.sDepartmentName).length;
+  const taskCount   = taskRows.length;
+
+  document.getElementById('statOut').textContent        = outCount;
+  document.getElementById('statPending').textContent    = pendingCount;
+  document.getElementById('statAvailable').textContent  = availCount;
+  document.getElementById('statTaskLoaners').textContent = taskCount;
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCOPE TYPE OPTIONS (for Add/Edit drawer)
+// ═══════════════════════════════════════════════════════
+async function loadScopeTypeOptions() {
+  try {
+    // GetAllScopes with no dept key returns all scopes — filter to loaners
+    const data = await API.getAllScopes(0);
+    const raw  = unwrap(data);
+    // Filter to loaner scopes (pbOnSiteLoaner) — use any available field name
+    const loaners = raw.filter(r => r.pbOnSiteLoaner || r.pbLoaner || r.bLoaner);
+    if (loaners.length) {
+      scopeTypeOptions = loaners;
+    } else {
+      // If no loaner flag returned, show all as fallback
+      scopeTypeOptions = raw.slice(0, 200);
+    }
+  } catch (e) {
+    console.warn('[TSI Loaners] Could not load scope types:', e.message);
+    // Fallback to demo scope types
+    scopeTypeOptions = demoActiveLoaners.map(r => ({
+      lScopeKey: r.lScopeKey,
+      plScopeTypeKey: r.lScopeKey,
+      sScopeTypeDesc: r.sScopeTypeDesc,
+      sSerialNumber: r.sSerialNumber,
+    }));
+  }
+
+  const sel = document.getElementById('loanerScopeType');
+  sel.innerHTML = '<option value="">Select scope type\u2026</option>';
+  scopeTypeOptions.forEach(r => {
+    const key  = r.plScopeTypeKey || r.lScopeTypeKey || r.lScopeKey || 0;
+    const desc = r.sScopeTypeDesc || r.sScopeType || r.sSerialNumber || '';
+    const sn   = r.sSerialNumber ? ' (' + r.sSerialNumber + ')' : '';
+    sel.innerHTML += '<option value="' + key + '">' + esc(desc + sn) + '</option>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOAD — TASK LOANERS
+// ═══════════════════════════════════════════════════════
+async function loadTaskLoaners() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
+  try {
+    const data = await API.getTaskLoaners(0, 0);
+    const raw  = unwrap(data);
+    // Normalise status — field name unknown yet; default to 'Out' if not present
+    taskRows = raw.map(r => ({
+      ...r,
+      _status: r.sStatus || r.sLoanerStatus || 'Out',
+    }));
+    isDemo = false;
+    API.UI.updateDemoBadge('api');
+    console.log('[TSI Loaners] Loaded', taskRows.length, 'task loaners from API');
+  } catch (e) {
+    console.warn('[TSI Loaners] API unavailable, using demo data:', e.message);
+    taskRows = demoTaskLoaners;
+    isDemo = true;
+    API.UI.updateDemoBadge('demo');
+  }
+  updateStats();
+  renderTaskLoaners();
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOAD — ACTIVE LOANERS (Scopes API)
+// ═══════════════════════════════════════════════════════
+async function loadActiveLoaners() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
+  try {
+    const data = await API.getAllScopes(0);
+    const raw  = unwrap(data);
+    // Filter to loaner-flagged scopes
+    activeRows = raw.filter(r => r.pbOnSiteLoaner || r.pbLoaner || r.bLoaner);
+    if (!activeRows.length) {
+      // If flag not present in response, show all — could be a schema variant
+      activeRows = raw.filter(r => r.psLoanerRackPosition);
+    }
+    isDemo = false;
+    API.UI.updateDemoBadge('api');
+    console.log('[TSI Loaners] Loaded', activeRows.length, 'active loaner scopes from API');
+  } catch (e) {
+    console.warn('[TSI Loaners] Scopes API unavailable, using demo data:', e.message);
+    activeRows = demoActiveLoaners;
+    isDemo = true;
+    API.UI.updateDemoBadge('demo');
+  }
+  updateStats();
+  renderActiveLoaners();
+}
+
+// ═══════════════════════════════════════════════════════
+//  FILTER HELPERS
+// ═══════════════════════════════════════════════════════
+function getFilteredTaskRows() {
+  const q = searchTerm.toLowerCase();
+  return taskRows.filter(r => {
+    if (taskStatusFilter !== 'All' && r._status !== taskStatusFilter) return false;
+    if (q) {
+      const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
+        .map(v => (v || '').toLowerCase()).join(' ');
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function getFilteredActiveRows() {
+  const q = searchTerm.toLowerCase();
+  if (!q) return activeRows;
+  return activeRows.filter(r => {
+    const hay = [r.sSerialNumber, r.sScopeTypeDesc, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
+      .map(v => (v || '').toLowerCase()).join(' ');
+    return hay.includes(q);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER — TASK LOANERS
+// ═══════════════════════════════════════════════════════
+function renderTaskLoaners() {
+  const thead = document.getElementById('tableHead');
+  thead.innerHTML = `<tr>
+    <th style="width:120px">Task #</th>
+    <th>Scope Type / Model</th>
+    <th style="width:100px">Serial #</th>
+    <th style="width:50px;text-align:center">Qty</th>
+    <th>Department</th>
+    <th>Client</th>
+    <th style="width:80px;text-align:center">Rack Pos.</th>
+    <th style="width:70px;text-align:center">Actions</th>
+  </tr>`;
+
+  const filtered = getFilteredTaskRows();
+  const tbody = document.getElementById('tableBody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">No task loaners found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(r => {
+      const key = r.plTaskScopeTypeKey || 0;
+      return `<tr onclick="showTaskDetail(${key})">
+        <td style="font-weight:600;color:var(--blue)">${esc(r.sTaskNumber || 'Task #' + r.plTaskKey)}</td>
+        <td style="font-weight:500">${esc(r.sScopeTypeDesc || '—')}</td>
+        <td style="font-family:monospace;font-size:11px">${esc(r.sSerialNumber || '—')}</td>
+        <td style="text-align:center;font-weight:700">${r.plQuantity || 1}</td>
+        <td style="color:var(--muted)">${esc(r.sDepartmentName || '—')}</td>
+        <td>${esc(r.sClientName || '—')}</td>
+        <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center" onclick="event.stopPropagation()">
+          <button class="row-action" title="Edit" onclick="openEditDrawer(${key})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  const outCount = filtered.filter(r => r._status === 'Out').length;
+  document.getElementById('recordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> record' + (filtered.length !== 1 ? 's' : '') +
+    ' &nbsp;·&nbsp; <strong>' + outCount + '</strong> out on loan';
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER — ACTIVE LOANERS
+// ═══════════════════════════════════════════════════════
+function renderActiveLoaners() {
+  const thead = document.getElementById('tableHead');
+  thead.innerHTML = `<tr>
+    <th>Serial #</th>
+    <th>Scope Type / Model</th>
+    <th>Rack Position</th>
+    <th>Assigned To — Department</th>
+    <th>Assigned To — Client</th>
+    <th style="width:70px;text-align:center">Status</th>
+  </tr>`;
+
+  const filtered = getFilteredActiveRows();
+  const tbody = document.getElementById('tableBody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No loaner scopes found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(r => {
+      const key = r.lScopeKey || 0;
+      const assigned = !!(r.sClientName || r.sDepartmentName);
+      return `<tr onclick="showActiveDetail(${key})">
+        <td style="font-family:monospace;font-size:11px;font-weight:600">${esc(r.sSerialNumber || '—')}</td>
+        <td style="font-weight:500">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}&nbsp;${loanerBadge()}</td>
+        <td>${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="color:var(--muted)">${esc(r.sDepartmentName || (assigned ? '' : '—'))}</td>
+        <td>${esc(r.sClientName || (assigned ? '' : '<span style="color:var(--muted)">—</span>'))}</td>
+        <td style="text-align:center">${assigned ? statusBadge('Out') : statusBadge('Available')}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const assignedCount = filtered.filter(r => r.sClientName || r.sDepartmentName).length;
+  document.getElementById('recordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> loaner scope' + (filtered.length !== 1 ? 's' : '') +
+    ' &nbsp;·&nbsp; <strong>' + assignedCount + '</strong> currently assigned';
+}
+
+// ═══════════════════════════════════════════════════════
+//  DETAIL DRAWER — TASK LOANER
+// ═══════════════════════════════════════════════════════
+function showTaskDetail(key) {
+  const r = taskRows.find(x => (x.plTaskScopeTypeKey || 0) === key);
+  if (!r) return;
+  currentDetailRow = r;
+  document.getElementById('detailTitle').textContent = r.sTaskNumber || 'Task Loaner';
+  document.getElementById('btnDetailEdit').style.display = '';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Task Information</div>
+      <div class="detail-row"><span class="detail-lbl">Task #</span><span class="detail-val" style="color:var(--blue);font-weight:700">${esc(r.sTaskNumber || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Task Key</span><span class="detail-val">${r.plTaskKey || '—'}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(r.sClientName || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Department</span><span class="detail-val">${esc(r.sDepartmentName || '—')}</span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Loaner Scope</div>
+      <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Serial #</span><span class="detail-val" style="font-family:monospace">${esc(r.sSerialNumber || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Quantity</span><span class="detail-val"><strong>${r.plQuantity || 1}</strong></span></div>
+      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Status</span><span class="detail-val">${statusBadge(r._status)}</span></div>
+    </div>`;
+
+  openDetailDrawer();
+}
+
+// ═══════════════════════════════════════════════════════
+//  DETAIL DRAWER — ACTIVE LOANER
+// ═══════════════════════════════════════════════════════
+function showActiveDetail(key) {
+  const r = activeRows.find(x => (x.lScopeKey || 0) === key);
+  if (!r) return;
+  currentDetailRow = r;
+  document.getElementById('detailTitle').textContent = r.sSerialNumber || 'Loaner Scope';
+  document.getElementById('btnDetailEdit').style.display = 'none'; // active loaners are read-only here
+
+  const assigned = !!(r.sClientName || r.sDepartmentName);
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Scope Identification</div>
+      <div class="detail-row"><span class="detail-lbl">Serial #</span><span class="detail-val" style="font-family:monospace;font-weight:700">${esc(r.sSerialNumber || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Loaner Flag</span><span class="detail-val">${loanerBadge()}</span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Current Assignment</div>
+      <div class="detail-row"><span class="detail-lbl">Status</span><span class="detail-val">${assigned ? statusBadge('Out') : statusBadge('Available')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(r.sClientName || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Department</span><span class="detail-val">${esc(r.sDepartmentName || '—')}</span></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">
+      To update scope details or remove the loaner flag, open the scope record directly in <a href="scopes.html" style="color:var(--blue)">Scopes</a>.
+    </div>`;
+
+  openDetailDrawer();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADD / EDIT DRAWER
+// ═══════════════════════════════════════════════════════
+function openAddDrawer() {
+  document.getElementById('drawerTitle').textContent = 'Log Task Loaner';
+  document.getElementById('editKey').value = '';
+  document.getElementById('loanerTaskKey').value = '';
+  document.getElementById('loanerQty').value = '1';
+  document.getElementById('loanerScopeType').value = '';
+  clearValidation();
+  openDrawer('loanerDrawer');
+}
+
+function openEditDrawer(key) {
+  const r = taskRows.find(x => (x.plTaskScopeTypeKey || 0) === key);
+  if (!r) return;
+  document.getElementById('drawerTitle').textContent = 'Edit Task Loaner';
+  document.getElementById('editKey').value = key;
+  document.getElementById('loanerTaskKey').value = r.plTaskKey || '';
+  document.getElementById('loanerQty').value = r.plQuantity || 1;
+  document.getElementById('loanerScopeType').value = r.plScopeTypeKey || '';
+  clearValidation();
+  openDrawer('loanerDrawer');
+}
+
+function openEditFromDetail() {
+  closeDetailDrawer();
+  if (currentDetailRow) {
+    openEditDrawer(currentDetailRow.plTaskScopeTypeKey || 0);
+  }
+}
+
+function clearValidation() {
+  ['fTaskKey','fQty','fScopeType'].forEach(id => {
+    document.getElementById(id).classList.remove('invalid');
+  });
+}
+
+async function saveLoaner() {
+  // Validate
+  let valid = true;
+  const taskKey   = parseInt(document.getElementById('loanerTaskKey').value, 10);
+  const qty       = parseInt(document.getElementById('loanerQty').value, 10);
+  const scopeType = parseInt(document.getElementById('loanerScopeType').value, 10);
+
+  if (!taskKey || isNaN(taskKey)) { document.getElementById('fTaskKey').classList.add('invalid'); valid = false; }
+  else document.getElementById('fTaskKey').classList.remove('invalid');
+
+  if (!qty || qty < 1) { document.getElementById('fQty').classList.add('invalid'); valid = false; }
+  else document.getElementById('fQty').classList.remove('invalid');
+
+  if (!scopeType) { document.getElementById('fScopeType').classList.add('invalid'); valid = false; }
+  else document.getElementById('fScopeType').classList.remove('invalid');
+
+  if (!valid) return;
+
+  const editKey = document.getElementById('editKey').value;
+  const btn = document.querySelector('#loanerDrawer .btn-save');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    if (editKey) {
+      await API.updateTaskLoaner({ plTaskScopeTypeKey: parseInt(editKey, 10), plScopeTypeKey: scopeType, plQuantity: qty });
+    } else {
+      await API.addTaskLoaner({ plTaskKey: taskKey, plScopeTypeKey: scopeType, plQuantity: qty });
+    }
+    closeDrawer();
+    await loadTaskLoaners();
+  } catch (e) {
+    console.warn('[TSI Loaners] Save failed:', e.message);
+    if (isDemo) {
+      // Demo mode: simulate success
+      if (editKey) {
+        const idx = taskRows.findIndex(r => r.plTaskScopeTypeKey === parseInt(editKey, 10));
+        if (idx >= 0) { taskRows[idx].plScopeTypeKey = scopeType; taskRows[idx].plQuantity = qty; }
+      } else {
+        const newKey = Math.max(0, ...taskRows.map(r => r.plTaskScopeTypeKey || 0)) + 1;
+        const model  = scopeTypeOptions.find(r => (r.plScopeTypeKey || r.lScopeKey) === scopeType);
+        taskRows.push({
+          plTaskScopeTypeKey: newKey,
+          plTaskKey: taskKey,
+          sTaskNumber: 'TASK-' + taskKey,
+          plScopeTypeKey: scopeType,
+          sScopeTypeDesc: model ? (model.sScopeTypeDesc || '') : 'Scope #' + scopeType,
+          sSerialNumber: model ? (model.sSerialNumber || '') : '',
+          plQuantity: qty,
+          sDepartmentName: '',
+          sClientName: '',
+          psLoanerRackPosition: '',
+          _status: 'Out',
+        });
+      }
+      closeDrawer();
+      updateStats();
+      renderTaskLoaners();
+    } else {
+      alert('Save failed: ' + e.message);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DRAWER OPEN / CLOSE
+// ═══════════════════════════════════════════════════════
+function openDrawer(id) {
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById(id).classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('loanerDrawer').classList.remove('open');
+  document.getElementById('detailDrawer').classList.remove('open');
+}
+
+function openDetailDrawer() {
+  // Reuse overlay but open detail drawer independently
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('detailDrawer').classList.add('open');
+}
+
+function closeDetailDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('detailDrawer').classList.remove('open');
+  currentDetailRow = null;
+}
+
+// Close on overlay click — already handled by onclick on overlay div
+
+// ═══════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.subnav-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+
+  // Show/hide task-only filters
+  const taskFilters    = document.getElementById('taskFilters');
+  const taskFilterSep  = document.getElementById('taskFilterSep');
+  const btnLog         = document.getElementById('btnLogLoaner');
+  if (tab === 'task') {
+    taskFilters.style.display = '';
+    taskFilterSep.style.display = '';
+    btnLog.style.display = '';
+    loadTaskLoaners();
+  } else {
+    taskFilters.style.display = 'none';
+    taskFilterSep.style.display = 'none';
+    btnLog.style.display = 'none';
+    loadActiveLoaners();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  WIRE EVENTS
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('.subnav-tab').forEach(tab => {
+  tab.addEventListener('click', function() { switchTab(this.dataset.tab); });
+});
+
+document.getElementById('taskStatusFilter').addEventListener('click', function(e) {
+  const btn = e.target.closest('.seg-btn');
+  if (!btn) return;
+  this.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  taskStatusFilter = btn.dataset.status || 'All';
+  renderTaskLoaners();
+});
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  searchTerm = this.value;
+  searchTimer = setTimeout(() => {
+    if (activeTab === 'task') renderTaskLoaners();
+    else renderActiveLoaners();
+  }, 200);
+});
+
+// Make row-click functions global
+window.showTaskDetail    = showTaskDetail;
+window.showActiveDetail  = showActiveDetail;
+window.openEditDrawer    = openEditDrawer;
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+API.UI.init();
+loadScopeTypeOptions();
+loadTaskLoaners(); // default tab
+</script>
+</body>
+</html>
