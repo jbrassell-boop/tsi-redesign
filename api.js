@@ -341,6 +341,7 @@ const API = (() => {
 
   // ── RepairItems (21) — Master catalog & pricing ───────
   async function getRepairItems(repairKey) { return post('/RepairItems/GetRepairItemsList', { plRepairKey: repairKey, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {} }); }
+  async function getRepairItemsList(filters) { return post('/RepairItems/GetRepairItemsList', filters); }
   async function getRepairItemsCatalog(rigidOrFlexible) { return get('/RepairItems/GetAllRepairItems?psRigidOrFlexible=' + (rigidOrFlexible||'Flexible')); }
   async function getRepairItemDetail(key) { return get('/RepairItems/GetRepairItemsBylRepairItemKey?plRepairItemKey=' + key); }
   async function addRepairItem(data) { return post('/RepairItems/AddRepairItems', data); }
@@ -689,7 +690,7 @@ const API = (() => {
     getRepairSuppliers, getPatientSafetyLevels, getRepairDistributors,
 
     // Repair Items
-    getRepairItems, getRepairItemsCatalog, getRepairItemDetail,
+    getRepairItems, getRepairItemsList, getRepairItemsCatalog, getRepairItemDetail,
     addRepairItem, updateRepairItem, deleteRepairItem,
     getRepairLevels, getRepairStatuses,
     getRepairItemPricing, updateRepairItemPricing,

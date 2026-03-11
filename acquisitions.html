@@ -462,7 +462,7 @@
     document.getElementById('inhouseBody').innerHTML = emptyRow(7, 'Loading…');
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
-      const raw = await API.post('/Acquisitions/GetAcquisitionsInHouseList', body);
+      const raw = await API.getAcquisitionsInHouse(body);
       state.inhouse.rows = unwrap(raw);
       API.UI.updateDemoBadge('api');
     } catch (e) {
@@ -479,7 +479,7 @@
     document.getElementById('consignedBody').innerHTML = emptyRow(7, 'Loading…');
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
-      const raw = await API.post('/Acquisitions/GetAcquisitionsConsignedList', body);
+      const raw = await API.getAcquisitionsConsigned(body);
       state.consigned.rows = unwrap(raw);
       API.UI.updateDemoBadge('api');
     } catch (e) {
@@ -506,7 +506,7 @@
         pdtSaleDateFrom: fromEl.value || null,
         pdtSaleDateTo:   toEl.value   || null,
       };
-      const raw = await API.post('/Acquisitions/GetAcquisitionsSoldList', body);
+      const raw = await API.getAcquisitionsSold(body);
       state.sold.rows = unwrap(raw);
       API.UI.updateDemoBadge('api');
     } catch (e) {

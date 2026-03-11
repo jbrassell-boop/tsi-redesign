@@ -639,7 +639,7 @@ function intVal(val) {
 // ─── Load Lookups ─────────────────────────────────────────────────────────────
 async function loadLookups() {
   try {
-    const lvlResp = await API.call('GET', '/RepairItems/GetRepairLevels?pbIncludeBlank=true');
+    const lvlResp = await API.getRepairLevels();
     if (lvlResp && Array.isArray(lvlResp)) repairLevels = lvlResp;
   } catch(e) {
     repairLevels = [
@@ -650,7 +650,7 @@ async function loadLookups() {
   }
 
   try {
-    const stResp = await API.call('GET', '/RepairItems/GetRepairStatus?pbIncludeBlank=true');
+    const stResp = await API.getRepairStatuses();
     if (stResp && Array.isArray(stResp)) repairStatuses = stResp;
   } catch(e) {
     repairStatuses = [
@@ -689,7 +689,7 @@ async function loadItems() {
       psRigidOrFlexible: '',
       psItemDescription: ''
     };
-    const resp = await API.call('POST', '/RepairItems/GetRepairItemsList', payload);
+    const resp = await API.getRepairItemsList(payload);
     if (resp && (Array.isArray(resp) || (resp.data && Array.isArray(resp.data)))) {
       allItems = Array.isArray(resp) ? resp : resp.data;
       showDataBadge(true);
@@ -806,7 +806,7 @@ async function selectItem(key) {
   // Try to load detail from API first
   let item = null;
   try {
-    const resp = await API.call('GET', `/RepairItems/GetRepairItemsBylRepairItemKey?plRepairItemKey=${key}`);
+    const resp = await API.getRepairItemDetail(key);
     if (resp && resp.lRepairItemKey) {
       item = resp;
     } else {
@@ -911,7 +911,7 @@ async function saveCurrentItem() {
   setDetailSaveStatus('save-saving', 'Saving…');
 
   try {
-    await API.call('POST', '/RepairItems/UpdateRepairItems', payload);
+    await API.updateRepairItem(payload);
 
     // Update local state
     Object.assign(selectedItem, {
@@ -1007,7 +1007,7 @@ async function confirmDelete() {
   closeDeleteModal();
 
   try {
-    await API.call('DELETE', `/RepairItems/DeleteRepairItems?plRepairItemKey=${key}`);
+    await API.deleteRepairItem(key);
   } catch(e) {
     // Demo mode — just remove locally
   }
@@ -1073,7 +1073,7 @@ async function submitAddItem() {
 
   let newKey = null;
   try {
-    const resp = await API.call('POST', '/RepairItems/AddRepairItems', payload);
+    const resp = await API.addRepairItem(payload);
     if (resp && resp.lRepairItemKey) newKey = resp.lRepairItemKey;
     else if (resp && resp.data && resp.data.lRepairItemKey) newKey = resp.data.lRepairItemKey;
   } catch(e) {
