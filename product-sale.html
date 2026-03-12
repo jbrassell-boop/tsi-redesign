@@ -1,143 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Sale — TSI Redesign Mockup</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <title>Product Sale | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* ── PAGE-SPECIFIC: Product Sale ── */
+    /* ── PAGE-SPECIFIC: Product Sale Cockpit ── */
 
-    /* Save indicator (page-specific override) */
-    .save-indicator{display:none;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);white-space:nowrap;color:#FDE68A}
-    .save-indicator svg{width:13px;height:13px}
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)}
 
-    /* ── ACTION BAR ── */
-    .action-bar { padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .ab-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; color: var(--navy); text-transform:uppercase; letter-spacing:0.5px;}
-    .ab-left .sep { color: var(--border-dk); font-weight: 400; }
-    .ab-badge { background: #EDF2FF; border: 1px solid #BAC9E8; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: var(--navy); font-weight: 700; }
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+    .filter-dd:focus{border-color:var(--navy)}
 
-    .ab-right { display: flex; align-items: center; gap: 8px; }
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .sn-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .sn-link:hover{text-decoration:underline}
 
-    .btn-group { display: flex; }
-    .btn-group .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-    .btn-group .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; padding: 0 8px; }
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-draft{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-open{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-invoiced{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-cancelled{background:#FEF2F2;color:var(--red);border-color:#FECACA}
 
-    /* ── HEADER GRID (Client details) ── */
-    .header-grid-wrapper { background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .header-grid { display: flex; padding: 16px 24px; gap: 20px; align-items: flex-start; overflow-x: auto; }
-    .hg-item { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
-    .hg-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
 
-    /* Input styling matched perfectly to Dashboard / Clients aesthetic */
-    .fi { width: 100%; height: 26px; border: 1.5px solid var(--border-dk); border-radius: 4px; padding: 0 10px; font-size: 11.5px; font-family: inherit; color: var(--text); background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; }
-    .fi:focus { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(0,37,122,.08); }
-    select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; line-height: 24px; }
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
 
-    textarea.fi { height: 60px; padding: 8px 10px; resize: none; min-height: 60px; line-height: 1.4; }
+    /* ── Slide-Out Drawer ── */
+    .sale-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .sale-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
 
-    /* ── TABS (page-specific wrapper) ── */
-    .tabs-wrapper { display: flex; padding: 0 24px; background: #DDE6F5; border-bottom: 2px solid var(--border-dk); margin-top: 8px; flex-shrink: 0; }
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .dtab:hover{color:var(--blue)}
+    .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+    .dpane{display:none;flex:1;min-height:0;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
 
-    .tab-content { display: none; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
-    .tab-content.active { display: flex; }
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s;flex-shrink:0}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-    /* ── WORKSPACE ── */
-    .workspace { display: flex; flex: 1; padding: 10px 16px; gap: 12px; overflow: hidden; background: #f0f2f5; }
+    .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
 
-    /* Card Panels */
-    .card { background: #fff; border-radius: 8px; border: 1px solid var(--border-dk); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 4px rgba(0,37,122,.05); }
-    .card-hd { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; background: #F7F9FC; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-    .card-body { padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; background: #fff; }
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 
-    /* ── LEFT COLUMN (page-specific override) ── */
-    .col-left { width: 300px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; min-height: 0; }
+    /* Empty state */
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--muted);text-align:center;gap:8px}
+    .empty-state svg{width:40px;height:40px;stroke:var(--border-dk);fill:none;stroke-width:1.5}
+    .empty-state .empty-title{font-size:13px;font-weight:600;color:var(--steel)}
+    .empty-state .empty-sub{font-size:11px}
 
-    /* Contact Form Grid (Bigger) */
-    .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; align-content: start; }
-    .cg-full { grid-column: 1 / -1; }
-    .cg-item { display: flex; flex-direction: column; gap: 2px; }
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:700px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:70vh}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 
-    /* Card structural overrides for Address Tab equal height matching */
-    #tab-address { align-items: stretch; }
-    #tab-address .col-left { flex: 1; display: flex; flex-direction: column; min-width: 250px; max-width: 400px; }
-    #tab-address .card { flex: 1; margin-bottom: 0px; }
-
-    /* Item Search Section */
-    .is-card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .is-top { padding: 4px 10px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; flex-shrink: 0; background: #fff; }
-    .is-top .fi { flex: 1; height: 22px; font-size: 11px; }
-    .is-body { flex: 1; display: flex; overflow: hidden; }
-
-    /* Dual pane in search */
-    .is-cats { width: 110px; background: #F7F9FC; border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
-    .cat-item { padding: 6px 8px; font-size: 11px; color: var(--label); border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
-    .cat-item:hover { background: var(--border); }
-    .cat-item.active { background: #fff; border-left: 3px solid var(--navy); font-weight: 700; color: var(--navy); }
-    .cat-sub { font-size: 9px; color: var(--muted); margin-top: 1px; font-weight: 400; }
-
-    .is-items { flex: 1; background: #fff; overflow-y: auto; }
-    .is-item { padding: 6px 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; transition: background .1s; }
-    .is-item:hover { background: var(--bg); }
-    .isi-name { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
-    .isi-lot { font-size: 9px; color: var(--muted); margin-top: 1px; }
-    .isi-price-box { text-align: right; }
-    .isi-price { font-size: 11px; font-weight: 700; color: var(--navy); }
-    .isi-stock { font-size: 9px; color: var(--green); margin-top: 1px; font-weight:600;}
-
-    /* ── RIGHT COLUMN (page-specific override) ── */
-    .col-right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .line-items-card { flex: 1; display: flex; flex-direction: column; }
-
-    .table-wrapper { flex: 1; overflow: auto; background: #fff; }
-    .lt { width: 100%; border-collapse: collapse; min-width: 600px; text-align: left; }
-    .lt th { background: var(--navy); color: #fff; font-size: 10.5px; font-weight: 700; padding: 10px 16px; border-right: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
-    .lt th:last-child { border-right: none; }
-    .lt td { padding: 10px 16px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .lt tbody tr:nth-last-child(1) td { border-bottom: none; }
-    .lt tbody tr:hover { background: #F7F9FC; cursor: pointer; }
-
-    /* Style inputs inside table softly */
-    .lt-input { width: 100%; background: transparent; border: 1.5px solid transparent; border-radius: 4px; padding: 4px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; transition: all .15s; }
-    .lt-input:hover { border-color: var(--border-dk); background: #fff; }
-    .lt-input:focus { border-color: var(--navy); background: #fff; box-shadow: 0 0 0 3px rgba(0,37,122,.08); }
-    .lt-input.num { text-align: right; }
-    .lt-input.ctr { text-align: center; }
-
-    /* Dynamic Empty State for Table */
-    .empty-rows { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 12.5px; padding: 40px; }
-    .empty-rows svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5; }
-
-    /* Footer Totals inside card */
-    .li-footer { border-top: 1px solid var(--border); background: #F7F9FC; padding: 12px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 32px; flex-shrink: 0; }
-    .lif-item { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--label); font-weight: 600; }
-    .lif-val { font-weight: 700; color: var(--text); width: 60px; text-align: right; }
-    .lif-total { font-size: 14px; font-weight: 800; color: var(--navy); display: flex; align-items: center; gap: 12px; }
-    .lif-total .lif-val { font-size: 18px; width: auto; min-width: 80px; }
-
-    .del-btn { color: var(--muted); cursor: pointer; transition: color .15s; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
-    .del-btn:hover { color: var(--red); background: #FEF2F2; }
-
-    /* AUTO-SAVE INDICATOR (page-specific) */
-    .save-indicator.active{display:flex;align-items:center;gap:6px;font-size:11px;color:#A7F3D0;opacity:0.8;font-weight:500;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);animation:pulse-save 4s infinite}
-    @keyframes pulse-save{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
   </style>
 </head>
 <body>
 <div class="shell">
-
-  <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </div>
-      <div class="brand-text">
-        <div class="t1">Total Scope, Inc.</div>
-        <div class="t2">The Leader in Medical Device Repair</div>
-      </div>
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
     </div>
     <div class="nav-group">
       <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
@@ -156,6 +159,7 @@
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
       <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
       <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
       <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
       <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
@@ -166,10 +170,7 @@
     <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
 
-  <!-- MAIN -->
   <div class="main">
-
-    <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-left">
         <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
@@ -178,660 +179,877 @@
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
           <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openAddModal()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
           </div>
         </div>
         <span id="dataBadge" class="data-badge"></span>
-        <div class="save-indicator"></div>
-        <span style="opacity:0.5; margin: 0 4px;">|</span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
         Service Location
-        <select class="svc-select" id="svcLocation"><option>Upper Chichester</option><option>Nashville</option></select>
-        <div class="topbar-avatar" id="topbarAvatar">JB</div>
-        <span class="topbar-welcome" id="topbarWelcome">Welcome back, <strong>Joseph</strong></span>
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
-    <!-- ACTION BAR -->
-    <div class="action-bar">
-      <div class="ab-left">
-        <span>TSI</span> <span class="sep">|</span> <span>Product Sale</span>
-        <span class="ab-badge">#PS26055001</span>
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">&#128203;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Orders</div></div>
+        </div>
+        <div class="stat-chip" id="kpiOpen" onclick="chipFilter('Open')">
+          <div class="s-icon" style="background:#EFF6FF">&#128194;</div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiOpenVal">0</div><div class="s-lbl">Open</div></div>
+        </div>
+        <div class="stat-chip" id="kpiInvoiced" onclick="chipFilter('Invoiced')">
+          <div class="s-icon" style="background:#E8F5E9">&#10003;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiInvoicedVal">0</div><div class="s-lbl">Invoiced</div></div>
+        </div>
+        <div class="stat-chip" id="kpiDraft" onclick="chipFilter('Draft')">
+          <div class="s-icon" style="background:#FFFBEB">&#9999;</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
+        </div>
+        <div class="stat-chip" id="kpiCancelled" onclick="chipFilter('Cancelled')">
+          <div class="s-icon" style="background:#FEF2F2">&#10005;</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiCancelledVal">0</div><div class="s-lbl">Cancelled</div></div>
+        </div>
+        <div class="stat-chip" id="kpiRevenue" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">&#128178;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiRevenueVal">$0</div><div class="s-lbl">Total Revenue</div></div>
+        </div>
       </div>
-      <div class="ab-right">
-        <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search</button>
-        <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
-        <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
-        <button class="btn btn-navy" onclick="alert('Order #PS26055001 has been finalized and submitted successfully!')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Finalize Order</button>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" style="padding:5px 14px;font-size:11px;gap:4px;display:flex;align-items:center" onclick="openAddModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Sale</button>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Status</span>
+        <div class="seg-group" id="segStatus">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+          <button class="seg-btn" data-val="Draft" onclick="setSegFilter('status','Draft',this)">Draft</button>
+          <button class="seg-btn" data-val="Open" onclick="setSegFilter('status','Open',this)">Open</button>
+          <button class="seg-btn" data-val="Invoiced" onclick="setSegFilter('status','Invoiced',this)">Invoiced</button>
+          <button class="seg-btn" data-val="Cancelled" onclick="setSegFilter('status','Cancelled',this)">Cancelled</button>
+        </div>
+        <div class="filter-sep"></div>
+        <select class="filter-dd" id="filterRep" onchange="filters.rep=this.value;currentPage=1;runPipeline()" style="min-width:130px">
+          <option value="">All Sales Reps</option>
+        </select>
+        <select class="filter-dd" id="filterLocation" onchange="filters.location=this.value;currentPage=1;runPipeline()" style="min-width:120px">
+          <option value="">All Locations</option>
+          <option value="Upper Chichester">Upper Chichester</option>
+          <option value="Nashville">Nashville</option>
+        </select>
+        <div class="filter-sep"></div>
+        <span class="filter-label">From</span>
+        <input type="date" class="filter-dd" id="filterDateFrom" onchange="filters.dateFrom=this.value;currentPage=1;runPipeline()" style="min-width:120px"/>
+        <span class="filter-label">To</span>
+        <input type="date" class="filter-dd" id="filterDateTo" onchange="filters.dateTo=this.value;currentPage=1;runPipeline()" style="min-width:120px"/>
+        <input class="search-input" id="searchInput" placeholder="Search invoice#, client, PO#..." oninput="debounceSearch()" style="margin-left:auto"/>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:100px" onclick="sortBy('invoiceNum')">Invoice # <span class="sort"></span></th>
+              <th onclick="sortBy('clientName')">Client <span class="sort"></span></th>
+              <th onclick="sortBy('deptName')">Department <span class="sort"></span></th>
+              <th style="width:120px" onclick="sortBy('salesRep')">Sales Rep <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortBy('orderDate')">Order Date <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortBy('status')">Status <span class="sort"></span></th>
+              <th style="width:60px;text-align:center" onclick="sortBy('itemCount')">Items <span class="sort"></span></th>
+              <th style="width:100px" onclick="sortBy('poNumber')">PO # <span class="sort"></span></th>
+              <th style="width:100px;text-align:right" onclick="sortBy('total')">Total <span class="sort"></span></th>
+              <th style="width:100px" onclick="sortBy('location')">Location <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="mainTbody">
+            <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading product sales...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">0 records</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select" id="rowsSelect" onchange="changePageSize(this.value)">
+              <option>15</option><option selected>25</option><option>50</option><option>All</option>
+            </select>
+          </div>
+          <div class="pagination" id="paginationBtns"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('edit')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Sale</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('markInvoiced')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Mark as Invoiced</div>
+  <div class="ctx-item" onclick="ctxAction('printInvoice')"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Invoice</div>
+  <div class="ctx-item" onclick="ctxAction('exportPdf')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Export PDF</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('cancel')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Cancel Order</div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DETAIL DRAWER -->
+<div class="sale-drawer" id="saleDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerTitle">--</div>
+      <div class="dh-sub" id="drawerSub">--</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="dtab" onclick="switchTab('items',this)">Line Items</div>
+    <div class="dtab" onclick="switchTab('docs',this)">Documents</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="dpane active" id="dpane-overview">
+    <div class="section-card">
+      <div class="section-head">Order Info</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Invoice #</label><input id="fInvoice" readonly/></div>
+          <div class="field"><label>Status</label><input id="fStatus" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Client</label><input id="fClient" readonly/></div>
+          <div class="field"><label>Department</label><input id="fDept" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Sales Rep</label><input id="fSalesRep" readonly/></div>
+          <div class="field"><label>Order Date</label><input id="fOrderDate" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>PO #</label><input id="fPO" readonly/></div>
+          <div class="field"><label>Price List</label><input id="fPriceList" readonly/></div>
+        </div>
+        <div class="field"><label>Location</label><input id="fLocation" readonly/></div>
       </div>
     </div>
 
-    <!-- HEADER GRID -->
-    <div class="header-grid-wrapper">
-      <div class="header-grid">
-        <div class="hg-item" style="flex:1.5;">
-          <span class="hg-label">Client *</span>
-          <select class="fi" id="hdrClient">
-            <option value="" disabled selected>Loading clients...</option>
+    <div class="section-card">
+      <div class="section-head">Financial Summary</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Subtotal</label><input id="fSubtotal" readonly/></div>
+          <div class="field"><label>Tax</label><input id="fTax" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Shipping</label><input id="fShipping" readonly/></div>
+          <div class="field"><label>Grand Total</label><input id="fGrandTotal" readonly style="font-weight:700;color:var(--navy)"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Notes</div>
+      <div class="section-body">
+        <div class="field"><textarea id="fNotes" placeholder="Order notes..." oninput="markDirty()"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Items Tab -->
+  <div class="dpane" id="dpane-items">
+    <div class="section-card">
+      <div class="section-head">Order Line Items</div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Item</th><th>SKU</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr></thead>
+          <tbody id="drawerItemsBody"></tbody>
+          <tfoot><tr style="font-weight:700;background:#F0F4FA"><td colspan="4" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerItemsTotal">$0.00</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Tab -->
+  <div class="dpane" id="dpane-docs">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <div class="empty-title">No documents attached</div>
+      <div class="empty-sub">Invoices, POs, and supporting documents will appear here.</div>
+      <button class="btn btn-outline" style="margin-top:8px;padding:6px 16px;font-size:11px" disabled>Upload Document</button>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span style="font-size:10.5px;color:var(--muted)" id="drawerSaveStatus">Sale detail</span>
+    <button class="btn btn-navy" style="padding:5px 14px;font-size:11px" onclick="closeDrawer()">Close</button>
+  </div>
+</div>
+
+<!-- ADD SALE MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Product Sale</div>
+      <button class="modal-close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="g2">
+        <div class="field">
+          <label>Client</label>
+          <select id="mClient" onchange="populateModalDepts()">
+            <option value="">Select client...</option>
           </select>
         </div>
-        <div class="hg-item">
-          <span class="hg-label">Department *</span>
-          <select class="fi" id="hdrDept">
-            <option value="" disabled selected>-- Select Client first --</option>
+        <div class="field">
+          <label>Department</label>
+          <select id="mDept">
+            <option value="">Select department...</option>
           </select>
         </div>
-        <div class="hg-item">
-          <span class="hg-label">Sales Rep *</span>
-          <select class="fi" id="hdrSalesRep"><option value="" disabled selected>Loading...</option></select>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label>Sales Rep</label>
+          <select id="mSalesRep">
+            <option value="">Select sales rep...</option>
+          </select>
         </div>
-        <div class="hg-item">
-          <span class="hg-label">Price List</span>
-          <select class="fi" id="hdrPriceList"><option value="0">-- none --</option></select>
-        </div>
-        <div class="hg-item">
-          <span class="hg-label">Quote Date</span>
-          <input type="date" class="fi" />
-        </div>
-        <div class="hg-item">
-          <span class="hg-label">Order Date</span>
-          <input type="date" class="fi" id="hdrOrderDate" />
-        </div>
-        <div class="hg-item">
-          <span class="hg-label">Work Order #</span>
-          <input type="text" class="fi" id="hdrWoNum" value="NEW" readonly style="background:var(--gray-50); color:var(--gray-500);"/>
-        </div>
-        <div class="hg-item">
-          <span class="hg-label">Work Order Date</span>
-          <input type="date" class="fi" id="hdrWoDate" />
+        <div class="field">
+          <label>Order Date</label>
+          <input type="date" id="mOrderDate"/>
         </div>
       </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs-wrapper">
-      <div class="tab active" onclick="showTab('main', this)">Main</div>
-      <div class="tab" onclick="showTab('address', this)">Address</div>
-      <div class="tab">Documents</div>
-    </div>
-
-    <!-- WORKSPACE -->
-    <div class="workspace">
-
-      <!-- MAIN TAB CONTENT -->
-      <div id="tab-main" class="tab-content active" style="flex-direction: row; width: 100%;">
-
-        <!-- LEFT COLUMN -->
-        <div class="col-left">
-          <!-- Item Search Card -->
-          <div class="card is-card">
-            <div class="card-hd">
-              <span>Item Search</span>
-              <span style="color:var(--gray-400); cursor:pointer; font-weight:500; text-transform:none; font-size:10px;">× clear selection</span>
-            </div>
-            <div class="is-top">
-              <input type="text" class="fi" placeholder="Search items..." oninput="searchItems(this.value)" />
-              <select class="fi" style="max-width: 100px;"><option>All Sizes</option></select>
-            </div>
-            <div class="is-body">
-              <!-- Categories pane -->
-              <div class="is-cats" id="catListPane">
-                 <!-- injected by JS -->
-              </div>
-              <!-- Items pane -->
-              <div class="is-items" id="itemListPane">
-                 <!-- injected by JS -->
-              </div>
-            </div>
-          </div>
+      <div class="g2">
+        <div class="field">
+          <label>PO #</label>
+          <input id="mPO" placeholder="e.g. PO-50100"/>
         </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="col-right">
-          <div class="card line-items-card">
-            <div class="card-hd">Line Items</div>
-            <div class="table-wrapper" style="position:relative;">
-              <table class="lt">
-                <colgroup>
-                  <col style="width:250px;" />
-                  <col style="width:200px;" />
-                  <col style="width:120px;" />
-                  <col style="width:60px;" />
-                  <col style="width:100px;" />
-                  <col style="width:100px;" />
-                  <col style="width:30px;" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>Description</th>
-                    <th>Description 2</th>
-                    <th>Lot #</th>
-                    <th style="text-align:center;">Qty</th>
-                    <th style="text-align:right;">Unit Price</th>
-                    <th style="text-align:right;">Total</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="lineItemsBody">
-                  <!-- Empty state shown by default in UI but we inject dynamic rows via JS -->
-                </tbody>
-              </table>
-
-              <div class="empty-rows" id="emptyStateContainer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                <div style="font-weight:600; color:var(--gray-600); margin-bottom:4px;">No items on this order yet</div>
-                <div>Click any item in the search panels to add it</div>
-              </div>
-            </div>
-
-            <div class="li-footer">
-              <div class="lif-item">
-                <span>Shipping</span>
-                <span class="lif-val">$ <span id="valShipping">0.00</span></span>
-              </div>
-              <div class="lif-item">
-                <span>Tax</span>
-                <span class="lif-val">$ <span id="valTax">0.00</span></span>
-              </div>
-              <div class="lif-total">
-                <span>Order Total</span>
-                <span class="lif-val" id="valTotal">$0.00</span>
-              </div>
-            </div>
-          </div>
+        <div class="field">
+          <label>Price List</label>
+          <select id="mPriceList">
+            <option value="Standard">Standard</option>
+            <option value="Contract">Contract</option>
+            <option value="Wholesale">Wholesale</option>
+          </select>
         </div>
-      </div><!-- /#tab-main -->
-
-      <!-- ADDRESS TAB CONTENT -->
-      <div id="tab-address" class="tab-content" style="flex-direction: row; width: 100%; overflow-x: auto; gap: 16px;">
-
-        <div class="col-left">
-          <!-- Contact Card -->
-          <div class="card">
-            <div class="card-hd">Contact</div>
-            <div class="card-body contact-form">
-              <div class="cg-item cg-full">
-                <span class="hg-label">Name</span>
-                <input type="text" class="fi" placeholder="Contact name" />
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Phone</span>
-                <input type="tel" class="fi" placeholder="+1 Phone" />
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Email</span>
-                <input type="email" class="fi" placeholder="Email" />
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Fax</span>
-                <input type="tel" class="fi" placeholder="+1 Fax" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Purchase Order</span>
-                <input type="text" class="fi" placeholder="PO Number" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Note</span>
-                <textarea class="fi" style="height: 60px;" placeholder="Order notes..."></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-left">
-          <!-- Shipping Address -->
-          <div class="card">
-            <div class="card-hd">Shipping Address</div>
-            <div class="card-body contact-form">
-              <div class="cg-item cg-full">
-                <span class="hg-label">Address 1</span>
-                <input type="text" class="fi" id="shipAdd1" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Address 2</span>
-                <input type="text" class="fi" id="shipAdd2" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">City</span>
-                <input type="text" class="fi" id="shipCity" />
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">State</span>
-                <select class="fi" id="shipState">
-                  <option value="PA">PA</option>
-                  <option value="TN">TN</option>
-                  <option value="OH">OH</option>
-                  <option value="FL">FL</option>
-                  <option value="GA">GA</option>
-                </select>
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Zip Code</span>
-                <input type="text" class="fi" id="shipZip" />
-              </div>
-
-              <!-- Additional Shipping Fields -->
-              <div class="cg-item">
-                <span class="hg-label">Ship Via</span>
-                <select class="fi"><option>UPS Ground</option><option>FedEx Overnight</option></select>
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Account #</span>
-                <input type="text" class="fi" placeholder="Acct..." />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Delivery Instructions</span>
-                <input type="text" class="fi" placeholder="e.g. leave at back door..." />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-left">
-          <!-- Billing Address -->
-          <div class="card">
-            <div class="card-hd">Billing Address <span style="font-size:9px; text-transform:none; font-weight:400; color:var(--muted);"><input type="checkbox" id="chkSameAsShipping" style="vertical-align:middle; margin-right:4px;"> Same as Shipping</span></div>
-            <div class="card-body contact-form">
-              <div class="cg-item cg-full">
-                <span class="hg-label">Address 1</span>
-                <input type="text" class="fi" id="billAdd1" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Address 2</span>
-                <input type="text" class="fi" id="billAdd2" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">City</span>
-                <input type="text" class="fi" id="billCity" />
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">State</span>
-                <select class="fi" id="billState">
-                  <option value="PA">PA</option>
-                  <option value="TN">TN</option>
-                  <option value="OH">OH</option>
-                  <option value="FL">FL</option>
-                  <option value="GA">GA</option>
-                </select>
-              </div>
-              <div class="cg-item">
-                <span class="hg-label">Zip Code</span>
-                <input type="text" class="fi" id="billZip" />
-              </div>
-              <div class="cg-item cg-full">
-                <span class="hg-label">Billing Email</span>
-                <input type="email" class="fi" placeholder="Email for invoices..." />
-              </div>
-
-               <!-- Additional Billing Fields -->
-               <div class="cg-item">
-                <span class="hg-label">Terms</span>
-                <select class="fi"><option>Net 30</option><option>Due on Receipt</option></select>
-              </div>
-               <div class="cg-item">
-                <span class="hg-label">Tax Exempt #</span>
-                <input type="text" class="fi" placeholder="Tax ID..." />
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
-
-    </div><!-- /.workspace -->
-  </div><!-- /.main -->
-</div><!-- /.shell -->
+      <div class="field">
+        <label>Location</label>
+        <select id="mLocation">
+          <option value="Upper Chichester">Upper Chichester</option>
+          <option value="Nashville">Nashville</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="mNotes" placeholder="Order notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-navy" onclick="createSale()">Create Sale</button>
+    </div>
+  </div>
+</div>
 
 <script src="api.js"></script>
 <script>
-const INVENTORY_CATS = [
-  "Clamps",
-  "Curettes",
-  "Elevators",
-  "Forceps",
-  "General Instruments",
-  "Hooks",
-  "Knives & Blades",
-  "Needle Holders",
-  "Rongeurs",
-  "Retractors",
-  "Scissors",
-  "Speculums",
-  "Tubes & Cannulas"
+/* ─── STATE ─── */
+let allSales = [], filteredSales = [], displaySales = [];
+let selectedSaleKey = null, isLive = false, isDirty = false;
+let currentPage = 1, pageSize = 25;
+let sortCol = 'orderDate', sortDir = 'desc';
+let filters = { status:'', rep:'', location:'', search:'', dateFrom:'', dateTo:'' };
+let ctxKey = null;
+let _searchTimer, _saveTimer;
+
+/* ─── CLIENT / DEPT DATA ─── */
+var clientData = [
+  { key:1, name:'Johns Hopkins', depts:['Endoscopy','Pulmonology'] },
+  { key:2, name:'Cleveland Clinic', depts:['Gastroenterology','Surgery'] },
+  { key:3, name:'Mayo Clinic', depts:['Pulmonology','ENT'] },
+  { key:4, name:'HCA West Kendall', depts:['Endoscopy Center','GI Lab'] },
+  { key:5, name:'Cedars-Sinai', depts:['Bronchoscopy','Gastro'] }
 ];
+var salesReps = ['Mike Rivera','Sarah Chen','James Wilson'];
 
-const INVENTORY_DB = [
-  // Clamps
-  { sku: "5022", name: "BACKHAUS TOWEL CLAMP", lot: "Lot: 5022", price: 8.60, category: "Clamps", stock: 12 },
-  { sku: "19383", name: "DEBAKEY BULLDOG CLAMP", lot: "Lot: 19383", price: 188.48, category: "Clamps", stock: 5 },
+/* ─── HELPERS ─── */
+function fmtMoney(n) {
+  if (n == null) return '--';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtMoneyShort(n) {
+  if (n == null) return '--';
+  if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtDate(d) {
+  if (!d) return '--';
+  var dt = new Date(d);
+  return ((dt.getMonth()+1)+'').padStart(2,'0') + '/' + (dt.getDate()+'').padStart(2,'0') + '/' + dt.getFullYear();
+}
+function statusBadge(status) {
+  var map = { 'Draft':'b-draft', 'Open':'b-open', 'Invoiced':'b-invoiced', 'Cancelled':'b-cancelled' };
+  return '<span class="badge '+(map[status]||'')+'">'+status+'</span>';
+}
 
-  // Elevators
-  { sku: "19688", name: "FREER ELEVATOR", lot: "Lot: 19688", price: 16.89, category: "Elevators", stock: 15 },
-  { sku: "20380", name: "KEY ELEVATOR", lot: "Lot: 20380", price: 40.77, category: "Elevators", stock: 6 },
+/* ─── DEMO DATA ─── */
+function getDemoData() {
+  return [
+    { lSaleKey:2401, invoiceNum:'PS-2401', clientKey:1, clientName:'Johns Hopkins', deptName:'Endoscopy', salesRep:'Mike Rivera', orderDate:'2026-01-05', status:'Invoiced', poNumber:'PO-50101', priceList:'Standard', location:'Upper Chichester', notes:'', items:[
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:4, unitPrice:125.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:10, unitPrice:18.50 },
+      { name:'Suction Valve', sku:'SV-3300', qty:2, unitPrice:245.00 }
+    ]},
+    { lSaleKey:2402, invoiceNum:'PS-2402', clientKey:2, clientName:'Cleveland Clinic', deptName:'Gastroenterology', salesRep:'Sarah Chen', orderDate:'2026-01-12', status:'Open', poNumber:'PO-50102', priceList:'Contract', location:'Nashville', notes:'Rush delivery requested', items:[
+      { name:'Light Guide Bundle', sku:'LG-4400', qty:1, unitPrice:450.00 },
+      { name:'Water Bottle', sku:'WB-5500', qty:3, unitPrice:32.00 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:8, unitPrice:15.00 },
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:6, unitPrice:125.00 }
+    ]},
+    { lSaleKey:2403, invoiceNum:'PS-2403', clientKey:3, clientName:'Mayo Clinic', deptName:'ENT', salesRep:'James Wilson', orderDate:'2026-01-18', status:'Draft', poNumber:'', priceList:'Standard', location:'Upper Chichester', notes:'Awaiting PO from dept', items:[
+      { name:'Air/Water Channel', sku:'AW-7700', qty:2, unitPrice:185.00 },
+      { name:'Insertion Tube Cover', sku:'IT-8800', qty:5, unitPrice:42.00 }
+    ]},
+    { lSaleKey:2404, invoiceNum:'PS-2404', clientKey:4, clientName:'HCA West Kendall', deptName:'Endoscopy Center', salesRep:'Mike Rivera', orderDate:'2026-01-25', status:'Open', poNumber:'PO-50104', priceList:'Wholesale', location:'Nashville', notes:'', items:[
+      { name:'Suction Valve', sku:'SV-3300', qty:5, unitPrice:245.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:20, unitPrice:18.50 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:10, unitPrice:15.00 },
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:3, unitPrice:125.00 },
+      { name:'Water Bottle', sku:'WB-5500', qty:5, unitPrice:32.00 }
+    ]},
+    { lSaleKey:2405, invoiceNum:'PS-2405', clientKey:5, clientName:'Cedars-Sinai', deptName:'Bronchoscopy', salesRep:'Sarah Chen', orderDate:'2026-02-02', status:'Invoiced', poNumber:'PO-50105', priceList:'Standard', location:'Upper Chichester', notes:'', items:[
+      { name:'Light Guide Bundle', sku:'LG-4400', qty:2, unitPrice:450.00 },
+      { name:'Air/Water Channel', sku:'AW-7700', qty:3, unitPrice:185.00 }
+    ]},
+    { lSaleKey:2406, invoiceNum:'PS-2406', clientKey:1, clientName:'Johns Hopkins', deptName:'Pulmonology', salesRep:'James Wilson', orderDate:'2026-02-08', status:'Cancelled', poNumber:'PO-50106', priceList:'Contract', location:'Nashville', notes:'Client cancelled — budget freeze', items:[
+      { name:'Insertion Tube Cover', sku:'IT-8800', qty:10, unitPrice:42.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:15, unitPrice:18.50 }
+    ]},
+    { lSaleKey:2407, invoiceNum:'PS-2407', clientKey:2, clientName:'Cleveland Clinic', deptName:'Surgery', salesRep:'Mike Rivera', orderDate:'2026-02-14', status:'Open', poNumber:'PO-50107', priceList:'Standard', location:'Upper Chichester', notes:'', items:[
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:8, unitPrice:125.00 },
+      { name:'Suction Valve', sku:'SV-3300', qty:3, unitPrice:245.00 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:6, unitPrice:15.00 }
+    ]},
+    { lSaleKey:2408, invoiceNum:'PS-2408', clientKey:3, clientName:'Mayo Clinic', deptName:'Pulmonology', salesRep:'Sarah Chen', orderDate:'2026-02-20', status:'Draft', poNumber:'', priceList:'Wholesale', location:'Nashville', notes:'Pending approval from finance', items:[
+      { name:'Water Bottle', sku:'WB-5500', qty:8, unitPrice:32.00 },
+      { name:'Light Guide Bundle', sku:'LG-4400', qty:1, unitPrice:450.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:12, unitPrice:18.50 },
+      { name:'Air/Water Channel', sku:'AW-7700', qty:2, unitPrice:185.00 }
+    ]},
+    { lSaleKey:2409, invoiceNum:'PS-2409', clientKey:4, clientName:'HCA West Kendall', deptName:'GI Lab', salesRep:'James Wilson', orderDate:'2026-02-28', status:'Invoiced', poNumber:'PO-50109', priceList:'Standard', location:'Upper Chichester', notes:'', items:[
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:5, unitPrice:125.00 },
+      { name:'Insertion Tube Cover', sku:'IT-8800', qty:8, unitPrice:42.00 }
+    ]},
+    { lSaleKey:2410, invoiceNum:'PS-2410', clientKey:5, clientName:'Cedars-Sinai', deptName:'Gastro', salesRep:'Mike Rivera', orderDate:'2026-03-03', status:'Open', poNumber:'PO-50110', priceList:'Contract', location:'Nashville', notes:'', items:[
+      { name:'Suction Valve', sku:'SV-3300', qty:4, unitPrice:245.00 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:10, unitPrice:15.00 },
+      { name:'Water Bottle', sku:'WB-5500', qty:6, unitPrice:32.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:8, unitPrice:18.50 },
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:2, unitPrice:125.00 },
+      { name:'Light Guide Bundle', sku:'LG-4400', qty:1, unitPrice:450.00 }
+    ]},
+    { lSaleKey:2411, invoiceNum:'PS-2411', clientKey:1, clientName:'Johns Hopkins', deptName:'Endoscopy', salesRep:'Sarah Chen', orderDate:'2026-03-07', status:'Draft', poNumber:'', priceList:'Standard', location:'Upper Chichester', notes:'New quarterly order — draft', items:[
+      { name:'Air/Water Channel', sku:'AW-7700', qty:4, unitPrice:185.00 },
+      { name:'Insertion Tube Cover', sku:'IT-8800', qty:6, unitPrice:42.00 },
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:3, unitPrice:125.00 }
+    ]},
+    { lSaleKey:2412, invoiceNum:'PS-2412', clientKey:3, clientName:'Mayo Clinic', deptName:'ENT', salesRep:'James Wilson', orderDate:'2026-03-10', status:'Cancelled', poNumber:'PO-50112', priceList:'Standard', location:'Nashville', notes:'Duplicate order — cancelled', items:[
+      { name:'Cleaning Brush', sku:'CB-1100', qty:5, unitPrice:18.50 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:4, unitPrice:15.00 }
+    ]}
+  ];
+}
 
-  // Forceps
-  { sku: "5014", name: "ADSON FORCEP", lot: "Lot: 5014", price: 9.60, category: "Forceps", stock: 25 },
-  { sku: "18489", name: "ALLIS TISSUE FORCEPS", lot: "Lot: 18489", price: 9.35, category: "Forceps", stock: 20 },
-  { sku: "19876", name: "HALSTED MOSQUITO FORCEP", lot: "Lot: 19876", price: 9.90, category: "Forceps", stock: 40 },
-
-  // Tubes & Cannulas
-  { sku: "18606", name: "BARON SUCTION TUBE 3 FR", lot: "Lot: 18606", price: 22.90, category: "Tubes & Cannulas", stock: 10 },
-  { sku: "19652", name: "FRAZIER SUCTION TUBE 10 FR", lot: "Lot: 19652", price: 16.00, category: "Tubes & Cannulas", stock: 14 },
-
-  // Flex Components
-  { sku: "547", name: "ACHROMAT", lot: "Lot: 547", price: 125.00, category: "General Instruments", stock: 8 },
-  { sku: "78", name: "AIR WATER NOZZLES", lot: "Lot: 78", price: 45.00, category: "General Instruments", stock: 20 },
-  { sku: "279", name: "BENDING SECTION", lot: "Lot: 279", price: 350.00, category: "General Instruments", stock: 5 },
-  { sku: "335", name: "CCD CHIP CABLE", lot: "Lot: 335", price: 550.00, category: "General Instruments", stock: 3 }
-];
-</script>
-<script>
-  let currentCategory = "All";
-  let searchQuery = "";
-
-  function showTab(tabId, el) {
-    // Hide all tab content within the left column
-    document.querySelectorAll('.tab-content').forEach(content => {
-      content.classList.remove('active');
-    });
-    // Remove active state from all tabs
-    document.querySelectorAll('.tab').forEach(t => {
-      t.classList.remove('active');
-    });
-
-    // Show selected content and activate tab
-    document.getElementById('tab-' + tabId).classList.add('active');
-    el.classList.add('active');
+/* ─── DATA LOADING ─── */
+async function loadSales() {
+  try {
+    var data = await API.productSale.searchProductSales({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{} });
+    if (data && data.length) {
+      allSales = data;
+      isLive = true;
+    } else { throw new Error('empty'); }
+  } catch(e) {
+    allSales = getDemoData();
+    isLive = false;
   }
-
-  function renderInventoryUI() {
-    const catPane = document.getElementById('catListPane');
-    const itemPane = document.getElementById('itemListPane');
-
-    // Render Categories
-    let catsHtml = `<div class="cat-item ${currentCategory === 'All' ? 'active' : ''}" onclick="selectCategory('All')">
-                      <div>All Items</div>
-                    </div>`;
-
-    INVENTORY_CATS.forEach(cat => {
-      catsHtml += `<div class="cat-item ${currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
-                     <div>${cat}</div>
-                   </div>`;
-    });
-    catPane.innerHTML = catsHtml;
-
-    // Filter Items
-    let filtered = INVENTORY_DB;
-    if (currentCategory !== 'All') {
-      filtered = filtered.filter(i => i.category === currentCategory);
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q));
-    }
-
-    // Render Items
-    let itemsHtml = '';
-    filtered.forEach(item => {
-      // Escape single quotes for inline onclick handler
-      const safeName = item.name.replace(/'/g, "\\'");
-      const safeLot = item.lot.replace(/'/g, "\\'");
-
-      itemsHtml += `
-        <div class="is-item" onclick="addItemToOrder('${safeName}', '${safeLot}', ${item.price})">
-          <div>
-            <div class="isi-name">${item.name}</div>
-            <div class="isi-lot">${item.lot}</div>
-          </div>
-          <div class="isi-price-box">
-            <div class="isi-price">$${formatCurrency(item.price)}</div>
-            <div class="isi-stock">${item.stock} avail</div>
-          </div>
-        </div>
-      `;
-    });
-
-    if (filtered.length === 0) {
-      itemsHtml = `<div style="padding:20px; text-align:center; color:var(--muted); font-size:11.5px;">No items found matching criteria.</div>`;
-    }
-
-    itemPane.innerHTML = itemsHtml;
-  }
-
-  function selectCategory(cat) {
-    currentCategory = cat;
-    renderInventoryUI();
-  }
-
-  // Hook up search input
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.querySelector('.is-top input[type="text"]');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value;
-        renderInventoryUI();
-      });
-    }
-    // Initial Render
-    renderInventoryUI();
-  });
-
-  function formatCurrency(num) {
-    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function updateTotals() {
-    const tbody = document.getElementById('lineItemsBody');
-    const emptyState = document.getElementById('emptyStateContainer');
-
-    let subtotal = 0;
-    const rows = tbody.querySelectorAll('tr');
-
-    if (rows.length === 0) {
-      emptyState.style.display = 'flex';
-      document.getElementById('valTotal').textContent = '$0.00';
-      return;
+  // Ensure computed fields
+  allSales.forEach(function(s) {
+    if (s.items) {
+      s.itemCount = s.items.length;
+      s.total = s.items.reduce(function(sum, i) { return sum + (i.qty * i.unitPrice); }, 0);
     } else {
-      emptyState.style.display = 'none';
-    }
-
-    rows.forEach(row => {
-      const qtyInput = row.querySelector('.qty-input');
-      const priceInput = row.querySelector('.price-input');
-      const totalCell = row.querySelector('.row-total');
-
-      const qty = parseInt(qtyInput.value) || 0;
-      const price = parseFloat(priceInput.value.replace(/[^0-9.-]+/g, "")) || 0;
-      const rowTotal = qty * price;
-
-      subtotal += rowTotal;
-      totalCell.textContent = '$' + formatCurrency(rowTotal);
-    });
-
-    const shipping = 0.00; // Mocked
-    const tax = 0.00; // Mocked
-    const grandTotal = subtotal + shipping + tax;
-
-    document.getElementById('valShipping').textContent = formatCurrency(shipping);
-    document.getElementById('valTax').textContent = formatCurrency(tax);
-    document.getElementById('valTotal').textContent = '$' + formatCurrency(grandTotal);
-  }
-
-  function deleteRow(btn) {
-    btn.closest('tr').remove();
-    updateTotals();
-  }
-
-  function addItemToOrder(desc, lot, price) {
-    const tbody = document.getElementById('lineItemsBody');
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td><input type="text" class="lt-input" value="${desc}" /></td>
-      <td><input type="text" class="lt-input" placeholder="Add notation..." /></td>
-      <td><input type="text" class="lt-input" value="${lot}" /></td>
-      <td><input type="number" class="lt-input num qty-input" value="1" min="1" onchange="updateTotals()" /></td>
-      <td><input type="text" class="lt-input num price-input" value="${formatCurrency(price)}" onchange="updateTotals()" /></td>
-      <td style="text-align:right; font-weight:700; color:var(--navy);" class="row-total">$0.00</td>
-      <td style="text-align:center;">
-        <div class="del-btn" onclick="deleteRow(this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        </div>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-    updateTotals();
-  }
-
-  // ═══════════════════════════════════════════════════════
-  //  API-WIRED INIT
-  // ═══════════════════════════════════════════════════════
-
-  let allClients = [];       // cached from API
-  let allInventory = [];     // cached from API
-  let serviceLocationKey = 1;
-
-  // ── Populate Client Dropdown ──
-  async function loadClients() {
-    const sel = document.getElementById('hdrClient');
-    try {
-      const data = await API.getAllClients(serviceLocationKey);
-      allClients = Array.isArray(data) ? data : [];
-      sel.innerHTML = '<option value="" disabled selected>-- Select Client --</option>';
-      allClients.forEach(c => {
-        sel.innerHTML += `<option value="${c.lClientKey}">${c.sClientName1}</option>`;
-      });
-      console.log('[PS] Loaded', allClients.length, 'clients from API');
-    } catch (e) {
-      console.warn('[PS] Client API failed, using demo fallback:', e.message);
-      sel.innerHTML = '<option value="" disabled selected>-- Select Client --</option><option value="demo">Demo Client</option>';
-    }
-  }
-
-  // ── Populate Departments when Client changes ──
-  async function loadDepartments(clientKey) {
-    const sel = document.getElementById('hdrDept');
-    sel.innerHTML = '<option value="" disabled selected>Loading...</option>';
-    try {
-      const allDepts = await API.getAllDepartments();
-      const all = Array.isArray(allDepts) ? allDepts : [];
-      const depts = all.filter(d => d.lClientKey == clientKey);
-      sel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option>';
-      depts.forEach(d => {
-        sel.innerHTML += `<option value="${d.lDepartmentKey}">${d.sDepartmentName}</option>`;
-      });
-      console.log('[PS] Loaded', depts.length, 'departments for client', clientKey);
-    } catch (e) {
-      console.warn('[PS] Department API failed:', e.message);
-      sel.innerHTML = '<option value="" disabled selected>-- Select Dept --</option><option value="demo">Demo Dept</option>';
-    }
-  }
-
-  // ── Populate Sales Reps ──
-  async function loadSalesReps() {
-    const sel = document.querySelector('#hdrSalesRep');
-    if (!sel) return;
-    try {
-      const data = await API.getSalesReps();
-      const reps = Array.isArray(data) ? data : [];
-      sel.innerHTML = '<option value="" disabled selected>-- Select --</option>';
-      reps.forEach(r => {
-        sel.innerHTML += `<option value="${r.lSalesRepKey}">${r.sSalesRepName || r.sName || 'Rep ' + r.lSalesRepKey}</option>`;
-      });
-      console.log('[PS] Loaded', reps.length, 'sales reps');
-    } catch (e) {
-      console.warn('[PS] Sales rep API failed:', e.message);
-    }
-  }
-
-  // ── Populate Price Lists ──
-  async function loadPriceLists() {
-    const sel = document.querySelector('#hdrPriceList');
-    if (!sel) return;
-    try {
-      const data = await API.getInventoryPricing();
-      const lists = Array.isArray(data) ? data : [];
-      sel.innerHTML = '<option value="0">-- none --</option>';
-      lists.forEach(p => {
-        sel.innerHTML += `<option value="${p.lInventoryPricingListKey}">${p.sPricingListName || p.sDescription || 'List ' + p.lInventoryPricingListKey}</option>`;
-      });
-      console.log('[PS] Loaded', lists.length, 'price lists');
-    } catch (e) {
-      console.warn('[PS] Price list API failed:', e.message);
-    }
-  }
-
-  // ── Load Real Inventory into Picker ──
-  async function loadInventoryFromAPI() {
-    try {
-      const data = await API.getInventoryList({ Pagination: { PageNumber: 1, PageSize: 500 } });
-      const items = Array.isArray(data) ? data : [];
-      // Map API data into our picker format
-      allInventory = items.map(i => ({
-        key: i.lInventoryKey,
-        sku: String(i.lInventoryKey),
-        name: i.sDescription || i.sInventoryName || ('Item ' + i.lInventoryKey),
-        lot: 'Lot: ' + (i.sLotNumber || i.lInventoryKey),
-        price: i.dblUnitCost || i.dblUnitPrice || 0,
-        category: i.sInventoryCategory || i.sCategory || 'General',
-        stock: i.lQuantityOnHand || 0
-      }));
-
-      // Build categories from real data
-      const catSet = new Set(allInventory.map(i => i.category));
-      INVENTORY_CATS.length = 0;
-      [...catSet].sort().forEach(c => INVENTORY_CATS.push(c));
-
-      // Merge into INVENTORY_DB for the picker
-      INVENTORY_DB.length = 0;
-      allInventory.forEach(i => INVENTORY_DB.push(i));
-
-      console.log('[PS] Loaded', allInventory.length, 'inventory items,', INVENTORY_CATS.length, 'categories from API');
-      renderInventoryUI();
-    } catch (e) {
-      console.warn('[PS] Inventory API failed, keeping demo data:', e.message);
-      renderInventoryUI();
-    }
-  }
-
-  // ── Client change handler ──
-  document.getElementById('hdrClient').addEventListener('change', function(e) {
-    const clientKey = e.target.value;
-    if (clientKey && clientKey !== 'demo') {
-      loadDepartments(clientKey);
+      s.items = [];
+      s.itemCount = 0;
+      s.total = 0;
     }
   });
+  runPipeline();
+}
 
-  // ── Init ──
-  async function initializeWorkspace() {
-    // Auth guard
-    if (!API.requireAuth()) return;
+/* ─── PIPELINE ─── */
+function runPipeline() {
+  applyFilters();
+  applySort();
+  paginate();
+  renderTable();
+  updateKPIs();
+  updatePagination();
+}
 
-    // Set today's date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('hdrOrderDate').value = today;
-    if (document.getElementById('hdrWoDate')) document.getElementById('hdrWoDate').value = today;
+function applyFilters() {
+  filteredSales = allSales.filter(function(s) {
+    if (filters.status && s.status !== filters.status) return false;
+    if (filters.rep && s.salesRep !== filters.rep) return false;
+    if (filters.location && s.location !== filters.location) return false;
+    if (filters.dateFrom && s.orderDate < filters.dateFrom) return false;
+    if (filters.dateTo && s.orderDate > filters.dateTo) return false;
+    if (filters.search) {
+      var q = filters.search.toLowerCase();
+      var hay = ((s.invoiceNum||'')+'|'+(s.clientName||'')+'|'+(s.poNumber||'')+'|'+(s.deptName||'')+'|'+(s.salesRep||'')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
 
-    // Load all dropdowns in parallel
-    await Promise.all([
-      loadClients(),
-      loadSalesReps(),
-      loadPriceLists(),
-      loadInventoryFromAPI()
-    ]);
+function applySort() {
+  var col = sortCol, dir = sortDir === 'asc' ? 1 : -1;
+  filteredSales.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (typeof va === 'string') return va.localeCompare(vb) * dir;
+    return (va - vb) * dir;
+  });
+}
 
+function paginate() {
+  if (pageSize >= filteredSales.length) {
+    displaySales = filteredSales;
+  } else {
+    var start = (currentPage - 1) * pageSize;
+    displaySales = filteredSales.slice(start, start + pageSize);
+  }
+}
+
+/* ─── RENDER TABLE ─── */
+function renderTable() {
+  var tbody = document.getElementById('mainTbody');
+  if (!displaySales.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">No records match current filters.</td></tr>';
+    return;
+  }
+  var html = '';
+  displaySales.forEach(function(s) {
+    var sel = s.lSaleKey === selectedSaleKey ? ' selected' : '';
+    html += '<tr class="'+sel+'" onclick="openDrawer('+s.lSaleKey+')" oncontextmenu="onCtx(event,'+s.lSaleKey+')">';
+    html += '<td><span class="sn-link" onclick="event.stopPropagation();openDrawer('+s.lSaleKey+')">'+s.invoiceNum+'</span></td>';
+    html += '<td>'+s.clientName+'</td>';
+    html += '<td>'+s.deptName+'</td>';
+    html += '<td>'+s.salesRep+'</td>';
+    html += '<td>'+fmtDate(s.orderDate)+'</td>';
+    html += '<td>'+statusBadge(s.status)+'</td>';
+    html += '<td style="text-align:center">'+s.itemCount+'</td>';
+    html += '<td>'+(s.poNumber||'—')+'</td>';
+    html += '<td style="text-align:right;font-weight:700">'+fmtMoney(s.total)+'</td>';
+    html += '<td>'+s.location+'</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  // Update sort header indicators
+  document.querySelectorAll('.table-wrap thead th').forEach(function(th) {
+    th.classList.remove('sorted','asc','desc');
+  });
+  var cols = ['invoiceNum','clientName','deptName','salesRep','orderDate','status','itemCount','poNumber','total','location'];
+  var idx = cols.indexOf(sortCol);
+  if (idx >= 0) {
+    var ths = document.querySelectorAll('.table-wrap thead th');
+    ths[idx].classList.add('sorted', sortDir);
+  }
+}
+
+/* ─── KPIs ─── */
+function updateKPIs() {
+  var recs = filteredSales;
+  document.getElementById('kpiTotalVal').textContent = recs.length;
+  document.getElementById('kpiOpenVal').textContent = recs.filter(function(s){ return s.status==='Open'; }).length;
+  document.getElementById('kpiInvoicedVal').textContent = recs.filter(function(s){ return s.status==='Invoiced'; }).length;
+  document.getElementById('kpiDraftVal').textContent = recs.filter(function(s){ return s.status==='Draft'; }).length;
+  document.getElementById('kpiCancelledVal').textContent = recs.filter(function(s){ return s.status==='Cancelled'; }).length;
+  var totalRevenue = recs.reduce(function(sum,s){ return sum + (s.total||0); }, 0);
+  document.getElementById('kpiRevenueVal').textContent = fmtMoneyShort(totalRevenue);
+}
+
+/* ─── PAGINATION ─── */
+function updatePagination() {
+  var total = filteredSales.length;
+  var start = Math.min((currentPage-1)*pageSize+1, total);
+  var end = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = total + ' records' + (total > pageSize ? ' (showing '+start+'–'+end+')' : '');
+
+  var totalPages = Math.ceil(total / pageSize) || 1;
+  var btns = '';
+  btns += '<button class="pg-btn" onclick="goPage(1)" '+(currentPage<=1?'disabled':'')+'>&#171;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage<=1?'disabled':'')+'>&#8249;</button>';
+  for (var i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++) {
+    btns += '<button class="pg-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage>=totalPages?'disabled':'')+'>&#8250;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+totalPages+')" '+(currentPage>=totalPages?'disabled':'')+'>&#187;</button>';
+  document.getElementById('paginationBtns').innerHTML = btns;
+}
+
+function goPage(n) {
+  var totalPages = Math.ceil(filteredSales.length / pageSize) || 1;
+  if (n < 1 || n > totalPages) return;
+  currentPage = n;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+function changePageSize(val) {
+  if (val === 'All') { pageSize = 99999; } else { pageSize = parseInt(val)||25; }
+  currentPage = 1;
+  runPipeline();
+}
+
+/* ─── FILTERS ─── */
+function chipFilter(status) {
+  filters.status = status;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-val') === status);
+  });
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  if (status === 'Open') document.getElementById('kpiOpen').classList.add('active-chip');
+  else if (status === 'Invoiced') document.getElementById('kpiInvoiced').classList.add('active-chip');
+  else if (status === 'Draft') document.getElementById('kpiDraft').classList.add('active-chip');
+  else if (status === 'Cancelled') document.getElementById('kpiCancelled').classList.add('active-chip');
+  else document.getElementById('kpiTotal').classList.add('active-chip');
+  currentPage = 1;
+  runPipeline();
+}
+
+function setSegFilter(group, val, btn) {
+  filters.status = val;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  currentPage = 1;
+  runPipeline();
+}
+
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function() {
+    filters.search = document.getElementById('searchInput').value.trim();
+    currentPage = 1;
+    runPipeline();
+  }, 300);
+}
+
+/* ─── SORT ─── */
+function sortBy(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = 'asc'; }
+  runPipeline();
+}
+
+/* ─── CONTEXT MENU ─── */
+function onCtx(e, key) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxKey = key;
+  var menu = document.getElementById('ctxMenu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.style.display = 'block';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  var sale = allSales.find(function(s) { return s.lSaleKey === ctxKey; });
+  if (!sale) return;
+  switch(action) {
+    case 'view': openDrawer(ctxKey); break;
+    case 'edit': openDrawer(ctxKey); break;
+    case 'markInvoiced':
+      sale.status = 'Invoiced';
+      runPipeline();
+      break;
+    case 'printInvoice':
+      alert('Print invoice for ' + sale.invoiceNum + ' — not yet implemented.');
+      break;
+    case 'exportPdf':
+      alert('PDF export for ' + sale.invoiceNum + ' — not yet implemented.');
+      break;
+    case 'cancel':
+      sale.status = 'Cancelled';
+      runPipeline();
+      break;
+    case 'delete':
+      if (confirm('Delete ' + sale.invoiceNum + '? This cannot be undone.')) {
+        allSales = allSales.filter(function(s) { return s.lSaleKey !== ctxKey; });
+        if (selectedSaleKey === ctxKey) closeDrawer();
+        runPipeline();
+      }
+      break;
+  }
+}
+
+/* ─── DRAWER ─── */
+function openDrawer(key) {
+  selectedSaleKey = key;
+  var sale = allSales.find(function(s) { return s.lSaleKey === key; });
+  if (!sale) return;
+  populateDrawer(sale);
+  document.getElementById('saleDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  renderTable();
+  switchTab('overview', document.querySelector('.dtab'));
+}
+
+function closeDrawer() {
+  if (isDirty) saveNotes();
+  selectedSaleKey = null;
+  document.getElementById('saleDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  renderTable();
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.dtab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dpane').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('dpane-'+id).classList.add('active');
+}
+
+function populateDrawer(s) {
+  document.getElementById('drawerTitle').textContent = s.invoiceNum;
+  document.getElementById('drawerSub').textContent = s.clientName + ' — ' + s.deptName;
+
+  document.getElementById('fInvoice').value = s.invoiceNum;
+  document.getElementById('fStatus').value = s.status;
+  document.getElementById('fClient').value = s.clientName;
+  document.getElementById('fDept').value = s.deptName;
+  document.getElementById('fSalesRep').value = s.salesRep;
+  document.getElementById('fOrderDate').value = fmtDate(s.orderDate);
+  document.getElementById('fPO').value = s.poNumber || '—';
+  document.getElementById('fPriceList').value = s.priceList || 'Standard';
+  document.getElementById('fLocation').value = s.location;
+
+  var subtotal = s.total || 0;
+  document.getElementById('fSubtotal').value = fmtMoney(subtotal);
+  document.getElementById('fTax').value = '$0.00';
+  document.getElementById('fShipping').value = '$0.00';
+  document.getElementById('fGrandTotal').value = fmtMoney(subtotal);
+
+  document.getElementById('fNotes').value = s.notes || '';
+  isDirty = false;
+  document.getElementById('drawerSaveStatus').textContent = 'Sale detail';
+
+  // Line items
+  var itemsHtml = '';
+  var itemsTotal = 0;
+  s.items.forEach(function(item) {
+    var lineTotal = item.qty * item.unitPrice;
+    itemsTotal += lineTotal;
+    itemsHtml += '<tr>';
+    itemsHtml += '<td>' + item.name + '</td>';
+    itemsHtml += '<td>' + item.sku + '</td>';
+    itemsHtml += '<td style="text-align:center">' + item.qty + '</td>';
+    itemsHtml += '<td style="text-align:right">' + fmtMoney(item.unitPrice) + '</td>';
+    itemsHtml += '<td style="text-align:right">' + fmtMoney(lineTotal) + '</td>';
+    itemsHtml += '</tr>';
+  });
+  document.getElementById('drawerItemsBody').innerHTML = itemsHtml;
+  document.getElementById('drawerItemsTotal').textContent = fmtMoney(itemsTotal);
+}
+
+/* ─── AUTOSAVE NOTES ─── */
+function markDirty() {
+  isDirty = true;
+  document.getElementById('drawerSaveStatus').textContent = 'Unsaved changes';
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveNotes, 1500);
+}
+
+function saveNotes() {
+  if (!isDirty || !selectedSaleKey) return;
+  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
+  if (!sale) return;
+  document.getElementById('drawerSaveStatus').textContent = 'Saving...';
+  sale.notes = document.getElementById('fNotes').value;
+  isDirty = false;
+  setTimeout(function() {
+    var now = new Date();
+    document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
+  }, 400);
+}
+
+/* ─── ADD SALE MODAL ─── */
+function openAddModal() {
+  // Populate client dropdown
+  var mClient = document.getElementById('mClient');
+  mClient.innerHTML = '<option value="">Select client...</option>';
+  clientData.forEach(function(c) {
+    mClient.innerHTML += '<option value="'+c.key+'">'+c.name+'</option>';
+  });
+  document.getElementById('mDept').innerHTML = '<option value="">Select department...</option>';
+  // Populate sales rep dropdown
+  var mRep = document.getElementById('mSalesRep');
+  mRep.innerHTML = '<option value="">Select sales rep...</option>';
+  salesReps.forEach(function(r) {
+    mRep.innerHTML += '<option value="'+r+'">'+r+'</option>';
+  });
+  // Default date to today
+  document.getElementById('mOrderDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mPO').value = '';
+  document.getElementById('mNotes').value = '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+
+function populateModalDepts() {
+  var clientKey = parseInt(document.getElementById('mClient').value);
+  var dd = document.getElementById('mDept');
+  dd.innerHTML = '<option value="">Select department...</option>';
+  var c = clientData.find(function(x) { return x.key === clientKey; });
+  if (c) {
+    c.depts.forEach(function(d) {
+      dd.innerHTML += '<option value="'+d+'">'+d+'</option>';
+    });
+  }
+}
+
+function createSale() {
+  var clientKey = parseInt(document.getElementById('mClient').value);
+  var client = clientData.find(function(c) { return c.key === clientKey; });
+  if (!client) { alert('Please select a client.'); return; }
+  var dept = document.getElementById('mDept').value;
+  if (!dept) { alert('Please select a department.'); return; }
+  var rep = document.getElementById('mSalesRep').value;
+  if (!rep) { alert('Please select a sales rep.'); return; }
+
+  var nextKey = allSales.reduce(function(mx,s) { return Math.max(mx, s.lSaleKey); }, 2400) + 1;
+  var nextInv = 'PS-' + nextKey;
+
+  var newSale = {
+    lSaleKey: nextKey,
+    invoiceNum: nextInv,
+    clientKey: clientKey,
+    clientName: client.name,
+    deptName: dept,
+    salesRep: rep,
+    orderDate: document.getElementById('mOrderDate').value || new Date().toISOString().slice(0,10),
+    status: 'Draft',
+    poNumber: document.getElementById('mPO').value || '',
+    priceList: document.getElementById('mPriceList').value || 'Standard',
+    location: document.getElementById('mLocation').value || 'Upper Chichester',
+    notes: document.getElementById('mNotes').value || '',
+    items: [],
+    itemCount: 0,
+    total: 0
+  };
+  allSales.unshift(newSale);
+  closeAddModal();
+  runPipeline();
+  openDrawer(nextKey);
+}
+
+/* ─── SERVICE LOCATION ─── */
+function changeServiceLocation() {
+  runPipeline();
+}
+
+/* ─── INIT ─── */
+async function init() {
+  if (!API.requireAuth()) return;
+  await loadSales();
+
+  if (typeof API.UI !== 'undefined') {
     API.UI.init();
-    if (API.isDemoMode()) {
-      API.UI.updateDemoBadge('demo');
-    } else {
-      API.UI.updateDemoBadge('api');
+    API.UI.updateDemoBadge(isLive ? 'api' : 'demo');
+  } else {
+    var badge = document.getElementById('dataBadge');
+    if (badge) {
+      badge.textContent = isLive ? 'Live Data' : 'Demo Data';
+      badge.style.background = isLive ? '#E8F5E9' : '#FFFBEB';
+      badge.style.color = isLive ? '#2E7D32' : '#D97706';
+      badge.style.padding = '2px 8px';
+      badge.style.borderRadius = '10px';
+      badge.style.fontSize = '10.5px';
+      badge.style.fontWeight = '600';
     }
   }
 
-  initializeWorkspace();
+  // Dismiss context menu on click
+  document.addEventListener('click', function() {
+    document.getElementById('ctxMenu').style.display = 'none';
+    var nom = document.getElementById('newOrderMenu');
+    if (nom) nom.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeDrawer(); closeAddModal(); }
+  });
+
+  // NewOrderMenu open/close via CSS class
+  var nom = document.getElementById('newOrderMenu');
+  if (nom) {
+    var observer = new MutationObserver(function() {
+      nom.style.display = nom.classList.contains('open') ? 'block' : 'none';
+    });
+    observer.observe(nom, { attributes:true, attributeFilter:['class'] });
+  }
+
+  // Populate sales rep filter dropdown from data
+  var reps = [];
+  var seen = {};
+  allSales.forEach(function(s) {
+    if (!seen[s.salesRep]) { seen[s.salesRep] = true; reps.push(s.salesRep); }
+  });
+  reps.sort();
+  var dd = document.getElementById('filterRep');
+  reps.forEach(function(r) {
+    var opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    dd.appendChild(opt);
+  });
+
+  // Handle ?action=new from New Order dropdown on other pages
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'new') {
+    openAddModal();
+  }
+}
+init();
 </script>
 </body>
 </html>

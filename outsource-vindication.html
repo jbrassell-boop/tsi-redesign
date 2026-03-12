@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Outsource Validation | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC: Outsource Validation Cockpit ── */
+
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+    .filter-dd:focus{border-color:var(--navy)}
+
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .sn-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .sn-link:hover{text-decoration:underline}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-atvendor{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-returned{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-validated{background:#E0F2F1;color:#00695C;border-color:#80CBC4}
+    .b-flagged{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .b-pending{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+
+    /* Heat indicators */
+    .heat-red{color:var(--red);font-weight:700}
+    .heat-amber{color:var(--amber);font-weight:600}
+    .heat-green{color:var(--green);font-weight:500}
+    .heat-ok{color:var(--muted)}
+
+    /* Margin coloring */
+    .margin-positive{color:var(--green);font-weight:700}
+    .margin-negative{color:var(--red);font-weight:700}
+
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
+
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
+
+    /* ── Slide-Out Drawer ── */
+    .detail-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .detail-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .dtab:hover{color:var(--blue)}
+    .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+    .dpane{display:none;flex:1;min-height:0;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
+
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s;flex-shrink:0}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+    .toggle-row{display:flex;align-items:center;gap:10px;padding:3px 0}
+    .toggle{position:relative;width:38px;height:21px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#CBD5E0;border-radius:11px;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.18s}
+    .toggle input:checked + .toggle-slider{background:var(--navy)}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(17px)}
+    .toggle-label{font-size:11px;color:var(--text)}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+
+    /* Cost Bar */
+    .cost-bar-container{display:flex;flex-direction:column;gap:10px}
+    .cost-bar-row{display:flex;flex-direction:column;gap:3px}
+    .cost-bar-label{font-size:10px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;display:flex;justify-content:space-between}
+    .cost-bar-track{height:22px;background:#F0F4FA;border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+    .cost-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+    .cost-bar-vendor .cost-bar-fill{background:linear-gradient(90deg,var(--red),#EF4444)}
+    .cost-bar-inhouse .cost-bar-fill{background:linear-gradient(90deg,var(--green),#22C55E)}
+
+    /* Historical context */
+    .hist-item{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-bottom:1px solid var(--border)}
+    .hist-item:last-child{border-bottom:none}
+    .hist-label{font-size:9.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.2px}
+    .hist-val{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* Empty state */
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--muted);text-align:center;gap:8px}
+    .empty-state svg{width:40px;height:40px;stroke:var(--border-dk);fill:none;stroke-width:1.5}
+    .empty-state .empty-title{font-size:13px;font-weight:600;color:var(--steel)}
+    .empty-state .empty-sub{font-size:11px}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:860px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:70vh}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">&#128230;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Outsourced</div></div>
+        </div>
+        <div class="stat-chip" id="kpiSpend" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#FEF2F2">&#128176;</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiSpendVal">$0</div><div class="s-lbl">Outsource Spend</div></div>
+        </div>
+        <div class="stat-chip" id="kpiMargin" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E8F5E9">&#128202;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiMarginVal">0%</div><div class="s-lbl">Avg Margin</div></div>
+        </div>
+        <div class="stat-chip" id="kpiNegative" onclick="chipFilter('Flagged')">
+          <div class="s-icon" style="background:#FEF2F2">&#9888;</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiNegativeVal">0</div><div class="s-lbl">Negative Margin</div></div>
+        </div>
+        <div class="stat-chip" id="kpiTopVendor" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#FFFBEB">&#127981;</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiTopVendorVal">--</div><div class="s-lbl" id="kpiTopVendorLbl">Top Vendor Spend</div></div>
+        </div>
+        <div class="stat-chip" id="kpiDaysOut" onclick="chipFilter('At Vendor')">
+          <div class="s-icon" style="background:#EFF6FF">&#9201;</div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiDaysOutVal">0d</div><div class="s-lbl">Avg Days Out</div></div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <span class="filter-label">Status</span>
+        <div class="seg-group" id="segStatus">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+          <button class="seg-btn" data-val="At Vendor" onclick="setSegFilter('status','At Vendor',this)">At Vendor</button>
+          <button class="seg-btn" data-val="Returned" onclick="setSegFilter('status','Returned',this)">Returned</button>
+          <button class="seg-btn" data-val="Pending Review" onclick="setSegFilter('status','Pending Review',this)">Pending Review</button>
+          <button class="seg-btn" data-val="Validated" onclick="setSegFilter('status','Validated',this)">Validated</button>
+          <button class="seg-btn" data-val="Flagged" onclick="setSegFilter('status','Flagged',this)">Flagged</button>
+        </div>
+        <div class="filter-sep"></div>
+        <select class="filter-dd" id="filterVendor" onchange="filters.vendor=this.value;currentPage=1;runPipeline()">
+          <option value="">All Vendors</option>
+        </select>
+        <select class="filter-dd" id="filterLocation" onchange="filters.location=this.value;currentPage=1;runPipeline()" style="min-width:120px">
+          <option value="">All Locations</option>
+          <option value="Upper Chichester">Upper Chichester</option>
+          <option value="Nashville">Nashville</option>
+        </select>
+        <div class="filter-sep"></div>
+        <span class="filter-label">From</span>
+        <input type="date" class="filter-dd" id="filterDateFrom" onchange="filters.dateFrom=this.value;currentPage=1;runPipeline()" style="min-width:120px"/>
+        <span class="filter-label">To</span>
+        <input type="date" class="filter-dd" id="filterDateTo" onchange="filters.dateTo=this.value;currentPage=1;runPipeline()" style="min-width:120px"/>
+        <input class="search-input" id="searchInput" placeholder="Search WO#, serial, client, vendor..." oninput="debounceSearch()" style="margin-left:auto"/>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:80px" onclick="sortBy('lRepairKey')">WO# <span class="sort"></span></th>
+              <th style="width:100px" onclick="sortBy('sSerialNumber')">Serial# <span class="sort"></span></th>
+              <th style="width:100px" onclick="sortBy('sScopeTypeDesc')">Scope Type <span class="sort"></span></th>
+              <th onclick="sortBy('sClientName')">Client <span class="sort"></span></th>
+              <th style="width:120px" onclick="sortBy('sVendorName')">Vendor <span class="sort"></span></th>
+              <th style="width:85px" onclick="sortBy('dtSentDate')">Sent Date <span class="sort"></span></th>
+              <th style="width:65px;text-align:center" onclick="sortBy('daysOut')">Days Out <span class="sort"></span></th>
+              <th style="width:90px;text-align:right" onclick="sortBy('dblOutSourceCost')">Vendor Cost <span class="sort"></span></th>
+              <th style="width:90px;text-align:right" onclick="sortBy('dblAmtRepair')">TSI Charge <span class="sort"></span></th>
+              <th style="width:80px;text-align:right" onclick="sortBy('marginDollar')">Margin $ <span class="sort"></span></th>
+              <th style="width:65px;text-align:right" onclick="sortBy('marginPct')">Margin % <span class="sort"></span></th>
+              <th style="width:85px" onclick="sortBy('status')">Status <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="mainTbody">
+            <tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted)">Loading outsourced repairs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">0 records</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select" id="rowsSelect" onchange="changePageSize(this.value)">
+              <option>15</option><option selected>25</option><option>50</option><option>All</option>
+            </select>
+          </div>
+          <div class="pagination" id="paginationBtns"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('openRepair')"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Open Repair</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('markReturned')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Mark Returned</div>
+  <div class="ctx-item" onclick="ctxAction('markValidated')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Mark Validated</div>
+  <div class="ctx-item danger" onclick="ctxAction('flag')"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>Flag for Review</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('exportPdf')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Export PDF</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DETAIL DRAWER -->
+<div class="detail-drawer" id="detailDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerTitle">--</div>
+      <div class="dh-sub" id="drawerSub">--</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="dtab" onclick="switchTab('costs',this)">Cost Breakdown</div>
+    <div class="dtab" onclick="switchTab('docs',this)">Documents</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="dpane active" id="dpane-overview">
+    <div class="section-card">
+      <div class="section-head">Repair Info</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>WO #</label><input id="fWO" readonly/></div>
+          <div class="field"><label>Serial #</label><input id="fSerial" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Scope Type</label><input id="fScopeType" readonly/></div>
+          <div class="field"><label>Instrument Type</label><input id="fInstType" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Client</label><input id="fClient" readonly/></div>
+          <div class="field"><label>Department</label><input id="fDept" readonly/></div>
+        </div>
+        <div class="field"><label>Location</label><input id="fLocation" readonly/></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Vendor Info</div>
+      <div class="section-body">
+        <div class="field"><label>Vendor Name</label><input id="fVendorName" readonly/></div>
+        <div class="g2">
+          <div class="field"><label>Tracking # Out</label><input id="fTrackOut" readonly/></div>
+          <div class="field"><label>Tracking # Return</label><input id="fTrackReturn" readonly/></div>
+        </div>
+        <div class="g3">
+          <div class="field"><label>Date Sent</label><input id="fDateSent" readonly/></div>
+          <div class="field"><label>Date Returned</label><input id="fDateReturn" readonly/></div>
+          <div class="field"><label>Days Out</label><input id="fDaysOut" readonly/></div>
+        </div>
+        <div class="field"><label>Service Level</label><input id="fServiceLevel" readonly/></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Cost Analysis</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Vendor Cost</label><input id="fVendorCost" readonly/></div>
+          <div class="field"><label>TSI Charge</label><input id="fTsiCharge" readonly/></div>
+        </div>
+        <div class="g3">
+          <div class="field"><label>Parts Cost</label><input id="fPartsCost" readonly/></div>
+          <div class="field"><label>Labor Est.</label><input id="fLaborEst" readonly/></div>
+          <div class="field"><label>Shipping</label><input id="fShipping" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Margin $</label><input id="fMarginDollar" readonly/></div>
+          <div class="field"><label>Margin %</label><input id="fMarginPct" readonly/></div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="fInHouse"/><span class="toggle-slider"></span></label>
+          <span class="toggle-label">Could TSI do this in-house?</span>
+        </div>
+        <div class="field">
+          <label>Validation Status</label>
+          <select id="fValidationStatus">
+            <option>Pending</option>
+            <option>Validated</option>
+            <option>Flagged</option>
+          </select>
+        </div>
+        <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Validation notes..."></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Breakdown Tab -->
+  <div class="dpane" id="dpane-costs">
+    <div class="section-card">
+      <div class="section-head">Vendor vs In-House Comparison</div>
+      <div class="section-body">
+        <div class="cost-bar-container">
+          <div class="cost-bar-row cost-bar-vendor">
+            <div class="cost-bar-label"><span>Vendor Cost</span><span id="barVendorAmt">$0</span></div>
+            <div class="cost-bar-track"><div class="cost-bar-fill" id="barVendor" style="width:0"></div></div>
+          </div>
+          <div class="cost-bar-row cost-bar-inhouse">
+            <div class="cost-bar-label"><span>Est. In-House Cost</span><span id="barInHouseAmt">$0</span></div>
+            <div class="cost-bar-track"><div class="cost-bar-fill" id="barInHouse" style="width:0"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Cost Components</div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Component</th><th style="text-align:right">Vendor</th><th style="text-align:right">In-House Est.</th></tr></thead>
+          <tbody>
+            <tr><td>Parts</td><td style="text-align:right" id="ccVendorParts">--</td><td style="text-align:right" id="ccInHouseParts">--</td></tr>
+            <tr><td>Labor</td><td style="text-align:right" id="ccVendorLabor">--</td><td style="text-align:right" id="ccInHouseLabor">--</td></tr>
+            <tr><td>Shipping</td><td style="text-align:right" id="ccVendorShipping">--</td><td style="text-align:right" id="ccInHouseShipping">--</td></tr>
+            <tr><td>Markup</td><td style="text-align:right" id="ccVendorMarkup">--</td><td style="text-align:right" id="ccInHouseMarkup">--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Historical Context</div>
+      <div class="section-body">
+        <div class="hist-item">
+          <div class="hist-label" id="histVendorLabel">This vendor's avg for this scope type</div>
+          <div class="hist-val" id="histVendorAvg">--</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-label">Similar in-house repairs avg</div>
+          <div class="hist-val" id="histInHouseAvg">--</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-label">Potential savings if in-house</div>
+          <div class="hist-val" id="histSavings" style="color:var(--green)">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Tab -->
+  <div class="dpane" id="dpane-docs">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <div class="empty-title">No documents attached</div>
+      <div class="empty-sub">Vendor invoices, POs, and supporting documents will appear here.</div>
+      <button class="btn btn-outline" style="margin-top:8px;padding:6px 16px;font-size:11px" disabled>Upload Document</button>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span style="font-size:10.5px;color:var(--muted)">Outsource record detail</span>
+    <button class="btn btn-navy" style="padding:5px 14px;font-size:11px" onclick="closeDrawer()">Close</button>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+/* ─── STATE ─── */
+let allRecords = [], filteredRecords = [], displayRecords = [];
+let selectedKey = null, isLive = false;
+let currentPage = 1, pageSize = 25;
+let sortCol = 'dtSentDate', sortDir = 'desc';
+let filters = { status:'', vendor:'', location:'', search:'', dateFrom:'', dateTo:'' };
+let ctxKey = null;
+let _searchTimer;
+
+/* ─── HELPERS ─── */
+function fmtMoney(n) {
+  if (n == null) return '--';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtMoneyShort(n) {
+  if (n == null) return '--';
+  if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtDate(d) {
+  if (!d) return '--';
+  const dt = new Date(d);
+  return ((dt.getMonth()+1)+'').padStart(2,'0') + '/' + (dt.getDate()+'').padStart(2,'0') + '/' + dt.getFullYear();
+}
+function statusBadge(status) {
+  const map = {
+    'At Vendor':'b-atvendor','Returned':'b-returned',
+    'Pending Review':'b-pending','Validated':'b-validated','Flagged':'b-flagged'
+  };
+  return '<span class="badge '+(map[status]||'')+'">'+status+'</span>';
+}
+function marginClass(pct) {
+  if (pct < 0) return 'margin-negative';
+  if (pct < 20) return 'heat-amber';
+  return 'margin-positive';
+}
+function daysClass(days) {
+  if (days > 14) return 'heat-red';
+  if (days > 7) return 'heat-amber';
+  return 'heat-ok';
+}
+function daysBetween(d1, d2) {
+  if (!d1) return 0;
+  var a = new Date(d1), b = d2 ? new Date(d2) : new Date();
+  return Math.round((b - a) / 86400000);
+}
+
+/* ─── DEMO DATA ─── */
+function getDemoData() {
+  var today = new Date();
+  function ago(d) { var x = new Date(today); x.setDate(x.getDate()-d); return x.toISOString().slice(0,10); }
+  return [
+    { lRepairKey:30101, sSerialNumber:'GIF190N-4421', sScopeTypeDesc:'GIF-XP190N', sInstrumentType:'Flexible', sClientName:'Johns Hopkins', sDepartmentName:'Endoscopy', sVendorName:'Karl Storz Repair', lSupplierKey:101, sTrackingOut:'1Z999AA10412345678', sTrackingReturn:'1Z999AA10412345679', dtSentDate:ago(22), dtReturnDate:ago(3), daysOut:19, dblOutSourceCost:3200.00, dblAmtRepair:4800.00, marginDollar:1600.00, marginPct:33.33, status:'Validated', sLocation:'Upper Chichester', estInHouseCost:2600.00, estParts:1200.00, estLabor:1000.00, estShipping:150.00, vendorParts:1500.00, vendorLabor:1200.00, vendorShipping:200.00, vendorMarkup:300.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30102, sSerialNumber:'CFH190L-8832', sScopeTypeDesc:'CF-HQ190L', sInstrumentType:'Flexible', sClientName:'Cleveland Clinic', sDepartmentName:'GI Lab', sVendorName:'Olympus Repair Depot', lSupplierKey:103, sTrackingOut:'1Z888BB20523456789', sTrackingReturn:null, dtSentDate:ago(18), dtReturnDate:null, daysOut:18, dblOutSourceCost:4100.00, dblAmtRepair:3500.00, marginDollar:-600.00, marginPct:-17.14, status:'Flagged', sLocation:'Upper Chichester', estInHouseCost:2800.00, estParts:1400.00, estLabor:1100.00, estShipping:100.00, vendorParts:1800.00, vendorLabor:1500.00, vendorShipping:300.00, vendorMarkup:500.00, serviceLevel:'Expedited', notes:'Vendor cost exceeds customer charge. Negotiate pricing.' },
+    { lRepairKey:30103, sSerialNumber:'BFH190-1155', sScopeTypeDesc:'BF-H190', sInstrumentType:'Flexible', sClientName:'Mayo Clinic', sDepartmentName:'Pulmonology', sVendorName:'Stryker Service Center', lSupplierKey:102, sTrackingOut:'1Z777CC30634567890', sTrackingReturn:'1Z777CC30634567891', dtSentDate:ago(30), dtReturnDate:ago(10), daysOut:20, dblOutSourceCost:2850.00, dblAmtRepair:4200.00, marginDollar:1350.00, marginPct:32.14, status:'Validated', sLocation:'Nashville', estInHouseCost:2200.00, estParts:1000.00, estLabor:900.00, estShipping:120.00, vendorParts:1300.00, vendorLabor:1050.00, vendorShipping:250.00, vendorMarkup:250.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30104, sSerialNumber:'WA50042A-0099', sScopeTypeDesc:'WA50042A', sInstrumentType:'Rigid', sClientName:'HCA West Kendall', sDepartmentName:'Surgery', sVendorName:'Karl Storz Repair', lSupplierKey:101, sTrackingOut:'1Z666DD40745678901', sTrackingReturn:null, dtSentDate:ago(5), dtReturnDate:null, daysOut:5, dblOutSourceCost:1200.00, dblAmtRepair:1950.00, marginDollar:750.00, marginPct:38.46, status:'At Vendor', sLocation:'Upper Chichester', estInHouseCost:800.00, estParts:350.00, estLabor:350.00, estShipping:50.00, vendorParts:500.00, vendorLabor:450.00, vendorShipping:100.00, vendorMarkup:150.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30105, sSerialNumber:'CV190-3377', sScopeTypeDesc:'CV-190', sInstrumentType:'Camera', sClientName:'Cedars-Sinai', sDepartmentName:'Endoscopy Suite', sVendorName:'Olympus Repair Depot', lSupplierKey:103, sTrackingOut:'1Z555EE50856789012', sTrackingReturn:'1Z555EE50856789013', dtSentDate:ago(14), dtReturnDate:ago(2), daysOut:12, dblOutSourceCost:1800.00, dblAmtRepair:2700.00, marginDollar:900.00, marginPct:33.33, status:'Pending Review', sLocation:'Nashville', estInHouseCost:1500.00, estParts:700.00, estLabor:600.00, estShipping:80.00, vendorParts:800.00, vendorLabor:650.00, vendorShipping:150.00, vendorMarkup:200.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30106, sSerialNumber:'GIF190N-7712', sScopeTypeDesc:'GIF-XP190N', sInstrumentType:'Flexible', sClientName:'Johns Hopkins', sDepartmentName:'Endoscopy', sVendorName:'Machida Endoscope', lSupplierKey:104, sTrackingOut:'1Z444FF60967890123', sTrackingReturn:null, dtSentDate:ago(16), dtReturnDate:null, daysOut:16, dblOutSourceCost:4500.00, dblAmtRepair:3800.00, marginDollar:-700.00, marginPct:-18.42, status:'Flagged', sLocation:'Upper Chichester', estInHouseCost:2900.00, estParts:1500.00, estLabor:1100.00, estShipping:130.00, vendorParts:2000.00, vendorLabor:1600.00, vendorShipping:350.00, vendorMarkup:550.00, serviceLevel:'Expedited', notes:'Loss on this repair. Machida overcharging on labor.' },
+    { lRepairKey:30107, sSerialNumber:'CFH190L-2241', sScopeTypeDesc:'CF-HQ190L', sInstrumentType:'Flexible', sClientName:'Cleveland Clinic', sDepartmentName:'GI Lab', sVendorName:'Stryker Service Center', lSupplierKey:102, sTrackingOut:'1Z333GG71078901234', sTrackingReturn:'1Z333GG71078901235', dtSentDate:ago(25), dtReturnDate:ago(8), daysOut:17, dblOutSourceCost:2400.00, dblAmtRepair:3600.00, marginDollar:1200.00, marginPct:33.33, status:'Returned', sLocation:'Nashville', estInHouseCost:1900.00, estParts:900.00, estLabor:750.00, estShipping:100.00, vendorParts:1100.00, vendorLabor:850.00, vendorShipping:200.00, vendorMarkup:250.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30108, sSerialNumber:'BFH190-6643', sScopeTypeDesc:'BF-H190', sInstrumentType:'Flexible', sClientName:'Mayo Clinic', sDepartmentName:'Pulmonology', sVendorName:'Karl Storz Repair', lSupplierKey:101, sTrackingOut:'1Z222HH81189012345', sTrackingReturn:null, dtSentDate:ago(3), dtReturnDate:null, daysOut:3, dblOutSourceCost:950.00, dblAmtRepair:1500.00, marginDollar:550.00, marginPct:36.67, status:'At Vendor', sLocation:'Upper Chichester', estInHouseCost:700.00, estParts:300.00, estLabor:300.00, estShipping:50.00, vendorParts:400.00, vendorLabor:350.00, vendorShipping:80.00, vendorMarkup:120.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30109, sSerialNumber:'WA50042A-1188', sScopeTypeDesc:'WA50042A', sInstrumentType:'Rigid', sClientName:'HCA West Kendall', sDepartmentName:'Surgery', sVendorName:'Stryker Service Center', lSupplierKey:102, sTrackingOut:'1Z111II91290123456', sTrackingReturn:'1Z111II91290123457', dtSentDate:ago(12), dtReturnDate:ago(1), daysOut:11, dblOutSourceCost:1650.00, dblAmtRepair:2500.00, marginDollar:850.00, marginPct:34.00, status:'Pending Review', sLocation:'Nashville', estInHouseCost:1100.00, estParts:500.00, estLabor:450.00, estShipping:60.00, vendorParts:700.00, vendorLabor:600.00, vendorShipping:150.00, vendorMarkup:200.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30110, sSerialNumber:'CV190-9001', sScopeTypeDesc:'CV-190', sInstrumentType:'Camera', sClientName:'Cedars-Sinai', sDepartmentName:'Endoscopy Suite', sVendorName:'Machida Endoscope', lSupplierKey:104, sTrackingOut:'1Z000JJ02301234567', sTrackingReturn:'1Z000JJ02301234568', dtSentDate:ago(20), dtReturnDate:ago(5), daysOut:15, dblOutSourceCost:2200.00, dblAmtRepair:1800.00, marginDollar:-400.00, marginPct:-22.22, status:'Flagged', sLocation:'Upper Chichester', estInHouseCost:1400.00, estParts:650.00, estLabor:550.00, estShipping:80.00, vendorParts:950.00, vendorLabor:750.00, vendorShipping:200.00, vendorMarkup:300.00, serviceLevel:'Expedited', notes:'Camera unit loss. Customer charged below cost.' },
+    { lRepairKey:30111, sSerialNumber:'GIF190N-3305', sScopeTypeDesc:'GIF-XP190N', sInstrumentType:'Flexible', sClientName:'Mayo Clinic', sDepartmentName:'Gastroenterology', sVendorName:'Olympus Repair Depot', lSupplierKey:103, sTrackingOut:'1Z999KK13412345670', sTrackingReturn:'1Z999KK13412345671', dtSentDate:ago(35), dtReturnDate:ago(12), daysOut:23, dblOutSourceCost:3800.00, dblAmtRepair:5500.00, marginDollar:1700.00, marginPct:30.91, status:'Validated', sLocation:'Nashville', estInHouseCost:3100.00, estParts:1600.00, estLabor:1200.00, estShipping:140.00, vendorParts:1700.00, vendorLabor:1400.00, vendorShipping:300.00, vendorMarkup:400.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30112, sSerialNumber:'CFH190L-5504', sScopeTypeDesc:'CF-HQ190L', sInstrumentType:'Flexible', sClientName:'Johns Hopkins', sDepartmentName:'GI Lab', sVendorName:'Karl Storz Repair', lSupplierKey:101, sTrackingOut:'1Z888LL24523456781', sTrackingReturn:null, dtSentDate:ago(8), dtReturnDate:null, daysOut:8, dblOutSourceCost:2900.00, dblAmtRepair:4400.00, marginDollar:1500.00, marginPct:34.09, status:'At Vendor', sLocation:'Upper Chichester', estInHouseCost:2300.00, estParts:1100.00, estLabor:900.00, estShipping:110.00, vendorParts:1300.00, vendorLabor:1100.00, vendorShipping:200.00, vendorMarkup:300.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30113, sSerialNumber:'BFH190-8877', sScopeTypeDesc:'BF-H190', sInstrumentType:'Flexible', sClientName:'Cleveland Clinic', sDepartmentName:'Pulmonology', sVendorName:'Machida Endoscope', lSupplierKey:104, sTrackingOut:'1Z777MM35634567892', sTrackingReturn:'1Z777MM35634567893', dtSentDate:ago(28), dtReturnDate:ago(9), daysOut:19, dblOutSourceCost:3100.00, dblAmtRepair:2400.00, marginDollar:-700.00, marginPct:-29.17, status:'Flagged', sLocation:'Nashville', estInHouseCost:2000.00, estParts:950.00, estLabor:800.00, estShipping:100.00, vendorParts:1400.00, vendorLabor:1100.00, vendorShipping:250.00, vendorMarkup:350.00, serviceLevel:'Expedited', notes:'Machida consistently over market rate. Consider in-house.' },
+    { lRepairKey:30114, sSerialNumber:'WA50042A-4466', sScopeTypeDesc:'WA50042A', sInstrumentType:'Rigid', sClientName:'Cedars-Sinai', sDepartmentName:'Surgery', sVendorName:'Olympus Repair Depot', lSupplierKey:103, sTrackingOut:'1Z666NN46745678903', sTrackingReturn:'1Z666NN46745678904', dtSentDate:ago(10), dtReturnDate:ago(1), daysOut:9, dblOutSourceCost:1400.00, dblAmtRepair:2100.00, marginDollar:700.00, marginPct:33.33, status:'Returned', sLocation:'Upper Chichester', estInHouseCost:950.00, estParts:400.00, estLabor:400.00, estShipping:60.00, vendorParts:600.00, vendorLabor:500.00, vendorShipping:120.00, vendorMarkup:180.00, serviceLevel:'Standard', notes:'' },
+    { lRepairKey:30115, sSerialNumber:'CV190-5522', sScopeTypeDesc:'CV-190', sInstrumentType:'Camera', sClientName:'HCA West Kendall', sDepartmentName:'Endoscopy', sVendorName:'Stryker Service Center', lSupplierKey:102, sTrackingOut:'1Z555OO57856789014', sTrackingReturn:'1Z555OO57856789015', dtSentDate:ago(15), dtReturnDate:ago(4), daysOut:11, dblOutSourceCost:1950.00, dblAmtRepair:3000.00, marginDollar:1050.00, marginPct:35.00, status:'Pending Review', sLocation:'Nashville', estInHouseCost:1550.00, estParts:750.00, estLabor:600.00, estShipping:80.00, vendorParts:850.00, vendorLabor:700.00, vendorShipping:170.00, vendorMarkup:230.00, serviceLevel:'Standard', notes:'' }
+  ];
+}
+
+/* ─── DATA LOADING ─── */
+async function loadRecords() {
+  try {
+    var data = await API.repair.getAllRepairList({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{} });
+    if (data && data.length) {
+      allRecords = data.filter(function(r) { return r.dblOutSourceCost > 0; });
+      isLive = true;
+    } else { throw new Error('empty'); }
+  } catch(e) {
+    allRecords = getDemoData();
+    isLive = false;
+  }
+  // Ensure computed fields
+  allRecords.forEach(function(r) {
+    if (r.daysOut == null && r.dtSentDate) r.daysOut = daysBetween(r.dtSentDate, r.dtReturnDate);
+    if (r.marginDollar == null) r.marginDollar = (r.dblAmtRepair||0) - (r.dblOutSourceCost||0);
+    if (r.marginPct == null && r.dblAmtRepair) r.marginPct = ((r.marginDollar / r.dblAmtRepair) * 100);
+    if (r.marginPct == null) r.marginPct = 0;
+  });
+  runPipeline();
+}
+
+/* ─── PIPELINE ─── */
+function runPipeline() {
+  applyFilters();
+  applySort();
+  paginate();
+  renderTable();
+  updateKPIs();
+  updatePagination();
+}
+
+function applyFilters() {
+  filteredRecords = allRecords.filter(function(r) {
+    if (filters.status && r.status !== filters.status) return false;
+    if (filters.vendor && r.sVendorName !== filters.vendor) return false;
+    if (filters.location && r.sLocation !== filters.location) return false;
+    if (filters.dateFrom && r.dtSentDate < filters.dateFrom) return false;
+    if (filters.dateTo && r.dtSentDate > filters.dateTo) return false;
+    if (filters.search) {
+      var s = filters.search.toLowerCase();
+      var hay = ((r.lRepairKey||'')+'|'+(r.sSerialNumber||'')+'|'+(r.sScopeTypeDesc||'')+'|'+(r.sClientName||'')+'|'+(r.sVendorName||'')).toLowerCase();
+      if (hay.indexOf(s) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function applySort() {
+  var col = sortCol, dir = sortDir === 'asc' ? 1 : -1;
+  filteredRecords.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (typeof va === 'string') return va.localeCompare(vb) * dir;
+    return (va - vb) * dir;
+  });
+}
+
+function paginate() {
+  if (pageSize >= filteredRecords.length) {
+    displayRecords = filteredRecords;
+  } else {
+    var start = (currentPage - 1) * pageSize;
+    displayRecords = filteredRecords.slice(start, start + pageSize);
+  }
+}
+
+/* ─── RENDER TABLE ─── */
+function renderTable() {
+  var tbody = document.getElementById('mainTbody');
+  if (!displayRecords.length) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted)">No records match current filters.</td></tr>';
+    return;
+  }
+  var html = '';
+  displayRecords.forEach(function(r) {
+    var dc = daysClass(r.daysOut);
+    var mc = marginClass(r.marginPct);
+    var sel = r.lRepairKey === selectedKey ? ' selected' : '';
+    html += '<tr class="'+sel+'" onclick="openDrawer('+r.lRepairKey+')" oncontextmenu="onCtx(event,'+r.lRepairKey+')">';
+    html += '<td><span class="sn-link" onclick="event.stopPropagation();openDrawer('+r.lRepairKey+')">'+r.lRepairKey+'</span></td>';
+    html += '<td>'+r.sSerialNumber+'</td>';
+    html += '<td>'+r.sScopeTypeDesc+'</td>';
+    html += '<td>'+r.sClientName+'</td>';
+    html += '<td>'+r.sVendorName+'</td>';
+    html += '<td>'+fmtDate(r.dtSentDate)+'</td>';
+    html += '<td style="text-align:center" class="'+dc+'">'+r.daysOut+'d</td>';
+    html += '<td style="text-align:right">'+fmtMoney(r.dblOutSourceCost)+'</td>';
+    html += '<td style="text-align:right">'+fmtMoney(r.dblAmtRepair)+'</td>';
+    html += '<td style="text-align:right" class="'+mc+'">'+fmtMoney(r.marginDollar)+'</td>';
+    html += '<td style="text-align:right" class="'+mc+'">'+r.marginPct.toFixed(1)+'%</td>';
+    html += '<td>'+statusBadge(r.status)+'</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  // Update sort header indicators
+  document.querySelectorAll('.table-wrap thead th').forEach(function(th) {
+    th.classList.remove('sorted','asc','desc');
+  });
+  var idx = ['lRepairKey','sSerialNumber','sScopeTypeDesc','sClientName','sVendorName','dtSentDate','daysOut','dblOutSourceCost','dblAmtRepair','marginDollar','marginPct','status'].indexOf(sortCol);
+  if (idx >= 0) {
+    var ths = document.querySelectorAll('.table-wrap thead th');
+    ths[idx].classList.add('sorted', sortDir);
+  }
+}
+
+/* ─── KPIs ─── */
+function updateKPIs() {
+  var recs = filteredRecords;
+  document.getElementById('kpiTotalVal').textContent = recs.length;
+
+  var totalSpend = recs.reduce(function(s,r){ return s + (r.dblOutSourceCost||0); }, 0);
+  document.getElementById('kpiSpendVal').textContent = fmtMoneyShort(totalSpend);
+
+  var avgMargin = recs.length ? recs.reduce(function(s,r){ return s + (r.marginPct||0); },0) / recs.length : 0;
+  var mEl = document.getElementById('kpiMarginVal');
+  mEl.textContent = avgMargin.toFixed(1) + '%';
+  mEl.className = 's-val ' + (avgMargin >= 0 ? 's-green' : 's-red');
+
+  var negCount = recs.filter(function(r){ return r.marginDollar < 0; }).length;
+  document.getElementById('kpiNegativeVal').textContent = negCount;
+
+  // Top vendor spend
+  var vendorSpend = {};
+  recs.forEach(function(r) {
+    vendorSpend[r.sVendorName] = (vendorSpend[r.sVendorName]||0) + (r.dblOutSourceCost||0);
+  });
+  var topVendor = '', topVal = 0;
+  Object.keys(vendorSpend).forEach(function(v) {
+    if (vendorSpend[v] > topVal) { topVal = vendorSpend[v]; topVendor = v; }
+  });
+  document.getElementById('kpiTopVendorVal').textContent = fmtMoneyShort(topVal);
+  document.getElementById('kpiTopVendorLbl').textContent = topVendor || 'Top Vendor Spend';
+
+  var avgDays = recs.length ? recs.reduce(function(s,r){ return s + (r.daysOut||0); },0) / recs.length : 0;
+  document.getElementById('kpiDaysOutVal').textContent = Math.round(avgDays) + 'd';
+}
+
+/* ─── PAGINATION ─── */
+function updatePagination() {
+  var total = filteredRecords.length;
+  var start = Math.min((currentPage-1)*pageSize+1, total);
+  var end = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = total + ' records' + (total > pageSize ? ' (showing '+start+'–'+end+')' : '');
+
+  var totalPages = Math.ceil(total / pageSize) || 1;
+  var btns = '';
+  btns += '<button class="pg-btn" onclick="goPage(1)" '+(currentPage<=1?'disabled':'')+'>&#171;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage<=1?'disabled':'')+'>&#8249;</button>';
+  for (var i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++) {
+    btns += '<button class="pg-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage>=totalPages?'disabled':'')+'>&#8250;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+totalPages+')" '+(currentPage>=totalPages?'disabled':'')+'>&#187;</button>';
+  document.getElementById('paginationBtns').innerHTML = btns;
+}
+
+function goPage(n) {
+  var totalPages = Math.ceil(filteredRecords.length / pageSize) || 1;
+  if (n < 1 || n > totalPages) return;
+  currentPage = n;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+function changePageSize(val) {
+  if (val === 'All') { pageSize = 99999; } else { pageSize = parseInt(val)||25; }
+  currentPage = 1;
+  runPipeline();
+}
+
+/* ─── FILTERS ─── */
+function chipFilter(status) {
+  filters.status = status;
+  // Update seg buttons
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-val') === status);
+  });
+  // Update chip highlights
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  if (status === 'Flagged') document.getElementById('kpiNegative').classList.add('active-chip');
+  else if (status === 'At Vendor') document.getElementById('kpiDaysOut').classList.add('active-chip');
+  else if (status === '') document.getElementById('kpiTotal').classList.add('active-chip');
+  currentPage = 1;
+  runPipeline();
+}
+
+function setSegFilter(group, val, btn) {
+  filters.status = val;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  currentPage = 1;
+  runPipeline();
+}
+
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function() {
+    filters.search = document.getElementById('searchInput').value.trim();
+    currentPage = 1;
+    runPipeline();
+  }, 300);
+}
+
+/* ─── SORT ─── */
+function sortBy(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = 'asc'; }
+  runPipeline();
+}
+
+/* ─── CONTEXT MENU ─── */
+function onCtx(e, key) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxKey = key;
+  var menu = document.getElementById('ctxMenu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.style.display = 'block';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  var rec = allRecords.find(function(r) { return r.lRepairKey === ctxKey; });
+  if (!rec) return;
+  switch(action) {
+    case 'view': openDrawer(ctxKey); break;
+    case 'openRepair': window.location = 'repairs.html?key='+ctxKey; break;
+    case 'markReturned':
+      rec.status = 'Returned';
+      rec.dtReturnDate = new Date().toISOString().slice(0,10);
+      rec.daysOut = daysBetween(rec.dtSentDate, rec.dtReturnDate);
+      runPipeline();
+      break;
+    case 'markValidated':
+      rec.status = 'Validated';
+      runPipeline();
+      break;
+    case 'flag':
+      rec.status = 'Flagged';
+      runPipeline();
+      break;
+    case 'exportPdf':
+      alert('PDF export for WO# '+rec.lRepairKey+' — not yet implemented.');
+      break;
+  }
+}
+
+/* ─── DRAWER ─── */
+function openDrawer(key) {
+  selectedKey = key;
+  var rec = allRecords.find(function(r) { return r.lRepairKey === key; });
+  if (!rec) return;
+  populateDrawer(rec);
+  populateCostBreakdown(rec);
+  document.getElementById('detailDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  // Re-render table to highlight selected row
+  renderTable();
+  // Reset to overview tab
+  switchTab('overview', document.querySelector('.dtab'));
+}
+
+function closeDrawer() {
+  selectedKey = null;
+  document.getElementById('detailDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  renderTable();
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.dtab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dpane').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('dpane-'+id).classList.add('active');
+}
+
+function populateDrawer(r) {
+  document.getElementById('drawerTitle').textContent = 'WO# ' + r.lRepairKey;
+  document.getElementById('drawerSub').textContent = r.sSerialNumber + ' — ' + r.sScopeTypeDesc + ' — ' + r.sClientName;
+
+  document.getElementById('fWO').value = r.lRepairKey;
+  document.getElementById('fSerial').value = r.sSerialNumber || '';
+  document.getElementById('fScopeType').value = r.sScopeTypeDesc || '';
+  document.getElementById('fInstType').value = r.sInstrumentType || '';
+  document.getElementById('fClient').value = r.sClientName || '';
+  document.getElementById('fDept').value = r.sDepartmentName || '';
+  document.getElementById('fLocation').value = r.sLocation || '';
+
+  document.getElementById('fVendorName').value = r.sVendorName || '';
+  document.getElementById('fTrackOut').value = r.sTrackingOut || '';
+  document.getElementById('fTrackReturn').value = r.sTrackingReturn || '--';
+  document.getElementById('fDateSent').value = fmtDate(r.dtSentDate);
+  document.getElementById('fDateReturn').value = r.dtReturnDate ? fmtDate(r.dtReturnDate) : 'Still out';
+  document.getElementById('fDaysOut').value = r.daysOut + ' days';
+  document.getElementById('fServiceLevel').value = r.serviceLevel || 'Standard';
+
+  document.getElementById('fVendorCost').value = fmtMoney(r.dblOutSourceCost);
+  document.getElementById('fTsiCharge').value = fmtMoney(r.dblAmtRepair);
+  document.getElementById('fPartsCost').value = fmtMoney(r.estParts);
+  document.getElementById('fLaborEst').value = fmtMoney(r.estLabor);
+  document.getElementById('fShipping').value = fmtMoney(r.estShipping);
+
+  var mEl = document.getElementById('fMarginDollar');
+  mEl.value = fmtMoney(r.marginDollar);
+  mEl.style.color = r.marginDollar < 0 ? 'var(--red)' : 'var(--green)';
+
+  var pEl = document.getElementById('fMarginPct');
+  pEl.value = r.marginPct.toFixed(1) + '%';
+  pEl.style.color = r.marginPct < 0 ? 'var(--red)' : r.marginPct < 20 ? 'var(--amber)' : 'var(--green)';
+
+  document.getElementById('fInHouse').checked = r.estInHouseCost < r.dblOutSourceCost;
+
+  var vs = document.getElementById('fValidationStatus');
+  if (r.status === 'Validated') vs.value = 'Validated';
+  else if (r.status === 'Flagged') vs.value = 'Flagged';
+  else vs.value = 'Pending';
+
+  document.getElementById('fNotes').value = r.notes || '';
+}
+
+function populateCostBreakdown(r) {
+  var max = Math.max(r.dblOutSourceCost||1, r.estInHouseCost||1, 1);
+  document.getElementById('barVendor').style.width = ((r.dblOutSourceCost / max) * 100) + '%';
+  document.getElementById('barInHouse').style.width = ((r.estInHouseCost / max) * 100) + '%';
+  document.getElementById('barVendorAmt').textContent = fmtMoney(r.dblOutSourceCost);
+  document.getElementById('barInHouseAmt').textContent = fmtMoney(r.estInHouseCost);
+
+  document.getElementById('ccVendorParts').textContent = fmtMoney(r.vendorParts);
+  document.getElementById('ccInHouseParts').textContent = fmtMoney(r.estParts);
+  document.getElementById('ccVendorLabor').textContent = fmtMoney(r.vendorLabor);
+  document.getElementById('ccInHouseLabor').textContent = fmtMoney(r.estLabor);
+  document.getElementById('ccVendorShipping').textContent = fmtMoney(r.vendorShipping);
+  document.getElementById('ccInHouseShipping').textContent = fmtMoney(r.estShipping);
+  document.getElementById('ccVendorMarkup').textContent = fmtMoney(r.vendorMarkup);
+  document.getElementById('ccInHouseMarkup').textContent = fmtMoney(0);
+
+  // Historical context — compute from allRecords
+  var sameVendorType = allRecords.filter(function(x) { return x.sVendorName === r.sVendorName && x.sScopeTypeDesc === r.sScopeTypeDesc; });
+  var svAvg = sameVendorType.length ? sameVendorType.reduce(function(s,x){ return s + x.dblOutSourceCost; },0) / sameVendorType.length : 0;
+  document.getElementById('histVendorLabel').textContent = r.sVendorName + "'s avg for " + r.sScopeTypeDesc;
+  document.getElementById('histVendorAvg').textContent = fmtMoney(svAvg) + ' (' + sameVendorType.length + ' repairs)';
+
+  var sameType = allRecords.filter(function(x) { return x.sScopeTypeDesc === r.sScopeTypeDesc; });
+  var ihAvg = sameType.length ? sameType.reduce(function(s,x){ return s + (x.estInHouseCost||0); },0) / sameType.length : 0;
+  document.getElementById('histInHouseAvg').textContent = fmtMoney(ihAvg) + ' (' + sameType.length + ' repairs)';
+
+  var savings = r.dblOutSourceCost - (r.estInHouseCost||0);
+  var savEl = document.getElementById('histSavings');
+  savEl.textContent = fmtMoney(savings);
+  savEl.style.color = savings > 0 ? 'var(--green)' : 'var(--red)';
+}
+
+/* ─── SERVICE LOCATION ─── */
+function changeServiceLocation() {
+  // In demo mode this is a no-op — live mode would reload
+  runPipeline();
+}
+
+/* ─── INIT ─── */
+async function init() {
+  if (!API.requireAuth()) return;
+  await loadRecords();
+
+  if (typeof API.UI !== 'undefined') {
+    API.UI.init();
+    API.UI.updateDemoBadge(isLive ? 'api' : 'demo');
+  } else {
+    var badge = document.getElementById('dataBadge');
+    if (badge) {
+      badge.textContent = isLive ? 'Live Data' : 'Demo Data';
+      badge.style.background = isLive ? '#E8F5E9' : '#FFFBEB';
+      badge.style.color = isLive ? '#2E7D32' : '#D97706';
+      badge.style.padding = '2px 8px';
+      badge.style.borderRadius = '10px';
+      badge.style.fontSize = '10.5px';
+      badge.style.fontWeight = '600';
+    }
+  }
+
+  // Dismiss context menu on click
+  document.addEventListener('click', function() {
+    document.getElementById('ctxMenu').style.display = 'none';
+    // Close newOrderMenu on outside click
+    var nom = document.getElementById('newOrderMenu');
+    if (nom) nom.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  // NewOrderMenu open/close via CSS class
+  var nom = document.getElementById('newOrderMenu');
+  if (nom) {
+    var observer = new MutationObserver(function() {
+      nom.style.display = nom.classList.contains('open') ? 'block' : 'none';
+    });
+    observer.observe(nom, { attributes:true, attributeFilter:['class'] });
+  }
+
+  // Populate vendor dropdown from data
+  var vendors = [];
+  var seen = {};
+  allRecords.forEach(function(r) {
+    if (!seen[r.sVendorName]) { seen[r.sVendorName] = true; vendors.push(r.sVendorName); }
+  });
+  vendors.sort();
+  var dd = document.getElementById('filterVendor');
+  vendors.forEach(function(v) {
+    var opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    dd.appendChild(opt);
+  });
+}
+init();
+</script>
+</body>
+</html>
