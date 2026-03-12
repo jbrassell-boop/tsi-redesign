@@ -687,7 +687,17 @@ async function loadItems() {
       API.getRepairItemsCatalog('Flexible'),
       API.getRepairItemsCatalog('Rigid')
     ]);
-    allItems = [...(Array.isArray(flex) ? flex : []), ...(Array.isArray(rigid) ? rigid : [])];
+    // Normalize catalog fields: API returns sItemDescription (not psItemDescription),
+    // psRigidOrFlexible is null — inject from which catalog call returned the item.
+    const norm = (items, type) => (Array.isArray(items) ? items : []).map(r => ({
+      ...r,
+      psItemDescription: r.psItemDescription || r.sItemDescription || '',
+      psTSICode:         r.psTSICode         || r.sTSICode         || '',
+      psPartOrLabor:     r.psPartOrLabor     || r.sPartOrLabor     || 'L',
+      psRigidOrFlexible: r.psRigidOrFlexible || type,
+      pbActive:          r.pbActive          ?? r.bActive          ?? true,
+    }));
+    allItems = [...norm(flex, 'F'), ...norm(rigid, 'R')];
     if (allItems.length === 0) throw new Error('Empty catalog response');
     showDataBadge(true);
   } catch(e) {
