@@ -71,9 +71,6 @@ const API = (() => {
     try {
       if (envelope.responseData && typeof envelope.responseData === 'string') {
         json = JSON.parse(envelope.responseData);
-      } else if (envelope.statusCode !== undefined) {
-        // Direct format (not wrapped)
-        json = envelope;
       } else {
         json = envelope;
       }
@@ -170,8 +167,6 @@ const API = (() => {
     try {
       if (envelope.responseData && typeof envelope.responseData === 'string') {
         json = JSON.parse(envelope.responseData);
-      } else if (envelope.statusCode !== undefined) {
-        json = envelope;
       } else {
         json = envelope;
       }
@@ -213,7 +208,7 @@ const API = (() => {
     const user = getUser();
     const defaults = {
       psRepairKeys: null, plUserKey: user?.lUserKey || null,
-      plServiceLocationKey: filters?.plServiceLocationKey || 1,
+      plServiceLocationKey: filters?.plServiceLocationKey || getUser()?.lServiceLocationKey || 1,
       chkIncludeCogentix: false, chkIncludeTS: false, chkHotList: false,
       sRowFilter: null, instrumentTypeValue: 'F', diameterValue: 'all', inHouseValue: true
     };
@@ -310,8 +305,8 @@ const API = (() => {
   async function getVideoImagesList(includeBlank) { return get('/ScopeModel/GetAllvideoImagesList?pbIncludeBlank=' + (includeBlank||false)); }
   async function getDiTypes(includeBlank) { return get('/ScopeModel/GetAllDiTypes?pbIncludeBlank=' + (includeBlank||false)); }
   async function addUpdateScopeType(data) { return post('/ScopeModel/AddUpdateScopeType', data); }
-  async function getScopeTypeAvgDays(scopeTypeKey) { return get('/ScopeModel/GetScopeTypeGetAverageDaysSinceLastIn?plScopeTypeKey=' + scopeTypeKey); }
-  async function getScopeTypeEpoxyAvg(scopeTypeKey) { return get('/ScopeModel/GetscopeTypeEpoxySizeRollingAvg?plScopeTypeKey=' + scopeTypeKey); }
+  async function getScopeTypeAvgDays(scopeTypeKey) { return get('/ScopeModel/GetScopeTypeGetAverageDaysSinceLastIn?plScopeTypeKey=' + scopeTypeKey); } // NOTE: backend endpoint has duplicate "Get"
+  async function getScopeTypeEpoxyAvg(scopeTypeKey) { return get('/ScopeModel/GetscopeTypeEpoxySizeRollingAvg?plScopeTypeKey=' + scopeTypeKey); } // NOTE: backend endpoint has lowercase "scope"
   async function getScopeTypeRepairItems(filters) { return post('/ScopeModel/GetScopeTypeRepairItem', filters); }
   async function addScopeTypeRepairItems(data) { return post('/ScopeModel/AddScopeTypeRepairItems', data); }
   async function updateScopeTypeRepairItems(data) { return post('/ScopeModel/UpdateScopeTypeRepairItems', data); }
@@ -454,9 +449,9 @@ const API = (() => {
   async function deleteProductSaleInventory(key) { return del('/ProductSales/DeleteProductSaleInventory?plProductSaleInventoryKey=' + key); }
   async function deleteProductSale(key) { return del('/ProductSales/DeleteProductSale?plProductSaleKey=' + key); }
   async function searchProductSales(invoice, po, desc) { return get('/ProductSales/ProductSalesSearch?psInvoiceNumber=' + (invoice||'') + '&psPONumber=' + (po||'') + '&psDescription2=' + (desc||'')); }
-  async function updateProductSaleInventoryQty(data) { return post('/ProductSales/UpdateProductSaleInverntoryQuantityAndUnitCost', data); }
-  async function addProductSaleInventoryLot(data) { return post('/ProductSales/AddProductSaleInverntoryLotNumberAndQuntity', data); }
-  async function updateProductSaleInventoryLot(data) { return post('/ProductSales/UpdateProductSaleInverntoryLotNumber', data); }
+  async function updateProductSaleInventoryQty(data) { return post('/ProductSales/UpdateProductSaleInverntoryQuantityAndUnitCost', data); } // NOTE: backend endpoint has typo "Inverntory" (should be "Inventory")
+  async function addProductSaleInventoryLot(data) { return post('/ProductSales/AddProductSaleInverntoryLotNumberAndQuntity', data); } // NOTE: backend endpoint has typos "Inverntory" and "Quntity"
+  async function updateProductSaleInventoryLot(data) { return post('/ProductSales/UpdateProductSaleInverntoryLotNumber', data); } // NOTE: backend endpoint has typo "Inverntory"
 
   // ── Contract (101) ────────────────────────────────────
   async function getContractsList(data) { return post('/Contract/GetAllContractsList', data); }
@@ -497,7 +492,7 @@ const API = (() => {
 
   // ── Financials (19) ───────────────────────────────────
   async function getOutstandingInvoices(data) { return post('/Financials/GetOutstandingInvoicesList', data); }
-  async function getOutstandingInvoiceById(key) { return get('/Financials/GetOutstandinInvoiceById?plInvoiceKey=' + key); }
+  async function getOutstandingInvoiceById(key) { return get('/Financials/GetOutstandinInvoiceById?plInvoiceKey=' + key); } // NOTE: backend endpoint has typo "Outstandin" (missing 'g')
   async function updateInvoiceStatus(data) { return post('/Financials/UpdateInvoiceStatusAndFollowUpDate', data); }
   async function importOutstandingInvoices(data) { return post('/Financials/ImportOutstandingInvoices', data); }
   async function getGLAccounts() { return get('/Financials/GetAllGLAccounts'); }
