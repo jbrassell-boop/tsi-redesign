@@ -2,6 +2,19 @@
 
 This file is read automatically by Claude Code on startup. Use it to pass context between sessions (web vs laptop).
 
+## Instructions for Claude
+
+**IMPORTANT — Session Handoff Protocol:**
+At the END of every session (before the user leaves), automatically update the "Session Log" section below with:
+1. What was done this session (bullet points)
+2. Any new bugs found or fixed
+3. Any remaining TODO items
+4. Commit this file and push so the next session (laptop or web) picks it up
+
+This ensures Joseph always has continuity whether he's on the web, his laptop (C: drive), or his phone.
+
+---
+
 ## Session Log
 
 ### 2026-03-12 — Bug Fixes, Test Framework, Outsource Validation Page
