@@ -1424,6 +1424,16 @@ document.querySelector('.split-left-search .btn-xs:last-child')?.addEventListene
   applyFilters();
 });
 
+// Normalize supplier boolean flags — API may use bIsActive / bIsPartsVendor variants
+function normalizeSupplier(s) {
+  s.bActive           = s.bActive           ?? s.bIsActive           ?? s.pbActive           ?? false;
+  s.bPartsVendor      = s.bPartsVendor      ?? s.bIsPartsVendor      ?? s.pbPartsVendor      ?? false;
+  s.bRepairVendor     = s.bRepairVendor     ?? s.bIsRepairVendor     ?? s.pbRepairVendor     ?? false;
+  s.bAcquisitionVendor= s.bAcquisitionVendor?? s.bIsAcquisitionVendor?? s.pbAcquisitionVendor?? false;
+  s.bCartsVendor      = s.bCartsVendor      ?? s.bIsCartsVendor      ?? s.pbCartsVendor      ?? false;
+  return s;
+}
+
 // ── Reload Suppliers ─────────────────────────────────
 async function reloadSuppliers() {
   try {
@@ -1431,7 +1441,7 @@ async function reloadSuppliers() {
     if (data && Array.isArray(data) && data.length > 0) {
       _liveMode = true;
       API.UI.updateDemoBadge('api');
-      _allSuppliers = data;
+      _allSuppliers = data.map(normalizeSupplier);
       console.log('[TSI Suppliers] Loaded', data.length, 'suppliers from API');
     } else {
       throw new Error('Empty response');

@@ -180,7 +180,13 @@ const API = (() => {
     }
 
     if (json.statusCode === 200) {
-      return json.data;
+      const d = json.data;
+      // Some paginated POST endpoints return { dataSource: [...], totalRecord: N }
+      // instead of a plain array — unwrap it so callers always get an array.
+      if (d && typeof d === 'object' && !Array.isArray(d) && Array.isArray(d.dataSource)) {
+        return d.dataSource;
+      }
+      return d;
     }
 
     throw new Error(json.message || 'API request failed');

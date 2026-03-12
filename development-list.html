@@ -499,14 +499,43 @@ function escHtml(s) {
 // ═══════════════════════════════════════
 //  LOAD DATA
 // ═══════════════════════════════════════
+// Normalize API field names (API uses camelCase; page uses Hungarian notation)
+function normalizeDevItem(r) {
+  const PRIORITY_MAP = {'High':1, 'Medium':2, 'Low':3};
+  return {
+    plToDoID:                   r.toDoID            ?? r.plToDoID            ?? 0,
+    psToDoTitle:                r.toDoTitle          ?? r.psToDoTitle         ?? '',
+    psToDoItem:                 r.toDoDetails        ?? r.toDoDescription     ?? r.psToDoItem ?? '',
+    plToDoStatusID:             r.toDoStatusID       ?? r.plToDoStatusID      ?? 1,
+    plToDoPriorityKey:          r.toDoPriorityID     ?? PRIORITY_MAP[r.sToDoPriority] ?? r.plToDoPriorityKey ?? 2,
+    psAssigneeName:             r.sUserFullName       ?? r.psAssigneeName      ?? '',
+    pdtToDoRequestDate:         r.toDoRequestDate    ?? r.pdtToDoRequestDate  ?? null,
+    pdtToDoCompletionDate:      r.toDoCompletionDate ?? r.pdtToDoCompletionDate ?? null,
+    plRequestedDeliveryYear:    r.plRequestedDeliveryYear    ?? null,
+    plRequestedDeliveryQuarter: r.plRequestedDeliveryQuarter ?? null,
+  };
+}
+function normalizeDevStatus(s) {
+  return {
+    plToDoStatusID: s.toDoStatusID ?? s.plToDoStatusID ?? 0,
+    psStatus:       s.toDoStatus   ?? s.psStatus       ?? '',
+  };
+}
+function normalizeDevPriority(p) {
+  return {
+    plToDoPriorityKey: p.toDoPriorityID ?? p.plToDoPriorityKey ?? 0,
+    psPriority:        p.sToDoPriority  ?? p.psPriority        ?? '',
+  };
+}
+
 async function loadLookups() {
   try {
     const [statusData, priData] = await Promise.all([
       API.getDevTodoStatuses(),
       API.getDevTodoPriorities()
     ]);
-    STATUSES   = Array.isArray(statusData) ? statusData : demoStatuses;
-    PRIORITIES = Array.isArray(priData)    ? priData    : demoPriorities;
+    STATUSES   = (Array.isArray(statusData) ? statusData : demoStatuses).map(normalizeDevStatus);
+    PRIORITIES = (Array.isArray(priData)    ? priData    : demoPriorities).map(normalizeDevPriority);
   } catch(e) {
     console.warn('[DevList] Using demo lookups:', e.message || e);
     STATUSES   = demoStatuses;
@@ -550,7 +579,7 @@ async function loadItems() {
       plToDoPriorityKey: '',
       plAssigneeUserKey: ''
     });
-    ALL_ITEMS = Array.isArray(raw) ? raw : [];
+    ALL_ITEMS = (Array.isArray(raw) ? raw : []).map(normalizeDevItem);
     IS_DEMO   = false;
     showDataBadge(true);
     console.log('[DevList] Loaded', ALL_ITEMS.length, 'items from API');

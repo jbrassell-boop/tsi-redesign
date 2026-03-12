@@ -682,21 +682,14 @@ function populateSelect(id, items, keyField, labelField, blankLabel) {
 async function loadItems() {
   document.getElementById('itemList').innerHTML = '<div class="empty-state">Loading…</div>';
   try {
-    const payload = {
-      pagination: {PageNumber: 1, PageSize: 2000},
-      filters: {},
-      plRepairItemKey: 0,
-      pbShowInactive: true,
-      psRigidOrFlexible: '',
-      psItemDescription: ''
-    };
-    const resp = await API.getRepairItemsList(payload);
-    if (resp && (Array.isArray(resp) || (resp.data && Array.isArray(resp.data)))) {
-      allItems = Array.isArray(resp) ? resp : resp.data;
-      showDataBadge(true);
-    } else {
-      throw new Error('unexpected response');
-    }
+    // getRepairItemsList is per-repair; use getRepairItemsCatalog for the master catalog
+    const [flex, rigid] = await Promise.all([
+      API.getRepairItemsCatalog('Flexible'),
+      API.getRepairItemsCatalog('Rigid')
+    ]);
+    allItems = [...(Array.isArray(flex) ? flex : []), ...(Array.isArray(rigid) ? rigid : [])];
+    if (allItems.length === 0) throw new Error('Empty catalog response');
+    showDataBadge(true);
   } catch(e) {
     allItems = DEMO_ITEMS;
     showDataBadge(false);

@@ -329,6 +329,19 @@
     return [];
   }
 
+  // Normalize API field names to page-expected names
+  // API: nScopeCost, dtDateReceived; no sDepartmentName / sClientName in list response
+  function normalizeAcquisition(r) {
+    r.pnCost           = r.pnCost      || r.dblCost      || r.nScopeCost    || r.nScopeExpenses || 0;
+    r.dtAcquiredDate   = r.dtAcquiredDate  || r.dtDateAcquired || r.dtDateReceived || null;
+    r.dtConsignDate    = r.dtConsignDate   || r.dtDateConsigned || null;
+    r.dtSaleDate       = r.dtSaleDate      || r.dtDateSold     || null;
+    r.pnSalePrice      = r.pnSalePrice     || r.dblSalePrice   || r.nSalePrice    || 0;
+    r.sSerialNumber    = r.sSerialNumber   || r.psSerialNumber  || '';
+    r.sScopeTypeDesc   = r.sScopeTypeDesc  || r.sScopeType      || r.sModel        || '';
+    return r;
+  }
+
   function buildPagination(tab, infoEl, ctrlEl) {
     const s = state[tab];
     const total = s.filtered.length;
@@ -464,7 +477,7 @@
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
       const raw = await API.getAcquisitionsInHouse(body);
-      state.inhouse.rows = unwrap(raw);
+      state.inhouse.rows = unwrap(raw).map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] In-House API unavailable, using demo data:', e.message);
@@ -481,7 +494,7 @@
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
       const raw = await API.getAcquisitionsConsigned(body);
-      state.consigned.rows = unwrap(raw);
+      state.consigned.rows = unwrap(raw).map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] Consigned API unavailable, using demo data:', e.message);
@@ -508,7 +521,7 @@
         pdtSaleDateTo:   toEl.value   || null,
       };
       const raw = await API.getAcquisitionsSold(body);
-      state.sold.rows = unwrap(raw);
+      state.sold.rows = unwrap(raw).map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] Sold API unavailable, using demo data:', e.message);

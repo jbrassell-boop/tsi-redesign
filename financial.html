@@ -239,6 +239,16 @@
     return [];
   }
 
+  // Normalize API field names to page-expected names
+  // API returns sTranNumber/dblTranAmount/dtTranDate instead of sInvoiceNumber/dblAmount/dtIssuedDate
+  function normalizeFinancialRow(r) {
+    r.sInvoiceNumber = r.sInvoiceNumber || r.sTranNumber || '';
+    r.dblAmount      = r.dblAmount      || r.dblTranAmount || r.dblInvoiceAmount || r.balance || 0;
+    r.dtIssuedDate   = r.dtIssuedDate   || r.dtTranDate   || r.dtInvoiceDate    || null;
+    r.sStatus        = r.sStatus        || (r.aging > 0 ? 'Unpaid' : 'Unpaid');
+    return r;
+  }
+
   // ── Tab headers ─────────────────────────────────────────
   const HEADERS = {
     outstanding: '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Issued</th><th>Due Date</th><th style="text-align:right">Aging</th><th>Status</th><th style="width:80px"></th></tr>',
@@ -307,9 +317,10 @@
         case 'payments':    raw = await API.getInvoicePayments(pg); break;
         case 'gl':          raw = await API.getGLAccounts(); break;
       }
-      rows = unwrap(raw);
+      rows = unwrap(raw).map(normalizeFinancialRow);
       isLive = true;
       API.UI.updateDemoBadge('api');
+      if (tab === 'outstanding') updateFinancialKPIs(rows);
     } catch (e) {
       console.warn('[TSI Financial] API unavailable, using demo data:', e.message);
       rows = DEMO[tab] || [];
@@ -322,27 +333,29 @@
   }
 
   // ── Update financial KPI chips ──────────────────────────
-  function updateFinancialKPIs() {
-    const inv = DEMO.outstanding;
+  // liveOutstanding: live data for outstanding tab (optional; falls back to DEMO)
+  function updateFinancialKPIs(liveOutstanding) {
+    const inv = liveOutstanding || DEMO.outstanding;
     const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
     const overdue = inv.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
 
-    const totalAR = open.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
+    const totalAR = open.reduce((s, r) => s + Number(r.dblAmount || r.dblTranAmount || 0), 0);
 
     let totalAgingDays = 0, agingCount = 0;
     open.forEach(r => {
-      const d = agingDays(r.dtIssuedDate || r.dtInvoiceDate);
+      const d = agingDays(r.dtIssuedDate || r.dtTranDate);
       if (d > 0) { totalAgingDays += d; agingCount++; }
     });
 
-    const totalPaid = DEMO.payments.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
+    const paymentSrc = liveOutstanding ? [] : DEMO.payments; // can't compute paid from outstanding tab
+    const totalPaid = paymentSrc.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
 
     document.getElementById('kpiAR').textContent = fmt$(totalAR);
     document.getElementById('kpiOverdue').textContent = String(overdue.length);
     document.getElementById('kpiAging').textContent = agingCount ? Math.round(totalAgingDays / agingCount) + 'd' : '0d';
-    document.getElementById('kpiDrafts').textContent = String(DEMO.drafts.length);
-    document.getElementById('kpiHold').textContent = String(DEMO.hold.length);
-    document.getElementById('kpiPaid').textContent = fmt$(totalPaid);
+    document.getElementById('kpiDrafts').textContent = liveOutstanding ? '—' : String(DEMO.drafts.length);
+    document.getElementById('kpiHold').textContent = liveOutstanding ? '—' : String(DEMO.hold.length);
+    document.getElementById('kpiPaid').textContent = liveOutstanding ? '—' : fmt$(totalPaid);
   }
 
   // ── Populate client dropdown ────────────────────────────
@@ -358,7 +371,7 @@
     const cl = filterClient.value || '';
     return rows.filter(r => {
       const name = (r.sClientName1 || r.sClientName || '').toLowerCase();
-      const inv = (r.sInvoiceNumber || r.sAccountNumber || r.sAccountName || '').toLowerCase();
+      const inv = (r.sInvoiceNumber || r.sTranNumber || r.sAccountNumber || r.sAccountName || '').toLowerCase();
       const status = (r.sStatus || '').toLowerCase();
       if (q && !name.includes(q) && !inv.includes(q)) return false;
       if (st && !status.includes(st)) return false;

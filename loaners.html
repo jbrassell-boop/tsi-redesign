@@ -454,9 +454,14 @@ async function loadTaskLoaners() {
   try {
     const data = await API.getTaskLoaners(0, 0);
     const raw  = unwrap(data);
-    // Normalise status — field name unknown yet; default to 'Out' if not present
+    // Normalize API field names (API returns lTaskKey, lScopeTypeKey without p-prefix)
+    // Also synthesize sTaskNumber from lTaskKey since list endpoint doesn't include it
     taskRows = raw.map(r => ({
       ...r,
+      plTaskKey:       r.plTaskKey       ?? r.lTaskKey       ?? 0,
+      plScopeTypeKey:  r.plScopeTypeKey  ?? r.lScopeTypeKey  ?? 0,
+      plQuantity:      r.plQuantity      ?? r.lQuantity       ?? 1,
+      sTaskNumber:     r.sTaskNumber     || (r.lTaskKey ? 'Task-' + r.lTaskKey : null) || null,
       _status: r.sStatus || r.sLoanerStatus || 'Out',
     }));
     isDemo = false;
