@@ -77,6 +77,20 @@
     .file-drop svg{width:24px;height:24px;color:var(--muted);margin-bottom:6px}
     .file-drop-text{font-size:11.5px;color:var(--muted);margin-bottom:3px}
     .file-drop-formats{font-size:10px;color:var(--border-dk)}
+
+    /* Cockpit style alignment */
+    .toolbar{background:#F7F8FC;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border)}
+    .tab-bar{background:var(--card);padding:0 14px}
+
+    /* Stat-strip (replaces old ss-chip) */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+    .stat-chip:last-of-type{border-right:none}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
   </style>
 </head>
 <body>
@@ -159,7 +173,7 @@
         </select>
         <span class="id-badge" id="deptIdBadge">#5001</span>
         <div class="divider"></div>
-        <button class="btn btn-outline" title="New Department" style="gap:4px" id="btnNewDept">
+        <button class="btn btn-navy" title="New Department" style="gap:4px" id="btnNewDept">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New
         </button>
@@ -183,21 +197,33 @@
       </div>
 
       <!-- STATUS STRIP -->
-      <div class="status-strip">
-        <div class="ss-chip ss-active">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
-          Active
+      <div class="stat-strip" id="deptStrip">
+        <div class="stat-chip" id="statusChip">
+          <div class="s-icon" style="background:#F0FDF4"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><circle cx="12" cy="12" r="6"/></svg></div>
+          <div class="s-data"><div class="s-val s-green">Active</div><div class="s-lbl">STATUS</div></div>
         </div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Rep</span> <span class="ss-val">Brandi Cook</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Pricing</span> <span class="ss-val">GSA 2014 (Joint)</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Carrier</span> <span class="ss-val">UPS</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Scopes</span> <span class="ss-val">16</span></div>
-        <div class="ss-chip ss-warn">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Contract expires 11/14/2026
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">👤</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-rep">Brandi Cook</div><div class="s-lbl">REP</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">💲</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-pricing">GSA 2014 (Joint)</div><div class="s-lbl">PRICING</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">📦</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-carrier">UPS</div><div class="s-lbl">CARRIER</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#DBEAFE">🔭</div>
+          <div class="s-data"><div class="s-val s-blue" id="ss-scopes">16</div><div class="s-lbl">SCOPES</div></div>
+        </div>
+        <div class="stat-chip" id="contractChip" style="background:#FFFBEB">
+          <div class="s-icon" style="background:#FEF3C7">⚠️</div>
+          <div class="s-data"><div class="s-val s-amber" id="ss-contract" style="font-size:12px;font-weight:600">Contract expires 11/14/2026</div></div>
         </div>
         <div style="flex:1"></div>
-        <span style="font-size:10px;color:var(--muted)">Modified 03/05/2026 by J. Brassell</span>
+        <span style="font-size:10px;color:var(--muted);padding:8px 12px;white-space:nowrap" id="ss-modified">Modified 03/05/2026 by J. Brassell</span>
       </div>
 
       <!-- TABS with count badges -->
@@ -1197,46 +1223,43 @@ function openContactModal(mode){
 
   /* ── Update status strip ────────────────────────────── */
   function updateStatusStrip(d){
-    const strip = qs('.status-strip');
-    if(!strip) return;
-    strip.innerHTML = '';
+    // Status chip (active/inactive)
+    const statusChip = document.getElementById('statusChip');
+    if(!statusChip) return;
+    const sIcon = statusChip.querySelector('.s-icon');
+    const sVal = statusChip.querySelector('.s-val');
+    const svgEl = statusChip.querySelector('svg');
+    if (d.bActive) {
+      sIcon.style.background = '#F0FDF4';
+      sVal.textContent = 'Active';
+      sVal.className = 's-val s-green';
+      if (svgEl) svgEl.style.color = 'var(--green)';
+    } else {
+      sIcon.style.background = '#FEF2F2';
+      sVal.textContent = 'Inactive';
+      sVal.className = 's-val s-red';
+      if (svgEl) svgEl.style.color = 'var(--red)';
+    }
 
-    // Active chip
-    const activeChip = document.createElement('div');
-    activeChip.className = 'ss-chip ' + (d.bActive ? 'ss-active' : 'ss-warn');
-    activeChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> ' + (d.bActive ? 'Active' : 'Inactive');
-    strip.appendChild(activeChip);
+    // Dynamic field updates
+    document.getElementById('ss-rep').textContent = d.sSalesRepName || d.sSalesRep || '';
+    document.getElementById('ss-pricing').textContent = d.sPricingCategoryDesc || d.sPricingCategory || '';
+    document.getElementById('ss-carrier').textContent = d.sShippingCarrier || '';
+    document.getElementById('ss-scopes').textContent = d.scopeCount || '0';
 
-    // Sales rep
-    if(d.sSalesRepName || d.sSalesRep){
-      const c = document.createElement('div');
-      c.className = 'ss-chip ss-neutral';
-      c.innerHTML = '<span class="ss-label">Rep</span> <span class="ss-val">'+(d.sSalesRepName||d.sSalesRep||'')+'</span>';
-      strip.appendChild(c);
+    // Contract warning chip
+    const contractChip = document.getElementById('contractChip');
+    const contractExpiry = d.contractExpiry || d.dtContractExpiry || '';
+    if (contractExpiry) {
+      contractChip.style.display = '';
+      document.getElementById('ss-contract').textContent = 'Contract expires ' + (typeof contractExpiry === 'string' && contractExpiry.includes('/') ? contractExpiry : fmtDate(contractExpiry));
+    } else {
+      contractChip.style.display = 'none';
     }
-    // Pricing
-    if(d.sPricingCategoryDesc || d.sPricingCategory){
-      const c = document.createElement('div');
-      c.className = 'ss-chip ss-neutral';
-      c.innerHTML = '<span class="ss-label">Pricing</span> <span class="ss-val">'+(d.sPricingCategoryDesc||d.sPricingCategory||'')+'</span>';
-      strip.appendChild(c);
-    }
-    // Carrier
-    if(d.sShippingCarrier){
-      const c = document.createElement('div');
-      c.className = 'ss-chip ss-neutral';
-      c.innerHTML = '<span class="ss-label">Carrier</span> <span class="ss-val">'+d.sShippingCarrier+'</span>';
-      strip.appendChild(c);
-    }
-    // Spacer + modified
-    const spacer = document.createElement('div');
-    spacer.style.flex = '1';
-    strip.appendChild(spacer);
+
+    // Modified timestamp
     if(d.dtModified || d.dtLastModified){
-      const m = document.createElement('span');
-      m.style.cssText = 'font-size:10px;color:var(--muted)';
-      m.textContent = 'Modified ' + fmtDate(d.dtModified||d.dtLastModified) + (d.sModifiedBy ? ' by '+d.sModifiedBy : '');
-      strip.appendChild(m);
+      document.getElementById('ss-modified').textContent = 'Modified ' + fmtDate(d.dtModified||d.dtLastModified) + (d.sModifiedBy ? ' by '+d.sModifiedBy : '');
     }
   }
 

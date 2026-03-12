@@ -14,6 +14,20 @@
     .client-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.09)}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--steel)}
     .status-pill{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:3px 12px;font-size:11.5px;font-weight:700;color:var(--green)}
+
+    /* Cockpit style alignment */
+    .toolbar{background:#F7F8FC;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border)}
+    .tab-bar{background:var(--card);padding:0 14px}
+
+    /* Stat-strip (replaces old ss-chip) */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+    .stat-chip:last-of-type{border-right:none}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
   </style>
 </head>
 <body>
@@ -93,7 +107,7 @@
       <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="toolbar-group">
-          <button class="btn btn-outline" title="New Client" style="gap:6px" onclick="openAddClientModal()">
+          <button class="btn btn-navy" title="New Client" style="gap:6px" onclick="openAddClientModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
             New
           </button>
@@ -133,19 +147,37 @@
       </div>
 
       <!-- STATUS STRIP -->
-      <div class="status-strip">
-        <div class="ss-chip ss-active">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
-          Active
+      <div class="stat-strip">
+        <div class="stat-chip" id="statusChip">
+          <div class="s-icon" style="background:#F0FDF4"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg></div>
+          <div class="s-data"><div class="s-val s-green">Active</div><div class="s-lbl">STATUS</div></div>
         </div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Rep</span> <span class="ss-val" id="ss-rep">Brandi Cook</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Pricing</span> <span class="ss-val" id="ss-pricing">GSA 2014 (Joint)</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Terms</span> <span class="ss-val" id="ss-terms">Due Upon Receipt</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Depts</span> <span class="ss-val" id="ss-depts">2</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Contacts</span> <span class="ss-val" id="ss-contacts">3</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Flags</span> <span class="ss-val" id="ss-flags">1</span></div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">&#x1F464;</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-rep">Brandi Cook</div><div class="s-lbl">REP</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">&#x1F4B2;</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-pricing">GSA 2014 (Joint)</div><div class="s-lbl">PRICING</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">&#x1F4CB;</div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-terms">Due Upon Receipt</div><div class="s-lbl">TERMS</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#DBEAFE">&#x1F3E2;</div>
+          <div class="s-data"><div class="s-val s-blue" id="ss-depts">2</div><div class="s-lbl">DEPTS</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#DBEAFE">&#x1F4C7;</div>
+          <div class="s-data"><div class="s-val s-blue" id="ss-contacts">4</div><div class="s-lbl">CONTACTS</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FEF3C7">&#x1F6A9;</div>
+          <div class="s-data"><div class="s-val s-amber" id="ss-flags">0</div><div class="s-lbl">FLAGS</div></div>
+        </div>
         <div style="flex:1"></div>
-        <span style="font-size:10px;color:var(--muted)">Modified 03/02/2026 by J. Brassell</span>
+        <span style="font-size:10px;color:var(--muted);padding:8px 12px;white-space:nowrap" id="ss-modified">Modified 03/02/2026 by J. Brassell</span>
       </div>
 
       <!-- TABS -->
@@ -1052,15 +1084,18 @@ function loadClient(c) {
   _currentClientData = c;
   document.getElementById('clientBadge').textContent = '#' + c.id;
   // Update the Active/Inactive chip in the status strip
-  const statusChip = document.querySelector('.status-strip .ss-chip:first-child');
+  const statusChip = document.getElementById('statusChip');
   if (statusChip) {
+    const sIcon = statusChip.querySelector('.s-icon');
+    const sVal = statusChip.querySelector('.s-val');
     if (c.active) {
-      statusChip.className = 'ss-chip ss-active';
-      statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Active';
+      sIcon.style.background = '#F0FDF4';
+      sVal.textContent = 'Active';
+      sVal.className = 's-val s-green';
     } else {
-      statusChip.className = 'ss-chip';
-      statusChip.style.background = '#FEF2F2'; statusChip.style.borderColor = '#FECACA'; statusChip.style.color = '#B71234';
-      statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Inactive';
+      sIcon.style.background = '#FEF2F2';
+      sVal.textContent = 'Inactive';
+      sVal.className = 's-val s-red';
     }
   }
   setVal('ci-name', c.name); setVal('ci-unit', c.unit);
@@ -1789,11 +1824,13 @@ function doDeactivate() {
   const c = _currentClientData || CLIENTS[name];
   if(c) c.active = false;
   // Update status strip chip
-  const statusChip = document.querySelector('.status-strip .ss-chip:first-child');
+  const statusChip = document.getElementById('statusChip');
   if (statusChip) {
-    statusChip.className = 'ss-chip';
-    statusChip.style.background = '#FEF2F2'; statusChip.style.borderColor = '#FECACA'; statusChip.style.color = '#B71234';
-    statusChip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg> Inactive';
+    const sIcon = statusChip.querySelector('.s-icon');
+    const sVal = statusChip.querySelector('.s-val');
+    sIcon.style.background = '#FEF2F2';
+    sVal.textContent = 'Inactive';
+    sVal.className = 's-val s-red';
   }
   setChk('ci-active', false);
   const lbl = document.getElementById('ci-active-lbl');
