@@ -92,7 +92,7 @@
       <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="toolbar-group">
-          <button class="btn btn-outline" title="New Client" style="gap:6px" onclick="document.getElementById('addClientModal').classList.add('open')">
+          <button class="btn btn-outline" title="New Client" style="gap:6px" onclick="openAddClientModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
             New
           </button>
@@ -137,9 +137,9 @@
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
           Active
         </div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Rep</span> <span class="ss-val">Brandi Cook</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Pricing</span> <span class="ss-val">GSA 2014 (Joint)</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Terms</span> <span class="ss-val">Due Upon Receipt</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Rep</span> <span class="ss-val" id="ss-rep">Brandi Cook</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Pricing</span> <span class="ss-val" id="ss-pricing">GSA 2014 (Joint)</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Terms</span> <span class="ss-val" id="ss-terms">Due Upon Receipt</span></div>
         <div class="ss-chip ss-info"><span class="ss-label">Depts</span> <span class="ss-val" id="ss-depts">2</span></div>
         <div class="ss-chip ss-info"><span class="ss-label">Contacts</span> <span class="ss-val" id="ss-contacts">3</span></div>
         <div class="ss-chip ss-info"><span class="ss-label">Flags</span> <span class="ss-val" id="ss-flags">1</span></div>
@@ -218,12 +218,12 @@
                   </div>
                   <div class="ff">
                     <label>Portal Months</label>
-                    <input id="ci-portal" class="inp" value="24"/>
+                    <input id="ci-portal" class="inp" value="24" placeholder="e.g. 12"/>
                   </div>
                   <div class="ff">
                     <label>Active</label>
                     <div style="display:flex;align-items:center;gap:9px;padding-top:4px">
-                      <label class="toggle"><input id="ci-active" type="checkbox" checked/><span class="toggle-slider"></span></label>
+                      <label class="toggle"><input id="ci-active" type="checkbox" checked onchange="if(!this.checked){this.checked=true;confirmDeactivate()}"/><span class="toggle-slider"></span></label>
                       <span id="ci-active-lbl" style="font-size:12px;color:var(--green);font-weight:600">Yes</span>
                     </div>
                   </div>
@@ -342,7 +342,7 @@
         <div class="tbl-card">
           <div class="tbl-card-head">
             <span class="tbl-card-title">Departments</span>
-            <span style="font-size:11px;color:var(--muted)">Managed from the Departments module →</span>
+            <a href="departments.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500">Managed from the Departments module →</a>
           </div>
           <table>
             <thead>
@@ -833,10 +833,11 @@
       <div>
         <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Applies to Instrument Type</div>
         <div class="chip-group">
-          <button class="chip" onclick="this.classList.toggle('on')" type="button"><span class="dot"></span> Flexible</button>
-          <button class="chip" onclick="this.classList.toggle('on')" type="button"><span class="dot"></span> Rigid</button>
-          <button class="chip" onclick="this.classList.toggle('on')" type="button"><span class="dot"></span> Instrument</button>
-          <button class="chip" onclick="this.classList.toggle('on')" type="button"><span class="dot"></span> Camera</button>
+          <button class="chip" onclick="toggleAllInstrChips(this)" type="button"><span class="dot"></span> All</button>
+          <button class="chip" onclick="this.classList.toggle('on');uncheckAllChip()" type="button"><span class="dot"></span> Flexible</button>
+          <button class="chip" onclick="this.classList.toggle('on');uncheckAllChip()" type="button"><span class="dot"></span> Rigid</button>
+          <button class="chip" onclick="this.classList.toggle('on');uncheckAllChip()" type="button"><span class="dot"></span> Instrument</button>
+          <button class="chip" onclick="this.classList.toggle('on');uncheckAllChip()" type="button"><span class="dot"></span> Camera</button>
         </div>
       </div>
 
@@ -1093,11 +1094,22 @@ function loadClient(c) {
     setVal('def-discount', c.discount); setVal('def-markup', c.markup);
     setChk('def-blind-ps3', c.blindPS3); setChk('def-req-totals', c.reqTotals); setChk('def-blind-final', c.blindFinal);
   }
-  // Update status strip chips
-  const chips = document.querySelectorAll('.status-strip .ss-chip .ss-val');
-  if (chips[0]) chips[0].textContent = c.salesrep || '—';
-  if (chips[1]) chips[1].textContent = c.pricing || '—';
-  if (chips[2]) chips[2].textContent = c.terms || '—';
+  // Update status strip chips (by ID)
+  const ssRep = document.getElementById('ss-rep');
+  const ssPricing = document.getElementById('ss-pricing');
+  const ssTerms = document.getElementById('ss-terms');
+  if (ssRep) ssRep.textContent = c.salesrep || '—';
+  if (ssPricing) ssPricing.textContent = c.pricing || '—';
+  if (ssTerms) ssTerms.textContent = c.terms || '—';
+  // In live mode, read display text from the dropdown selections
+  if (_liveMode && c._raw) {
+    const repSel = document.getElementById('def-salesrep');
+    const pricSel = document.getElementById('def-pricing');
+    const termsSel = document.getElementById('def-terms');
+    if (ssRep && repSel && repSel.selectedIndex >= 0) ssRep.textContent = repSel.options[repSel.selectedIndex].textContent || '—';
+    if (ssPricing && pricSel && pricSel.selectedIndex >= 0) ssPricing.textContent = pricSel.options[pricSel.selectedIndex].textContent || '—';
+    if (ssTerms && termsSel && termsSel.selectedIndex >= 0) ssTerms.textContent = termsSel.options[termsSel.selectedIndex].textContent || '—';
+  }
   // If live mode, map API departments onto the client object
   if (_liveMode && _allDepartments.length > 0) {
     const clientKey = parseInt(document.querySelector('.client-select').value);
@@ -1128,7 +1140,7 @@ function loadClient(c) {
   }
   // Update status strip counts
   const deptCount = (c.departments || []).length;
-  const contactCount = (c.contacts || []).filter(ct => ct.active).length;
+  const contactCount = (c.contacts || []).length;
   const flagRows = document.querySelectorAll('#flags-tbody tr:not(#flags-empty-row)');
   const flagCount = flagRows.length;
   const ssDepts = document.getElementById('ss-depts');
@@ -1143,6 +1155,23 @@ function loadClient(c) {
 
 let _currentClientName = '88th Medical Group';
 let _currentClientData = null; // Holds current loaded client for live mode
+
+function toggleAllInstrChips(allBtn) {
+  allBtn.classList.toggle('on');
+  const grp = allBtn.parentElement;
+  const others = grp.querySelectorAll('.chip:not(:first-child)');
+  if (allBtn.classList.contains('on')) {
+    others.forEach(c => c.classList.add('on'));
+  } else {
+    others.forEach(c => c.classList.remove('on'));
+  }
+}
+function uncheckAllChip() {
+  const grp = document.querySelector('#flagModal .chip-group');
+  if (!grp) return;
+  const allBtn = grp.querySelector('.chip:first-child');
+  if (allBtn) allBtn.classList.remove('on');
+}
 
 async function saveFlagMock() {
   // ── Live mode: save to API ──
@@ -1215,7 +1244,7 @@ async function saveFlagMock() {
   const modal = document.getElementById('flagModal');
   const chips = modal.querySelectorAll('.chip.on');
   const instrTypes = [], showAt = [], visibility = [];
-  const instrLabels = ['Flexible','Rigid','Instrument','Camera'];
+  const instrLabels = ['All','Flexible','Rigid','Instrument','Camera'];
   const showAtLabels = ['D&I','Requisition','Upon Approval','Invoice','Booking Loaner'];
   const visLabels = ['D&I Form','Blank Inspection'];
   chips.forEach(c => {
@@ -1252,8 +1281,15 @@ async function saveFlagMock() {
 
 async function loadFlagsFromAPI(clientKey) {
   try {
-    const flags = await API.getFlagsByClient(clientKey);
-    _currentFlags = Array.isArray(flags) ? flags : [];
+    // flagTypeKey=1 = client-level flags; scoped to this client via plOwnerKey
+    const raw = await API.getFlagsByOwner(clientKey, 1);
+    // Deduplicate by lFlagKey
+    const seen = new Set();
+    _currentFlags = (Array.isArray(raw) ? raw : []).filter(f => {
+      if (!f.lFlagKey || seen.has(f.lFlagKey)) return false;
+      seen.add(f.lFlagKey);
+      return true;
+    });
     renderFlagsFromAPI(_currentFlags);
     const countEl = document.getElementById('ss-flags');
     if (countEl) countEl.textContent = _currentFlags.length;
@@ -1325,9 +1361,9 @@ async function loadContactsFromAPI(clientKey) {
     const list = Array.isArray(contacts) ? contacts : [];
     _currentContacts = list;
     renderContactsFromAPI(list);
-    // Update status strip
+    // Update status strip — show total contacts count
     const countEl = document.getElementById('ss-contacts');
-    if (countEl) countEl.textContent = list.filter(c => c.bActive !== false).length;
+    if (countEl) countEl.textContent = list.length;
   } catch (e) {
     console.warn('[TSI Clients] Contact API failed:', e.message);
   }
@@ -1345,7 +1381,7 @@ function renderContactsFromAPI(contacts) {
     const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
     return `<tr${bg} data-contact-key="${c.lContactKey}">
       <td style="font-weight:600">${name}</td>
-      <td style="color:var(--muted)">${c.bBillingContact ? 'Billing Contact' : ''}</td>
+      <td style="color:var(--muted)">${c.sContactTitle || c.sTitle || (c.bBillingContact ? 'Billing Contact' : '') || '—'}</td>
       <td>${c.sContactPhoneNumber || '—'}</td>
       <td>${c.sContactFaxNumber || '—'}</td>
       <td>${c.sContactEMail || '—'}</td>
@@ -1356,7 +1392,7 @@ function renderContactsFromAPI(contacts) {
 }
 
 function openEditContactAPI(contactKey) {
-  const contact = _currentContacts.find(c => c.lContactKey === contactKey);
+  const contact = _currentContacts.find(c => String(c.lContactKey) === String(contactKey));
   if (!contact) return;
   _editContactKey = contactKey;
   _editContactRow = null; // don't use DOM-based editing
@@ -1384,7 +1420,7 @@ function renderDepartments(c) {
     const badge = d.active
       ? '<span class="badge b-active">Active</span>'
       : '<span class="badge b-inactive">Inactive</span>';
-    return `<tr onclick="window.location='departments.html'"${bg}>
+    return `<tr onclick="window.location='departments.html?dept=${d.key || ''}'"${bg}>
       <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">${d.name}</td>
       <td>${d.location || '—'}</td>
       <td>${badge}</td>
@@ -1731,8 +1767,17 @@ async function saveContact() {
   document.getElementById('contactModal').classList.remove('open');
 }
 
+function openAddClientModal() {
+  const modal = document.getElementById('addClientModal');
+  modal.classList.add('open');
+  // Reset scroll to top of modal body
+  const body = modal.querySelector('.modal-body');
+  if (body) body.scrollTop = 0;
+}
+
 function confirmDeactivate() {
-  const name = document.querySelector('.client-select').value;
+  const sel = document.querySelector('.client-select');
+  const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : sel.value;
   document.getElementById('deactivate-client-name').textContent = '\u201c' + name + '\u201d';
   document.getElementById('deactivateModal').classList.add('open');
 }
@@ -1818,35 +1863,35 @@ function mapApiClient(d) {
     id: String(d.lClientKey || ''),
     active: d.bActive !== false,
     name: d.sClientName1 || '',
-    unit: d.sUnitBuilding || '',
-    country: d.sCountry || 'USA',
-    zip: d.sZipCode || '',
-    city: d.sCity || '',
-    state: d.sState || '',
-    addr1: d.sAddress1 || '',
-    addr2: d.sAddress2 || '',
+    unit: d.sUnitBuilding || d.sMailAddr3 || '',
+    country: d.sMailCountry || d.sCountry || 'USA',
+    zip: d.sMailZip || d.sZipCode || '',
+    city: d.sMailCity || d.sCity || '',
+    state: d.sMailState || d.sState || '',
+    addr1: d.sMailAddr1 || d.sAddress1 || '',
+    addr2: d.sMailAddr2 || d.sAddress2 || '',
     phone: d.sPhoneNumber || '',
     fax: d.sFaxNumber || '',
     since: fmtDate(d.dtClientSince),
-    portal: String(d.lPortalMonths || ''),
-    skip: !!d.bSkipMetrics,
-    creditMemo: !!d.bOpenCreditMemo,
+    portal: String(d.nPortalMonths || d.lPortalMonths || ''),
+    skip: !!(d.bSkipTracking ?? d.bSkipMetrics),
+    creditMemo: d.sOpenCreditMemo === 'Y' || !!d.bOpenCreditMemo,
     national: !!d.bNationalAccount,
-    pricing: d.sPricingCategory || '',
-    salesrep: d.sSalesRepName || '',
-    dist: d.sDistributor || '',
-    terms: d.sPaymentTerms || '',
-    credit: d.sCreditLimit || '',
+    pricing: d.sPricingDescription || d.sPricingCategory || '',
+    salesrep: d.sSalesRepName || d.repName || '',
+    dist: d.sDistName1 || d.sDistributor || '',
+    terms: d.sTermsDesc || d.sPaymentTerms || '',
+    credit: d.sItemText || d.sCreditLimit || '',
     billto: d.sBillTo || '',
-    discount: d.dblDiscount != null ? d.dblDiscount + '%' : '0%',
-    markup: d.dblMarkup != null ? d.dblMarkup + '%' : '0%',
+    discount: d.dblDiscountPct != null ? d.dblDiscountPct + '%' : (d.dblDiscount != null ? d.dblDiscount + '%' : '0%'),
+    markup: d.dblAdjustmentPct != null ? d.dblAdjustmentPct + '%' : (d.dblMarkup != null ? d.dblMarkup + '%' : '0%'),
     blindPS3: !!d.bBlindPS3,
-    reqTotals: !!d.bReqTotalsOnly,
+    reqTotals: !!(d.bRequisitionTotalsOnly ?? d.bReqTotalsOnly),
     blindFinal: !!d.bBlindTotalsOnFinal,
-    creditMemos: [], // credit memos are managed separately
+    creditMemos: [],
     contacts: d.contacts || [],
     departments: d.departments || [],
-    _raw: d // keep raw for save
+    _raw: d
   };
 }
 
@@ -2022,6 +2067,21 @@ async function saveClientToAPI() {
     updateSaveStatus('saved');
     showToast('Client "' + document.querySelector('.client-select option:checked').textContent + '" saved (demo).', 'success');
     return;
+  }
+  // Validate required fields
+  const reqFields = [
+    {id:'ci-name', label:'Client Name'}, {id:'ci-addr1', label:'Address Line 1'},
+    {id:'ci-zip', label:'ZIP'}, {id:'ci-city', label:'City'}, {id:'ci-state', label:'State'}
+  ];
+  for (const f of reqFields) {
+    const el = document.getElementById(f.id);
+    if (el && !el.value.trim()) {
+      updateSaveStatus('error');
+      showToast(f.label + ' is required.', 'error');
+      el.focus(); el.style.borderColor = 'var(--red)';
+      setTimeout(() => el.style.borderColor = '', 3000);
+      return;
+    }
   }
   // Build update payload from form fields
   const sel = document.querySelector('.client-select');
