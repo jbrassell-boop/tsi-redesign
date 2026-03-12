@@ -1868,14 +1868,29 @@ function openContactModal(mode){
 
     await loadClients();
     const sel = $('selClient');
+
+    // If arriving from clients page, ensure that client is in the dropdown.
+    // loadClients() may have loaded it already; if not (e.g. API pagination
+    // or demo mode), inject it from sessionStorage so the user sees context.
+    if(paramClient && !sel.querySelector(`option[value="${paramClient}"]`)){
+      try {
+        const stored = JSON.parse(sessionStorage.getItem('deptNavClient') || 'null');
+        if(stored && stored.key == paramClient){
+          const o = document.createElement('option');
+          o.value = stored.key;
+          o.textContent = stored.name || ('Client #' + stored.key);
+          sel.appendChild(o);
+        }
+      } catch(e2){}
+    }
+
     if(sel.options.length > 1 && !isDemo){
-      // If we arrived from clients page, honour the URL param; otherwise pick first
+      // Honour URL param if present; otherwise pick first client
       if(paramClient && sel.querySelector(`option[value="${paramClient}"]`)){
         sel.value = paramClient;
       } else {
         sel.selectedIndex = 1;
       }
-      // Load departments, then optionally jump to specific dept
       await loadDepartments(sel.value, paramDept || null);
       showLiveBadge();
     }
