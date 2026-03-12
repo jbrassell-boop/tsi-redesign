@@ -18,12 +18,16 @@
     .subnav-tab:hover{color:var(--navy)}
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
 
-    /* STAT ROW */
-    .stat-row{display:flex;gap:14px;margin-bottom:20px}
-    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;box-shadow:0 1px 8px rgba(0,37,122,.05)}
-    .stat-card .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-    .stat-card .val{font-size:22px;font-weight:900;letter-spacing:-.5px}
-    .stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+    /* STAT STRIP */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0;margin-bottom:20px;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* FILTER ROW */
     .filter-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px}
@@ -109,27 +113,31 @@
         <div class="subnav-tab" data-tab="gl">GL Accounts</div>
       </div>
 
-      <!-- STAT CARDS -->
-      <div class="stat-row" id="statRow">
-        <div class="stat-card">
-          <div class="lbl">Total A/R</div>
-          <div class="val" id="statTotalAR" style="color:var(--navy)">—</div>
-          <div class="sub">Open invoices</div>
+      <!-- STAT STRIP -->
+      <div class="stat-strip" id="statStrip">
+        <div class="stat-chip active-chip" onclick="switchTab('outstanding')" title="Outstanding A/R">
+          <div class="s-icon" style="background:#E8EDF5;color:var(--navy)">$</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiAR">—</div><div class="s-lbl">Outstanding A/R</div></div>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Overdue</div>
-          <div class="val" id="statOverdue" style="color:var(--red)">—</div>
-          <div class="sub">Past due date</div>
+        <div class="stat-chip" onclick="switchTab('outstanding','overdue')" title="Overdue invoices">
+          <div class="s-icon" style="background:#FEF2F2;color:var(--red)">!</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiOverdue">—</div><div class="s-lbl">Overdue</div></div>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Avg Aging</div>
-          <div class="val" id="statAvgAging" style="color:var(--amber)">—</div>
-          <div class="sub">Open invoices</div>
+        <div class="stat-chip" style="cursor:default" title="Average days to payment">
+          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">⏱</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiAging">—</div><div class="s-lbl">Avg Days to Pay</div></div>
         </div>
-        <div class="stat-card">
-          <div class="lbl">Paid MTD</div>
-          <div class="val" id="statPaidMTD" style="color:var(--green)">—</div>
-          <div class="sub" id="statPaidPeriod">This month</div>
+        <div class="stat-chip" onclick="switchTab('drafts')" title="Draft invoices">
+          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">✎</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiDrafts">—</div><div class="s-lbl">Drafts</div></div>
+        </div>
+        <div class="stat-chip" onclick="switchTab('hold')" title="Clients on hold">
+          <div class="s-icon" style="background:#FEF2F2;color:var(--red)">⊘</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiHold">—</div><div class="s-lbl">On Hold</div></div>
+        </div>
+        <div class="stat-chip" onclick="switchTab('payments')" title="Paid this month">
+          <div class="s-icon" style="background:#F0FDF4;color:var(--green)">✓</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiPaid">—</div><div class="s-lbl">Paid MTD</div></div>
         </div>
       </div>
 
@@ -187,16 +195,10 @@
   const body      = document.getElementById('dataBody');
   const head      = document.getElementById('dataHead');
   const badge     = document.getElementById('dataBadge');
-  const statAR    = document.getElementById('statTotalAR');
-  const statOver  = document.getElementById('statOverdue');
-  const statAging = document.getElementById('statAvgAging');
-  const statPaid  = document.getElementById('statPaidMTD');
-  const statPeriod= document.getElementById('statPaidPeriod');
   const filterSearch = document.getElementById('filterSearch');
   const filterStatus = document.getElementById('filterStatus');
   const filterClient = document.getElementById('filterClient');
   const filterRow    = document.getElementById('filterRow');
-  const statRow      = document.getElementById('statRow');
 
   // ── Data badge ──────────────────────────────────────────
 
@@ -284,10 +286,14 @@
     activeTab = tab;
     head.innerHTML = HEADERS[tab] || HEADERS.outstanding;
 
-    // Show/hide filters and stats based on tab
+    // Show/hide filters based on tab
     const showFilters = (tab === 'outstanding' || tab === 'drafts' || tab === 'payments');
     filterRow.style.display = showFilters ? '' : 'none';
-    statRow.style.display = (tab === 'outstanding') ? '' : 'none';
+
+    // Update active chip highlight
+    document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+    const chipMap = { outstanding: 0, drafts: 3, hold: 4, payments: 5, gl: -1 };
+    const idx = chipMap[tab]; if (idx >= 0) document.querySelectorAll('.stat-chip')[idx]?.classList.add('active-chip');
 
     body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
 
@@ -311,20 +317,17 @@
       API.UI.updateDemoBadge('demo');
     }
 
-    if (tab === 'outstanding') updateStats();
     populateClientFilter();
     renderRows();
   }
 
-  // ── Update stat cards ───────────────────────────────────
-  function updateStats() {
-    const open = rows.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
-    const overdue = rows.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
-    const paid = rows.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s.includes('paid') && !s.includes('un'); });
+  // ── Update financial KPI chips ──────────────────────────
+  function updateFinancialKPIs() {
+    const inv = DEMO.outstanding;
+    const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
+    const overdue = inv.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
 
     const totalAR = open.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
-    const totalOverdue = overdue.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
-    const totalPaid = paid.reduce((s, r) => s + Number(r.dblAmount || r.dblInvoiceAmount || 0), 0);
 
     let totalAgingDays = 0, agingCount = 0;
     open.forEach(r => {
@@ -332,13 +335,14 @@
       if (d > 0) { totalAgingDays += d; agingCount++; }
     });
 
-    statAR.textContent = fmt$(totalAR);
-    statOver.textContent = fmt$(totalOverdue);
-    statAging.textContent = agingCount ? Math.round(totalAgingDays / agingCount) + ' days' : '0 days';
-    statPaid.textContent = fmt$(totalPaid);
+    const totalPaid = DEMO.payments.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
 
-    const now = new Date();
-    statPeriod.textContent = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    document.getElementById('kpiAR').textContent = fmt$(totalAR);
+    document.getElementById('kpiOverdue').textContent = String(overdue.length);
+    document.getElementById('kpiAging').textContent = agingCount ? Math.round(totalAgingDays / agingCount) + 'd' : '0d';
+    document.getElementById('kpiDrafts').textContent = String(DEMO.drafts.length);
+    document.getElementById('kpiHold').textContent = String(DEMO.hold.length);
+    document.getElementById('kpiPaid').textContent = fmt$(totalPaid);
   }
 
   // ── Populate client dropdown ────────────────────────────
@@ -449,6 +453,17 @@
     }).join('');
   }
 
+  // ── Global: switch tab from chip click ──────────────────
+  window.switchTab = function(tab, filter) {
+    document.querySelectorAll('.subnav-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    loadTab(tab);
+    if (filter === 'overdue') {
+      setTimeout(() => { filterStatus.value = 'Overdue'; renderRows(); }, 50);
+    }
+  };
+
   // ── Global action stubs ─────────────────────────────────
   window.viewInvoice = function(key) {
     console.log('[TSI Financial] View invoice:', key);
@@ -487,6 +502,7 @@
 
   // ── Init ───────────────────────────────────────────────
   API.UI.init();
+  updateFinancialKPIs();
   loadTab('outstanding');
 
 })();

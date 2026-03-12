@@ -50,6 +50,15 @@
     .stat-row.warn .stat-val{color:var(--amber)}
     .stat-row.good .stat-val{color:var(--green)}
 
+    /* KPI COMMAND CENTER */
+    .kpi-card .card-head{padding:10px 16px;background:linear-gradient(135deg,#00257A 0%,#1E3A6E 100%);border-bottom:none}
+    .kpi-card .card-head .title{color:#fff;font-size:12px;display:flex;align-items:center;gap:8px}
+    .kpi-card .card-head .title .kpi-icon{font-size:14px}
+    .stat-row.clickable{cursor:pointer}
+    .stat-row.clickable:hover{background:#d0ddf0;border-color:var(--border-dk)}
+    .stat-row.clickable::after{content:'›';font-size:16px;font-weight:700;color:var(--muted);margin-left:8px}
+    .stat-row.clickable:hover::after{color:var(--navy)}
+
     /* QUICK EMAILS */
     .email-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
     .email-item:hover{background:var(--bg)}
@@ -234,56 +243,147 @@
         <!-- RIGHT: Stats + Recent Emails -->
         <div class="workspace-side">
 
-          <!-- Quick Stats -->
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-head"><span class="title">Quick Stats</span></div>
-            <div style="padding:14px 16px" id="statsContainer">
-              <div class="stat-row alert">
+          <!-- KPI: Repair Operations -->
+          <div class="card kpi-card" style="margin-bottom:12px">
+            <div class="card-head"><span class="title"><span class="kpi-icon">&#128295;</span> Repair Operations</span></div>
+            <div style="padding:10px 14px">
+              <div class="stat-row alert clickable" onclick="window.location='dashboard.html'">
                 <div class="stat-left">
                   <div class="stat-icon" style="background:#FEF2F2">&#128295;</div>
                   <span class="stat-label">Repairs In Progress</span>
                 </div>
                 <span class="stat-val" id="statRepairs">12</span>
               </div>
-              <div class="stat-row warn">
+              <div class="stat-row warn clickable" onclick="window.location='dashboard.html'">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#8634;</div>
-                  <span class="stat-label">Open Tasks</span>
+                  <div class="stat-icon" style="background:#FFFBEB">&#9201;</div>
+                  <span class="stat-label">Avg TAT</span>
                 </div>
-                <span class="stat-val" id="statTasks">2</span>
+                <span class="stat-val" id="statTAT">4.2d</span>
               </div>
-              <div class="stat-row warn">
+              <div class="stat-row warn clickable" onclick="window.location='dashboard.html'">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#9636;</div>
-                  <span class="stat-label">Contracts Up for Renewal</span>
+                  <div class="stat-icon" style="background:#FFFBEB">&#9202;</div>
+                  <span class="stat-label">Waiting Parts</span>
                 </div>
-                <span class="stat-val" id="statContracts">3</span>
+                <span class="stat-val" id="statWaiting">3</span>
               </div>
-              <div class="stat-row alert">
+              <div class="stat-row good clickable" onclick="window.location='dashboard.html'">
                 <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">&#10003;</div>
-                  <span class="stat-label">Open QC Events</span>
+                  <div class="stat-icon" style="background:#F0FDF4">&#10003;</div>
+                  <span class="stat-label">Completed (30d)</span>
                 </div>
-                <span class="stat-val" id="statQC">3</span>
+                <span class="stat-val" id="statCompleted">47</span>
               </div>
-              <div class="stat-row" style="border-color:var(--border)">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#E8EDF5">&#9672;</div>
-                  <span class="stat-label">Pending Invoices</span>
-                </div>
-                <span class="stat-val" id="statInvoices" style="font-size:15px">$31,240</span>
-              </div>
-              <div class="stat-row good">
+            </div>
+          </div>
+
+          <!-- KPI: Financial Health -->
+          <div class="card kpi-card" style="margin-bottom:12px">
+            <div class="card-head"><span class="title"><span class="kpi-icon">&#128176;</span> Financial Health</span></div>
+            <div style="padding:10px 14px">
+              <div class="stat-row good clickable" onclick="window.location='financial.html'">
                 <div class="stat-left">
                   <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
                   <span class="stat-label">Revenue MTD</span>
                 </div>
                 <span class="stat-val" id="statRevenue" style="font-size:15px">$84,600</span>
               </div>
+              <div class="stat-row clickable" onclick="window.location='financial.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#E8EDF5">&#9672;</div>
+                  <span class="stat-label">Outstanding A/R</span>
+                </div>
+                <span class="stat-val" id="statAR" style="font-size:15px">$31,240</span>
+              </div>
+              <div class="stat-row alert clickable" onclick="window.location='financial.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FEF2F2">&#9888;</div>
+                  <span class="stat-label">Overdue Invoices</span>
+                </div>
+                <span class="stat-val" id="statOverdue">2</span>
+              </div>
+              <div class="stat-row warn clickable" onclick="window.location='financial.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FFFBEB">&#128197;</div>
+                  <span class="stat-label">Avg Days to Pay</span>
+                </div>
+                <span class="stat-val" id="statDaysPay">34d</span>
+              </div>
             </div>
           </div>
 
-          <!-- Recent Emails / Notifications -->
+          <!-- KPI: Contracts & Sales -->
+          <div class="card kpi-card" style="margin-bottom:12px">
+            <div class="card-head"><span class="title"><span class="kpi-icon">&#128203;</span> Contracts &amp; Sales</span></div>
+            <div style="padding:10px 14px">
+              <div class="stat-row good clickable" onclick="window.location='contracts.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#F0FDF4">&#128196;</div>
+                  <span class="stat-label">Active Contracts</span>
+                </div>
+                <span class="stat-val" id="statActiveContracts">5</span>
+              </div>
+              <div class="stat-row warn clickable" onclick="window.location='contracts.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FFFBEB">&#9203;</div>
+                  <span class="stat-label">Expiring &#8804;90d</span>
+                </div>
+                <span class="stat-val" id="statExpiring">2</span>
+              </div>
+              <div class="stat-row clickable" onclick="window.location='contracts.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#E8EDF5">&#128176;</div>
+                  <span class="stat-label">Annual Contract Value</span>
+                </div>
+                <span class="stat-val" id="statACV" style="font-size:15px">$268K</span>
+              </div>
+              <div class="stat-row clickable" onclick="window.location='product-sale.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#E8EDF5">&#128722;</div>
+                  <span class="stat-label">Open Sales Orders</span>
+                </div>
+                <span class="stat-val" id="statOpenSales">4</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI: Assets & Inventory -->
+          <div class="card kpi-card" style="margin-bottom:12px">
+            <div class="card-head"><span class="title"><span class="kpi-icon">&#128230;</span> Assets &amp; Inventory</span></div>
+            <div style="padding:10px 14px">
+              <div class="stat-row clickable" onclick="window.location='scopes.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#E8EDF5">&#128270;</div>
+                  <span class="stat-label">Active Scopes</span>
+                </div>
+                <span class="stat-val" id="statScopes">156</span>
+              </div>
+              <div class="stat-row alert clickable" onclick="window.location='inventory.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FEF2F2">&#128680;</div>
+                  <span class="stat-label">Low Stock Items</span>
+                </div>
+                <span class="stat-val" id="statLowStock">3</span>
+              </div>
+              <div class="stat-row warn clickable" onclick="window.location='loaners.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#FFFBEB">&#128260;</div>
+                  <span class="stat-label">Loaners Out</span>
+                </div>
+                <span class="stat-val" id="statLoaners">8</span>
+              </div>
+              <div class="stat-row good clickable" onclick="window.location='outsource-vindication.html'">
+                <div class="stat-left">
+                  <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
+                  <span class="stat-label">Outsource Margin</span>
+                </div>
+                <span class="stat-val" id="statOutMargin">18.4%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Notifications (compact) -->
           <div class="card">
             <div class="card-head">
               <span class="title">Recent Notifications</span>
@@ -310,20 +410,6 @@
                   <span class="email-time">Yesterday</span>
                 </div>
                 <div class="email-subject">BF-UC180F CCD chip order update — backordered 3 weeks</div>
-              </div>
-              <div class="email-item">
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span class="email-from">Nashville General Hospital</span>
-                  <span class="email-time">Mar 6</span>
-                </div>
-                <div class="email-subject">Contract renewal — awaiting signature by COB Fri</div>
-              </div>
-              <div class="email-item">
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span class="email-from">Brandi Cook</span>
-                  <span class="email-time">Mar 6</span>
-                </div>
-                <div class="email-subject">88th Medical Group — PO updated for Q2</div>
               </div>
             </div>
           </div>
@@ -514,9 +600,7 @@ async function loadTasks() {
   _tasks = list.map(normalizeTask);
   console.log('[Workspace] Loaded', _tasks.length, 'tasks from API');
   renderTasks(_tasks);
-  // Update open tasks stat
-  const { overdue, today, upcoming } = categorizeTasks(_tasks);
-  document.getElementById('statTasks').textContent = String(overdue.length + today.length + upcoming.length);
+  // Task count is shown in card title (taskCardTitle) — no separate stat row needed
 }
 
 // ── Load Dashboard Stats ──
@@ -532,6 +616,12 @@ async function loadStats() {
     }).length;
     if (inProgress > 0) document.getElementById('statRepairs').textContent = String(inProgress);
     console.log('[Workspace] Dashboard scopes loaded:', list.length, 'repairs in progress:', inProgress);
+    // TODO: Wire other KPI cards from their respective API endpoints:
+    // - Financial: statRevenue, statAR, statOverdue, statDaysPay
+    // - Contracts: statActiveContracts, statExpiring, statACV, statOpenSales
+    // - Assets: statScopes, statLowStock, statLoaners, statOutMargin
+    // - Repairs: statTAT, statWaiting, statCompleted
+    // For now, all values are demo-hardcoded in the HTML.
   } catch (e) {
     console.warn('[Workspace] Dashboard stats error:', e.message);
     // Keep demo values

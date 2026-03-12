@@ -14,6 +14,18 @@
     .mtab:hover{color:var(--navy)}
     .mtab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
 
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
+
     /* BUTTON EXTRAS (not in shared) */
     .btn svg{width:12px;height:12px}
     .btn-danger:hover{background:#FEE2E2}
@@ -194,6 +206,34 @@
       <div class="mtab" onclick="switchModule('reports',this)">Reports</div>
       <div class="mtab" onclick="switchModule('costs',this)">Model Contract Costs</div>
       <div class="mtab" onclick="switchModule('pending',this)">Pending Contracts</div>
+    </div>
+
+    <!-- KPI STAT STRIP -->
+    <div class="stat-strip">
+      <div class="stat-chip active-chip" id="kpiTotal" onclick="chipFilter('')">
+        <div class="s-icon s-navy">📋</div>
+        <div class="s-data"><div class="s-val" id="kpiTotalVal">8</div><div class="s-lbl">TOTAL CONTRACTS</div></div>
+      </div>
+      <div class="stat-chip" id="kpiActive" onclick="chipFilter('Active')">
+        <div class="s-icon s-green">✓</div>
+        <div class="s-data"><div class="s-val" id="kpiActiveVal">5</div><div class="s-lbl">ACTIVE</div></div>
+      </div>
+      <div class="stat-chip" id="kpiExpiring" onclick="chipFilter('Expiring')">
+        <div class="s-icon s-amber">⚠</div>
+        <div class="s-data"><div class="s-val" id="kpiExpiringVal">2</div><div class="s-lbl">EXPIRING ≤90d</div></div>
+      </div>
+      <div class="stat-chip" id="kpiExpired" onclick="chipFilter('Expired')">
+        <div class="s-icon s-red">✕</div>
+        <div class="s-data"><div class="s-val" id="kpiExpiredVal">1</div><div class="s-lbl">EXPIRED</div></div>
+      </div>
+      <div class="stat-chip" id="kpiACV">
+        <div class="s-icon s-navy">💲</div>
+        <div class="s-data"><div class="s-val" id="kpiACVVal">$268K</div><div class="s-lbl">ANNUAL VALUE</div></div>
+      </div>
+      <div class="stat-chip" id="kpiAvgLen">
+        <div class="s-icon s-blue">📅</div>
+        <div class="s-data"><div class="s-val" id="kpiAvgLenVal">24 mo</div><div class="s-lbl">AVG LENGTH</div></div>
+      </div>
     </div>
 
     <!-- ═══════════ MODULE: OPEN CONTRACTS ═══════════ -->
@@ -1537,6 +1577,80 @@ async function downloadDocument(docKey) {
 }
 
 // ── Filter Contracts ──────────────────────────────────
+// ── KPI Stat Strip ────────────────────────────────────
+function updateContractKPIs() {
+  const now = new Date();
+  const ninetyDays = 90 * 24 * 60 * 60 * 1000;
+
+  let total = contracts.length;
+  let active = 0, expiring = 0, expired = 0, acvSum = 0, totalMonths = 0, monthCount = 0;
+
+  contracts.forEach(c => {
+    const status = deriveStatus(c);
+    if (status === 'Active') active++;
+    if (status === 'Expired') expired++;
+    // Expiring: Active AND end date within 90 days
+    if (status === 'Active' && c.dtEndDate) {
+      const end = new Date(c.dtEndDate);
+      if (!isNaN(end) && (end - now) <= ninetyDays && end >= now) expiring++;
+    }
+    // Also count explicitly marked 'Expiring'
+    if (status === 'Expiring') expiring++;
+
+    acvSum += (c.dblAnnualValue || c.dblContractTotal || 0);
+
+    if (c.dtStartDate && c.dtEndDate) {
+      const s = new Date(c.dtStartDate), e = new Date(c.dtEndDate);
+      if (!isNaN(s) && !isNaN(e)) {
+        const months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+        if (months > 0) { totalMonths += months; monthCount++; }
+      }
+    }
+  });
+
+  // Format ACV
+  let acvLabel;
+  if (acvSum >= 1000000) acvLabel = '$' + (acvSum / 1000000).toFixed(1) + 'M';
+  else if (acvSum >= 1000) acvLabel = '$' + Math.round(acvSum / 1000) + 'K';
+  else acvLabel = '$' + acvSum;
+
+  const avgLen = monthCount > 0 ? Math.round(totalMonths / monthCount) : 0;
+
+  document.getElementById('kpiTotalVal').textContent = total;
+  document.getElementById('kpiActiveVal').textContent = active;
+  document.getElementById('kpiExpiringVal').textContent = expiring;
+  document.getElementById('kpiExpiredVal').textContent = expired;
+  document.getElementById('kpiACVVal').textContent = acvLabel;
+  document.getElementById('kpiAvgLenVal').textContent = avgLen + ' mo';
+}
+
+function chipFilter(status) {
+  // Toggle active chip
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  if (status === '') {
+    document.getElementById('kpiTotal').classList.add('active-chip');
+  } else {
+    const chipId = 'kpi' + status; // 'Active' → 'kpiActive', etc.
+    const chip = document.getElementById(chipId);
+    if (chip) chip.classList.add('active-chip');
+  }
+
+  // Map chip status to the existing filterStatus mechanism
+  const statusMap = { '': 'all', 'Active': 'active', 'Expiring': 'expiring', 'Expired': 'expired' };
+  currentStatusFilter = statusMap[status] || 'all';
+
+  // Also sync segmented buttons
+  document.querySelectorAll('#mv-open .seg-group .seg-btn').forEach(b => b.classList.remove('on'));
+  const segBtns = document.querySelectorAll('#mv-open .seg-group .seg-btn');
+  segBtns.forEach(b => {
+    const btnStatus = (b.textContent.replace(/\(.*\)/, '').trim()).toLowerCase();
+    if (btnStatus === currentStatusFilter || (currentStatusFilter === 'all' && btnStatus === 'all')) b.classList.add('on');
+  });
+
+  const q = (document.getElementById('contractSearch') || {}).value || '';
+  filterContracts(q);
+}
+
 function filterContracts(q) {
   q = (q || '').toLowerCase();
   const filtered = contracts.filter(c =>
@@ -1821,6 +1935,7 @@ async function loadContracts() {
   if (listHeadCount) listHeadCount.textContent = contracts.length + ' records';
 
   renderList(contracts);
+  updateContractKPIs();
 }
 
 

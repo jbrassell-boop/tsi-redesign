@@ -8,6 +8,18 @@
   <style>
     /* ── PAGE-SPECIFIC: Inventory ── */
 
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)} .s-muted{color:var(--muted)}
+
     /* Extra button variants not in shared styles */
     .btn-green{background:#F0FDF4;border:1.5px solid #BBF7D0;color:var(--green);font-weight:600}
     .btn-green:hover{background:#DCFCE7}
@@ -274,24 +286,34 @@
 
     <div class="page-body" style="display:flex;flex-direction:column">
 
-      <!-- STATUS STRIP -->
-      <div class="status-strip">
-        <div class="ss-chip ss-info">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/></svg>
-          <span class="ss-label">Items</span> <span class="ss-val" id="ssItemCount">0</span>
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">📦</div>
+          <div class="s-data"><div class="s-val s-navy" id="ssItemCount">127</div><div class="s-lbl">TOTAL ITEMS</div></div>
         </div>
-        <div class="ss-chip ss-active">
-          <span class="ss-label">Active</span> <span class="ss-val" id="ssActiveCount">0</span>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#F0FDF4">✓</div>
+          <div class="s-data"><div class="s-val s-green" id="ssActiveCount">112</div><div class="s-lbl">ACTIVE</div></div>
         </div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="ssInactiveCount">0</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Open POs</span> <span class="ss-val">3</span></div>
-        <div class="ss-chip ss-warn" id="ssLowStockChip">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span id="ssLowStockText">0 items below reorder level</span>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#F8FAFF">—</div>
+          <div class="s-data"><div class="s-val s-muted" id="ssInactiveCount">15</div><div class="s-lbl">INACTIVE</div></div>
         </div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Pending Receives</span> <span class="ss-val">6</span></div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">📄</div>
+          <div class="s-data"><div class="s-val s-blue">3</div><div class="s-lbl">OPEN POs</div></div>
+        </div>
+        <div class="stat-chip" id="ssLowStockChip">
+          <div class="s-icon" style="background:#FFFBEB">⚠</div>
+          <div class="s-data"><div class="s-val s-amber" id="ssLowStockCount">4</div><div class="s-lbl">LOW STOCK</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF">📥</div>
+          <div class="s-data"><div class="s-val s-blue">6</div><div class="s-lbl">PENDING RECEIVES</div></div>
+        </div>
         <div style="flex:1"></div>
-        <span style="font-size:10px;color:var(--muted)">Last sync 03/08/2026 09:14 AM</span>
+        <div style="font-size:10px;color:var(--muted);padding:8px 12px" id="ssLastSync">Last sync 03/08/2026 09:14 AM</div>
       </div>
 
       <!-- TABS -->
@@ -1898,7 +1920,7 @@ function buildDemoItemList() {
   document.getElementById('ssItemCount').textContent = total;
   document.getElementById('ssActiveCount').textContent = activeCount;
   document.getElementById('ssInactiveCount').textContent = total - activeCount;
-  document.getElementById('ssLowStockText').textContent = lowStockCount + ' item' + (lowStockCount !== 1 ? 's' : '') + ' below reorder level';
+  document.getElementById('ssLowStockCount').textContent = lowStockCount;
 
   // Update tab count
   const tabCount = document.querySelector('.tab-bar .tab:first-child .tab-count');
@@ -2022,11 +2044,10 @@ function populateItemList(items) {
   });
 
   // Update status strip counts
-  const chips = document.querySelectorAll('.status-strip .ss-chip .ss-val');
-  if (chips[0]) chips[0].textContent = items.length;
+  document.getElementById('ssItemCount').textContent = items.length;
   const activeCount = items.filter(i => i.bActive !== false).length;
-  if (chips[1]) chips[1].textContent = activeCount;
-  if (chips[2]) chips[2].textContent = items.length - activeCount;
+  document.getElementById('ssActiveCount').textContent = activeCount;
+  document.getElementById('ssInactiveCount').textContent = items.length - activeCount;
 
   // Update tab count
   const tabCount = document.querySelector('.tab-bar .tab:first-child .tab-count');
