@@ -3,61 +3,162 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Onsite Services | TSI Redesign</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* PAGE-SPECIFIC: Onsite Services layout */
-    .page-body{display:flex;overflow:hidden}
+    /* ── PAGE-SPECIFIC: Onsite Services Cockpit ── */
 
-    /* LIST PANEL */
-    .list-panel{width:360px;border-right:1px solid var(--border);background:#fff;display:flex;flex-direction:column;flex-shrink:0}
-    .list-header{padding:12px 14px;border-bottom:1px solid var(--border);background:#E9EFF9;display:flex;align-items:center;justify-content:space-between}
-    .list-header h3{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px}
-    .inp-search{width:100%;height:30px;border:1px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11.5px;outline:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") 10px center no-repeat #fff;margin:10px 14px}
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)} .s-purple{color:#7C3AED}
 
-    .list-scroll{flex:1;overflow-y:auto}
-    .list-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .1s}
-    .list-item:hover{background:var(--bg)}
-    .list-item.selected{background:#EDF2FF;border-left:4px solid var(--navy);padding-left:10px}
-    .list-item .c-top{display:flex;justify-content:space-between;margin-bottom:4px}
-    .list-item .c-name{font-size:12px;font-weight:700;color:var(--navy)}
-    .list-item .c-id{font-size:10.5px;color:var(--muted);font-weight:600}
-    .list-item .c-meta{font-size:11px;color:var(--label);display:flex;align-items:center;gap:10px}
-    .list-item .c-status{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase}
-    .status-scheduled{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .status-ongoing{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
-    .status-completed{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:120px}
+    .filter-dd:focus{border-color:var(--navy)}
+    .date-input{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;width:120px}
+    .date-input:focus{border-color:var(--navy)}
 
-    /* DETAIL PANEL */
-    .detail-panel{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px}
-    .panel-card{background:#fff;border:1px solid var(--border-dk);border-radius:8px;margin:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-    .panel-card .panel-head{display:flex;justify-content:space-between;align-items:center}
-    .panel-card .panel-body{padding:16px}
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'\25B2'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'\25BC'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .inv-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .inv-link:hover{text-decoration:underline}
 
-    /* FORM GRID */
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 20px}
-    .ff{gap:4px}
-    .ff label{font-size:10px}
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-draft{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-submitted{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-invoiced{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-void{background:#FEF2F2;color:var(--red);border-color:#FECACA}
 
-    /* CALENDAR */
-    .calendar-mock{border:1px solid var(--border);border-radius:6px;overflow:hidden}
-    .cal-header{background:#f8f9fa;padding:10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--border)}
-    .cal-day-head{background:#f8f9fa;padding:6px;text-align:center;font-size:10px;font-weight:700;color:var(--muted)}
-    .cal-cell{background:#fff;height:80px;padding:4px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:relative}
-    .cal-cell.today{background:#FFFBEB}
-    .cal-date{font-size:10px;color:var(--muted);margin-bottom:4px}
-    .cal-event{font-size:9px;background:var(--navy);color:#fff;padding:2px 4px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .cal-event.green{background:var(--green)}
-    .cal-event.amber{background:var(--amber)}
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
+
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
+
+    /* ── Slide-Out Drawer ── */
+    .visit-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .visit-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .dtab:hover{color:var(--blue)}
+    .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+    .dpane{display:none;flex:1;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
+
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+    .mini-table tr:hover td{background:#EFF6FF}
+
+    /* Tray accordion */
+    .tray-row{border:1.5px solid var(--border-dk);border-radius:6px;margin-bottom:8px;overflow:hidden}
+    .tray-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F0F4FA;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--navy);transition:background .1s}
+    .tray-header:hover{background:#E3ECF8}
+    .tray-header .tray-meta{display:flex;align-items:center;gap:12px;font-size:10.5px;color:var(--muted);font-weight:500}
+    .tray-header .tray-chevron{transition:transform .2s;font-size:10px;color:var(--steel)}
+    .tray-header.expanded .tray-chevron{transform:rotate(90deg)}
+    .tray-body{display:none;border-top:1px solid var(--border)}
+    .tray-body.open{display:block}
+    .tray-footer{padding:6px 12px;background:#F8FAFF;font-size:10.5px;font-weight:700;text-align:right;color:var(--navy);border-top:1px solid var(--border)}
+    .tray-total-row{padding:10px 12px;font-size:12px;font-weight:800;text-align:right;color:var(--navy);border-top:2px solid var(--border-dk);background:#EDF2FF}
+
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    #drawerSaveStatus{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .save-saving{animation:pulse .8s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:700px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(90vh - 140px)}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+
+    /* Financial highlight */
+    .fin-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11.5px}
+    .fin-row.total{border-top:2px solid var(--border-dk);padding-top:8px;margin-top:4px;font-weight:800;font-size:12.5px;color:var(--navy)}
+    .fin-label{color:var(--label)}
+    .fin-val{font-weight:600}
   </style>
 </head>
 <body>
 <div class="shell">
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-      <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
     </div>
     <div class="nav-group">
       <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
@@ -95,274 +196,889 @@
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
           <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
           </div>
         </div>
         <span id="dataBadge" class="data-badge"></span>
-        <div class="save-indicator"></div>
-        <span style="opacity:0.5; margin: 0 4px;">|</span>
-        Service Location <select id="svcLocation" class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
-        <div class="topbar-avatar" id="topbarAvatar">JB</div>
-        <span class="topbar-welcome" id="topbarWelcome">Welcome back, <strong>Joseph</strong></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
-    <div class="toolbar">
-      <button class="btn btn-navy">+ Schedule Service</button>
-      <div class="divider"></div>
-      <button class="btn btn-outline">Print Dispatch</button>
-      <button class="btn btn-outline">Compliance Report</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-navy">Save Log</button>
-    </div>
-
+    <!-- PAGE BODY -->
     <div class="page-body">
-      <!-- ONSITE JOB LIST -->
-      <div class="list-panel">
-        <div class="list-header">
-          <h3>Active Jobs</h3>
-          <button class="btn btn-outline" style="height:20px; font-size:9px">View Map</button>
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" style="width:14px;height:14px"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Visits</div></div>
         </div>
-        <input class="inp-search" placeholder="Search jobs, tech, hospital..."/>
-        <div class="list-scroll">
-          <div class="list-item selected">
-            <div class="c-top">
-              <span class="c-name">Halifax Medical Center</span>
-              <span class="c-id">JOB-4022</span>
-            </div>
-            <div class="c-meta"><span>Tech: Mike R.</span> <span class="c-status status-ongoing">Ongoing</span></div>
-            <div class="c-meta" style="margin-top:2px"><span>Date: 03/09/2026</span> <span>Scopes: 12</span></div>
-          </div>
-          <div class="list-item">
-            <div class="c-top">
-              <span class="c-name">Tift Regional Medical</span>
-              <span class="c-id">JOB-4025</span>
-            </div>
-            <div class="c-meta"><span>Tech: Sarah L.</span> <span class="c-status status-scheduled">Scheduled</span></div>
-            <div class="c-meta" style="margin-top:2px"><span>Date: 03/10/2026</span> <span>Scopes: 8</span></div>
-          </div>
-          <div class="list-item">
-            <div class="c-top">
-              <span class="c-name">Northside Hospital</span>
-              <span class="c-id">JOB-3998</span>
-            </div>
-            <div class="c-meta"><span>Tech: Mike R.</span> <span class="c-status status-completed">Completed</span></div>
-            <div class="c-meta" style="margin-top:2px"><span>Date: 03/08/2026</span> <span>Scopes: 15</span></div>
-          </div>
+        <div class="stat-chip" id="kpiSubmitted" onclick="chipFilter('Submitted')">
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiSubmittedVal">0</div><div class="s-lbl">Submitted</div></div>
+        </div>
+        <div class="stat-chip" id="kpiInvoiced" onclick="chipFilter('Invoiced')">
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="s-data"><div class="s-val s-green" id="kpiInvoicedVal">0</div><div class="s-lbl">Invoiced</div></div>
+        </div>
+        <div class="stat-chip" id="kpiDraft" onclick="chipFilter('Draft')">
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
+        </div>
+        <div class="stat-chip" id="kpiVoid" onclick="chipFilter('Void')">
+          <div class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="s-data"><div class="s-val s-red" id="kpiVoidVal">0</div><div class="s-lbl">Void</div></div>
+        </div>
+        <div class="stat-chip" id="kpiValue" style="cursor:default">
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" style="width:14px;height:14px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiValueVal">$0</div><div class="s-lbl">Total Value</div></div>
         </div>
       </div>
 
-      <!-- JOB DETAIL -->
-      <div class="detail-panel">
-        <!-- SCHEDULE PREVIEW -->
-        <div class="panel-card">
-          <div class="panel-head">Onsite Schedule (March 2026)</div>
-          <div class="panel-body">
-            <div class="calendar-mock">
-              <div class="cal-header">
-                <span style="font-weight:700">March 9 - 15, 2026</span>
-                <div style="display:flex; gap:4px">
-                  <button class="btn btn-outline" style="height:22px">Today</button>
-                  <button class="btn btn-outline" style="height:22px">&#9664;</button>
-                  <button class="btn btn-outline" style="height:22px">&#9654;</button>
-                </div>
-              </div>
-              <div class="cal-grid">
-                <div class="cal-day-head">MON</div><div class="cal-day-head">TUE</div><div class="cal-day-head">WED</div><div class="cal-day-head">THU</div><div class="cal-day-head">FRI</div><div class="cal-day-head">SAT</div><div class="cal-day-head">SUN</div>
-                <div class="cal-cell today"><div class="cal-date">9</div><div class="cal-event">Halifax (Mike)</div><div class="cal-event amber">88th Med (Sarah)</div></div>
-                <div class="cal-cell"><div class="cal-date">10</div><div class="cal-event">Tift (Sarah)</div></div>
-                <div class="cal-cell"><div class="cal-date">11</div></div>
-                <div class="cal-cell"><div class="cal-date">12</div><div class="cal-event green">Audit (Mike)</div></div>
-                <div class="cal-cell"><div class="cal-date">13</div></div>
-                <div class="cal-cell"><div class="cal-date">14</div></div>
-                <div class="cal-cell"><div class="cal-date">15</div></div>
-              </div>
-            </div>
-          </div>
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="openAddModal()" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Visit
+        </button>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Status</span>
+        <div class="seg-group" id="segStatus">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+          <button class="seg-btn" data-val="Draft" onclick="setSegFilter('status','Draft',this)">Draft</button>
+          <button class="seg-btn" data-val="Submitted" onclick="setSegFilter('status','Submitted',this)">Submitted</button>
+          <button class="seg-btn" data-val="Invoiced" onclick="setSegFilter('status','Invoiced',this)">Invoiced</button>
+          <button class="seg-btn" data-val="Void" onclick="setSegFilter('status','Void',this)">Void</button>
         </div>
-
-        <!-- JOB DETAILS -->
-        <div class="panel-card">
-          <div class="panel-head">Job Information: JOB-4022</div>
-          <div class="panel-body">
-            <div class="grid-3">
-              <div class="ff">
-                <label>Hospital / Client</label>
-                <input class="inp" value="Halifax Medical Center"/>
-              </div>
-              <div class="ff">
-                <label>Primary Technician</label>
-                <select class="inp">
-                  <option selected>Mike Robinson</option>
-                  <option>Sarah Lewis</option>
-                  <option>David Chen</option>
-                </select>
-              </div>
-              <div class="ff">
-                <label>Job Status</label>
-                <select class="inp">
-                  <option>Scheduled</option>
-                  <option selected>In Progress</option>
-                  <option>Completed</option>
-                  <option>Cancelled</option>
-                </select>
-              </div>
-              <div class="ff">
-                <label>Service Date</label>
-                <input class="inp" type="date" value="2026-03-09"/>
-              </div>
-              <div class="ff">
-                <label>Arrival Time</label>
-                <input class="inp" type="time" value="08:30"/>
-              </div>
-              <div class="ff">
-                <label>Total Scopes Inspected</label>
-                <input class="inp" value="12"/>
-              </div>
-              <div class="ff" style="grid-column: span 3">
-                <label>Service Summary / Notes</label>
-                <textarea class="inp">Conducted quarterly onsite inspection for the GI Lab. 10 flexible scopes inspected. 2 marked for major repair (fluid invasion). Cleanliness scores generally high, but noted wear on angulation cables for CF-H190 unit #304.</textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- EQUIPMENT LOG -->
-        <div class="panel-card">
-          <div class="panel-head">Equipment Inspected <button class="btn btn-outline" style="height:20px; font-size:9px">+ Add Equipment</button></div>
-          <div class="panel-body" style="padding:0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Serial #</th>
-                  <th>Type</th>
-                  <th>Inspected Status</th>
-                  <th>Action Needed</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>GIF-H190</td><td style="font-weight:600;color:var(--blue)">3801442</td><td>Flexible</td><td><span class="c-status status-completed">Passed</span></td><td>None</td></tr>
-                <tr><td>CF-H185L</td><td style="font-weight:600;color:var(--blue)">2918371</td><td>Flexible</td><td><span class="c-status" style="background:#FFE4E6; color:#BE123C; border:1px solid #FDA4AF">Failed</span></td><td style="color:var(--red); font-weight:600">Send to Lab</td></tr>
-                <tr><td>EG-760Z</td><td style="font-weight:600;color:var(--blue)">4450188</td><td>Flexible</td><td><span class="c-status status-completed">Passed</span></td><td>Clean Lens</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
+        <div class="filter-sep"></div>
+        <select class="filter-dd" id="filterTech" onchange="filters.tech=this.value;runPipeline()">
+          <option value="">All Technicians</option>
+        </select>
+        <select class="filter-dd" id="filterLocation" onchange="filters.location=this.value;runPipeline()">
+          <option value="">All Locations</option>
+          <option value="Upper Chichester">Upper Chichester</option>
+          <option value="Nashville">Nashville</option>
+        </select>
+        <div class="filter-sep"></div>
+        <input type="date" class="date-input" id="filterDateFrom" onchange="filters.dateFrom=this.value;runPipeline()" title="From date"/>
+        <span style="font-size:10px;color:var(--muted)">to</span>
+        <input type="date" class="date-input" id="filterDateTo" onchange="filters.dateTo=this.value;runPipeline()" title="To date"/>
+        <input class="search-input" id="searchInput" placeholder="Search invoice, client, dept..." oninput="debounceSearch()" style="margin-left:auto"/>
       </div>
+
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:100px" onclick="sortByCol('invoiceNum')">Invoice # <span class="sort"></span></th>
+              <th onclick="sortByCol('clientName')">Client <span class="sort"></span></th>
+              <th onclick="sortByCol('deptName')">Department <span class="sort"></span></th>
+              <th style="width:120px" onclick="sortByCol('techName')">Technician <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortByCol('visitDate')">Visit Date <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortByCol('status')">Status <span class="sort"></span></th>
+              <th style="width:60px;text-align:center" onclick="sortByCol('trayCount')">Trays <span class="sort"></span></th>
+              <th style="width:80px;text-align:center" onclick="sortByCol('instrCount')">Instruments <span class="sort"></span></th>
+              <th style="width:100px;text-align:right" onclick="sortByCol('totalBilled')">Total Billed <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortByCol('submittedDate')">Submitted <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="visitsTbody">
+            <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading visits...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">0 records</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select" id="rowsSelect" onchange="changePageSize()">
+              <option>15</option><option selected>25</option><option>50</option><option>All</option>
+            </select>
+          </div>
+          <div class="pagination" id="paginationBtns"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('edit')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Visit</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('invoice')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="ctxInvoiceLabel">Mark as Invoiced</span></div>
+  <div class="ctx-item" onclick="ctxAction('print')"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Invoice</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxAction('void')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Void Visit</div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete Visit</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- VISIT DETAIL DRAWER -->
+<div class="visit-drawer" id="visitDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerTitle">--</div>
+      <div class="dh-sub" id="drawerSub">--</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="dtab" onclick="switchTab('trays',this)">Trays</div>
+    <div class="dtab" onclick="switchTab('expenses',this)">Expenses</div>
+    <div class="dtab" onclick="switchTab('documents',this)">Documents</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="dpane active" id="dpane-overview">
+    <div class="section-card">
+      <div class="section-head">Visit Information</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Client</label><input id="fClient" readonly/></div>
+          <div class="field"><label>Department</label><input id="fDept" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Technician</label><input id="fTech" readonly/></div>
+          <div class="field"><label>Status</label><span id="fStatusBadge" style="margin-top:2px"></span></div>
+        </div>
+        <div class="g3">
+          <div class="field"><label>Visit Date</label><input id="fVisitDate" readonly/></div>
+          <div class="field"><label>Start Time</label><input id="fStartTime" readonly/></div>
+          <div class="field"><label>End Time</label><input id="fEndTime" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>PO #</label><input id="fPO" readonly/></div>
+          <div class="field"><label>Location</label><input id="fLocation" readonly/></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head">Financial Summary</div>
+      <div class="section-body" id="fFinancials"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-head">Notes</div>
+      <div class="section-body">
+        <textarea id="fNotes" class="field" style="height:80px;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:none;width:100%;box-sizing:border-box;outline:none" oninput="markDirty()" placeholder="Visit notes..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trays Tab -->
+  <div class="dpane" id="dpane-trays"></div>
+
+  <!-- Expenses Tab -->
+  <div class="dpane" id="dpane-expenses"></div>
+
+  <!-- Documents Tab -->
+  <div class="dpane" id="dpane-documents">
+    <div class="section-card">
+      <div class="section-head">Documents <button class="btn btn-outline" style="height:20px;font-size:9px" onclick="alert('Upload not available in demo mode')">+ Upload</button></div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Date</th></tr></thead>
+          <tbody id="docsBody"><tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">No documents</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span id="drawerSaveStatus"></span>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline" onclick="closeDrawer()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VISIT MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">New Onsite Visit</span>
+      <button class="modal-close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="g2">
+        <div class="field"><label>Client *</label>
+          <select id="mClient" onchange="onModalClientChange()" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
+            <option value="">-- Select Client --</option>
+          </select>
+        </div>
+        <div class="field"><label>Department *</label>
+          <select id="mDept" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
+            <option value="">-- Select Department --</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Technician *</label>
+          <select id="mTech" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
+            <option value="">-- Select Tech --</option>
+          </select>
+        </div>
+        <div class="field"><label>Visit Date *</label>
+          <input id="mDate" type="date" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit"/>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Location</label>
+          <select id="mLocation" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
+            <option value="Upper Chichester">Upper Chichester</option>
+            <option value="Nashville">Nashville</option>
+          </select>
+        </div>
+        <div class="field"><label>PO #</label>
+          <input id="mPO" placeholder="Optional" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit"/>
+        </div>
+      </div>
+      <div class="field"><label>Notes</label>
+        <textarea id="mNotes" placeholder="Visit notes..." style="height:60px;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:none;width:100%;box-sizing:border-box"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-navy" onclick="submitAddVisit()">Create Visit</button>
     </div>
   </div>
 </div>
 
 <script src="api.js"></script>
 <script>
-(function() {
-  // ── Auth Guard ──
-  if (!API.requireAuth()) throw new Error('redirect');
+// ── Auth guard ──────────────────────────────────────────
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
 
-  API.UI.init();
-  API.UI.updateDemoBadge('demo');
+// ── State ───────────────────────────────────────────────
+let allVisits = [], filteredVisits = [], displayVisits = [];
+let selectedVisitKey = null, isDirty = false, isLive = false;
+let currentPage = 1, pageSize = 25;
+let sortCol = 'visitDate', sortDir = 'desc';
+let filters = { status:'', tech:'', location:'', search:'', dateFrom:'', dateTo:'' };
+let ctxVisitKey = null;
+let _searchTimer = null, _saveTimer = null;
 
-
-  // ── Demo Data for Job Selection ──
-  const jobs = [
-    {
-      id: 'JOB-4022', client: 'Halifax Medical Center', tech: 'Mike Robinson', status: 'In Progress',
-      date: '2026-03-09', time: '08:30', scopes: '12',
-      notes: 'Conducted quarterly onsite inspection for the GI Lab. 10 flexible scopes inspected. 2 marked for major repair (fluid invasion). Cleanliness scores generally high, but noted wear on angulation cables for CF-H190 unit #304.',
-      equipment: [
-        { model: 'GIF-H190', serial: '3801442', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
-        { model: 'CF-H185L', serial: '2918371', type: 'Flexible', status: 'Failed', statusClass: '', statusStyle: 'background:#FFE4E6;color:#BE123C;border:1px solid #FDA4AF', action: 'Send to Lab', actionClass: 'color:var(--red);font-weight:600' },
-        { model: 'EG-760Z', serial: '4450188', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'Clean Lens', actionClass: '' }
-      ]
+// ── Demo Data ───────────────────────────────────────────
+function getDemoVisits() {
+  return [
+    { key:5001, invoiceNum:'INV-4022', clientName:'Johns Hopkins Hospital', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-02-18', startTime:'08:00', endTime:'15:30', status:'Invoiced', location:'Upper Chichester', po:'PO-88412', submittedDate:'2026-02-19', notes:'Full quarterly service visit. 3 trays processed, all instruments in good condition. Minor repair on CF-H190.',
+      trays:[
+        { name:'Tray A - GI Flexible', items:[
+          {type:'Gastroscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:125},
+          {type:'Colonoscope',total:3,repaired:2,sentTSI:1,ber:0,unitPrice:150},
+          {type:'Duodenoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Tray B - Bronchoscopes', items:[
+          {type:'Bronchoscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:175},
+          {type:'ENT Scope',total:2,repaired:1,sentTSI:0,ber:1,unitPrice:100}
+        ]}
+      ],
+      expenses:[{desc:'Mileage (142 mi)',category:'Travel',amount:79.52},{desc:'Parking Garage',category:'Travel',amount:18.00}]
     },
-    {
-      id: 'JOB-4025', client: 'Tift Regional Medical', tech: 'Sarah Lewis', status: 'Scheduled',
-      date: '2026-03-10', time: '09:00', scopes: '8',
-      notes: 'Scheduled quarterly scope inspection for the Endoscopy Suite. Pre-visit checklist completed. Contact: Dr. Martinez, GI Director.',
-      equipment: [
-        { model: 'GIF-HQ190', serial: '5102938', type: 'Flexible', status: 'Pending', statusClass: 'status-scheduled', action: 'Inspect', actionClass: '' },
-        { model: 'CF-HQ190I', serial: '5102940', type: 'Flexible', status: 'Pending', statusClass: 'status-scheduled', action: 'Inspect', actionClass: '' }
-      ]
+    { key:5002, invoiceNum:'INV-4025', clientName:'Cleveland Clinic', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-02-24', startTime:'07:30', endTime:'14:00', status:'Submitted', location:'Upper Chichester', po:'PO-CC-2026-118', submittedDate:'2026-02-25', notes:'Semi-annual audit. 2 trays inspected. Found 1 BER colonoscope.',
+      trays:[
+        { name:'Tray 1 - Upper GI', items:[
+          {type:'Gastroscope',total:5,repaired:4,sentTSI:1,ber:0,unitPrice:125},
+          {type:'Duodenoscope',total:1,repaired:1,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Tray 2 - Lower GI', items:[
+          {type:'Colonoscope',total:4,repaired:3,sentTSI:0,ber:1,unitPrice:150}
+        ]}
+      ],
+      expenses:[{desc:'Hotel (1 night)',category:'Lodging',amount:149.00},{desc:'Mileage (88 mi)',category:'Travel',amount:49.28}]
     },
-    {
-      id: 'JOB-3998', client: 'Northside Hospital', tech: 'Mike Robinson', status: 'Completed',
-      date: '2026-03-08', time: '07:45', scopes: '15',
-      notes: 'Completed full onsite service. All 15 scopes inspected and logged. 1 duodenoscope flagged for elevated bacterial count — sent for reprocessing audit. Client satisfied with turnaround.',
-      equipment: [
-        { model: 'TJF-Q190V', serial: '4401221', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
-        { model: 'GIF-H190', serial: '4401225', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' },
-        { model: 'EC-760R', serial: '4401230', type: 'Flexible', status: 'Failed', statusClass: '', statusStyle: 'background:#FFE4E6;color:#BE123C;border:1px solid #FDA4AF', action: 'Reprocessing Audit', actionClass: 'color:var(--red);font-weight:600' },
-        { model: 'CF-H190DL', serial: '4401233', type: 'Flexible', status: 'Passed', statusClass: 'status-completed', action: 'None', actionClass: '' }
-      ]
+    { key:5003, invoiceNum:'INV-4031', clientName:'Mayo Clinic', deptName:'Surgical Suite', techName:'James Wilson', visitDate:'2026-03-01', startTime:'09:00', endTime:'16:00', status:'Invoiced', location:'Nashville', po:'MC-REQ-4031', submittedDate:'2026-03-02', notes:'Annual instrument service. High volume - 3 full trays. Client requested expedited turnaround on BER items.',
+      trays:[
+        { name:'Tray A - Rigid Scopes', items:[
+          {type:'Arthroscope',total:6,repaired:5,sentTSI:1,ber:0,unitPrice:175},
+          {type:'Laparoscope',total:4,repaired:4,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Tray B - Cameras', items:[
+          {type:'Camera Head',total:3,repaired:2,sentTSI:0,ber:1,unitPrice:350},
+          {type:'Light Cable',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:85}
+        ]},
+        { name:'Tray C - Instruments', items:[
+          {type:'Grasper',total:8,repaired:7,sentTSI:1,ber:0,unitPrice:65},
+          {type:'Scissors',total:6,repaired:6,sentTSI:0,ber:0,unitPrice:55}
+        ]}
+      ],
+      expenses:[{desc:'Flight (round trip)',category:'Travel',amount:385.00},{desc:'Hotel (2 nights)',category:'Lodging',amount:298.00},{desc:'Rental Car',category:'Travel',amount:89.00},{desc:'Meals',category:'Meals',amount:62.50}]
+    },
+    { key:5004, invoiceNum:'INV-4038', clientName:'HCA West Kendall', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-03-05', startTime:'08:30', endTime:'12:00', status:'Submitted', location:'Upper Chichester', po:'', submittedDate:'2026-03-06', notes:'Routine quarterly check. Small tray, all items in good condition.',
+      trays:[
+        { name:'Tray 1 - Flex Endoscopes', items:[
+          {type:'Gastroscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:125},
+          {type:'Colonoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:150}
+        ]}
+      ],
+      expenses:[{desc:'Mileage (65 mi)',category:'Travel',amount:36.40}]
+    },
+    { key:5005, invoiceNum:'INV-4041', clientName:'Cedars-Sinai', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-07', startTime:'07:00', endTime:'15:00', status:'Draft', location:'Nashville', po:'CS-PO-9921', submittedDate:null, notes:'Visit in progress. Tech still entering tray data.',
+      trays:[
+        { name:'Tray A - Upper Endo', items:[
+          {type:'Gastroscope',total:4,repaired:2,sentTSI:0,ber:0,unitPrice:125},
+          {type:'Duodenoscope',total:2,repaired:1,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Tray B - Lower Endo', items:[
+          {type:'Colonoscope',total:5,repaired:3,sentTSI:1,ber:0,unitPrice:150}
+        ]}
+      ],
+      expenses:[]
+    },
+    { key:5006, invoiceNum:'INV-4044', clientName:'Johns Hopkins Hospital', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-08', startTime:'10:00', endTime:'14:30', status:'Draft', location:'Upper Chichester', po:'JH-PO-2026-304', submittedDate:null, notes:'Bronchoscope service visit.',
+      trays:[
+        { name:'Tray 1 - Bronchoscopes', items:[
+          {type:'Bronchoscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:175},
+          {type:'ENT Scope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:100}
+        ]}
+      ],
+      expenses:[{desc:'Mileage (32 mi)',category:'Travel',amount:17.92}]
+    },
+    { key:5007, invoiceNum:'INV-3998', clientName:'Cleveland Clinic', deptName:'Urology', techName:'Mike Rivera', visitDate:'2026-01-15', startTime:'08:00', endTime:'13:00', status:'Invoiced', location:'Upper Chichester', po:'CC-URO-115', submittedDate:'2026-01-16', notes:'Cystoscopy instrument service. All items passed inspection.',
+      trays:[
+        { name:'Tray 1 - Cystoscopes', items:[
+          {type:'Cystoscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:200},
+          {type:'Resectoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:225}
+        ]}
+      ],
+      expenses:[{desc:'Mileage (88 mi)',category:'Travel',amount:49.28}]
+    },
+    { key:5008, invoiceNum:'INV-3985', clientName:'Mayo Clinic', deptName:'OR Suite', techName:'James Wilson', visitDate:'2026-01-08', startTime:'07:00', endTime:'16:30', status:'Invoiced', location:'Nashville', po:'MC-REQ-3985', submittedDate:'2026-01-09', notes:'Full OR instrument processing. Large volume day.',
+      trays:[
+        { name:'Tray A - Rigid Scopes', items:[
+          {type:'Arthroscope',total:8,repaired:7,sentTSI:1,ber:0,unitPrice:175},
+          {type:'Laparoscope',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Tray B - Instruments', items:[
+          {type:'Grasper',total:10,repaired:9,sentTSI:1,ber:0,unitPrice:65},
+          {type:'Scissors',total:8,repaired:8,sentTSI:0,ber:0,unitPrice:55},
+          {type:'Trocar',total:6,repaired:6,sentTSI:0,ber:0,unitPrice:95}
+        ]}
+      ],
+      expenses:[{desc:'Flight',category:'Travel',amount:342.00},{desc:'Hotel (2 nights)',category:'Lodging',amount:310.00},{desc:'Rental Car',category:'Travel',amount:95.00}]
+    },
+    { key:5009, invoiceNum:'INV-4050', clientName:'HCA West Kendall', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-10', startTime:'08:00', endTime:'14:00', status:'Draft', location:'Upper Chichester', po:'HCA-WK-0310', submittedDate:null, notes:'Scheduled quarterly flexible endoscope service.',
+      trays:[
+        { name:'Tray 1 - Flex Endoscopes', items:[
+          {type:'Gastroscope',total:6,repaired:4,sentTSI:1,ber:1,unitPrice:125},
+          {type:'Colonoscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:150}
+        ]}
+      ],
+      expenses:[]
+    },
+    { key:5010, invoiceNum:'INV-3950', clientName:'Cedars-Sinai', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2025-12-15', startTime:'09:00', endTime:'14:00', status:'Void', location:'Nashville', po:'', submittedDate:'2025-12-16', notes:'Visit voided - client rescheduled to January.',
+      trays:[
+        { name:'Tray A - Endoscopes', items:[
+          {type:'Gastroscope',total:3,repaired:0,sentTSI:0,ber:0,unitPrice:125},
+          {type:'Colonoscope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:150}
+        ]}
+      ],
+      expenses:[]
+    },
+    { key:5011, invoiceNum:'INV-4055', clientName:'Johns Hopkins Hospital', deptName:'Endoscopy', techName:'Sarah Chen', visitDate:'2026-03-11', startTime:'07:30', endTime:'', status:'Draft', location:'Upper Chichester', po:'JH-PO-2026-311', submittedDate:null, notes:'Today visit - in progress.',
+      trays:[
+        { name:'Tray 1 - GI Scopes', items:[
+          {type:'Gastroscope',total:5,repaired:2,sentTSI:0,ber:0,unitPrice:125},
+          {type:'Colonoscope',total:3,repaired:1,sentTSI:0,ber:0,unitPrice:150}
+        ]},
+        { name:'Tray 2 - ERCP', items:[
+          {type:'Duodenoscope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:200}
+        ]}
+      ],
+      expenses:[]
+    },
+    { key:5012, invoiceNum:'INV-4060', clientName:'Cleveland Clinic', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-09', startTime:'08:00', endTime:'12:30', status:'Submitted', location:'Upper Chichester', po:'CC-PULM-309', submittedDate:'2026-03-10', notes:'Bronchoscope maintenance visit. All units serviceable.',
+      trays:[
+        { name:'Tray 1 - Bronchoscopes', items:[
+          {type:'Bronchoscope',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:175}
+        ]}
+      ],
+      expenses:[{desc:'Mileage (88 mi)',category:'Travel',amount:49.28}]
     }
   ];
+}
 
-  const listItems = document.querySelectorAll('.list-item');
-  const jobInfoPanel = document.querySelectorAll('.panel-card')[1]; // Job Information card
-  const equipPanel = document.querySelectorAll('.panel-card')[2];   // Equipment card
-  const searchInput = document.querySelector('.inp-search');
+// ── Helpers ──────────────────────────────────────────────
+function fmtDate(d) { if (!d) return '\u2014'; const dt = new Date(d+'T00:00:00'); return isNaN(dt) ? '\u2014' : dt.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+function fmtMoney(n) { return '$' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function statusBadgeClass(s) { return {Draft:'b-draft',Submitted:'b-submitted',Invoiced:'b-invoiced',Void:'b-void'}[s]||'b-draft'; }
 
-  function selectJob(index) {
-    const job = jobs[index];
-    if (!job) return;
+function calcTrayTotal(tray) {
+  return (tray.items||[]).reduce((sum,it) => sum + (it.repaired||0) * (it.unitPrice||0), 0);
+}
+function calcVisitTraysTotal(visit) {
+  return (visit.trays||[]).reduce((sum,t) => sum + calcTrayTotal(t), 0);
+}
+function calcExpensesTotal(visit) {
+  return (visit.expenses||[]).reduce((sum,e) => sum + (e.amount||0), 0);
+}
+function calcVisitTotal(visit) {
+  return calcVisitTraysTotal(visit) + calcExpensesTotal(visit);
+}
+function countInstruments(visit) {
+  return (visit.trays||[]).reduce((sum,t) => sum + (t.items||[]).reduce((s2,it) => s2 + (it.total||0), 0), 0);
+}
 
-    // Update list selection
-    listItems.forEach((el, i) => el.classList.toggle('selected', i === index));
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.className = 'data-badge ' + (live ? 'live' : 'demo');
+  b.textContent = live ? 'Live Data' : 'Demo Data';
+}
 
-    // Update Job Information panel header
-    jobInfoPanel.querySelector('.panel-head').textContent = 'Job Information: ' + job.id;
+// ── Init ────────────────────────────────────────────────
+async function init() {
+  // No site service API exists - demo only
+  allVisits = getDemoVisits();
+  isLive = false;
+  showDataBadge(false);
+  populateTechFilter();
+  populateModalDropdowns();
+  runPipeline();
+  // Event listeners
+  document.addEventListener('click', () => { document.getElementById('ctxMenu').style.display = 'none'; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+}
 
-    // Update form fields
-    const inputs = jobInfoPanel.querySelectorAll('.inp');
-    inputs[0].value = job.client;          // Hospital
-    // Tech select
-    const techSelect = inputs[1];
-    for (let o = 0; o < techSelect.options.length; o++) {
-      techSelect.options[o].selected = techSelect.options[o].text === job.tech;
+function populateTechFilter() {
+  const techs = [...new Set(allVisits.map(v => v.techName))].sort();
+  document.getElementById('filterTech').innerHTML = '<option value="">All Technicians</option>' +
+    techs.map(t => '<option value="' + t + '">' + t + '</option>').join('');
+}
+
+function populateModalDropdowns() {
+  const clients = [...new Set(allVisits.map(v => v.clientName))].sort();
+  document.getElementById('mClient').innerHTML = '<option value="">-- Select Client --</option>' +
+    clients.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+  const techs = [...new Set(allVisits.map(v => v.techName))].sort();
+  document.getElementById('mTech').innerHTML = '<option value="">-- Select Tech --</option>' +
+    techs.map(t => '<option value="' + t + '">' + t + '</option>').join('');
+  document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+}
+
+function onModalClientChange() {
+  const client = document.getElementById('mClient').value;
+  const depts = [...new Set(allVisits.filter(v => v.clientName === client).map(v => v.deptName))].sort();
+  document.getElementById('mDept').innerHTML = '<option value="">-- Select Department --</option>' +
+    depts.map(d => '<option value="' + d + '">' + d + '</option>').join('');
+}
+
+// ── Filter/Sort/Render Pipeline ─────────────────────────
+function runPipeline() {
+  applyFilters();
+  applySort();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updateKPIs();
+  updatePagination();
+}
+
+function applyFilters() {
+  const q = filters.search.toLowerCase();
+  filteredVisits = allVisits.filter(v => {
+    if (filters.status && v.status !== filters.status) return false;
+    if (filters.tech && v.techName !== filters.tech) return false;
+    if (filters.location && v.location !== filters.location) return false;
+    if (filters.dateFrom && v.visitDate < filters.dateFrom) return false;
+    if (filters.dateTo && v.visitDate > filters.dateTo) return false;
+    if (q) {
+      const hay = ((v.invoiceNum||'')+(v.clientName||'')+(v.deptName||'')+(v.techName||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
     }
-    // Status select
-    const statusSelect = inputs[2];
-    for (let o = 0; o < statusSelect.options.length; o++) {
-      statusSelect.options[o].selected = statusSelect.options[o].text === job.status;
-    }
-    inputs[3].value = job.date;            // Date
-    inputs[4].value = job.time;            // Time
-    inputs[5].value = job.scopes;          // Scopes
-    inputs[6].value = job.notes;           // Notes textarea
+    return true;
+  });
+}
 
-    // Update Equipment table
-    const tbody = equipPanel.querySelector('tbody');
-    tbody.innerHTML = job.equipment.map(eq => {
-      const statusSpan = eq.statusClass
-        ? '<span class="c-status ' + eq.statusClass + '">' + eq.status + '</span>'
-        : '<span class="c-status" style="' + (eq.statusStyle||'') + '">' + eq.status + '</span>';
-      const actionTd = eq.actionClass
-        ? '<td style="' + eq.actionClass + '">' + eq.action + '</td>'
-        : '<td>' + eq.action + '</td>';
-      return '<tr><td>' + eq.model + '</td><td style="font-weight:600;color:var(--blue)">' + eq.serial + '</td><td>' + eq.type + '</td><td>' + statusSpan + '</td>' + actionTd + '</tr>';
-    }).join('');
+function applySort() {
+  if (!sortCol) return;
+  filteredVisits.sort((a,b) => {
+    let va, vb;
+    switch(sortCol) {
+      case 'trayCount': va = (a.trays||[]).length; vb = (b.trays||[]).length; break;
+      case 'instrCount': va = countInstruments(a); vb = countInstruments(b); break;
+      case 'totalBilled': va = calcVisitTotal(a); vb = calcVisitTotal(b); break;
+      default: va = a[sortCol]||''; vb = b[sortCol]||'';
+    }
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb||'').toLowerCase(); }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function paginate() {
+  if (pageSize === 0) { displayVisits = filteredVisits; return; }
+  const start = (currentPage - 1) * pageSize;
+  displayVisits = filteredVisits.slice(start, start + pageSize);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('visitsTbody');
+  if (!displayVisits.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">' + (allVisits.length ? 'No visits match filters' : 'No visits found') + '</td></tr>';
+    document.getElementById('recordInfo').textContent = '0 records';
+    return;
   }
+  tbody.innerHTML = displayVisits.map(v => {
+    const sel = v.key === selectedVisitKey ? ' selected' : '';
+    const total = calcVisitTotal(v);
+    return '<tr class="' + sel + '" data-key="' + v.key + '" onclick="openDrawer(' + v.key + ')" oncontextmenu="onCtx(event,' + v.key + ')">' +
+      '<td><span class="inv-link">' + v.invoiceNum + '</span></td>' +
+      '<td>' + v.clientName + '</td>' +
+      '<td>' + v.deptName + '</td>' +
+      '<td>' + v.techName + '</td>' +
+      '<td>' + fmtDate(v.visitDate) + '</td>' +
+      '<td><span class="badge ' + statusBadgeClass(v.status) + '">' + v.status + '</span></td>' +
+      '<td style="text-align:center">' + (v.trays||[]).length + '</td>' +
+      '<td style="text-align:center">' + countInstruments(v) + '</td>' +
+      '<td style="text-align:right;font-weight:700">' + fmtMoney(total) + '</td>' +
+      '<td>' + fmtDate(v.submittedDate) + '</td>' +
+    '</tr>';
+  }).join('');
+  const total = filteredVisits.length;
+  const from = (currentPage-1)*pageSize + 1;
+  const to = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = pageSize === 0 ? total + ' records' : from + '\u2013' + to + ' of ' + total + ' records';
+}
 
-  // Click handlers on list items
-  listItems.forEach((el, i) => {
-    el.addEventListener('click', () => selectJob(i));
+function updateKPIs() {
+  const total = allVisits.length;
+  let submitted=0, invoiced=0, draft=0, voidCount=0, totalValue=0;
+  allVisits.forEach(v => {
+    if (v.status==='Submitted') submitted++;
+    else if (v.status==='Invoiced') invoiced++;
+    else if (v.status==='Draft') draft++;
+    else if (v.status==='Void') voidCount++;
+    totalValue += calcVisitTotal(v);
   });
+  document.getElementById('kpiTotalVal').textContent = total;
+  document.getElementById('kpiSubmittedVal').textContent = submitted;
+  document.getElementById('kpiInvoicedVal').textContent = invoiced;
+  document.getElementById('kpiDraftVal').textContent = draft;
+  document.getElementById('kpiVoidVal').textContent = voidCount;
+  document.getElementById('kpiValueVal').textContent = fmtMoney(totalValue);
+  // Highlight active chip
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  if (filters.status === 'Submitted') document.getElementById('kpiSubmitted').classList.add('active-chip');
+  else if (filters.status === 'Invoiced') document.getElementById('kpiInvoiced').classList.add('active-chip');
+  else if (filters.status === 'Draft') document.getElementById('kpiDraft').classList.add('active-chip');
+  else if (filters.status === 'Void') document.getElementById('kpiVoid').classList.add('active-chip');
+}
 
-  // Search filter
-  searchInput.addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    listItems.forEach((el, i) => {
-      const text = el.textContent.toLowerCase();
-      el.style.display = text.includes(q) ? '' : 'none';
+function updatePagination() {
+  const cont = document.getElementById('paginationBtns');
+  if (pageSize === 0) { cont.innerHTML = ''; return; }
+  const totalPages = Math.ceil(filteredVisits.length / pageSize) || 1;
+  let html = '<button class="pg-btn" onclick="goPage(1)" ' + (currentPage===1?'disabled':'') + '>&laquo;</button>';
+  html += '<button class="pg-btn" onclick="goPage(' + (currentPage-1) + ')" ' + (currentPage===1?'disabled':'') + '>&lsaquo;</button>';
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, start + 4);
+  for (let i = start; i <= end; i++) {
+    html += '<button class="pg-btn' + (i===currentPage?' active':'') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+  }
+  html += '<button class="pg-btn" onclick="goPage(' + (currentPage+1) + ')" ' + (currentPage>=totalPages?'disabled':'') + '>&rsaquo;</button>';
+  html += '<button class="pg-btn" onclick="goPage(' + totalPages + ')" ' + (currentPage>=totalPages?'disabled':'') + '>&raquo;</button>';
+  cont.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredVisits.length / pageSize) || 1;
+  currentPage = Math.max(1, Math.min(p, totalPages));
+  paginate(); renderTable(); updatePagination();
+}
+
+function changePageSize() {
+  const v = document.getElementById('rowsSelect').value;
+  pageSize = v === 'All' ? 0 : parseInt(v);
+  currentPage = 1;
+  paginate(); renderTable(); updatePagination();
+}
+
+// ── Toolbar wiring ──────────────────────────────────────
+function setSegFilter(group, val, btn) {
+  filters.status = val;
+  btn.closest('.seg-group').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  runPipeline();
+}
+
+function chipFilter(status) {
+  if (filters.status === status) status = '';
+  filters.status = status;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === status);
+  });
+  runPipeline();
+}
+
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => { filters.search = document.getElementById('searchInput').value; runPipeline(); }, 300);
+}
+
+// ── Column Sorting ──────────────────────────────────────
+function sortByCol(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = col === 'visitDate' ? 'desc' : 'asc'; }
+  document.querySelectorAll('.table-wrap thead th').forEach(th => th.classList.remove('sorted','asc','desc'));
+  const cols = ['invoiceNum','clientName','deptName','techName','visitDate','status','trayCount','instrCount','totalBilled','submittedDate'];
+  const idx = cols.indexOf(col);
+  if (idx >= 0) {
+    const th = document.querySelectorAll('.table-wrap thead th')[idx];
+    th.classList.add('sorted', sortDir);
+  }
+  applySort(); currentPage = 1; paginate(); renderTable(); updatePagination();
+}
+
+// ── Context Menu ────────────────────────────────────────
+function onCtx(e, key) {
+  e.preventDefault(); e.stopPropagation();
+  ctxVisitKey = key;
+  const visit = allVisits.find(v => v.key === key);
+  document.getElementById('ctxInvoiceLabel').textContent = visit && visit.status === 'Invoiced' ? 'Already Invoiced' : 'Mark as Invoiced';
+  const menu = document.getElementById('ctxMenu');
+  menu.style.display = 'block';
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 250) + 'px';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  if (!ctxVisitKey) return;
+  const visit = allVisits.find(v => v.key === ctxVisitKey);
+  if (!visit) return;
+  switch(action) {
+    case 'view': openDrawer(ctxVisitKey); break;
+    case 'edit': openDrawer(ctxVisitKey); break;
+    case 'invoice':
+      if (visit.status !== 'Invoiced') {
+        visit.status = 'Invoiced';
+        if (!visit.submittedDate) visit.submittedDate = new Date().toISOString().split('T')[0];
+        runPipeline();
+      }
+      break;
+    case 'print': alert('Print invoice: ' + visit.invoiceNum + '\n(Not available in demo mode)'); break;
+    case 'void':
+      if (confirm('Void visit ' + visit.invoiceNum + '? This cannot be undone.')) {
+        visit.status = 'Void'; runPipeline();
+      }
+      break;
+    case 'delete':
+      if (confirm('Delete visit ' + visit.invoiceNum + '? This cannot be undone.')) {
+        allVisits = allVisits.filter(v => v.key !== ctxVisitKey);
+        if (selectedVisitKey === ctxVisitKey) closeDrawer();
+        runPipeline();
+      }
+      break;
+  }
+}
+
+// ── Detail Drawer ───────────────────────────────────────
+function openDrawer(key) {
+  selectedVisitKey = key;
+  isDirty = false;
+  const visit = allVisits.find(v => v.key === key);
+  if (!visit) return;
+
+  // Header
+  document.getElementById('drawerTitle').textContent = visit.invoiceNum;
+  document.getElementById('drawerSub').textContent = visit.clientName + ' \u2014 ' + visit.deptName;
+
+  // Overview tab
+  document.getElementById('fClient').value = visit.clientName;
+  document.getElementById('fDept').value = visit.deptName;
+  document.getElementById('fTech').value = visit.techName;
+  document.getElementById('fStatusBadge').innerHTML = '<span class="badge ' + statusBadgeClass(visit.status) + '">' + visit.status + '</span>';
+  document.getElementById('fVisitDate').value = fmtDate(visit.visitDate);
+  document.getElementById('fStartTime').value = visit.startTime || '\u2014';
+  document.getElementById('fEndTime').value = visit.endTime || '\u2014';
+  document.getElementById('fPO').value = visit.po || '\u2014';
+  document.getElementById('fLocation').value = visit.location || '\u2014';
+  document.getElementById('fNotes').value = visit.notes || '';
+
+  // Financial summary
+  var trayTotal = calcVisitTraysTotal(visit);
+  var expTotal = calcExpensesTotal(visit);
+  var grandTotal = trayTotal + expTotal;
+  document.getElementById('fFinancials').innerHTML =
+    '<div class="fin-row"><span class="fin-label">Tray Services</span><span class="fin-val">' + fmtMoney(trayTotal) + '</span></div>' +
+    '<div class="fin-row"><span class="fin-label">Expenses</span><span class="fin-val">' + fmtMoney(expTotal) + '</span></div>' +
+    '<div class="fin-row"><span class="fin-label">Tax</span><span class="fin-val">' + fmtMoney(0) + '</span></div>' +
+    '<div class="fin-row total"><span class="fin-label">Grand Total</span><span class="fin-val">' + fmtMoney(grandTotal) + '</span></div>';
+
+  // Trays tab
+  renderTraysTab(visit);
+
+  // Expenses tab
+  renderExpensesTab(visit);
+
+  // Reset to overview tab
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dtab')[0].classList.add('active');
+  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+  document.getElementById('dpane-overview').classList.add('active');
+
+  // Open
+  document.getElementById('visitDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+
+  // Highlight row
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => tr.classList.remove('selected'));
+  var row = document.querySelector('.table-wrap tbody tr[data-key="' + key + '"]');
+  if (row) row.classList.add('selected');
+}
+
+function closeDrawer() {
+  document.getElementById('visitDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  selectedVisitKey = null;
+  isDirty = false;
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => tr.classList.remove('selected'));
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+  document.getElementById('dpane-' + tab).classList.add('active');
+}
+
+function renderTraysTab(visit) {
+  var pane = document.getElementById('dpane-trays');
+  var trays = visit.trays || [];
+  if (!trays.length) {
+    pane.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">No trays recorded</div>';
+    return;
+  }
+  var overallTotal = 0;
+  var html = '';
+  trays.forEach(function(tray, ti) {
+    var trayTotal = calcTrayTotal(tray);
+    overallTotal += trayTotal;
+    var itemCount = (tray.items||[]).reduce(function(s,it){return s+(it.total||0);},0);
+    html += '<div class="tray-row">';
+    html += '<div class="tray-header" onclick="toggleTray(this)">';
+    html += '<span>' + tray.name + '</span>';
+    html += '<span class="tray-meta"><span>' + itemCount + ' instruments</span><span style="font-weight:700;color:var(--navy)">' + fmtMoney(trayTotal) + '</span><span class="tray-chevron">\u25B6</span></span>';
+    html += '</div>';
+    html += '<div class="tray-body">';
+    html += '<table class="mini-table"><thead><tr><th>Type</th><th style="text-align:center">Total</th><th style="text-align:center">Repaired</th><th style="text-align:center">Sent TSI</th><th style="text-align:center">BER</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr></thead><tbody>';
+    (tray.items||[]).forEach(function(it) {
+      var lineTotal = (it.repaired||0) * (it.unitPrice||0);
+      html += '<tr><td>' + it.type + '</td><td style="text-align:center">' + it.total + '</td><td style="text-align:center">' + it.repaired + '</td><td style="text-align:center">' + it.sentTSI + '</td><td style="text-align:center">' + (it.ber||0) + '</td><td style="text-align:right">' + fmtMoney(it.unitPrice) + '</td><td style="text-align:right;font-weight:600">' + fmtMoney(lineTotal) + '</td></tr>';
     });
+    html += '</tbody></table>';
+    html += '<div class="tray-footer">Tray Subtotal: ' + fmtMoney(trayTotal) + '</div>';
+    html += '</div></div>';
   });
+  html += '<div class="tray-total-row">Total Tray Services: ' + fmtMoney(overallTotal) + '</div>';
+  pane.innerHTML = html;
+}
 
-})();
+function toggleTray(header) {
+  header.classList.toggle('expanded');
+  var body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function renderExpensesTab(visit) {
+  var pane = document.getElementById('dpane-expenses');
+  var expenses = visit.expenses || [];
+  if (!expenses.length) {
+    pane.innerHTML = '<div class="section-card"><div class="section-head">Expenses</div><div class="section-body" style="text-align:center;color:var(--muted);padding:20px">No expenses recorded</div></div>';
+    return;
+  }
+  var total = calcExpensesTotal(visit);
+  var html = '<div class="section-card"><div class="section-head">Expenses</div><div class="section-body" style="padding:0"><table class="mini-table"><thead><tr><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody>';
+  expenses.forEach(function(e) {
+    html += '<tr><td>' + e.desc + '</td><td>' + e.category + '</td><td style="text-align:right;font-weight:600">' + fmtMoney(e.amount) + '</td></tr>';
+  });
+  html += '</tbody></table></div></div>';
+  html += '<div style="text-align:right;font-size:12px;font-weight:800;color:var(--navy);padding:8px 0">Expenses Total: ' + fmtMoney(total) + '</div>';
+  pane.innerHTML = html;
+}
+
+function markDirty() {
+  isDirty = true;
+  document.getElementById('drawerSaveStatus').textContent = 'Unsaved changes';
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(autoSave, 1500);
+}
+
+function autoSave() {
+  if (!isDirty || !selectedVisitKey) return;
+  var visit = allVisits.find(function(v){return v.key === selectedVisitKey;});
+  if (!visit) return;
+  document.getElementById('drawerSaveStatus').innerHTML = '<span class="save-saving">Saving...</span>';
+  // Simulate save
+  visit.notes = document.getElementById('fNotes').value;
+  setTimeout(function() {
+    isDirty = false;
+    var now = new Date();
+    document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  }, 400);
+}
+
+// ── Add Modal ───────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+function submitAddVisit() {
+  var client = document.getElementById('mClient').value;
+  var dept = document.getElementById('mDept').value;
+  var tech = document.getElementById('mTech').value;
+  var date = document.getElementById('mDate').value;
+  if (!client || !dept || !tech || !date) { alert('Please fill in all required fields.'); return; }
+  var nextKey = Math.max(...allVisits.map(function(v){return v.key;})) + 1;
+  var nextInv = 'INV-' + (4060 + allVisits.length + 1);
+  allVisits.unshift({
+    key: nextKey, invoiceNum: nextInv, clientName: client, deptName: dept, techName: tech,
+    visitDate: date, startTime:'08:00', endTime:'', status:'Draft',
+    location: document.getElementById('mLocation').value,
+    po: document.getElementById('mPO').value,
+    submittedDate: null, notes: document.getElementById('mNotes').value,
+    trays:[], expenses:[]
+  });
+  closeAddModal();
+  runPipeline();
+  // Clear form
+  document.getElementById('mClient').value = '';
+  document.getElementById('mDept').innerHTML = '<option value="">-- Select Department --</option>';
+  document.getElementById('mTech').value = '';
+  document.getElementById('mPO').value = '';
+  document.getElementById('mNotes').value = '';
+}
+
+// ── Service Location ────────────────────────────────────
+function changeServiceLocation() {
+  // placeholder for future API wiring
+}
+
+// ── Boot ────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
