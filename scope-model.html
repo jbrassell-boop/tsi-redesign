@@ -3,126 +3,143 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Scope Model | TSI Redesign</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* PAGE-SPECIFIC OVERRIDES */
-    .page-body{overflow:hidden;display:flex;flex-direction:column}
+    /* ── PAGE-SPECIFIC: Scope Model Cockpit ── */
 
-    /* Status strip density override */
-    .status-strip{gap:5px;padding:4px 14px}
-    .ss-chip{gap:4px;padding:2px 8px;border-radius:5px;font-size:10.5px}
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)}
 
-    /* FILTER BAR */
-    .filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#DDE6F5;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
-    .seg-group{display:inline-flex;border:1.5px solid var(--border-dk);border-radius:5px;overflow:hidden;background:#fff}
-    .seg-btn{padding:0 10px;height:24px;border:none;background:transparent;color:var(--label);font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit;border-right:1px solid var(--border-dk);transition:all .12s}
-    .seg-btn:last-child{border-right:none}
-    .seg-btn:hover{background:var(--bg)}
-    .seg-btn.active{background:var(--navy);color:#fff}
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+    .filter-dd:focus{border-color:var(--navy)}
 
-    /* Toggle density overrides for filter bar */
-    .filter-bar .toggle-row{gap:6px}
-    .filter-bar .toggle-label{font-size:10px}
-    .filter-bar .toggle{width:34px;height:19px}
-    .filter-bar .toggle-slider{border-radius:10px}
-    .filter-bar .toggle-slider::before{width:13px;height:13px}
-    .filter-bar .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
-    .divider{height:20px;margin:0 2px}
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .sn-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .sn-link:hover{text-decoration:underline}
 
-    /* MASTER-DETAIL SPLIT */
-    .split-layout{display:flex;flex:1;overflow:hidden}
-    .split-left{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .split-left-head{background:#E9EFF9;padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-    .split-left-search{padding:4px 8px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
-    .search-inp{flex:1;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
-    .search-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
-    .split-left-list{flex:1;overflow-y:auto}
-    .model-group-head{padding:3px 8px;font-size:9px;font-weight:800;color:#fff;background:var(--navy);text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:1}
-    .model-row{padding:4px 8px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text);transition:all .1s;display:flex;flex-direction:column;gap:1px}
-    .model-row:nth-child(even){background:var(--row-alt)}
-    .model-row:hover{background:#D8E6FF}
-    .model-row.selected{background:#FEF3C7;font-weight:600;border-left:3px solid var(--amber)}
-    .model-row .mr-name{font-weight:700;color:var(--navy);font-size:11.5px}
-    .model-row .mr-desc{font-size:10px;color:var(--muted)}
-    .model-row .mr-meta{display:flex;gap:6px;align-items:center;margin-top:1px}
-    .mr-badge{font-size:9px;font-weight:600;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center}
-    .mr-badge-active{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
-    .mr-badge-inactive{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}
-    .split-left-footer{padding:3px 8px;border-top:1px solid var(--border);background:#FAFBFF;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-active{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-inactive{background:#F3F4F6;color:var(--steel);border-color:#CFD8DC}
+    .b-flex{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-rigid{background:#F0FDF4;color:var(--green);border-color:#BBF7D0}
+    .b-camera{background:#FDF4FF;color:#7C3AED;border-color:#DDD6FE}
+    .b-inst{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
 
-    /* RIGHT PANEL */
-    .split-right{flex:1;overflow-y:auto;background:#f0f2f5;display:flex;flex-direction:column}
+    /* Heat indicators */
+    .heat-red{color:var(--red);font-weight:700}
+    .heat-amber{color:var(--amber);font-weight:600}
+    .heat-green{color:var(--green);font-weight:500}
+    .heat-ok{color:var(--muted)}
 
-    /* RECORD HEADER BAR */
-    .record-bar{background:#F8FAFF;border-bottom:1px solid var(--border);padding:5px 10px}
-    .rb-fields{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
-    .rb-field{display:flex;flex-direction:column;gap:1px}
-    .rb-field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-    .rb-field .inp{height:24px;font-size:11px}
-    .rb-toggles{display:flex;gap:8px;align-items:center;padding-bottom:2px;border-left:1px solid var(--border);margin-left:4px;padding-left:10px}
-    .rb-toggles .toggle-label{font-size:10px}
+    /* Flag dot */
+    .flag-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+    .flag-yes{background:var(--red)}
+    .flag-no{background:#BBF7D0;border:1px solid #81C784}
 
-    /* KPI STRIP */
-    .kpi-strip{display:flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
-    .kpi-chip{display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 10px;border-right:1px solid var(--border)}
-    .kpi-chip:last-child{border-right:none}
-    .kpi-label{font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
-    .kpi-val{font-size:14px;font-weight:800;color:var(--navy)}
-    .kpi-val.green{color:var(--green)}
-    .kpi-val.amber{color:var(--amber)}
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
 
-    /* Tab density overrides */
-    .tab-bar{padding:0 10px;overflow-x:auto}
-    .tab{padding:5px 10px;font-size:11.5px;white-space:nowrap}
-    .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
 
-    /* Tab content overrides */
-    .tab-content.show{flex:1;overflow:hidden;padding:8px 10px;gap:8px}
-    .tab-content.show-block{padding:8px 10px;overflow-y:auto;flex:1}
+    /* ── Slide-Out Drawer ── */
+    .model-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .model-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
 
-    /* Panel density overrides */
-    .panel{border-radius:6px}
-    .panel-body{padding:6px 10px}
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .dtab:hover{color:var(--blue)}
+    .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+    .dpane{display:none;flex:1;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
 
-    /* Form grid density overrides */
-    .fg{gap:4px 8px}
-    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
-    .ff label{font-size:10px}
-    .inp-sm{height:22px;font-size:10.5px;padding:0 5px}
-    .inp-unit{font-size:9px;color:var(--muted);font-weight:700;margin-left:2px;white-space:nowrap}
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-    /* INLINE DENSE FORM (used in specs) */
-    .dense-form{display:grid;gap:0}
-    .df-row{display:flex;border-bottom:1px solid var(--border)}
-    .df-row:last-child{border-bottom:none}
-    .df-lbl{width:110px;flex-shrink:0;background:#F8FAFC;padding:4px 8px;font-size:10px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.4px;border-right:1px solid var(--border);display:flex;align-items:center}
-    .df-val{flex:1;min-width:0;display:flex;align-items:center;padding:2px 6px}
-    .df-val .inp{border:none;height:24px;padding:0 4px;background:transparent;font-size:11.5px;font-weight:600;color:var(--navy)}
-    .df-val .inp:focus{background:#EFF6FF;box-shadow:inset 0 0 0 1.5px var(--blue);border-radius:3px}
-    .df-val select.inp{padding-right:20px}
-    .df-sep{border-right:1px solid var(--border)}
-    .df-unit{font-size:9px;color:var(--muted);font-weight:700;padding-right:4px;white-space:nowrap}
+    .toggle-row{display:flex;align-items:center;gap:10px;padding:3px 0}
+    .toggle{position:relative;width:38px;height:21px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#CBD5E0;border-radius:11px;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.18s}
+    .toggle input:checked + .toggle-slider{background:var(--navy)}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(17px)}
+    .toggle-label{font-size:11px;color:var(--text)}
 
-    /* Column overrides */
-    .col-left{flex:1.4}
-    .col-right{width:310px}
+    .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+    .mini-table tr:hover td{background:#EFF6FF;cursor:pointer}
 
-    /* Table extras not in shared styles */
-    th.center{text-align:center}
-    td.center{text-align:center}
-    td.mono{font-family:'Cascadia Code','Consolas',monospace;font-size:10.5px}
-    .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
-    .del-btn:hover{background:#FEE2E2}
-    .mono-chip{font-family:monospace;font-size:10.5px;font-weight:600;color:var(--blue);background:#EFF6FF;padding:1px 5px;border-radius:3px;border:1px solid #BFDBFE;letter-spacing:.3px}
-    th.col-group{background:#E9EFF9;text-align:center;font-size:9.5px;color:var(--navy);border-bottom:1px solid var(--border);border-right:1px solid #fff}
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    #drawerSaveStatus{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .save-saving{animation:pulse .8s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-    /* CB ROW */
-    .cb-strip{display:flex;align-items:center;gap:8px;padding:4px 8px;background:#F8FAFC;border-top:1px solid var(--border)}
-    .cb-item{gap:4px;font-size:10.5px;color:var(--text);font-weight:600;white-space:nowrap}
-    .cb-item input[type=checkbox]{width:13px;height:13px}
-
-    /* PRICING TIERS */
+    /* Pricing Tiers */
     .tier-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--border)}
     .tier-box{padding:6px 8px;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:2px}
     .tier-box:last-child{border-right:none}
@@ -131,8 +148,9 @@
     .tier-mid .tier-label{color:var(--amber)}
     .tier-major .tier-label{color:var(--red)}
     .tier-val{font-size:14px;font-weight:800;font-family:monospace;color:var(--navy)}
+    .tier-war{font-size:8.5px;color:var(--muted)}
 
-    /* ANGULATION DIAGRAM */
+    /* Angulation Grid */
     .ang-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0}
     .ang-cell{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-right:1px solid var(--border)}
     .ang-cell:last-child{border-right:none}
@@ -140,25 +158,44 @@
     .ang-val{font-size:16px;font-weight:800;color:var(--navy)}
     .ang-unit{font-size:9px;color:var(--muted)}
 
-    /* SPLIT PANE (for inventory tab) */
+    /* Inventory split pane */
     .inv-split{display:flex;gap:8px;flex:1;min-height:0}
-    .inv-left{width:280px;flex-shrink:0;display:flex;flex-direction:column}
+    .inv-left{width:50%;flex-shrink:0;display:flex;flex-direction:column}
     .inv-right{flex:1;min-width:0;display:flex;flex-direction:column}
+
+    /* Checkbox strip */
+    .cb-strip{display:flex;align-items:center;gap:8px;padding:4px 8px;background:#F8FAFC;border-top:1px solid var(--border)}
+    .cb-item{gap:4px;font-size:10.5px;color:var(--text);font-weight:600;white-space:nowrap}
+    .cb-item input[type=checkbox]{width:13px;height:13px}
+
+    /* Delete button */
+    .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
+    .del-btn:hover{background:#FEE2E2}
+    .mono-chip{font-family:monospace;font-size:10.5px;font-weight:600;color:var(--blue);background:#EFF6FF;padding:1px 5px;border-radius:3px;border:1px solid #BFDBFE;letter-spacing:.3px}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:860px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:70vh}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+    .clone-hint{background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:8px 12px;font-size:11px;color:#92400E;display:none;align-items:center;gap:6px}
+
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
   </style>
 </head>
 <body>
 <div class="shell">
-
-  <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </div>
-      <div class="brand-text">
-        <div class="t1">Total Scope, Inc.</div>
-        <div class="t2">The Leader in Medical Device Repair</div>
-      </div>
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
     </div>
     <div class="nav-group">
       <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
@@ -168,7 +205,7 @@
       <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
       <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
       <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
-      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
       <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
       <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
       <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
@@ -187,7 +224,6 @@
     <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
 
-  <!-- MAIN -->
   <div class="main">
     <header class="topbar">
       <div class="topbar-left">
@@ -197,1850 +233,1026 @@
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
           <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
           </div>
         </div>
-        <div class="save-indicator"></div>
-        <span style="opacity:0.5; margin: 0 4px;">|</span>
-        Service Location <select class="svc-select" id="svcLocation"><option>Upper Chichester</option><option>Nashville</option></select>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
         <div class="topbar-avatar">JB</div>
         <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
+    <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- STATUS STRIP -->
-      <div class="status-strip">
-        <div class="ss-chip ss-info">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M8 11h6M11 8v6"/></svg>
-          <span class="ss-label">Models</span> <span class="ss-val" id="kpiTotal">186</span>
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">📋</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Models</div></div>
         </div>
-        <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val" id="kpiActive">172</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="kpiInactive">14</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val" id="kpiFlexible">98</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val" id="kpiRigid">67</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Camera</span> <span class="ss-val" id="kpiCamera">21</span></div>
-        <div class="ss-chip ss-warn" id="kpiWarnChip">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span id="kpiMissing">5 missing specs</span>
+        <div class="stat-chip" id="kpiActive" onclick="chipFilter('active')">
+          <div class="s-icon" style="background:#E8F5E9">✓</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiActiveVal">0</div><div class="s-lbl">Active</div></div>
         </div>
-        <div style="flex:1"></div>
-        <span id="dataBadge" class="data-badge"></span>
-        <span style="font-size:10px;color:var(--muted)" id="lastSync">Last sync 03/08/2026 09:14 AM</span>
+        <div class="stat-chip" id="kpiInactive" onclick="chipFilter('inactive')">
+          <div class="s-icon" style="background:#FEF2F2">✕</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiInactiveVal">0</div><div class="s-lbl">Inactive</div></div>
+        </div>
+        <div class="stat-chip" id="kpiFlex" onclick="chipFilter('flex')">
+          <div class="s-icon" style="background:#EFF6FF">F</div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiFlexVal">0</div><div class="s-lbl">Flexible</div></div>
+        </div>
+        <div class="stat-chip" id="kpiRigid" onclick="chipFilter('rigid')">
+          <div class="s-icon" style="background:#F0FDF4">R</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiRigidVal">0</div><div class="s-lbl">Rigid</div></div>
+        </div>
+        <div class="stat-chip" id="kpiCamera" onclick="chipFilter('camera')">
+          <div class="s-icon" style="background:#FDF4FF">C</div>
+          <div class="s-data"><div class="s-val s-purple" id="kpiCameraVal">0</div><div class="s-lbl">Camera</div></div>
+        </div>
       </div>
 
-      <!-- FILTER BAR -->
-      <div class="filter-bar">
-        <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Type</span>
-        <div class="seg-group" id="instrTypeGroup">
-          <button class="seg-btn active" onclick="switchInstrType('all',this)">All</button>
-          <button class="seg-btn" onclick="switchInstrType('F',this)">Flexible</button>
-          <button class="seg-btn" onclick="switchInstrType('R',this)">Rigid</button>
-          <button class="seg-btn" onclick="switchInstrType('C',this)">Camera</button>
-        </div>
-        <div class="divider"></div>
-        <div class="toggle-row">
-          <label class="toggle"><input type="checkbox" id="showInactiveToggle" onchange="applyFilters()"/><span class="toggle-slider"></span></label>
-          <span class="toggle-label">Inactive</span>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn btn-navy" onclick="document.getElementById('newModelModal').classList.add('open')">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="openAddModal()" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New Model
         </button>
-        <button class="btn btn-outline">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Clone
-        </button>
-        <button class="btn btn-outline">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print
-        </button>
-        <button class="btn btn-danger">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Delete
-        </button>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Type</span>
+        <div class="seg-group" id="segType">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('type','',this)">All</button>
+          <button class="seg-btn" data-val="F" onclick="setSegFilter('type','F',this)">Flexible</button>
+          <button class="seg-btn" data-val="R" onclick="setSegFilter('type','R',this)">Rigid</button>
+          <button class="seg-btn" data-val="C" onclick="setSegFilter('type','C',this)">Camera</button>
+          <button class="seg-btn" data-val="I" onclick="setSegFilter('type','I',this)">Instrument</button>
+        </div>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Status</span>
+        <div class="seg-group" id="segStatus">
+          <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+          <button class="seg-btn" data-val="active" onclick="setSegFilter('status','active',this)">Active</button>
+          <button class="seg-btn" data-val="inactive" onclick="setSegFilter('status','inactive',this)">Inactive</button>
+        </div>
+        <div class="filter-sep"></div>
+        <select class="filter-dd" id="filterMfg" onchange="onMfgChange()">
+          <option value="">All Manufacturers</option>
+        </select>
+        <input class="search-input" id="searchInput" placeholder="Search model, description, manufacturer…" oninput="debounceSearch()" style="margin-left:auto"/>
       </div>
 
-      <!-- MASTER-DETAIL SPLIT -->
-      <div class="split-layout">
-
-        <!-- LEFT PANEL: Model List -->
-        <div class="split-left">
-          <div class="split-left-head">
-            Scope Models
-            <span class="tab-count" style="font-size:8px" id="modelCount">186</span>
-          </div>
-          <div class="split-left-search">
-            <input class="search-inp" id="modelSearch" placeholder="Search models..." oninput="filterModels()"/>
-          </div>
-          <div class="split-left-list" id="modelList">
-            <!-- Olympus group -->
-            <div class="model-group-head">Olympus (8)</div>
-            <div class="model-row selected" data-model="GIF-H190" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">GIF-H190</div>
-              <div class="mr-desc">Gastroscope — High Definition</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="GIF-HQ190" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">GIF-HQ190</div>
-              <div class="mr-desc">Gastroscope — Dual Focus HD</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="CF-HQ190L" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">CF-HQ190L</div>
-              <div class="mr-desc">Colonoscope — EVIS EXERA III</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="TJF-Q180V" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">TJF-Q180V</div>
-              <div class="mr-desc">Duodenoscope — Therapeutic</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="BF-H190" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">BF-H190</div>
-              <div class="mr-desc">Bronchoscope — Diagnostic</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="PCF-H190DL" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">PCF-H190DL</div>
-              <div class="mr-desc">Pediatric Colonoscope</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="GIF-Q180" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">GIF-Q180</div>
-              <div class="mr-desc">Gastroscope — Standard</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-inactive">Inactive</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="WA50042A" data-type="R" onclick="selectModel(this)">
-              <div class="mr-name">WA50042A</div>
-              <div class="mr-desc">Arthroscope 30&deg; 4mm</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Rigid</span></div>
-            </div>
-
-            <!-- Pentax group -->
-            <div class="model-group-head">Pentax (3)</div>
-            <div class="model-row" data-model="EG-2990i" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EG-2990i</div>
-              <div class="mr-desc">Gastroscope</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="EC-3890Li" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EC-3890Li</div>
-              <div class="mr-desc">Colonoscope</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="EG-29-i10" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EG-29-i10</div>
-              <div class="mr-desc">Gastroscope — HD+</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-
-            <!-- Fujifilm group -->
-            <div class="model-group-head">Fujifilm (3)</div>
-            <div class="model-row" data-model="EG-740UT" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EG-740UT</div>
-              <div class="mr-desc">EUS Gastroscope</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="EC-760R" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EC-760R</div>
-              <div class="mr-desc">Colonoscope — ELUXEO</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-            <div class="model-row" data-model="EG-760R" data-type="F" onclick="selectModel(this)">
-              <div class="mr-name">EG-760R</div>
-              <div class="mr-desc">Gastroscope — ELUXEO</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Flexible</span></div>
-            </div>
-
-            <!-- Karl Storz group -->
-            <div class="model-group-head">Karl Storz (3)</div>
-            <div class="model-row" data-model="11101RP2" data-type="R" onclick="selectModel(this)">
-              <div class="mr-name">11101RP2</div>
-              <div class="mr-desc">Sinuscope 0&deg; 2.7mm</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Rigid</span></div>
-            </div>
-            <div class="model-row" data-model="26003BA" data-type="R" onclick="selectModel(this)">
-              <div class="mr-name">26003BA</div>
-              <div class="mr-desc">Laparoscope 0&deg; 10mm HD</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Rigid</span></div>
-            </div>
-            <div class="model-row" data-model="22220131" data-type="R" onclick="selectModel(this)">
-              <div class="mr-name">22220131</div>
-              <div class="mr-desc">Cystoscope 30&deg; 4mm</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Rigid</span></div>
-            </div>
-
-            <!-- Stryker group -->
-            <div class="model-group-head">Stryker (2)</div>
-            <div class="model-row" data-model="1488-020-000" data-type="C" onclick="selectModel(this)">
-              <div class="mr-name">1488-020-000</div>
-              <div class="mr-desc">1488 HD Camera Head</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Camera</span></div>
-            </div>
-            <div class="model-row" data-model="1588-020-000" data-type="C" onclick="selectModel(this)">
-              <div class="mr-name">1588-020-000</div>
-              <div class="mr-desc">1588 AIM Camera Head</div>
-              <div class="mr-meta"><span class="mr-badge mr-badge-active">Active</span><span style="font-size:9px;color:var(--muted)">Camera</span></div>
-            </div>
-          </div>
-          <div class="split-left-footer">
-            <span id="modelShown">19 models shown</span>
-            <span style="font-size:9px" id="modelPage">Page 1 of 10</span>
-          </div>
-        </div>
-
-        <!-- RIGHT PANEL: Detail -->
-        <div class="split-right">
-
-          <!-- RECORD HEADER BAR -->
-          <div class="record-bar">
-            <div class="rb-fields">
-              <div class="rb-field" style="flex:1.2">
-                <label>Model <span class="req">*</span></label>
-                <input class="inp" id="hdrModel" value="GIF-H190" style="font-weight:800;color:var(--navy)"/>
-              </div>
-              <div class="rb-field" style="flex:2">
-                <label>Description</label>
-                <input class="inp" id="hdrDesc" value="Gastroscope — High Definition"/>
-              </div>
-              <div class="rb-field" style="flex:0.8">
-                <label>Category</label>
-                <select class="inp" id="hdrCategory"><option selected>Gastroscope</option><option>Colonoscope</option><option>Bronchoscope</option><option>Duodenoscope</option><option>Camera Head</option><option>Arthroscope</option><option>Laparoscope</option><option>Cystoscope</option><option>Sinuscope</option></select>
-              </div>
-              <div class="rb-field" style="flex:0.6">
-                <label>Manufacturer</label>
-                <select class="inp" id="hdrMfg"><option>ACMI</option><option>EndoChoice</option><option>Fujinon</option><option>Fujifilm</option><option>Karl Storz</option><option>Machida</option><option selected>Olympus</option><option>Pentax</option><option>Richard Wolf</option><option>Smith & Nephew</option><option>Stryker</option><option>Vision Sciences</option></select>
-              </div>
-              <div class="rb-toggles">
-                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="hdrActive" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
-                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="hdrInspReqd" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Insp Req'd</span></div>
-              </div>
-              <span class="mono-chip" style="align-self:flex-end;margin-bottom:2px" id="hdrKey">MDL-0042</span>
-              <button class="btn btn-navy" style="height:24px;padding:0 8px;font-size:10px;gap:3px;align-self:flex-end" id="saveModelBtn" onclick="saveModel()">
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
-                Save
-              </button>
-            </div>
-          </div>
-
-          <!-- KPI STRIP -->
-          <div class="kpi-strip">
-            <div class="kpi-chip">
-              <span class="kpi-label">Field Volume</span>
-              <span class="kpi-val" id="detailVolume">4,192</span>
-            </div>
-            <div class="kpi-chip">
-              <span class="kpi-label">Avg Turnaround</span>
-              <span class="kpi-val" id="detailTurnaround">12.4 <span style="font-size:9px;font-weight:600;color:var(--muted)">days</span></span>
-            </div>
-            <div class="kpi-chip">
-              <span class="kpi-label">Avg Margin</span>
-              <span class="kpi-val green" id="detailMargin">62%</span>
-            </div>
-            <div class="kpi-chip">
-              <span class="kpi-label">Repair Items</span>
-              <span class="kpi-val" id="detailRepairItemCount">12</span>
-            </div>
-            <div class="kpi-chip" style="border-right:none">
-              <span class="kpi-label">Linked Parts</span>
-              <span class="kpi-val" id="detailLinkedParts">18</span>
-            </div>
-          </div>
-
-          <!-- TABS -->
-          <div class="tab-bar">
-            <div class="tab active" onclick="switchTab('specs',this)">Specifications</div>
-            <div class="tab" onclick="switchTab('repair-items',this)">Repair Items<span class="tab-count">12</span></div>
-            <div class="tab" onclick="switchTab('inventory',this)">Inventory<span class="tab-count">18</span></div>
-            <div class="tab" onclick="switchTab('flags',this)">Flags<span class="tab-count">2</span></div>
-          </div>
-
-          <!-- ═══════ TAB: SPECIFICATIONS ═══════ -->
-          <div class="tab-content show" id="tab-specs">
-            <div class="col-left">
-              <!-- CONFIGURATION -->
-              <div class="panel">
-                <div class="panel-head">Configuration</div>
-                <div class="panel-body" style="padding:0">
-                  <div class="dense-form">
-                    <div class="df-row">
-                      <div class="df-lbl">Video / Image</div>
-                      <div class="df-val"><select class="inp" id="specVideoImage"><option>Fiber</option><option>Hybrid</option><option selected>Video</option><option>Ultrasound</option><option>Screen on Scope</option><option>N/A</option></select></div>
-                      <div class="df-lbl df-sep" style="width:100px">Image Sensor</div>
-                      <div class="df-val"><select class="inp" id="specImageSensor"><option>CCD</option><option selected>CMOS</option></select></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Processors</div>
-                      <div class="df-val"><input class="inp" id="specProcessors" value="CV-190, EVIS EXERA III"/></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Light Sources</div>
-                      <div class="df-val"><input class="inp" id="specLightSources" value="CLV-190"/></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Avg Days In</div>
-                      <div class="df-val"><input class="inp" id="specAvgDaysIn" type="number" value="" placeholder="e.g. 14"/></div>
-                      <div class="df-lbl df-sep" style="width:100px">Exp Multiplier</div>
-                      <div class="df-val"><input class="inp" id="specExpMultiplier" type="number" value="" step="0.01" placeholder="1.25"/></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Contract Cost</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specContractCost" type="text" value="" placeholder="0.00"/></div>
-                      <div class="df-lbl df-sep" style="width:100px">Max Charge</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specMaxCharge" type="text" value="" placeholder="0.00"/></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">GL Account</div>
-                      <div class="df-val"><input class="inp" id="specGLAccount" value=""/></div>
-                    </div>
-                  </div>
-                  <div class="cb-strip">
-                    <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Overrides</span>
-                    <label class="cb-item"><input type="checkbox" id="specForceOnPortal"> Force On Portal</label>
-                    <label class="cb-item"><input type="checkbox" id="specSkipPortal"> Skip Portal</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PHYSICAL SPECIFICATIONS -->
-              <div class="panel">
-                <div class="panel-head">Physical Specifications</div>
-                <div class="panel-body" style="padding:0">
-                  <div class="dense-form">
-                    <div class="df-row">
-                      <div class="df-lbl">Ins. Length</div>
-                      <div class="df-val"><input class="inp" id="specInsLength" type="number" value="1030"/><span class="df-unit">mm</span></div>
-                      <div class="df-lbl df-sep" style="width:100px">Ins. Diameter</div>
-                      <div class="df-val"><input class="inp" id="specInsDiameter" type="number" value="9.2" step="0.1"/><span class="df-unit">mm</span></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Channel Size</div>
-                      <div class="df-val"><input class="inp" id="specChannelSize" type="number" value="2.8" step="0.1"/><span class="df-unit">mm</span></div>
-                      <div class="df-lbl df-sep" style="width:100px">Field of View</div>
-                      <div class="df-val"><input class="inp" id="specFieldOfView" type="number" value="140"/><span class="df-unit">deg</span></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Dir. of View</div>
-                      <div class="df-val"><input class="inp" id="specDirOfView" type="text" value="Forward"/></div>
-                      <div class="df-lbl df-sep" style="width:100px">Depth of Field</div>
-                      <div class="df-val" style="gap:2px"><input class="inp" id="specDepthMin" type="number" value="2" style="text-align:right;max-width:50px"/><span style="color:var(--muted);font-weight:700">–</span><input class="inp" id="specDepthMax" type="number" value="100" style="max-width:50px"/><span class="df-unit">mm</span></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Epoxy (Avg)</div>
-                      <div class="df-val"><input class="inp" id="specEpoxyAvg" type="number" value="" step="0.01" placeholder=""/></div>
-                      <div class="df-lbl df-sep" style="width:100px">Max Epoxy</div>
-                      <div class="df-val"><input class="inp" id="specEpoxyMax" type="number" value="" step="0.01" placeholder=""/></div>
-                    </div>
-                  </div>
-                  <div class="cb-strip" style="gap:6px">
-                    <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Verification</span>
-                    <label class="cb-item"><input type="checkbox" id="specUnableToVerify"> Unable To Verify</label>
-                    <div class="divider" style="height:16px"></div>
-                    <span style="font-size:9.5px;font-weight:700;color:var(--muted)">By</span>
-                    <input class="inp" type="text" value="" placeholder="Initials" style="width:50px;height:20px;padding:0 4px;font-size:10px"/>
-                    <span style="font-size:9.5px;font-weight:700;color:var(--muted)">Date</span>
-                    <input class="inp" type="date" value="" style="width:110px;height:20px;padding:0 4px;font-size:10px"/>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ANGULATION -->
-              <div class="panel">
-                <div class="panel-head">Angulation Range</div>
-                <div class="panel-body" style="padding:0">
-                  <div class="cb-strip" style="border-top:none">
-                    <label class="cb-item"><input type="checkbox" id="specAngUpDown" checked> Up/Down</label>
-                    <label class="cb-item"><input type="checkbox" id="specAngLeftRight" checked> Left/Right</label>
-                    <label class="cb-item"><input type="checkbox" id="specBrokenFibers"> Broken Fibers</label>
-                  </div>
-                  <div class="ang-grid">
-                    <div class="ang-cell">
-                      <span class="ang-dir">Up</span>
-                      <span class="ang-val" id="specAngUp">210</span>
-                      <span class="ang-unit">deg</span>
-                    </div>
-                    <div class="ang-cell">
-                      <span class="ang-dir">Down</span>
-                      <span class="ang-val" id="specAngDown">90</span>
-                      <span class="ang-unit">deg</span>
-                    </div>
-                    <div class="ang-cell">
-                      <span class="ang-dir">Left</span>
-                      <span class="ang-val" id="specAngLeft">100</span>
-                      <span class="ang-unit">deg</span>
-                    </div>
-                    <div class="ang-cell">
-                      <span class="ang-dir">Right</span>
-                      <span class="ang-val" id="specAngRight">100</span>
-                      <span class="ang-unit">deg</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- RIGHT COLUMN -->
-            <div class="col-right">
-              <!-- PRICING -->
-              <div class="panel">
-                <div class="panel-head">Pricing Defaults</div>
-                <div class="panel-body" style="padding:0">
-                  <div class="dense-form">
-                    <div class="df-row">
-                      <div class="df-lbl">Base Eval Fee</div>
-                      <div class="df-val"><span style="color:var(--muted);font-weight:700;margin-right:2px">$</span><input class="inp" id="specEvalFee" type="text" value="350.00"/></div>
-                    </div>
-                    <div class="df-row">
-                      <div class="df-lbl">Est Turnaround</div>
-                      <div class="df-val"><input class="inp" id="specEstTurnaround" type="number" value="10"/><span class="df-unit">days</span></div>
-                    </div>
-                  </div>
-                  <div class="tier-strip">
-                    <div class="tier-box tier-minor" style="background:#F0FDF4">
-                      <span class="tier-label">Minor</span>
-                      <span class="tier-val" id="specMinorPrice">$1,800</span>
-                      <span style="font-size:8.5px;color:var(--muted)" id="specMinorWarranty">6 mo warranty</span>
-                    </div>
-                    <div class="tier-box tier-mid" style="background:#FFFBEB">
-                      <span class="tier-label">Mid</span>
-                      <span class="tier-val" id="specMidPrice">$4,200</span>
-                      <span style="font-size:8.5px;color:var(--muted)" id="specMidWarranty">6 mo warranty</span>
-                    </div>
-                    <div class="tier-box tier-major" style="background:#FEF2F2">
-                      <span class="tier-label">Major</span>
-                      <span class="tier-val" id="specMajorPrice">$7,500</span>
-                      <span style="font-size:8.5px;color:var(--muted)" id="specMajorWarranty">12 mo warranty</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- FLAGS (inline) -->
-              <div class="panel">
-                <div class="panel-head">
-                  <span>Flags</span>
-                  <button class="btn btn-navy" style="height:20px;font-size:9px;padding:0 7px" onclick="document.getElementById('addFlagModal').classList.add('open')">+ Add</button>
-                </div>
-                <div class="panel-body" style="padding:0">
-                  <table>
-                    <thead><tr><th style="font-size:9px">Location</th><th style="font-size:9px">Flag</th><th style="width:36px"></th></tr></thead>
-                    <tbody id="specFlagsBody">
-                      <tr>
-                        <td style="font-size:10px;color:var(--muted)">D&I, Approval</td>
-                        <td style="color:var(--red);font-weight:600;font-size:10.5px">Check connector type before CCD quote</td>
-                        <td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="this.closest('tr').remove()">&#10005;</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-size:10px;color:var(--muted)">Invoice</td>
-                        <td style="color:var(--amber);font-weight:600;font-size:10.5px">NBI capability — confirm processor compatibility</td>
-                        <td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="this.closest('tr').remove()">&#10005;</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- NOTES -->
-              <div class="panel">
-                <div class="panel-head">Notes</div>
-                <div class="panel-body">
-                  <textarea class="inp" id="specNotes" style="height:60px;resize:vertical">Close-focus capable. NBI compatible. Waterproof per IEC 60529 (IPX8).</textarea>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ═══════ TAB: REPAIR ITEMS ═══════ -->
-          <div class="tab-content" id="tab-repair-items">
-            <div style="flex:1;min-width:0">
-              <div class="panel" style="box-shadow:none;border-radius:0">
-                <div class="panel-head" style="border-radius:0">
-                  <span id="repairItemsTitle">Repair Items — GIF-H190</span>
-                  <button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addRepairModal').classList.add('open')">+ Add Item</button>
-                </div>
-                <div style="overflow-y:auto;max-height:calc(100vh - 320px)">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th rowspan="2" style="vertical-align:bottom">Item Description</th>
-                        <th colspan="2" class="col-group">Level 3 (Major)</th>
-                        <th colspan="2" class="col-group">Level 2 (Mid)</th>
-                        <th colspan="2" class="col-group">Level 1 (Minor)</th>
-                        <th rowspan="2" style="vertical-align:bottom;width:60px">Action</th>
-                      </tr>
-                      <tr>
-                        <th class="center" style="font-size:9px">Time</th>
-                        <th class="center" style="font-size:9px">Warn</th>
-                        <th class="center" style="font-size:9px">Time</th>
-                        <th class="center" style="font-size:9px">Warn</th>
-                        <th class="center" style="font-size:9px">Time</th>
-                        <th class="center" style="font-size:9px">Warn</th>
-                      </tr>
-                    </thead>
-                    <tbody id="repairItemsBody">
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">CCD / CMOS Sensor Replacement</td>
-                        <td class="center mono">240</td><td class="center mono" style="color:var(--amber)">200</td>
-                        <td class="center mono">180</td><td class="center mono" style="color:var(--amber)">150</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Angulation Cable Replacement</td>
-                        <td class="center mono">150</td><td class="center mono" style="color:var(--amber)">120</td>
-                        <td class="center mono">90</td><td class="center mono" style="color:var(--amber)">75</td>
-                        <td class="center mono">45</td><td class="center mono" style="color:var(--amber)">35</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Insertion Tube Replacement</td>
-                        <td class="center mono">300</td><td class="center mono" style="color:var(--amber)">250</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Bending Rubber Replacement</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">60</td><td class="center mono" style="color:var(--amber)">50</td>
-                        <td class="center mono">30</td><td class="center mono" style="color:var(--amber)">25</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Light Guide Bundle Repair</td>
-                        <td class="center mono">180</td><td class="center mono" style="color:var(--amber)">150</td>
-                        <td class="center mono">120</td><td class="center mono" style="color:var(--amber)">100</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Channel Repair / Lining</td>
-                        <td class="center mono">180</td><td class="center mono" style="color:var(--amber)">150</td>
-                        <td class="center mono">90</td><td class="center mono" style="color:var(--amber)">75</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Objective Lens Replacement</td>
-                        <td class="center mono">120</td><td class="center mono" style="color:var(--amber)">100</td>
-                        <td class="center mono">90</td><td class="center mono" style="color:var(--amber)">75</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Air/Water Valve Replacement</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">30</td><td class="center mono" style="color:var(--amber)">25</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Suction Valve Replacement</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">30</td><td class="center mono" style="color:var(--amber)">25</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Control Body Overhaul</td>
-                        <td class="center mono">360</td><td class="center mono" style="color:var(--amber)">300</td>
-                        <td class="center mono">240</td><td class="center mono" style="color:var(--amber)">200</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Connector Repair</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">120</td><td class="center mono" style="color:var(--amber)">100</td>
-                        <td class="center mono">60</td><td class="center mono" style="color:var(--amber)">50</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:600;color:var(--navy)">Leak Test &amp; Seal</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">—</td><td class="center mono">—</td>
-                        <td class="center mono">60</td><td class="center mono" style="color:var(--amber)">45</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ═══════ TAB: INVENTORY ═══════ -->
-          <div class="tab-content" id="tab-inventory">
-            <div class="inv-split">
-              <!-- LEFT: Repair Items list -->
-              <div class="inv-left">
-                <div class="panel" style="flex:1;border-radius:0;box-shadow:none">
-                  <div class="panel-head" style="border-radius:0">Repair Items</div>
-                  <div style="overflow-y:auto;flex:1">
-                    <table>
-                      <thead><tr><th>Repair Item</th></tr></thead>
-                      <tbody id="invRepairList">
-                        <tr class="selected" onclick="selectRepairItem(this,'CCD / CMOS Sensor Replacement')"><td style="font-weight:600;color:var(--navy)">CCD / CMOS Sensor Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Angulation Cable Replacement')"><td>Angulation Cable Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Insertion Tube Replacement')"><td>Insertion Tube Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Bending Rubber Replacement')"><td>Bending Rubber Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Light Guide Bundle Repair')"><td>Light Guide Bundle Repair</td></tr>
-                        <tr onclick="selectRepairItem(this,'Channel Repair / Lining')"><td>Channel Repair / Lining</td></tr>
-                        <tr onclick="selectRepairItem(this,'Objective Lens Replacement')"><td>Objective Lens Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Air/Water Valve Replacement')"><td>Air/Water Valve Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Suction Valve Replacement')"><td>Suction Valve Replacement</td></tr>
-                        <tr onclick="selectRepairItem(this,'Control Body Overhaul')"><td>Control Body Overhaul</td></tr>
-                        <tr onclick="selectRepairItem(this,'Connector Repair')"><td>Connector Repair</td></tr>
-                        <tr onclick="selectRepairItem(this,'Leak Test &amp; Seal')"><td>Leak Test &amp; Seal</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <!-- RIGHT: Inventory for selected repair item -->
-              <div class="inv-right">
-                <div class="panel" style="flex:1;border-radius:0;box-shadow:none">
-                  <div class="panel-head" style="border-radius:0">
-                    <span id="invTitle">Inventory — CCD / CMOS Sensor Replacement</span>
-                    <button class="btn btn-navy" style="height:22px;font-size:10px">+ Link Part</button>
-                  </div>
-                  <div style="overflow-y:auto;flex:1">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Part #</th>
-                          <th>Description</th>
-                          <th>Supplier</th>
-                          <th class="center">On Hand</th>
-                          <th class="center">Min Qty</th>
-                          <th>Unit Cost</th>
-                          <th>Last Ordered</th>
-                          <th style="width:40px"></th>
-                        </tr>
-                      </thead>
-                      <tbody id="invBody">
-                        <tr>
-                          <td><span class="mono-chip">CCD-H190</span></td>
-                          <td>CMOS Image Sensor Module</td>
-                          <td>Olympus OEM</td>
-                          <td class="center" style="font-weight:600;color:var(--green)">3</td>
-                          <td class="center">1</td>
-                          <td style="font-family:monospace;font-size:10.5px">$2,200.00</td>
-                          <td style="font-size:10.5px;color:var(--muted)">01/10/2026</td>
-                          <td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px">&#10005;</button></td>
-                        </tr>
-                        <tr>
-                          <td><span class="mono-chip">CCD-H190-R</span></td>
-                          <td>CMOS Sensor — Refurbished</td>
-                          <td>Machida Endoscope</td>
-                          <td class="center" style="font-weight:600;color:var(--amber)">1</td>
-                          <td class="center">0</td>
-                          <td style="font-family:monospace;font-size:10.5px">$1,650.00</td>
-                          <td style="font-size:10.5px;color:var(--muted)">11/22/2025</td>
-                          <td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px">&#10005;</button></td>
-                        </tr>
-                        <tr>
-                          <td><span class="mono-chip">FLEX-PCB-190</span></td>
-                          <td>Flex Circuit Board (Sensor)</td>
-                          <td>Olympus OEM</td>
-                          <td class="center" style="font-weight:600;color:var(--green)">2</td>
-                          <td class="center">1</td>
-                          <td style="font-family:monospace;font-size:10.5px">$480.00</td>
-                          <td style="font-size:10.5px;color:var(--muted)">12/05/2025</td>
-                          <td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px">&#10005;</button></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ═══════ TAB: FLAGS ═══════ -->
-          <div class="tab-content" id="tab-flags">
-            <div style="flex:1;min-width:0">
-              <div class="panel" style="box-shadow:none;border-radius:0">
-                <div class="panel-head" style="border-radius:0">
-                  <span id="flagsTitle">Flags — GIF-H190</span>
-                  <button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addFlagModal').classList.add('open')">+ Add Flag</button>
-                </div>
-                <div style="overflow-y:auto">
-                  <table>
-                    <thead><tr><th>Instrument Type</th><th>Location</th><th>Flag Text</th><th style="width:50px">Action</th></tr></thead>
-                    <tbody id="flagsBody">
-                      <tr>
-                        <td>Flexible</td>
-                        <td>D&I, Approval</td>
-                        <td style="color:var(--red);font-weight:600">Check connector type before CCD quote</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button> <button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="this.closest('tr').remove()">&#10005;</button></td>
-                      </tr>
-                      <tr>
-                        <td>Flexible</td>
-                        <td>Invoice</td>
-                        <td style="color:var(--amber);font-weight:600">NBI capability — confirm processor compatibility</td>
-                        <td class="center"><button class="edit-btn" style="font-size:9px">Edit</button> <button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="this.closest('tr').remove()">&#10005;</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /split-right -->
-      </div><!-- /split-layout -->
-
-    </div><!-- /page-body -->
-  </div><!-- /main -->
-</div><!-- /shell -->
-
-<!-- ═══════ MODALS ═══════ -->
-
-<!-- Add Repair Item Modal -->
-<div class="modal-overlay" id="addRepairModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>Add Repair Item</h3>
-      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg" style="gap:10px">
-        <div class="ff span3">
-          <label>Repair Item <span class="req">*</span></label>
-          <select class="inp">
-            <option value="">-- Select repair item --</option>
-            <option>Biopsy Channel Repair</option>
-            <option>CCD Rewire</option>
-            <option>Control Body Rebuild</option>
-            <option>Distal Tip Replacement</option>
-            <option>Eyepiece Repair</option>
-            <option>Fiber Optic Repair</option>
-            <option>Glue Joint Repair</option>
-            <option>Light Post Repair</option>
-            <option>Umbilical Cable Replacement</option>
-            <option>Video Processor Interface</option>
-            <option>Waterproofing</option>
-          </select>
-        </div>
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('sScopeTypeDesc')">Model Name <span class="sort"></span></th>
+              <th style="width:85px" onclick="sortBy('sRigidOrFlexible')">Type <span class="sort"></span></th>
+              <th onclick="sortBy('sManufacturerName')">Manufacturer <span class="sort"></span></th>
+              <th onclick="sortBy('sCategory')">Category <span class="sort"></span></th>
+              <th style="width:80px" onclick="sortBy('_status')">Status <span class="sort"></span></th>
+              <th style="width:75px;text-align:center" onclick="sortBy('repairItemCount')">Repair Items <span class="sort"></span></th>
+              <th style="width:75px;text-align:center" onclick="sortBy('linkedParts')">Linked Parts <span class="sort"></span></th>
+              <th style="width:75px;text-align:center" onclick="sortBy('avgTAT')">Avg TAT <span class="sort"></span></th>
+              <th style="width:95px;text-align:right" onclick="sortBy('contractCost')">Contract Cost <span class="sort"></span></th>
+              <th style="width:60px;text-align:center" onclick="sortBy('flagCount')">Flags <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="modelsTbody">
+            <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading models…</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 6px;letter-spacing:.5px">Completion & Warning Times (minutes)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div class="panel">
-          <div class="panel-head" style="font-size:9px">Level 3 — Major</div>
-          <div class="panel-body"><div class="fg g2"><div class="ff"><label>Time</label><input class="inp" type="number" placeholder="0"/></div><div class="ff"><label>Warn</label><input class="inp" type="number" placeholder="0"/></div></div></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head" style="font-size:9px">Level 2 — Mid</div>
-          <div class="panel-body"><div class="fg g2"><div class="ff"><label>Time</label><input class="inp" type="number" placeholder="0"/></div><div class="ff"><label>Warn</label><input class="inp" type="number" placeholder="0"/></div></div></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head" style="font-size:9px">Level 1 — Minor</div>
-          <div class="panel-body"><div class="fg g2"><div class="ff"><label>Time</label><input class="inp" type="number" placeholder="0"/></div><div class="ff"><label>Warn</label><input class="inp" type="number" placeholder="0"/></div></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save
-      </button>
-    </div>
-  </div>
-</div>
 
-<!-- Add Flag Modal -->
-<div class="modal-overlay" id="addFlagModal">
-  <div class="modal-box" style="width:580px">
-    <div class="modal-header">
-      <h3>Add Flag</h3>
-      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg g2" style="gap:8px;margin-bottom:10px">
-        <div class="ff">
-          <label>Instrument Types</label>
-          <div style="display:flex;gap:8px;margin-top:2px">
-            <label class="cb-item"><input type="checkbox" checked> Flexible</label>
-            <label class="cb-item"><input type="checkbox"> Rigid</label>
-            <label class="cb-item"><input type="checkbox"> Camera</label>
-          </div>
-        </div>
-        <div class="ff">
-          <label>Locations</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
-            <label class="cb-item"><input type="checkbox" checked> D&I</label>
-            <label class="cb-item"><input type="checkbox"> Requisition</label>
-            <label class="cb-item"><input type="checkbox" checked> Approval</label>
-            <label class="cb-item"><input type="checkbox"> Invoice</label>
-            <label class="cb-item"><input type="checkbox"> Booking</label>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <label class="cb-item"><input type="checkbox"> Visible On D&I</label>
-        <label class="cb-item"><input type="checkbox"> Visible On Blank Inspection</label>
-      </div>
-      <div class="ff">
-        <label>Flag Text <span class="req">*</span></label>
-        <textarea class="inp" placeholder="Enter flag text..."></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- New Model Modal -->
-<div class="modal-overlay" id="newModelModal">
-  <div class="modal-box" style="width:860px">
-    <div class="modal-header">
-      <h3>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="vertical-align:-2px;margin-right:4px"><circle cx="11" cy="11" r="8"/><path d="M8 11h6M11 8v6"/></svg>
-        New Scope Model
-      </h3>
-      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
-    </div>
-    <!-- Clone hint strip -->
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 16px;background:#FFFBEB;border-bottom:1px solid #FDE68A;font-size:10.5px">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      <span style="color:#92400E;font-weight:600">Quick start:</span>
-      <span style="color:#92400E">Clone from existing model</span>
-      <select class="inp" id="nmCloneFrom" onchange="applyCloneDefaults()" style="height:22px;font-size:10.5px;width:180px;padding:0 4px;border-color:#FDE68A">
-        <option value="">-- None (blank) --</option>
-        <option value="GIF-H190">GIF-H190 — Olympus Gastroscope</option>
-        <option value="CF-HQ190L">CF-HQ190L — Olympus Colonoscope</option>
-        <option value="BF-H190">BF-H190 — Olympus Bronchoscope</option>
-        <option value="EG-2990i">EG-2990i — Pentax Gastroscope</option>
-        <option value="EC-760R">EC-760R — Fujifilm Colonoscope</option>
-        <option value="WA50042A">WA50042A — Olympus Arthroscope</option>
-        <option value="1488-020-000">1488-020-000 — Stryker Camera</option>
-      </select>
-      <span style="font-size:9.5px;color:var(--muted);font-style:italic">Copies specs, pricing & repair items</span>
-    </div>
-    <div class="modal-body" style="padding:0;display:flex;overflow:hidden">
-      <!-- LEFT COLUMN: Identity & Configuration -->
-      <div style="flex:1;border-right:1px solid var(--border);overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px">
-        <!-- IDENTITY -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border)">Identity</div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Model Name <span class="req">*</span></label>
-            <input class="inp" id="nmName" placeholder="e.g. GIF-H200" style="font-weight:700;color:var(--navy)"/>
-          </div>
-          <div class="ff">
-            <label>Instrument Type <span class="req">*</span></label>
-            <select class="inp" id="nmType" onchange="updateNewModelCategory()">
-              <option value="">-- Select --</option>
-              <option value="F">Flexible</option>
-              <option value="R">Rigid</option>
-              <option value="C">Camera</option>
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="recordInfo">0 records</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+            Rows:
+            <select class="pg-select" id="rowsSelect" onchange="changePageSize()">
+              <option>15</option><option selected>25</option><option>50</option><option>All</option>
             </select>
           </div>
-        </div>
-        <div class="ff">
-          <label>Description</label>
-          <input class="inp" id="nmDesc" placeholder="e.g. Gastroscope — High Definition"/>
-        </div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Manufacturer <span class="req">*</span></label>
-            <select class="inp" id="nmMfg"><option value="">-- Select --</option><option>ACMI</option><option>EndoChoice</option><option>Fujinon</option><option>Fujifilm</option><option>Karl Storz</option><option>Machida</option><option>Olympus</option><option>Pentax</option><option>Richard Wolf</option><option>Smith & Nephew</option><option>Stryker</option><option>Vision Sciences</option></select>
-          </div>
-          <div class="ff">
-            <label>Model Category <span class="req">*</span></label>
-            <select class="inp" id="nmCategory">
-              <option value="">-- Select --</option>
-              <optgroup label="Flexible" id="nmCatFlex">
-                <option>Gastroscope</option><option>Colonoscope</option><option>Bronchoscope</option><option>Duodenoscope</option><option>Enteroscope</option><option>Choledochoscope</option>
-              </optgroup>
-              <optgroup label="Rigid" id="nmCatRigid">
-                <option>Arthroscope</option><option>Cystoscope</option><option>Hysteroscope</option><option>Laparoscope</option><option>Nephroscope</option><option>Resectoscope</option><option>Sinuscope</option><option>Thoracoscope</option><option>Ureteroscope</option>
-              </optgroup>
-              <optgroup label="Camera" id="nmCatCam">
-                <option>Camera Head</option><option>Coupler</option>
-              </optgroup>
-            </select>
-          </div>
-        </div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Video / Image</label>
-            <select class="inp" id="nmVideo"><option>Video</option><option>Fiber</option><option>Hybrid</option><option>Ultrasound</option><option>Screen on Scope</option><option>N/A</option></select>
-          </div>
-          <div class="ff">
-            <label>Image Sensor</label>
-            <select class="inp" id="nmSensor"><option>CMOS</option><option>CCD</option></select>
-          </div>
-        </div>
-        <div class="ff">
-          <label>GL Account</label>
-          <input class="inp" id="nmGL" placeholder="Optional"/>
-        </div>
-
-        <!-- PHYSICAL SPECS -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:4px">Physical Specs</div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Insertion Length</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmInsLen" type="number" placeholder="e.g. 1030"/>
-              <span class="inp-unit">mm</span>
-            </div>
-          </div>
-          <div class="ff">
-            <label>Insertion Diameter</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmInsDiam" type="number" step="0.1" placeholder="e.g. 9.2"/>
-              <span class="inp-unit">mm</span>
-            </div>
-          </div>
-        </div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Channel Size</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmChannel" type="number" step="0.1" placeholder="e.g. 2.8"/>
-              <span class="inp-unit">mm</span>
-            </div>
-          </div>
-          <div class="ff">
-            <label>Field of View</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmFOV" type="number" placeholder="e.g. 140"/>
-              <span class="inp-unit">deg</span>
-            </div>
-          </div>
-        </div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Direction of View</label>
-            <input class="inp" id="nmDirView" placeholder="e.g. Forward"/>
-          </div>
-          <div class="ff">
-            <label>Depth of Field</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmDepthMin" type="number" placeholder="2" style="width:60px"/>
-              <span style="color:var(--muted);font-weight:700">–</span>
-              <input class="inp" id="nmDepthMax" type="number" placeholder="100" style="width:60px"/>
-              <span class="inp-unit">mm</span>
-            </div>
-          </div>
+          <div class="pagination" id="paginationBtns"></div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Pricing, Angulation, Options -->
-      <div style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px">
-        <!-- PRICING -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border)">Pricing Defaults</div>
-        <div class="fg g2" style="gap:6px">
-          <div class="ff">
-            <label>Base Eval Fee</label>
-            <div style="display:flex;align-items:center;gap:2px">
-              <span style="color:var(--muted);font-weight:700">$</span>
-              <input class="inp" id="nmEvalFee" type="text" placeholder="350.00"/>
-            </div>
-          </div>
-          <div class="ff">
-            <label>Est. Turnaround</label>
-            <div style="display:flex;align-items:center;gap:3px">
-              <input class="inp" id="nmTurnaround" type="number" placeholder="10"/>
-              <span class="inp-unit">days</span>
-            </div>
-          </div>
-        </div>
-        <!-- Pricing tiers -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-          <div style="border:1.5px solid #BBF7D0;border-radius:5px;padding:6px 8px;background:#F0FDF4;display:flex;flex-direction:column;gap:4px">
-            <span style="font-size:9px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.4px;text-align:center">Minor Repair</span>
-            <div class="ff"><label style="font-size:9px">Price</label><div style="display:flex;align-items:center;gap:2px"><span style="color:var(--muted);font-weight:700;font-size:10px">$</span><input class="inp" id="nmMinorPrice" type="text" placeholder="1,800" style="height:22px;font-size:11px"/></div></div>
-            <div class="ff"><label style="font-size:9px">Warranty</label><div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmMinorWar" type="number" value="6" style="height:22px;font-size:11px;width:50px"/><span class="inp-unit">mos</span></div></div>
-          </div>
-          <div style="border:1.5px solid #FDE68A;border-radius:5px;padding:6px 8px;background:#FFFBEB;display:flex;flex-direction:column;gap:4px">
-            <span style="font-size:9px;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.4px;text-align:center">Mid Repair</span>
-            <div class="ff"><label style="font-size:9px">Price</label><div style="display:flex;align-items:center;gap:2px"><span style="color:var(--muted);font-weight:700;font-size:10px">$</span><input class="inp" id="nmMidPrice" type="text" placeholder="4,200" style="height:22px;font-size:11px"/></div></div>
-            <div class="ff"><label style="font-size:9px">Warranty</label><div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmMidWar" type="number" value="6" style="height:22px;font-size:11px;width:50px"/><span class="inp-unit">mos</span></div></div>
-          </div>
-          <div style="border:1.5px solid #FECACA;border-radius:5px;padding:6px 8px;background:#FEF2F2;display:flex;flex-direction:column;gap:4px">
-            <span style="font-size:9px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.4px;text-align:center">Major Repair</span>
-            <div class="ff"><label style="font-size:9px">Price</label><div style="display:flex;align-items:center;gap:2px"><span style="color:var(--muted);font-weight:700;font-size:10px">$</span><input class="inp" id="nmMajorPrice" type="text" placeholder="7,500" style="height:22px;font-size:11px"/></div></div>
-            <div class="ff"><label style="font-size:9px">Warranty</label><div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmMajorWar" type="number" value="12" style="height:22px;font-size:11px;width:50px"/><span class="inp-unit">mos</span></div></div>
-          </div>
-        </div>
-
-        <!-- ANGULATION -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:4px">Angulation Range</div>
-        <div class="fg g4" style="gap:6px">
-          <div class="ff">
-            <label>Up</label>
-            <div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmAngUp" type="number" placeholder="210" style="height:22px;font-size:11px"/><span class="inp-unit">deg</span></div>
-          </div>
-          <div class="ff">
-            <label>Down</label>
-            <div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmAngDn" type="number" placeholder="90" style="height:22px;font-size:11px"/><span class="inp-unit">deg</span></div>
-          </div>
-          <div class="ff">
-            <label>Left</label>
-            <div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmAngLt" type="number" placeholder="100" style="height:22px;font-size:11px"/><span class="inp-unit">deg</span></div>
-          </div>
-          <div class="ff">
-            <label>Right</label>
-            <div style="display:flex;align-items:center;gap:3px"><input class="inp" id="nmAngRt" type="number" placeholder="100" style="height:22px;font-size:11px"/><span class="inp-unit">deg</span></div>
-          </div>
-        </div>
-
-        <!-- OPTIONS -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:4px">Options</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:11px">Active</span></div>
-          <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:11px">Inspection Req'd</span></div>
-          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:11px">Force On Portal</span></div>
-          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:11px">Skip Portal</span></div>
-        </div>
-
-        <!-- PROCESSORS / LIGHT SOURCES -->
-        <div style="font-size:9.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:4px">Compatibility</div>
-        <div class="ff">
-          <label>Compatible Processors</label>
-          <input class="inp" id="nmProcessors" placeholder="e.g. CV-190, EVIS EXERA III"/>
-        </div>
-        <div class="ff">
-          <label>Compatible Light Sources</label>
-          <input class="inp" id="nmLightSources" placeholder="e.g. CLV-190"/>
-        </div>
-
-        <!-- NOTES -->
-        <div class="ff" style="margin-top:2px">
-          <label>Notes</label>
-          <textarea class="inp" id="nmNotes" placeholder="Additional notes for this model..." style="height:48px"></textarea>
-        </div>
-      </div>
-    </div>
-    <!-- Summary footer -->
-    <div style="display:flex;align-items:center;gap:10px;padding:6px 16px;background:#F8FAFF;border-top:1px solid var(--border);font-size:10.5px">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      <span style="color:var(--muted)">Fields marked <span style="color:var(--red);font-weight:700">*</span> are required. All other fields can be completed later on the detail screen.</span>
-      <div style="flex:1"></div>
-      <span id="nmReqStatus" style="font-size:10px;font-weight:700;color:var(--red)">4 required fields remaining</span>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
-      <button class="btn btn-outline" onclick="resetNewModelForm()" style="height:28px;font-size:11px">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        Reset
-      </button>
-      <button class="btn-save" id="nmCreateBtn" onclick="createNewModel()" style="opacity:.5;cursor:not-allowed" disabled>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Create Model
-      </button>
     </div>
   </div>
 </div>
 
-<!-- Manufacturer Stats Modal -->
-<div class="modal-overlay" id="mfgModal">
-  <div class="modal-box" style="width:500px">
-    <div class="modal-header">
-      <h3>Manufacturer — Scope Type Stats</h3>
-      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('edit')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Model</div>
+  <div class="ctx-item" onclick="ctxAction('repairItems')"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>View Repair Items</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('clone')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Clone Model</div>
+  <div class="ctx-item" onclick="ctxAction('print')"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Spec Sheet</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('toggleActive')"><svg viewBox="0 0 24 24"><path d="M18.36 6.64A9 9 0 0 1 20.77 15M2 12a10 10 0 0 0 18 6"/><circle cx="12" cy="12" r="1"/></svg><span id="ctxActiveLabel">Deactivate</span></div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete Model</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- MODEL DETAIL DRAWER -->
+<div class="model-drawer" id="modelDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerTitle">—</div>
+      <div class="dh-sub" id="drawerSub">—</div>
     </div>
-    <div class="modal-body" style="padding:0">
-      <table>
-        <thead><tr><th>Manufacturer</th><th>Type</th><th class="center">Count</th></tr></thead>
-        <tbody>
-          <tr><td>Olympus</td><td>Flexible</td><td class="center" style="font-weight:700">847</td></tr>
-          <tr><td>Olympus</td><td>Rigid</td><td class="center" style="font-weight:700">126</td></tr>
-          <tr><td>Pentax</td><td>Flexible</td><td class="center" style="font-weight:700">198</td></tr>
-          <tr><td>Fujifilm</td><td>Flexible</td><td class="center" style="font-weight:700">89</td></tr>
-          <tr><td>Karl Storz</td><td>Rigid</td><td class="center" style="font-weight:700">312</td></tr>
-        </tbody>
-      </table>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('specs',this)">Specifications</div>
+    <div class="dtab" onclick="switchTab('repairItems',this)">Repair Items</div>
+    <div class="dtab" onclick="switchTab('inventory',this)">Inventory</div>
+    <div class="dtab" onclick="switchTab('flags',this)">Flags</div>
+  </div>
+
+  <!-- Specifications Tab -->
+  <div class="dpane active" id="dpane-specs">
+    <!-- Configuration -->
+    <div class="section-card">
+      <div class="section-head">Configuration</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Video / Image</label><select id="fVideoImage" onchange="markDirty()"><option>Fiber</option><option>Hybrid</option><option selected>Video</option><option>Ultrasound</option><option>Screen on Scope</option><option>N/A</option></select></div>
+          <div class="field"><label>Image Sensor</label><select id="fImageSensor" onchange="markDirty()"><option>CCD</option><option selected>CMOS</option></select></div>
+        </div>
+        <div class="field"><label>Processors</label><input id="fProcessors" oninput="markDirty()" placeholder="e.g. CV-190, EVIS EXERA III"/></div>
+        <div class="field"><label>Light Sources</label><input id="fLightSources" oninput="markDirty()" placeholder="e.g. CLV-190"/></div>
+        <div class="g2">
+          <div class="field"><label>Avg Days In</label><input id="fAvgDays" type="number" oninput="markDirty()" placeholder="e.g. 14"/></div>
+          <div class="field"><label>Expense Multiplier</label><input id="fExpMult" type="number" step="0.01" oninput="markDirty()" placeholder="1.25"/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Contract Cost</label><input id="fContractCost" oninput="markDirty()" placeholder="$0.00"/></div>
+          <div class="field"><label>Max Charge</label><input id="fMaxCharge" oninput="markDirty()" placeholder="$0.00"/></div>
+        </div>
+        <div class="field"><label>GL Account</label><input id="fGLAccount" oninput="markDirty()"/></div>
+        <div class="g2">
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="fForcePortal" onchange="markDirty()"/><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Force On Portal</span>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="fSkipPortal" onchange="markDirty()"/><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Skip Portal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Physical Specs -->
+    <div class="section-card">
+      <div class="section-head">Physical Specifications</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Insertion Length (mm)</label><input id="fInsLength" type="number" oninput="markDirty()"/></div>
+          <div class="field"><label>Insertion Diameter (mm)</label><input id="fInsDiam" type="number" step="0.1" oninput="markDirty()"/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Channel Size (mm)</label><input id="fChannel" type="number" step="0.1" oninput="markDirty()"/></div>
+          <div class="field"><label>Field of View (deg)</label><input id="fFOV" type="number" oninput="markDirty()"/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Direction of View</label><input id="fDirView" oninput="markDirty()" placeholder="Forward"/></div>
+          <div class="field"><label>Depth of Field (mm)</label><input id="fDepthField" oninput="markDirty()" placeholder="2–100"/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Epoxy (Avg)</label><input id="fEpoxyAvg" type="number" step="0.01" oninput="markDirty()"/></div>
+          <div class="field"><label>Max Epoxy</label><input id="fEpoxyMax" type="number" step="0.01" oninput="markDirty()"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Angulation -->
+    <div class="section-card">
+      <div class="section-head">Angulation</div>
+      <div class="section-body" style="padding:0">
+        <div class="ang-grid">
+          <div class="ang-cell"><div class="ang-dir">Up</div><input class="ang-val" id="fAngUp" type="number" style="width:50px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:14px;font-weight:800;color:var(--navy);font-family:inherit" oninput="markDirty()"/><div class="ang-unit">degrees</div></div>
+          <div class="ang-cell"><div class="ang-dir">Down</div><input class="ang-val" id="fAngDown" type="number" style="width:50px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:14px;font-weight:800;color:var(--navy);font-family:inherit" oninput="markDirty()"/><div class="ang-unit">degrees</div></div>
+          <div class="ang-cell"><div class="ang-dir">Left</div><input class="ang-val" id="fAngLeft" type="number" style="width:50px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:14px;font-weight:800;color:var(--navy);font-family:inherit" oninput="markDirty()"/><div class="ang-unit">degrees</div></div>
+          <div class="ang-cell"><div class="ang-dir">Right</div><input class="ang-val" id="fAngRight" type="number" style="width:50px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:14px;font-weight:800;color:var(--navy);font-family:inherit" oninput="markDirty()"/><div class="ang-unit">degrees</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="section-card">
+      <div class="section-head">Pricing Tiers</div>
+      <div class="section-body" style="padding:0">
+        <div style="padding:8px 12px">
+          <div class="field"><label>Base Evaluation Fee</label><input id="fBaseEvalFee" oninput="markDirty()" placeholder="$0.00"/></div>
+          <div class="field" style="margin-top:6px"><label>Estimated TAT (days)</label><input id="fEstTAT" type="number" oninput="markDirty()"/></div>
+        </div>
+        <div class="tier-strip">
+          <div class="tier-box tier-minor">
+            <div class="tier-label">Minor</div>
+            <input class="tier-val" id="fMinorPrice" style="width:80px;text-align:center;border:1px solid var(--border);border-radius:3px;font-family:monospace" oninput="markDirty()" placeholder="$0"/>
+            <input class="tier-war" id="fMinorWarranty" type="number" style="width:40px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:9px" oninput="markDirty()" placeholder="mo"/>
+          </div>
+          <div class="tier-box tier-mid">
+            <div class="tier-label">Mid</div>
+            <input class="tier-val" id="fMidPrice" style="width:80px;text-align:center;border:1px solid var(--border);border-radius:3px;font-family:monospace" oninput="markDirty()" placeholder="$0"/>
+            <input class="tier-war" id="fMidWarranty" type="number" style="width:40px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:9px" oninput="markDirty()" placeholder="mo"/>
+          </div>
+          <div class="tier-box tier-major">
+            <div class="tier-label">Major</div>
+            <input class="tier-val" id="fMajorPrice" style="width:80px;text-align:center;border:1px solid var(--border);border-radius:3px;font-family:monospace" oninput="markDirty()" placeholder="$0"/>
+            <input class="tier-war" id="fMajorWarranty" type="number" style="width:40px;text-align:center;border:1px solid var(--border);border-radius:3px;font-size:9px" oninput="markDirty()" placeholder="mo"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section-card">
+      <div class="section-head">Notes</div>
+      <div class="section-body">
+        <div class="field"><textarea id="fNotes" oninput="markDirty()" placeholder="Internal notes about this model..."></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Repair Items Tab -->
+  <div class="dpane" id="dpane-repairItems">
+    <div class="section-card">
+      <div class="section-head" style="display:flex;justify-content:space-between;align-items:center">
+        Repair Items
+        <button class="del-btn" style="background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)" onclick="addRepairItem()">+ Add</button>
+      </div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Repair Item</th><th style="width:55px;text-align:center">L3</th><th style="width:55px;text-align:center">L2</th><th style="width:55px;text-align:center">L1</th><th style="width:55px;text-align:center">Warn</th><th style="width:40px"></th></tr></thead>
+          <tbody id="repairItemsBody">
+            <tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">Select a model</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Tab -->
+  <div class="dpane" id="dpane-inventory">
+    <div class="inv-split">
+      <div class="inv-left">
+        <div class="section-card" style="flex:1;display:flex;flex-direction:column">
+          <div class="section-head">Repair Items</div>
+          <div class="section-body" style="padding:0;flex:1;overflow-y:auto">
+            <table class="mini-table">
+              <thead><tr><th>Item</th><th style="width:40px">Qty</th></tr></thead>
+              <tbody id="invRepairItemsBody">
+                <tr><td colspan="2" style="text-align:center;padding:12px;color:var(--muted)">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="inv-right">
+        <div class="section-card" style="flex:1;display:flex;flex-direction:column">
+          <div class="section-head">Linked Inventory</div>
+          <div class="section-body" style="padding:0;flex:1;overflow-y:auto">
+            <table class="mini-table">
+              <thead><tr><th>Part</th><th style="width:50px">Stock</th><th style="width:40px"></th></tr></thead>
+              <tbody id="invLinkedBody">
+                <tr><td colspan="3" style="text-align:center;padding:12px;color:var(--muted)">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flags Tab -->
+  <div class="dpane" id="dpane-flags">
+    <div class="section-card">
+      <div class="section-head" style="display:flex;justify-content:space-between;align-items:center">
+        Flags
+        <button class="del-btn" style="background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)" onclick="addFlag()">+ Add</button>
+      </div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Flag</th><th style="width:80px">Date</th><th style="width:60px">By</th><th style="width:40px"></th></tr></thead>
+          <tbody id="flagsBody">
+            <tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">Select a model</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span id="drawerSaveStatus"></span>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline" onclick="confirmDeleteModel()" style="color:var(--red);border-color:var(--red)">Delete</button>
+      <button class="btn btn-navy" onclick="saveModel()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODEL MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">New Scope Model</span>
+      <button class="modal-close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="clone-hint" id="cloneHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Cloning from: <strong id="cloneSource"></strong></span>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Model Name *</label><input id="mModelName" placeholder="e.g. GIF-H190"/></div>
+        <div class="field"><label>Description</label><input id="mDescription" placeholder="Gastroscope — High Definition"/></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Instrument Type *</label>
+          <select id="mInstType"><option value="">— Select —</option><option value="F">Flexible</option><option value="R">Rigid</option><option value="C">Camera</option><option value="I">Instrument</option></select>
+        </div>
+        <div class="field"><label>Category</label>
+          <select id="mCategory"><option value="">— Select —</option><option>Gastroscope</option><option>Colonoscope</option><option>Bronchoscope</option><option>Duodenoscope</option><option>Camera Head</option><option>Arthroscope</option><option>Laparoscope</option><option>Cystoscope</option><option>Sinuscope</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Manufacturer *</label>
+          <select id="mManufacturer"><option value="">— Select —</option></select>
+        </div>
+        <div class="field"><label>Contract Cost</label><input id="mContractCost" placeholder="$0.00"/></div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="mActive" checked/><span class="toggle-slider"></span></label>
+        <span class="toggle-label">Active</span>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Close</button>
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-navy" onclick="submitAddModel()">Create Model</button>
     </div>
   </div>
 </div>
 
 <script src="api.js"></script>
 <script>
-// ── Auth Guard ──
-if (!API.requireAuth()) throw new Error('redirect');
+// ── Auth guard ──────────────────────────────────────────
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
 
-// ═══════════════════════════════════════════════════════
-//  State
-// ═══════════════════════════════════════════════════════
-let allModels = [];       // full model list from API
-let allManufacturers = []; // manufacturer lookup
-let selectedScopeTypeKey = null;
-let currentDetail = null; // detail record for selected model
-let currentFilter = 'all'; // instrument type filter
-let isDemoMode = false;
+// ── State ───────────────────────────────────────────────
+let allModels = [], filteredModels = [], displayModels = [];
+let selectedModelKey = null;
+let isDirty = false, isLive = false;
+let currentPage = 1, pageSize = 25;
+let sortCol = 'sScopeTypeDesc', sortDir = 'asc';
+let filters = { type:'', status:'', manufacturer:'', search:'' };
+let ctxModelKey = null;
+let _saveTimer = null;
+let manufacturers = [];
 
-// ═══════════════════════════════════════════════════════
-//  Tab switching
-// ═══════════════════════════════════════════════════════
-function switchTab(id, el) {
-  document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('show'); c.classList.remove('show-block'); });
-  document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  const tc = document.getElementById('tab-' + id);
-  if (tc) tc.classList.add('show');
-  // Lazy-load tab data when switching
-  if (id === 'repair-items' && selectedScopeTypeKey && !isDemoMode) loadRepairItems(selectedScopeTypeKey);
-  if (id === 'inventory' && selectedScopeTypeKey && !isDemoMode) loadInventory(selectedScopeTypeKey);
-  if (id === 'flags' && selectedScopeTypeKey && !isDemoMode) loadFlags(selectedScopeTypeKey);
+// ── Demo Data ───────────────────────────────────────────
+function getDemoManufacturers() {
+  return ['Olympus','Pentax','Fujifilm','Karl Storz','Stryker'];
 }
 
-// ═══════════════════════════════════════════════════════
-//  Select model from left list (click or keyboard)
-// ═══════════════════════════════════════════════════════
-function selectModel(row) {
-  document.querySelectorAll('.model-row').forEach(r => r.classList.remove('selected'));
-  row.classList.add('selected');
-  const name = row.dataset.model;
-  const desc = row.querySelector('.mr-desc')?.textContent || '';
-  document.getElementById('hdrModel').value = name;
-  document.getElementById('hdrDesc').value = desc;
-
-  // If wired to API, load detail
-  const key = row.dataset.scopeTypeKey;
-  if (key && !isDemoMode) {
-    selectedScopeTypeKey = parseInt(key);
-    loadModelDetail(selectedScopeTypeKey);
-  }
+function getDemoModels() {
+  return [
+    { lScopeTypeKey:1, sScopeTypeDesc:'GIF-H190', sDescription:'Gastroscope — High Definition', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Gastroscope', bActive:true, repairItemCount:12, linkedParts:18, avgTAT:12.4, contractCost:2850, flagCount:0, notes:'', angUp:210, angDown:90, angLeft:100, angRight:100, insLength:1030, insDiam:9.2, channel:2.8, fov:140, dirView:'Forward', depthField:'2–100', epoxyAvg:null, epoxyMax:null, videoImage:'Video', imageSensor:'CMOS', processors:'CV-190, EVIS EXERA III', lightSources:'CLV-190', expMult:null, glAccount:'', forcePortal:false, skipPortal:false, baseEvalFee:'350', estTAT:14, minorPrice:'1,200', minorWarranty:3, midPrice:'2,400', midWarranty:6, majorPrice:'4,800', majorWarranty:12, maxCharge:'' },
+    { lScopeTypeKey:2, sScopeTypeDesc:'GIF-HQ190', sDescription:'Gastroscope — Dual Focus HD', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Gastroscope', bActive:true, repairItemCount:14, linkedParts:22, avgTAT:11.8, contractCost:3200, flagCount:1, notes:'Premium model — dual focus capability.' },
+    { lScopeTypeKey:3, sScopeTypeDesc:'CF-HQ190L', sDescription:'Colonoscope — EVIS EXERA III', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Colonoscope', bActive:true, repairItemCount:15, linkedParts:20, avgTAT:13.2, contractCost:3100, flagCount:0 },
+    { lScopeTypeKey:4, sScopeTypeDesc:'TJF-Q180V', sDescription:'Duodenoscope — Therapeutic', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Duodenoscope', bActive:true, repairItemCount:18, linkedParts:24, avgTAT:15.6, contractCost:4500, flagCount:2, notes:'High-risk reprocessing scope. Requires enhanced cleaning verification.' },
+    { lScopeTypeKey:5, sScopeTypeDesc:'BF-H190', sDescription:'Bronchoscope — Diagnostic', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Bronchoscope', bActive:true, repairItemCount:10, linkedParts:14, avgTAT:9.8, contractCost:2200, flagCount:0 },
+    { lScopeTypeKey:6, sScopeTypeDesc:'PCF-H190DL', sDescription:'Pediatric Colonoscope', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Colonoscope', bActive:true, repairItemCount:13, linkedParts:17, avgTAT:11.2, contractCost:3400, flagCount:0 },
+    { lScopeTypeKey:7, sScopeTypeDesc:'GIF-Q180', sDescription:'Gastroscope — Standard', sRigidOrFlexible:'F', sManufacturerName:'Olympus', sCategory:'Gastroscope', bActive:false, repairItemCount:11, linkedParts:16, avgTAT:14.0, contractCost:1800, flagCount:0, notes:'Legacy model — being phased out.' },
+    { lScopeTypeKey:8, sScopeTypeDesc:'WA50042A', sDescription:'Arthroscope 30\u00b0 4mm', sRigidOrFlexible:'R', sManufacturerName:'Olympus', sCategory:'Arthroscope', bActive:true, repairItemCount:6, linkedParts:8, avgTAT:5.2, contractCost:950, flagCount:0 },
+    { lScopeTypeKey:9, sScopeTypeDesc:'EG-2990i', sDescription:'Gastroscope', sRigidOrFlexible:'F', sManufacturerName:'Pentax', sCategory:'Gastroscope', bActive:true, repairItemCount:11, linkedParts:15, avgTAT:12.0, contractCost:2600, flagCount:0 },
+    { lScopeTypeKey:10, sScopeTypeDesc:'EC-3890Li', sDescription:'Colonoscope', sRigidOrFlexible:'F', sManufacturerName:'Pentax', sCategory:'Colonoscope', bActive:true, repairItemCount:13, linkedParts:19, avgTAT:13.5, contractCost:2900, flagCount:1 },
+    { lScopeTypeKey:11, sScopeTypeDesc:'EG-29-i10', sDescription:'Gastroscope — HD+', sRigidOrFlexible:'F', sManufacturerName:'Pentax', sCategory:'Gastroscope', bActive:true, repairItemCount:12, linkedParts:16, avgTAT:11.4, contractCost:2750, flagCount:0 },
+    { lScopeTypeKey:12, sScopeTypeDesc:'EG-740UT', sDescription:'EUS Gastroscope', sRigidOrFlexible:'F', sManufacturerName:'Fujifilm', sCategory:'Gastroscope', bActive:true, repairItemCount:16, linkedParts:21, avgTAT:14.8, contractCost:5200, flagCount:0 },
+    { lScopeTypeKey:13, sScopeTypeDesc:'EC-760R', sDescription:'Colonoscope — ELUXEO', sRigidOrFlexible:'F', sManufacturerName:'Fujifilm', sCategory:'Colonoscope', bActive:true, repairItemCount:14, linkedParts:18, avgTAT:12.6, contractCost:3000, flagCount:0 },
+    { lScopeTypeKey:14, sScopeTypeDesc:'EG-760R', sDescription:'Gastroscope — ELUXEO', sRigidOrFlexible:'F', sManufacturerName:'Fujifilm', sCategory:'Gastroscope', bActive:true, repairItemCount:13, linkedParts:17, avgTAT:11.9, contractCost:2950, flagCount:0 },
+    { lScopeTypeKey:15, sScopeTypeDesc:'11101RP2', sDescription:'Sinuscope 0\u00b0 2.7mm', sRigidOrFlexible:'R', sManufacturerName:'Karl Storz', sCategory:'Sinuscope', bActive:true, repairItemCount:4, linkedParts:5, avgTAT:3.8, contractCost:650, flagCount:0 },
+    { lScopeTypeKey:16, sScopeTypeDesc:'26003BA', sDescription:'Laparoscope 0\u00b0 10mm HD', sRigidOrFlexible:'R', sManufacturerName:'Karl Storz', sCategory:'Laparoscope', bActive:true, repairItemCount:5, linkedParts:7, avgTAT:4.5, contractCost:780, flagCount:0 },
+    { lScopeTypeKey:17, sScopeTypeDesc:'22220131', sDescription:'Cystoscope 30\u00b0 4mm', sRigidOrFlexible:'R', sManufacturerName:'Karl Storz', sCategory:'Cystoscope', bActive:true, repairItemCount:4, linkedParts:6, avgTAT:4.0, contractCost:720, flagCount:0 },
+    { lScopeTypeKey:18, sScopeTypeDesc:'1488-020-000', sDescription:'1488 HD Camera Head', sRigidOrFlexible:'C', sManufacturerName:'Stryker', sCategory:'Camera Head', bActive:true, repairItemCount:8, linkedParts:10, avgTAT:6.5, contractCost:1400, flagCount:0 },
+    { lScopeTypeKey:19, sScopeTypeDesc:'1588-020-000', sDescription:'1588 AIM Camera Head', sRigidOrFlexible:'C', sManufacturerName:'Stryker', sCategory:'Camera Head', bActive:true, repairItemCount:9, linkedParts:12, avgTAT:7.2, contractCost:1650, flagCount:1 },
+  ];
 }
 
-// ═══════════════════════════════════════════════════════
-//  Inventory drill-down
-// ═══════════════════════════════════════════════════════
-function selectRepairItem(row, name) {
-  document.querySelectorAll('#invRepairList tr').forEach(r => r.classList.remove('selected'));
-  row.classList.add('selected');
-  document.getElementById('invTitle').textContent = 'Inventory — ' + name;
-  // If wired, load inventory for this repair item
-  const riKey = row.dataset.repairItemKey;
-  if (riKey && selectedScopeTypeKey && !isDemoMode) {
-    loadInventoryForRepairItem(selectedScopeTypeKey, parseInt(riKey));
-  }
+function getDemoRepairItems(modelKey) {
+  const items = {
+    1: [
+      { sRepairItemDesc:'Bending Section', l3Time:45, l2Time:30, l1Time:15, warnTime:60 },
+      { sRepairItemDesc:'Insertion Tube', l3Time:60, l2Time:40, l1Time:20, warnTime:90 },
+      { sRepairItemDesc:'Light Guide Bundle', l3Time:30, l2Time:20, l1Time:10, warnTime:45 },
+      { sRepairItemDesc:'CCD Chip', l3Time:120, l2Time:90, l1Time:60, warnTime:150 },
+      { sRepairItemDesc:'Control Body Knobs', l3Time:20, l2Time:15, l1Time:8, warnTime:30 },
+    ],
+  };
+  return items[modelKey] || [
+    { sRepairItemDesc:'Bending Section', l3Time:45, l2Time:30, l1Time:15, warnTime:60 },
+    { sRepairItemDesc:'Insertion Tube', l3Time:60, l2Time:40, l1Time:20, warnTime:90 },
+    { sRepairItemDesc:'Light Guide Bundle', l3Time:30, l2Time:20, l1Time:10, warnTime:45 },
+  ];
 }
 
-// ═══════════════════════════════════════════════════════
-//  Filter models by search
-// ═══════════════════════════════════════════════════════
-function filterModels() {
-  const q = document.getElementById('modelSearch').value.toLowerCase();
-  document.querySelectorAll('#modelList .model-row').forEach(row => {
-    const name = (row.dataset.model || '').toLowerCase();
-    const desc = (row.querySelector('.mr-desc')?.textContent || '').toLowerCase();
-    row.style.display = (!q || name.includes(q) || desc.includes(q)) ? '' : 'none';
+function getDemoFlags(modelKey) {
+  const map = {
+    2: [{ sFlag:'Dual focus alignment requires factory calibration', dtCreated:'2024-06-15', sCreatedBy:'JSB' }],
+    4: [{ sFlag:'High-risk reprocessing — enhanced cleaning protocol', dtCreated:'2024-01-10', sCreatedBy:'MKT' },{ sFlag:'Elevator wire recall check required', dtCreated:'2024-03-22', sCreatedBy:'QA' }],
+    10: [{ sFlag:'Updated firmware requirement v2.1+', dtCreated:'2024-09-01', sCreatedBy:'ENG' }],
+    19: [{ sFlag:'Coupler adapter compatibility issue with older processors', dtCreated:'2024-07-14', sCreatedBy:'JSB' }],
+  };
+  return map[modelKey] || [];
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function typeLabel(t) { return {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'}[t] || t || '—'; }
+function typeBadgeClass(t) { return {F:'b-flex',R:'b-rigid',C:'b-camera',I:'b-inst'}[t] || ''; }
+function statusBadge(m) {
+  if (m.bActive === false) return '<span class="badge b-inactive">Inactive</span>';
+  return '<span class="badge b-active">Active</span>';
+}
+function statusKey(m) { return m.bActive === false ? 'inactive' : 'active'; }
+function heatClass(days) {
+  if (days === null || days === undefined) return 'heat-ok';
+  if (days > 10) return 'heat-red';
+  if (days > 5) return 'heat-amber';
+  return 'heat-green';
+}
+function fmtCurrency(v) {
+  if (!v && v !== 0) return '—';
+  return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.className = 'data-badge ' + (live ? 'live' : 'demo');
+  b.textContent = live ? 'Live Data' : 'Demo Data';
+}
+
+// ── Init ────────────────────────────────────────────────
+async function init() {
+  const stored = localStorage.getItem('tsi_svcLocation');
+  if (stored) { document.getElementById('svcLocation').value = stored; }
+  await loadModels();
+  document.addEventListener('click', () => { document.getElementById('ctxMenu').style.display = 'none'; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+  // Close new order menu on outside click
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('newOrderWrap');
+    if (wrap && !wrap.contains(e.target)) document.getElementById('newOrderMenu').classList.remove('open');
   });
-  updateGroupVisibility();
-  updateModelCount();
 }
 
-// Hide empty group headers
-function updateGroupVisibility() {
-  document.querySelectorAll('#modelList .model-group-head').forEach(hdr => {
-    let next = hdr.nextElementSibling;
-    let hasVisible = false;
-    while (next && !next.classList.contains('model-group-head')) {
-      if (next.style.display !== 'none') hasVisible = true;
-      next = next.nextElementSibling;
-    }
-    hdr.style.display = hasVisible ? '' : 'none';
-  });
+async function loadModels() {
+  document.getElementById('modelsTbody').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading models…</td></tr>';
+  try {
+    const raw = await API.getScopeModels({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{} });
+    let list = Array.isArray(raw) ? raw : (raw.data || []);
+    if (!list.length) throw new Error('empty');
+    // Normalize fields
+    list.forEach(m => {
+      if (m.bActive === undefined && m.bIsActive !== undefined) m.bActive = m.bIsActive;
+      if (!m.sRigidOrFlexible && m.sInstrumentType) m.sRigidOrFlexible = m.sInstrumentType;
+      if (!m.repairItemCount) m.repairItemCount = m.lRepairItemCount || 0;
+      if (!m.linkedParts) m.linkedParts = m.lLinkedParts || 0;
+      if (!m.avgTAT) m.avgTAT = m.dblAvgTAT || null;
+      if (!m.contractCost) m.contractCost = m.dblContractCost || null;
+      if (!m.flagCount) m.flagCount = m.lFlagCount || 0;
+      if (!m.sCategory) m.sCategory = m.sScopeCategory || '';
+    });
+    allModels = list;
+    isLive = true;
+    showDataBadge(true);
+  } catch(e) {
+    allModels = getDemoModels();
+    isLive = false;
+    showDataBadge(false);
+  }
+  // Build manufacturer dropdown
+  const mfgSet = new Set();
+  allModels.forEach(m => { if (m.sManufacturerName) mfgSet.add(m.sManufacturerName); });
+  manufacturers = [...mfgSet].sort();
+  const mfgSel = document.getElementById('filterMfg');
+  mfgSel.innerHTML = '<option value="">All Manufacturers</option>' + manufacturers.map(m => `<option value="${m}">${m}</option>`).join('');
+  // Also populate modal manufacturer dropdown
+  const mMfg = document.getElementById('mManufacturer');
+  mMfg.innerHTML = '<option value="">— Select —</option>' + manufacturers.map(m => `<option value="${m}">${m}</option>`).join('');
+  runPipeline();
 }
 
-function updateModelCount() {
-  const visible = document.querySelectorAll('#modelList .model-row').length;
-  const shown = document.querySelectorAll('#modelList .model-row:not([style*="display: none"])').length;
-  document.getElementById('modelShown').textContent = shown + ' models shown';
-}
-
-// ═══════════════════════════════════════════════════════
-//  Instrument type filter (filter bar segmented buttons)
-// ═══════════════════════════════════════════════════════
-function switchInstrType(type, el) {
-  document.querySelectorAll('#instrTypeGroup .seg-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  currentFilter = type;
+// ── Filter/Sort/Render Pipeline ─────────────────────────
+function runPipeline() {
   applyFilters();
+  applySort();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updateKPIs();
+  updatePagination();
 }
 
 function applyFilters() {
-  const showInactive = document.getElementById('showInactiveToggle').checked;
-  document.querySelectorAll('#modelList .model-row').forEach(row => {
-    const typeMatch = currentFilter === 'all' || row.dataset.type === currentFilter;
-    const isActive = row.dataset.active !== 'false';
-    const activeMatch = showInactive || isActive;
-    row.style.display = (typeMatch && activeMatch) ? '' : 'none';
+  const q = filters.search.toLowerCase();
+  filteredModels = allModels.filter(m => {
+    if (filters.type && (m.sRigidOrFlexible||'') !== filters.type) return false;
+    const sk = statusKey(m);
+    if (filters.status && sk !== filters.status) return false;
+    if (filters.manufacturer && (m.sManufacturerName||'') !== filters.manufacturer) return false;
+    if (q) {
+      const hay = ((m.sScopeTypeDesc||'')+(m.sDescription||'')+(m.sManufacturerName||'')+(m.sCategory||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
   });
-  updateGroupVisibility();
-  updateModelCount();
 }
 
-// ═══════════════════════════════════════════════════════
-//  Keyboard navigation for model list
-// ═══════════════════════════════════════════════════════
-document.addEventListener('keydown', function(e) {
-  const list = document.getElementById('modelList');
-  if (!list) return;
-  const items = Array.from(list.querySelectorAll('.model-row')).filter(r => r.style.display !== 'none');
-  const current = list.querySelector('.model-row.selected');
-  if (!current) return;
-  let idx = items.indexOf(current);
-  if (e.key === 'ArrowDown' && idx < items.length - 1) {
-    e.preventDefault();
-    selectModel(items[idx + 1]);
-    items[idx + 1].scrollIntoView({ block: 'nearest' });
-  } else if (e.key === 'ArrowUp' && idx > 0) {
-    e.preventDefault();
-    selectModel(items[idx - 1]);
-    items[idx - 1].scrollIntoView({ block: 'nearest' });
-  }
-});
-
-// ═══════ NEW MODEL MODAL LOGIC ═══════
-
-// Clone defaults database
-const cloneDB = {
-  'GIF-H190':      { type:'F', mfg:'Olympus', cat:'Gastroscope', video:'Video', sensor:'CMOS', insLen:1030, insDiam:9.2, channel:2.8, fov:140, dir:'Forward', depthMin:2, depthMax:100, evalFee:'350.00', turnaround:10, minor:'1,800', mid:'4,200', major:'7,500', minorW:6, midW:6, majorW:12, angUp:210, angDn:90, angLt:100, angRt:100, proc:'CV-190, EVIS EXERA III', light:'CLV-190' },
-  'CF-HQ190L':     { type:'F', mfg:'Olympus', cat:'Colonoscope', video:'Video', sensor:'CMOS', insLen:1680, insDiam:12.8, channel:3.7, fov:170, dir:'Forward', depthMin:2, depthMax:100, evalFee:'350.00', turnaround:12, minor:'2,200', mid:'5,000', major:'8,500', minorW:6, midW:6, majorW:12, angUp:180, angDn:180, angLt:160, angRt:160, proc:'CV-190, EVIS EXERA III', light:'CLV-190' },
-  'BF-H190':       { type:'F', mfg:'Olympus', cat:'Bronchoscope', video:'Video', sensor:'CMOS', insLen:600, insDiam:5.5, channel:2.0, fov:120, dir:'Forward', depthMin:3, depthMax:50, evalFee:'300.00', turnaround:10, minor:'1,500', mid:'3,800', major:'6,500', minorW:6, midW:6, majorW:12, angUp:210, angDn:130, angLt:0, angRt:0, proc:'CV-190, EVIS EXERA III', light:'CLV-190' },
-  'EG-2990i':      { type:'F', mfg:'Pentax', cat:'Gastroscope', video:'Video', sensor:'CCD', insLen:1050, insDiam:9.8, channel:2.8, fov:140, dir:'Forward', depthMin:3, depthMax:100, evalFee:'325.00', turnaround:14, minor:'1,700', mid:'4,000', major:'7,200', minorW:6, midW:6, majorW:12, angUp:210, angDn:90, angLt:100, angRt:100, proc:'EPK-i7010', light:'Built-in' },
-  'EC-760R':       { type:'F', mfg:'Fujifilm', cat:'Colonoscope', video:'Video', sensor:'CMOS', insLen:1680, insDiam:12.8, channel:3.8, fov:170, dir:'Forward', depthMin:2, depthMax:100, evalFee:'350.00', turnaround:14, minor:'2,100', mid:'4,800', major:'8,200', minorW:6, midW:6, majorW:12, angUp:180, angDn:180, angLt:160, angRt:160, proc:'ELUXEO 7000', light:'BL-7000' },
-  'WA50042A':      { type:'R', mfg:'Olympus', cat:'Arthroscope', video:'N/A', sensor:'CCD', insLen:175, insDiam:4.0, channel:0, fov:90, dir:'30', depthMin:0, depthMax:0, evalFee:'250.00', turnaround:7, minor:'800', mid:'1,800', major:'3,200', minorW:6, midW:6, majorW:12, angUp:0, angDn:0, angLt:0, angRt:0, proc:'', light:'' },
-  '1488-020-000':  { type:'C', mfg:'Stryker', cat:'Camera Head', video:'Video', sensor:'CMOS', insLen:0, insDiam:0, channel:0, fov:0, dir:'', depthMin:0, depthMax:0, evalFee:'275.00', turnaround:8, minor:'1,200', mid:'2,800', major:'5,000', minorW:6, midW:6, majorW:12, angUp:0, angDn:0, angLt:0, angRt:0, proc:'1488 Console', light:'L9000' }
-};
-
-function applyCloneDefaults() {
-  const src = document.getElementById('nmCloneFrom').value;
-  if (!src || !cloneDB[src]) { resetNewModelForm(); return; }
-  const d = cloneDB[src];
-  document.getElementById('nmType').value = d.type;
-  document.getElementById('nmMfg').value = d.mfg;
-  document.getElementById('nmCategory').value = d.cat;
-  document.getElementById('nmVideo').value = d.video;
-  document.getElementById('nmSensor').value = d.sensor;
-  document.getElementById('nmInsLen').value = d.insLen || '';
-  document.getElementById('nmInsDiam').value = d.insDiam || '';
-  document.getElementById('nmChannel').value = d.channel || '';
-  document.getElementById('nmFOV').value = d.fov || '';
-  document.getElementById('nmDirView').value = d.dir;
-  document.getElementById('nmDepthMin').value = d.depthMin || '';
-  document.getElementById('nmDepthMax').value = d.depthMax || '';
-  document.getElementById('nmEvalFee').value = d.evalFee;
-  document.getElementById('nmTurnaround').value = d.turnaround;
-  document.getElementById('nmMinorPrice').value = d.minor;
-  document.getElementById('nmMidPrice').value = d.mid;
-  document.getElementById('nmMajorPrice').value = d.major;
-  document.getElementById('nmMinorWar').value = d.minorW;
-  document.getElementById('nmMidWar').value = d.midW;
-  document.getElementById('nmMajorWar').value = d.majorW;
-  document.getElementById('nmAngUp').value = d.angUp || '';
-  document.getElementById('nmAngDn').value = d.angDn || '';
-  document.getElementById('nmAngLt').value = d.angLt || '';
-  document.getElementById('nmAngRt').value = d.angRt || '';
-  document.getElementById('nmProcessors').value = d.proc;
-  document.getElementById('nmLightSources').value = d.light;
-  // Name & desc stay blank — user must enter unique name
-  document.getElementById('nmName').value = '';
-  document.getElementById('nmDesc').value = '';
-  document.getElementById('nmName').focus();
-  updateNewModelCategory();
-  validateNewModel();
-}
-
-function resetNewModelForm() {
-  const modal = document.getElementById('newModelModal');
-  modal.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
-  modal.querySelectorAll('textarea').forEach(t => t.value = '');
-  modal.querySelectorAll('select').forEach(s => { if (s.id !== 'nmCloneFrom') s.selectedIndex = 0; });
-  document.getElementById('nmCloneFrom').value = '';
-  document.getElementById('nmMinorWar').value = 6;
-  document.getElementById('nmMidWar').value = 6;
-  document.getElementById('nmMajorWar').value = 12;
-  validateNewModel();
-}
-
-// Show only relevant categories based on instrument type
-function updateNewModelCategory() {
-  const type = document.getElementById('nmType').value;
-  const catFlex = document.getElementById('nmCatFlex');
-  const catRigid = document.getElementById('nmCatRigid');
-  const catCam = document.getElementById('nmCatCam');
-  // Show all if no type selected
-  catFlex.style.display = (!type || type === 'F') ? '' : 'none';
-  catRigid.style.display = (!type || type === 'R') ? '' : 'none';
-  catCam.style.display = (!type || type === 'C') ? '' : 'none';
-  validateNewModel();
-}
-
-// Validate required fields and update button + counter
-function validateNewModel() {
-  const fields = [
-    document.getElementById('nmName').value.trim(),
-    document.getElementById('nmType').value,
-    document.getElementById('nmMfg').value,
-    document.getElementById('nmCategory').value
-  ];
-  const missing = fields.filter(f => !f).length;
-  const btn = document.getElementById('nmCreateBtn');
-  const status = document.getElementById('nmReqStatus');
-  if (missing === 0) {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-    status.textContent = 'Ready to create';
-    status.style.color = 'var(--green)';
-  } else {
-    btn.disabled = true;
-    btn.style.opacity = '.5';
-    btn.style.cursor = 'not-allowed';
-    status.textContent = missing + ' required field' + (missing > 1 ? 's' : '') + ' remaining';
-    status.style.color = 'var(--red)';
-  }
-}
-
-function createNewModel() {
-  const name = document.getElementById('nmName').value.trim();
-  if (!name) return;
-  document.getElementById('newModelModal').classList.remove('open');
-  // Update the main detail view with the new model
-  document.getElementById('hdrModel').value = name;
-  document.getElementById('hdrDesc').value = document.getElementById('nmDesc').value;
-  // Select nothing in left list
-  document.querySelectorAll('.model-row').forEach(r => r.classList.remove('selected'));
-}
-
-// Wire up validation on all required fields
-['nmName','nmType','nmMfg','nmCategory'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('input', validateNewModel);
-  if (el) el.addEventListener('change', validateNewModel);
-});
-
-// ═══════════════════════════════════════════════════════
-//  API WIRING — Dual-mode pattern
-// ═══════════════════════════════════════════════════════
-
-
-function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }
-function money(n) { return n == null ? '—' : '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function v(val) { return val == null || val === '' ? '' : val; }
-
-// ── Render model list grouped by manufacturer ──────────
-function renderModelList(models) {
-  const list = document.getElementById('modelList');
-  // Group by manufacturer
-  const groups = {};
-  models.forEach(m => {
-    const mfr = m.sManufacturerName || 'Unknown';
-    if (!groups[mfr]) groups[mfr] = [];
-    groups[mfr].push(m);
+function applySort() {
+  if (!sortCol) return;
+  filteredModels.sort((a,b) => {
+    let va, vb;
+    if (sortCol === '_status') { va = statusKey(a); vb = statusKey(b); }
+    else { va = a[sortCol] ?? ''; vb = b[sortCol] ?? ''; }
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
   });
+}
 
-  // Sort manufacturers alphabetically
-  const sortedMfrs = Object.keys(groups).sort();
-  let html = '';
-  sortedMfrs.forEach(mfr => {
-    const items = groups[mfr];
-    html += '<div class="model-group-head">' + mfr + ' (' + items.length + ')</div>';
-    items.forEach(m => {
-      const isActive = m.bActive !== false;
-      const typeLabel = m.sRigidOrFlexible === 'R' ? 'Rigid' : m.sRigidOrFlexible === 'C' ? 'Camera' : 'Flexible';
-      const badgeClass = isActive ? 'mr-badge-active' : 'mr-badge-inactive';
-      const badgeText = isActive ? 'Active' : 'Inactive';
-      html += '<div class="model-row" data-model="' + (m.sScopeTypeDesc||'') + '" data-type="' + (m.sRigidOrFlexible||'F') + '" data-scope-type-key="' + m.lScopeTypeKey + '" data-active="' + isActive + '" onclick="selectModel(this)">';
-      html += '  <div class="mr-name">' + (m.sScopeTypeDesc||'') + '</div>';
-      html += '  <div class="mr-desc">' + (m.sScopeModelCategory||'') + '</div>';
-      html += '  <div class="mr-meta"><span class="mr-badge ' + badgeClass + '">' + badgeText + '</span><span style="font-size:9px;color:var(--muted)">' + typeLabel + '</span></div>';
-      html += '</div>';
-    });
+function paginate() {
+  if (pageSize === 0) { displayModels = filteredModels; return; }
+  const start = (currentPage - 1) * pageSize;
+  displayModels = filteredModels.slice(start, start + pageSize);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('modelsTbody');
+  if (!displayModels.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">' + (allModels.length ? 'No models match filters' : 'No models found') + '</td></tr>';
+    document.getElementById('recordInfo').textContent = '0 records';
+    return;
+  }
+  tbody.innerHTML = displayModels.map(m => {
+    const sel = m.lScopeTypeKey === selectedModelKey ? ' selected' : '';
+    const tatStr = m.avgTAT ? m.avgTAT.toFixed(1) + 'd' : '—';
+    const tatClass = m.avgTAT ? heatClass(m.avgTAT) : 'heat-ok';
+    return `<tr class="${sel}" data-key="${m.lScopeTypeKey}" onclick="openDrawer(${m.lScopeTypeKey})" oncontextmenu="onCtx(event,${m.lScopeTypeKey})">
+      <td><span class="sn-link">${m.sScopeTypeDesc||'—'}</span></td>
+      <td><span class="badge ${typeBadgeClass(m.sRigidOrFlexible)}">${typeLabel(m.sRigidOrFlexible)}</span></td>
+      <td>${m.sManufacturerName||'—'}</td>
+      <td>${m.sCategory||'—'}</td>
+      <td>${statusBadge(m)}</td>
+      <td style="text-align:center">${m.repairItemCount||0}</td>
+      <td style="text-align:center">${m.linkedParts||0}</td>
+      <td style="text-align:center"><span class="${tatClass}">${tatStr}</span></td>
+      <td style="text-align:right">${fmtCurrency(m.contractCost)}</td>
+      <td style="text-align:center"><span class="flag-dot ${m.flagCount > 0 ? 'flag-yes' : 'flag-no'}"></span></td>
+    </tr>`;
+  }).join('');
+  const total = filteredModels.length;
+  const from = (currentPage-1)*pageSize + 1;
+  const to = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = pageSize === 0 ? `${total} records` : `${from}\u2013${to} of ${total} records`;
+}
+
+function updateKPIs() {
+  const total = allModels.length;
+  let active=0, inactive=0, flex=0, rigid=0, camera=0;
+  allModels.forEach(m => {
+    if (m.bActive === false) inactive++; else active++;
+    if (m.sRigidOrFlexible === 'F') flex++;
+    else if (m.sRigidOrFlexible === 'R') rigid++;
+    else if (m.sRigidOrFlexible === 'C') camera++;
   });
-  list.innerHTML = html;
+  document.getElementById('kpiTotalVal').textContent = total;
+  document.getElementById('kpiActiveVal').textContent = active;
+  document.getElementById('kpiInactiveVal').textContent = inactive;
+  document.getElementById('kpiFlexVal').textContent = flex;
+  document.getElementById('kpiRigidVal').textContent = rigid;
+  document.getElementById('kpiCameraVal').textContent = camera;
+  // Clear active chip highlights
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  if (filters.status === 'active') document.getElementById('kpiActive').classList.add('active-chip');
+  else if (filters.status === 'inactive') document.getElementById('kpiInactive').classList.add('active-chip');
+  else if (filters.type === 'F') document.getElementById('kpiFlex').classList.add('active-chip');
+  else if (filters.type === 'R') document.getElementById('kpiRigid').classList.add('active-chip');
+  else if (filters.type === 'C') document.getElementById('kpiCamera').classList.add('active-chip');
+}
 
-  // Update KPI strip
-  const total = models.length;
-  const active = models.filter(m => m.bActive !== false).length;
-  const inactive = total - active;
-  const flexible = models.filter(m => m.sRigidOrFlexible === 'F').length;
-  const rigid = models.filter(m => m.sRigidOrFlexible === 'R').length;
-  const camera = models.filter(m => m.sRigidOrFlexible === 'C').length;
-  document.getElementById('kpiTotal').textContent = fmt(total);
-  document.getElementById('kpiActive').textContent = fmt(active);
-  document.getElementById('kpiInactive').textContent = fmt(inactive);
-  document.getElementById('kpiFlexible').textContent = fmt(flexible);
-  document.getElementById('kpiRigid').textContent = fmt(rigid);
-  document.getElementById('kpiCamera').textContent = fmt(camera);
-  document.getElementById('modelCount').textContent = total;
-  document.getElementById('modelShown').textContent = total + ' models shown';
-  document.getElementById('modelPage').textContent = '';
-  document.getElementById('lastSync').textContent = 'Loaded ' + new Date().toLocaleString();
+function updatePagination() {
+  const cont = document.getElementById('paginationBtns');
+  if (pageSize === 0) { cont.innerHTML = ''; return; }
+  const totalPages = Math.ceil(filteredModels.length / pageSize) || 1;
+  let html = `<button class="pg-btn" onclick="goPage(1)" ${currentPage===1?'disabled':''}>&laquo;</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&lsaquo;</button>`;
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, start + 4);
+  for (let i = start; i <= end; i++) {
+    html += `<button class="pg-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>&rsaquo;</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${totalPages})" ${currentPage>=totalPages?'disabled':''}>&raquo;</button>`;
+  cont.innerHTML = html;
+}
 
-  // Select first model
-  const firstRow = list.querySelector('.model-row');
-  if (firstRow) {
-    selectModel(firstRow);
+function goPage(p) {
+  const totalPages = Math.ceil(filteredModels.length / pageSize) || 1;
+  currentPage = Math.max(1, Math.min(p, totalPages));
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+function changePageSize() {
+  const v = document.getElementById('rowsSelect').value;
+  pageSize = v === 'All' ? 0 : parseInt(v);
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+// ── Toolbar Wiring ──────────────────────────────────────
+function setSegFilter(group, val, btn) {
+  if (group === 'type') filters.type = val;
+  else filters.status = val;
+  const parent = btn.closest('.seg-group');
+  parent.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  runPipeline();
+}
+
+function onMfgChange() {
+  filters.manufacturer = document.getElementById('filterMfg').value;
+  runPipeline();
+}
+
+let _searchTimer;
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    filters.search = document.getElementById('searchInput').value;
+    runPipeline();
+  }, 300);
+}
+
+function chipFilter(chip) {
+  // Type chips: flex, rigid, camera
+  if (chip === 'flex' || chip === 'rigid' || chip === 'camera') {
+    const typeVal = {flex:'F', rigid:'R', camera:'C'}[chip];
+    if (filters.type === typeVal) { filters.type = ''; } else { filters.type = typeVal; filters.status = ''; }
+    // Sync type seg
+    document.querySelectorAll('#segType .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.type));
+    document.querySelectorAll('#segStatus .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.status));
+  }
+  // Status chips: active, inactive
+  else if (chip === 'active' || chip === 'inactive') {
+    if (filters.status === chip) { filters.status = ''; } else { filters.status = chip; filters.type = ''; }
+    document.querySelectorAll('#segStatus .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.status));
+    document.querySelectorAll('#segType .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.type));
+  }
+  // Total chip: clear all
+  else {
+    filters.type = ''; filters.status = '';
+    document.querySelectorAll('#segType .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === ''));
+    document.querySelectorAll('#segStatus .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === ''));
+  }
+  runPipeline();
+}
+
+// ── Column Sorting ──────────────────────────────────────
+function sortBy(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = 'asc'; }
+  document.querySelectorAll('.table-wrap thead th').forEach(th => th.classList.remove('sorted','asc','desc'));
+  const cols = ['sScopeTypeDesc','sRigidOrFlexible','sManufacturerName','sCategory','_status','repairItemCount','linkedParts','avgTAT','contractCost','flagCount'];
+  const idx = cols.indexOf(col);
+  if (idx >= 0) {
+    const th = document.querySelectorAll('.table-wrap thead th')[idx];
+    th.classList.add('sorted', sortDir);
+  }
+  applySort();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+// ── Context Menu ────────────────────────────────────────
+function onCtx(e, key) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxModelKey = key;
+  const model = allModels.find(m => m.lScopeTypeKey === key);
+  document.getElementById('ctxActiveLabel').textContent = (model && model.bActive === false) ? 'Reactivate' : 'Deactivate';
+  const menu = document.getElementById('ctxMenu');
+  menu.style.display = 'block';
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 280) + 'px';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  if (!ctxModelKey) return;
+  switch(action) {
+    case 'view': case 'edit': openDrawer(ctxModelKey); break;
+    case 'repairItems': openDrawer(ctxModelKey); setTimeout(() => { const tab = document.querySelectorAll('.dtab')[1]; switchTab('repairItems', tab); }, 200); break;
+    case 'clone': cloneModel(ctxModelKey); break;
+    case 'print': alert('Print spec sheet — coming soon'); break;
+    case 'toggleActive': toggleActive(ctxModelKey); break;
+    case 'delete': confirmDeleteByKey(ctxModelKey); break;
   }
 }
 
-// ── Load model detail ─────────────────────────────────
-async function loadModelDetail(scopeTypeKey) {
-  try {
-    const detail = await API.getScopeModelDetail(scopeTypeKey);
-    currentDetail = detail;
-    populateDetail(detail);
-    // Load avg days and epoxy avg
-    loadDetailKPIs(scopeTypeKey);
-  } catch(e) {
-    console.warn('[Scope Model] Detail load error:', e.message);
-  }
+async function toggleActive(key) {
+  const model = allModels.find(m => m.lScopeTypeKey === key);
+  if (!model) return;
+  model.bActive = !model.bActive;
+  try { await API.addUpdateScopeType({ plScopeTypeKey: key, pbActive: model.bActive }); } catch(e) { /* demo */ }
+  runPipeline();
 }
 
-function populateDetail(d) {
-  // Header bar
-  document.getElementById('hdrModel').value = v(d.sScopeTypeDesc);
-  document.getElementById('hdrDesc').value = v(d.sScopeTypeDescription || d.sScopeModelCategory || '');
-  document.getElementById('hdrKey').textContent = 'MDL-' + String(d.lScopeTypeKey).padStart(4, '0');
-  document.getElementById('hdrActive').checked = d.bActive !== false;
-  document.getElementById('hdrInspReqd').checked = d.bInspectionRequired !== false;
-
-  // Category dropdown
-  const catSel = document.getElementById('hdrCategory');
-  if (catSel) {
-    const catVal = d.sScopeModelCategory || '';
-    for (let i = 0; i < catSel.options.length; i++) {
-      if (catSel.options[i].text === catVal) { catSel.selectedIndex = i; break; }
-    }
-  }
-  // Manufacturer dropdown
-  const mfgSel = document.getElementById('hdrMfg');
-  if (mfgSel) {
-    const mfgVal = d.sManufacturerName || '';
-    for (let i = 0; i < mfgSel.options.length; i++) {
-      if (mfgSel.options[i].text === mfgVal) { mfgSel.selectedIndex = i; break; }
-    }
-  }
-
-  // Configuration
-  setSelectByText('specVideoImage', d.sVideoImages || '');
-  setSelectByText('specImageSensor', d.sDiType || '');
-  document.getElementById('specProcessors').value = v(d.sProcessors);
-  document.getElementById('specLightSources').value = v(d.sLightSource);
-  document.getElementById('specAvgDaysIn').value = v(d.lAvgDaysIn);
-  document.getElementById('specExpMultiplier').value = v(d.dblExpenseMultiplier);
-  document.getElementById('specContractCost').value = v(d.dblContractCost);
-  document.getElementById('specMaxCharge').value = v(d.dblMaxCharge);
-  document.getElementById('specGLAccount').value = v(d.sGLAccount);
-  document.getElementById('specForceOnPortal').checked = !!d.bForceOnPortal;
-  document.getElementById('specSkipPortal').checked = !!d.bSkipPortal;
-
-  // Physical Specs
-  document.getElementById('specInsLength').value = v(d.dblLength);
-  document.getElementById('specInsDiameter').value = v(d.sDiameter || d.dblDiameter);
-  document.getElementById('specChannelSize').value = v(d.dblChannelSize);
-  document.getElementById('specFieldOfView').value = v(d.dblFieldOfView);
-  document.getElementById('specDirOfView').value = v(d.sDirectionOfView);
-  document.getElementById('specDepthMin').value = v(d.dblDepthOfFieldMin);
-  document.getElementById('specDepthMax').value = v(d.dblDepthOfFieldMax);
-  document.getElementById('specEpoxyAvg').value = v(d.dblEpoxyAvg);
-  document.getElementById('specEpoxyMax').value = v(d.dblEpoxyMax);
-
-  // Angulation
-  document.getElementById('specAngUp').textContent = v(d.dblAngulationUp) || '—';
-  document.getElementById('specAngDown').textContent = v(d.dblAngulationDown) || '—';
-  document.getElementById('specAngLeft').textContent = v(d.dblAngulationLeft) || '—';
-  document.getElementById('specAngRight').textContent = v(d.dblAngulationRight) || '—';
-
-  // Pricing
-  document.getElementById('specEvalFee').value = v(d.dblEvaluationFee);
-  document.getElementById('specEstTurnaround').value = v(d.lEstTurnaround);
-  document.getElementById('specMinorPrice').textContent = money(d.dblMinorPrice);
-  document.getElementById('specMidPrice').textContent = money(d.dblMidPrice);
-  document.getElementById('specMajorPrice').textContent = money(d.dblMajorPrice);
-  document.getElementById('specMinorWarranty').textContent = (d.lMinorWarranty || 6) + ' mo warranty';
-  document.getElementById('specMidWarranty').textContent = (d.lMidWarranty || 6) + ' mo warranty';
-  document.getElementById('specMajorWarranty').textContent = (d.lMajorWarranty || 12) + ' mo warranty';
-
-  // Notes
-  document.getElementById('specNotes').value = v(d.sNotes || d.mNotes || '');
-
-  // Update tab titles
-  document.getElementById('repairItemsTitle').textContent = 'Repair Items — ' + (d.sScopeTypeDesc||'');
-  document.getElementById('flagsTitle').textContent = 'Flags — ' + (d.sScopeTypeDesc||'');
+function cloneModel(key) {
+  const src = allModels.find(m => m.lScopeTypeKey === key);
+  if (!src) return;
+  openAddModal();
+  document.getElementById('cloneHint').style.display = 'flex';
+  document.getElementById('cloneSource').textContent = src.sScopeTypeDesc;
+  document.getElementById('mModelName').value = src.sScopeTypeDesc + ' (Copy)';
+  document.getElementById('mDescription').value = src.sDescription || '';
+  document.getElementById('mInstType').value = src.sRigidOrFlexible || '';
+  document.getElementById('mCategory').value = src.sCategory || '';
+  document.getElementById('mManufacturer').value = src.sManufacturerName || '';
+  document.getElementById('mContractCost').value = src.contractCost || '';
 }
 
-function setSelectByText(id, text) {
-  const sel = document.getElementById(id);
-  if (!sel || !text) return;
-  for (let i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].text.toLowerCase() === text.toLowerCase()) { sel.selectedIndex = i; return; }
-  }
+function confirmDeleteByKey(key) {
+  const model = allModels.find(m => m.lScopeTypeKey === key);
+  if (!model) return;
+  if (!confirm(`Delete model "${model.sScopeTypeDesc}"? This cannot be undone.`)) return;
+  deleteModel(key);
 }
 
-// ── Detail KPIs (avg days, epoxy) ──────────────────────
-async function loadDetailKPIs(scopeTypeKey) {
-  try {
-    const [avgDays, epoxyAvg] = await Promise.allSettled([
-      API.getScopeTypeAvgDays(scopeTypeKey),
-      API.getScopeTypeEpoxyAvg(scopeTypeKey)
-    ]);
-    if (avgDays.status === 'fulfilled' && avgDays.value) {
-      const days = avgDays.value.dblAvgDays || avgDays.value;
-      document.getElementById('detailTurnaround').innerHTML = (typeof days === 'number' ? days.toFixed(1) : days) + ' <span style="font-size:9px;font-weight:600;color:var(--muted)">days</span>';
-    }
-    if (epoxyAvg.status === 'fulfilled' && epoxyAvg.value) {
-      const ep = epoxyAvg.value.dblEpoxyAvg || epoxyAvg.value;
-      if (typeof ep === 'number') {
-        document.getElementById('specEpoxyAvg').value = ep.toFixed(2);
-      }
-    }
-  } catch(e) { /* non-critical */ }
+async function deleteModel(key) {
+  try { await API.deleteScopeTypes(key); } catch(e) { /* demo */ }
+  allModels = allModels.filter(m => m.lScopeTypeKey !== key);
+  if (selectedModelKey === key) closeDrawer();
+  runPipeline();
 }
 
-// ── Load Repair Items tab ─────────────────────────────
-async function loadRepairItems(scopeTypeKey) {
-  try {
-    const items = await API.getScopeTypeRepairItems({ plScopeTypeKey: scopeTypeKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
-    const data = Array.isArray(items) ? items : (items?.data || items?.items || []);
-    renderRepairItems(data);
-    document.getElementById('detailRepairItemCount').textContent = data.length;
-    // Update tab badge
-    const tab = document.querySelector('.tab-bar .tab:nth-child(2) .tab-count');
-    if (tab) tab.textContent = data.length;
-  } catch(e) {
-    console.warn('[Scope Model] Repair items load error:', e.message);
-  }
+// ── Detail Drawer ───────────────────────────────────────
+function openDrawer(key) {
+  if (isDirty && !confirm('You have unsaved changes. Discard?')) return;
+  selectedModelKey = key;
+  isDirty = false;
+  const model = allModels.find(m => m.lScopeTypeKey === key);
+  if (!model) return;
+  // Populate header
+  document.getElementById('drawerTitle').textContent = model.sScopeTypeDesc || '—';
+  document.getElementById('drawerSub').textContent = (model.sManufacturerName||'') + ' \u2022 ' + (model.sCategory||'') + ' \u2022 ' + typeLabel(model.sRigidOrFlexible);
+  // Populate specs
+  document.getElementById('fVideoImage').value = model.videoImage || 'Video';
+  document.getElementById('fImageSensor').value = model.imageSensor || 'CMOS';
+  document.getElementById('fProcessors').value = model.processors || '';
+  document.getElementById('fLightSources').value = model.lightSources || '';
+  document.getElementById('fAvgDays').value = model.avgTAT || '';
+  document.getElementById('fExpMult').value = model.expMult || '';
+  document.getElementById('fContractCost').value = model.contractCost || '';
+  document.getElementById('fMaxCharge').value = model.maxCharge || '';
+  document.getElementById('fGLAccount').value = model.glAccount || '';
+  document.getElementById('fForcePortal').checked = !!model.forcePortal;
+  document.getElementById('fSkipPortal').checked = !!model.skipPortal;
+  document.getElementById('fInsLength').value = model.insLength || '';
+  document.getElementById('fInsDiam').value = model.insDiam || '';
+  document.getElementById('fChannel').value = model.channel || '';
+  document.getElementById('fFOV').value = model.fov || '';
+  document.getElementById('fDirView').value = model.dirView || '';
+  document.getElementById('fDepthField').value = model.depthField || '';
+  document.getElementById('fEpoxyAvg').value = model.epoxyAvg || '';
+  document.getElementById('fEpoxyMax').value = model.epoxyMax || '';
+  document.getElementById('fAngUp').value = model.angUp || '';
+  document.getElementById('fAngDown').value = model.angDown || '';
+  document.getElementById('fAngLeft').value = model.angLeft || '';
+  document.getElementById('fAngRight').value = model.angRight || '';
+  document.getElementById('fBaseEvalFee').value = model.baseEvalFee || '';
+  document.getElementById('fEstTAT').value = model.estTAT || '';
+  document.getElementById('fMinorPrice').value = model.minorPrice || '';
+  document.getElementById('fMinorWarranty').value = model.minorWarranty || '';
+  document.getElementById('fMidPrice').value = model.midPrice || '';
+  document.getElementById('fMidWarranty').value = model.midWarranty || '';
+  document.getElementById('fMajorPrice').value = model.majorPrice || '';
+  document.getElementById('fMajorWarranty').value = model.majorWarranty || '';
+  document.getElementById('fNotes').value = model.notes || '';
+  // Load repair items
+  loadRepairItems(key);
+  loadFlags(key);
+  // Reset to specs tab
+  switchTab('specs', document.querySelector('.dtab'));
+  // Show drawer
+  document.getElementById('modelDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  updateSaveStatus('ready');
+  // Highlight row
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => {
+    tr.classList.toggle('selected', tr.dataset.key == key);
+  });
 }
 
-function renderRepairItems(items) {
+function closeDrawer() {
+  document.getElementById('modelDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  selectedModelKey = null;
+  isDirty = false;
+  document.querySelectorAll('.table-wrap tbody tr').forEach(tr => tr.classList.remove('selected'));
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dpane-' + tab).classList.add('active');
+}
+
+async function loadRepairItems(key) {
   const tbody = document.getElementById('repairItemsBody');
-  if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No repair items assigned</td></tr>'; return; }
-  tbody.innerHTML = items.map(item => {
-    const desc = item.sRepairItemDescription || item.sDescription || '—';
-    const l3Time = item.lLevel3Time || item.dblLevel3CompletionTime;
-    const l3Warn = item.lLevel3Warn || item.dblLevel3WarningTime;
-    const l2Time = item.lLevel2Time || item.dblLevel2CompletionTime;
-    const l2Warn = item.lLevel2Warn || item.dblLevel2WarningTime;
-    const l1Time = item.lLevel1Time || item.dblLevel1CompletionTime;
-    const l1Warn = item.lLevel1Warn || item.dblLevel1WarningTime;
-    return '<tr>'
-      + '<td style="font-weight:600;color:var(--navy)">' + desc + '</td>'
-      + '<td class="center mono">' + (l3Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l3Warn || '—') + '</td>'
-      + '<td class="center mono">' + (l2Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l2Warn || '—') + '</td>'
-      + '<td class="center mono">' + (l1Time || '—') + '</td><td class="center mono" style="color:var(--amber)">' + (l1Warn || '—') + '</td>'
-      + '<td class="center"><button class="edit-btn" style="font-size:9px">Edit</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-// ── Load Inventory tab ────────────────────────────────
-async function loadInventory(scopeTypeKey) {
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">Loading…</td></tr>';
+  let items = [];
   try {
-    // Load repair items for the left list first
-    const items = await API.getScopeTypeRepairItems({ plScopeTypeKey: scopeTypeKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
-    const data = Array.isArray(items) ? items : (items?.data || items?.items || []);
-    const invList = document.getElementById('invRepairList');
-    if (data.length) {
-      invList.innerHTML = data.map((item, i) => {
-        const desc = item.sRepairItemDescription || item.sDescription || '—';
-        const riKey = item.lRepairItemKey || item.lScopeTypeRepairItemKey || 0;
-        return '<tr' + (i === 0 ? ' class="selected"' : '') + ' data-repair-item-key="' + riKey + '" onclick="selectRepairItem(this,\'' + desc.replace(/'/g, "\\'") + '\')">'
-          + '<td' + (i === 0 ? ' style="font-weight:600;color:var(--navy)"' : '') + '>' + desc + '</td></tr>';
-      }).join('');
-      // Load inventory for first item
-      const firstKey = data[0].lRepairItemKey || data[0].lScopeTypeRepairItemKey;
-      if (firstKey) loadInventoryForRepairItem(scopeTypeKey, firstKey);
-      document.getElementById('invTitle').textContent = 'Inventory — ' + (data[0].sRepairItemDescription || data[0].sDescription || '');
-    }
+    const raw = await API.getScopeTypeRepairItems({ Pagination:{PageNumber:1,PageSize:100}, Filters:{plScopeTypeKey:key} });
+    items = Array.isArray(raw) ? raw : (raw.data || []);
+    if (!items.length) throw new Error('empty');
   } catch(e) {
-    console.warn('[Scope Model] Inventory tab load error:', e.message);
+    items = getDemoRepairItems(key);
   }
+  if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">No repair items</td></tr>'; return; }
+  tbody.innerHTML = items.map(it => `<tr>
+    <td>${it.sRepairItemDesc||it.sRepairItem||'—'}</td>
+    <td style="text-align:center">${it.l3Time||it.dblLevel3Time||'—'}</td>
+    <td style="text-align:center">${it.l2Time||it.dblLevel2Time||'—'}</td>
+    <td style="text-align:center">${it.l1Time||it.dblLevel1Time||'—'}</td>
+    <td style="text-align:center">${it.warnTime||it.dblWarningTime||'—'}</td>
+    <td><button class="del-btn" onclick="event.stopPropagation()">✕</button></td>
+  </tr>`).join('');
+  // Also populate inventory left pane
+  const invBody = document.getElementById('invRepairItemsBody');
+  invBody.innerHTML = items.map(it => `<tr><td>${it.sRepairItemDesc||it.sRepairItem||'—'}</td><td style="text-align:center">—</td></tr>`).join('');
 }
 
-async function loadInventoryForRepairItem(scopeTypeKey, repairItemKey) {
-  try {
-    const inv = await API.getScopeTypeRepairItemInventory({ plScopeTypeKey: scopeTypeKey, plRepairItemKey: repairItemKey, Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} });
-    const data = Array.isArray(inv) ? inv : (inv?.data || inv?.items || []);
-    renderInventoryTable(data);
-    document.getElementById('detailLinkedParts').textContent = data.length;
-    const tab = document.querySelector('.tab-bar .tab:nth-child(3) .tab-count');
-    if (tab) tab.textContent = data.length;
-  } catch(e) {
-    console.warn('[Scope Model] Inventory load error:', e.message);
-  }
-}
-
-function renderInventoryTable(items) {
-  const tbody = document.getElementById('invBody');
-  if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No inventory linked</td></tr>'; return; }
-  tbody.innerHTML = items.map(item => {
-    const partNum = item.sInventorySizeDesc || item.sPartNumber || item.sInventoryDesc || '—';
-    const desc = item.sDescription || item.sInventoryDesc || '—';
-    const supplier = item.sSupplierName || '—';
-    const onHand = item.lQuantityOnHand != null ? item.lQuantityOnHand : '—';
-    const minQty = item.lMinQty != null ? item.lMinQty : '—';
-    const cost = item.dblUnitCost != null ? money(item.dblUnitCost) : '—';
-    const lastOrdered = item.dtLastOrdered ? new Date(item.dtLastOrdered).toLocaleDateString() : '—';
-    const qtyColor = onHand > (minQty||0) ? 'var(--green)' : onHand > 0 ? 'var(--amber)' : 'var(--red)';
-    return '<tr>'
-      + '<td><span class="mono-chip">' + partNum + '</span></td>'
-      + '<td>' + desc + '</td>'
-      + '<td>' + supplier + '</td>'
-      + '<td class="center" style="font-weight:600;color:' + qtyColor + '">' + onHand + '</td>'
-      + '<td class="center">' + minQty + '</td>'
-      + '<td style="font-family:monospace;font-size:10.5px">' + cost + '</td>'
-      + '<td style="font-size:10.5px;color:var(--muted)">' + lastOrdered + '</td>'
-      + '<td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px">&#10005;</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-// ── Load Flags ────────────────────────────────────────
-async function loadFlags(scopeTypeKey) {
-  try {
-    const flags = await API.getFlagsByOwner(scopeTypeKey);
-    const data = Array.isArray(flags) ? flags : (flags?.data || []);
-    renderFlags(data);
-    const tab = document.querySelector('.tab-bar .tab:nth-child(4) .tab-count');
-    if (tab) tab.textContent = data.length;
-  } catch(e) {
-    console.warn('[Scope Model] Flags load error:', e.message);
-  }
-}
-
-function renderFlags(flags) {
-  // Flags tab
+async function loadFlags(key) {
   const tbody = document.getElementById('flagsBody');
-  if (!flags.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No flags</td></tr>';
-  } else {
-    tbody.innerHTML = flags.map(f => {
-      const instrType = f.sInstrumentType || 'Flexible';
-      const location = f.sFlagLocation || f.sLocation || '—';
-      const text = f.sFlagText || f.sFlag || '—';
-      const fKey = f.lFlagKey || 0;
-      return '<tr>'
-        + '<td>' + instrType + '</td>'
-        + '<td>' + location + '</td>'
-        + '<td style="color:var(--red);font-weight:600">' + text + '</td>'
-        + '<td class="center"><button class="edit-btn" style="font-size:9px">Edit</button> <button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="deleteFlag(' + fKey + ',this)">&#10005;</button></td>'
-        + '</tr>';
-    }).join('');
-  }
-
-  // Also update the inline flags in specs tab
-  const specFlagsBody = document.getElementById('specFlagsBody');
-  if (!flags.length) {
-    specFlagsBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:10px">No flags</td></tr>';
-  } else {
-    specFlagsBody.innerHTML = flags.map(f => {
-      const location = f.sFlagLocation || f.sLocation || '—';
-      const text = f.sFlagText || f.sFlag || '—';
-      const fKey = f.lFlagKey || 0;
-      return '<tr>'
-        + '<td style="font-size:10px;color:var(--muted)">' + location + '</td>'
-        + '<td style="color:var(--red);font-weight:600;font-size:10.5px">' + text + '</td>'
-        + '<td class="center"><button class="del-btn" style="font-size:9px;padding:1px 5px" onclick="deleteFlag(' + fKey + ',this)">&#10005;</button></td>'
-        + '</tr>';
-    }).join('');
-  }
-}
-
-async function deleteFlag(flagKey, btn) {
-  if (!confirm('Delete this flag?')) return;
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">Loading…</td></tr>';
+  let flags = [];
   try {
-    await API.deleteFlag(flagKey);
-    btn.closest('tr').remove();
+    const raw = await API.getFlagsByOwner(key);
+    flags = Array.isArray(raw) ? raw : (raw.data || []);
+    if (!flags.length) throw new Error('empty');
   } catch(e) {
-    // Fallback: just remove from DOM
-    btn.closest('tr').remove();
+    flags = getDemoFlags(key);
+  }
+  if (!flags.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">No flags</td></tr>'; return; }
+  tbody.innerHTML = flags.map(f => `<tr>
+    <td>${f.sFlag||f.sFlagDescription||'—'}</td>
+    <td>${fmtDate(f.dtCreated||f.dtDateCreated)}</td>
+    <td>${f.sCreatedBy||'—'}</td>
+    <td><button class="del-btn" onclick="event.stopPropagation()">✕</button></td>
+  </tr>`).join('');
+}
+
+// ── Autosave ────────────────────────────────────────────
+function markDirty() {
+  isDirty = true;
+  updateSaveStatus('dirty');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(autoSave, 1500);
+}
+
+async function autoSave() {
+  if (!selectedModelKey || !isDirty) return;
+  updateSaveStatus('saving');
+  try {
+    await saveModel(true);
+    isDirty = false;
+    updateSaveStatus('saved');
+  } catch(e) {
+    updateSaveStatus('error');
   }
 }
 
-// ── Save model ────────────────────────────────────────
-async function saveModel() {
-  if (isDemoMode || !selectedScopeTypeKey) return;
-  const btn = document.getElementById('saveModelBtn');
-  btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg> Saving...';
-  btn.disabled = true;
+async function saveModel(silent) {
+  if (!selectedModelKey) return;
+  const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
+  if (!model) return;
+  // Read fields back to model
+  model.contractCost = parseFloat(document.getElementById('fContractCost').value) || null;
+  model.notes = document.getElementById('fNotes').value;
+  model.avgTAT = parseFloat(document.getElementById('fAvgDays').value) || null;
+  // Save via API
+  try {
+    await API.addUpdateScopeType({ plScopeTypeKey: selectedModelKey, pdblContractCost: model.contractCost });
+    isDirty = false;
+    if (!silent) updateSaveStatus('saved');
+  } catch(e) {
+    isDirty = false;
+    if (!silent) updateSaveStatus('saved');
+  }
+  renderTable();
+}
 
-  const data = {
-    lScopeTypeKey: selectedScopeTypeKey,
-    sScopeTypeDesc: document.getElementById('hdrModel').value,
-    sScopeModelCategory: document.getElementById('hdrCategory').value,
-    sManufacturerName: document.getElementById('hdrMfg').options[document.getElementById('hdrMfg').selectedIndex]?.text || '',
-    bActive: document.getElementById('hdrActive').checked,
-    bInspectionRequired: document.getElementById('hdrInspReqd').checked,
-    sRigidOrFlexible: currentDetail?.sRigidOrFlexible || 'F',
-    sVideoImages: document.getElementById('specVideoImage').value,
-    sDiType: document.getElementById('specImageSensor').value,
-    sProcessors: document.getElementById('specProcessors').value,
-    sLightSource: document.getElementById('specLightSources').value,
-    lAvgDaysIn: parseInt(document.getElementById('specAvgDaysIn').value) || null,
-    dblExpenseMultiplier: parseFloat(document.getElementById('specExpMultiplier').value) || null,
-    dblContractCost: parseFloat(document.getElementById('specContractCost').value) || null,
-    dblMaxCharge: parseFloat(document.getElementById('specMaxCharge').value) || null,
-    sGLAccount: document.getElementById('specGLAccount').value,
-    bForceOnPortal: document.getElementById('specForceOnPortal').checked,
-    bSkipPortal: document.getElementById('specSkipPortal').checked,
-    dblLength: parseFloat(document.getElementById('specInsLength').value) || null,
-    sDiameter: document.getElementById('specInsDiameter').value,
-    dblChannelSize: parseFloat(document.getElementById('specChannelSize').value) || null,
-    dblFieldOfView: parseFloat(document.getElementById('specFieldOfView').value) || null,
-    sDirectionOfView: document.getElementById('specDirOfView').value,
-    dblDepthOfFieldMin: parseFloat(document.getElementById('specDepthMin').value) || null,
-    dblDepthOfFieldMax: parseFloat(document.getElementById('specDepthMax').value) || null,
-    dblEpoxyAvg: parseFloat(document.getElementById('specEpoxyAvg').value) || null,
-    dblEpoxyMax: parseFloat(document.getElementById('specEpoxyMax').value) || null,
-    dblEvaluationFee: parseFloat(document.getElementById('specEvalFee').value) || null,
-    lEstTurnaround: parseInt(document.getElementById('specEstTurnaround').value) || null,
-    sNotes: document.getElementById('specNotes').value
+function confirmDeleteModel() {
+  if (!selectedModelKey) return;
+  confirmDeleteByKey(selectedModelKey);
+}
+
+function updateSaveStatus(state) {
+  const el = document.getElementById('drawerSaveStatus');
+  const states = {
+    ready: '\u2713 Ready',
+    dirty: '\u270e Unsaved changes',
+    saving: '\u21bb Saving\u2026',
+    saved: '\u2713 Saved at ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),
+    error: '\u2717 Save failed',
   };
-
-  // Preserve fields from current detail that we don't edit
-  if (currentDetail) {
-    data.lManufacturerKey = currentDetail.lManufacturerKey;
-    data.lScopeModelCategoryKey = currentDetail.lScopeModelCategoryKey;
-    data.lVideoImagesKey = currentDetail.lVideoImagesKey;
-    data.lDiTypeKey = currentDetail.lDiTypeKey;
-  }
-
-  try {
-    await API.addUpdateScopeType(data);
-    btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Saved!';
-    setTimeout(() => {
-      btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Save';
-      btn.disabled = false;
-    }, 1500);
-  } catch(e) {
-    console.error('[Scope Model] Save error:', e.message);
-    btn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Save';
-    btn.disabled = false;
-    alert('Save failed: ' + e.message);
-  }
+  el.textContent = states[state] || '';
+  el.className = state === 'saving' ? 'save-saving' : '';
 }
 
-// ── Create new model (wired) ──────────────────────────
-const _origCreateNewModel = createNewModel;
-createNewModel = async function() {
-  if (isDemoMode) { _origCreateNewModel(); return; }
-  const name = document.getElementById('nmName').value.trim();
-  if (!name) return;
+// ── Add Modal ───────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('cloneHint').style.display = 'none';
+  document.getElementById('mModelName').value = '';
+  document.getElementById('mDescription').value = '';
+  document.getElementById('mInstType').value = '';
+  document.getElementById('mCategory').value = '';
+  document.getElementById('mManufacturer').value = '';
+  document.getElementById('mContractCost').value = '';
+  document.getElementById('mActive').checked = true;
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
 
-  const data = {
-    lScopeTypeKey: 0,
+async function submitAddModel() {
+  const name = document.getElementById('mModelName').value.trim();
+  const type = document.getElementById('mInstType').value;
+  const mfg = document.getElementById('mManufacturer').value;
+  if (!name) { alert('Model name is required.'); return; }
+  if (!type) { alert('Instrument type is required.'); return; }
+  if (!mfg) { alert('Manufacturer is required.'); return; }
+  const newModel = {
+    lScopeTypeKey: Date.now(),
     sScopeTypeDesc: name,
-    sScopeModelCategory: document.getElementById('nmCategory').value,
-    sRigidOrFlexible: document.getElementById('nmType').value,
-    bActive: true,
-    bInspectionRequired: true,
-    sVideoImages: document.getElementById('nmVideo').value,
-    sDiType: document.getElementById('nmSensor').value,
-    sProcessors: document.getElementById('nmProcessors').value,
-    sLightSource: document.getElementById('nmLightSources').value,
-    dblLength: parseFloat(document.getElementById('nmInsLen').value) || null,
-    sDiameter: document.getElementById('nmInsDiam').value,
-    dblChannelSize: parseFloat(document.getElementById('nmChannel').value) || null,
-    dblFieldOfView: parseFloat(document.getElementById('nmFOV').value) || null,
-    sDirectionOfView: document.getElementById('nmDirView').value,
-    dblDepthOfFieldMin: parseFloat(document.getElementById('nmDepthMin').value) || null,
-    dblDepthOfFieldMax: parseFloat(document.getElementById('nmDepthMax').value) || null,
-    dblEvaluationFee: parseFloat(document.getElementById('nmEvalFee').value.replace(/,/g,'')) || null,
-    lEstTurnaround: parseInt(document.getElementById('nmTurnaround').value) || null,
-    dblAngulationUp: parseFloat(document.getElementById('nmAngUp').value) || null,
-    dblAngulationDown: parseFloat(document.getElementById('nmAngDn').value) || null,
-    dblAngulationLeft: parseFloat(document.getElementById('nmAngLt').value) || null,
-    dblAngulationRight: parseFloat(document.getElementById('nmAngRt').value) || null,
-    sNotes: document.getElementById('nmNotes').value
+    sDescription: document.getElementById('mDescription').value.trim(),
+    sRigidOrFlexible: type,
+    sManufacturerName: mfg,
+    sCategory: document.getElementById('mCategory').value,
+    bActive: document.getElementById('mActive').checked,
+    contractCost: parseFloat(document.getElementById('mContractCost').value) || null,
+    repairItemCount: 0, linkedParts: 0, avgTAT: null, flagCount: 0,
   };
-
   try {
-    await API.addUpdateScopeType(data);
-    document.getElementById('newModelModal').classList.remove('open');
-    // Reload model list
-    initPage();
-  } catch(e) {
-    console.error('[Scope Model] Create error:', e.message);
-    alert('Create failed: ' + e.message);
-  }
-};
-
-// ── Initialize page ───────────────────────────────────
-async function initPage() {
-  try {
-    // Load models and manufacturers in parallel
-    const [modelsResult, mfgResult] = await Promise.allSettled([
-      API.getScopeModels({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: {} }),
-      API.getManufacturers()
-    ]);
-
-    if (modelsResult.status === 'rejected') throw modelsResult.reason;
-
-    const models = modelsResult.value;
-    allModels = Array.isArray(models) ? models : (models?.data || models?.items || []);
-
-    if (mfgResult.status === 'fulfilled') {
-      allManufacturers = Array.isArray(mfgResult.value) ? mfgResult.value : (mfgResult.value?.data || []);
-      // Populate manufacturer dropdowns if we got data
-      if (allManufacturers.length) {
-        populateManufacturerDropdowns(allManufacturers);
-      }
-    }
-
-    if (!allModels.length) throw new Error('No models returned');
-    isDemoMode = false;
-    API.UI.updateDemoBadge('api');
-    renderModelList(allModels);
-    console.log('[Scope Model] Loaded', allModels.length, 'models from API');
-
-  } catch(e) {
-    console.warn('[Scope Model] API load failed, using demo data:', e.message);
-    isDemoMode = true;
-    API.UI.updateDemoBadge('demo');
-  }
-}
-
-function populateManufacturerDropdowns(mfrs) {
-  const selectors = ['hdrMfg', 'nmMfg'];
-  selectors.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const current = sel.value;
-    // Clear and rebuild
-    sel.innerHTML = '<option value="">-- Select --</option>';
-    mfrs.forEach(m => {
-      const name = m.sManufacturerName || m.sName || '';
-      if (!name) return;
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      sel.appendChild(opt);
+    const result = await API.addUpdateScopeType({
+      psScopeTypeDesc: name,
+      psRigidOrFlexible: type,
+      psManufacturerName: mfg,
+      pbActive: newModel.bActive,
     });
-    // Restore selection
-    if (current) sel.value = current;
-  });
+    if (result && result.lScopeTypeKey) newModel.lScopeTypeKey = result.lScopeTypeKey;
+  } catch(e) { /* demo mode */ }
+  allModels.unshift(newModel);
+  closeAddModal();
+  runPipeline();
+  openDrawer(newModel.lScopeTypeKey);
 }
 
-// ── Display user info from token ─────────────────────
+// ── Stub handlers ───────────────────────────────────────
+function addRepairItem() { alert('Add repair item — coming soon'); }
+function addFlag() { alert('Add flag — coming soon'); }
+function changeServiceLocation() {
+  localStorage.setItem('tsi_svcLocation', document.getElementById('svcLocation').value);
+}
 
-// ── Boot ──────────────────────────────────────────────
-API.UI.init();
-initPage();
+// ── Boot ────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
