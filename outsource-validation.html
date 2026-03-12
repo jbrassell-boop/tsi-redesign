@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Outsource Validation | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* BREADCRUMB */
+    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+    .sep{color:var(--border)}
+    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+
+    /* STAT ROW */
+    .stat-row{display:flex;gap:14px;margin-bottom:20px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;flex:1;box-shadow:0 1px 8px rgba(0,37,122,.05)}
+    .stat-card .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .stat-card .val{font-size:22px;font-weight:900;letter-spacing:-.5px}
+    .stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* FILTER ROW */
+    .filter-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+    .filter-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+    /* TABLE WRAP */
+    .tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06)}
+    .tbl-wrap table{width:100%;border-collapse:collapse}
+    .tbl-wrap th{background:#F6F8FC;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+    .tbl-wrap th:hover{color:var(--navy)}
+    .tbl-wrap th .sort-arrow{font-size:9px;margin-left:3px;opacity:.4}
+    .tbl-wrap th.sorted .sort-arrow{opacity:1;color:var(--navy)}
+    .tbl-wrap td{padding:9px 12px;border-bottom:1px solid #F0F2F5;font-size:12px;vertical-align:middle}
+    .tbl-wrap tbody tr:hover{background:#F8FAFF}
+
+    /* ROW BORDERS */
+    .row-loss{border-left:3px solid var(--red);background:#FEF9F9}
+    .row-breakeven{border-left:3px solid var(--amber);background:#FFFDF7}
+    .row-summary{background:#F6F8FC;font-weight:700;border-top:2px solid var(--border)}
+
+    /* BADGES */
+    .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.3px}
+    .badge-green{background:#F0FDF4;color:var(--green)}
+    .badge-amber{background:#FFFBEB;color:var(--amber)}
+    .badge-red{background:#FEF2F2;color:var(--red)}
+    .badge-blue{background:#F0F4FF;color:var(--blue)}
+
+    /* MARGIN COLORS */
+    .margin-good{color:var(--green);font-weight:700}
+    .margin-warn{color:var(--amber);font-weight:700}
+    .margin-bad{color:var(--red);font-weight:700}
+
+    /* MODEL ANALYSIS PANEL */
+    .analysis-section{margin-top:20px;display:flex;gap:16px;flex-wrap:wrap}
+    .analysis-panel{flex:1;min-width:420px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,37,122,.06)}
+    .analysis-title{padding:12px 16px;font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;border-bottom:2px solid var(--border);background:#F6F8FC;display:flex;align-items:center;gap:8px}
+    .analysis-title svg{width:16px;height:16px}
+    .model-row{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid #F0F2F5;gap:12px;font-size:12px}
+    .model-row:hover{background:#F8FAFF}
+    .model-row:last-child{border-bottom:none}
+    .model-name{font-weight:700;color:var(--navy);min-width:110px}
+    .model-bar-wrap{flex:1;height:8px;background:#E8ECF4;border-radius:4px;overflow:hidden;min-width:80px}
+    .model-bar{height:100%;border-radius:4px;transition:width .3s}
+    .model-stat{font-size:11px;color:var(--muted);min-width:60px;text-align:right}
+    .model-margin{font-size:11px;font-weight:700;min-width:55px;text-align:right}
+    .model-action{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap}
+    .action-bring-inhouse{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}
+    .action-review{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+    .action-keep{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">Total Scope, Inc.</div>
+        <div class="t2">The Leader in Medical Device Repair</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item active" onclick="window.location='outsource-validation.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Outsource Validation</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs.html?action=endocart'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <div class="save-indicator"></div>
+        <span style="opacity:0.5; margin: 0 4px;">|</span>
+        Service Location <select id="svcLocation" class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="page-body" style="padding:20px 24px">
+      <div class="breadcrumb"><span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-root">Financial</span><span class="sep">›</span><span class="bc-page">Outsource Validation</span></div>
+
+      <!-- STAT CARDS -->
+      <div class="stat-row" id="statRow">
+        <div class="stat-card">
+          <div class="lbl">Total Outsourced</div>
+          <div class="val" id="statCount" style="color:var(--navy)">—</div>
+          <div class="sub">Repairs sent to vendors</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Total Vendor Cost</div>
+          <div class="val" id="statVendorCost" style="color:var(--red)">—</div>
+          <div class="sub">Sum of outsource costs</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Total Revenue</div>
+          <div class="val" id="statRevenue" style="color:var(--green)">—</div>
+          <div class="sub">Approved charges to clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Net Margin</div>
+          <div class="val" id="statNetMargin" style="color:var(--green)">—</div>
+          <div class="sub" id="statMarginPct">—</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filter-row">
+        <div class="filter-left">
+          <input class="inp" type="date" id="filterFrom" title="From Date" style="width:140px"/>
+          <input class="inp" type="date" id="filterTo" title="To Date" style="width:140px"/>
+          <select class="inp" id="filterVendor" style="width:180px;cursor:pointer">
+            <option value="">All Vendors</option>
+          </select>
+          <select class="inp" id="filterStatus" style="width:150px;cursor:pointer">
+            <option value="">All Statuses</option>
+            <option value="profitable">Profitable</option>
+            <option value="breakeven">Break Even</option>
+            <option value="loss">Loss</option>
+            <option value="pending">Pending</option>
+          </select>
+          <input class="inp" id="filterSearch" placeholder="Search WO#, client, model..." style="width:240px"/>
+        </div>
+        <button class="btn btn-navy" onclick="exportCSV()" style="height:30px;padding:0 14px;border-radius:6px;border:none;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Export CSV</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="tbl-wrap">
+        <table>
+          <thead id="dataHead">
+            <tr>
+              <th data-col="wo" data-type="string">WO# <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="client" data-type="string">Client <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="model" data-type="string">Scope Model <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="vendor" data-type="string">Vendor <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="dateSent" data-type="date">Date Sent <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="dateReturned" data-type="date">Date Returned <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="vendorCost" data-type="number" style="text-align:right">Vendor Cost <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="ourCharge" data-type="number" style="text-align:right">Our Charge <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="margin" data-type="number" style="text-align:right">Margin <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="marginPct" data-type="number" style="text-align:right">Margin % <span class="sort-arrow">&#9650;</span></th>
+              <th data-col="status" data-type="string">Status <span class="sort-arrow">&#9650;</span></th>
+              <th style="width:70px"></th>
+            </tr>
+          </thead>
+          <tbody id="dataBody"></tbody>
+          <tfoot id="dataFoot"></tfoot>
+        </table>
+      </div>
+      <!-- MODEL ANALYSIS — which models to bring in-house -->
+      <div class="analysis-section">
+        <div class="analysis-panel">
+          <div class="analysis-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M8 11h6M11 8v6"/></svg>
+            Model Frequency — Bring In-House Candidates
+          </div>
+          <div id="modelAnalysis"></div>
+        </div>
+        <div class="analysis-panel">
+          <div class="analysis-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Vendor Performance — Cost Comparison
+          </div>
+          <div id="vendorAnalysis"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="api.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ── Auth guard ──────────────────────────────────────────
+  if (!API.requireAuth()) throw new Error('redirect');
+
+  // ── State ───────────────────────────────────────────────
+  let rows = [];
+  let isLive = false;
+  let searchTimer = null;
+  let sortCol = 'wo';
+  let sortAsc = true;
+
+  // ── DOM refs ────────────────────────────────────────────
+  const body          = document.getElementById('dataBody');
+  const foot          = document.getElementById('dataFoot');
+  const badge         = document.getElementById('dataBadge');
+  const statCount     = document.getElementById('statCount');
+  const statVendorCost= document.getElementById('statVendorCost');
+  const statRevenue   = document.getElementById('statRevenue');
+  const statNetMargin = document.getElementById('statNetMargin');
+  const statMarginPct = document.getElementById('statMarginPct');
+  const filterSearch  = document.getElementById('filterSearch');
+  const filterStatus  = document.getElementById('filterStatus');
+  const filterVendor  = document.getElementById('filterVendor');
+  const filterFrom    = document.getElementById('filterFrom');
+  const filterTo      = document.getElementById('filterTo');
+
+  // ── Helpers ─────────────────────────────────────────────
+  function fmt$(v) { return '$' + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }); }
+  function esc(s) { const el = document.createElement('span'); el.textContent = s || ''; return el.innerHTML; }
+
+  function calcMargin(vendorCost, ourCharge) {
+    return (ourCharge || 0) - (vendorCost || 0);
+  }
+
+  function calcMarginPct(vendorCost, ourCharge) {
+    if (!ourCharge || ourCharge === 0) return 0;
+    return ((ourCharge - (vendorCost || 0)) / ourCharge) * 100;
+  }
+
+  function getRowStatus(r) {
+    if (!r.dateReturned) return 'pending';
+    const pct = calcMarginPct(r.vendorCost, r.ourCharge);
+    if (pct < 0) return 'loss';
+    if (pct <= 20) return 'breakeven';
+    return 'profitable';
+  }
+
+  function statusBadge(status) {
+    switch (status) {
+      case 'profitable': return '<span class="badge badge-green">Profitable</span>';
+      case 'breakeven':  return '<span class="badge badge-amber">Break Even</span>';
+      case 'loss':       return '<span class="badge badge-red">Loss</span>';
+      case 'pending':    return '<span class="badge badge-blue">Pending</span>';
+      default:           return '<span class="badge badge-blue">—</span>';
+    }
+  }
+
+  function marginClass(pct, isPending) {
+    if (isPending) return '';
+    if (pct > 20) return 'margin-good';
+    if (pct >= 0) return 'margin-warn';
+    return 'margin-bad';
+  }
+
+  function rowClass(status) {
+    if (status === 'loss') return 'row-loss';
+    if (status === 'breakeven') return 'row-breakeven';
+    return '';
+  }
+
+  // ── Unwrap API response ─────────────────────────────────
+  function unwrap(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.dataSource)) return data.dataSource;
+    if (data && Array.isArray(data.data)) return data.data;
+    return [];
+  }
+
+  // ── Normalize row data ──────────────────────────────────
+  function normalize(r) {
+    return {
+      wo:           r.sWorkOrderNumber || r.wo || '',
+      client:       r.sClientName1 || r.sClientName || r.client || '',
+      model:        r.sScopeModel || r.model || '',
+      vendor:       r.sSupplierName || r.vendor || '',
+      dateSent:     r.dtDateSent || r.dateSent || '',
+      dateReturned: r.dtDateReturned || r.dateReturned || '',
+      vendorCost:   Number(r.dblOutSourceCost || r.vendorCost || 0),
+      ourCharge:    Number(r.dblApprovedAmount || r.ourCharge || 0),
+      lWorkOrderKey: r.lWorkOrderKey || r.lRepairKey || 0
+    };
+  }
+
+  // ── Demo data ───────────────────────────────────────────
+  const DEMO = [
+    { wo:'WO-2026-1042', client:'88th Medical Group',             model:'GIF-H190',    vendor:'1-800-ENDOSCOPE',    dateSent:'2026-01-08', dateReturned:'2026-01-22', vendorCost:1850,  ourCharge:3200 },
+    { wo:'WO-2026-1057', client:'Nashville General Hospital',     model:'CF-H185L',    vendor:'Adtec Medical',      dateSent:'2026-01-12', dateReturned:'2026-01-28', vendorCost:2400,  ourCharge:4100 },
+    { wo:'WO-2026-1063', client:'Tift Regional Medical Center',   model:'BF-UC180F',   vendor:'1-800-ENDOSCOPE',    dateSent:'2026-01-15', dateReturned:'2026-02-01', vendorCost:3100,  ourCharge:5500 },
+    { wo:'WO-2026-1078', client:'West Side GI Center',            model:'GIF-HQ190',   vendor:'STERIS Endoscopy',   dateSent:'2026-01-20', dateReturned:'2026-02-05', vendorCost:1200,  ourCharge:2800 },
+    { wo:'WO-2026-1091', client:'Northside Hospital',             model:'PCF-H190L',   vendor:'Adtec Medical',      dateSent:'2026-01-25', dateReturned:'2026-02-08', vendorCost:4200,  ourCharge:4400 },
+    { wo:'WO-2026-1104', client:'Metro Health Hospital',          model:'GIF-H190',    vendor:'United Endoscopy',   dateSent:'2026-02-01', dateReturned:'2026-02-14', vendorCost:2800,  ourCharge:2600 },
+    { wo:'WO-2026-1115', client:'Shreveport Endoscopy Center',    model:'CYF-VHA',     vendor:'1-800-ENDOSCOPE',    dateSent:'2026-02-03', dateReturned:'2026-02-18', vendorCost:1600,  ourCharge:3400 },
+    { wo:'WO-2026-1128', client:'Atlanta Gastro Associates',      model:'GIF-XP190N',  vendor:'Machida Endoscope',  dateSent:'2026-02-06', dateReturned:'2026-02-20', vendorCost:3500,  ourCharge:3600 },
+    { wo:'WO-2026-1133', client:'Baptist Health Little Rock',     model:'TJF-Q190V',   vendor:'Adtec Medical',      dateSent:'2026-02-10', dateReturned:'2026-02-25', vendorCost:5200,  ourCharge:8400 },
+    { wo:'WO-2026-1147', client:'Piedmont Healthcare',            model:'BF-H190',     vendor:'STERIS Endoscopy',   dateSent:'2026-02-12', dateReturned:'2026-02-28', vendorCost:2100,  ourCharge:1950 },
+    { wo:'WO-2026-1158', client:'Duke University Hospital',       model:'GIF-H190',    vendor:'United Endoscopy',   dateSent:'2026-02-15', dateReturned:'2026-03-01', vendorCost:1900,  ourCharge:3800 },
+    { wo:'WO-2026-1162', client:'Emory University Hospital',      model:'CF-HQ190L',   vendor:'1-800-ENDOSCOPE',    dateSent:'2026-02-18', dateReturned:'2026-03-04', vendorCost:2600,  ourCharge:4200 },
+    { wo:'WO-2026-1175', client:'West Side GI Center',            model:'EG-3890TK',   vendor:'Machida Endoscope',  dateSent:'2026-02-20', dateReturned:'2026-03-06', vendorCost:1400,  ourCharge:1500 },
+    { wo:'WO-2026-1189', client:'Nashville General Hospital',     model:'GIF-H190',    vendor:'Adtec Medical',      dateSent:'2026-02-25', dateReturned:null,         vendorCost:3200,  ourCharge:5800 },
+    { wo:'WO-2026-1194', client:'88th Medical Group',             model:'BF-UC180F',   vendor:'STERIS Endoscopy',   dateSent:'2026-02-28', dateReturned:null,         vendorCost:2750,  ourCharge:4600 },
+    { wo:'WO-2026-1207', client:'Tift Regional Medical Center',   model:'PCF-H190L',   vendor:'1-800-ENDOSCOPE',    dateSent:'2026-03-01', dateReturned:null,         vendorCost:1800,  ourCharge:3500 },
+    { wo:'WO-2026-1218', client:'Piedmont Healthcare',            model:'GIF-XP190N',  vendor:'United Endoscopy',   dateSent:'2026-03-05', dateReturned:null,         vendorCost:2200,  ourCharge:4100 },
+    { wo:'WO-2026-1096', client:'Metro Health Hospital',          model:'TJF-Q190V',   vendor:'Machida Endoscope',  dateSent:'2026-01-28', dateReturned:'2026-02-12', vendorCost:4800,  ourCharge:4700 }
+  ];
+
+  // ── Load data ───────────────────────────────────────────
+  async function loadData() {
+    body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
+    foot.innerHTML = '';
+
+    try {
+      const pg = { Pagination: { PageNumber: 1, PageSize: 500 }, Filters: {} };
+      const raw = await API.getOutsourcedRepairs(pg);
+      rows = unwrap(raw).map(normalize);
+      isLive = true;
+      API.UI.updateDemoBadge('api');
+    } catch (e) {
+      console.warn('[TSI Outsource Validation] API unavailable, using demo data:', e.message);
+      rows = DEMO.map(normalize);
+      isLive = false;
+      API.UI.updateDemoBadge('demo');
+    }
+
+    populateVendorFilter();
+    calcStats();
+    renderTable();
+    renderModelAnalysis();
+    renderVendorAnalysis();
+  }
+
+  // ── Populate vendor dropdown ────────────────────────────
+  function populateVendorFilter() {
+    const vendors = [...new Set(rows.map(r => r.vendor).filter(Boolean))].sort();
+    filterVendor.innerHTML = '<option value="">All Vendors</option>' + vendors.map(v => '<option>' + esc(v) + '</option>').join('');
+  }
+
+  // ── Calc stats ──────────────────────────────────────────
+  function calcStats() {
+    const filtered = getFiltered();
+    const completed = filtered.filter(r => r.dateReturned);
+
+    const totalCount = filtered.length;
+    const totalVendorCost = filtered.reduce((s, r) => s + r.vendorCost, 0);
+    const totalRevenue = filtered.reduce((s, r) => s + r.ourCharge, 0);
+    const netMargin = totalRevenue - totalVendorCost;
+    const netMarginPct = totalRevenue > 0 ? (netMargin / totalRevenue * 100) : 0;
+
+    statCount.textContent = totalCount;
+    statVendorCost.textContent = fmt$(totalVendorCost);
+    statRevenue.textContent = fmt$(totalRevenue);
+    statNetMargin.textContent = fmt$(netMargin);
+    statNetMargin.style.color = netMargin >= 0 ? 'var(--green)' : 'var(--red)';
+    statMarginPct.textContent = netMarginPct.toFixed(1) + '% overall margin';
+  }
+
+  // ── Filter logic ────────────────────────────────────────
+  function getFiltered() {
+    const q = (filterSearch.value || '').toLowerCase();
+    const st = filterStatus.value || '';
+    const vn = filterVendor.value || '';
+    const from = filterFrom.value ? new Date(filterFrom.value) : null;
+    const to = filterTo.value ? new Date(filterTo.value + 'T23:59:59') : null;
+
+    return rows.filter(r => {
+      // Search
+      if (q && !r.wo.toLowerCase().includes(q) && !r.client.toLowerCase().includes(q) && !r.model.toLowerCase().includes(q) && !r.vendor.toLowerCase().includes(q)) return false;
+      // Status
+      const status = getRowStatus(r);
+      if (st && status !== st) return false;
+      // Vendor
+      if (vn && r.vendor !== vn) return false;
+      // Date range
+      if (from && r.dateSent) { const d = new Date(r.dateSent); if (d < from) return false; }
+      if (to && r.dateSent) { const d = new Date(r.dateSent); if (d > to) return false; }
+      return true;
+    });
+  }
+
+  // ── Sort logic ──────────────────────────────────────────
+  function sortData(data) {
+    return data.slice().sort(function(a, b) {
+      let va, vb;
+      switch (sortCol) {
+        case 'wo': va = a.wo; vb = b.wo; break;
+        case 'client': va = a.client; vb = b.client; break;
+        case 'model': va = a.model; vb = b.model; break;
+        case 'vendor': va = a.vendor; vb = b.vendor; break;
+        case 'dateSent': va = a.dateSent || ''; vb = b.dateSent || ''; break;
+        case 'dateReturned': va = a.dateReturned || ''; vb = b.dateReturned || ''; break;
+        case 'vendorCost': va = a.vendorCost; vb = b.vendorCost; break;
+        case 'ourCharge': va = a.ourCharge; vb = b.ourCharge; break;
+        case 'margin': va = calcMargin(a.vendorCost, a.ourCharge); vb = calcMargin(b.vendorCost, b.ourCharge); break;
+        case 'marginPct': va = calcMarginPct(a.vendorCost, a.ourCharge); vb = calcMarginPct(b.vendorCost, b.ourCharge); break;
+        case 'status': va = getRowStatus(a); vb = getRowStatus(b); break;
+        default: va = a.wo; vb = b.wo;
+      }
+      if (typeof va === 'string') {
+        const cmp = va.localeCompare(vb);
+        return sortAsc ? cmp : -cmp;
+      }
+      return sortAsc ? va - vb : vb - va;
+    });
+  }
+
+  // ── Render table ────────────────────────────────────────
+  function renderTable() {
+    const data = sortData(getFiltered());
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+      foot.innerHTML = '';
+      return;
+    }
+
+    body.innerHTML = data.map(function(r) {
+      const status = getRowStatus(r);
+      const isPending = status === 'pending';
+      const margin = calcMargin(r.vendorCost, r.ourCharge);
+      const marginPct = calcMarginPct(r.vendorCost, r.ourCharge);
+      const mc = marginClass(marginPct, isPending);
+      const rc = rowClass(status);
+
+      return '<tr class="' + rc + '">' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.wo) + '</td>' +
+        '<td>' + esc(r.client) + '</td>' +
+        '<td style="font-weight:500">' + esc(r.model) + '</td>' +
+        '<td>' + esc(r.vendor) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dateSent) + '</td>' +
+        '<td style="color:var(--muted)">' + (isPending ? '<em style="color:var(--blue)">At Vendor</em>' : fmtDate(r.dateReturned)) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--red)">' + fmt$(r.vendorCost) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--navy)">' + fmt$(r.ourCharge) + '</td>' +
+        '<td style="text-align:right" class="' + mc + '">' + (isPending ? '—' : fmt$(margin)) + '</td>' +
+        '<td style="text-align:right" class="' + mc + '">' + (isPending ? '—' : marginPct.toFixed(1) + '%') + '</td>' +
+        '<td>' + statusBadge(status) + '</td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="viewRepair(\'' + esc(r.wo) + '\')">View</button></td>' +
+        '</tr>';
+    }).join('');
+
+    // Summary row
+    const totVendor = data.reduce(function(s, r) { return s + r.vendorCost; }, 0);
+    const totCharge = data.reduce(function(s, r) { return s + r.ourCharge; }, 0);
+    const totMargin = totCharge - totVendor;
+    const totPct = totCharge > 0 ? (totMargin / totCharge * 100) : 0;
+    const totMc = totMargin < 0 ? 'margin-bad' : (totPct > 20 ? 'margin-good' : 'margin-warn');
+
+    foot.innerHTML = '<tr class="row-summary">' +
+      '<td colspan="6" style="text-align:right;font-weight:700;color:var(--navy)">TOTALS (' + data.length + ' records)</td>' +
+      '<td style="text-align:right;color:var(--red)">' + fmt$(totVendor) + '</td>' +
+      '<td style="text-align:right;color:var(--navy)">' + fmt$(totCharge) + '</td>' +
+      '<td style="text-align:right" class="' + totMc + '">' + fmt$(totMargin) + '</td>' +
+      '<td style="text-align:right" class="' + totMc + '">' + totPct.toFixed(1) + '%</td>' +
+      '<td colspan="2"></td>' +
+      '</tr>';
+
+    // Update sort arrows
+    document.querySelectorAll('#dataHead th').forEach(function(th) {
+      const col = th.dataset.col;
+      if (col === sortCol) {
+        th.classList.add('sorted');
+        th.querySelector('.sort-arrow').innerHTML = sortAsc ? '&#9650;' : '&#9660;';
+      } else {
+        th.classList.remove('sorted');
+        if (th.querySelector('.sort-arrow')) th.querySelector('.sort-arrow').innerHTML = '&#9650;';
+      }
+    });
+  }
+
+  // ── Export CSV ───────────────────────────────────────────
+  window.exportCSV = function() {
+    const data = sortData(getFiltered());
+    const header = 'WO#,Client,Scope Model,Vendor,Date Sent,Date Returned,Vendor Cost,Our Charge,Margin,Margin %,Status\n';
+    const csv = header + data.map(function(r) {
+      const status = getRowStatus(r);
+      const margin = calcMargin(r.vendorCost, r.ourCharge);
+      const pct = calcMarginPct(r.vendorCost, r.ourCharge);
+      return [r.wo, '"' + r.client + '"', r.model, '"' + r.vendor + '"', r.dateSent || '', r.dateReturned || '', r.vendorCost.toFixed(2), r.ourCharge.toFixed(2), margin.toFixed(2), pct.toFixed(1) + '%', status].join(',');
+    }).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'outsource-validation-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  // ── View repair stub ────────────────────────────────────
+  window.viewRepair = function(wo) {
+    window.location = 'repairs.html?wo=' + encodeURIComponent(wo);
+  };
+
+  // ── Model Analysis — which models to bring in-house ──
+  function renderModelAnalysis() {
+    const data = getFiltered();
+    const modelMap = {};
+    data.forEach(function(r) {
+      if (!r.model) return;
+      if (!modelMap[r.model]) modelMap[r.model] = { count: 0, totalVendorCost: 0, totalRevenue: 0, clients: new Set() };
+      const m = modelMap[r.model];
+      m.count++;
+      m.totalVendorCost += r.vendorCost;
+      m.totalRevenue += r.ourCharge;
+      m.clients.add(r.client);
+    });
+
+    const models = Object.entries(modelMap)
+      .map(function(e) { return { model: e[0], count: e[1].count, vendorCost: e[1].totalVendorCost, revenue: e[1].totalRevenue, clients: e[1].clients.size, margin: e[1].totalRevenue - e[1].totalVendorCost, marginPct: e[1].totalRevenue > 0 ? ((e[1].totalRevenue - e[1].totalVendorCost) / e[1].totalRevenue * 100) : 0 }; })
+      .sort(function(a, b) { return b.count - a.count; });
+
+    const maxCount = models.length > 0 ? models[0].count : 1;
+    const el = document.getElementById('modelAnalysis');
+
+    if (!models.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No data</div>'; return; }
+
+    el.innerHTML = models.map(function(m) {
+      const barPct = (m.count / maxCount * 100).toFixed(0);
+      const barColor = m.marginPct < 0 ? 'var(--red)' : m.marginPct < 20 ? 'var(--amber)' : 'var(--green)';
+      const mc = m.marginPct < 0 ? 'margin-bad' : m.marginPct < 20 ? 'margin-warn' : 'margin-good';
+
+      // Recommendation: high frequency + low margin = bring in-house
+      var action, actionClass;
+      if (m.count >= 3 && m.marginPct < 15) {
+        action = 'BRING IN-HOUSE';
+        actionClass = 'action-bring-inhouse';
+      } else if (m.count >= 2 && m.marginPct < 25) {
+        action = 'REVIEW';
+        actionClass = 'action-review';
+      } else {
+        action = 'KEEP';
+        actionClass = 'action-keep';
+      }
+
+      return '<div class="model-row">' +
+        '<span class="model-name">' + esc(m.model) + '</span>' +
+        '<div class="model-bar-wrap"><div class="model-bar" style="width:' + barPct + '%;background:' + barColor + '"></div></div>' +
+        '<span class="model-stat">' + m.count + ' repairs</span>' +
+        '<span class="model-stat">' + m.clients + ' client' + (m.clients > 1 ? 's' : '') + '</span>' +
+        '<span class="model-stat">' + fmt$(m.vendorCost) + ' cost</span>' +
+        '<span class="model-margin ' + mc + '">' + m.marginPct.toFixed(0) + '% margin</span>' +
+        '<span class="model-action ' + actionClass + '">' + action + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ── Vendor Analysis — compare vendor costs ────────────
+  function renderVendorAnalysis() {
+    const data = getFiltered();
+    const vendorMap = {};
+    data.forEach(function(r) {
+      if (!r.vendor) return;
+      if (!vendorMap[r.vendor]) vendorMap[r.vendor] = { count: 0, totalVendorCost: 0, totalRevenue: 0, turnaroundDays: [] };
+      const v = vendorMap[r.vendor];
+      v.count++;
+      v.totalVendorCost += r.vendorCost;
+      v.totalRevenue += r.ourCharge;
+      if (r.dateSent && r.dateReturned) {
+        var days = Math.round((new Date(r.dateReturned) - new Date(r.dateSent)) / 86400000);
+        if (days > 0) v.turnaroundDays.push(days);
+      }
+    });
+
+    const vendors = Object.entries(vendorMap)
+      .map(function(e) {
+        var avgDays = e[1].turnaroundDays.length > 0 ? (e[1].turnaroundDays.reduce(function(a,b){return a+b;},0) / e[1].turnaroundDays.length) : 0;
+        return { vendor: e[0], count: e[1].count, vendorCost: e[1].totalVendorCost, revenue: e[1].totalRevenue, avgCost: e[1].totalVendorCost / e[1].count, marginPct: e[1].totalRevenue > 0 ? ((e[1].totalRevenue - e[1].totalVendorCost) / e[1].totalRevenue * 100) : 0, avgDays: avgDays };
+      })
+      .sort(function(a, b) { return a.marginPct - b.marginPct; }); // worst margin first
+
+    const maxCost = vendors.reduce(function(m,v){return Math.max(m,v.vendorCost);},1);
+    const el = document.getElementById('vendorAnalysis');
+
+    if (!vendors.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No data</div>'; return; }
+
+    el.innerHTML = vendors.map(function(v) {
+      const barPct = (v.vendorCost / maxCost * 100).toFixed(0);
+      const barColor = v.marginPct < 0 ? 'var(--red)' : v.marginPct < 20 ? 'var(--amber)' : 'var(--green)';
+      const mc = v.marginPct < 0 ? 'margin-bad' : v.marginPct < 20 ? 'margin-warn' : 'margin-good';
+
+      return '<div class="model-row">' +
+        '<span class="model-name" style="min-width:140px">' + esc(v.vendor) + '</span>' +
+        '<div class="model-bar-wrap"><div class="model-bar" style="width:' + barPct + '%;background:' + barColor + '"></div></div>' +
+        '<span class="model-stat">' + v.count + ' jobs</span>' +
+        '<span class="model-stat">~' + fmt$(v.avgCost) + '/job</span>' +
+        '<span class="model-stat">' + (v.avgDays > 0 ? v.avgDays.toFixed(0) + ' day avg' : 'N/A') + '</span>' +
+        '<span class="model-margin ' + mc + '">' + v.marginPct.toFixed(0) + '% margin</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ── Wire column sorting ─────────────────────────────────
+  document.querySelectorAll('#dataHead th[data-col]').forEach(function(th) {
+    th.addEventListener('click', function() {
+      const col = this.dataset.col;
+      if (sortCol === col) {
+        sortAsc = !sortAsc;
+      } else {
+        sortCol = col;
+        sortAsc = true;
+      }
+      renderTable();
+    });
+  });
+
+  // ── Wire filters ───────────────────────────────────────
+  filterSearch.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() { calcStats(); renderTable(); renderModelAnalysis(); renderVendorAnalysis(); }, 200);
+  });
+  filterStatus.addEventListener('change', function() { calcStats(); renderTable(); renderModelAnalysis(); renderVendorAnalysis(); });
+  filterVendor.addEventListener('change', function() { calcStats(); renderTable(); renderModelAnalysis(); renderVendorAnalysis(); });
+  filterFrom.addEventListener('change', function() { calcStats(); renderTable(); renderModelAnalysis(); renderVendorAnalysis(); });
+  filterTo.addEventListener('change', function() { calcStats(); renderTable(); renderModelAnalysis(); renderVendorAnalysis(); });
+
+  // ── Init ───────────────────────────────────────────────
+  API.UI.init();
+  loadData();
+
+})();
+</script>
+</body>
+</html>
