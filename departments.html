@@ -1067,7 +1067,7 @@ function openContactModal(mode){
   }
 
   /* ── Load departments for selected client ──────────── */
-  async function loadDepartments(clientKey){
+  async function loadDepartments(clientKey, selectKey){
     try {
       allDepartments = await API.getAllDepartments(1);
       if(!Array.isArray(allDepartments)) allDepartments = [];
@@ -1087,10 +1087,12 @@ function openContactModal(mode){
         o.textContent = d.sDepartmentName || ('Dept #'+d.lDepartmentKey);
         sel.appendChild(o);
       });
-      // Auto-select first
-      if(depts.length > 0){
-        sel.value = depts[0].lDepartmentKey;
-        await loadDepartmentDetail(depts[0].lDepartmentKey);
+      // Select requested dept (from URL param), or fall back to first
+      const target = selectKey && depts.find(d => d.lDepartmentKey == selectKey);
+      const pick = target ? target : (depts.length > 0 ? depts[0] : null);
+      if(pick){
+        sel.value = pick.lDepartmentKey;
+        await loadDepartmentDetail(pick.lDepartmentKey);
       }
     } catch(e){
       console.warn('[Dept] Could not load departments:', e.message);
@@ -1802,7 +1804,7 @@ function openContactModal(mode){
   $('selClient').addEventListener('change', function(){
     const key = this.value;
     if(!key) return;
-    loadDepartments(key);
+    loadDepartments(key, null);
   });
 
   $('selDept').addEventListener('change', function(){
@@ -1860,12 +1862,21 @@ function openContactModal(mode){
 
   /* ═══ INIT ═══════════════════════════════════════════ */
   try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramClient = urlParams.get('clientKey');
+    const paramDept   = urlParams.get('dept');
+
     await loadClients();
-    // If clients loaded, auto-select first client
     const sel = $('selClient');
     if(sel.options.length > 1 && !isDemo){
-      sel.selectedIndex = 1;
-      await loadDepartments(sel.value);
+      // If we arrived from clients page, honour the URL param; otherwise pick first
+      if(paramClient && sel.querySelector(`option[value="${paramClient}"]`)){
+        sel.value = paramClient;
+      } else {
+        sel.selectedIndex = 1;
+      }
+      // Load departments, then optionally jump to specific dept
+      await loadDepartments(sel.value, paramDept || null);
       showLiveBadge();
     }
   } catch(e){

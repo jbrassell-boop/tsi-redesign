@@ -812,7 +812,14 @@ async function selectItem(key) {
   try {
     const resp = await API.getRepairItemDetail(key);
     if (resp && resp.lRepairItemKey) {
-      item = resp;
+      // Normalize detail response same as catalog (API returns sItemDescription etc.)
+      item = {
+        ...resp,
+        psItemDescription: resp.psItemDescription || resp.sItemDescription || '',
+        psTSICode:         resp.psTSICode         || resp.sTSICode         || '',
+        psPartOrLabor:     resp.psPartOrLabor     || resp.sPartOrLabor     || 'L',
+        psRigidOrFlexible: resp.psRigidOrFlexible || resp.sRigidOrFlexible || '',
+      };
     } else {
       throw new Error('empty');
     }
