@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>EndoCarts | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC: EndoCarts Cockpit ── */
+
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s,outline-color .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#EDF2FF}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)}
+
+    /* Sub-Tab Bar */
+    .sub-tabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:var(--card);flex-shrink:0}
+    .sub-tab{padding:9px 18px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .sub-tab:hover{color:var(--navy)}
+    .sub-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* Sub-Views */
+    .sub-view{display:none}
+    .sub-view.active{display:flex;flex-direction:column;flex:1;min-height:0}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,37,122,.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+    .filter-dd:focus{border-color:var(--navy)}
+
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:#1A3F8F}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#D8E6FF;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .sn-link{font-weight:700;color:var(--navy);cursor:pointer}
+    .sn-link:hover{text-decoration:underline}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-draft{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-quoted{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-approved{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-billed{background:#F3E8FF;color:#7C3AED;border-color:#DDD6FE}
+    .b-cancelled{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    /* Catalog category badges */
+    .b-frame{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-monitor{background:#F3E8FF;color:#7C3AED;border-color:#DDD6FE}
+    .b-accessory{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-power{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-cabling{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .b-storage{background:#F0F4FA;color:var(--navy);border-color:#B8C8E0}
+
+    /* Table Footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pg-select{height:26px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;cursor:pointer}
+
+    /* Right-click Context Menu */
+    .ctx-menu{position:fixed;z-index:100;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:200px;padding:4px 0;display:none}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .08s}
+    .ctx-item:hover{background:var(--bg)}
+    .ctx-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 0}
+    .ctx-item.danger{color:var(--red)}
+    .ctx-item.danger:hover{background:#FEF2F2}
+
+    /* ── Slide-Out Drawer ── */
+    .cart-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(0,37,122,.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .cart-drawer.open{transform:translateX(0)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px}
+    .dtab:hover{color:var(--blue)}
+    .dtab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+    .dpane{display:none;flex:1;min-height:0;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
+
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;transition:box-shadow .15s,transform .15s;flex-shrink:0}
+    .section-card:hover{box-shadow:0 4px 12px rgba(0,37,122,.08);transform:translateY(-1px)}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(0,37,122,.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .mini-table th{background:#F0F4FA;padding:5px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left}
+    .mini-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+
+    /* Empty state */
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--muted);text-align:center;gap:8px}
+    .empty-state svg{width:40px;height:40px;stroke:var(--border-dk);fill:none;stroke-width:1.5}
+    .empty-state .empty-title{font-size:13px;font-weight:600;color:var(--steel)}
+    .empty-state .empty-sub{font-size:11px}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,37,122,.3);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:12px;width:700px;max-height:90vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,37,122,.25)}
+    .modal-header{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:14px;font-weight:700}
+    .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+    .modal-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:70vh}
+    .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+    /* Overlay for drawer background click */
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+
+    /* Models expandable BOM row */
+    .bom-row td{padding:0!important;border-bottom:1px solid var(--border)}
+    .bom-inner{padding:8px 16px 12px 32px;background:#F8FAFF}
+    .bom-inner table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .bom-inner th{background:#EDF2FF;padding:4px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;text-align:left}
+    .bom-inner td{padding:4px 8px;border-bottom:1px solid var(--border)}
+    .btn-sm{height:24px;padding:0 10px;font-size:10.5px;border-radius:4px;border:none;cursor:pointer;font-family:inherit;font-weight:600}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item active" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(0,37,122,.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale.html'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewQuoteModal()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#EDF2FF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation" onchange="changeServiceLocation()">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- SUB-TAB BAR -->
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="switchSubTab('quotes')">Quotes</div>
+        <div class="sub-tab" onclick="switchSubTab('catalog')">Catalog</div>
+        <div class="sub-tab" onclick="switchSubTab('models')">Models</div>
+      </div>
+
+      <!-- ════════════════════════════════════════════ -->
+      <!-- SUB-VIEW 1: QUOTES                          -->
+      <!-- ════════════════════════════════════════════ -->
+      <div class="sub-view active" id="viewQuotes">
+
+        <!-- KPI STAT STRIP -->
+        <div class="stat-strip">
+          <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
+            <div class="s-icon" style="background:#E3F2FD">&#128203;</div>
+            <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Quotes</div></div>
+          </div>
+          <div class="stat-chip" id="kpiDraft" onclick="chipFilter('Draft')">
+            <div class="s-icon" style="background:#FFFBEB">&#9999;</div>
+            <div class="s-data"><div class="s-val s-amber" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
+          </div>
+          <div class="stat-chip" id="kpiQuoted" onclick="chipFilter('Quoted')">
+            <div class="s-icon" style="background:#EFF6FF">&#9993;</div>
+            <div class="s-data"><div class="s-val s-blue" id="kpiQuotedVal">0</div><div class="s-lbl">Quoted</div></div>
+          </div>
+          <div class="stat-chip" id="kpiApproved" onclick="chipFilter('Approved')">
+            <div class="s-icon" style="background:#E8F5E9">&#10003;</div>
+            <div class="s-data"><div class="s-val s-green" id="kpiApprovedVal">0</div><div class="s-lbl">Approved</div></div>
+          </div>
+          <div class="stat-chip" id="kpiBilled" onclick="chipFilter('Billed')">
+            <div class="s-icon" style="background:#F3E8FF">&#128178;</div>
+            <div class="s-data"><div class="s-val s-purple" id="kpiBilledVal">0</div><div class="s-lbl">Billed</div></div>
+          </div>
+          <div class="stat-chip" id="kpiPipeline" onclick="chipFilter('')">
+            <div class="s-icon" style="background:#E3F2FD">&#128200;</div>
+            <div class="s-data"><div class="s-val s-navy" id="kpiPipelineVal">$0</div><div class="s-lbl">Pipeline Value</div></div>
+          </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <button class="btn btn-navy" style="padding:5px 14px;font-size:11px;gap:4px;display:flex;align-items:center" onclick="openNewQuoteModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Quote</button>
+          <div class="filter-sep"></div>
+          <span class="filter-label">Status</span>
+          <div class="seg-group" id="segStatus">
+            <button class="seg-btn active" data-val="" onclick="setSegFilter('status','',this)">All</button>
+            <button class="seg-btn" data-val="Draft" onclick="setSegFilter('status','Draft',this)">Draft</button>
+            <button class="seg-btn" data-val="Quoted" onclick="setSegFilter('status','Quoted',this)">Quoted</button>
+            <button class="seg-btn" data-val="Approved" onclick="setSegFilter('status','Approved',this)">Approved</button>
+            <button class="seg-btn" data-val="Billed" onclick="setSegFilter('status','Billed',this)">Billed</button>
+            <button class="seg-btn" data-val="Cancelled" onclick="setSegFilter('status','Cancelled',this)">Cancelled</button>
+          </div>
+          <div class="filter-sep"></div>
+          <select class="filter-dd" id="filterRep" onchange="filters.rep=this.value;currentPage=1;runPipeline()" style="min-width:130px">
+            <option value="">All Sales Reps</option>
+          </select>
+          <input class="search-input" id="searchInput" placeholder="Search quote#, client, model..." oninput="debounceSearch()" style="margin-left:auto"/>
+        </div>
+
+        <!-- DATA TABLE -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:100px" onclick="sortBy('quoteNum')">Quote # <span class="sort"></span></th>
+                <th onclick="sortBy('clientName')">Client <span class="sort"></span></th>
+                <th onclick="sortBy('deptName')">Department <span class="sort"></span></th>
+                <th onclick="sortBy('cartModel')">Cart Model <span class="sort"></span></th>
+                <th style="width:55px;text-align:center" onclick="sortBy('itemCount')">Items <span class="sort"></span></th>
+                <th style="width:100px;text-align:right" onclick="sortBy('total')">Total $ <span class="sort"></span></th>
+                <th style="width:90px" onclick="sortBy('status')">Status <span class="sort"></span></th>
+                <th style="width:95px" onclick="sortBy('dateCreated')">Created <span class="sort"></span></th>
+                <th style="width:95px" onclick="sortBy('dateQuoted')">Quoted <span class="sort"></span></th>
+                <th style="width:110px" onclick="sortBy('salesRep')">Sales Rep <span class="sort"></span></th>
+              </tr>
+            </thead>
+            <tbody id="mainTbody">
+              <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading endocart quotes...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TABLE FOOTER -->
+        <div class="table-footer">
+          <div class="record-info" id="recordInfo">0 records</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">
+              Rows:
+              <select class="pg-select" id="rowsSelect" onchange="changePageSize(this.value)">
+                <option>15</option><option selected>25</option><option>50</option><option>All</option>
+              </select>
+            </div>
+            <div class="pagination" id="paginationBtns"></div>
+          </div>
+        </div>
+
+      </div><!-- /viewQuotes -->
+
+      <!-- ════════════════════════════════════════════ -->
+      <!-- SUB-VIEW 2: CATALOG                         -->
+      <!-- ════════════════════════════════════════════ -->
+      <div class="sub-view" id="viewCatalog">
+        <div class="toolbar">
+          <button class="btn btn-navy" style="padding:5px 14px;font-size:11px;gap:4px;display:flex;align-items:center" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Component</button>
+          <div class="filter-sep"></div>
+          <span class="filter-label">Category</span>
+          <select class="filter-dd" id="filterCatCategory" onchange="renderCatalog()" style="min-width:130px">
+            <option value="">All Categories</option>
+            <option value="Cart Frame">Cart Frame</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Accessory">Accessory</option>
+            <option value="Power">Power</option>
+            <option value="Cabling">Cabling</option>
+            <option value="Storage">Storage</option>
+          </select>
+          <input class="search-input" id="catSearchInput" placeholder="Search parts..." oninput="renderCatalog()" style="margin-left:auto"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:100px">Part #</th>
+                <th>Description</th>
+                <th style="width:90px">Category</th>
+                <th style="width:90px;text-align:right">Unit Cost</th>
+                <th style="width:70px;text-align:center">Stock</th>
+                <th style="width:80px;text-align:center">Reorder Pt</th>
+              </tr>
+            </thead>
+            <tbody id="catTbody"></tbody>
+          </table>
+        </div>
+      </div><!-- /viewCatalog -->
+
+      <!-- ════════════════════════════════════════════ -->
+      <!-- SUB-VIEW 3: MODELS                          -->
+      <!-- ════════════════════════════════════════════ -->
+      <div class="sub-view" id="viewModels">
+        <div class="toolbar">
+          <button class="btn btn-navy" style="padding:5px 14px;font-size:11px;gap:4px;display:flex;align-items:center" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Model</button>
+          <input class="search-input" id="modelSearchInput" placeholder="Search models..." oninput="renderModels()" style="margin-left:auto"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:160px">Model Name</th>
+                <th>Description</th>
+                <th style="width:90px;text-align:center">Components</th>
+                <th style="width:100px;text-align:right">Base Price</th>
+                <th style="width:80px;text-align:center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="modelTbody"></tbody>
+          </table>
+        </div>
+      </div><!-- /viewModels -->
+
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT-CLICK CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
+  <div class="ctx-item" onclick="ctxAction('edit')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Quote</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('toQuoted')"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Mark as Quoted</div>
+  <div class="ctx-item" onclick="ctxAction('approve')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Approve</div>
+  <div class="ctx-item" onclick="ctxAction('bill')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Convert to Billed</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('cancel')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Cancel</div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DETAIL DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-sn" id="drawerTitle">--</div>
+      <div class="dh-sub" id="drawerSub">--</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="dtab" onclick="switchTab('bom',this)">BOM Items</div>
+    <div class="dtab" onclick="switchTab('docs',this)">Documents</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="dpane active" id="dpane-overview">
+    <div class="section-card">
+      <div class="section-head">Quote Info</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Quote #</label><input id="fQuoteNum" readonly/></div>
+          <div class="field"><label>Status</label><input id="fStatus" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Client</label><input id="fClient" readonly/></div>
+          <div class="field"><label>Department</label><input id="fDept" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Cart Model</label><input id="fCartModel" readonly/></div>
+          <div class="field"><label>Sales Rep</label><input id="fSalesRep" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Created</label><input id="fDateCreated" readonly/></div>
+          <div class="field"><label>Date Quoted</label><input id="fDateQuoted" readonly/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Financial Summary</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Subtotal</label><input id="fSubtotal" readonly/></div>
+          <div class="field"><label>Total</label><input id="fGrandTotal" readonly style="font-weight:700;color:var(--navy)"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Notes</div>
+      <div class="section-body">
+        <div class="field"><textarea id="fNotes" placeholder="Quote notes..." oninput="markDirty()"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOM Items Tab -->
+  <div class="dpane" id="dpane-bom">
+    <div class="section-card">
+      <div class="section-head">Bill of Materials</div>
+      <div class="section-body" style="padding:0">
+        <table class="mini-table">
+          <thead><tr><th>Part #</th><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Cost</th><th style="text-align:right">Line Total</th></tr></thead>
+          <tbody id="drawerBomBody"></tbody>
+          <tfoot><tr style="font-weight:700;background:#F0F4FA"><td colspan="4" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerBomTotal">$0.00</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Tab -->
+  <div class="dpane" id="dpane-docs">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <div class="empty-title">No documents attached</div>
+      <div class="empty-sub">Quotes, specs, and supporting documents will appear here.</div>
+      <button class="btn btn-outline" style="margin-top:8px;padding:6px 16px;font-size:11px" disabled>Upload Document</button>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <span style="font-size:10.5px;color:var(--muted)" id="drawerSaveStatus">Quote detail</span>
+    <button class="btn btn-navy" style="padding:5px 14px;font-size:11px" onclick="closeDrawer()">Close</button>
+  </div>
+</div>
+
+<!-- NEW QUOTE MODAL -->
+<div class="modal-overlay" id="newQuoteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New EndoCart Quote</div>
+      <button class="modal-close" onclick="closeNewQuoteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="g2">
+        <div class="field">
+          <label>Client</label>
+          <select id="mClient" onchange="populateModalDepts()">
+            <option value="">Select client...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <select id="mDept">
+            <option value="">Select department...</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label>Cart Model</label>
+          <select id="mCartModel">
+            <option value="">Select model...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sales Rep</label>
+          <select id="mSalesRep">
+            <option value="">Select sales rep...</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="mNotes" placeholder="Quote notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeNewQuoteModal()">Cancel</button>
+      <button class="btn btn-navy" onclick="createQuote()">Create Quote</button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+/* ─── STATE ─── */
+var allQuotes = [], filteredQuotes = [], displayQuotes = [];
+var allCatalog = [], filteredCatalog = [];
+var allModels = [];
+var selectedQuoteKey = null, isLive = false, isDirty = false;
+var currentPage = 1, pageSize = 25;
+var sortCol = 'dateCreated', sortDir = 'desc';
+var filters = { status:'', rep:'', search:'' };
+var ctxKey = null;
+var _searchTimer, _saveTimer;
+var activeSubTab = 'quotes';
+var expandedModelKey = null;
+
+/* ─── CLIENT / DEPT DATA ─── */
+var clientData = [
+  { key:1, name:'Johns Hopkins', depts:['Endoscopy','Pulmonology'] },
+  { key:2, name:'Cleveland Clinic', depts:['Gastroenterology','Surgery'] },
+  { key:3, name:'Mayo Clinic', depts:['Pulmonology','ENT'] },
+  { key:4, name:'HCA West Kendall', depts:['Endoscopy Center','GI Lab'] },
+  { key:5, name:'Cedars-Sinai', depts:['Bronchoscopy','Gastro'] }
+];
+var salesReps = ['Mike Rivera','Sarah Chen','James Wilson'];
+
+/* ─── HELPERS ─── */
+function fmtMoney(n) {
+  if (n == null) return '--';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtMoneyShort(n) {
+  if (n == null) return '--';
+  if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtDate(d) {
+  if (!d) return '--';
+  var dt = new Date(d);
+  return ((dt.getMonth()+1)+'').padStart(2,'0') + '/' + (dt.getDate()+'').padStart(2,'0') + '/' + dt.getFullYear();
+}
+function statusBadge(status) {
+  var map = { 'Draft':'b-draft', 'Quoted':'b-quoted', 'Approved':'b-approved', 'Billed':'b-billed', 'Cancelled':'b-cancelled' };
+  return '<span class="badge '+(map[status]||'')+'">'+status+'</span>';
+}
+function catBadge(cat) {
+  var map = { 'Cart Frame':'b-frame', 'Monitor':'b-monitor', 'Accessory':'b-accessory', 'Power':'b-power', 'Cabling':'b-cabling', 'Storage':'b-storage' };
+  return '<span class="badge '+(map[cat]||'')+'">'+cat+'</span>';
+}
+
+/* ─── DEMO CATALOG DATA ─── */
+function getDemoCatalog() {
+  return [
+    { partNum:'EC-FRM-001', desc:'Motorized Cart Frame - Standard', category:'Cart Frame', unitCost:8200, stock:4, reorderPt:2 },
+    { partNum:'EC-FRM-002', desc:'Motorized Cart Frame - Compact', category:'Cart Frame', unitCost:6800, stock:3, reorderPt:2 },
+    { partNum:'EC-FRM-003', desc:'Manual Cart Frame - Standard', category:'Cart Frame', unitCost:3200, stock:6, reorderPt:3 },
+    { partNum:'EC-MON-001', desc:'24" Medical-Grade HD Monitor', category:'Monitor', unitCost:2450, stock:8, reorderPt:4 },
+    { partNum:'EC-MON-002', desc:'27" 4K Surgical Display', category:'Monitor', unitCost:4100, stock:5, reorderPt:3 },
+    { partNum:'EC-MON-003', desc:'19" Secondary Display', category:'Monitor', unitCost:1350, stock:10, reorderPt:5 },
+    { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', category:'Accessory', unitCost:185, stock:22, reorderPt:10 },
+    { partNum:'EC-ACC-002', desc:'Keyboard Tray - Articulating', category:'Accessory', unitCost:320, stock:15, reorderPt:8 },
+    { partNum:'EC-ACC-003', desc:'Water Bottle Holder', category:'Accessory', unitCost:75, stock:30, reorderPt:15 },
+    { partNum:'EC-ACC-004', desc:'Equipment Shelf - Adjustable', category:'Accessory', unitCost:290, stock:18, reorderPt:8 },
+    { partNum:'EC-ACC-005', desc:'IV Pole Mount', category:'Accessory', unitCost:145, stock:20, reorderPt:10 },
+    { partNum:'EC-ACC-006', desc:'Monitor Stand - Dual Arm', category:'Accessory', unitCost:520, stock:7, reorderPt:4 },
+    { partNum:'EC-ACC-007', desc:'Drawer Unit - 3 Drawer', category:'Accessory', unitCost:410, stock:12, reorderPt:6 },
+    { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', category:'Power', unitCost:245, stock:25, reorderPt:12 },
+    { partNum:'EC-PWR-002', desc:'Isolation Transformer 120V', category:'Power', unitCost:680, stock:6, reorderPt:3 },
+    { partNum:'EC-PWR-003', desc:'UPS Battery Backup 1500VA', category:'Power', unitCost:890, stock:4, reorderPt:2 },
+    { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', category:'Cabling', unitCost:165, stock:35, reorderPt:15 },
+    { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', category:'Cabling', unitCost:95, stock:40, reorderPt:20 },
+    { partNum:'EC-CBL-003', desc:'Cable Tray - Under-shelf', category:'Cabling', unitCost:120, stock:28, reorderPt:12 },
+    { partNum:'EC-STR-001', desc:'Storage Basket - Large', category:'Storage', unitCost:210, stock:14, reorderPt:8 },
+    { partNum:'EC-STR-002', desc:'Accessory Bin Set (5-pack)', category:'Storage', unitCost:135, stock:20, reorderPt:10 }
+  ];
+}
+
+/* ─── DEMO MODELS DATA ─── */
+function getDemoModels() {
+  return [
+    { lModelKey:1, modelName:'IEDM-100', desc:'Motorized Endocart - Standard single-screen configuration', components:[
+      { partNum:'EC-FRM-001', desc:'Motorized Cart Frame - Standard', qty:1, unitCost:8200 },
+      { partNum:'EC-MON-001', desc:'24" Medical-Grade HD Monitor', qty:1, unitCost:2450 },
+      { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', qty:2, unitCost:185 },
+      { partNum:'EC-ACC-002', desc:'Keyboard Tray - Articulating', qty:1, unitCost:320 },
+      { partNum:'EC-ACC-004', desc:'Equipment Shelf - Adjustable', qty:1, unitCost:290 },
+      { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', qty:1, unitCost:245 },
+      { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', qty:1, unitCost:165 },
+      { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', qty:1, unitCost:95 },
+      { partNum:'EC-ACC-003', desc:'Water Bottle Holder', qty:1, unitCost:75 },
+      { partNum:'EC-STR-002', desc:'Accessory Bin Set (5-pack)', qty:1, unitCost:135 }
+    ]},
+    { lModelKey:2, modelName:'IEDM-200', desc:'Dual-Screen Endocart - Premium dual-monitor surgical setup', components:[
+      { partNum:'EC-FRM-001', desc:'Motorized Cart Frame - Standard', qty:1, unitCost:8200 },
+      { partNum:'EC-MON-002', desc:'27" 4K Surgical Display', qty:1, unitCost:4100 },
+      { partNum:'EC-MON-003', desc:'19" Secondary Display', qty:1, unitCost:1350 },
+      { partNum:'EC-ACC-006', desc:'Monitor Stand - Dual Arm', qty:1, unitCost:520 },
+      { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', qty:2, unitCost:185 },
+      { partNum:'EC-ACC-002', desc:'Keyboard Tray - Articulating', qty:1, unitCost:320 },
+      { partNum:'EC-ACC-004', desc:'Equipment Shelf - Adjustable', qty:2, unitCost:290 },
+      { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', qty:1, unitCost:245 },
+      { partNum:'EC-PWR-002', desc:'Isolation Transformer 120V', qty:1, unitCost:680 },
+      { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', qty:2, unitCost:165 },
+      { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', qty:1, unitCost:95 },
+      { partNum:'EC-ACC-003', desc:'Water Bottle Holder', qty:1, unitCost:75 }
+    ]},
+    { lModelKey:3, modelName:'IEDM-300', desc:'Compact Endocart - Smaller footprint for tight spaces', components:[
+      { partNum:'EC-FRM-002', desc:'Motorized Cart Frame - Compact', qty:1, unitCost:6800 },
+      { partNum:'EC-MON-003', desc:'19" Secondary Display', qty:1, unitCost:1350 },
+      { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', qty:1, unitCost:185 },
+      { partNum:'EC-ACC-002', desc:'Keyboard Tray - Articulating', qty:1, unitCost:320 },
+      { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', qty:1, unitCost:245 },
+      { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', qty:1, unitCost:165 },
+      { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', qty:1, unitCost:95 }
+    ]},
+    { lModelKey:4, modelName:'Custom-420', desc:'Research Cart - Research-grade with extended storage and UPS backup', components:[
+      { partNum:'EC-FRM-001', desc:'Motorized Cart Frame - Standard', qty:1, unitCost:8200 },
+      { partNum:'EC-MON-002', desc:'27" 4K Surgical Display', qty:2, unitCost:4100 },
+      { partNum:'EC-ACC-006', desc:'Monitor Stand - Dual Arm', qty:1, unitCost:520 },
+      { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', qty:2, unitCost:185 },
+      { partNum:'EC-ACC-002', desc:'Keyboard Tray - Articulating', qty:1, unitCost:320 },
+      { partNum:'EC-ACC-004', desc:'Equipment Shelf - Adjustable', qty:2, unitCost:290 },
+      { partNum:'EC-ACC-007', desc:'Drawer Unit - 3 Drawer', qty:1, unitCost:410 },
+      { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', qty:2, unitCost:245 },
+      { partNum:'EC-PWR-002', desc:'Isolation Transformer 120V', qty:1, unitCost:680 },
+      { partNum:'EC-PWR-003', desc:'UPS Battery Backup 1500VA', qty:1, unitCost:890 },
+      { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', qty:2, unitCost:165 },
+      { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', qty:2, unitCost:95 },
+      { partNum:'EC-STR-001', desc:'Storage Basket - Large', qty:2, unitCost:210 },
+      { partNum:'EC-STR-002', desc:'Accessory Bin Set (5-pack)', qty:1, unitCost:135 }
+    ]},
+    { lModelKey:5, modelName:'IEDM-100S', desc:'Basic Cart - Entry-level single-screen with manual frame', components:[
+      { partNum:'EC-FRM-003', desc:'Manual Cart Frame - Standard', qty:1, unitCost:3200 },
+      { partNum:'EC-MON-003', desc:'19" Secondary Display', qty:1, unitCost:1350 },
+      { partNum:'EC-ACC-001', desc:'Scope Hanger Bracket', qty:1, unitCost:185 },
+      { partNum:'EC-PWR-001', desc:'Medical-Grade Power Strip (6-outlet)', qty:1, unitCost:245 },
+      { partNum:'EC-CBL-001', desc:'Video Cable Kit (HDMI/SDI)', qty:1, unitCost:165 },
+      { partNum:'EC-CBL-002', desc:'Cord Wrap Management System', qty:1, unitCost:95 }
+    ]}
+  ];
+}
+
+/* ─── DEMO QUOTES DATA ─── */
+function getDemoQuotes() {
+  var cat = getDemoCatalog();
+  function pick(pn, qty) { var c = cat.find(function(x){ return x.partNum===pn; }); return { partNum:pn, desc:c?c.desc:pn, qty:qty, unitCost:c?c.unitCost:0 }; }
+  return [
+    { lQuoteKey:5001, quoteNum:'ECQ-5001', clientKey:1, clientName:'Johns Hopkins', deptName:'Endoscopy', cartModel:'IEDM-100', salesRep:'Mike Rivera', dateCreated:'2025-11-02', dateQuoted:'2025-11-05', status:'Billed', notes:'Delivered and invoiced.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-001',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1), pick('EC-ACC-003',1), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5002, quoteNum:'ECQ-5002', clientKey:2, clientName:'Cleveland Clinic', deptName:'Surgery', cartModel:'IEDM-200', salesRep:'Sarah Chen', dateCreated:'2025-11-18', dateQuoted:'2025-11-22', status:'Billed', notes:'', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',1), pick('EC-MON-003',1), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-PWR-001',1), pick('EC-PWR-002',1), pick('EC-CBL-001',2), pick('EC-CBL-002',1), pick('EC-ACC-003',1)
+    ]},
+    { lQuoteKey:5003, quoteNum:'ECQ-5003', clientKey:3, clientName:'Mayo Clinic', deptName:'Pulmonology', cartModel:'IEDM-300', salesRep:'James Wilson', dateCreated:'2025-12-05', dateQuoted:'2025-12-10', status:'Approved', notes:'PO received, scheduling delivery.', items:[
+      pick('EC-FRM-002',1), pick('EC-MON-003',1), pick('EC-ACC-001',1), pick('EC-ACC-002',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1)
+    ]},
+    { lQuoteKey:5004, quoteNum:'ECQ-5004', clientKey:4, clientName:'HCA West Kendall', deptName:'Endoscopy Center', cartModel:'IEDM-100', salesRep:'Mike Rivera', dateCreated:'2025-12-14', dateQuoted:'2025-12-18', status:'Approved', notes:'Awaiting delivery date confirmation.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-001',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1), pick('EC-ACC-003',1), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5005, quoteNum:'ECQ-5005', clientKey:5, clientName:'Cedars-Sinai', deptName:'Bronchoscopy', cartModel:'Custom-420', salesRep:'Sarah Chen', dateCreated:'2026-01-06', dateQuoted:'2026-01-12', status:'Approved', notes:'Custom research config approved by dept head.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',2), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-ACC-007',1), pick('EC-PWR-001',2), pick('EC-PWR-002',1), pick('EC-PWR-003',1), pick('EC-CBL-001',2), pick('EC-CBL-002',2), pick('EC-STR-001',2), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5006, quoteNum:'ECQ-5006', clientKey:1, clientName:'Johns Hopkins', deptName:'Pulmonology', cartModel:'IEDM-200', salesRep:'James Wilson', dateCreated:'2026-01-15', dateQuoted:'2026-01-20', status:'Quoted', notes:'Sent to dept for review.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',1), pick('EC-MON-003',1), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-PWR-001',1), pick('EC-PWR-002',1), pick('EC-CBL-001',2), pick('EC-CBL-002',1), pick('EC-ACC-003',1)
+    ]},
+    { lQuoteKey:5007, quoteNum:'ECQ-5007', clientKey:2, clientName:'Cleveland Clinic', deptName:'Gastroenterology', cartModel:'IEDM-100', salesRep:'Mike Rivera', dateCreated:'2026-01-28', dateQuoted:'2026-02-01', status:'Quoted', notes:'Follow up scheduled next week.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-001',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1), pick('EC-ACC-003',1), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5008, quoteNum:'ECQ-5008', clientKey:3, clientName:'Mayo Clinic', deptName:'ENT', cartModel:'IEDM-100S', salesRep:'Sarah Chen', dateCreated:'2026-02-03', dateQuoted:'2026-02-06', status:'Quoted', notes:'Budget review pending.', items:[
+      pick('EC-FRM-003',1), pick('EC-MON-003',1), pick('EC-ACC-001',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1)
+    ]},
+    { lQuoteKey:5009, quoteNum:'ECQ-5009', clientKey:4, clientName:'HCA West Kendall', deptName:'GI Lab', cartModel:'IEDM-300', salesRep:'James Wilson', dateCreated:'2026-02-10', dateQuoted:'2026-02-14', status:'Quoted', notes:'Compact model for small procedure room.', items:[
+      pick('EC-FRM-002',1), pick('EC-MON-003',1), pick('EC-ACC-001',1), pick('EC-ACC-002',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1)
+    ]},
+    { lQuoteKey:5010, quoteNum:'ECQ-5010', clientKey:5, clientName:'Cedars-Sinai', deptName:'Gastro', cartModel:'IEDM-200', salesRep:'Mike Rivera', dateCreated:'2026-02-18', dateQuoted:'', status:'Draft', notes:'Waiting on monitor preference from surgeon.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',1), pick('EC-MON-003',1), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-PWR-001',1), pick('EC-PWR-002',1), pick('EC-CBL-001',2), pick('EC-CBL-002',1), pick('EC-ACC-003',1)
+    ]},
+    { lQuoteKey:5011, quoteNum:'ECQ-5011', clientKey:1, clientName:'Johns Hopkins', deptName:'Endoscopy', cartModel:'IEDM-100', salesRep:'Sarah Chen', dateCreated:'2026-02-25', dateQuoted:'', status:'Draft', notes:'Second cart for expansion.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-001',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1), pick('EC-ACC-003',1), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5012, quoteNum:'ECQ-5012', clientKey:2, clientName:'Cleveland Clinic', deptName:'Surgery', cartModel:'Custom-420', salesRep:'James Wilson', dateCreated:'2026-03-01', dateQuoted:'', status:'Draft', notes:'Research dept requesting custom build.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',2), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-ACC-007',1), pick('EC-PWR-001',2), pick('EC-PWR-002',1), pick('EC-PWR-003',1), pick('EC-CBL-001',2), pick('EC-CBL-002',2), pick('EC-STR-001',2), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5013, quoteNum:'ECQ-5013', clientKey:3, clientName:'Mayo Clinic', deptName:'Pulmonology', cartModel:'IEDM-100', salesRep:'Mike Rivera', dateCreated:'2026-03-05', dateQuoted:'', status:'Draft', notes:'Replacement for aging cart.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-001',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1), pick('EC-ACC-003',1), pick('EC-STR-002',1)
+    ]},
+    { lQuoteKey:5014, quoteNum:'ECQ-5014', clientKey:4, clientName:'HCA West Kendall', deptName:'Endoscopy Center', cartModel:'IEDM-200', salesRep:'Sarah Chen', dateCreated:'2026-03-08', dateQuoted:'', status:'Draft', notes:'New procedure room build-out.', items:[
+      pick('EC-FRM-001',1), pick('EC-MON-002',1), pick('EC-MON-003',1), pick('EC-ACC-006',1), pick('EC-ACC-001',2), pick('EC-ACC-002',1), pick('EC-ACC-004',2), pick('EC-PWR-001',1), pick('EC-PWR-002',1), pick('EC-CBL-001',2), pick('EC-CBL-002',1), pick('EC-ACC-003',1)
+    ]},
+    { lQuoteKey:5015, quoteNum:'ECQ-5015', clientKey:5, clientName:'Cedars-Sinai', deptName:'Bronchoscopy', cartModel:'IEDM-300', salesRep:'James Wilson', dateCreated:'2026-02-20', dateQuoted:'2026-02-22', status:'Cancelled', notes:'Dept switched to different vendor.', items:[
+      pick('EC-FRM-002',1), pick('EC-MON-003',1), pick('EC-ACC-001',1), pick('EC-ACC-002',1), pick('EC-PWR-001',1), pick('EC-CBL-001',1), pick('EC-CBL-002',1)
+    ]}
+  ];
+}
+
+/* ─── PIPELINE ─── */
+function runPipeline() {
+  applyFilters();
+  applySort();
+  paginate();
+  renderQuotesTable();
+  updateKPIs();
+  updatePagination();
+}
+
+function applyFilters() {
+  filteredQuotes = allQuotes.filter(function(q) {
+    if (filters.status && q.status !== filters.status) return false;
+    if (filters.rep && q.salesRep !== filters.rep) return false;
+    if (filters.search) {
+      var s = filters.search.toLowerCase();
+      var hay = ((q.quoteNum||'')+'|'+(q.clientName||'')+'|'+(q.cartModel||'')+'|'+(q.deptName||'')+'|'+(q.salesRep||'')).toLowerCase();
+      if (hay.indexOf(s) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function applySort() {
+  var col = sortCol, dir = sortDir === 'asc' ? 1 : -1;
+  filteredQuotes.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (typeof va === 'string') return va.localeCompare(vb) * dir;
+    return (va - vb) * dir;
+  });
+}
+
+function paginate() {
+  if (pageSize >= filteredQuotes.length) {
+    displayQuotes = filteredQuotes;
+  } else {
+    var start = (currentPage - 1) * pageSize;
+    displayQuotes = filteredQuotes.slice(start, start + pageSize);
+  }
+}
+
+/* ─── RENDER QUOTES TABLE ─── */
+function renderQuotesTable() {
+  var tbody = document.getElementById('mainTbody');
+  if (!displayQuotes.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">No records match current filters.</td></tr>';
+    return;
+  }
+  var html = '';
+  displayQuotes.forEach(function(q) {
+    var sel = q.lQuoteKey === selectedQuoteKey ? ' selected' : '';
+    html += '<tr class="'+sel+'" onclick="openDrawer('+q.lQuoteKey+')" oncontextmenu="onCtx(event,'+q.lQuoteKey+')">';
+    html += '<td><span class="sn-link" onclick="event.stopPropagation();openDrawer('+q.lQuoteKey+')">'+q.quoteNum+'</span></td>';
+    html += '<td>'+q.clientName+'</td>';
+    html += '<td>'+q.deptName+'</td>';
+    html += '<td>'+q.cartModel+'</td>';
+    html += '<td style="text-align:center">'+q.itemCount+'</td>';
+    html += '<td style="text-align:right;font-weight:700">'+fmtMoney(q.total)+'</td>';
+    html += '<td>'+statusBadge(q.status)+'</td>';
+    html += '<td>'+fmtDate(q.dateCreated)+'</td>';
+    html += '<td>'+fmtDate(q.dateQuoted)+'</td>';
+    html += '<td>'+q.salesRep+'</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  // Update sort header indicators
+  document.querySelectorAll('#viewQuotes .table-wrap thead th').forEach(function(th) {
+    th.classList.remove('sorted','asc','desc');
+  });
+  var cols = ['quoteNum','clientName','deptName','cartModel','itemCount','total','status','dateCreated','dateQuoted','salesRep'];
+  var idx = cols.indexOf(sortCol);
+  if (idx >= 0) {
+    var ths = document.querySelectorAll('#viewQuotes .table-wrap thead th');
+    if (ths[idx]) ths[idx].classList.add('sorted', sortDir);
+  }
+}
+
+/* ─── KPIs ─── */
+function updateKPIs() {
+  var recs = filteredQuotes;
+  document.getElementById('kpiTotalVal').textContent = recs.length;
+  document.getElementById('kpiDraftVal').textContent = recs.filter(function(q){ return q.status==='Draft'; }).length;
+  document.getElementById('kpiQuotedVal').textContent = recs.filter(function(q){ return q.status==='Quoted'; }).length;
+  document.getElementById('kpiApprovedVal').textContent = recs.filter(function(q){ return q.status==='Approved'; }).length;
+  document.getElementById('kpiBilledVal').textContent = recs.filter(function(q){ return q.status==='Billed'; }).length;
+  var pipeline = recs.filter(function(q){ return q.status==='Draft'||q.status==='Quoted'; }).reduce(function(sum,q){ return sum+(q.total||0); }, 0);
+  document.getElementById('kpiPipelineVal').textContent = fmtMoneyShort(pipeline);
+}
+
+/* ─── PAGINATION ─── */
+function updatePagination() {
+  var total = filteredQuotes.length;
+  var start = Math.min((currentPage-1)*pageSize+1, total);
+  var end = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = total + ' records' + (total > pageSize ? ' (showing '+start+'\u2013'+end+')' : '');
+
+  var totalPages = Math.ceil(total / pageSize) || 1;
+  var btns = '';
+  btns += '<button class="pg-btn" onclick="goPage(1)" '+(currentPage<=1?'disabled':'')+'>&#171;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage<=1?'disabled':'')+'>&#8249;</button>';
+  for (var i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++) {
+    btns += '<button class="pg-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  btns += '<button class="pg-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage>=totalPages?'disabled':'')+'>&#8250;</button>';
+  btns += '<button class="pg-btn" onclick="goPage('+totalPages+')" '+(currentPage>=totalPages?'disabled':'')+'>&#187;</button>';
+  document.getElementById('paginationBtns').innerHTML = btns;
+}
+
+function goPage(n) {
+  var totalPages = Math.ceil(filteredQuotes.length / pageSize) || 1;
+  if (n < 1 || n > totalPages) return;
+  currentPage = n;
+  paginate();
+  renderQuotesTable();
+  updatePagination();
+}
+
+function changePageSize(val) {
+  if (val === 'All') { pageSize = 99999; } else { pageSize = parseInt(val)||25; }
+  currentPage = 1;
+  runPipeline();
+}
+
+/* ─── FILTERS ─── */
+function chipFilter(status) {
+  filters.status = status;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-val') === status);
+  });
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  if (status === 'Draft') document.getElementById('kpiDraft').classList.add('active-chip');
+  else if (status === 'Quoted') document.getElementById('kpiQuoted').classList.add('active-chip');
+  else if (status === 'Approved') document.getElementById('kpiApproved').classList.add('active-chip');
+  else if (status === 'Billed') document.getElementById('kpiBilled').classList.add('active-chip');
+  else if (status === 'Cancelled') {}
+  else document.getElementById('kpiTotal').classList.add('active-chip');
+  currentPage = 1;
+  runPipeline();
+}
+
+function setSegFilter(group, val, btn) {
+  filters.status = val;
+  document.querySelectorAll('#segStatus .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+  currentPage = 1;
+  runPipeline();
+}
+
+function debounceSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function() {
+    filters.search = document.getElementById('searchInput').value.trim();
+    currentPage = 1;
+    runPipeline();
+  }, 300);
+}
+
+/* ─── SORT ─── */
+function sortBy(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = 'asc'; }
+  runPipeline();
+}
+
+/* ─── CONTEXT MENU ─── */
+function onCtx(e, key) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxKey = key;
+  var menu = document.getElementById('ctxMenu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.style.display = 'block';
+}
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').style.display = 'none';
+  var quote = allQuotes.find(function(q) { return q.lQuoteKey === ctxKey; });
+  if (!quote) return;
+  switch(action) {
+    case 'view': openDrawer(ctxKey); break;
+    case 'edit': openDrawer(ctxKey); break;
+    case 'toQuoted':
+      quote.status = 'Quoted';
+      quote.dateQuoted = new Date().toISOString().slice(0,10);
+      runPipeline();
+      if (selectedQuoteKey === ctxKey) populateDrawer(quote);
+      break;
+    case 'approve':
+      quote.status = 'Approved';
+      runPipeline();
+      if (selectedQuoteKey === ctxKey) populateDrawer(quote);
+      break;
+    case 'bill':
+      quote.status = 'Billed';
+      runPipeline();
+      if (selectedQuoteKey === ctxKey) populateDrawer(quote);
+      break;
+    case 'cancel':
+      quote.status = 'Cancelled';
+      runPipeline();
+      if (selectedQuoteKey === ctxKey) populateDrawer(quote);
+      break;
+    case 'delete':
+      if (confirm('Delete ' + quote.quoteNum + '? This cannot be undone.')) {
+        allQuotes = allQuotes.filter(function(q) { return q.lQuoteKey !== ctxKey; });
+        if (selectedQuoteKey === ctxKey) closeDrawer();
+        runPipeline();
+      }
+      break;
+  }
+}
+
+/* ─── DRAWER ─── */
+function openDrawer(key) {
+  selectedQuoteKey = key;
+  var quote = allQuotes.find(function(q) { return q.lQuoteKey === key; });
+  if (!quote) return;
+  populateDrawer(quote);
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  renderQuotesTable();
+  switchTab('overview', document.querySelector('.dtab'));
+}
+
+function closeDrawer() {
+  if (isDirty) saveNotes();
+  selectedQuoteKey = null;
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  renderQuotesTable();
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.dtab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dpane').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('dpane-'+id).classList.add('active');
+}
+
+function populateDrawer(q) {
+  document.getElementById('drawerTitle').textContent = q.quoteNum;
+  document.getElementById('drawerSub').textContent = q.clientName + ' \u2014 ' + q.deptName;
+
+  document.getElementById('fQuoteNum').value = q.quoteNum;
+  document.getElementById('fStatus').value = q.status;
+  document.getElementById('fClient').value = q.clientName;
+  document.getElementById('fDept').value = q.deptName;
+  document.getElementById('fCartModel').value = q.cartModel;
+  document.getElementById('fSalesRep').value = q.salesRep;
+  document.getElementById('fDateCreated').value = fmtDate(q.dateCreated);
+  document.getElementById('fDateQuoted').value = fmtDate(q.dateQuoted);
+
+  var subtotal = q.total || 0;
+  document.getElementById('fSubtotal').value = fmtMoney(subtotal);
+  document.getElementById('fGrandTotal').value = fmtMoney(subtotal);
+
+  document.getElementById('fNotes').value = q.notes || '';
+  isDirty = false;
+  document.getElementById('drawerSaveStatus').textContent = 'Quote detail';
+
+  // BOM items
+  var bomHtml = '';
+  var bomTotal = 0;
+  q.items.forEach(function(item) {
+    var lineTotal = item.qty * item.unitCost;
+    bomTotal += lineTotal;
+    bomHtml += '<tr>';
+    bomHtml += '<td>' + item.partNum + '</td>';
+    bomHtml += '<td>' + item.desc + '</td>';
+    bomHtml += '<td style="text-align:center">' + item.qty + '</td>';
+    bomHtml += '<td style="text-align:right">' + fmtMoney(item.unitCost) + '</td>';
+    bomHtml += '<td style="text-align:right">' + fmtMoney(lineTotal) + '</td>';
+    bomHtml += '</tr>';
+  });
+  document.getElementById('drawerBomBody').innerHTML = bomHtml;
+  document.getElementById('drawerBomTotal').textContent = fmtMoney(bomTotal);
+}
+
+/* ─── AUTOSAVE NOTES ─── */
+function markDirty() {
+  isDirty = true;
+  document.getElementById('drawerSaveStatus').textContent = 'Unsaved changes';
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveNotes, 1500);
+}
+
+function saveNotes() {
+  if (!isDirty || !selectedQuoteKey) return;
+  var quote = allQuotes.find(function(q) { return q.lQuoteKey === selectedQuoteKey; });
+  if (!quote) return;
+  document.getElementById('drawerSaveStatus').textContent = 'Saving...';
+  quote.notes = document.getElementById('fNotes').value;
+  isDirty = false;
+  setTimeout(function() {
+    var now = new Date();
+    document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
+  }, 400);
+}
+
+/* ─── NEW QUOTE MODAL ─── */
+function openNewQuoteModal(prePopModel) {
+  // Populate client dropdown
+  var mClient = document.getElementById('mClient');
+  mClient.innerHTML = '<option value="">Select client...</option>';
+  clientData.forEach(function(c) {
+    mClient.innerHTML += '<option value="'+c.key+'">'+c.name+'</option>';
+  });
+  document.getElementById('mDept').innerHTML = '<option value="">Select department...</option>';
+  // Populate cart model dropdown
+  var mModel = document.getElementById('mCartModel');
+  mModel.innerHTML = '<option value="">Select model...</option>';
+  allModels.forEach(function(m) {
+    mModel.innerHTML += '<option value="'+m.modelName+'">'+m.modelName+' \u2014 '+m.desc+'</option>';
+  });
+  if (prePopModel) mModel.value = prePopModel;
+  // Populate sales rep dropdown
+  var mRep = document.getElementById('mSalesRep');
+  mRep.innerHTML = '<option value="">Select sales rep...</option>';
+  salesReps.forEach(function(r) {
+    mRep.innerHTML += '<option value="'+r+'">'+r+'</option>';
+  });
+  document.getElementById('mNotes').value = '';
+  document.getElementById('newQuoteModal').classList.add('open');
+}
+
+function closeNewQuoteModal() {
+  document.getElementById('newQuoteModal').classList.remove('open');
+}
+
+function populateModalDepts() {
+  var clientKey = parseInt(document.getElementById('mClient').value);
+  var dd = document.getElementById('mDept');
+  dd.innerHTML = '<option value="">Select department...</option>';
+  var c = clientData.find(function(x) { return x.key === clientKey; });
+  if (c) {
+    c.depts.forEach(function(d) {
+      dd.innerHTML += '<option value="'+d+'">'+d+'</option>';
+    });
+  }
+}
+
+function createQuote() {
+  var clientKey = parseInt(document.getElementById('mClient').value);
+  var client = clientData.find(function(c) { return c.key === clientKey; });
+  if (!client) { alert('Please select a client.'); return; }
+  var dept = document.getElementById('mDept').value;
+  if (!dept) { alert('Please select a department.'); return; }
+  var modelName = document.getElementById('mCartModel').value;
+  if (!modelName) { alert('Please select a cart model.'); return; }
+  var rep = document.getElementById('mSalesRep').value;
+  if (!rep) { alert('Please select a sales rep.'); return; }
+
+  var nextKey = allQuotes.reduce(function(mx,q) { return Math.max(mx, q.lQuoteKey); }, 5000) + 1;
+  var nextNum = 'ECQ-' + nextKey;
+
+  // Get BOM from model
+  var model = allModels.find(function(m){ return m.modelName === modelName; });
+  var items = model ? model.components.map(function(c){ return { partNum:c.partNum, desc:c.desc, qty:c.qty, unitCost:c.unitCost }; }) : [];
+  var total = items.reduce(function(s,i){ return s + i.qty*i.unitCost; }, 0);
+
+  var newQuote = {
+    lQuoteKey: nextKey,
+    quoteNum: nextNum,
+    clientKey: clientKey,
+    clientName: client.name,
+    deptName: dept,
+    cartModel: modelName,
+    salesRep: rep,
+    dateCreated: new Date().toISOString().slice(0,10),
+    dateQuoted: '',
+    status: 'Draft',
+    notes: document.getElementById('mNotes').value || '',
+    items: items,
+    itemCount: items.length,
+    total: total
+  };
+  allQuotes.unshift(newQuote);
+  closeNewQuoteModal();
+  runPipeline();
+  openDrawer(nextKey);
+}
+
+/* ─── SUB-TAB SWITCHING ─── */
+function switchSubTab(tab) {
+  activeSubTab = tab;
+  document.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.sub-view').forEach(function(v) { v.classList.remove('active'); });
+  if (tab === 'quotes') {
+    document.querySelectorAll('.sub-tab')[0].classList.add('active');
+    document.getElementById('viewQuotes').classList.add('active');
+  } else if (tab === 'catalog') {
+    document.querySelectorAll('.sub-tab')[1].classList.add('active');
+    document.getElementById('viewCatalog').classList.add('active');
+    renderCatalog();
+  } else if (tab === 'models') {
+    document.querySelectorAll('.sub-tab')[2].classList.add('active');
+    document.getElementById('viewModels').classList.add('active');
+    renderModels();
+  }
+}
+
+/* ─── CATALOG RENDER ─── */
+function renderCatalog() {
+  var catFilter = document.getElementById('filterCatCategory').value;
+  var search = (document.getElementById('catSearchInput').value||'').toLowerCase();
+  var items = allCatalog.filter(function(c) {
+    if (catFilter && c.category !== catFilter) return false;
+    if (search && (c.partNum+' '+c.desc).toLowerCase().indexOf(search) === -1) return false;
+    return true;
+  });
+  var tbody = document.getElementById('catTbody');
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No catalog items match filters.</td></tr>';
+    return;
+  }
+  var html = '';
+  items.forEach(function(c) {
+    html += '<tr>';
+    html += '<td><span class="sn-link">'+c.partNum+'</span></td>';
+    html += '<td>'+c.desc+'</td>';
+    html += '<td>'+catBadge(c.category)+'</td>';
+    html += '<td style="text-align:right;font-weight:600">'+fmtMoney(c.unitCost)+'</td>';
+    html += '<td style="text-align:center'+(c.stock<=c.reorderPt?';color:var(--red);font-weight:700':'')+'">'+c.stock+'</td>';
+    html += '<td style="text-align:center">'+c.reorderPt+'</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+/* ─── MODELS RENDER ─── */
+function renderModels() {
+  var search = (document.getElementById('modelSearchInput').value||'').toLowerCase();
+  var models = allModels.filter(function(m) {
+    if (search && (m.modelName+' '+m.desc).toLowerCase().indexOf(search) === -1) return false;
+    return true;
+  });
+  var tbody = document.getElementById('modelTbody');
+  if (!models.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No models match search.</td></tr>';
+    return;
+  }
+  var html = '';
+  models.forEach(function(m) {
+    var basePrice = m.components.reduce(function(s,c){ return s+c.qty*c.unitCost; }, 0);
+    var isExp = expandedModelKey === m.lModelKey;
+    html += '<tr onclick="toggleModelBom('+m.lModelKey+')" style="cursor:pointer">';
+    html += '<td><span class="sn-link" style="font-weight:800">'+m.modelName+'</span></td>';
+    html += '<td>'+m.desc+'</td>';
+    html += '<td style="text-align:center">'+m.components.length+'</td>';
+    html += '<td style="text-align:right;font-weight:700">'+fmtMoney(basePrice)+'</td>';
+    html += '<td style="text-align:center"><button class="btn-sm" style="background:var(--navy);color:#fff" onclick="event.stopPropagation();quoteFromModel(\''+m.modelName+'\')">Quote</button></td>';
+    html += '</tr>';
+    if (isExp) {
+      html += '<tr class="bom-row"><td colspan="5"><div class="bom-inner"><table>';
+      html += '<thead><tr><th>Part #</th><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Cost</th><th style="text-align:right">Line Total</th></tr></thead><tbody>';
+      var bomTotal = 0;
+      m.components.forEach(function(c) {
+        var lt = c.qty*c.unitCost;
+        bomTotal += lt;
+        html += '<tr><td>'+c.partNum+'</td><td>'+c.desc+'</td><td style="text-align:center">'+c.qty+'</td><td style="text-align:right">'+fmtMoney(c.unitCost)+'</td><td style="text-align:right">'+fmtMoney(lt)+'</td></tr>';
+      });
+      html += '</tbody><tfoot><tr style="font-weight:700;background:#EDF2FF"><td colspan="4" style="padding:5px 8px;text-align:right">Total</td><td style="padding:5px 8px;text-align:right">'+fmtMoney(bomTotal)+'</td></tr></tfoot>';
+      html += '</table></div></td></tr>';
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function toggleModelBom(key) {
+  expandedModelKey = expandedModelKey === key ? null : key;
+  renderModels();
+}
+
+function quoteFromModel(modelName) {
+  switchSubTab('quotes');
+  openNewQuoteModal(modelName);
+}
+
+/* ─── SERVICE LOCATION ─── */
+function changeServiceLocation() {
+  runPipeline();
+}
+
+/* ─── DATA BADGE ─── */
+function showDataBadge(live) {
+  var badge = document.getElementById('dataBadge');
+  if (!badge) return;
+  badge.textContent = live ? 'Live Data' : 'Demo Data';
+  badge.style.background = live ? '#E8F5E9' : '#FFFBEB';
+  badge.style.color = live ? '#2E7D32' : '#D97706';
+  badge.style.padding = '2px 8px';
+  badge.style.borderRadius = '10px';
+  badge.style.fontSize = '10.5px';
+  badge.style.fontWeight = '600';
+}
+
+/* ─── INIT ─── */
+async function init() {
+  if (!API.requireAuth()) return;
+  try { throw new Error('no-api'); } catch(e) {
+    allQuotes = getDemoQuotes();
+    allCatalog = getDemoCatalog();
+    allModels = getDemoModels();
+    isLive = false;
+  }
+  allQuotes.forEach(function(q) {
+    q.itemCount = q.items.length;
+    q.total = q.items.reduce(function(s,i){ return s + i.qty * i.unitCost; }, 0);
+  });
+  // Populate reps dropdown
+  var reps = [], seen = {};
+  allQuotes.forEach(function(q) { if (!seen[q.salesRep]) { seen[q.salesRep]=true; reps.push(q.salesRep); } });
+  reps.sort();
+  var dd = document.getElementById('filterRep');
+  reps.forEach(function(r) { var o=document.createElement('option'); o.value=r; o.textContent=r; dd.appendChild(o); });
+  runPipeline();
+  showDataBadge(isLive);
+  // Handle ?action=new
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'new') openNewQuoteModal();
+  // Dismiss context menu on click
+  document.addEventListener('click', function() {
+    document.getElementById('ctxMenu').style.display = 'none';
+  });
+  // Close drawer on escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeDrawer(); closeNewQuoteModal(); }
+  });
+  // Close new order menu on outside click
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('newOrderWrap').contains(e.target)) document.getElementById('newOrderMenu').classList.remove('open');
+  });
+  // NewOrderMenu open/close via CSS class
+  var nom = document.getElementById('newOrderMenu');
+  if (nom) {
+    var observer = new MutationObserver(function() {
+      nom.style.display = nom.classList.contains('open') ? 'block' : 'none';
+    });
+    observer.observe(nom, { attributes:true, attributeFilter:['class'] });
+  }
+}
+init();
+</script>
+</body>
+</html>
