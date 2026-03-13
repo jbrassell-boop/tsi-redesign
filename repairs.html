@@ -27,7 +27,10 @@
     .detail-scroll{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column}
 
     /* REFERENCE STRIP — compact read-only context */
-    .ref-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding:7px 14px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;border-left:3px solid var(--navy)}
+    .ref-strip{display:flex;flex-direction:column;gap:0;padding:0 14px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;border-left:3px solid var(--navy)}
+    .ref-group{display:flex;flex-wrap:wrap;align-items:center;gap:6px 32px;padding:6px 0}
+    .ref-group+.ref-group{border-top:1px solid var(--border)}
+    .ref-group-label{font-size:8px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;width:42px;flex-shrink:0;opacity:.7}
     .ref-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--label);white-space:nowrap}
     .ref-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
     .ref-val{font-weight:700;color:var(--navy)}
@@ -53,6 +56,23 @@
     /* FLAGS BAR */
     .flags-bar{display:flex;align-items:flex-start;gap:5px;padding:6px 12px;background:#FFFBEB;border:1px solid #F0C040;border-left:3px solid #D97706;border-radius:5px;min-height:26px;flex-wrap:wrap;flex-shrink:0;margin-bottom:6px}
     .flag-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:500;background:#FEF3C7;color:#92400E;border:1px solid #F0C040}
+
+    /* QC INSPECTION DRAWER */
+    .qc-backdrop{display:none;position:fixed;inset:0;background:rgba(0,20,60,.25);z-index:800}
+    .qc-backdrop.open{display:block}
+    .qc-drawer{position:fixed;top:0;right:-440px;width:420px;height:100vh;background:#fff;z-index:810;box-shadow:-4px 0 24px rgba(0,37,122,.15);transition:right .25s ease;display:flex;flex-direction:column}
+    .qc-drawer.open{right:0 !important}
+    .qc-drawer-head{display:flex;align-items:center;padding:10px 16px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff}
+    .qc-drawer-head span{color:#fff}
+    .qc-drawer-head .btn{color:#fff;border-color:rgba(255,255,255,.4)}
+    .qc-drawer-body{flex:1;overflow-y:auto;padding:12px 16px}
+    .qc-check-grid{display:flex;flex-direction:column;gap:0}
+    .qc-row{display:flex;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border)}
+    .qc-row:nth-child(odd){background:#F8FAFD}
+    .qc-label{flex:1;font-size:11px;font-weight:600;color:var(--text)}
+    .qc-pf{display:flex;gap:12px}
+    .qc-pf label{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--steel);cursor:pointer}
+    .qc-pf input[type="radio"]{margin:0;accent-color:var(--navy)}
 
     /* TABS */
     .tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;padding:0 10px}
@@ -348,29 +368,37 @@
           <!-- PERSISTENT CONTEXT — visible on all tabs -->
           <div style="padding:6px 14px 0;background:var(--bg);flex-shrink:0">
             <div class="ref-strip">
-              <span class="ref-item"><b>WO</b> <span id="hWO" class="ref-val">—</span></span>
-              <span class="ref-item"><b>Date</b> <input type="date" id="hDateIn" class="ref-input" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Client</b> <span id="hClient" class="ref-val">—</span></span>
-              <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
-              <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:150px" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:60px" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:160px" onchange="markDirty()"></select></span>
-              <span class="ref-item"><b>Mfr</b> <span id="hMfr" class="ref-val">—</span></span>
-              <span class="ref-item"><b>Category</b> <span id="hScopeCat" class="ref-val">—</span></span>
-              <span class="ref-item"><b>Model</b> <span id="hModel" class="ref-val">—</span></span>
-              <span class="ref-item" style="position:relative"><b>SN#</b> <span id="hSerial" class="ref-val" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick="toggleScopeHistory()" title="Click for repair history">—</span><span id="hHistoryCount" class="history-badge" style="display:none" onclick="toggleScopeHistory()">0</span>
-                <div class="scope-history-panel" id="scopeHistoryPanel"></div>
-              </span>
-              <span class="ref-item"><b>Cap/FFS</b> <span id="hCapFFS" class="ref-val">—</span></span>
-              <span class="ref-item"><b>Days Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
-              <span class="ref-item"><b>40d</b> <span id="hWithin40" class="ref-val">—</span></span>
-              <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
-              <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
-              <span class="ref-item"><b>Date In</b> <span class="ref-val" id="hDateInRO2">—</span></span>
-              <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
-              <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
-              <span></span>
+              <div class="ref-group" style="gap:6px 18px">
+                <span class="ref-group-label">Order</span>
+                <span class="ref-item"><b>WO</b> <span id="hWO" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Client</b> <span id="hClient" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
+                <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:130px" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:120px" onchange="markDirty()"></select></span>
+              </div>
+              <div class="ref-group">
+                <span class="ref-group-label">Scope</span>
+                <span class="ref-item"><b>Mfr</b> <span id="hMfr" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Category</b> <span id="hScopeCat" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Model</b> <span id="hModel" class="ref-val">—</span></span>
+                <span class="ref-item" style="position:relative"><b>SN#</b> <span id="hSerial" class="ref-val" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick="toggleScopeHistory()" title="Click for repair history">—</span><span id="hHistoryCount" class="history-badge" style="display:none" onclick="toggleScopeHistory()">0</span>
+                  <div class="scope-history-panel" id="scopeHistoryPanel"></div>
+                </span>
+                <span class="ref-item"><b>Cap/FFS</b> <span id="hCapFFS" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Loaner</b> <select id="fLoanerProvided" style="height:20px;font-size:10px;padding:0 4px;border:1px solid var(--border);border-radius:3px;background:#fff" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></span>
+              </div>
+              <div class="ref-group">
+                <span class="ref-group-label">Timing</span>
+                <span class="ref-item"><b>Date In</b> <input type="date" id="hDateIn" class="ref-input" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
+                <span class="ref-item"><b>Days Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
+                <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
+                <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
+                <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
+              </div>
             </div>
             <!-- COMPLAINT STRIP — customer's incoming complaint, persistent across tabs -->
             <div style="display:flex;align-items:stretch;gap:0;margin-bottom:4px;background:#FFF8F0;border:1px solid #F0D4A8;border-left:3px solid var(--amber);border-radius:5px;overflow:hidden">
@@ -387,24 +415,22 @@
           <!-- ═══ PAGE 1: SCOPE IN ═══ -->
           <div class="tab-pane active" id="pane-scopein">
 
-            <!-- ASSESSMENT — reason, level, angulation, notes -->
-            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start">
-              <div class="field" style="min-width:130px"><label>Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:110px"><label>Level</label><select id="hRepairLevel" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:110px"><label>PS Level</label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
-              <div style="width:1px;height:28px;background:var(--border);align-self:flex-end;margin:0 2px;flex-shrink:0"></div>
-              <div class="field" style="width:62px"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:62px"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:62px"><label>Right</label><input id="fAngInRight" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:62px"><label>Left</label><input id="fAngInLeft" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:62px"><label>Epoxy</label><input id="fEpoxyIn" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:62px"><label>BR Jig</label><input id="fBRJig" style="text-align:center" onchange="markDirty()"/></div>
-              <div style="width:1px;height:28px;background:var(--border);align-self:flex-end;margin:0 2px;flex-shrink:0"></div>
-              <button class="btn btn-outline" style="align-self:flex-end">Slips</button>
-              <button class="btn btn-outline" style="align-self:flex-end">Amend</button>
-              <button class="btn btn-outline" style="align-self:flex-end">Defects</button>
-              <button class="btn btn-outline" style="align-self:flex-end">Techs</button>
-              <button class="btn btn-outline" style="align-self:flex-end">Inventory</button>
+            <!-- ASSESSMENT — reason, level, angulation, drawer buttons -->
+            <div style="display:flex;align-items:flex-end;gap:6px 14px;padding:6px 14px;margin-bottom:4px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;border-left:3px solid var(--blue);flex-wrap:wrap">
+              <div class="field" style="min-width:130px;margin:0"><label>Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:100px;margin:0"><label>Level</label><select id="hRepairLevel" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:100px;margin:0"><label>PS Level</label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
+              <div style="width:1px;height:24px;background:var(--border-dk);margin:0 2px;flex-shrink:0"></div>
+              <div class="field" style="width:56px;margin:0"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:56px;margin:0"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:56px;margin:0"><label>Right</label><input id="fAngInRight" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:56px;margin:0"><label>Left</label><input id="fAngInLeft" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:56px;margin:0"><label>Epoxy</label><input id="fEpoxyIn" style="text-align:center" onchange="markDirty()"/></div>
+              <div class="field" style="width:56px;margin:0"><label>BR Jig</label><input id="fBRJig" style="text-align:center" onchange="markDirty()"/></div>
+              <div style="width:1px;height:24px;background:var(--border-dk);margin:0 2px;flex-shrink:0"></div>
+              <button class="btn btn-outline" style="height:26px;font-size:10px;padding:0 10px" onclick="openDrawer('slips')">Slips</button>
+              <button class="btn btn-outline" style="height:26px;font-size:10px;padding:0 10px" onclick="openDrawer('amend')">Amend</button>
+              <button class="btn btn-outline" style="height:26px;font-size:10px;padding:0 10px" onclick="openDrawer('defects')">Defects</button>
             </div>
 
             <!-- ★ REPAIR ITEMS TABLE — the main work area ★ -->
@@ -414,6 +440,8 @@
                 <div style="display:flex;gap:4px;margin-left:auto">
                   <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="approveAllItems()">Approve All</button>
                   <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="unapproveAllItems()">Unapprove All</button>
+                  <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="openTechsDrawer()">Techs</button>
+                  <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="openInvDrawer()">Inventory</button>
                   <button class="btn" style="height:24px;font-size:10px;padding:0 10px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="openItemPicker()">+ Add Item</button>
                 </div>
               </div>
@@ -490,7 +518,8 @@
                     <div class="field"><label>Requisition</label><input id="fRequisition" onchange="markDirty()"/></div>
                     <div class="field"><label>Approval Name</label><input id="fApprName" onchange="markDirty()"/></div>
                     <div class="field span2"><label>Inbound Tracking</label><input id="fTrackIn" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
+                    <div class="field"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
+                    <div class="field"><label>Pickup Req</label><select id="fPickupReq" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></div>
                   </div>
                   <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
                     <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispAmounts" onchange="markDirty()"/><span class="toggle-slider"></span></label>Itemized Amounts</label>
@@ -546,16 +575,13 @@
           <!-- ═══ PAGE 3: OUTGOING ═══ -->
           <div class="tab-pane" id="pane-outgoing">
 
-            <!-- Angulation Out — uses same ref-strip style -->
-            <div class="ref-strip" style="justify-content:flex-start;gap:16px;border-left-color:var(--steel)">
-              <span class="ref-item" style="font-weight:700;color:var(--navy);font-size:10.5px">ANGULATION OUT</span>
-              <span class="ref-item"><b>Up</b> <input id="fAngOutUp" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Down</b> <input id="fAngOutDown" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Right</b> <input id="fAngOutRight" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
-              <span class="ref-item"><b>Left</b> <input id="fAngOutLeft" class="ref-input" style="width:65px;text-align:center" onchange="markDirty()"/></span>
+            <!-- Outgoing toolbar row -->
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-end">
+              <div style="flex:1"></div>
+              <button class="btn btn-navy" style="gap:5px" onclick="openDrawer('qc')">&#9745; QC Inspection</button>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 
               <!-- LEFT: Package + Shipment -->
               <div class="section-card">
@@ -577,7 +603,7 @@
               </div>
 
               <!-- RIGHT: Invoice + Accessories -->
-              <div>
+              <div style="display:flex;flex-direction:column;gap:8px">
                 <div class="section-card">
                   <div class="section-head">Invoice</div>
                   <div class="section-body" style="padding:8px 12px">
@@ -594,21 +620,89 @@
                 </div>
 
                 <!-- Accessories -->
-                <div class="section-card">
+                <div class="section-card" style="flex:1">
                   <div class="section-head">Accessories Included</div>
                   <div class="section-body" style="padding:8px 12px">
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCase" onchange="markDirty()"/><span class="toggle-slider"></span></label>Case</label>
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCap" onchange="markDirty()"/><span class="toggle-slider"></span></label>Cap</label>
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclWaterCap" onchange="markDirty()"/><span class="toggle-slider"></span></label>Water Res Cap</label>
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclVideoPlug" onchange="markDirty()"/><span class="toggle-slider"></span></label>Video Plug</label>
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclMouthpiece" onchange="markDirty()"/><span class="toggle-slider"></span></label>Mouthpiece</label>
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclAngleKnob" onchange="markDirty()"/><span class="toggle-slider"></span></label>Angle Knob</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclSuctionValve" onchange="markDirty()"/><span class="toggle-slider"></span></label>Suction Valve</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclBiopsy" onchange="markDirty()"/><span class="toggle-slider"></span></label>Biopsy</label>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- QC INSPECTION DRAWER — slides in from right -->
+            <div class="qc-drawer" id="drawer-qc">
+              <div class="qc-drawer-head">
+                <span style="font-size:13px;font-weight:700;color:var(--navy)">QC Inspection</span>
+                <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto" onclick="closeDrawer()">&times; Close</button>
+              </div>
+              <div class="qc-drawer-body">
+                <!-- Angulation Out -->
+                <div style="margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Angulation Out</div>
+                  <div style="display:flex;gap:6px">
+                    <div class="field" style="flex:1"><label>Up</label><input id="fAngOutUp" style="text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="flex:1"><label>Down</label><input id="fAngOutDown" style="text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="flex:1"><label>Right</label><input id="fAngOutRight" style="text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="flex:1"><label>Left</label><input id="fAngOutLeft" style="text-align:center" onchange="markDirty()"/></div>
+                  </div>
+                </div>
+                <!-- Pass/Fail Checks -->
+                <div style="margin-bottom:10px">
+                  <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Pass / Fail Checks</div>
+                  <div class="qc-check-grid">
+                    <div class="qc-row"><span class="qc-label">Angulation</span><div class="qc-pf"><label><input type="radio" name="qcAngulation" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcAngulation" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Insertion Tube</span><div class="qc-pf"><label><input type="radio" name="qcInsertionTube" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcInsertionTube" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Universal Cord</span><div class="qc-pf"><label><input type="radio" name="qcUniversalCord" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcUniversalCord" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Light Guide Conn</span><div class="qc-pf"><label><input type="radio" name="qcLightGuide" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcLightGuide" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Distal Tip</span><div class="qc-pf"><label><input type="radio" name="qcDistalTip" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcDistalTip" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Forcep Channel</span><div class="qc-pf"><label><input type="radio" name="qcForcepChannel" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcForcepChannel" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Suction</span><div class="qc-pf"><label><input type="radio" name="qcSuction" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcSuction" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Aux. Water</span><div class="qc-pf"><label><input type="radio" name="qcAuxWater" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcAuxWater" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Image</span><div class="qc-pf"><label><input type="radio" name="qcImage" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcImage" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Air/Water</span><div class="qc-pf"><label><input type="radio" name="qcAirWater" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcAirWater" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Leak Test</span><div class="qc-pf"><label><input type="radio" name="qcLeakTest" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcLeakTest" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Fog Test</span><div class="qc-pf"><label><input type="radio" name="qcFogTest" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcFogTest" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Alcohol Wipe</span><div class="qc-pf"><label><input type="radio" name="qcAlcoholWipe" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcAlcoholWipe" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Final Insp</span><div class="qc-pf"><label><input type="radio" name="qcFinalInsp" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcFinalInsp" value="F" onchange="markDirty()"/> F</label></div></div>
+                    <div class="qc-row"><span class="qc-label">Image Centration</span><div class="qc-pf"><label><input type="radio" name="qcImageCentration" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="qcImageCentration" value="F" onchange="markDirty()"/> F</label></div></div>
+                  </div>
+                </div>
+
+                <!-- Status Flags -->
+                <div style="display:flex;gap:16px;margin-bottom:10px">
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="qcRepairable" onchange="markDirty()"/><span class="toggle-slider"></span></label><b style="color:var(--navy)">Scope Is Repairable</b></label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="qcUsable" onchange="markDirty()"/><span class="toggle-slider"></span></label><b style="color:var(--navy)">Scope Is Usable</b></label>
+                </div>
+
+                <!-- Broken Fibers + Metrics -->
+                <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Broken Fibers &amp; Metrics</div>
+                <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+                  <div class="field"><label>Broken Fibers In</label><input id="qcFibersIn" onchange="markDirty()"/></div>
+                  <div class="field"><label>Broken Fibers Out</label><input id="qcFibersOut" onchange="markDirty()"/></div>
+                  <div class="field"><label>Number of Uses</label><input id="qcNumUses" onchange="markDirty()"/></div>
+                  <div class="field"><label>B.R. Jig Size</label><input id="qcBRJigSize" onchange="markDirty()"/></div>
+                  <div class="field"><label>Include Total</label><select id="qcIncludeTotal" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  <div class="field"><label>PS Level</label><input id="qcPSLevel" onchange="markDirty()"/></div>
+                </div>
+
+                <!-- Personnel -->
+                <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Personnel</div>
+                <div class="form-grid g2" style="gap:6px 10px">
+                  <div class="field"><label>Technician</label><select id="qcTechnician" onchange="markDirty()"></select></div>
+                  <div class="field"><label>Inspected By</label><select id="qcInspectedBy" onchange="markDirty()"></select></div>
+                </div>
+              </div>
+            </div>
+
           </div><!-- /pane-outgoing -->
 
           <!-- ═══ PAGE 4: EXPENSE ═══ -->
@@ -917,6 +1011,207 @@
   </div>
 </div>
 
+<!-- ═══ SLIDE-OUT DRAWERS ═══ -->
+<div class="qc-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- SLIPS DRAWER -->
+<div class="qc-drawer" id="drawer-slips">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Repair Update Slips</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body">
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Existing Slips</div>
+    <table class="items" style="margin-bottom:12px">
+      <thead><tr><th>Date</th><th>Reason</th><th>Resp. Tech</th><th style="width:30px"></th></tr></thead>
+      <tbody id="slipsBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr></tbody>
+    </table>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Slip</div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+      <div class="field"><label>Request Date</label><input type="date" id="slipDate" onchange="markDirty()"/></div>
+      <div class="field"><label>Reason</label><select id="slipReason" onchange="markDirty()"><option value="">— Select —</option><option>Root Cause / 40 Day</option><option>Customer Request</option><option>Quality Issue</option><option>Warranty</option></select></div>
+      <div class="field"><label>Resp. Tech</label><select id="slipTech" onchange="markDirty()"></select></div>
+      <div class="field"><label>Resp. Tech 2</label><select id="slipTech2" onchange="markDirty()"></select></div>
+    </div>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Update Details</div>
+    <div class="form-grid" style="grid-template-columns:1fr;gap:6px;margin-bottom:10px">
+      <div class="field"><label>Update Reason</label><select id="slipUpdateReason" onchange="markDirty()"><option value="">— Select —</option><option>Video Features</option><option>Angulation</option><option>Insertion Tube</option><option>Light Guide</option><option>Leak</option><option>Other</option></select></div>
+      <div class="field"><label>Comment</label><textarea id="slipComment" rows="2" style="resize:vertical" oninput="markDirty()"></textarea></div>
+      <div class="field"><label>Findings</label><textarea id="slipFindings" rows="2" style="resize:vertical" oninput="markDirty()"></textarea></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-navy" style="flex:1">Save Slip</button>
+      <button class="btn btn-outline" style="flex:1">Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- AMEND DRAWER -->
+<div class="qc-drawer" id="drawer-amend">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Repair Amendments</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body">
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Amendment History</div>
+    <table class="items" style="margin-bottom:12px">
+      <thead><tr><th>Amendment</th><th>Type</th><th>Reason</th><th>Date</th></tr></thead>
+      <tbody id="amendBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr></tbody>
+    </table>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Amendment</div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+      <div class="field"><label>Amendment Type</label><select id="amendType" onchange="markDirty()"><option value="">— Select —</option><option>Additional Findings</option><option>Not Repairable</option><option>Rework</option></select></div>
+      <div class="field"><label>Reason</label><select id="amendReason" onchange="markDirty()"><option value="">— Select —</option><option>Failure found during repair</option><option>Failure missed during D &amp; I</option><option>Failure missed during update</option><option>Misquote by operations</option><option>Result of another repair being performed</option></select></div>
+    </div>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Repair Item</div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+      <div class="field"><label>Repair Item</label><select id="amendItem" onchange="markDirty()"></select></div>
+      <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><label class="toggle"><input type="checkbox" id="amendIsBlind" onchange="markDirty()"/><span class="toggle-slider"></span></label><span style="font-size:10px;font-weight:600">Is Blind</span></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>Additional Comment</label><textarea id="amendComment" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
+    <button class="btn btn-navy" style="width:100%">Save Amendment</button>
+  </div>
+</div>
+
+<!-- DEFECTS DRAWER -->
+<div class="qc-drawer" id="drawer-defects">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Defect Tracking</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body">
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+      <div class="field"><label>Date</label><input type="date" id="defectDate" onchange="markDirty()"/></div>
+      <div class="field"><label>Time</label><input type="time" id="defectTime" onchange="markDirty()"/></div>
+      <div class="field"><label>Reason</label><select id="defectReason" onchange="markDirty()"><option value="">— Select —</option></select></div>
+      <div class="field"><label>Technician</label><select id="defectTech" onchange="markDirty()"></select></div>
+    </div>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Defect Items</div>
+    <div class="qc-check-grid" style="margin-bottom:10px">
+      <div class="qc-row"><span class="qc-label">Leak Test</span><input type="checkbox" id="defLeakTest" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Control Buttons</span><input type="checkbox" id="defControlButtons" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Image</span><input type="checkbox" id="defImage" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Video Functions</span><input type="checkbox" id="defVideoFunctions" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Angulation</span><input type="checkbox" id="defAngulation" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Variable Function</span><input type="checkbox" id="defVariableFunction" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Other</span><input type="checkbox" id="defOther" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>Follow-up Notes</label><textarea id="defectNotes" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
+    <button class="btn btn-navy" style="width:100%">Save Defect</button>
+  </div>
+</div>
+
+<!-- ADD INVENTORY DRAWER (per repair item) -->
+<div class="qc-drawer" id="drawer-addInv" style="width:640px;right:-660px">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Add Inventory</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" style="display:flex;flex-direction:column;gap:0;padding:0">
+
+    <!-- TOP: 3-column grid -->
+    <div style="display:grid;grid-template-columns:200px 1fr 1fr;gap:0;flex:1;min-height:0">
+
+      <!-- LEFT: Repair Items list -->
+      <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
+        <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;padding:10px 12px 6px">Repair Items</div>
+        <div id="invItemsList" style="flex:1;overflow-y:auto">
+          <div style="padding:12px;color:var(--muted);font-size:10px;text-align:center">No repair items</div>
+        </div>
+      </div>
+
+      <!-- MIDDLE: Lot Numbers + Available Inventory -->
+      <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
+        <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;padding:10px 12px 6px">Lot Numbers</div>
+        <div style="flex:1;overflow-y:auto;min-height:0;max-height:40%">
+          <table class="items" style="margin:0;font-size:10px">
+            <thead><tr><th>Lot #</th><th style="width:45px">Qty</th><th style="width:28px"></th></tr></thead>
+            <tbody id="invLotsBody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Select a repair item</td></tr></tbody>
+          </table>
+        </div>
+        <div style="border-top:1px solid var(--border)">
+          <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;padding:8px 12px 6px">Available Inventory</div>
+          <div style="overflow-y:auto;max-height:160px">
+            <table class="items" style="margin:0;font-size:10px">
+              <thead><tr><th>Item</th><th>Size</th><th>Last Used</th><th style="width:28px"></th></tr></thead>
+              <tbody id="invAvailBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No available inventory</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Used Inventory for this Repair -->
+      <div style="display:flex;flex-direction:column">
+        <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;padding:10px 12px 6px">Used Inventory For Repair</div>
+        <div style="flex:1;overflow-y:auto;min-height:0">
+          <table class="items" style="margin:0;font-size:10px">
+            <thead><tr><th>Item</th><th>Size</th><th>Lot #</th><th style="width:40px">Qty</th><th style="width:28px"></th></tr></thead>
+            <tbody id="invUsedBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No parts assigned</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: Manual Add -->
+    <div style="border-top:1px solid var(--border);padding:10px 14px;background:#F8FAFD">
+      <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Add Manually</div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <div class="field" style="width:110px;margin:0"><label>Lot Number</label><input id="invManualLot"/></div>
+        <div class="field" style="width:60px;margin:0"><label>Quantity</label><input id="invManualQty" type="number" value="1" min="1"/></div>
+        <div class="field" style="flex:1;margin:0"><label>Item Description</label><input id="invManualItem"/></div>
+        <div class="field" style="flex:1;margin:0"><label>Size Description</label><input id="invManualSize"/></div>
+        <button class="btn btn-navy" style="height:28px;font-size:10px;padding:0 14px;white-space:nowrap">Add</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid var(--border);padding:8px 14px;display:flex;justify-content:flex-end;gap:6px">
+      <button class="btn btn-outline" style="height:30px;font-size:11px;padding:0 16px" onclick="closeDrawer()">Cancel</button>
+      <button class="btn btn-navy" style="height:30px;font-size:11px;padding:0 16px">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- 40-DAY EVALUATION DRAWER -->
+<div class="qc-drawer" id="drawer-fortyDay">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Recent Repair — Within 40 Days</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body">
+    <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:10px">Is the customer complaint a result of improper care or handling by the customer?</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;padding-left:8px">
+      <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="yes" style="accent-color:var(--navy)" onchange="markDirty()"/> Yes</label>
+      <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="no" style="accent-color:var(--navy)" onchange="markDirty()"/> No</label>
+      <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="unknown" style="accent-color:var(--navy)" onchange="markDirty()"/> Cannot determine — further inspection needed</label>
+    </div>
+
+    <div style="font-size:11px;color:var(--text);margin-bottom:10px;line-height:1.4;padding:8px 10px;background:#FFF8F0;border:1px solid #F0D4A8;border-radius:4px">If the above is <b>NO</b> or cannot be determined, the Lab Manager should evaluate the scope for the failure codes below.</div>
+
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Failure Codes</div>
+    <div class="qc-check-grid" style="margin-bottom:12px">
+      <div class="qc-row"><span class="qc-label">Result of improper care and handling</span><input type="checkbox" id="fc1" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Part failure unrelated to previous repairs</span><input type="checkbox" id="fc2" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Cosmetic issue unrelated to previous repairs</span><input type="checkbox" id="fc3" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Improper repair technique</span><input type="checkbox" id="fc4" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Failure during previous final inspection</span><input type="checkbox" id="fc5" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Failure related to previous repairs</span><input type="checkbox" id="fc6" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Unable to duplicate customer complaint</span><input type="checkbox" id="fc7" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">No repairs we performed previously</span><input type="checkbox" id="fc8" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-label">Other</span><input type="checkbox" id="fc9" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+    </div>
+    <button class="btn btn-navy" style="width:100%">Save Evaluation</button>
+  </div>
+</div>
+
+<div class="qc-drawer" id="drawer-techs">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Tech Assignment</span>
+    <button class="btn btn-outline" style="height:26px;padding:0 10px;font-size:10px;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.4)" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="techsDrawerBody"></div>
+</div>
+
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -1122,7 +1417,6 @@ function populateDetail(d) {
     document.getElementById('hTAT').textContent = days + ' days';
   } else { document.getElementById('hTAT').textContent = '—'; }
   document.getElementById('hLeadTime').textContent = '—';
-  document.getElementById('hDateInRO2').textContent = d.dtDateIn ? fmtDate(d.dtDateIn) : '—';
   document.getElementById('hDateOutRO').textContent = d.dtDateOut ? fmtDate(d.dtDateOut) : '—';
 
   // ── SCOPE IN TAB ──
@@ -1298,6 +1592,88 @@ function selectItemRow(tr, idx) {
   document.querySelectorAll('#repairItemsBody tr').forEach(r => r.classList.remove('selected-row'));
   tr.classList.add('selected-row');
   _selectedItemIdx = idx;
+}
+
+/* ── Bulk Tech Assignment (Techs Drawer) ── */
+function renderTechsDrawer() {
+  const body = document.getElementById('techsDrawerBody');
+  if (!_repairItems.length) { body.innerHTML = '<div style="padding:20px;color:var(--muted);text-align:center">No repair items</div>'; return; }
+  body.innerHTML = '<div style="margin-bottom:10px">' +
+    '<div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bulk Assign</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:8px">' +
+      '<select id="bulkTechSel" style="flex:1;height:28px;font-size:11px">' +
+        '<option value="">— Select Tech —</option>' + _techs.map(t => '<option value="' + t.sTechName.split(' ').map(w=>w[0]).join('') + '">' + t.sTechName + '</option>').join('') +
+      '</select>' +
+      '<button class="btn btn-blue" style="height:28px;font-size:10px;padding:0 12px" onclick="bulkAssignTech(1)">→ Tech 1</button>' +
+      '<button class="btn btn-outline" style="height:28px;font-size:10px;padding:0 12px" onclick="bulkAssignTech(2)">→ Tech 2</button>' +
+    '</div>' +
+  '</div>' +
+  '<div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Per-Item Assignment</div>' +
+  '<div class="qc-check-grid">' +
+    _repairItems.map((item, i) => {
+      const code = item.sTSICode||item.sRepairCode||'';
+      const t1 = item.sTechInits||item.sTech1||'';
+      const t2 = item.sTechInits2||item.sTech2Inits||item.sTech2||'';
+      return '<div class="qc-row" style="gap:6px">' +
+        '<span style="font-size:10px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + (item.sItemDescription||'') + '"><code style="font-size:9px;color:var(--blue)">' + code + '</code> ' + (item.sItemDescription||'').substring(0,30) + '</span>' +
+        '<select style="width:70px;height:22px;font-size:10px" onchange="assignTechFromDrawer(' + i + ',1,this.value)">' +
+          '<option value="">—</option>' + _techs.map(t => { const inits=t.sTechName.split(' ').map(w=>w[0]).join(''); return '<option value="'+inits+'"'+(inits===t1?' selected':'')+'>'+inits+'</option>'; }).join('') +
+        '</select>' +
+        '<select style="width:70px;height:22px;font-size:10px" onchange="assignTechFromDrawer(' + i + ',2,this.value)">' +
+          '<option value="">—</option>' + _techs.map(t => { const inits=t.sTechName.split(' ').map(w=>w[0]).join(''); return '<option value="'+inits+'"'+(inits===t2?' selected':'')+'>'+inits+'</option>'; }).join('') +
+        '</select>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+function assignTechFromDrawer(idx, techNum, val) {
+  const item = _repairItems[idx];
+  if (techNum === 1) { item.sTechInits = val; item.sTech1 = val; }
+  else { item.sTechInits2 = val; item.sTech2Inits = val; item.sTech2 = val; }
+  markDirty();
+  renderRepairItems(_repairItems);
+}
+function bulkAssignTech(techNum) {
+  const val = document.getElementById('bulkTechSel').value;
+  if (!val) return;
+  _repairItems.forEach(item => {
+    if (techNum === 1) { item.sTechInits = val; item.sTech1 = val; }
+    else { item.sTechInits2 = val; item.sTech2Inits = val; item.sTech2 = val; }
+  });
+  markDirty();
+  renderRepairItems(_repairItems);
+  renderTechsDrawer();
+}
+function openTechsDrawer() { renderTechsDrawer(); openDrawer('techs'); }
+
+/* ── Inventory Drawer ── */
+let _invSelectedItem = -1;
+function openInvDrawer() {
+  renderInvItemsList();
+  _invSelectedItem = -1;
+  openDrawer('addInv');
+}
+function renderInvItemsList() {
+  const el = document.getElementById('invItemsList');
+  if (!_repairItems.length) { el.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:10px;text-align:center">No repair items</div>'; return; }
+  el.innerHTML = _repairItems.map((item, i) => {
+    const code = item.sTSICode||item.sRepairCode||'';
+    const desc = (item.sItemDescription||item.sDescription||'').substring(0,28);
+    return '<div onclick="selectInvItem(' + i + ')" style="padding:6px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:10px;' + (i===_invSelectedItem?'background:#EDF2FF;font-weight:600':'') + '" data-inv-idx="' + i + '">' +
+      '<code style="font-size:9px;color:var(--blue)">' + code + '</code><br/>' +
+      '<span style="color:var(--text)">' + desc + '</span></div>';
+  }).join('');
+}
+function selectInvItem(idx) {
+  _invSelectedItem = idx;
+  // Highlight selected
+  document.querySelectorAll('#invItemsList > div').forEach((el, i) => {
+    el.style.background = i === idx ? '#EDF2FF' : '';
+    el.style.fontWeight = i === idx ? '600' : '';
+  });
+  // TODO: load lots/available inventory for this repair item via API
+  document.getElementById('invLotsBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No lots on file</td></tr>';
+  document.getElementById('invAvailBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No available inventory</td></tr>';
 }
 
 // ── Right-click context menu for repair items ──
@@ -2222,6 +2598,17 @@ function toggleScopeHistory() {
 }
 function closeScopeHistory() {
   document.getElementById('scopeHistoryPanel').classList.remove('open');
+}
+
+/* Shared Drawer System */
+function openDrawer(id) {
+  closeDrawer();
+  document.getElementById('drawer-' + id).classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('open');
+}
+function closeDrawer() {
+  document.querySelectorAll('.qc-drawer.open').forEach(d => d.classList.remove('open'));
+  document.getElementById('drawerBackdrop').classList.remove('open');
 }
 
 async function loadScopeHistory() {
