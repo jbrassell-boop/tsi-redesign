@@ -56,6 +56,7 @@
     .b-open{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
     .b-invoiced{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
     .b-cancelled{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .b-quoted{background:#F5F3FF;color:#7C3AED;border-color:#DDD6FE}
 
     /* Table Footer */
     .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
@@ -133,6 +134,24 @@
     /* Overlay for drawer background click */
     .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
     .drawer-overlay.open{display:block}
+
+    /* Item search panel */
+    .item-search-panel{display:none;padding:8px 12px 10px;border-top:1px solid var(--border);background:#FAFBFF}
+    .item-search-panel.open{display:block}
+    .item-search-input{width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px}
+    .item-search-input:focus{border-color:var(--navy)}
+    .catalog-results{max-height:140px;overflow-y:auto;border:1px solid var(--border-dk);border-radius:4px;background:#fff}
+    .catalog-row{padding:6px 10px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .catalog-row:last-child{border-bottom:none}
+    .catalog-row:hover{background:#EDF2FF}
+    .cr-left{min-width:0}
+    .cr-name{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cr-sku{font-size:10px;color:var(--muted)}
+    .cr-price{font-size:11px;color:var(--navy);font-weight:700;white-space:nowrap;flex-shrink:0}
+    .item-del-btn{background:none;border:none;color:#DC2626;cursor:pointer;padding:2px 5px;border-radius:3px;font-size:13px;line-height:1;font-family:inherit}
+    .item-del-btn:hover{background:#FEF2F2}
+    .item-qty-input{width:48px;height:22px;border:1.5px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:11px;font-family:inherit;text-align:center;outline:none}
+    .item-qty-input:focus{border-color:var(--navy)}
   </style>
 </head>
 <body>
@@ -218,6 +237,10 @@
           <div class="s-icon" style="background:#FFFBEB">&#9999;</div>
           <div class="s-data"><div class="s-val s-amber" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
         </div>
+        <div class="stat-chip" id="kpiQuoted" onclick="chipFilter('Quote Sent')">
+          <div class="s-icon" style="background:#F5F3FF">&#128203;</div>
+          <div class="s-data"><div class="s-val s-purple" id="kpiQuotedVal">0</div><div class="s-lbl">Quoted</div></div>
+        </div>
         <div class="stat-chip" id="kpiCancelled" onclick="chipFilter('Cancelled')">
           <div class="s-icon" style="background:#FEF2F2">&#10005;</div>
           <div class="s-data"><div class="s-val s-red" id="kpiCancelledVal">0</div><div class="s-lbl">Cancelled</div></div>
@@ -239,6 +262,7 @@
           <button class="seg-btn" data-val="Open" onclick="setSegFilter('status','Open',this)">Open</button>
           <button class="seg-btn" data-val="Invoiced" onclick="setSegFilter('status','Invoiced',this)">Invoiced</button>
           <button class="seg-btn" data-val="Cancelled" onclick="setSegFilter('status','Cancelled',this)">Cancelled</button>
+          <button class="seg-btn" data-val="Quote Sent" onclick="setSegFilter('status','Quote Sent',this)">Quote Sent</button>
         </div>
         <div class="filter-sep"></div>
         <select class="filter-dd" id="filterRep" onchange="filters.rep=this.value;currentPage=1;runPipeline()" style="min-width:130px">
@@ -263,8 +287,8 @@
           <thead>
             <tr>
               <th style="width:100px" onclick="sortBy('invoiceNum')">Invoice # <span class="sort"></span></th>
-              <th onclick="sortBy('clientName')">Client <span class="sort"></span></th>
-              <th onclick="sortBy('deptName')">Department <span class="sort"></span></th>
+              <th style="width:22%" onclick="sortBy('clientName')">Client <span class="sort"></span></th>
+              <th style="width:18%" onclick="sortBy('deptName')">Department <span class="sort"></span></th>
               <th style="width:120px" onclick="sortBy('salesRep')">Sales Rep <span class="sort"></span></th>
               <th style="width:90px" onclick="sortBy('orderDate')">Order Date <span class="sort"></span></th>
               <th style="width:90px" onclick="sortBy('status')">Status <span class="sort"></span></th>
@@ -336,21 +360,83 @@
       <div class="section-body">
         <div class="g2">
           <div class="field"><label>Invoice #</label><input id="fInvoice" readonly/></div>
-          <div class="field"><label>Status</label><input id="fStatus" readonly/></div>
+          <div class="field"><label>Status</label>
+            <select id="fStatus" onchange="markDirty()">
+              <option value="Draft">Draft</option>
+              <option value="Quote Sent">Quote Sent</option>
+              <option value="Open">Open</option>
+              <option value="Invoiced">Invoiced</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
         </div>
         <div class="g2">
           <div class="field"><label>Client</label><input id="fClient" readonly/></div>
           <div class="field"><label>Department</label><input id="fDept" readonly/></div>
         </div>
         <div class="g2">
-          <div class="field"><label>Sales Rep</label><input id="fSalesRep" readonly/></div>
+          <div class="field"><label>Sales Rep</label>
+            <select id="fSalesRep" onchange="markDirty()">
+              <option value="">Select rep...</option>
+            </select>
+          </div>
           <div class="field"><label>Order Date</label><input id="fOrderDate" readonly/></div>
         </div>
         <div class="g2">
-          <div class="field"><label>PO #</label><input id="fPO" readonly/></div>
-          <div class="field"><label>Price List</label><input id="fPriceList" readonly/></div>
+          <div class="field"><label>PO #</label><input id="fPO" placeholder="e.g. PO-50100" oninput="markDirty()"/></div>
+          <div class="field"><label>Price List</label>
+            <select id="fPriceList" onchange="markDirty()">
+              <option value="Standard">Standard</option>
+              <option value="Contract">Contract</option>
+              <option value="Wholesale">Wholesale</option>
+              <option value="Government">Government</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Payment Terms</label>
+            <select id="fPayTerms" onchange="markDirty()">
+              <option value="Net 30">Net 30</option>
+              <option value="Net 60">Net 60</option>
+              <option value="Net 90">Net 90</option>
+              <option value="COD">COD</option>
+              <option value="Prepaid">Prepaid</option>
+              <option value="Credit Card">Credit Card</option>
+            </select>
+          </div>
+          <div class="field"><label>Shipping Method</label>
+            <select id="fShipMethod" onchange="markDirty()">
+              <option value="Ground">Ground</option>
+              <option value="2-Day Air">2-Day Air</option>
+              <option value="Next Day Air">Next Day Air</option>
+              <option value="Will Call">Will Call</option>
+              <option value="Freight">Freight</option>
+              <option value="No Charge">No Charge</option>
+            </select>
+          </div>
         </div>
         <div class="field"><label>Location</label><input id="fLocation" readonly/></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">Addresses</div>
+      <div class="section-body">
+        <div class="g2" style="align-items:flex-start">
+          <div class="field">
+            <label>Bill To</label>
+            <textarea id="fBillTo" rows="4" style="height:80px" oninput="markDirty()" placeholder="Billing address..."></textarea>
+          </div>
+          <div class="field">
+            <label style="display:flex;align-items:center;justify-content:space-between;width:100%">
+              <span>Ship To</span>
+              <label style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;display:flex;align-items:center;gap:4px;cursor:pointer">
+                <input type="checkbox" id="fShipSame" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To
+              </label>
+            </label>
+            <textarea id="fShipTo" rows="4" style="height:80px" oninput="markDirty()" placeholder="Shipping address..."></textarea>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -379,12 +465,19 @@
   <!-- Line Items Tab -->
   <div class="dpane" id="dpane-items">
     <div class="section-card">
-      <div class="section-head">Order Line Items</div>
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Order Line Items</span>
+        <button class="btn btn-outline" style="padding:2px 10px;font-size:10px;height:22px;line-height:1" onclick="toggleItemSearch()">+ Add Item</button>
+      </div>
+      <div class="item-search-panel" id="itemSearchPanel">
+        <input class="item-search-input" id="itemSearchInput" placeholder="Search catalog by name or SKU..." oninput="filterCatalog()"/>
+        <div class="catalog-results" id="catalogResults"></div>
+      </div>
       <div class="section-body" style="padding:0">
         <table class="mini-table">
-          <thead><tr><th>Item</th><th>SKU</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr></thead>
+          <thead><tr><th>Item</th><th>SKU</th><th style="text-align:center;width:52px">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th><th style="width:28px"></th></tr></thead>
           <tbody id="drawerItemsBody"></tbody>
-          <tfoot><tr style="font-weight:700;background:#F0F4FA"><td colspan="4" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerItemsTotal">$0.00</td></tr></tfoot>
+          <tfoot><tr style="font-weight:700;background:#F0F4FA"><td colspan="5" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerItemsTotal">$0.00</td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -402,7 +495,11 @@
 
   <div class="drawer-footer">
     <span style="font-size:10.5px;color:var(--muted)" id="drawerSaveStatus">Sale detail</span>
-    <button class="btn btn-navy" style="padding:5px 14px;font-size:11px" onclick="closeDrawer()">Close</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="saveDrawer()">Save Changes</button>
+      <button class="btn btn-navy" style="padding:5px 12px;font-size:11px" onclick="generateQuote(selectedSaleKey)">Generate Quote</button>
+      <button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="closeDrawer()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -486,13 +583,44 @@ let _searchTimer, _saveTimer;
 
 /* ─── CLIENT / DEPT DATA ─── */
 var clientData = [
-  { key:1, name:'Johns Hopkins', depts:['Endoscopy','Pulmonology'] },
-  { key:2, name:'Cleveland Clinic', depts:['Gastroenterology','Surgery'] },
-  { key:3, name:'Mayo Clinic', depts:['Pulmonology','ENT'] },
-  { key:4, name:'HCA West Kendall', depts:['Endoscopy Center','GI Lab'] },
-  { key:5, name:'Cedars-Sinai', depts:['Bronchoscopy','Gastro'] }
+  { key:1, name:'Johns Hopkins Hospital', depts:[
+    { name:'Endoscopy',    addr1:'1800 Orleans Street',   city:'Baltimore',   state:'MD', zip:'21287' },
+    { name:'Pulmonology',  addr1:'600 N Wolfe Street',    city:'Baltimore',   state:'MD', zip:'21287' }
+  ]},
+  { key:2, name:'Cleveland Clinic', depts:[
+    { name:'Gastroenterology', addr1:'9500 Euclid Avenue',    city:'Cleveland',  state:'OH', zip:'44195' },
+    { name:'Surgery',          addr1:'9500 Euclid Avenue',    city:'Cleveland',  state:'OH', zip:'44195' }
+  ]},
+  { key:3, name:'Mayo Clinic', depts:[
+    { name:'Pulmonology', addr1:'200 First Street SW',    city:'Rochester',   state:'MN', zip:'55905' },
+    { name:'ENT',         addr1:'200 First Street SW',    city:'Rochester',   state:'MN', zip:'55905' }
+  ]},
+  { key:4, name:'HCA West Kendall Hospital', depts:[
+    { name:'Endoscopy Center', addr1:'11750 Bird Road',   city:'Miami',       state:'FL', zip:'33175' },
+    { name:'GI Lab',           addr1:'11750 Bird Road',   city:'Miami',       state:'FL', zip:'33175' }
+  ]},
+  { key:5, name:'Cedars-Sinai Medical Center', depts:[
+    { name:'Bronchoscopy', addr1:'8700 Beverly Blvd',    city:'Los Angeles', state:'CA', zip:'90048' },
+    { name:'Gastro',       addr1:'8700 Beverly Blvd',    city:'Los Angeles', state:'CA', zip:'90048' }
+  ]}
 ];
 var salesReps = ['Mike Rivera','Sarah Chen','James Wilson'];
+
+/* ─── INVENTORY CATALOG ─── */
+var inventoryCatalog = [
+  { sku:'BF-2200', name:'Biopsy Forceps', category:'Accessories', unitPrice:125.00 },
+  { sku:'CB-1100', name:'Cleaning Brush', category:'Accessories', unitPrice:18.50 },
+  { sku:'SV-3300', name:'Suction Valve', category:'Valves', unitPrice:245.00 },
+  { sku:'LG-4400', name:'Light Guide Bundle', category:'Optics', unitPrice:450.00 },
+  { sku:'WB-5500', name:'Water Bottle', category:'Accessories', unitPrice:32.00 },
+  { sku:'MP-6600', name:'Mouthpiece', category:'Accessories', unitPrice:15.00 },
+  { sku:'AW-7700', name:'Air/Water Channel', category:'Channels', unitPrice:185.00 },
+  { sku:'IT-8800', name:'Insertion Tube Cover', category:'Covers', unitPrice:42.00 },
+  { sku:'AV-9900', name:'Air/Water Valve', category:'Valves', unitPrice:210.00 },
+  { sku:'FB-1010', name:'Forceps Bracket', category:'Hardware', unitPrice:88.00 },
+  { sku:'UT-1020', name:'Universal Tip Cover', category:'Covers', unitPrice:55.00 },
+  { sku:'SP-1030', name:'Sterilization Pouch', category:'Supplies', unitPrice:4.75 }
+];
 
 /* ─── HELPERS ─── */
 function fmtMoney(n) {
@@ -510,7 +638,7 @@ function fmtDate(d) {
   return ((dt.getMonth()+1)+'').padStart(2,'0') + '/' + (dt.getDate()+'').padStart(2,'0') + '/' + dt.getFullYear();
 }
 function statusBadge(status) {
-  var map = { 'Draft':'b-draft', 'Open':'b-open', 'Invoiced':'b-invoiced', 'Cancelled':'b-cancelled' };
+  var map = { 'Draft':'b-draft', 'Open':'b-open', 'Invoiced':'b-invoiced', 'Cancelled':'b-cancelled', 'Quote Sent':'b-quoted' };
   return '<span class="badge '+(map[status]||'')+'">'+status+'</span>';
 }
 
@@ -578,6 +706,16 @@ function getDemoData() {
     { lSaleKey:2412, invoiceNum:'PS-2412', clientKey:3, clientName:'Mayo Clinic', deptName:'ENT', salesRep:'James Wilson', orderDate:'2026-03-10', status:'Cancelled', poNumber:'PO-50112', priceList:'Standard', location:'Nashville', notes:'Duplicate order — cancelled', items:[
       { name:'Cleaning Brush', sku:'CB-1100', qty:5, unitPrice:18.50 },
       { name:'Mouthpiece', sku:'MP-6600', qty:4, unitPrice:15.00 }
+    ]},
+    { lSaleKey:2413, invoiceNum:'PS-2413', clientKey:2, clientName:'Cleveland Clinic', deptName:'Gastroenterology', salesRep:'Sarah Chen', orderDate:'2026-03-11', status:'Quote Sent', poNumber:'', priceList:'Contract', location:'Upper Chichester', notes:'Quote emailed to procurement 2026-03-11', items:[
+      { name:'Biopsy Forceps', sku:'BF-2200', qty:6, unitPrice:125.00 },
+      { name:'Suction Valve', sku:'SV-3300', qty:3, unitPrice:245.00 },
+      { name:'Cleaning Brush', sku:'CB-1100', qty:10, unitPrice:18.50 }
+    ]},
+    { lSaleKey:2414, invoiceNum:'PS-2414', clientKey:5, clientName:'Cedars-Sinai', deptName:'Gastro', salesRep:'Mike Rivera', orderDate:'2026-03-12', status:'Quote Sent', poNumber:'', priceList:'Standard', location:'Nashville', notes:'Awaiting PO — quote valid 30 days', items:[
+      { name:'Light Guide Bundle', sku:'LG-4400', qty:2, unitPrice:450.00 },
+      { name:'Air/Water Channel', sku:'AW-7700', qty:2, unitPrice:185.00 },
+      { name:'Mouthpiece', sku:'MP-6600', qty:6, unitPrice:15.00 }
     ]}
   ];
 }
@@ -594,7 +732,7 @@ async function loadSales() {
     allSales = getDemoData();
     isLive = false;
   }
-  // Ensure computed fields
+  // Ensure computed fields + defaults for new fields
   allSales.forEach(function(s) {
     if (s.items) {
       s.itemCount = s.items.length;
@@ -604,6 +742,18 @@ async function loadSales() {
       s.itemCount = 0;
       s.total = 0;
     }
+    if (!s.paymentTerms) s.paymentTerms = 'Net 30';
+    if (!s.shipMethod) s.shipMethod = 'Ground';
+    if (!s.billToAddr) {
+      var c = clientData.find(function(x) { return x.key === s.clientKey; });
+      var dept = c && c.depts ? c.depts.find(function(d) { return d.name === s.deptName; }) : null;
+      if (dept) {
+        s.billToAddr = (c.name) + '\nAttn: ' + dept.name + '\n' + dept.addr1 + '\n' + dept.city + ', ' + dept.state + ' ' + dept.zip;
+      } else {
+        s.billToAddr = s.clientName + '\nAttn: ' + s.deptName;
+      }
+    }
+    if (s.shipToAddr === undefined) s.shipToAddr = '';
   });
   runPipeline();
 }
@@ -698,6 +848,7 @@ function updateKPIs() {
   document.getElementById('kpiOpenVal').textContent = recs.filter(function(s){ return s.status==='Open'; }).length;
   document.getElementById('kpiInvoicedVal').textContent = recs.filter(function(s){ return s.status==='Invoiced'; }).length;
   document.getElementById('kpiDraftVal').textContent = recs.filter(function(s){ return s.status==='Draft'; }).length;
+  document.getElementById('kpiQuotedVal').textContent = recs.filter(function(s){ return s.status==='Quote Sent'; }).length;
   document.getElementById('kpiCancelledVal').textContent = recs.filter(function(s){ return s.status==='Cancelled'; }).length;
   var totalRevenue = recs.reduce(function(sum,s){ return sum + (s.total||0); }, 0);
   document.getElementById('kpiRevenueVal').textContent = fmtMoneyShort(totalRevenue);
@@ -747,6 +898,7 @@ function chipFilter(status) {
   if (status === 'Open') document.getElementById('kpiOpen').classList.add('active-chip');
   else if (status === 'Invoiced') document.getElementById('kpiInvoiced').classList.add('active-chip');
   else if (status === 'Draft') document.getElementById('kpiDraft').classList.add('active-chip');
+  else if (status === 'Quote Sent') document.getElementById('kpiQuoted').classList.add('active-chip');
   else if (status === 'Cancelled') document.getElementById('kpiCancelled').classList.add('active-chip');
   else document.getElementById('kpiTotal').classList.add('active-chip');
   currentPage = 1;
@@ -855,11 +1007,25 @@ function populateDrawer(s) {
   document.getElementById('fStatus').value = s.status;
   document.getElementById('fClient').value = s.clientName;
   document.getElementById('fDept').value = s.deptName;
-  document.getElementById('fSalesRep').value = s.salesRep;
   document.getElementById('fOrderDate').value = fmtDate(s.orderDate);
-  document.getElementById('fPO').value = s.poNumber || '—';
+  document.getElementById('fPO').value = s.poNumber || '';
   document.getElementById('fPriceList').value = s.priceList || 'Standard';
+  document.getElementById('fPayTerms').value = s.paymentTerms || 'Net 30';
+  document.getElementById('fShipMethod').value = s.shipMethod || 'Ground';
   document.getElementById('fLocation').value = s.location;
+
+  document.getElementById('fBillTo').value = s.billToAddr || '';
+  var shipSame = !s.shipToAddr || s.shipToAddr === s.billToAddr;
+  document.getElementById('fShipSame').checked = shipSame;
+  document.getElementById('fShipTo').value = s.shipToAddr || '';
+  document.getElementById('fShipTo').disabled = shipSame;
+
+  // Populate sales rep select
+  var repSel = document.getElementById('fSalesRep');
+  repSel.innerHTML = '<option value="">Select rep...</option>';
+  salesReps.forEach(function(r) {
+    repSel.innerHTML += '<option value="'+r+'"'+(r===s.salesRep?' selected':'')+'>'+r+'</option>';
+  });
 
   var subtotal = s.total || 0;
   document.getElementById('fSubtotal').value = fmtMoney(subtotal);
@@ -871,20 +1037,31 @@ function populateDrawer(s) {
   isDirty = false;
   document.getElementById('drawerSaveStatus').textContent = 'Sale detail';
 
-  // Line items
+  // Close search panel when switching records
+  var panel = document.getElementById('itemSearchPanel');
+  if (panel) panel.classList.remove('open');
+
+  renderLineItems(s);
+}
+
+function renderLineItems(s) {
   var itemsHtml = '';
   var itemsTotal = 0;
-  s.items.forEach(function(item) {
+  s.items.forEach(function(item, idx) {
     var lineTotal = item.qty * item.unitPrice;
     itemsTotal += lineTotal;
     itemsHtml += '<tr>';
-    itemsHtml += '<td>' + item.name + '</td>';
-    itemsHtml += '<td>' + item.sku + '</td>';
-    itemsHtml += '<td style="text-align:center">' + item.qty + '</td>';
-    itemsHtml += '<td style="text-align:right">' + fmtMoney(item.unitPrice) + '</td>';
-    itemsHtml += '<td style="text-align:right">' + fmtMoney(lineTotal) + '</td>';
+    itemsHtml += '<td>'+item.name+'</td>';
+    itemsHtml += '<td>'+item.sku+'</td>';
+    itemsHtml += '<td style="text-align:center"><input class="item-qty-input" type="number" min="1" value="'+item.qty+'" onchange="updateItemQty('+idx+',this.value)"/></td>';
+    itemsHtml += '<td style="text-align:right">'+fmtMoney(item.unitPrice)+'</td>';
+    itemsHtml += '<td style="text-align:right" id="lt-'+idx+'">'+fmtMoney(lineTotal)+'</td>';
+    itemsHtml += '<td><button class="item-del-btn" onclick="removeItem('+idx+')" title="Remove">&#215;</button></td>';
     itemsHtml += '</tr>';
   });
+  if (!itemsHtml) {
+    itemsHtml = '<tr><td colspan="6" style="padding:14px 8px;text-align:center;color:var(--muted);font-size:11px">No items — click + Add Item to build the order.</td></tr>';
+  }
   document.getElementById('drawerItemsBody').innerHTML = itemsHtml;
   document.getElementById('drawerItemsTotal').textContent = fmtMoney(itemsTotal);
 }
@@ -908,6 +1085,223 @@ function saveNotes() {
     var now = new Date();
     document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
   }, 400);
+}
+
+/* ─── SAVE DRAWER ─── */
+function saveDrawer() {
+  if (!selectedSaleKey) return;
+  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
+  if (!sale) return;
+  sale.status = document.getElementById('fStatus').value;
+  sale.salesRep = document.getElementById('fSalesRep').value;
+  sale.poNumber = document.getElementById('fPO').value.trim();
+  sale.priceList = document.getElementById('fPriceList').value;
+  sale.paymentTerms = document.getElementById('fPayTerms').value;
+  sale.shipMethod = document.getElementById('fShipMethod').value;
+  sale.billToAddr = document.getElementById('fBillTo').value;
+  sale.shipToAddr = document.getElementById('fShipSame').checked ? '' : document.getElementById('fShipTo').value;
+  sale.notes = document.getElementById('fNotes').value;
+  isDirty = false;
+  var now = new Date();
+  document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
+  runPipeline();
+}
+
+/* ─── ITEM CATALOG SEARCH ─── */
+function toggleItemSearch() {
+  var panel = document.getElementById('itemSearchPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    document.getElementById('itemSearchInput').value = '';
+    filterCatalog();
+    document.getElementById('itemSearchInput').focus();
+  }
+}
+
+function filterCatalog() {
+  var q = document.getElementById('itemSearchInput').value.toLowerCase().trim();
+  var results = inventoryCatalog.filter(function(c) {
+    return !q || c.name.toLowerCase().indexOf(q) !== -1 || c.sku.toLowerCase().indexOf(q) !== -1 || c.category.toLowerCase().indexOf(q) !== -1;
+  });
+  var html = '';
+  if (!results.length) {
+    html = '<div style="padding:10px;font-size:11px;color:var(--muted);text-align:center">No items found</div>';
+  } else {
+    results.forEach(function(c, i) {
+      var origIdx = inventoryCatalog.indexOf(c);
+      html += '<div class="catalog-row" onclick="addItemFromCatalog('+origIdx+')">';
+      html += '<div class="cr-left"><div class="cr-name">'+c.name+'</div><div class="cr-sku">'+c.sku+' &middot; '+c.category+'</div></div>';
+      html += '<div class="cr-price">'+fmtMoney(c.unitPrice)+'</div>';
+      html += '</div>';
+    });
+  }
+  document.getElementById('catalogResults').innerHTML = html;
+}
+
+function addItemFromCatalog(catalogIdx) {
+  if (!selectedSaleKey) return;
+  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
+  if (!sale) return;
+  var cat = inventoryCatalog[catalogIdx];
+  // If item already exists, increment qty
+  var existing = sale.items.find(function(i) { return i.sku === cat.sku; });
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    sale.items.push({ name:cat.name, sku:cat.sku, qty:1, unitPrice:cat.unitPrice });
+  }
+  sale.itemCount = sale.items.length;
+  sale.total = sale.items.reduce(function(sum, i) { return sum + (i.qty * i.unitPrice); }, 0);
+  // Update financial summary fields
+  document.getElementById('fSubtotal').value = fmtMoney(sale.total);
+  document.getElementById('fGrandTotal').value = fmtMoney(sale.total);
+  renderLineItems(sale);
+  document.getElementById('itemSearchPanel').classList.remove('open');
+  markDirty();
+}
+
+function updateItemQty(idx, val) {
+  if (!selectedSaleKey) return;
+  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
+  if (!sale || !sale.items[idx]) return;
+  var qty = Math.max(1, parseInt(val) || 1);
+  sale.items[idx].qty = qty;
+  sale.total = sale.items.reduce(function(sum, i) { return sum + (i.qty * i.unitPrice); }, 0);
+  document.getElementById('fSubtotal').value = fmtMoney(sale.total);
+  document.getElementById('fGrandTotal').value = fmtMoney(sale.total);
+  document.getElementById('drawerItemsTotal').textContent = fmtMoney(sale.total);
+  var ltCell = document.getElementById('lt-'+idx);
+  if (ltCell) ltCell.textContent = fmtMoney(qty * sale.items[idx].unitPrice);
+  markDirty();
+}
+
+function removeItem(idx) {
+  if (!selectedSaleKey) return;
+  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
+  if (!sale) return;
+  sale.items.splice(idx, 1);
+  sale.itemCount = sale.items.length;
+  sale.total = sale.items.reduce(function(sum, i) { return sum + (i.qty * i.unitPrice); }, 0);
+  document.getElementById('fSubtotal').value = fmtMoney(sale.total);
+  document.getElementById('fGrandTotal').value = fmtMoney(sale.total);
+  renderLineItems(sale);
+  markDirty();
+}
+
+/* ─── SHIP SAME TOGGLE ─── */
+function toggleShipSame() {
+  var checked = document.getElementById('fShipSame').checked;
+  var shipTo = document.getElementById('fShipTo');
+  if (checked) {
+    shipTo.value = document.getElementById('fBillTo').value;
+    shipTo.disabled = true;
+  } else {
+    shipTo.disabled = false;
+    shipTo.focus();
+  }
+  markDirty();
+}
+
+/* ─── GENERATE QUOTE ─── */
+function generateQuote(saleKey) {
+  var sale = allSales.find(function(s) { return s.lSaleKey === saleKey; });
+  if (!sale) { alert('No sale selected.'); return; }
+
+  var today = new Date();
+  var dateStr = ((today.getMonth()+1)+'').padStart(2,'0')+'/'+((today.getDate())+'').padStart(2,'0')+'/'+today.getFullYear();
+  var validDate = new Date(today); validDate.setDate(validDate.getDate()+30);
+  var validStr = ((validDate.getMonth()+1)+'').padStart(2,'0')+'/'+((validDate.getDate())+'').padStart(2,'0')+'/'+validDate.getFullYear();
+
+  var subtotal = sale.items.reduce(function(sum, i) { return sum + (i.qty * i.unitPrice); }, 0);
+  var itemRows = sale.items.map(function(item, i) {
+    var lt = item.qty * item.unitPrice;
+    return '<tr>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB">'+(i+1)+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB">'+item.name+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;color:#6B7280">'+item.sku+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:center">'+item.qty+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:right">'+fmtMoney(item.unitPrice)+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:right;font-weight:700">'+fmtMoney(lt)+'</td>'
+      +'</tr>';
+  }).join('');
+  if (!itemRows) itemRows = '<tr><td colspan="6" style="padding:14px;text-align:center;color:#9CA3AF">No line items</td></tr>';
+
+  var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>'
+    +'<title>Quote '+sale.invoiceNum+'</title>'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:\'Segoe UI\',Arial,sans-serif;font-size:12px;color:#1F2937;background:#fff;padding:32px}'
+    +'@media print{body{padding:24px} .no-print{display:none} @page{margin:16mm 14mm}}'
+    +'.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}'
+    +'.co-name{font-size:22px;font-weight:900;color:#00257A;letter-spacing:-.3px}'
+    +'.co-tag{font-size:10px;color:#6B7280;margin-top:2px}'
+    +'.quote-stamp{background:#00257A;color:#fff;padding:8px 18px;border-radius:6px;text-align:center}'
+    +'.quote-stamp .qs-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.7}'
+    +'.quote-stamp .qs-num{font-size:16px;font-weight:800;letter-spacing:-.2px}'
+    +'.divider{height:2px;background:linear-gradient(90deg,#00257A,#2E74B5);margin:0 0 20px}'
+    +'.meta-row{display:flex;gap:40px;margin-bottom:20px;flex-wrap:wrap}'
+    +'.meta-block{flex:1;min-width:140px}'
+    +'.meta-lbl{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}'
+    +'.meta-val{font-size:12px;color:#1F2937;font-weight:600}'
+    +'.bill-box{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:12px 16px;margin-bottom:20px}'
+    +'.bill-title{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}'
+    +'.bill-name{font-size:14px;font-weight:800;color:#00257A}'
+    +'.bill-dept{font-size:11px;color:#6B7280;margin-top:2px}'
+    +'table.items{width:100%;border-collapse:collapse;margin-bottom:20px}'
+    +'table.items th{background:#00257A;color:#fff;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:left}'
+    +'table.items th:nth-child(4){text-align:center}'
+    +'table.items th:nth-child(5),table.items th:nth-child(6){text-align:right}'
+    +'table.items tr:nth-child(even) td{background:#F9FAFB}'
+    +'.totals-block{display:flex;justify-content:flex-end;margin-bottom:24px}'
+    +'.totals-tbl{width:240px;border-collapse:collapse}'
+    +'.totals-tbl td{padding:5px 10px;font-size:12px}'
+    +'.totals-tbl tr:last-child td{border-top:2px solid #00257A;font-weight:800;font-size:13px;color:#00257A;padding-top:8px}'
+    +'.footer{border-top:1px solid #E5E7EB;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px;color:#9CA3AF}'
+    +'.footer-co{font-size:11px;font-weight:700;color:#374151}'
+    +'.terms{font-style:italic;font-size:10px;color:#6B7280}'
+    +'</style>'
+    +'<\/head><body>'
+    +'<div class="hdr">'
+      +'<div><div class="co-name">TOTAL SCOPE, INC.</div><div class="co-tag">Endoscope Repair &amp; Supply · ISO Certified</div></div>'
+      +'<div class="quote-stamp"><div class="qs-lbl">Quotation</div><div class="qs-num">'+sale.invoiceNum+'</div></div>'
+    +'<\/div>'
+    +'<div class="divider"><\/div>'
+    +'<div style="display:flex;gap:16px;margin-bottom:20px">'
+      +'<div class="bill-box" style="flex:1">'
+        +'<div class="bill-title">Bill To<\/div>'
+        +'<div style="white-space:pre-line;font-size:12px;color:#374151;line-height:1.5">'+sale.billToAddr+'<\/div>'
+      +'<\/div>'
+      +(sale.shipToAddr && sale.shipToAddr !== sale.billToAddr
+        ? '<div class="bill-box" style="flex:1"><div class="bill-title">Ship To<\/div><div style="white-space:pre-line;font-size:12px;color:#374151;line-height:1.5">'+sale.shipToAddr+'<\/div><\/div>'
+        : '')
+    +'<\/div>'
+    +'<div class="meta-row">'
+      +'<div class="meta-block"><div class="meta-lbl">Quote Date<\/div><div class="meta-val">'+dateStr+'<\/div><\/div>'
+      +'<div class="meta-block"><div class="meta-lbl">PO #<\/div><div class="meta-val">'+(sale.poNumber||'Pending')+'<\/div><\/div>'
+      +'<div class="meta-block"><div class="meta-lbl">Sales Rep<\/div><div class="meta-val">'+sale.salesRep+'<\/div><\/div>'
+      +'<div class="meta-block"><div class="meta-lbl">Price List<\/div><div class="meta-val">'+(sale.priceList||'Standard')+'<\/div><\/div>'
+      +'<div class="meta-block"><div class="meta-lbl">Payment Terms<\/div><div class="meta-val">'+(sale.paymentTerms||'Net 30')+'<\/div><\/div>'
+      +'<div class="meta-block"><div class="meta-lbl">Ship Via<\/div><div class="meta-val">'+(sale.shipMethod||'Ground')+'<\/div><\/div>'
+    +'<\/div>'
+    +'<table class="items"><thead><tr><th>#<\/th><th>Description<\/th><th>SKU<\/th><th>Qty<\/th><th>Unit Price<\/th><th>Line Total<\/th><\/tr><\/thead>'
+    +'<tbody>'+itemRows+'<\/tbody><\/table>'
+    +'<div class="totals-block"><table class="totals-tbl">'
+      +'<tr><td>Subtotal<\/td><td style="text-align:right">'+fmtMoney(subtotal)+'<\/td><\/tr>'
+      +'<tr><td>Tax (0%)<\/td><td style="text-align:right">$0.00<\/td><\/tr>'
+      +'<tr><td>Shipping<\/td><td style="text-align:right">$0.00<\/td><\/tr>'
+      +'<tr><td>Grand Total<\/td><td style="text-align:right">'+fmtMoney(subtotal)+'<\/td><\/tr>'
+    +'<\/table><\/div>'
+    +'<div class="footer">'
+      +'<div><div class="footer-co">Total Scope, Inc.<\/div><div>4 Steel Road East, Morrisville PA 19067 &nbsp;|&nbsp; (215) 736-1991<\/div><div style="margin-top:2px">ISO 13485 Certified &middot; FDA Registered<\/div><\/div>'
+      +'<div class="terms">Valid for 30 days from quote date (' + validStr + ')<\/div>'
+    +'<\/div>'
+    +'<\/body><\/html>';
+
+  var w = window.open('', '_blank', 'width=850,height=700');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(function() { w.print(); }, 400);
 }
 
 /* ─── ADD SALE MODAL ─── */
@@ -943,7 +1337,7 @@ function populateModalDepts() {
   var c = clientData.find(function(x) { return x.key === clientKey; });
   if (c) {
     c.depts.forEach(function(d) {
-      dd.innerHTML += '<option value="'+d+'">'+d+'</option>';
+      dd.innerHTML += '<option value="'+d.name+'">'+d.name+'</option>';
     });
   }
 }
@@ -960,6 +1354,11 @@ function createSale() {
   var nextKey = allSales.reduce(function(mx,s) { return Math.max(mx, s.lSaleKey); }, 2400) + 1;
   var nextInv = 'PS-' + nextKey;
 
+  var deptObj = client.depts ? client.depts.find(function(d) { return d.name === dept; }) : null;
+  var billToAddr = deptObj
+    ? (client.name + '\nAttn: ' + dept + '\n' + deptObj.addr1 + '\n' + deptObj.city + ', ' + deptObj.state + ' ' + deptObj.zip)
+    : (client.name + '\nAttn: ' + dept);
+
   var newSale = {
     lSaleKey: nextKey,
     invoiceNum: nextInv,
@@ -971,6 +1370,10 @@ function createSale() {
     status: 'Draft',
     poNumber: document.getElementById('mPO').value || '',
     priceList: document.getElementById('mPriceList').value || 'Standard',
+    paymentTerms: 'Net 30',
+    shipMethod: 'Ground',
+    billToAddr: billToAddr,
+    shipToAddr: '',
     location: document.getElementById('mLocation').value || 'Upper Chichester',
     notes: document.getElementById('mNotes').value || '',
     items: [],
