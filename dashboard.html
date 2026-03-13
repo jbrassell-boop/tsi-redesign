@@ -624,20 +624,32 @@ function mapApiRow(r) {
 
 // Load data from API
 async function loadDashboardData(filters) {
+  // Show demo data immediately so the table isn't blank while waiting
+  SCOPES = getDemoData();
+  DATA_SOURCE = 'fallback';
+  updateStats();
+  renderTable();
+
   try {
     document.getElementById('recordInfo').innerHTML = 'Connecting to API…';
-    const data = await API.getDashboardScopes(filters);
 
-    if (data && Array.isArray(data) && data.length > 0) {
+    // 12-second timeout — fall back to demo data if API is slow/unresponsive
+    const apiCall = API.getDashboardScopes(filters);
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('API timeout after 12s')), 12000)
+    );
+    const data = await Promise.race([apiCall, timeout]);
+
+    if (Array.isArray(data) && data.length > 0) {
       SCOPES = data.map(mapApiRow);
       DATA_SOURCE = 'api';
       console.log('[TSI] Loaded ' + SCOPES.length + ' scopes from live API');
-    } else if (data && data.length === 0) {
+    } else if (Array.isArray(data)) {
       SCOPES = [];
       DATA_SOURCE = 'api';
-      console.log('[TSI] API returned 0 scopes (empty result set)');
+      console.log('[TSI] API returned 0 scopes');
     } else {
-      throw new Error('Unexpected API response format');
+      throw new Error('Unexpected API response: ' + JSON.stringify(data)?.slice(0, 100));
     }
   } catch (err) {
     console.warn('[TSI] API call failed, using demo data:', err.message);
