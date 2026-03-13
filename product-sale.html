@@ -584,27 +584,61 @@ let _searchTimer, _saveTimer;
 /* ─── CLIENT / DEPT DATA ─── */
 var clientData = [
   { key:1, name:'Johns Hopkins Hospital', depts:[
-    { name:'Endoscopy',    addr1:'1800 Orleans Street',   city:'Baltimore',   state:'MD', zip:'21287' },
-    { name:'Pulmonology',  addr1:'600 N Wolfe Street',    city:'Baltimore',   state:'MD', zip:'21287' }
+    { name:'Endoscopy',
+      billName:'Johns Hopkins Hospital - AP', billAddr1:'PO Box 7380',              billCity:'Baltimore',   billState:'MD', billZip:'21203',
+      shipName:'Johns Hopkins Hospital',      shipAddr1:'Endoscopy Suite, Blalock 600 N Wolfe St', shipCity:'Baltimore',   shipState:'MD', shipZip:'21287' },
+    { name:'Pulmonology',
+      billName:'Johns Hopkins Hospital - AP', billAddr1:'PO Box 7380',              billCity:'Baltimore',   billState:'MD', billZip:'21203',
+      shipName:'Johns Hopkins Hospital',      shipAddr1:'Pulmonology, Carnegie Bldg, 1800 Orleans St', shipCity:'Baltimore', shipState:'MD', shipZip:'21287' }
   ]},
   { key:2, name:'Cleveland Clinic', depts:[
-    { name:'Gastroenterology', addr1:'9500 Euclid Avenue',    city:'Cleveland',  state:'OH', zip:'44195' },
-    { name:'Surgery',          addr1:'9500 Euclid Avenue',    city:'Cleveland',  state:'OH', zip:'44195' }
+    { name:'Gastroenterology',
+      billName:'Cleveland Clinic',            billAddr1:'9500 Euclid Avenue',       billCity:'Cleveland',  billState:'OH', billZip:'44195',
+      shipName:'Cleveland Clinic',            shipAddr1:'Gastroenterology Dept, Bldg A, 9500 Euclid Ave', shipCity:'Cleveland', shipState:'OH', shipZip:'44195' },
+    { name:'Surgery',
+      billName:'Cleveland Clinic',            billAddr1:'9500 Euclid Avenue',       billCity:'Cleveland',  billState:'OH', billZip:'44195',
+      shipName:'Cleveland Clinic',            shipAddr1:'Surgical Services, Bldg H, 9500 Euclid Ave',    shipCity:'Cleveland', shipState:'OH', shipZip:'44195' }
   ]},
   { key:3, name:'Mayo Clinic', depts:[
-    { name:'Pulmonology', addr1:'200 First Street SW',    city:'Rochester',   state:'MN', zip:'55905' },
-    { name:'ENT',         addr1:'200 First Street SW',    city:'Rochester',   state:'MN', zip:'55905' }
+    { name:'Pulmonology',
+      billName:'Mayo Clinic - Accounts Payable', billAddr1:'200 First Street SW',  billCity:'Rochester',   billState:'MN', billZip:'55905',
+      shipName:'Mayo Clinic',                    shipAddr1:'Pulmonology, Gonda 18, 200 First St SW', shipCity:'Rochester', shipState:'MN', shipZip:'55905' },
+    { name:'ENT',
+      billName:'Mayo Clinic - Accounts Payable', billAddr1:'200 First Street SW',  billCity:'Rochester',   billState:'MN', billZip:'55905',
+      shipName:'Mayo Clinic',                    shipAddr1:'ENT Clinic, Charlton Bldg, 200 First St SW', shipCity:'Rochester', shipState:'MN', shipZip:'55905' }
   ]},
   { key:4, name:'HCA West Kendall Hospital', depts:[
-    { name:'Endoscopy Center', addr1:'11750 Bird Road',   city:'Miami',       state:'FL', zip:'33175' },
-    { name:'GI Lab',           addr1:'11750 Bird Road',   city:'Miami',       state:'FL', zip:'33175' }
+    { name:'Endoscopy Center',
+      billName:'HCA West Kendall Hospital',   billAddr1:'11750 Bird Road',          billCity:'Miami',       billState:'FL', billZip:'33175',
+      shipName:'HCA West Kendall Hospital',   shipAddr1:'Endoscopy Center, 2nd Fl, 11750 Bird Rd',     shipCity:'Miami', shipState:'FL', shipZip:'33175' },
+    { name:'GI Lab',
+      billName:'HCA West Kendall Hospital',   billAddr1:'11750 Bird Road',          billCity:'Miami',       billState:'FL', billZip:'33175',
+      shipName:'HCA West Kendall Hospital',   shipAddr1:'GI Lab, 3rd Fl, 11750 Bird Rd',               shipCity:'Miami', shipState:'FL', shipZip:'33175' }
   ]},
   { key:5, name:'Cedars-Sinai Medical Center', depts:[
-    { name:'Bronchoscopy', addr1:'8700 Beverly Blvd',    city:'Los Angeles', state:'CA', zip:'90048' },
-    { name:'Gastro',       addr1:'8700 Beverly Blvd',    city:'Los Angeles', state:'CA', zip:'90048' }
+    { name:'Bronchoscopy',
+      billName:'Cedars-Sinai Medical Center', billAddr1:'8700 Beverly Blvd, Ste 2100', billCity:'Los Angeles', billState:'CA', billZip:'90048',
+      shipName:'Cedars-Sinai Medical Center', shipAddr1:'Bronchoscopy Suite, Bldg B, 8700 Beverly Blvd', shipCity:'Los Angeles', shipState:'CA', shipZip:'90048' },
+    { name:'Gastro',
+      billName:'Cedars-Sinai Medical Center', billAddr1:'8700 Beverly Blvd, Ste 2100', billCity:'Los Angeles', billState:'CA', billZip:'90048',
+      shipName:'Cedars-Sinai Medical Center', shipAddr1:'Gastroenterology, Bldg A, 8700 Beverly Blvd',  shipCity:'Los Angeles', shipState:'CA', shipZip:'90048' }
   ]}
 ];
 var salesReps = ['Mike Rivera','Sarah Chen','James Wilson'];
+
+/* ─── ADDRESS BUILDER ─── */
+function buildDeptAddr(clientName, dept, type) {
+  if (!dept) return clientName;
+  var name  = type === 'bill' ? (dept.billName  || clientName) : (dept.shipName  || clientName);
+  var addr1 = type === 'bill' ? (dept.billAddr1 || '')         : (dept.shipAddr1 || '');
+  var city  = type === 'bill' ? (dept.billCity  || '')         : (dept.shipCity  || '');
+  var state = type === 'bill' ? (dept.billState || '')         : (dept.shipState || '');
+  var zip   = type === 'bill' ? (dept.billZip   || '')         : (dept.shipZip   || '');
+  var lines = [name, 'Attn: ' + dept.name];
+  if (addr1) lines.push(addr1);
+  if (city || state || zip) lines.push((city ? city + ', ' : '') + [state, zip].filter(Boolean).join(' '));
+  return lines.join('\n');
+}
 
 /* ─── INVENTORY CATALOG ─── */
 var inventoryCatalog = [
@@ -744,16 +778,12 @@ async function loadSales() {
     }
     if (!s.paymentTerms) s.paymentTerms = 'Net 30';
     if (!s.shipMethod) s.shipMethod = 'Ground';
-    if (!s.billToAddr) {
+    if (!s.billToAddr || s.shipToAddr === undefined) {
       var c = clientData.find(function(x) { return x.key === s.clientKey; });
       var dept = c && c.depts ? c.depts.find(function(d) { return d.name === s.deptName; }) : null;
-      if (dept) {
-        s.billToAddr = (c.name) + '\nAttn: ' + dept.name + '\n' + dept.addr1 + '\n' + dept.city + ', ' + dept.state + ' ' + dept.zip;
-      } else {
-        s.billToAddr = s.clientName + '\nAttn: ' + s.deptName;
-      }
+      if (!s.billToAddr)          s.billToAddr  = buildDeptAddr(s.clientName, dept, 'bill');
+      if (s.shipToAddr === undefined) s.shipToAddr = buildDeptAddr(s.clientName, dept, 'ship');
     }
-    if (s.shipToAddr === undefined) s.shipToAddr = '';
   });
   runPipeline();
 }
@@ -1355,9 +1385,8 @@ function createSale() {
   var nextInv = 'PS-' + nextKey;
 
   var deptObj = client.depts ? client.depts.find(function(d) { return d.name === dept; }) : null;
-  var billToAddr = deptObj
-    ? (client.name + '\nAttn: ' + dept + '\n' + deptObj.addr1 + '\n' + deptObj.city + ', ' + deptObj.state + ' ' + deptObj.zip)
-    : (client.name + '\nAttn: ' + dept);
+  var billToAddr = buildDeptAddr(client.name, deptObj, 'bill');
+  var shipToAddr = buildDeptAddr(client.name, deptObj, 'ship');
 
   var newSale = {
     lSaleKey: nextKey,
@@ -1373,7 +1402,7 @@ function createSale() {
     paymentTerms: 'Net 30',
     shipMethod: 'Ground',
     billToAddr: billToAddr,
-    shipToAddr: '',
+    shipToAddr: shipToAddr,
     location: document.getElementById('mLocation').value || 'Upper Chichester',
     notes: document.getElementById('mNotes').value || '',
     items: [],
