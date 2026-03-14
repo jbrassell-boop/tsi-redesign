@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Instrument Quotes | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s;min-width:0}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#ECFEFF}
+    .stat-chip.info-only{cursor:default}.stat-chip.info-only:hover{background:var(--card)}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)}.s-red{color:var(--red)}.s-green{color:var(--green)}.s-amber{color:var(--amber)}.s-blue{color:var(--blue)}.s-purple{color:#7C3AED}
+
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:visible;flex-shrink:0}
+    .seg-btn{padding:5px 8px;font-size:10px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s;flex-shrink:0}
+    .search-input:focus{border-color:var(--navy)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:150px;flex-shrink:0}
+    .filter-dd:focus{border-color:var(--navy)}
+
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:8px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none;transition:background .1s}
+    .table-wrap thead th:hover{background:var(--steel)}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#CFFAFE;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .code-link{font-weight:700;color:var(--navy);font-family:'Consolas','Courier New',monospace;font-size:10.5px}
+
+    .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-draft{background:#F3F4F6;color:#374151;border-color:#D1D5DB}
+    .b-sent{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-approved{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-partial{background:#FFFBEB;color:#92400E;border-color:#FDE68A}
+    .b-declined{background:#FEF2F2;color:#991B1B;border-color:#FECACA}
+    .gpo-tag{display:inline-flex;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:700;background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE}
+    .out-badge{display:inline-flex;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:700;background:#FDF4FF;color:#7C3AED;border:1px solid #E9D5FF}
+
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .pagination{display:flex;gap:3px;align-items:center}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit;transition:all .1s}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+
+    /* Drawer */
+    .quote-drawer{position:fixed;right:0;top:64px;bottom:0;width:560px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .quote-drawer.open{transform:translateX(0)}
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+    .drawer-header{padding:12px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
+    .dh-left{min-width:0;flex:1}
+    .dh-qnum{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+    .dtabs{display:flex;border-bottom:1.5px solid var(--border-dk);background:#F8FAFF;flex-shrink:0}
+    .dtab{padding:8px 14px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1.5px;white-space:nowrap}
+    .dtab:hover{color:var(--navy)}
+    .dtab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .dpane{display:none;flex:1;min-height:0;overflow-y:auto;padding:14px 18px;flex-direction:column;gap:12px}
+    .dpane.active{display:flex}
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden;flex-shrink:0}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field input,.field select{height:28px}
+    .field textarea{padding:6px 8px;resize:vertical;min-height:70px}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .addr-block{font-size:11px;color:var(--text);line-height:1.7;padding:8px 10px;background:#F8FAFF;border-radius:4px;border:1px solid var(--border)}
+
+    /* Items table */
+    .items-wrap{overflow-x:auto;flex-shrink:0}
+    .items-table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:680px}
+    .items-table th{background:#F0F4FA;padding:6px 8px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left;white-space:nowrap;border-bottom:1.5px solid var(--border-dk)}
+    .items-table td{padding:5px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .items-table tr.item-row:hover{background:#F8FAFF}
+    .items-table input,.items-table select{height:24px;border:1.5px solid var(--border-dk);border-radius:3px;padding:0 5px;font-size:10.5px;font-family:inherit;width:100%;box-sizing:border-box;background:#fff}
+    .items-table input:focus,.items-table select:focus{border-color:var(--navy);outline:none}
+    .appr-btns{display:flex;gap:2px;flex-shrink:0}
+    .appr-btn{height:22px;min-width:24px;padding:0 5px;border:1.5px solid var(--border-dk);border-radius:3px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff;color:var(--muted);transition:all .1s}
+    .appr-btn.ay{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .appr-btn.an{background:#FEF2F2;color:#991B1B;border-color:#FECACA}
+    .appr-btn.ap{background:#F3F4F6;color:var(--steel);border-color:#D1D5DB}
+    .out-chk{width:14px;height:14px;cursor:pointer;accent-color:var(--navy);flex-shrink:0}
+    .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;border-radius:3px;transition:color .1s}
+    .del-btn:hover{color:var(--red)}
+    .add-item-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1.5px dashed var(--border-dk);border-radius:5px;background:transparent;font-size:11px;color:var(--blue);font-family:inherit;cursor:pointer;font-weight:600;margin-top:4px;transition:all .1s;flex-shrink:0}
+    .add-item-btn:hover{border-color:var(--navy);color:var(--navy);background:#F0F4FA}
+
+    /* Quote totals */
+    .quote-totals{display:flex;align-items:center;gap:16px;padding:8px 12px;background:#F0F4FA;border-radius:6px;border:1.5px solid var(--border-dk);flex-shrink:0;justify-content:flex-end}
+    .qt-item{display:flex;flex-direction:column;align-items:flex-end}
+    .qt-lbl{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.3px}
+    .qt-val{font-size:14px;font-weight:800;color:var(--navy)}
+
+    /* Outsource tab */
+    .out-table{width:100%;border-collapse:collapse;font-size:11px}
+    .out-table th{background:#F0F4FA;padding:6px 10px;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left;border-bottom:1.5px solid var(--border-dk)}
+    .out-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .out-table input{height:24px;border:1.5px solid var(--border-dk);border-radius:3px;padding:0 6px;font-size:10.5px;font-family:inherit;background:#fff;box-sizing:border-box;width:100%}
+    .out-table input:focus{border-color:var(--navy);outline:none}
+    .out-total-row td{background:#F0F4FA;font-weight:700;font-size:11px;color:var(--navy);border-bottom:none}
+    .margin-pos{color:#2E7D32;font-weight:700}
+    .margin-neg{color:var(--red);font-weight:700}
+    .out-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px}
+
+    /* Drawer footer */
+    .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+    #drawerSaveStatus{font-size:10.5px;color:var(--muted)}
+
+    /* Wizard */
+    .wiz-overlay{position:fixed;inset:0;background:rgba(var(--primary-rgb),.35);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .wiz-overlay.open{display:flex}
+    .wiz-modal{background:#fff;border-radius:12px;width:680px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 72px rgba(var(--primary-rgb),.25)}
+    .wiz-hdr{padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .wiz-title{font-size:14px;font-weight:800}
+    .wiz-x{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;line-height:1;border-radius:4px;font-family:inherit}
+    .wiz-x:hover{background:rgba(255,255,255,.15);color:#fff}
+    .wiz-steps-bar{display:flex;background:#F8FAFF;border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .wiz-stab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;font-size:11px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s}
+    .wiz-stab .sn{width:20px;height:20px;border-radius:50%;background:var(--border-dk);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+    .wiz-stab.active{color:var(--navy);border-bottom-color:var(--navy)}
+    .wiz-stab.active .sn{background:var(--navy)}
+    .wiz-stab.done{color:var(--green)}
+    .wiz-stab.done .sn{background:var(--green)}
+    .wiz-body{flex:1;min-height:0;overflow-y:auto;padding:16px 20px}
+    .wiz-panel{display:none;flex-direction:column;gap:10px}
+    .wiz-panel.active{display:flex}
+    .wiz-search{width:100%;height:32px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;box-sizing:border-box;transition:border-color .15s}
+    .wiz-search:focus{border-color:var(--navy)}
+    .wiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px;max-height:260px;overflow-y:auto;padding:2px}
+    .wiz-card{border:1.5px solid var(--border-dk);border-radius:8px;padding:11px 14px;cursor:pointer;transition:all .15s;background:#fff}
+    .wiz-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(46,116,181,.12)}
+    .wiz-card.selected{border-color:var(--navy);background:#ECFEFF;box-shadow:0 2px 8px rgba(var(--primary-rgb),.12)}
+    .wiz-card-name{font-size:12px;font-weight:700;color:var(--navy)}
+    .wiz-card-detail{font-size:10px;color:var(--muted);margin-top:2px}
+    .wiz-confirm-bar{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .wcb-lbl{font-size:9.5px;font-weight:700;color:var(--green);text-transform:uppercase}
+    .wcb-val{font-size:12px;font-weight:700;color:var(--navy)}
+    .wcb-chg{background:none;border:none;color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:inherit}
+    .wiz-ftr{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#fff}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Instruments</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>Instrument Quotes</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:210px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newQuote()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <div>Instrument Quote<div style="font-size:10px;color:var(--muted);font-weight:400">Quote surgical instrument repairs</div></div>
+            </a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip" id="kpiAll" onclick="chipFilter('')">
+          <div class="s-icon" style="background:#E3F2FD">📋</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiAllVal">0</div><div class="s-lbl">Total Quotes</div></div>
+        </div>
+        <div class="stat-chip" id="kpiDraft" onclick="chipFilter('Draft')">
+          <div class="s-icon" style="background:#F3F4F6">✏️</div>
+          <div class="s-data"><div class="s-val" style="color:#374151" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
+        </div>
+        <div class="stat-chip" id="kpiSent" onclick="chipFilter('Sent')">
+          <div class="s-icon" style="background:#EFF6FF">📤</div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiSentVal">0</div><div class="s-lbl">Sent / Pending</div></div>
+        </div>
+        <div class="stat-chip" id="kpiApproved" onclick="chipFilter('Approved')">
+          <div class="s-icon" style="background:#E8F5E9">✅</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiApprovedVal">0</div><div class="s-lbl">Approved</div></div>
+        </div>
+        <div class="stat-chip" id="kpiPartial" onclick="chipFilter('Partially Approved')">
+          <div class="s-icon" style="background:#FFFBEB">⚡</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiPartialVal">0</div><div class="s-lbl">Part. Approved</div></div>
+        </div>
+        <div class="stat-chip" id="kpiDeclined" onclick="chipFilter('Declined')">
+          <div class="s-icon" style="background:#FEF2F2">❌</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiDeclinedVal">0</div><div class="s-lbl">Declined</div></div>
+        </div>
+        <div class="stat-chip info-only">
+          <div class="s-icon" style="background:#E8F5E9">💰</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiValueVal">$0</div><div class="s-lbl">Total Value</div></div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="newQuote()" style="height:30px;padding:0 12px;font-size:11px;font-weight:700;flex-shrink:0;display:flex;align-items:center;gap:5px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Quote
+        </button>
+        <div class="filter-sep"></div>
+        <span class="filter-label">Client</span>
+        <select class="filter-dd" id="filterClient" onchange="applyFilters()">
+          <option value="">All Clients</option>
+        </select>
+        <div class="filter-sep"></div>
+        <span class="filter-label">GPO</span>
+        <div class="seg-group">
+          <button class="seg-btn active" onclick="setGpoFilter('',this)">All</button>
+          <button class="seg-btn" onclick="setGpoFilter('hpg',this)">HPG</button>
+          <button class="seg-btn" onclick="setGpoFilter('viz',this)">Vizient</button>
+          <button class="seg-btn" onclick="setGpoFilter('s3',this)">S3</button>
+          <button class="seg-btn" onclick="setGpoFilter('std',this)">Standard</button>
+        </div>
+        <input class="search-input" id="searchInput" placeholder="Search quote #, client, dept..." oninput="debounceSearch()" style="margin-left:auto"/>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px" onclick="sortBy('quoteNum')">Quote # <span class="sort"></span></th>
+              <th style="width:160px" onclick="sortBy('clientName')">Client <span class="sort"></span></th>
+              <th style="width:160px" onclick="sortBy('deptName')">Department <span class="sort"></span></th>
+              <th style="width:90px" onclick="sortBy('quoteDate')">Date <span class="sort"></span></th>
+              <th style="width:55px" onclick="sortBy('itemCount')">Items <span class="sort"></span></th>
+              <th style="width:70px">Outsourced</th>
+              <th style="width:90px" onclick="sortBy('total')">Total <span class="sort"></span></th>
+              <th style="width:70px">GPO</th>
+              <th style="width:120px" onclick="sortBy('status')">Status <span class="sort"></span></th>
+            </tr>
+          </thead>
+          <tbody id="quotesTableBody">
+            <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="table-footer">
+        <span class="record-info" id="recordInfo"></span>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Quote Drawer -->
+<div class="quote-drawer" id="quoteDrawer">
+  <div class="drawer-header">
+    <div class="dh-left">
+      <div class="dh-qnum" id="dhQuoteNum">—</div>
+      <div class="dh-sub" id="dhSub">—</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <span id="dhStatusBadge"></span>
+      <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="dtabs">
+    <div class="dtab active" onclick="switchTab('details',this)">Details</div>
+    <div class="dtab" onclick="switchTab('items',this)">Line Items</div>
+    <div class="dtab" onclick="switchTab('outsource',this)">Outsource</div>
+    <div class="dtab" onclick="switchTab('notes',this)">Notes</div>
+  </div>
+
+  <!-- Details Tab -->
+  <div class="dpane active" id="dpane-details">
+    <div class="section-card">
+      <div class="section-head">Quote Info</div>
+      <div class="section-body">
+        <div class="g3">
+          <div class="field"><label>Quote #</label><input type="text" id="dQuoteNum" readonly/></div>
+          <div class="field"><label>Date</label><input type="date" id="dQuoteDate" onchange="markDirty()"/></div>
+          <div class="field"><label>Status</label>
+            <select id="dStatus" onchange="onStatusChange()">
+              <option value="Draft">Draft</option>
+              <option value="Sent">Sent</option>
+              <option value="Partially Approved">Partially Approved</option>
+              <option value="Approved">Approved</option>
+              <option value="Declined">Declined</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Client</label><input type="text" id="dClient" readonly/></div>
+          <div class="field"><label>Department</label><input type="text" id="dDept" readonly/></div>
+        </div>
+        <div class="g3">
+          <div class="field"><label>GPO</label>
+            <select id="dGpo" onchange="onGpoChange()">
+              <option value="">Standard</option>
+              <option value="hpg">HPG</option>
+              <option value="viz">Vizient</option>
+              <option value="s3">S3</option>
+            </select>
+          </div>
+          <div class="field"><label>PO Number</label><input type="text" id="dPo" onchange="markDirty()"/></div>
+          <div class="field"><label>Reviewed By</label><input type="text" id="dReviewedBy" onchange="markDirty()"/></div>
+        </div>
+        <div class="field"><label>Visit / Service Reference</label><input type="text" id="dVisitRef" placeholder="e.g. Van service 03/06/2026" onchange="markDirty()"/></div>
+        <div class="field"><label>Sales Rep</label><input type="text" id="dSalesRep" onchange="markDirty()"/></div>
+      </div>
+    </div>
+    <div class="g2" style="flex-shrink:0">
+      <div class="section-card">
+        <div class="section-head">Bill To</div>
+        <div class="section-body"><div class="addr-block" id="dBillTo">—</div></div>
+      </div>
+      <div class="section-card">
+        <div class="section-head">Ship To</div>
+        <div class="section-body"><div class="addr-block" id="dShipTo">—</div></div>
+      </div>
+    </div>
+    <div id="dSentDateRow" class="section-card" style="display:none">
+      <div class="section-head">Sent Date</div>
+      <div class="section-body">
+        <div class="field"><label>Date Sent</label><input type="date" id="dSentDate" onchange="markDirty()"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Items Tab -->
+  <div class="dpane" id="dpane-items">
+    <div class="items-wrap">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width:60px">Code</th>
+            <th style="width:80px">Mfr / Model</th>
+            <th style="width:60px">Serial</th>
+            <th>Issue / Finding</th>
+            <th style="width:90px">Level</th>
+            <th style="width:70px">Amount</th>
+            <th style="width:70px">Approval</th>
+            <th style="width:30px">Out</th>
+            <th style="width:24px"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsTableBody"></tbody>
+      </table>
+    </div>
+    <button class="add-item-btn" onclick="addItem()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Line Item
+    </button>
+    <div class="quote-totals" id="quoteTotals">
+      <div class="qt-item"><div class="qt-lbl">Items</div><div class="qt-val" id="qtItems">0</div></div>
+      <div class="qt-item"><div class="qt-lbl">Approved</div><div class="qt-val s-green" id="qtApproved">$0.00</div></div>
+      <div class="qt-item"><div class="qt-lbl">Pending</div><div class="qt-val s-amber" id="qtPending">$0.00</div></div>
+      <div class="qt-item"><div class="qt-lbl">Quote Total</div><div class="qt-val" id="qtTotal">$0.00</div></div>
+    </div>
+  </div>
+
+  <!-- Outsource Tab -->
+  <div class="dpane" id="dpane-outsource">
+    <div id="outsourceContent"></div>
+  </div>
+
+  <!-- Notes Tab -->
+  <div class="dpane" id="dpane-notes">
+    <div class="section-card">
+      <div class="section-head">Internal Notes</div>
+      <div class="section-body">
+        <div class="field">
+          <label>Notes (internal — not printed on requisition)</label>
+          <textarea id="dNotes" rows="6" onchange="markDirty()" style="min-height:120px"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <div id="drawerSaveStatus"></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-outline" onclick="deleteQuote()" style="height:30px;padding:0 12px;font-size:11px;border-color:var(--red);color:var(--red)">Delete</button>
+      <button class="btn btn-outline" id="btnMarkSent" onclick="markSent()" style="height:30px;padding:0 12px;font-size:11px">Mark Sent</button>
+      <button class="btn btn-navy" onclick="saveDrawer()" style="height:30px;padding:0 14px;font-size:11px">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wizard Modal -->
+<div class="wiz-overlay" id="wizOverlay">
+  <div class="wiz-modal">
+    <div class="wiz-hdr">
+      <span class="wiz-title">New Instrument Quote</span>
+      <button class="wiz-x" onclick="closeWiz()">&#x2715;</button>
+    </div>
+    <div class="wiz-steps-bar">
+      <div class="wiz-stab active" id="wTab1"><div class="sn">1</div> Client</div>
+      <div class="wiz-stab" id="wTab2"><div class="sn">2</div> Department</div>
+      <div class="wiz-stab" id="wTab3"><div class="sn">3</div> Details</div>
+    </div>
+    <div class="wiz-body">
+      <!-- Step 1: Client -->
+      <div class="wiz-panel active" id="wPanel1">
+        <input type="text" class="wiz-search" id="wClientSearch" placeholder="Search clients..." oninput="wizFilterClients(this.value)"/>
+        <div class="wiz-grid" id="wClientGrid"></div>
+      </div>
+      <!-- Step 2: Dept -->
+      <div class="wiz-panel" id="wPanel2">
+        <div class="wiz-confirm-bar" id="wClientBar">
+          <div><div class="wcb-lbl">Client</div><div class="wcb-val" id="wClientBarName">—</div></div>
+          <button class="wcb-chg" onclick="wizGoStep(1)">Change</button>
+        </div>
+        <input type="text" class="wiz-search" id="wDeptSearch" placeholder="Search departments..." oninput="wizFilterDepts(this.value)" style="margin-top:8px"/>
+        <div class="wiz-grid" id="wDeptGrid"></div>
+      </div>
+      <!-- Step 3: Options -->
+      <div class="wiz-panel" id="wPanel3">
+        <div class="wiz-confirm-bar" style="margin-bottom:4px">
+          <div><div class="wcb-lbl">Client / Department</div><div class="wcb-val" id="wSummaryName">—</div></div>
+          <button class="wcb-chg" onclick="wizGoStep(1)">Change</button>
+        </div>
+        <div class="section-card">
+          <div class="section-head">Quote Options</div>
+          <div class="section-body">
+            <div class="g2">
+              <div class="field"><label>GPO Pricing</label>
+                <select id="wGpo">
+                  <option value="">Standard</option>
+                  <option value="hpg">HPG</option>
+                  <option value="viz">Vizient</option>
+                  <option value="s3">S3</option>
+                </select>
+              </div>
+              <div class="field"><label>Reviewed By</label><input type="text" id="wReviewedBy" placeholder="Technician name"/></div>
+            </div>
+            <div class="field"><label>Visit / Service Reference</label><input type="text" id="wVisitRef" placeholder="e.g. Van service 03/06/2026"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wiz-ftr">
+      <button id="wBtnBack" onclick="wizBack()" style="height:32px;padding:0 16px;border:1.5px solid var(--border-dk);border-radius:6px;background:#fff;color:var(--navy);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:none">Back</button>
+      <div style="flex:1"></div>
+      <button onclick="closeWiz()" style="height:32px;padding:0 16px;border:1.5px solid var(--border-dk);border-radius:6px;background:#fff;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">Cancel</button>
+      <button id="wBtnNext" onclick="wizNext()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none">Next</button>
+      <button id="wBtnCreate" onclick="wizCreate()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:none">Create Quote</button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="instruments-data.js"></script>
+<script>
+// ── Auth ──
+try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message === 'redirect') window.location = 'login.html'; }
+
+// ── Repair Levels (from instruments.html) ──
+const REPAIR_LEVELS = [
+  { level:1, name:'Level 1 — Minor', pct:.34, desc:'Complete diagnostic, five point exterior inspection, minor repair stuck burr/blade/chuck, minor trigger/switch repair, specifications test.' },
+  { level:2, name:'Level 2 — Moderate', pct:.86, desc:'Complete diagnostic, five & ten point inspection, clean/lubricate all internal parts, replace worn O-rings/clips/seals, specifications test.' },
+  { level:3, name:'Level 3 — Major', pct:1.0, desc:'Complete diagnostic, five & ten point inspection, clean/lubricate, replace all worn O-rings/clips/seals/bearings/vanes, specifications test.' },
+  { level:4, name:'Hose Replacement', pct:.57, desc:'Inner and outer hose replacement, new clips/spring/O-ring, straighten connectors, specifications test.' }
+];
+
+// ── Demo Data ──
+var DEMO_QUOTES = [
+  {
+    id:1001, quoteNum:'IQ-2026-001', status:'Sent',
+    clientKey:1, clientName:'Inspira Medical Centers',
+    deptKey:11, deptName:'Endoscopy — Mullica Hill',
+    billTo:{name:'Inspira Medical Centers, Inc.',attn:'Accounts Payable',addr1:'333 Irving Avenue',city:'Bridgeton',state:'NJ',zip:'08302'},
+    shipTo:{name:'Inspira Medical Ctr — Mullica Hill',attn:'101 Sterile Processing',addr1:'700 Mullica Hill Road',city:'Mullica Hill',state:'NJ',zip:'08062'},
+    salesRep:'Jordan Martin', gpo:'', visitRef:'Van service 03/06/2026',
+    quoteDate:'2026-03-13', sentDate:'2026-03-13', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
+    items:[
+      {id:1,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'2797',issue:'Handle housing cracked and lever broken — damaged beyond repair',techNote:'TSI can offer exchange option for same make/model',repairLevel:3,basePrice:430,amount:430,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS851',mfr:'Storz',model:'33132',serial:'FH01',issue:'Repair rotation knob and replace locking spring, lock and button',techNote:'',repairLevel:2,basePrice:198,amount:170,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:3,instrCode:'OS1477',mfr:'Aesculap',model:'PM973R',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:4,instrCode:'OS1477',mfr:'Aesculap',model:'PM600201',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1002, quoteNum:'IQ-2026-002', status:'Draft',
+    clientKey:2, clientName:'Johns Hopkins Hospital',
+    deptKey:21, deptName:'GI Lab — East Baltimore',
+    billTo:{name:'Johns Hopkins Hospital',attn:'Accounts Payable',addr1:'600 N. Wolfe Street',city:'Baltimore',state:'MD',zip:'21287'},
+    shipTo:{name:'Johns Hopkins — GI Lab',attn:'Sterile Processing',addr1:'600 N. Wolfe Street, Bldg B',city:'Baltimore',state:'MD',zip:'21287'},
+    salesRep:'Mike Rivera', gpo:'hpg', visitRef:'Field eval 02/28/2026',
+    quoteDate:'2026-03-10', sentDate:null, poNumber:'', reviewedBy:'Alex Torres', notes:'Customer may want to bundle with scope repair.',
+    items:[
+      {id:1,instrCode:'OS1040',mfr:'Olympus',model:'FG-32L',serial:'A22-0441',issue:'Biopsy channel worn — burr snagging biopsy forceps on retrieval',techNote:'Channel replacement required',repairLevel:3,basePrice:540,amount:540,approval:null,outsource:true,outsourceVendor:'Olympus Repair Center',outsourceCost:380},
+      {id:2,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'B09-774',issue:'Sheath cracked at distal end — light loss visible',techNote:'New sheath fabricated in-house',repairLevel:2,basePrice:310,amount:267,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1003, quoteNum:'IQ-2026-003', status:'Approved',
+    clientKey:3, clientName:'Penn Medicine',
+    deptKey:31, deptName:'Endoscopy — Hospital of the University of PA',
+    billTo:{name:'Penn Medicine / UPHS',attn:'Accounts Payable',addr1:'3400 Civic Center Blvd',city:'Philadelphia',state:'PA',zip:'19104'},
+    shipTo:{name:'HUP Endoscopy — Sterile Processing',attn:'SPD Department',addr1:'3400 Civic Center Blvd, 3rd Floor',city:'Philadelphia',state:'PA',zip:'19104'},
+    salesRep:'Jordan Martin', gpo:'viz', visitRef:'Van service 03/01/2026',
+    quoteDate:'2026-03-05', sentDate:'2026-03-05', poNumber:'PO-77423', reviewedBy:'Jordan Martin', notes:'',
+    items:[
+      {id:1,instrCode:'OS2200',mfr:'Storz',model:'26174A',serial:'SC-2201',issue:'Light cable detached at eyepiece end',techNote:'Reattached and retested — passed',repairLevel:1,basePrice:280,amount:95,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS810',mfr:'Gyrus ACMI',model:'A3290',serial:'GY-0981',issue:'Insulation compromised on shaft — patient safety risk',techNote:'Full reinsulation required',repairLevel:3,basePrice:620,amount:620,approval:true,outsource:true,outsourceVendor:'ACMI Service Center',outsourceCost:420},
+      {id:3,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1004, quoteNum:'IQ-2026-004', status:'Partially Approved',
+    clientKey:4, clientName:'UPMC Presbyterian',
+    deptKey:41, deptName:'Sterile Processing — UPMC Pres',
+    billTo:{name:'UPMC Presbyterian',attn:'Accounts Payable',addr1:'200 Lothrop Street',city:'Pittsburgh',state:'PA',zip:'15213'},
+    shipTo:{name:'UPMC Pres — SPD',attn:'Sterile Processing',addr1:'200 Lothrop St, Level B',city:'Pittsburgh',state:'PA',zip:'15213'},
+    salesRep:'Dana Cole', gpo:'hpg', visitRef:'On-site eval 02/20/2026',
+    quoteDate:'2026-02-24', sentDate:'2026-02-25', poNumber:'UPMC-14892', reviewedBy:'Dana Cole', notes:'Customer approved 3 of 5 — two items under internal review.',
+    items:[
+      {id:1,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-0042',issue:'Motor housing cracked — vibration and heat',techNote:'Housing replacement required',repairLevel:3,basePrice:890,amount:890,approval:true,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
+      {id:2,instrCode:'OS321',mfr:'Stryker',model:'375-020-000',serial:'STR-0043',issue:'Motor housing cracked — same issue as STR-0042',techNote:'Same repair as above',repairLevel:3,basePrice:890,amount:890,approval:false,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
+      {id:3,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'ML-5591',issue:'Lever spring broken — handle non-functional',techNote:'Spring replaced in-house',repairLevel:2,basePrice:430,amount:370,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:4,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-112',issue:'Jaw alignment off — grip strength reduced',techNote:'Realigned and tested',repairLevel:1,basePrice:240,amount:82,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:5,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'WLF-003',issue:'Image quality degraded — fiber bundle damage',techNote:'Awaiting vendor assessment',repairLevel:null,basePrice:310,amount:0,approval:null,outsource:true,outsourceVendor:'R. Wolf USA',outsourceCost:0}
+    ]
+  },
+  {
+    id:1005, quoteNum:'IQ-2026-005', status:'Sent',
+    clientKey:5, clientName:'Virtua Health',
+    deptKey:51, deptName:'OR — Virtua Voorhees',
+    billTo:{name:'Virtua Health System',attn:'Accounts Payable',addr1:'401 Young Avenue',city:'Voorhees',state:'NJ',zip:'08043'},
+    shipTo:{name:'Virtua Voorhees OR — SPD',attn:'Sterile Processing',addr1:'100 Bowman Drive',city:'Voorhees',state:'NJ',zip:'08043'},
+    salesRep:'Jordan Martin', gpo:'', visitRef:'Field pick-up 03/10/2026',
+    quoteDate:'2026-03-11', sentDate:'2026-03-12', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
+    items:[
+      {id:1,instrCode:'OS1200',mfr:'Codman',model:'80-1550',serial:'CDM-2201',issue:'Bipolar forcep tips oxidized — electrical conductivity degraded',techNote:'Re-tips required',repairLevel:2,basePrice:380,amount:327,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS990',mfr:'V. Mueller',model:'CH6275',serial:'VM-0043',issue:'Ratchet lock skipping — intermittent failure',techNote:'Ratchet mechanism rebuilt',repairLevel:1,basePrice:290,amount:99,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1006, quoteNum:'IQ-2026-006', status:'Declined',
+    clientKey:6, clientName:'RWJ Barnabas Health',
+    deptKey:61, deptName:'Endoscopy — Robert Wood Johnson',
+    billTo:{name:'RWJ Barnabas Health',attn:'Accounts Payable',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
+    shipTo:{name:'RWJ Endoscopy — SPD',attn:'SPD',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
+    salesRep:'Mike Rivera', gpo:'viz', visitRef:'Drop-off 02/15/2026',
+    quoteDate:'2026-02-17', sentDate:'2026-02-18', poNumber:'', reviewedBy:'Alex Torres', notes:'Customer declined — going to OEM for all repairs.',
+    items:[
+      {id:1,instrCode:'OS1040',mfr:'Olympus',model:'FG-32L',serial:'OLY-8821',issue:'Biopsy channel severely worn',techNote:'Channel replacement',repairLevel:3,basePrice:540,amount:540,approval:false,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-7744',issue:'Motor failure — no power',techNote:'Full motor replacement',repairLevel:3,basePrice:890,amount:890,approval:false,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:650},
+      {id:3,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-554',issue:'Tip bent — functional but misaligned',techNote:'Tip replacement',repairLevel:1,basePrice:240,amount:82,approval:false,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1007, quoteNum:'IQ-2026-007', status:'Draft',
+    clientKey:7, clientName:'AtlantiCare Regional',
+    deptKey:71, deptName:'GI Lab — AtlantiCare City',
+    billTo:{name:'AtlantiCare Regional Medical Center',attn:'Accounts Payable',addr1:'1925 Pacific Avenue',city:'Atlantic City',state:'NJ',zip:'08401'},
+    shipTo:{name:'AtlantiCare GI Lab',attn:'Endoscopy SPD',addr1:'1925 Pacific Avenue, 4th Floor',city:'Atlantic City',state:'NJ',zip:'08401'},
+    salesRep:'Jordan Martin', gpo:'s3', visitRef:'',
+    quoteDate:'2026-03-13', sentDate:null, poNumber:'', reviewedBy:'', notes:'In-progress — instrument still being evaluated.',
+    items:[
+      {id:1,instrCode:'OS2200',mfr:'Storz',model:'26174A',serial:'SZ-0017',issue:'Imaging fiber bundle partially broken — image degradation',techNote:'Vendor assessment pending',repairLevel:null,basePrice:280,amount:0,approval:null,outsource:true,outsourceVendor:'Karl Storz Endoscopy',outsourceCost:0}
+    ]
+  },
+  {
+    id:1008, quoteNum:'IQ-2026-008', status:'Approved',
+    clientKey:8, clientName:'Jefferson Health',
+    deptKey:81, deptName:'Cath Lab — Thomas Jefferson',
+    billTo:{name:'Thomas Jefferson University Hospital',attn:'Accounts Payable',addr1:'111 S. 11th Street',city:'Philadelphia',state:'PA',zip:'19107'},
+    shipTo:{name:'Jefferson Cath Lab — SPD',attn:'Sterile Processing',addr1:'111 S. 11th Street, Level 1',city:'Philadelphia',state:'PA',zip:'19107'},
+    salesRep:'Dana Cole', gpo:'hpg', visitRef:'Van service 03/03/2026',
+    quoteDate:'2026-03-06', sentDate:'2026-03-06', poNumber:'JEFF-5521', reviewedBy:'Dana Cole', notes:'',
+    items:[
+      {id:1,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'ML-2210',issue:'Housing cracked',techNote:'',repairLevel:2,basePrice:430,amount:370,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS851',mfr:'Storz',model:'33132',serial:'SZ-0881',issue:'Rotation knob stuck',techNote:'',repairLevel:1,basePrice:198,amount:67,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:3,instrCode:'OS990',mfr:'V. Mueller',model:'CH6275',serial:'VM-0071',issue:'Ratchet failure',techNote:'',repairLevel:2,basePrice:290,amount:249,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:4,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-007',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  },
+  {
+    id:1009, quoteNum:'IQ-2026-009', status:'Sent',
+    clientKey:9, clientName:'Hackensack Meridian Health',
+    deptKey:91, deptName:'OR — Hackensack University MC',
+    billTo:{name:'Hackensack University Medical Center',attn:'Accounts Payable',addr1:'30 Prospect Avenue',city:'Hackensack',state:'NJ',zip:'07601'},
+    shipTo:{name:'HUMedC OR — SPD',attn:'Sterile Processing',addr1:'30 Prospect Avenue, 2nd Floor',city:'Hackensack',state:'NJ',zip:'07601'},
+    salesRep:'Mike Rivera', gpo:'viz', visitRef:'Field eval 03/08/2026',
+    quoteDate:'2026-03-09', sentDate:'2026-03-10', poNumber:'', reviewedBy:'Mike Rivera', notes:'',
+    items:[
+      {id:1,instrCode:'OS1200',mfr:'Codman',model:'80-1550',serial:'CDM-3310',issue:'Insulation damage on bipolar tips',techNote:'Full re-tip',repairLevel:3,basePrice:380,amount:380,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:2,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-1122',issue:'Blade assembly stuck — fails to retract',techNote:'Blade replaced',repairLevel:2,basePrice:890,amount:765,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
+      {id:3,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'WLF-081',issue:'Light guide detached',techNote:'Reattached and tested',repairLevel:1,basePrice:310,amount:105,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
+    ]
+  }
+];
+
+// Demo clients for wizard
+var DEMO_CLIENTS = [
+  {lClientKey:1,sClientName1:'Inspira Medical Centers',sClientCity:'Bridgeton',sClientState:'NJ'},
+  {lClientKey:2,sClientName1:'Johns Hopkins Hospital',sClientCity:'Baltimore',sClientState:'MD'},
+  {lClientKey:3,sClientName1:'Penn Medicine',sClientCity:'Philadelphia',sClientState:'PA'},
+  {lClientKey:4,sClientName1:'UPMC Presbyterian',sClientCity:'Pittsburgh',sClientState:'PA'},
+  {lClientKey:5,sClientName1:'Virtua Health',sClientCity:'Voorhees',sClientState:'NJ'},
+  {lClientKey:6,sClientName1:'RWJ Barnabas Health',sClientCity:'New Brunswick',sClientState:'NJ'},
+  {lClientKey:7,sClientName1:'AtlantiCare Regional',sClientCity:'Atlantic City',sClientState:'NJ'},
+  {lClientKey:8,sClientName1:'Jefferson Health',sClientCity:'Philadelphia',sClientState:'PA'},
+  {lClientKey:9,sClientName1:'Hackensack Meridian Health',sClientCity:'Hackensack',sClientState:'NJ'}
+];
+var DEMO_DEPTS = {
+  1:[{lDepartmentKey:11,sDepartmentName:'Endoscopy — Mullica Hill'},{lDepartmentKey:12,sDepartmentName:'OR — Inspira Bridgeton'}],
+  2:[{lDepartmentKey:21,sDepartmentName:'GI Lab — East Baltimore'},{lDepartmentKey:22,sDepartmentName:'Surgery — Hopkins Outpatient'}],
+  3:[{lDepartmentKey:31,sDepartmentName:'Endoscopy — Hospital of the University of PA'},{lDepartmentKey:32,sDepartmentName:'OR — Penn Presbyterian'}],
+  4:[{lDepartmentKey:41,sDepartmentName:'Sterile Processing — UPMC Pres'},{lDepartmentKey:42,sDepartmentName:'GI — UPMC Shadyside'}],
+  5:[{lDepartmentKey:51,sDepartmentName:'OR — Virtua Voorhees'},{lDepartmentKey:52,sDepartmentName:'Endoscopy — Virtua Berlin'}],
+  6:[{lDepartmentKey:61,sDepartmentName:'Endoscopy — Robert Wood Johnson'},{lDepartmentKey:62,sDepartmentName:'OR — Monmouth Medical'}],
+  7:[{lDepartmentKey:71,sDepartmentName:'GI Lab — AtlantiCare City'},{lDepartmentKey:72,sDepartmentName:'OR — AtlantiCare Mainland'}],
+  8:[{lDepartmentKey:81,sDepartmentName:'Cath Lab — Thomas Jefferson'},{lDepartmentKey:82,sDepartmentName:'Endoscopy — Jefferson Northeast'}],
+  9:[{lDepartmentKey:91,sDepartmentName:'OR — Hackensack University MC'},{lDepartmentKey:92,sDepartmentName:'GI — HMH Southern Ocean'}]
+};
+
+// ── State ──
+var allQuotes = DEMO_QUOTES.map(function(q) { return JSON.parse(JSON.stringify(q)); });
+var filteredQuotes = [];
+var displayQuotes = [];
+var selectedId = null;
+var currentPage = 1;
+var pageSize = 25;
+var sortCol = 'quoteNum';
+var sortDir = 'asc';
+var filterChip = '';
+var filterGpo = '';
+var filterClient = '';
+var searchTerm = '';
+var searchTimer = null;
+var isDirty = false;
+var saveTimer = null;
+var _wizStep = 1;
+var _wizClient = null;
+var _wizDept = null;
+
+// ── Helpers ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtCur(v) { return v != null ? '$' + Number(v).toFixed(2) : '--'; }
+function fmtDate(d) { if (!d) return '--'; var p = d.split('-'); return (p[1]||'')+'/'+(p[2]||'')+'/'+(p[0]||''); }
+function statusBadge(s) {
+  var map = {'Draft':'b-draft','Sent':'b-sent','Approved':'b-approved','Partially Approved':'b-partial','Declined':'b-declined'};
+  return '<span class="badge ' + (map[s]||'b-draft') + '">' + esc(s) + '</span>';
+}
+function gpoLabel(g) { return g==='hpg'?'HPG':g==='viz'?'Vizient':g==='s3'?'S3':''; }
+function showDataBadge(live) {
+  var b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.className = 'data-badge ' + (live ? 'live' : 'demo');
+  b.textContent = live ? 'Live Data' : 'Demo Data';
+}
+function quoteTotal(q) { return q.items.reduce(function(s,i){ return s + (i.amount||0); }, 0); }
+function outsourcedCount(q) { return q.items.filter(function(i){ return i.outsource; }).length; }
+
+// ── Init ──
+function initPage() {
+  showDataBadge(false);
+  populateClientFilter();
+  applyFilters();
+  // ?action=new
+  if (window.location.search.indexOf('action=new') !== -1) {
+    history.replaceState(null, '', window.location.pathname);
+    setTimeout(newQuote, 200);
+  }
+  // click outside new order menu
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('newOrderWrap');
+    if (wrap && !wrap.contains(e.target)) document.getElementById('newOrderMenu').classList.remove('open');
+  });
+}
+
+function populateClientFilter() {
+  var dd = document.getElementById('filterClient');
+  var clients = {};
+  allQuotes.forEach(function(q) { clients[q.clientKey] = q.clientName; });
+  Object.keys(clients).sort(function(a,b){ return clients[a].localeCompare(clients[b]); }).forEach(function(k) {
+    var o = document.createElement('option');
+    o.value = k; o.textContent = clients[k];
+    dd.appendChild(o);
+  });
+}
+
+// ── Filtering / Sorting / Paging ──
+function applyFilters() {
+  var s = searchTerm.toLowerCase();
+  filteredQuotes = allQuotes.filter(function(q) {
+    if (filterChip && q.status !== filterChip) return false;
+    if (filterGpo === 'std' && q.gpo !== '') return false;
+    if (filterGpo && filterGpo !== 'std' && q.gpo !== filterGpo) return false;
+    if (filterClient && String(q.clientKey) !== filterClient) return false;
+    if (s && !(q.quoteNum.toLowerCase().includes(s) || q.clientName.toLowerCase().includes(s) || q.deptName.toLowerCase().includes(s) || (q.visitRef||'').toLowerCase().includes(s))) return false;
+    return true;
+  });
+  applySort();
+  updateKPIs();
+  currentPage = 1;
+  paginate();
+  renderTable();
+  updatePagination();
+}
+
+function applySort() {
+  if (!sortCol) return;
+  filteredQuotes.sort(function(a, b) {
+    var av = sortCol === 'total' ? quoteTotal(a) : sortCol === 'itemCount' ? a.items.length : (a[sortCol]||'');
+    var bv = sortCol === 'total' ? quoteTotal(b) : sortCol === 'itemCount' ? b.items.length : (b[sortCol]||'');
+    if (typeof av === 'number') return sortDir === 'asc' ? av - bv : bv - av;
+    return sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+}
+
+function paginate() { displayQuotes = filteredQuotes.slice((currentPage-1)*pageSize, currentPage*pageSize); }
+
+function sortBy(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = 'asc'; }
+  applySort(); paginate(); renderTable(); updatePagination();
+  document.querySelectorAll('thead th').forEach(function(th) { th.classList.remove('sorted','asc','desc'); });
+  var idx = ['quoteNum','clientName','deptName','quoteDate','itemCount',null,'total',null,'status'].indexOf(col);
+  if (idx >= 0) {
+    var ths = document.querySelectorAll('thead th');
+    if (ths[idx]) { ths[idx].classList.add('sorted', sortDir); }
+  }
+}
+
+function chipFilter(status) {
+  filterChip = status;
+  document.querySelectorAll('.stat-chip:not(.info-only)').forEach(function(c){ c.classList.remove('active-chip'); });
+  var map = {'':'kpiAll','Draft':'kpiDraft','Sent':'kpiSent','Approved':'kpiApproved','Partially Approved':'kpiPartial','Declined':'kpiDeclined'};
+  var el = document.getElementById(map[status]);
+  if (el) el.classList.add('active-chip');
+  currentPage = 1; applyFilters();
+}
+
+function setGpoFilter(val, btn) {
+  filterGpo = val;
+  document.querySelectorAll('.seg-group .seg-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  currentPage = 1; applyFilters();
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() {
+    searchTerm = document.getElementById('searchInput').value;
+    currentPage = 1; applyFilters();
+  }, 280);
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  var counts = {Draft:0,Sent:0,Approved:0,'Partially Approved':0,Declined:0};
+  var total = 0;
+  allQuotes.forEach(function(q) {
+    if (counts[q.status] !== undefined) counts[q.status]++;
+    total += quoteTotal(q);
+  });
+  document.getElementById('kpiAllVal').textContent = allQuotes.length;
+  document.getElementById('kpiDraftVal').textContent = counts.Draft;
+  document.getElementById('kpiSentVal').textContent = counts.Sent;
+  document.getElementById('kpiApprovedVal').textContent = counts.Approved;
+  document.getElementById('kpiPartialVal').textContent = counts['Partially Approved'];
+  document.getElementById('kpiDeclinedVal').textContent = counts.Declined;
+  document.getElementById('kpiValueVal').textContent = fmtCur(total);
+}
+
+// ── Render Table ──
+function renderTable() {
+  var tbody = document.getElementById('quotesTableBody');
+  if (!displayQuotes.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No quotes match the current filters.</td></tr>';
+    document.getElementById('recordInfo').textContent = '0 records';
+    return;
+  }
+  tbody.innerHTML = displayQuotes.map(function(q) {
+    var tot = quoteTotal(q);
+    var outCnt = outsourcedCount(q);
+    var gpo = gpoLabel(q.gpo);
+    return '<tr class="' + (q.id === selectedId ? 'selected' : '') + '" onclick="openDrawer(' + q.id + ')">' +
+      '<td><span class="code-link">' + esc(q.quoteNum) + '</span></td>' +
+      '<td title="' + esc(q.clientName) + '">' + esc(q.clientName) + '</td>' +
+      '<td title="' + esc(q.deptName) + '">' + esc(q.deptName) + '</td>' +
+      '<td>' + fmtDate(q.quoteDate) + '</td>' +
+      '<td style="text-align:center">' + q.items.length + '</td>' +
+      '<td>' + (outCnt ? '<span class="out-badge">&#x21A5; ' + outCnt + '</span>' : '<span style="color:var(--muted);font-size:10px">—</span>') + '</td>' +
+      '<td style="font-weight:600">' + fmtCur(tot) + '</td>' +
+      '<td>' + (gpo ? '<span class="gpo-tag">' + gpo + '</span>' : '<span style="color:var(--muted);font-size:10px">Std</span>') + '</td>' +
+      '<td>' + statusBadge(q.status) + '</td>' +
+      '</tr>';
+  }).join('');
+  var total = filteredQuotes.length;
+  var start = (currentPage-1)*pageSize+1;
+  var end = Math.min(currentPage*pageSize, total);
+  document.getElementById('recordInfo').textContent = total + ' record' + (total!==1?'s':'') + (total > pageSize ? ' (showing ' + start + '–' + end + ')' : '');
+}
+
+function updatePagination() {
+  var totalPages = Math.ceil(filteredQuotes.length / pageSize);
+  var pg = document.getElementById('pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  var html = '<button class="pg-btn" onclick="gotoPage(' + (currentPage-1) + ')" ' + (currentPage===1?'disabled':'') + '>&#8592;</button>';
+  for (var i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i-currentPage) <= 1) {
+      html += '<button class="pg-btn' + (i===currentPage?' active':'') + '" onclick="gotoPage(' + i + ')">' + i + '</button>';
+    } else if (Math.abs(i-currentPage) === 2) { html += '<span style="padding:0 3px;color:var(--muted)">…</span>'; }
+  }
+  html += '<button class="pg-btn" onclick="gotoPage(' + (currentPage+1) + ')" ' + (currentPage===totalPages?'disabled':'') + '>&#8594;</button>';
+  pg.innerHTML = html;
+}
+
+function gotoPage(p) {
+  var totalPages = Math.ceil(filteredQuotes.length / pageSize);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p; paginate(); renderTable(); updatePagination();
+}
+
+// ── Drawer ──
+function openDrawer(id) {
+  selectedId = id;
+  var q = allQuotes.find(function(x){ return x.id === id; });
+  if (!q) return;
+  populateDrawer(q);
+  document.getElementById('quoteDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  renderTable(); // highlight row
+}
+
+function closeDrawer() {
+  document.getElementById('quoteDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  selectedId = null;
+  renderTable();
+}
+
+function populateDrawer(q) {
+  document.getElementById('dhQuoteNum').textContent = q.quoteNum;
+  document.getElementById('dhSub').textContent = q.clientName + ' — ' + q.deptName;
+  document.getElementById('dhStatusBadge').innerHTML = statusBadge(q.status);
+  document.getElementById('dQuoteNum').value = q.quoteNum;
+  document.getElementById('dQuoteDate').value = q.quoteDate || '';
+  document.getElementById('dStatus').value = q.status;
+  document.getElementById('dClient').value = q.clientName;
+  document.getElementById('dDept').value = q.deptName;
+  document.getElementById('dGpo').value = q.gpo || '';
+  document.getElementById('dPo').value = q.poNumber || '';
+  document.getElementById('dReviewedBy').value = q.reviewedBy || '';
+  document.getElementById('dVisitRef').value = q.visitRef || '';
+  document.getElementById('dSalesRep').value = q.salesRep || '';
+  document.getElementById('dNotes').value = q.notes || '';
+  document.getElementById('dBillTo').innerHTML = fmtAddr(q.billTo);
+  document.getElementById('dShipTo').innerHTML = fmtAddr(q.shipTo);
+  var sentRow = document.getElementById('dSentDateRow');
+  var sentInput = document.getElementById('dSentDate');
+  if (q.status === 'Sent' || q.sentDate) {
+    sentRow.style.display = '';
+    sentInput.value = q.sentDate || '';
+  } else { sentRow.style.display = 'none'; }
+  // Mark sent button visibility
+  document.getElementById('btnMarkSent').style.display = (q.status === 'Draft') ? '' : 'none';
+  renderItemsTab(q);
+  renderOutsourceTab(q);
+  setSaveStatus('', '');
+  isDirty = false;
+  switchTab('details', document.querySelector('.dtab'));
+}
+
+function fmtAddr(a) {
+  if (!a) return '—';
+  var parts = [a.name, a.attn ? 'ATTN: ' + a.attn : '', a.addr1, a.addr2||'', [a.city, a.state].filter(Boolean).join(', ') + (a.zip ? ' ' + a.zip : '')].filter(function(s){ return s.trim(); });
+  return parts.join('<br/>');
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.dtab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.dpane').forEach(function(p){ p.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.dtab').forEach(function(t){ if(t.textContent.toLowerCase().includes(name)) t.classList.add('active'); });
+  }
+  var pane = document.getElementById('dpane-' + name);
+  if (pane) pane.classList.add('active');
+}
+
+function onStatusChange() {
+  var s = document.getElementById('dStatus').value;
+  var sentRow = document.getElementById('dSentDateRow');
+  sentRow.style.display = (s === 'Sent' || s === 'Partially Approved' || s === 'Approved' || s === 'Declined') ? '' : 'none';
+  markDirty();
+}
+
+function onGpoChange() {
+  markDirty();
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (q) renderItemsTab(q);
+}
+
+// ── Line Items Tab ──
+function renderItemsTab(q) {
+  var gpo = document.getElementById('dGpo') ? document.getElementById('dGpo').value : (q.gpo || '');
+  var tbody = document.getElementById('itemsTableBody');
+  if (!q.items || !q.items.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="padding:16px;text-align:center;color:var(--muted);font-size:11px">No items yet — click Add Line Item below.</td></tr>';
+  } else {
+    tbody.innerHTML = q.items.map(function(item, idx) {
+      var lvlName = item.repairLevel ? (REPAIR_LEVELS.find(function(l){ return l.level===item.repairLevel; }) || {}).name || '—' : 'N/A';
+      var ay = item.approval === true ? 'ay' : '';
+      var an = item.approval === false ? 'an' : '';
+      var ap = item.approval === null ? 'ap' : '';
+      return '<tr class="item-row">' +
+        '<td><input type="text" value="' + esc(item.instrCode) + '" onchange="updateItem(' + idx + ',\'instrCode\',this.value)"/></td>' +
+        '<td><div style="font-size:10px;font-weight:600;color:var(--navy)">' + esc(item.mfr) + '</div><div style="font-size:9.5px;color:var(--muted)">' + esc(item.model) + '</div></td>' +
+        '<td><input type="text" value="' + esc(item.serial) + '" onchange="updateItem(' + idx + ',\'serial\',this.value)"/></td>' +
+        '<td title="' + esc(item.issue) + '"><div style="font-size:10px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">' + esc(item.issue) + '</div>' +
+          (item.techNote ? '<div style="font-size:9px;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + esc(item.techNote) + '</div>' : '') + '</td>' +
+        '<td><select onchange="updateItemLevel(' + idx + ',this.value)">' +
+          '<option value="">N/A</option>' +
+          REPAIR_LEVELS.map(function(l){ return '<option value="' + l.level + '"' + (item.repairLevel===l.level?' selected':'') + '>L' + l.level + '</option>'; }).join('') +
+        '</select></td>' +
+        '<td><input type="number" min="0" step="0.01" value="' + (item.amount||0) + '" onchange="updateItem(' + idx + ',\'amount\',parseFloat(this.value)||0)" style="text-align:right"/></td>' +
+        '<td><div class="appr-btns">' +
+          '<button class="appr-btn ' + ay + '" onclick="setApproval(' + idx + ',true)" title="Approved">Y</button>' +
+          '<button class="appr-btn ' + an + '" onclick="setApproval(' + idx + ',false)" title="Declined">N</button>' +
+          '<button class="appr-btn ' + ap + '" onclick="setApproval(' + idx + ',null)" title="Pending">—</button>' +
+        '</div></td>' +
+        '<td style="text-align:center"><input type="checkbox" class="out-chk" ' + (item.outsource?'checked':'') + ' onchange="toggleOutsource(' + idx + ',this.checked)" title="Outsource"/></td>' +
+        '<td><button class="del-btn" onclick="removeItem(' + idx + ')" title="Remove">&#x2715;</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+  updateTotals(q);
+}
+
+function updateItem(idx, field, value) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q || !q.items[idx]) return;
+  q.items[idx][field] = value;
+  markDirty(); updateTotals(q); renderOutsourceTab(q);
+}
+
+function updateItemLevel(idx, levelStr) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q || !q.items[idx]) return;
+  var level = levelStr ? parseInt(levelStr) : null;
+  q.items[idx].repairLevel = level;
+  if (level) {
+    var gpo = document.getElementById('dGpo').value;
+    var inst = typeof RAW !== 'undefined' ? RAW.find(function(r){ return r.c === q.items[idx].instrCode; }) : null;
+    var base = inst ? (gpo === 'hpg' && inst.hpg != null ? inst.hpg : gpo === 'viz' && inst.viz != null ? inst.viz : gpo === 's3' && inst.s3 != null ? inst.s3 : inst.mx || 0) : q.items[idx].basePrice || 0;
+    var lvl = REPAIR_LEVELS.find(function(l){ return l.level === level; });
+    if (base && lvl) { q.items[idx].amount = parseFloat((base * lvl.pct).toFixed(2)); }
+  } else { q.items[idx].amount = 0; }
+  markDirty(); renderItemsTab(q);
+}
+
+function setApproval(idx, val) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q || !q.items[idx]) return;
+  q.items[idx].approval = val;
+  markDirty(); renderItemsTab(q);
+}
+
+function toggleOutsource(idx, checked) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q || !q.items[idx]) return;
+  q.items[idx].outsource = checked;
+  markDirty(); renderOutsourceTab(q);
+}
+
+function removeItem(idx) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  q.items.splice(idx, 1);
+  markDirty(); renderItemsTab(q); renderOutsourceTab(q);
+}
+
+function addItem() {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  var newId = q.items.length ? Math.max.apply(null, q.items.map(function(i){ return i.id; })) + 1 : 1;
+  q.items.push({id:newId,instrCode:'',mfr:'',model:'',serial:'',issue:'',techNote:'',repairLevel:null,basePrice:0,amount:0,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0});
+  markDirty(); renderItemsTab(q);
+}
+
+function updateTotals(q) {
+  var total = 0, approved = 0, pending = 0;
+  q.items.forEach(function(i) {
+    total += i.amount || 0;
+    if (i.approval === true) approved += i.amount || 0;
+    else if (i.approval === null) pending += i.amount || 0;
+  });
+  document.getElementById('qtItems').textContent = q.items.length;
+  document.getElementById('qtApproved').textContent = fmtCur(approved);
+  document.getElementById('qtPending').textContent = fmtCur(pending);
+  document.getElementById('qtTotal').textContent = fmtCur(total);
+}
+
+// ── Outsource Tab ──
+function renderOutsourceTab(q) {
+  var items = q.items.filter(function(i){ return i.outsource; });
+  var el = document.getElementById('outsourceContent');
+  if (!items.length) {
+    el.innerHTML = '<div class="out-empty">No items marked for outsource.<br/>Toggle the Out checkbox on items in the Line Items tab.</div>';
+    return;
+  }
+  var totCost = 0, totBilled = 0;
+  var rows = items.map(function(item, i) {
+    totCost += item.outsourceCost || 0;
+    totBilled += item.amount || 0;
+    var margin = (item.amount || 0) - (item.outsourceCost || 0);
+    var mClass = margin >= 0 ? 'margin-pos' : 'margin-neg';
+    return '<tr>' +
+      '<td><span class="code-link">' + esc(item.instrCode) + '</span><br/><span style="font-size:10px;color:var(--muted)">' + esc(item.mfr) + ' ' + esc(item.model) + '</span></td>' +
+      '<td><input type="text" value="' + esc(item.outsourceVendor) + '" placeholder="Vendor name" onchange="updateOutVendor(\'' + item.id + '\',this.value)" style="width:140px"/></td>' +
+      '<td><input type="number" min="0" step="0.01" value="' + (item.outsourceCost||0) + '" onchange="updateOutCost(\'' + item.id + '\',parseFloat(this.value)||0)" style="width:80px;text-align:right"/></td>' +
+      '<td style="text-align:right;font-weight:600">' + fmtCur(item.amount) + '</td>' +
+      '<td class="' + mClass + '" style="text-align:right">' + fmtCur(margin) + '</td>' +
+      '</tr>';
+  }).join('');
+  var totMargin = totBilled - totCost;
+  var totMClass = totMargin >= 0 ? 'margin-pos' : 'margin-neg';
+  el.innerHTML = '<table class="out-table">' +
+    '<thead><tr><th>Instrument</th><th>Vendor</th><th>Our Cost</th><th>Billed</th><th>Margin</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '<tfoot><tr class="out-total-row"><td colspan="2">Totals</td><td style="text-align:right">' + fmtCur(totCost) + '</td><td style="text-align:right">' + fmtCur(totBilled) + '</td><td class="' + totMClass + '" style="text-align:right">' + fmtCur(totMargin) + '</td></tr></tfoot>' +
+    '</table>';
+}
+
+function updateOutVendor(itemId, val) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  var item = q.items.find(function(i){ return i.id === parseInt(itemId)||i.id === itemId; });
+  if (item) { item.outsourceVendor = val; markDirty(); }
+}
+
+function updateOutCost(itemId, val) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  var item = q.items.find(function(i){ return i.id === parseInt(itemId)||i.id === itemId; });
+  if (item) { item.outsourceCost = val; markDirty(); renderOutsourceTab(q); }
+}
+
+// ── Save / Dirty ──
+function markDirty() {
+  isDirty = true;
+  setSaveStatus('dirty', 'Unsaved changes');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(autoSave, 2000);
+}
+
+function autoSave() { if (isDirty) saveDrawer(true); }
+
+function saveDrawer(silent) {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  q.status = document.getElementById('dStatus').value;
+  q.quoteDate = document.getElementById('dQuoteDate').value;
+  q.gpo = document.getElementById('dGpo').value;
+  q.poNumber = document.getElementById('dPo').value;
+  q.reviewedBy = document.getElementById('dReviewedBy').value;
+  q.visitRef = document.getElementById('dVisitRef').value;
+  q.salesRep = document.getElementById('dSalesRep').value;
+  q.notes = document.getElementById('dNotes').value;
+  if (document.getElementById('dSentDate').value) q.sentDate = document.getElementById('dSentDate').value;
+  // Update header
+  document.getElementById('dhStatusBadge').innerHTML = statusBadge(q.status);
+  isDirty = false;
+  setSaveStatus('saved', 'Saved');
+  if (!silent) { setTimeout(function(){ setSaveStatus('', ''); }, 2500); }
+  updateKPIs(); renderTable();
+}
+
+function setSaveStatus(state, msg) {
+  var el = document.getElementById('drawerSaveStatus');
+  el.textContent = msg;
+  el.style.color = state === 'saved' ? 'var(--green)' : state === 'dirty' ? 'var(--amber)' : 'var(--muted)';
+}
+
+function markSent() {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  q.status = 'Sent';
+  q.sentDate = new Date().toISOString().split('T')[0];
+  document.getElementById('dStatus').value = 'Sent';
+  document.getElementById('dSentDate').value = q.sentDate;
+  document.getElementById('dSentDateRow').style.display = '';
+  document.getElementById('btnMarkSent').style.display = 'none';
+  document.getElementById('dhStatusBadge').innerHTML = statusBadge('Sent');
+  saveDrawer(true);
+}
+
+function deleteQuote() {
+  var q = allQuotes.find(function(x){ return x.id === selectedId; });
+  if (!q) return;
+  if (!confirm('Delete ' + q.quoteNum + '? This cannot be undone.')) return;
+  allQuotes = allQuotes.filter(function(x){ return x.id !== selectedId; });
+  closeDrawer(); applyFilters(); updateKPIs();
+}
+
+// ── New Quote Wizard ──
+var nextQuoteNum = 10;
+
+function newQuote() {
+  _wizStep = 1; _wizClient = null; _wizDept = null;
+  wizGoStep(1);
+  wizRenderClients('');
+  document.getElementById('wClientSearch').value = '';
+  document.getElementById('wizOverlay').classList.add('open');
+}
+
+function closeWiz() { document.getElementById('wizOverlay').classList.remove('open'); }
+
+function wizGoStep(step) {
+  _wizStep = step;
+  for (var i = 1; i <= 3; i++) {
+    var tab = document.getElementById('wTab' + i);
+    var panel = document.getElementById('wPanel' + i);
+    tab.classList.remove('active','done');
+    panel.classList.remove('active');
+    if (i < step) tab.classList.add('done');
+    if (i === step) { tab.classList.add('active'); panel.classList.add('active'); }
+  }
+  document.getElementById('wBtnBack').style.display = step > 1 ? '' : 'none';
+  document.getElementById('wBtnNext').style.display = step < 3 ? '' : 'none';
+  document.getElementById('wBtnCreate').style.display = step === 3 ? '' : 'none';
+  wizUpdateNext();
+}
+
+function wizBack() { if (_wizStep > 1) wizGoStep(_wizStep - 1); }
+
+function wizNext() {
+  if (_wizStep === 1 && _wizClient) { wizGoStep(2); wizRenderDepts(''); document.getElementById('wDeptSearch').value = ''; }
+  else if (_wizStep === 2 && _wizDept) { wizGoStep(3); wizRenderSummary(); }
+}
+
+function wizUpdateNext() {
+  var btn = document.getElementById('wBtnNext');
+  var enabled = (_wizStep === 1 && _wizClient) || (_wizStep === 2 && _wizDept);
+  btn.style.opacity = enabled ? '1' : '.5';
+  btn.style.pointerEvents = enabled ? 'all' : 'none';
+}
+
+function wizRenderClients(filter) {
+  var q = (filter||'').toLowerCase();
+  var clients = DEMO_CLIENTS.filter(function(c){ return !q || c.sClientName1.toLowerCase().includes(q) || (c.sClientCity||'').toLowerCase().includes(q); });
+  document.getElementById('wClientGrid').innerHTML = clients.map(function(c) {
+    var sel = _wizClient && _wizClient.lClientKey === c.lClientKey ? ' selected' : '';
+    return '<div class="wiz-card' + sel + '" onclick="wizPickClient(' + c.lClientKey + ')">' +
+      '<div class="wiz-card-name">' + esc(c.sClientName1) + '</div>' +
+      '<div class="wiz-card-detail">' + esc(c.sClientCity) + ', ' + esc(c.sClientState) + '</div>' +
+      '</div>';
+  }).join('') || '<div style="padding:16px;color:var(--muted);font-size:11px">No clients match.</div>';
+}
+
+function wizFilterClients(val) { wizRenderClients(val); }
+
+function wizPickClient(key) {
+  _wizClient = DEMO_CLIENTS.find(function(c){ return c.lClientKey === key; });
+  _wizDept = null;
+  document.querySelectorAll('#wClientGrid .wiz-card').forEach(function(c){ c.classList.remove('selected'); });
+  var cards = document.querySelectorAll('#wClientGrid .wiz-card');
+  // re-render to show selection
+  wizRenderClients(document.getElementById('wClientSearch').value);
+  wizUpdateNext();
+}
+
+function wizRenderDepts(filter) {
+  if (!_wizClient) return;
+  document.getElementById('wClientBarName').textContent = _wizClient.sClientName1;
+  var depts = (DEMO_DEPTS[_wizClient.lClientKey] || []);
+  var q = (filter||'').toLowerCase();
+  var filtered = depts.filter(function(d){ return !q || d.sDepartmentName.toLowerCase().includes(q); });
+  document.getElementById('wDeptGrid').innerHTML = filtered.map(function(d) {
+    var sel = _wizDept && _wizDept.lDepartmentKey === d.lDepartmentKey ? ' selected' : '';
+    return '<div class="wiz-card' + sel + '" onclick="wizPickDept(' + d.lDepartmentKey + ')">' +
+      '<div class="wiz-card-name">' + esc(d.sDepartmentName) + '</div>' +
+      '</div>';
+  }).join('') || '<div style="padding:16px;color:var(--muted);font-size:11px">No departments found.</div>';
+}
+
+function wizFilterDepts(val) { wizRenderDepts(val); }
+
+function wizPickDept(key) {
+  var depts = DEMO_DEPTS[_wizClient ? _wizClient.lClientKey : 0] || [];
+  _wizDept = depts.find(function(d){ return d.lDepartmentKey === key; });
+  wizRenderDepts(document.getElementById('wDeptSearch').value);
+  wizUpdateNext();
+}
+
+function wizRenderSummary() {
+  document.getElementById('wSummaryName').textContent = (_wizClient ? _wizClient.sClientName1 : '—') + ' — ' + (_wizDept ? _wizDept.sDepartmentName : '—');
+  document.getElementById('wGpo').value = '';
+  document.getElementById('wVisitRef').value = '';
+  document.getElementById('wReviewedBy').value = '';
+}
+
+function wizCreate() {
+  if (!_wizClient || !_wizDept) return;
+  var now = new Date();
+  var qNum = 'IQ-2026-0' + String(nextQuoteNum++).padStart(2,'0');
+  var dateStr = now.toISOString().split('T')[0];
+  var newQ = {
+    id: Date.now(),
+    quoteNum: qNum,
+    status: 'Draft',
+    clientKey: _wizClient.lClientKey,
+    clientName: _wizClient.sClientName1,
+    deptKey: _wizDept.lDepartmentKey,
+    deptName: _wizDept.sDepartmentName,
+    billTo: {name:_wizClient.sClientName1,attn:'Accounts Payable',addr1:'',city:_wizClient.sClientCity,state:_wizClient.sClientState,zip:''},
+    shipTo: {name:_wizDept.sDepartmentName,attn:'Sterile Processing',addr1:'',city:'',state:'',zip:''},
+    salesRep: '',
+    gpo: document.getElementById('wGpo').value,
+    visitRef: document.getElementById('wVisitRef').value,
+    quoteDate: dateStr,
+    sentDate: null,
+    poNumber: '',
+    reviewedBy: document.getElementById('wReviewedBy').value,
+    notes: '',
+    items: []
+  };
+  allQuotes.unshift(newQ);
+  closeWiz();
+  applyFilters(); updateKPIs();
+  setTimeout(function(){ openDrawer(newQ.id); }, 100);
+}
+
+// ── Bootstrap ──
+window.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>
