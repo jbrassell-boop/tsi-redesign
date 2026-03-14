@@ -40,9 +40,18 @@
 
     /* SPLIT LAYOUT */
     .split{display:flex;flex:1;overflow:hidden}
-    .list-panel{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#fff;overflow:hidden}
+    .list-panel{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#fff;overflow:hidden;transition:width .2s ease}
+    .list-panel.collapsed{width:0;min-width:0;border-right:none;overflow:hidden}
+    .list-panel.collapsed .list-head,.list-panel.collapsed .list-search,.list-panel.collapsed .list-scroll,.list-panel.collapsed .list-footer{display:none}
     .list-head{background:#ECF4F5;padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
     .list-search{padding:6px 10px;border-bottom:1px solid var(--border)}
+    /* Expand button — visible when list collapsed */
+    .list-expand-btn{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:10;width:20px;height:48px;background:var(--navy);color:#fff;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:14px;padding:0;box-shadow:2px 0 8px rgba(0,0,0,.12);transition:background .15s}
+    .list-expand-btn:hover{background:var(--blue)}
+    .list-panel.collapsed~.detail-panel .list-expand-btn{display:flex;align-items:center;justify-content:center}
+    /* Collapse toggle in list header */
+    .list-collapse-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border-dk);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:11px;transition:all .12s;flex-shrink:0}
+    .list-collapse-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
     .inp-search{width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 10px 0 28px;font-size:11px;outline:none;font-family:inherit;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat #fff;transition:border-color .15s}
     .inp-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
     .list-scroll{flex:1;overflow-y:auto}
@@ -72,7 +81,8 @@
     .dh-actions{display:flex;gap:6px}
 
     /* DETAIL TABS (overrides for contracts — smaller padding, scrollable) */
-    .tab-bar{padding:0 12px;overflow-x:auto}
+    .tab-bar{padding:0 12px;overflow-x:auto;scrollbar-width:none}
+    .tab-bar::-webkit-scrollbar{display:none}
     .tab{padding:6px 12px;font-size:11.5px;white-space:nowrap}
     .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
 
@@ -261,7 +271,10 @@
         <div class="list-panel">
           <div class="list-head">
             <span>Contracts</span>
-            <span style="font-weight:500;font-size:10px;color:var(--muted)">48 records</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-weight:500;font-size:10px;color:var(--muted)" id="listRecordCount">48 records</span>
+              <button class="list-collapse-btn" onclick="toggleListPanel()" title="Collapse list">◀</button>
+            </div>
           </div>
           <div class="list-search">
             <input class="inp-search" placeholder="Search contracts, client, PO#..." id="contractSearch" oninput="filterContracts(this.value)"/>
@@ -276,7 +289,8 @@
         </div>
 
         <!-- CONTRACT DETAIL -->
-        <div class="detail-panel" id="detailPanel">
+        <div class="detail-panel" id="detailPanel" style="position:relative">
+          <button class="list-expand-btn" onclick="toggleListPanel()" title="Show contract list">▶</button>
           <div class="detail-header">
             <div class="dh-left">
               <h2 id="detailName">88th Medical Group - Capitated</h2>
@@ -1000,6 +1014,7 @@ let contracts = [];           // Normalised contract rows (list)
 let filteredContracts = [];   // Current view after filters
 let selectedContractKey = 0;  // Currently selected lContractKey
 let DATA_SOURCE = 'demo';     // 'api' or 'demo'
+let listCollapsed = false;    // List panel collapsed state
 let contractTypes = [];       // Lookup: contract types
 let servicePlanTerms = [];    // Lookup: service plan terms
 let contractClients = [];     // Lookup: clients for dropdown
@@ -1131,8 +1146,21 @@ function renderList(data) {
   }
 }
 
+// ── List Panel Toggle ─────────────────────────────────
+function toggleListPanel() {
+  const lp = document.querySelector('.list-panel');
+  listCollapsed = !listCollapsed;
+  lp.classList.toggle('collapsed', listCollapsed);
+}
+
 // ── Select Contract (load detail) ─────────────────────
 async function selectContract(el, contractKey) {
+  // Auto-collapse list on selection
+  if (!listCollapsed) {
+    const lp = document.querySelector('.list-panel');
+    listCollapsed = true;
+    lp.classList.add('collapsed');
+  }
   document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
   if (el) el.classList.add('selected');
   selectedContractKey = contractKey;
