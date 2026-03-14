@@ -375,6 +375,26 @@
         </div>
       </div>
     </div>
+    <!-- Settings & Payment -->
+    <div class="section-card">
+      <div class="section-head">Settings &amp; Payment</div>
+      <div class="section-body">
+        <div class="g2">
+          <div class="field"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"><option value="">—</option></select></div>
+          <div class="field"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"><option value="">—</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Due on Receipt</option><option>Prepaid</option></select></div>
+        </div>
+      </div>
+    </div>
+    <!-- Addresses -->
+    <div class="section-card">
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">Addresses <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="osToggleShipSame()"/> Same as Bill To</label></div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field"><label>Bill To</label><textarea id="fBillTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"></textarea></div>
+          <div class="field"><label>Ship To</label><textarea id="fShipTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
+        </div>
+      </div>
+    </div>
     <div class="section-card">
       <div class="section-head">Financial Summary</div>
       <div class="section-body" id="fFinancials"></div>
@@ -917,6 +937,22 @@ function openDrawer(key) {
   document.getElementById('fEndTime').value = visit.endTime || '\u2014';
   document.getElementById('fPO').value = visit.po || '\u2014';
   document.getElementById('fLocation').value = visit.location || '\u2014';
+
+  // Settings & Payment
+  var repDD = document.getElementById('fSalesRep');
+  repDD.innerHTML = '<option value="">—</option>';
+  ['Mike Rivera','Sarah Chen','James Wilson'].forEach(r => { repDD.innerHTML += '<option value="'+r+'">'+r+'</option>'; });
+  repDD.value = visit.salesRep || '';
+  document.getElementById('fPaymentTerms').value = visit.paymentTerms || '';
+
+  // Addresses
+  document.getElementById('fBillTo').value = visit.billTo || visit.clientName + '\n' + (visit.deptName || '');
+  document.getElementById('fShipTo').value = visit.shipTo || visit.clientName + '\n' + (visit.deptName || '');
+  var sameBill = (document.getElementById('fBillTo').value === document.getElementById('fShipTo').value);
+  document.getElementById('fShipSameBill').checked = sameBill;
+  if (sameBill) { document.getElementById('fShipTo').readOnly = true; document.getElementById('fShipTo').style.background = '#F8FAFF'; }
+  else { document.getElementById('fShipTo').readOnly = false; document.getElementById('fShipTo').style.background = '#fff'; }
+
   document.getElementById('fNotes').value = visit.notes || '';
 
   // Financial summary
@@ -1026,6 +1062,19 @@ function markDirty() {
   document.getElementById('drawerSaveStatus').textContent = 'Unsaved changes';
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(autoSave, 1500);
+}
+
+function osToggleShipSame() {
+  var shipTo = document.getElementById('fShipTo');
+  if (document.getElementById('fShipSameBill').checked) {
+    shipTo.value = document.getElementById('fBillTo').value;
+    shipTo.readOnly = true;
+    shipTo.style.background = '#F8FAFF';
+  } else {
+    shipTo.readOnly = false;
+    shipTo.style.background = '#fff';
+  }
+  markDirty();
 }
 
 function autoSave() {

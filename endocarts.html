@@ -424,6 +424,7 @@
 
   <!-- Overview Tab -->
   <div class="dpane active" id="dpane-overview">
+    <!-- Quote Info -->
     <div class="section-card">
       <div class="section-head">Quote Info</div>
       <div class="section-body">
@@ -437,25 +438,46 @@
         </div>
         <div class="g2">
           <div class="field"><label>Cart Model</label><input id="fCartModel" readonly/></div>
-          <div class="field"><label>Sales Rep</label><input id="fSalesRep" readonly/></div>
-        </div>
-        <div class="g2">
-          <div class="field"><label>Created</label><input id="fDateCreated" readonly/></div>
-          <div class="field"><label>Date Quoted</label><input id="fDateQuoted" readonly/></div>
+          <div class="field"><label>Date Created</label><input id="fDateCreated" readonly/></div>
         </div>
       </div>
     </div>
 
+    <!-- Settings & Payment -->
     <div class="section-card">
-      <div class="section-head">Financial Summary</div>
+      <div class="section-head">Settings &amp; Payment</div>
       <div class="section-body">
         <div class="g2">
+          <div class="field"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"><option value="">—</option></select></div>
+          <div class="field"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"><option value="">—</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Due on Receipt</option><option>Prepaid</option></select></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Pricing Category</label><select id="fPricingCat" onchange="markDirty()"><option value="">—</option><option>Standard</option><option>Contract</option><option>GPO</option><option>Government</option></select></div>
+          <div class="field"><label>Discount %</label><input id="fDiscount" type="text" placeholder="0" onchange="markDirty()"/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Date Quoted</label><input id="fDateQuoted" readonly/></div>
+          <div class="field"><label>Ship Cost</label><input id="fShipCost" type="text" placeholder="$0.00" onchange="markDirty()"/></div>
+        </div>
+        <div class="g2">
           <div class="field"><label>Subtotal</label><input id="fSubtotal" readonly/></div>
-          <div class="field"><label>Total</label><input id="fGrandTotal" readonly style="font-weight:700;color:var(--navy)"/></div>
+          <div class="field"><label>Grand Total</label><input id="fGrandTotal" readonly style="font-weight:700;color:var(--navy)"/></div>
         </div>
       </div>
     </div>
 
+    <!-- Addresses -->
+    <div class="section-card">
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">Addresses <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fSameAsBill" onchange="syncShipToBill()"/> Same as Bill To</label></div>
+      <div class="section-body" style="padding:8px 12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field"><label>Bill To</label><textarea id="fBillTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"></textarea></div>
+          <div class="field"><label>Ship To</label><textarea id="fShipTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
     <div class="section-card">
       <div class="section-head">Notes</div>
       <div class="section-body">
@@ -984,19 +1006,55 @@ function populateDrawer(q) {
   document.getElementById('drawerTitle').textContent = q.quoteNum;
   document.getElementById('drawerSub').textContent = q.clientName + ' \u2014 ' + q.deptName;
 
+  // Quote Info
   document.getElementById('fQuoteNum').value = q.quoteNum;
   document.getElementById('fStatus').value = q.status;
   document.getElementById('fClient').value = q.clientName;
   document.getElementById('fDept').value = q.deptName;
   document.getElementById('fCartModel').value = q.cartModel;
-  document.getElementById('fSalesRep').value = q.salesRep;
   document.getElementById('fDateCreated').value = fmtDate(q.dateCreated);
+
+  // Settings & Payment
+  var repDD = document.getElementById('fSalesRep');
+  repDD.innerHTML = '<option value="">—</option>';
+  salesReps.forEach(function(r) { repDD.innerHTML += '<option value="'+r+'">'+r+'</option>'; });
+  repDD.value = q.salesRep || '';
+  document.getElementById('fPaymentTerms').value = q.paymentTerms || '';
+  document.getElementById('fPricingCat').value = q.pricingCat || '';
+  document.getElementById('fDiscount').value = q.discount || '';
   document.getElementById('fDateQuoted').value = fmtDate(q.dateQuoted);
+  document.getElementById('fShipCost').value = q.shipCost ? fmtMoney(q.shipCost) : '';
 
   var subtotal = q.total || 0;
+  var shipCost = parseFloat(q.shipCost) || 0;
+  var discount = parseFloat(q.discount) || 0;
+  var discAmt = discount > 0 ? Math.round(subtotal * discount / 100 * 100) / 100 : 0;
+  var grandTotal = subtotal - discAmt + shipCost;
   document.getElementById('fSubtotal').value = fmtMoney(subtotal);
-  document.getElementById('fGrandTotal').value = fmtMoney(subtotal);
+  document.getElementById('fGrandTotal').value = fmtMoney(grandTotal);
 
+  // Addresses — structured text blocks for report/invoice pull
+  var ship = q.shipAddress || {};
+  var bill = q.billAddress || {};
+  function addrBlock(a, fallbackName, fallbackDept) {
+    var lines = [];
+    lines.push(a.name1 || fallbackName || '');
+    if (a.attn) lines.push('Attn: ' + a.attn);
+    else if (a.name2 || fallbackDept) lines.push(a.name2 || fallbackDept);
+    if (a.addr1) lines.push(a.addr1);
+    if (a.addr2) lines.push(a.addr2);
+    var csz = [a.city, a.state].filter(Boolean).join(', ');
+    if (a.zip) csz += ' ' + a.zip;
+    if (csz.trim()) lines.push(csz.trim());
+    return lines.filter(Boolean).join('\n');
+  }
+  var billText = q.billText || addrBlock(bill, q.clientName, '');
+  var shipText = q.shipText || addrBlock(ship, q.clientName, q.deptName);
+  document.getElementById('fBillTo').value = billText;
+  document.getElementById('fShipTo').value = shipText;
+  document.getElementById('fSameAsBill').checked = (billText === shipText);
+
+  // Notes
   document.getElementById('fNotes').value = q.notes || '';
   isDirty = false;
   document.getElementById('drawerSaveStatus').textContent = 'Quote detail';
@@ -1017,6 +1075,19 @@ function populateDrawer(q) {
   });
   document.getElementById('drawerBomBody').innerHTML = bomHtml;
   document.getElementById('drawerBomTotal').textContent = fmtMoney(bomTotal);
+}
+
+/* ─── ADDRESS SYNC ─── */
+function syncShipToBill() {
+  if (document.getElementById('fSameAsBill').checked) {
+    document.getElementById('fShipTo').value = document.getElementById('fBillTo').value;
+    document.getElementById('fShipTo').readOnly = true;
+    document.getElementById('fShipTo').style.background = '#F8FAFF';
+  } else {
+    document.getElementById('fShipTo').readOnly = false;
+    document.getElementById('fShipTo').style.background = '#fff';
+  }
+  markDirty();
 }
 
 /* ─── AUTOSAVE NOTES ─── */
@@ -1246,9 +1317,24 @@ async function init() {
     allModels = getDemoModels();
     isLive = false;
   }
+  // Seed address + payment data onto demo quotes
+  var demoAddresses = {
+    1: { ship:{name1:'Johns Hopkins Hospital',name2:'Endoscopy Suite',attn:'Dr. Sarah Mitchell',addr1:'1800 Orleans St',addr2:'Blalock Building, 4th Floor',city:'Baltimore',state:'MD',zip:'21287'}, bill:{name1:'Johns Hopkins Health System',name2:'Accounts Payable',addr1:'733 N Broadway',addr2:'',city:'Baltimore',state:'MD',zip:'21205',email:'ap@jhmi.edu'}, paymentTerms:'Net 30', pricingCat:'Contract' },
+    2: { ship:{name1:'Cleveland Clinic',name2:'Surgery Department',attn:'Lisa Chang, RN',addr1:'9500 Euclid Ave',addr2:'A-Building, 2nd Floor',city:'Cleveland',state:'OH',zip:'44195'}, bill:{name1:'Cleveland Clinic Foundation',name2:'Purchasing',addr1:'9500 Euclid Ave',addr2:'Mail Code JJN3-01',city:'Cleveland',state:'OH',zip:'44195',email:'purchasing@ccf.org'}, paymentTerms:'Net 45', pricingCat:'GPO' },
+    3: { ship:{name1:'Mayo Clinic',name2:'Pulmonology',attn:'James Peters, MD',addr1:'200 First St SW',addr2:'Mary Brigh Building',city:'Rochester',state:'MN',zip:'55905'}, bill:{name1:'Mayo Clinic',name2:'Finance - AP',addr1:'200 First St SW',addr2:'Siebens Building, 10th Floor',city:'Rochester',state:'MN',zip:'55905',email:'ap@mayo.edu'}, paymentTerms:'Net 30', pricingCat:'Standard' },
+    4: { ship:{name1:'HCA Florida West Kendall',name2:'Endoscopy Center',attn:'Maria Gonzalez',addr1:'9555 SW 162nd Ave',addr2:'',city:'Miami',state:'FL',zip:'33196'}, bill:{name1:'HCA Healthcare',name2:'Accounts Payable',addr1:'One Park Plaza',addr2:'',city:'Nashville',state:'TN',zip:'37203',email:'ap@hcahealthcare.com'}, paymentTerms:'Net 60', pricingCat:'GPO' },
+    5: { ship:{name1:'Cedars-Sinai Medical Center',name2:'Bronchoscopy Lab',attn:'Dr. Alan Park',addr1:'8700 Beverly Blvd',addr2:'South Tower, Suite 6732',city:'Los Angeles',state:'CA',zip:'90048'}, bill:{name1:'Cedars-Sinai Health System',name2:'Procurement',addr1:'8700 Beverly Blvd',addr2:'Plaza Level',city:'Los Angeles',state:'CA',zip:'90048',email:'procurement@cshs.org'}, paymentTerms:'Net 30', pricingCat:'Contract' }
+  };
   allQuotes.forEach(function(q) {
     q.itemCount = q.items.length;
     q.total = q.items.reduce(function(s,i){ return s + i.qty * i.unitCost; }, 0);
+    var addr = demoAddresses[q.clientKey];
+    if (addr) {
+      q.shipAddress = addr.ship;
+      q.billAddress = addr.bill;
+      q.paymentTerms = addr.paymentTerms;
+      q.pricingCat = addr.pricingCat;
+    }
   });
   // Populate reps dropdown
   var reps = [], seen = {};

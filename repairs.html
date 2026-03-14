@@ -531,42 +531,16 @@
                 </div>
               </div>
 
-              <!-- CENTER: Shipping Address -->
-              <div class="section-card" style="margin-bottom:0">
-                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
-                  Shipping Address
-                  <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)" onclick="copyShipFromClient()">Copy from Client</button>
+              <!-- CENTER+RIGHT: Addresses -->
+              <div class="section-card" style="margin-bottom:0;grid-column:span 2">
+                <div class="section-head" style="padding:5px 12px;font-size:9.5px;display:flex;align-items:center;justify-content:space-between">
+                  Addresses
+                  <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To</label>
                 </div>
                 <div class="section-body" style="padding:8px 12px">
-                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
-                    <div class="field span2"><label>Name 1</label><input id="fShipName1" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Name 2 / Dept</label><input id="fShipName2" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Attention</label><input id="fShipAttn" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Address 1</label><input id="fShipAddr1" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Address 2</label><input id="fShipAddr2" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>City</label><input id="fShipCity" onchange="markDirty()"/></div>
-                    <div class="field"><label>State</label><input id="fShipState" onchange="markDirty()"/></div>
-                    <div class="field"><label>Zip</label><input id="fShipZip" onchange="markDirty()"/></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- RIGHT: Billing Address -->
-              <div class="section-card" style="margin-bottom:0">
-                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
-                  Billing Address
-                  <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)" onclick="copyBillFromShip()">Same as Shipping</button>
-                </div>
-                <div class="section-body" style="padding:8px 12px">
-                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
-                    <div class="field span2"><label>Name 1</label><input id="fBillName1" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Name 2</label><input id="fBillName2" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Address 1</label><input id="fBillAddr1" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Address 2</label><input id="fBillAddr2" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>City</label><input id="fBillCity" onchange="markDirty()"/></div>
-                    <div class="field"><label>State</label><input id="fBillState" onchange="markDirty()"/></div>
-                    <div class="field"><label>Zip</label><input id="fBillZip" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Email</label><input id="fBillEmail" onchange="markDirty()"/></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div class="field"><label>Bill To</label><textarea id="fBillAddr" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)toggleShipSame()"></textarea></div>
+                    <div class="field"><label>Ship To</label><textarea id="fShipAddr" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
                   </div>
                 </div>
               </div>
@@ -1459,23 +1433,24 @@ function populateDetail(d) {
   document.getElementById('fRecvdApproval').value = toDateInput(d.dtAprRecvd);
   document.getElementById('fApprName').value = d.sApprName || '';
 
-  // Addresses
-  document.getElementById('fShipName1').value = d.sShipName1 || '';
-  document.getElementById('fShipName2').value = d.sShipName2 || '';
-  document.getElementById('fShipAttn').value = d.sShipAttention || '';
-  document.getElementById('fShipAddr1').value = d.sShipAddr1 || '';
-  document.getElementById('fShipAddr2').value = d.sShipAddr2 || '';
-  document.getElementById('fShipCity').value = d.sShipCity || '';
-  document.getElementById('fShipState').value = d.sShipState || '';
-  document.getElementById('fShipZip').value = d.sShipZip || '';
-  document.getElementById('fBillName1').value = d.sBillName1 || '';
-  document.getElementById('fBillName2').value = d.sBillName2 || '';
-  document.getElementById('fBillAddr1').value = d.sBillAddr1 || '';
-  document.getElementById('fBillAddr2').value = d.sBillAddr2 || '';
-  document.getElementById('fBillCity').value = d.sBillCity || '';
-  document.getElementById('fBillState').value = d.sBillState || '';
-  document.getElementById('fBillZip').value = d.sBillZip || '';
-  document.getElementById('fBillEmail').value = d.sBillEmail || '';
+  // Addresses — structured text blocks for report/invoice pull
+  function addrBlock(lines) { return lines.filter(Boolean).join('\n'); }
+  var shipText = addrBlock([
+    d.sShipName1, d.sShipAttention ? 'Attn: '+d.sShipAttention : d.sShipName2,
+    d.sShipAddr1, d.sShipAddr2,
+    [d.sShipCity, d.sShipState].filter(Boolean).join(', ') + (d.sShipZip ? ' '+d.sShipZip : '')
+  ]);
+  var billText = addrBlock([
+    d.sBillName1, d.sBillName2,
+    d.sBillAddr1, d.sBillAddr2,
+    [d.sBillCity, d.sBillState].filter(Boolean).join(', ') + (d.sBillZip ? ' '+d.sBillZip : ''),
+    d.sBillEmail
+  ]);
+  document.getElementById('fBillAddr').value = billText;
+  document.getElementById('fShipAddr').value = shipText;
+  var sameBill = (billText === shipText);
+  document.getElementById('fShipSameBill').checked = sameBill;
+  if (sameBill) { document.getElementById('fShipAddr').readOnly = true; document.getElementById('fShipAddr').style.background = '#F8FAFF'; }
 
   // Inbound
   document.getElementById('fTrackIn').value = d.sShipTrackingNumberIn || '';
@@ -1918,19 +1893,17 @@ function resetMaxCharge() {
   }
 }
 
-// ── Address copy helpers ──
-function copyShipFromClient() {
-  // TODO: pull from client record when wired
-  console.log('[TSI] Copy shipping from client — not yet wired');
-}
-function copyBillFromShip() {
-  document.getElementById('fBillName1').value = document.getElementById('fShipName1').value;
-  document.getElementById('fBillName2').value = document.getElementById('fShipName2').value;
-  document.getElementById('fBillAddr1').value = document.getElementById('fShipAddr1').value;
-  document.getElementById('fBillAddr2').value = document.getElementById('fShipAddr2').value;
-  document.getElementById('fBillCity').value = document.getElementById('fShipCity').value;
-  document.getElementById('fBillState').value = document.getElementById('fShipState').value;
-  document.getElementById('fBillZip').value = document.getElementById('fShipZip').value;
+// ── Address toggle ──
+function toggleShipSame() {
+  var shipTo = document.getElementById('fShipAddr');
+  if (document.getElementById('fShipSameBill').checked) {
+    shipTo.value = document.getElementById('fBillAddr').value;
+    shipTo.readOnly = true;
+    shipTo.style.background = '#F8FAFF';
+  } else {
+    shipTo.readOnly = false;
+    shipTo.style.background = '#fff';
+  }
   markDirty();
 }
 

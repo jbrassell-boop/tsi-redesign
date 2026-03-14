@@ -383,109 +383,21 @@
       <div id="dtab-addresses" class="tab-content" style="display:none">
         <div style="flex:1;min-width:0">
           <div class="addr-grid">
-            <!-- Billing Address -->
-            <div class="addr-col">
-              <div class="addr-head">Billing Address</div>
-              <div class="addr-body">
-                <div class="bill-type-row">
-                  <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Bill Type:</span>
-                  <label class="cb-item"><input type="checkbox"/> Address</label>
-                  <label class="cb-item"><input type="checkbox" checked/> Email</label>
-                </div>
-                <div class="fg g2" style="gap:8px 12px">
-                  <div class="ff">
-                    <label>Name (Line 1)</label>
-                    <input class="inp" placeholder="Enter Client Name 1"/>
-                  </div>
-                  <div class="ff">
-                    <label>Name (Line 2)</label>
-                    <input class="inp" placeholder="Enter Client Name 2"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>Address Line 1</label>
-                    <input class="inp" placeholder="Enter Address Line 1"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>Address Line 2</label>
-                    <input class="inp" placeholder="Enter Address Line 2"/>
-                  </div>
-                  <div class="ff">
-                    <label>Zip</label>
-                    <input class="inp" placeholder="Enter Zip"/>
-                  </div>
-                  <div class="ff">
-                    <label>City</label>
-                    <input class="inp" placeholder="Enter City"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>State</label>
-                    <select class="inp"><option value="">Select State</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select>
-                  </div>
-                  <div class="ff">
-                    <label>Email Name</label>
-                    <input class="inp" value="John Congi"/>
-                  </div>
-                  <div class="ff">
-                    <label>Email Address <span class="req">*</span></label>
-                    <input class="inp" type="email" value="John.s.congi.civ@mail.mil"/>
-                  </div>
-                  <div class="ff">
-                    <label>Phone</label>
-                    <input class="inp" placeholder="+1 (___) ___-____"/>
-                  </div>
-                  <div class="ff">
-                    <label>Fax</label>
-                    <input class="inp" placeholder="(___) ___-____"/>
-                  </div>
-                </div>
+            <div class="addr-col" style="grid-column:span 2">
+              <div class="addr-head" style="display:flex;align-items:center;justify-content:space-between">
+                Addresses
+                <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="deptShipSameBill" style="width:auto;height:auto" onchange="deptToggleShipSame()"/> Same as Bill To</label>
               </div>
-            </div>
-
-            <!-- Shipping Address -->
-            <div class="addr-col">
-              <div class="addr-head">Shipping Address</div>
               <div class="addr-body">
-                <div class="bill-type-row">
-                  <label class="cb-item"><input type="checkbox"/> Same As Billing</label>
-                  <label class="cb-item"><input type="checkbox"/> Show On Invoice</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div class="ff"><label>Bill To</label><textarea id="deptBillTo" class="inp" rows="5" style="height:auto;font-size:11px;line-height:1.4;resize:none" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"></textarea></div>
+                  <div class="ff"><label>Ship To</label><textarea id="deptShipTo" class="inp" rows="5" style="height:auto;font-size:11px;line-height:1.4;resize:none" oninput="deptDirty()"></textarea></div>
                 </div>
-                <div class="fg g2" style="gap:8px 12px">
-                  <div class="ff">
-                    <label>Name (Line 1)</label>
-                    <input class="inp" placeholder="Enter Client Name 1"/>
-                  </div>
-                  <div class="ff">
-                    <label>Name (Line 2)</label>
-                    <input class="inp" placeholder="Enter Client Name 2"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>Address Line 1</label>
-                    <input class="inp" placeholder="Enter Address Line 1"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>Address Line 2</label>
-                    <input class="inp" placeholder="Enter Address Line 2"/>
-                  </div>
-                  <div class="ff">
-                    <label>Zip</label>
-                    <input class="inp" placeholder="Enter Zip"/>
-                  </div>
-                  <div class="ff">
-                    <label>City</label>
-                    <input class="inp" placeholder="Enter City"/>
-                  </div>
-                  <div class="ff span2">
-                    <label>State</label>
-                    <select class="inp"><option value="">Select State</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select>
-                  </div>
-                  <div class="ff">
-                    <label>Phone</label>
-                    <input class="inp" placeholder="+1 (___) ___-____"/>
-                  </div>
-                  <div class="ff">
-                    <label>Fax</label>
-                    <input class="inp" placeholder="(___) ___-____"/>
-                  </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px">
+                  <div class="ff"><label>Bill Email</label><input id="deptBillEmail" class="inp" type="email" oninput="deptDirty()"/></div>
+                  <div class="ff"><label>Bill Phone</label><input id="deptBillPhone" class="inp" oninput="deptDirty()"/></div>
+                  <div class="ff"><label>Ship Phone</label><input id="deptShipPhone" class="inp" oninput="deptDirty()"/></div>
+                  <div class="ff"><label>Fax</label><input id="deptFax" class="inp" oninput="deptDirty()"/></div>
                 </div>
               </div>
             </div>
@@ -1591,6 +1503,19 @@ function openContactModal(mode){
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveDepartment, 1500);
   }
+  window.deptDirty = function(){ triggerAutosave(); };
+  window.deptToggleShipSame = function(){
+    const shipTo = document.getElementById('deptShipTo');
+    if(document.getElementById('deptShipSameBill').checked){
+      shipTo.value = document.getElementById('deptBillTo').value;
+      shipTo.readOnly = true;
+      shipTo.style.background = '#F8FAFF';
+    } else {
+      shipTo.readOnly = false;
+      shipTo.style.background = '#fff';
+    }
+    triggerAutosave();
+  }
 
   // Attach autosave to all form fields in main tab
   function wireAutosave(){
@@ -1770,35 +1695,34 @@ function openContactModal(mode){
     const addrKeys = Object.keys(d).filter(k => /bill|ship|addr|city|state|zip|phone|fax|email/i.test(k));
     console.log('[Dept] Address fields in API response:', addrKeys, addrKeys.reduce((o,k)=>({...o,[k]:d[k]}),{}));
 
-    // Billing address — try all known field name variants
-    const bInputs = addrBodies[0].querySelectorAll('.inp');
-    if(bInputs.length >= 10){
-      bInputs[0].value = d.sBillingName1 || d.sBillToName1 || d.sBillName1 || '';
-      bInputs[1].value = d.sBillingName2 || d.sBillToName2 || d.sBillName2 || '';
-      bInputs[2].value = d.sBillingAddress1 || d.sBillToAddress1 || d.sBillToAddr1 || d.sBillingAddr1 || d.sBillAddr1 || '';
-      bInputs[3].value = d.sBillingAddress2 || d.sBillToAddress2 || d.sBillToAddr2 || d.sBillingAddr2 || d.sBillAddr2 || '';
-      bInputs[4].value = d.sBillingZip || d.sBillToZip || d.sBillToZipCode || d.sBillZip || '';
-      bInputs[5].value = d.sBillingCity || d.sBillToCity || d.sBillCity || '';
-      setSelectByText(bInputs[6], d.sBillingState || d.sBillToState || d.sBillState || '');
-      bInputs[7].value = d.sBillingEmailName || d.sBillToEmailName || d.sBillEmailName || '';
-      bInputs[8].value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
-      bInputs[9].value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneNumber || '';
-      if(bInputs[10]) bInputs[10].value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactFaxNumber || '';
-    }
+    // Addresses — structured text blocks for report/invoice pull
+    function ab(lines) { return lines.filter(Boolean).join('\n'); }
+    const bn1 = d.sBillingName1 || d.sBillToName1 || d.sBillName1 || '';
+    const bn2 = d.sBillingName2 || d.sBillToName2 || d.sBillName2 || '';
+    const ba1 = d.sBillingAddress1 || d.sBillToAddress1 || d.sBillToAddr1 || d.sBillingAddr1 || d.sBillAddr1 || '';
+    const ba2 = d.sBillingAddress2 || d.sBillToAddress2 || d.sBillToAddr2 || d.sBillingAddr2 || d.sBillAddr2 || '';
+    const bc = d.sBillingCity || d.sBillToCity || d.sBillCity || '';
+    const bs = d.sBillingState || d.sBillToState || d.sBillState || '';
+    const bz = d.sBillingZip || d.sBillToZip || d.sBillToZipCode || d.sBillZip || '';
+    const billText = ab([bn1, bn2, ba1, ba2, [bc, bs].filter(Boolean).join(', ') + (bz ? ' '+bz : '')]);
+    document.getElementById('deptBillTo').value = billText;
+    document.getElementById('deptBillEmail').value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
+    document.getElementById('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneNumber || '';
+    document.getElementById('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactFaxNumber || '';
 
-    // Shipping address — try all known field name variants
-    const sInputs = addrBodies[1].querySelectorAll('.inp');
-    if(sInputs.length >= 8){
-      sInputs[0].value = d.sShippingName1 || d.sShipToName1 || d.sShipName1 || '';
-      sInputs[1].value = d.sShippingName2 || d.sShipToName2 || d.sShipName2 || '';
-      sInputs[2].value = d.sShippingAddress1 || d.sShipToAddress1 || d.sShipToAddr1 || d.sShippingAddr1 || d.sShipAddr1 || '';
-      sInputs[3].value = d.sShippingAddress2 || d.sShipToAddress2 || d.sShipToAddr2 || d.sShippingAddr2 || d.sShipAddr2 || '';
-      sInputs[4].value = d.sShippingZip || d.sShipToZip || d.sShipToZipCode || d.sShipZip || '';
-      sInputs[5].value = d.sShippingCity || d.sShipToCity || d.sShipCity || '';
-      setSelectByText(sInputs[6], d.sShippingState || d.sShipToState || d.sShipState || '');
-      sInputs[7].value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
-      if(sInputs[8]) sInputs[8].value = d.sShippingFax || d.sShipToFax || d.sShipFax || '';
-    }
+    const sn1 = d.sShippingName1 || d.sShipToName1 || d.sShipName1 || '';
+    const sn2 = d.sShippingName2 || d.sShipToName2 || d.sShipName2 || '';
+    const sa1 = d.sShippingAddress1 || d.sShipToAddress1 || d.sShipToAddr1 || d.sShippingAddr1 || d.sShipAddr1 || '';
+    const sa2 = d.sShippingAddress2 || d.sShipToAddress2 || d.sShipToAddr2 || d.sShippingAddr2 || d.sShipAddr2 || '';
+    const sc = d.sShippingCity || d.sShipToCity || d.sShipCity || '';
+    const ss = d.sShippingState || d.sShipToState || d.sShipState || '';
+    const sz = d.sShippingZip || d.sShipToZip || d.sShipToZipCode || d.sShipZip || '';
+    const shipText = ab([sn1, sn2, sa1, sa2, [sc, ss].filter(Boolean).join(', ') + (sz ? ' '+sz : '')]);
+    document.getElementById('deptShipTo').value = shipText;
+    document.getElementById('deptShipPhone').value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
+    const sameBill = (billText === shipText);
+    document.getElementById('deptShipSameBill').checked = sameBill;
+    if(sameBill) { document.getElementById('deptShipTo').readOnly = true; document.getElementById('deptShipTo').style.background = '#F8FAFF'; }
   }
 
   /* ═══ EVENT WIRING ═══════════════════════════════════ */
