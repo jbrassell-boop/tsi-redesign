@@ -6,75 +6,117 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* PAGE-SPECIFIC: Workspace */
-    .page-body{padding:24px}
-    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px}
-    .breadcrumb .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
-    .breadcrumb .sep{color:var(--border)}
-    .breadcrumb .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
+    .page-body{overflow:auto;padding:0}
 
-    /* LAYOUT */
-    .workspace-layout{display:flex;gap:20px}
-    .workspace-main{flex:1.8;min-width:0}
-    .workspace-side{flex:1;min-width:0}
+    /* ── Workspace Toolbar ── */
+    .ws-toolbar{display:flex;align-items:center;gap:10px;padding:10px 20px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:10}
+    .ws-title{font-size:14px;font-weight:800;color:var(--navy)}
+    .ws-sub{font-size:11px;color:var(--muted);margin-left:6px}
+    .ws-spacer{flex:1}
 
-    /* CARD */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(var(--primary-rgb),.06);margin-bottom:16px}
-    .card-head{padding:12px 20px;border-bottom:1px solid var(--border);background:#ECF4F5;display:flex;align-items:center;justify-content:space-between}
-    .card-head .title{font-size:13px;font-weight:700;color:var(--navy)}
-    .card-body{padding:20px}
+    /* ── Widget Grid ── */
+    .ws-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:20px;align-items:start}
 
-    /* TASKS */
-    .task-item{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;border-left:3px solid transparent;margin-bottom:8px;transition:all .12s}
-    .task-item.high{border-left-color:var(--red);background:#FEF9F9}
-    .task-item.medium{border-left-color:var(--amber);background:#FFFDF7}
-    .task-item.done{opacity:.5;background:transparent;border-color:transparent}
-    .task-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px}
-    .task-check.checked{background:var(--green);border-color:var(--green);color:#fff;font-size:10px}
-    .task-text{font-size:13px;color:var(--text);line-height:1.4;flex:1}
-    .task-text.done{text-decoration:line-through;color:var(--muted)}
-    .task-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
-    .task-due{font-size:11px;color:var(--muted)}
-    .b-high{background:#FEF2F2;color:var(--red)}
-    .b-med{background:#FFFBEB;color:var(--amber)}
-    .section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+    /* ── Widget Card ── */
+    .wc{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(var(--primary-rgb),.05);position:relative;transition:box-shadow .15s}
+    .wc.span2{grid-column:span 2}
+    .wc.span3{grid-column:span 3}
+    .wc-head{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:#F0F4FA}
+    .wc-icon{font-size:14px;line-height:1}
+    .wc-title{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;flex:1}
+    .wc-action{font-size:10px;color:var(--blue);cursor:pointer;font-weight:600;white-space:nowrap}
+    .wc-action:hover{text-decoration:underline}
+    .wc-body{padding:12px 14px}
 
-    /* STATS */
-    .stat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:background .12s}
-    .stat-row:hover{background:#d8e3f2}
-    .stat-row .stat-left{display:flex;align-items:center;gap:10px}
-    .stat-row .stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-    .stat-row .stat-label{font-size:12.5px;color:var(--label)}
-    .stat-row .stat-val{font-size:16px;font-weight:800;color:var(--navy)}
-    .stat-row.alert .stat-val{color:var(--red)}
-    .stat-row.warn .stat-val{color:var(--amber)}
-    .stat-row.good .stat-val{color:var(--green)}
+    /* ── Edit Mode ── */
+    .ws-grid.edit-mode .wc{outline:2px dashed var(--border-dk);outline-offset:2px}
+    .ws-grid.edit-mode .wc:hover{outline-color:var(--blue)}
+    .wc-remove{display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:12px;line-height:1;cursor:pointer;align-items:center;justify-content:center;z-index:5;font-weight:700}
+    .edit-mode .wc-remove{display:flex}
+    .wc-drag{display:none;position:absolute;top:8px;left:8px;color:var(--muted);cursor:grab;font-size:13px}
+    .edit-mode .wc-drag{display:block}
 
-    /* KPI COMMAND CENTER */
-    .kpi-card .card-head{padding:10px 16px;background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-bottom:none}
-    .kpi-card .card-head .title{color:#fff;font-size:12px;display:flex;align-items:center;gap:8px}
-    .kpi-card .card-head .title .kpi-icon{font-size:14px}
-    .stat-row.clickable{cursor:pointer}
-    .stat-row.clickable:hover{background:#d0ddf0;border-color:var(--border-dk)}
-    .stat-row.clickable::after{content:'›';font-size:16px;font-weight:700;color:var(--muted);margin-left:8px}
-    .stat-row.clickable:hover::after{color:var(--navy)}
+    /* Add-widget drop zone shown in edit mode */
+    .wc-add-slot{border:2px dashed var(--border-dk);border-radius:10px;min-height:100px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:transparent}
+    .wc-add-slot:hover{border-color:var(--navy);background:#EEF2FF}
+    .edit-mode ~ .ws-add-btn,.edit-mode .wc-add-slot{display:flex}
 
-    /* QUICK EMAILS */
-    .email-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
-    .email-item:hover{background:var(--bg)}
-    .email-item:last-child{border-bottom:none}
-    .email-from{font-size:12.5px;font-weight:600;color:var(--text)}
-    .email-subject{font-size:12px;color:var(--label);margin-top:2px}
-    .email-time{font-size:11px;color:var(--muted)}
-    .unread .email-from{color:var(--navy)}
-    .unread-dot{display:inline-block;width:7px;height:7px;background:var(--blue);border-radius:50%;margin-right:6px}
+    /* ── Widget Picker Panel ── */
+    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;display:none}
+    .picker-overlay.open{display:block}
+    .picker-panel{position:fixed;top:0;right:0;bottom:0;width:320px;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.18);z-index:401;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+    .picker-panel.open{transform:translateX(0)}
+    .picker-head{background:linear-gradient(135deg,var(--navy),var(--steel));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .picker-head-title{font-size:14px;font-weight:800;color:#fff}
+    .picker-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+    .picker-list{flex:1;overflow-y:auto;padding:12px}
+    .picker-section{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px}
+    .picker-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;cursor:pointer;transition:all .12s;background:#fff}
+    .picker-item:hover{border-color:var(--navy);background:#EEF2FF}
+    .picker-item.added{opacity:.4;cursor:default;pointer-events:none}
+    .pi-icon{font-size:16px;width:28px;text-align:center;flex-shrink:0}
+    .pi-info{flex:1;min-width:0}
+    .pi-title{font-size:12px;font-weight:700;color:var(--navy)}
+    .pi-desc{font-size:10px;color:var(--muted);margin-top:1px}
+    .pi-add{background:var(--navy);border:none;border-radius:4px;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;cursor:pointer;flex-shrink:0}
+    .picker-item.added .pi-add{background:var(--muted)}
 
-    /* ADD TASK */
-    .add-task-row{display:flex;gap:8px;margin-bottom:20px}
-    .add-task-row input{flex:1;height:36px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px;font-family:inherit;outline:none;color:var(--text)}
-    .add-task-row input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
-    .add-task-row select{height:36px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none;background:#fff;cursor:pointer}
-    .add-task-row button{height:36px;padding:0 16px;background:var(--navy);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+    /* ── Stat rows (inside widgets) ── */
+    .ws-stat{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;margin-bottom:5px;cursor:pointer;transition:background .1s;border:1px solid var(--border)}
+    .ws-stat:hover{background:#D1EAF0}
+    .ws-stat:last-child{margin-bottom:0}
+    .ws-stat-left{display:flex;align-items:center;gap:8px}
+    .ws-stat-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+    .ws-stat-label{font-size:12px;color:var(--label)}
+    .ws-stat-val{font-size:15px;font-weight:800;color:var(--navy)}
+    .ws-stat-val.red{color:var(--red)}
+    .ws-stat-val.amber{color:var(--amber)}
+    .ws-stat-val.green{color:var(--green)}
+    .ws-stat-arrow{font-size:14px;color:var(--muted);margin-left:4px}
+
+    /* ── Mini table ── */
+    .ws-table{width:100%;border-collapse:collapse}
+    .ws-table th{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:4px 8px;border-bottom:1.5px solid var(--border-dk);text-align:left}
+    .ws-table td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);color:var(--text)}
+    .ws-table tbody tr:last-child td{border-bottom:none}
+    .ws-table tbody tr:hover td{background:#F0F8FF;cursor:pointer}
+    .ws-tbl-code{font-weight:700;color:var(--navy);font-size:11px}
+    .ws-tbl-badge{display:inline-flex;padding:1px 6px;border-radius:8px;font-size:9.5px;font-weight:600;border:1px solid transparent}
+    .b-red{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .b-amber{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-blue{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-green{background:#F0FDF4;color:var(--green);border-color:#BBF7D0}
+    .b-purple{background:#F5F3FF;color:#7C3AED;border-color:#DDD6FE}
+
+    /* ── Tasks ── */
+    .ws-task{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+    .ws-task:last-child{border-bottom:none}
+    .ws-task-check{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border-dk);background:#fff;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .ws-task-check.done{background:var(--green);border-color:var(--green);color:#fff;font-size:9px}
+    .ws-task-text{font-size:12px;color:var(--text);flex:1;line-height:1.4}
+    .ws-task-text.done{text-decoration:line-through;color:var(--muted)}
+    .ws-task-pri{font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:4px}
+    .pri-u{background:#FEF2F2;color:var(--red)}.pri-h{background:#FFFBEB;color:var(--amber)}.pri-n{background:#F0F4FA;color:var(--navy)}.pri-l{background:#F1F5F9;color:var(--muted)}
+
+    /* ── Quick Links ── */
+    .ql-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .ql-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .12s;background:#fff;text-decoration:none}
+    .ql-btn:hover{border-color:var(--navy);background:#EEF2FF;transform:translateY(-1px)}
+    .ql-btn svg{width:20px;height:20px;stroke:var(--navy);fill:none;stroke-width:1.8}
+    .ql-btn span{font-size:10px;font-weight:600;color:var(--navy);text-align:center;line-height:1.2}
+
+    /* ── Empty widget state ── */
+    .ws-empty{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+
+    /* ── Chip strip inside widget ── */
+    .ws-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .ws-chip{display:flex;flex-direction:column;align-items:center;padding:6px 12px;border:1px solid var(--border);border-radius:7px;background:var(--bg);min-width:54px;cursor:pointer;transition:background .1s}
+    .ws-chip:hover{background:#D1EAF0}
+    .ws-chip-val{font-size:14px;font-weight:800;color:var(--navy)}
+    .ws-chip-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:1px}
+    .ws-chip.red .ws-chip-val{color:var(--red)}
+    .ws-chip.amber .ws-chip-val{color:var(--amber)}
+    .ws-chip.green .ws-chip-val{color:var(--green)}
   </style>
 </head>
 <body>
@@ -83,37 +125,28 @@
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </div>
-      <div class="brand-text">
-        <div class="t1">Total Scope, Inc.</div>
-        <div class="t2">The Leader in Medical Device Repair</div>
-      </div>
+      <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>
     </div>
     <div class="nav-group">
-      <div class="nav-item active" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
-      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
-      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
-      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
-      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
-      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
-      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
-      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
-      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
-      <div class="nav-item" onclick="window.location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
-      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
-      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
-      <div class="nav-item" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
-      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
-      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
-      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
-      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
-      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
-      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
+      <div class="nav-item" onclick="location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item" onclick="location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item" onclick="location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
     </div>
     <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
@@ -121,591 +154,538 @@
   <!-- MAIN -->
   <div class="main">
     <header class="topbar">
-      <div class="topbar-left">
-        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
-      </div>
+      <div class="topbar-left"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/></div>
       <div class="topbar-right">
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
-          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1 solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='endocarts?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
           </div>
         </div>
-        <span id="dataBadge" class="data-badge"></span>
-        <div class="save-indicator"></div>
-        <span style="opacity:0.5; margin: 0 4px;">|</span>
-        Service Location
-        <select id="svcLocation" class="svc-select"><option>Upper Chichester</option><option>Nashville</option></select>
-        <div class="topbar-avatar" id="topbarAvatar">JB</div>
-        <span class="topbar-welcome" id="topbarWelcome">Welcome back, <strong>Joseph</strong></span>
+        <span id="dataBadge" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A">Demo Data</span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
         <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
       </div>
     </header>
 
     <div class="page-body">
-      <div class="breadcrumb">
-        <span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">My Workspace</span>
+
+      <!-- Workspace Toolbar -->
+      <div class="ws-toolbar">
+        <div class="ws-title">My Workspace</div>
+        <span class="ws-sub" id="wsGreeting"></span>
+        <div class="ws-spacer"></div>
+        <button class="btn btn-outline" id="btnEditLayout" onclick="toggleEditMode()" style="gap:5px;font-size:11px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Layout
+        </button>
       </div>
 
-      <div class="workspace-layout">
+      <!-- Widget Grid -->
+      <div class="ws-grid" id="wsGrid"></div>
 
-        <!-- LEFT: Tasks -->
-        <div class="workspace-main">
-          <div class="card">
-            <div class="card-head">
-              <span class="title" id="taskCardTitle">My Tasks — <span style="color:#B71234">5 open</span></span>
-              <span style="font-size:11px;color:#8896AA" id="taskCardDate">Today: Sat, Mar 7, 2026</span>
-            </div>
-            <div class="card-body" id="taskListContainer">
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
 
-              <!-- Add task -->
-              <div class="add-task-row" id="addTaskRow">
-                <input type="text" id="newTaskText" placeholder="Add a new task…"/>
-                <select id="newTaskPriority"><option value="3">High</option><option value="2" selected>Medium</option><option value="1">Low</option></select>
-                <input type="date" id="newTaskDue" style="height:36px;border:1.5px solid #DDE3EE;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/>
-                <button id="addTaskBtn">+ Add</button>
-              </div>
 
-              <div id="taskItems">
-              <!-- Overdue -->
-              <div class="section-label" style="color:#B71234;border-bottom-color:#FECACA">Overdue</div>
-              <div class="task-item high">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">Recover NI26004421 loaner from LN-002 — overdue</div>
-                  <div class="task-meta"><span class="task-due">Due 03/06/2026</span><span class="badge b-high">High</span></div>
-                </div>
-              </div>
-
-              <!-- Due today -->
-              <div class="section-label" style="color:#D97706;border-bottom-color:#FDE68A">Due Today</div>
-              <div class="task-item high">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">QC review: Tift Regional complaint QC-2026-041</div>
-                  <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-high">High</span></div>
-                </div>
-              </div>
-              <div class="task-item medium">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">Invoice Shreveport Endoscopy — OS-2026-003</div>
-                  <div class="task-meta"><span class="task-due">Due 03/07/2026</span><span class="badge b-med">Medium</span></div>
-                </div>
-              </div>
-
-              <!-- Upcoming -->
-              <div class="section-label">Upcoming</div>
-              <div class="task-item high">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">Follow up: Nashville General — contract renewal signature</div>
-                  <div class="task-meta"><span class="task-due">Due 03/08/2026</span><span class="badge b-high">High</span></div>
-                </div>
-              </div>
-              <div class="task-item medium">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">Request CCD chip ETA from ChipTech — BF-UC180F</div>
-                  <div class="task-meta"><span class="task-due">Due 03/09/2026</span><span class="badge b-med">Medium</span></div>
-                </div>
-              </div>
-              <div class="task-item high">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">Price increase letter — West Calcasieu Cameron</div>
-                  <div class="task-meta"><span class="task-due">Due 03/10/2026</span><span class="badge b-high">High</span></div>
-                </div>
-              </div>
-              <div class="task-item medium">
-                <div class="task-check"></div>
-                <div style="flex:1">
-                  <div class="task-text">DVMSS: VISN 4 BPA post-mortem debrief notes</div>
-                  <div class="task-meta"><span class="task-due">Due 03/12/2026</span><span class="badge b-med">Medium</span></div>
-                </div>
-              </div>
-
-              <!-- Done -->
-              <div class="section-label">Completed</div>
-              <div class="task-item done" style="display:flex;align-items:center;gap:12px;padding:8px 16px">
-                <div class="task-check checked">&#10003;</div>
-                <div class="task-text done">Update West Side GI capitation dashboard</div>
-              </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: Stats + Recent Emails -->
-        <div class="workspace-side">
-
-          <!-- KPI: Repair Operations -->
-          <div class="card kpi-card" style="margin-bottom:12px">
-            <div class="card-head"><span class="title"><span class="kpi-icon">&#128295;</span> Repair Operations</span></div>
-            <div style="padding:10px 14px">
-              <div class="stat-row alert clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">&#128295;</div>
-                  <span class="stat-label">Repairs In Progress</span>
-                </div>
-                <span class="stat-val" id="statRepairs">12</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#9201;</div>
-                  <span class="stat-label">Avg TAT</span>
-                </div>
-                <span class="stat-val" id="statTAT">4.2d</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#9202;</div>
-                  <span class="stat-label">Waiting Parts</span>
-                </div>
-                <span class="stat-val" id="statWaiting">3</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#10003;</div>
-                  <span class="stat-label">Completed (30d)</span>
-                </div>
-                <span class="stat-val" id="statCompleted">47</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='repairs.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128178;</div>
-                  <span class="stat-label">Approved Pipeline</span>
-                </div>
-                <span class="stat-val" id="statApprovedPipeline" style="font-size:15px">$119,503</span>
-              </div>
-              <div class="stat-row alert clickable" onclick="window.location='repairs.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">&#128680;</div>
-                  <span class="stat-label">Unapproved Pipeline</span>
-                </div>
-                <span class="stat-val" id="statUnapprovedPipeline" style="font-size:15px">$250,887</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128666;</div>
-                  <span class="stat-label">Ship Rate (Today)</span>
-                </div>
-                <span class="stat-val" id="statShipRate">87%</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#128260;</div>
-                  <span class="stat-label">40-Day Returns</span>
-                </div>
-                <span class="stat-val" id="stat40DayReturns">8</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- KPI: Financial Health -->
-          <div class="card kpi-card" style="margin-bottom:12px">
-            <div class="card-head"><span class="title"><span class="kpi-icon">&#128176;</span> Financial Health</span></div>
-            <div style="padding:10px 14px">
-              <div class="stat-row good clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
-                  <span class="stat-label">Revenue MTD</span>
-                </div>
-                <span class="stat-val" id="statRevenue" style="font-size:15px">$84,600</span>
-              </div>
-              <div class="stat-row clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#EDF2F4">&#9672;</div>
-                  <span class="stat-label">Outstanding A/R</span>
-                </div>
-                <span class="stat-val" id="statAR" style="font-size:15px">$31,240</span>
-              </div>
-              <div class="stat-row alert clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">&#9888;</div>
-                  <span class="stat-label">Overdue Invoices</span>
-                </div>
-                <span class="stat-val" id="statOverdue">2</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#128197;</div>
-                  <span class="stat-label">Avg Days to Pay</span>
-                </div>
-                <span class="stat-val" id="statDaysPay">34d</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128176;</div>
-                  <span class="stat-label">Today's Invoiced</span>
-                </div>
-                <span class="stat-val" id="statTodayInvoiced" style="font-size:15px">$5,382</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='financial.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
-                  <span class="stat-label">Avg Margin</span>
-                </div>
-                <span class="stat-val" id="statAvgMargin">67%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- KPI: Contracts & Sales -->
-          <div class="card kpi-card" style="margin-bottom:12px">
-            <div class="card-head"><span class="title"><span class="kpi-icon">&#128203;</span> Contracts &amp; Sales</span></div>
-            <div style="padding:10px 14px">
-              <div class="stat-row good clickable" onclick="window.location='contracts.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128196;</div>
-                  <span class="stat-label">Active Contracts</span>
-                </div>
-                <span class="stat-val" id="statActiveContracts">5</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='contracts.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#9203;</div>
-                  <span class="stat-label">Expiring &#8804;90d</span>
-                </div>
-                <span class="stat-val" id="statExpiring">2</span>
-              </div>
-              <div class="stat-row clickable" onclick="window.location='contracts.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#EDF2F4">&#128176;</div>
-                  <span class="stat-label">Annual Contract Value</span>
-                </div>
-                <span class="stat-val" id="statACV" style="font-size:15px">$268K</span>
-              </div>
-              <div class="stat-row clickable" onclick="window.location='product-sale.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#EDF2F4">&#128722;</div>
-                  <span class="stat-label">Open Sales Orders</span>
-                </div>
-                <span class="stat-val" id="statOpenSales">4</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- KPI: Assets & Inventory -->
-          <div class="card kpi-card" style="margin-bottom:12px">
-            <div class="card-head"><span class="title"><span class="kpi-icon">&#128230;</span> Assets &amp; Inventory</span></div>
-            <div style="padding:10px 14px">
-              <div class="stat-row clickable" onclick="window.location='scopes.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#EDF2F4">&#128270;</div>
-                  <span class="stat-label">Active Scopes</span>
-                </div>
-                <span class="stat-val" id="statScopes">156</span>
-              </div>
-              <div class="stat-row alert clickable" onclick="window.location='inventory.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FEF2F2">&#128680;</div>
-                  <span class="stat-label">Low Stock Items</span>
-                </div>
-                <span class="stat-val" id="statLowStock">3</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='loaners.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#128260;</div>
-                  <span class="stat-label">Loaners Out</span>
-                </div>
-                <span class="stat-val" id="statLoaners">8</span>
-              </div>
-              <div class="stat-row good clickable" onclick="window.location='outsource-vindication.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#F0FDF4">&#128200;</div>
-                  <span class="stat-label">Outsource Margin</span>
-                </div>
-                <span class="stat-val" id="statOutMargin">18.4%</span>
-              </div>
-              <div class="stat-row clickable" onclick="window.location='dashboard.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#EDF2F4">&#128202;</div>
-                  <span class="stat-label">Lab Backlog</span>
-                </div>
-                <span class="stat-val" id="statLabBacklog">0.6 wks</span>
-              </div>
-              <div class="stat-row warn clickable" onclick="window.location='loaners.html'">
-                <div class="stat-left">
-                  <div class="stat-icon" style="background:#FFFBEB">&#128260;</div>
-                  <span class="stat-label">Loaner Fill Rate</span>
-                </div>
-                <span class="stat-val" id="statLoanerFillRate">67%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Notifications (compact) -->
-          <div class="card">
-            <div class="card-head">
-              <span class="title">Recent Notifications</span>
-              <span id="notifBadge" style="background:#B71234;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">3 new</span>
-            </div>
-            <div id="notifList">
-              <div class="email-item unread">
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span class="email-from"><span class="unread-dot"></span>Tift Regional Medical Center</span>
-                  <span class="email-time">9:41 AM</span>
-                </div>
-                <div class="email-subject">RE: Scope return — NI26004421 fluid invasion repair</div>
-              </div>
-              <div class="email-item unread">
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span class="email-from"><span class="unread-dot"></span>QC System Alert</span>
-                  <span class="email-time">8:15 AM</span>
-                </div>
-                <div class="email-subject">New complaint logged: QC-2026-041 — High Priority</div>
-              </div>
-              <div class="email-item unread">
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span class="email-from"><span class="unread-dot"></span>ChipTech Medical</span>
-                  <span class="email-time">Yesterday</span>
-                </div>
-                <div class="email-subject">BF-UC180F CCD chip order update — backordered 3 weeks</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
+<!-- Widget Picker Panel -->
+<div class="picker-overlay" id="pickerOverlay" onclick="closePicker()"></div>
+<div class="picker-panel" id="pickerPanel">
+  <div class="picker-head">
+    <div class="picker-head-title">Add Widgets</div>
+    <button class="picker-close" onclick="closePicker()">&#10005;</button>
   </div>
+  <div class="picker-list" id="pickerList"></div>
 </div>
+
+
 <script src="api.js"></script>
 <script>
-// ── Auth Guard ──
-if (!API.requireAuth()) throw new Error('redirect');
-
-let _liveMode = false;
-let _tasks = [];
-
-// ── Data Badge ──
-
-// ── User Info ──
-
-// ── Date Helpers ──
-function fmtDate(v) {
-  if (!v) return '';
-  const d = new Date(v);
-  return isNaN(d) ? v : d.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
-}
-function toDateInput(v) {
-  if (!v) return '';
-  const d = new Date(v);
-  return isNaN(d) ? '' : d.toISOString().split('T')[0];
-}
-function todayStr() {
-  const d = new Date();
-  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+// Auth
+try {
+  if (!API.requireAuth()) throw new Error('redirect');
+} catch(e) {
+  if (e.message === 'redirect') window.location = 'login.html';
 }
 
-// ── Normalize task from API ──
-function normalizeTask(r) {
-  return {
-    key: r.lTaskKey || 0,
-    text: r.sNotes || r.sTaskNotes || r.mNotes || r.sDescription || '',
-    client: r.sClientName || r.sClientName1 || '',
-    dept: r.sDepartmentName || r.sDeptName || '',
-    type: r.sTaskTypeName || r.sTaskType || '',
-    priority: r.sPriorityName || r.sTaskPriority || r.sPriority || 'Normal',
-    status: r.sStatusName || r.sTaskStatus || r.sStatus || '',
-    dueDate: r.dtDueDate || r.dtDue || r.dtTaskDate || '',
-    models: r.sModels || r.sRequestedModels || '',
-    _raw: r
+// ── Greeting ──────────────────────────────────────────────────────────────────
+(function() {
+  var h = new Date().getHours();
+  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('wsGreeting').textContent = g + ', Joseph';
+})();
+
+// ── Widget Definitions ─────────────────────────────────────────────────────────
+var WIDGET_DEFS = [
+  {
+    id: 'repair-queue',
+    title: 'Repair Queue',
+    icon: '🔧',
+    desc: 'Open scope repairs by status',
+    span: 2,
+    render: function(body) {
+      var data = [
+        {status:'Received',  count:4,  cls:'b-blue'},
+        {status:'In Repair', count:11, cls:'b-amber'},
+        {status:'QC Hold',   count:2,  cls:'b-red'},
+        {status:'Ship Ready',count:6,  cls:'b-green'},
+        {status:'Overdue',   count:3,  cls:'b-red'},
+      ];
+      var chips = data.map(function(d) {
+        return '<div class="ws-chip ' + (d.cls==='b-red'?'red':d.cls==='b-amber'?'amber':d.cls==='b-green'?'green':'') + '" onclick="location=\'repairs.html\'">' +
+          '<div class="ws-chip-val">' + d.count + '</div>' +
+          '<div class="ws-chip-lbl">' + d.status + '</div>' +
+          '</div>';
+      }).join('');
+      var rows = [
+        {wo:'R-2026-1041', client:'Inspira Medical',    scope:'PCF-190TL', days:8,  sla:7,  stat:'Overdue'},
+        {wo:'R-2026-1038', client:'Johns Hopkins',       scope:'GIF-HQ190', days:5,  sla:7,  stat:'In Repair'},
+        {wo:'R-2026-1035', client:'Penn Medicine',       scope:'URF-V2',    days:3,  sla:5,  stat:'Received'},
+        {wo:'R-2026-1031', client:'UPMC Presbyterian',  scope:'CF-HQ190I', days:6,  sla:7,  stat:'Ship Ready'},
+      ];
+      var tbl = rows.map(function(r) {
+        var over = r.days > r.sla;
+        var cls = over ? 'b-red' : (r.sla - r.days <= 1 ? 'b-amber' : 'b-blue');
+        return '<tr onclick="location=\'repairs.html\'">' +
+          '<td><span class="ws-tbl-code">' + r.wo + '</span></td>' +
+          '<td>' + r.client + '</td>' +
+          '<td style="font-family:monospace;font-size:10.5px">' + r.scope + '</td>' +
+          '<td style="text-align:center"><span class="ws-tbl-badge ' + cls + '">' + r.days + 'd / ' + r.sla + 'd</span></td>' +
+          '<td><span class="ws-tbl-badge b-blue">' + r.stat + '</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<div class="ws-chips">' + chips + '</div>' +
+        '<table class="ws-table"><thead><tr><th>WO #</th><th>Client</th><th>Scope</th><th style="text-align:center">TAT/SLA</th><th>Status</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'my-tasks',
+    title: 'My Tasks',
+    icon: '✅',
+    desc: 'Tasks assigned to you',
+    span: 1,
+    render: function(body) {
+      var tasks = [
+        {text:'Follow up on UPMC quote IQ-2026-004', pri:'h', done:false},
+        {text:'Review Inspira contract renewal', pri:'u', done:false},
+        {text:'Update scope model specs — Olympus PCF-190', pri:'n', done:false},
+        {text:'Send shipping confirmation to Johns Hopkins', pri:'n', done:true},
+        {text:'Check outsource return from Storz', pri:'h', done:false},
+      ];
+      body.innerHTML = tasks.map(function(t, i) {
+        var priMap = {u:'pri-u',h:'pri-h',n:'pri-n',l:'pri-l'};
+        var priLabel = {u:'Urgent',h:'High',n:'Normal',l:'Low'};
+        return '<div class="ws-task">' +
+          '<div class="ws-task-check ' + (t.done?'done':'') + '" onclick="toggleTask(this)">' + (t.done?'✓':'') + '</div>' +
+          '<div class="ws-task-text ' + (t.done?'done':'') + '">' + t.text + '</div>' +
+          '<span class="ws-task-pri ' + priMap[t.pri] + '">' + priLabel[t.pri] + '</span>' +
+          '</div>';
+      }).join('');
+    }
+  },
+  {
+    id: 'overdue',
+    title: 'Overdue / At Risk',
+    icon: '⚠️',
+    desc: 'Repairs past or approaching SLA',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {wo:'R-2026-1041', client:'Inspira Medical',   scope:'PCF-190TL', days:8, sla:7},
+        {wo:'R-2026-1029', client:'Virtua Health',      scope:'GIF-Q180', days:9, sla:7},
+        {wo:'R-2026-1022', client:'AtlantiCare',        scope:'CF-HQ190', days:11,sla:7},
+        {wo:'R-2026-1037', client:'Hackensack Meridian',scope:'PCF-H190', days:7, sla:7},
+      ];
+      var tbl = items.map(function(r) {
+        var over = r.days > r.sla;
+        return '<tr onclick="location=\'repairs.html\'">' +
+          '<td><span class="ws-tbl-code">' + r.wo + '</span></td>' +
+          '<td>' + r.client + '</td>' +
+          '<td><span class="ws-tbl-badge ' + (over?'b-red':'b-amber') + '">' + r.days + 'd / ' + r.sla + 'd</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>WO #</th><th>Client</th><th>TAT/SLA</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'due-today',
+    title: 'Due Today / Tomorrow',
+    icon: '📅',
+    desc: 'Repairs with imminent due dates',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {wo:'R-2026-1044', client:'Penn Medicine',   scope:'URF-V2',    when:'Today'},
+        {wo:'R-2026-1043', client:'Jefferson Health', scope:'GIF-190N', when:'Today'},
+        {wo:'R-2026-1040', client:'Virtua Health',   scope:'CF-H185AL', when:'Tomorrow'},
+        {wo:'R-2026-1039', client:'RWJ Barnabas',    scope:'PCF-190TL', when:'Tomorrow'},
+      ];
+      var tbl = items.map(function(r) {
+        return '<tr onclick="location=\'repairs.html\'">' +
+          '<td><span class="ws-tbl-code">' + r.wo + '</span></td>' +
+          '<td>' + r.client + '</td>' +
+          '<td style="font-family:monospace;font-size:10.5px">' + r.scope + '</td>' +
+          '<td><span class="ws-tbl-badge ' + (r.when==='Today'?'b-red':'b-amber') + '">' + r.when + '</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>WO #</th><th>Client</th><th>Scope</th><th>Due</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'instrument-repairs',
+    title: 'Instrument Repairs',
+    icon: '🔩',
+    desc: 'Open rigid/surgical instrument orders',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {num:'IR-2026-008', client:'Hackensack Meridian', items:3, status:'In Progress'},
+        {num:'IR-2026-005', client:'Virtua Health',        items:2, status:'Received'},
+        {num:'IR-2026-006', client:'AtlantiCare',          items:1, status:'On Hold'},
+        {num:'IR-2026-004', client:'UPMC Presbyterian',    items:4, status:'Outsourced'},
+      ];
+      var tbl = items.map(function(r) {
+        var cls = r.status==='On Hold'?'b-amber':r.status==='Outsourced'?'b-purple':r.status==='Received'?'b-blue':'b-amber';
+        return '<tr onclick="location=\'instruments.html\'">' +
+          '<td><span class="ws-tbl-code">' + r.num + '</span></td>' +
+          '<td>' + r.client + '</td>' +
+          '<td style="text-align:center">' + r.items + '</td>' +
+          '<td><span class="ws-tbl-badge ' + cls + '">' + r.status + '</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>Order #</th><th>Client</th><th style="text-align:center">Items</th><th>Status</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'pending-quotes',
+    title: 'Pending Quotes',
+    icon: '📄',
+    desc: 'Instrument quotes awaiting response',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {num:'IQ-2026-009', client:'Hackensack Meridian', total:'$1,250', status:'Sent'},
+        {num:'IQ-2026-005', client:'Virtua Health',        total:'$426',   status:'Sent'},
+        {num:'IQ-2026-007', client:'AtlantiCare',          total:'—',      status:'Draft'},
+        {num:'IQ-2026-002', client:'Johns Hopkins',        total:'$807',   status:'Draft'},
+      ];
+      var tbl = items.map(function(r) {
+        return '<tr onclick="location=\'instruments.html?tab=quotes\'">' +
+          '<td><span class="ws-tbl-code">' + r.num + '</span></td>' +
+          '<td>' + r.client + '</td>' +
+          '<td style="font-weight:600">' + r.total + '</td>' +
+          '<td><span class="ws-tbl-badge ' + (r.status==='Sent'?'b-blue':'b-amber') + '">' + r.status + '</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>Quote #</th><th>Client</th><th>Total</th><th>Status</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'outstanding-invoices',
+    title: 'Outstanding Invoices',
+    icon: '💰',
+    desc: 'Unpaid invoices summary',
+    span: 1,
+    render: function(body) {
+      body.innerHTML = [
+        {label:'Total Outstanding',  val:'$148,420', icon:'💲', bg:'#F0FDF4', cls:'green'},
+        {label:'Past Due 30+',       val:'$22,180',  icon:'⚠️',  bg:'#FEF2F2', cls:'red'},
+        {label:'Past Due 60+',       val:'$8,440',   icon:'🚨',  bg:'#FEF2F2', cls:'red'},
+        {label:'Invoiced This Month',val:'$61,750',  icon:'📤',  bg:'#EFF6FF', cls:''},
+      ].map(function(s) {
+        return '<div class="ws-stat" onclick="location=\'financial.html\'">' +
+          '<div class="ws-stat-left"><div class="ws-stat-icon" style="background:' + s.bg + '">' + s.icon + '</div>' +
+          '<div class="ws-stat-label">' + s.label + '</div></div>' +
+          '<div class="ws-stat-val ' + s.cls + '">' + s.val + '</div>' +
+          '<span class="ws-stat-arrow">›</span></div>';
+      }).join('');
+    }
+  },
+  {
+    id: 'contracts-expiring',
+    title: 'Contracts Expiring Soon',
+    icon: '📋',
+    desc: 'Contracts expiring in the next 60 days',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {client:'Inspira Medical Centers',   exp:'04/01/2026', days:18},
+        {client:'Penn Medicine',             exp:'04/15/2026', days:32},
+        {client:'Virtua Health',             exp:'04/22/2026', days:39},
+        {client:'AtlantiCare Regional',      exp:'05/01/2026', days:48},
+      ];
+      var tbl = items.map(function(r) {
+        var cls = r.days <= 21 ? 'b-red' : 'b-amber';
+        return '<tr onclick="location=\'contracts.html\'">' +
+          '<td>' + r.client + '</td>' +
+          '<td>' + r.exp + '</td>' +
+          '<td><span class="ws-tbl-badge ' + cls + '">' + r.days + 'd</span></td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>Client</th><th>Expires</th><th>In</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'inventory-alerts',
+    title: 'Inventory Alerts',
+    icon: '📦',
+    desc: 'Items below minimum stock level',
+    span: 1,
+    render: function(body) {
+      var items = [
+        {name:'Biopsy Channel Kit — PCF-190', onhand:2, min:5},
+        {name:'Insertion Tube — GIF-Q180',    onhand:0, min:3},
+        {name:'CCD Assembly — CF-H185',       onhand:1, min:4},
+        {name:'Light Guide Bundle — URF-V2',  onhand:3, min:5},
+      ];
+      var tbl = items.map(function(r) {
+        return '<tr onclick="location=\'inventory.html\'">' +
+          '<td>' + r.name + '</td>' +
+          '<td style="text-align:center"><span class="ws-tbl-badge ' + (r.onhand===0?'b-red':'b-amber') + '">' + r.onhand + '</span></td>' +
+          '<td style="text-align:center;color:var(--muted)">' + r.min + '</td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = '<table class="ws-table"><thead><tr><th>Item</th><th style="text-align:center">On Hand</th><th style="text-align:center">Min</th></tr></thead><tbody>' + tbl + '</tbody></table>';
+    }
+  },
+  {
+    id: 'quick-links',
+    title: 'Quick Links',
+    icon: '⚡',
+    desc: 'One-click navigation shortcuts',
+    span: 1,
+    render: function(body) {
+      var links = [
+        {label:'Repairs',    href:'repairs.html',     svg:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'},
+        {label:'Dashboard',  href:'dashboard.html',   svg:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>'},
+        {label:'Clients',    href:'clients.html',     svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+        {label:'Instruments',href:'instruments.html', svg:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>'},
+        {label:'Financial',  href:'financial.html',   svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+        {label:'Contracts',  href:'contracts.html',   svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/>'},
+        {label:'Inventory',  href:'inventory.html',   svg:'<path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/>'},
+        {label:'Suppliers',  href:'suppliers.html',   svg:'<path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'},
+      ];
+      body.innerHTML = '<div class="ql-grid">' + links.map(function(l) {
+        return '<a class="ql-btn" href="' + l.href + '"><svg viewBox="0 0 24 24">' + l.svg + '</svg><span>' + l.label + '</span></a>';
+      }).join('') + '</div>';
+    }
+  },
+  {
+    id: 'scope-stats',
+    title: 'Scope Stats',
+    icon: '🔭',
+    desc: 'Equipment counts by type',
+    span: 1,
+    render: function(body) {
+      body.innerHTML = [
+        {label:'Flexible Scopes in System', val:'1,284', icon:'🔵', bg:'#EFF6FF', cls:''},
+        {label:'Rigid Instruments',         val:'892',   icon:'⚙️',  bg:'#F5F3FF', cls:''},
+        {label:'Cameras / Heads',           val:'341',   icon:'📷',  bg:'#F0FDF4', cls:''},
+        {label:'Active Loaners Out',        val:'7',     icon:'🔄',  bg:'#FFFBEB', cls:'amber'},
+      ].map(function(s) {
+        return '<div class="ws-stat" onclick="location=\'scopes.html\'">' +
+          '<div class="ws-stat-left"><div class="ws-stat-icon" style="background:' + s.bg + '">' + s.icon + '</div>' +
+          '<div class="ws-stat-label">' + s.label + '</div></div>' +
+          '<div class="ws-stat-val ' + s.cls + '">' + s.val + '</div>' +
+          '<span class="ws-stat-arrow">›</span></div>';
+      }).join('');
+    }
+  },
+  {
+    id: 'tat-performance',
+    title: 'TAT Performance',
+    icon: '⏱️',
+    desc: 'Average turnaround vs SLA targets',
+    span: 1,
+    render: function(body) {
+      var data = [
+        {label:'Avg TAT — This Month', val:'5.2d', target:'7d',  cls:'green'},
+        {label:'Avg TAT — Last Month', val:'6.8d', target:'7d',  cls:'green'},
+        {label:'On-Time Rate',          val:'87%',  target:'90%', cls:'amber'},
+        {label:'SLA Breaches (30d)',    val:'4',    target:'0',   cls:'red'},
+      ];
+      body.innerHTML = data.map(function(s) {
+        return '<div class="ws-stat" style="cursor:default">' +
+          '<div class="ws-stat-left"><div class="ws-stat-label">' + s.label + '</div></div>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:10px;color:var(--muted)">target: ' + s.target + '</span>' +
+          '<div class="ws-stat-val ' + s.cls + '">' + s.val + '</div></div></div>';
+      }).join('');
+    }
+  }
+];
+
+// ── Widget ID → def map ────────────────────────────────────────────────────────
+var WIDGET_MAP = {};
+WIDGET_DEFS.forEach(function(d){ WIDGET_MAP[d.id] = d; });
+
+// ── User prefs (localStorage) ──────────────────────────────────────────────────
+var PREFS_KEY = 'tsi_workspace_' + (API.getUser ? (API.getUser()||{}).lUserKey||'default' : 'default');
+var DEFAULT_LAYOUT = ['repair-queue','due-today','my-tasks','overdue','quick-links','outstanding-invoices'];
+
+function loadPrefs() {
+  try {
+    var raw = localStorage.getItem(PREFS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return DEFAULT_LAYOUT.slice();
+}
+
+function savePrefs(layout) {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(layout)); } catch(e) {}
+}
+
+// ── State ──────────────────────────────────────────────────────────────────────
+var currentLayout = loadPrefs();
+var editMode = false;
+
+// ── Render Grid ───────────────────────────────────────────────────────────────
+function renderGrid() {
+  var grid = document.getElementById('wsGrid');
+  grid.innerHTML = '';
+
+  currentLayout.forEach(function(id) {
+    var def = WIDGET_MAP[id];
+    if (!def) return;
+    var wc = document.createElement('div');
+    wc.className = 'wc' + (def.span > 1 ? ' span' + def.span : '');
+    wc.dataset.id = id;
+
+    // Remove button (edit mode)
+    var rmBtn = document.createElement('button');
+    rmBtn.className = 'wc-remove';
+    rmBtn.innerHTML = '&#10005;';
+    rmBtn.title = 'Remove widget';
+    rmBtn.onclick = function(e) { e.stopPropagation(); removeWidget(id); };
+    wc.appendChild(rmBtn);
+
+    // Header
+    var head = document.createElement('div');
+    head.className = 'wc-head';
+    head.innerHTML = '<span class="wc-icon">' + def.icon + '</span>' +
+      '<span class="wc-title">' + def.title + '</span>' +
+      '<span class="wc-action" onclick="location=\'' + (linkFor(id)) + '\'">View all ›</span>';
+    wc.appendChild(head);
+
+    // Body
+    var body = document.createElement('div');
+    body.className = 'wc-body';
+    body.innerHTML = '<div class="ws-empty">Loading…</div>';
+    wc.appendChild(body);
+
+    grid.appendChild(wc);
+
+    // Render async (paint first)
+    setTimeout(function(b, d){ return function(){ try { d.render(b); } catch(e){ b.innerHTML='<div class="ws-empty">—</div>'; } }; }(body, def), 0);
+  });
+
+  if (editMode) {
+    grid.classList.add('edit-mode');
+    // Add "+ Add Widget" slot
+    var slot = document.createElement('div');
+    slot.className = 'wc-add-slot';
+    slot.innerHTML = '<div style="text-align:center;color:var(--muted)"><div style="font-size:24px;margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600">Add Widget</div></div>';
+    slot.onclick = openPicker;
+    slot.style.display = 'flex';
+    grid.appendChild(slot);
+  } else {
+    grid.classList.remove('edit-mode');
+  }
+}
+
+function linkFor(id) {
+  var map = {
+    'repair-queue':'repairs.html','my-tasks':'development-list.html','overdue':'dashboard.html',
+    'due-today':'repairs.html','instrument-repairs':'instruments.html','pending-quotes':'instruments.html',
+    'outstanding-invoices':'financial.html','contracts-expiring':'contracts.html',
+    'inventory-alerts':'inventory.html','quick-links':'#','scope-stats':'scopes.html','tat-performance':'dashboard.html'
   };
+  return map[id] || '#';
 }
 
-// ── Categorize tasks by date ──
-function categorizeTasks(tasks) {
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const overdue = [], today = [], upcoming = [], completed = [];
-  const closedStatuses = ['Request Fulfilled','Closed Duplicate','Unable to Fulfill','Request Declined','Not Completed','Completed','Complete','Closed'];
-
-  tasks.forEach(t => {
-    if (closedStatuses.some(s => s.toLowerCase() === (t.status||'').toLowerCase())) {
-      completed.push(t);
-      return;
-    }
-    if (!t.dueDate) { upcoming.push(t); return; }
-    const due = new Date(t.dueDate);
-    due.setHours(0,0,0,0);
-    if (due < now) overdue.push(t);
-    else if (due.getTime() === now.getTime()) today.push(t);
-    else upcoming.push(t);
-  });
-  return { overdue, today, upcoming, completed };
-}
-
-// ── Priority helpers ──
-function priorityClass(p) {
-  if (/urgent|high/i.test(p)) return 'high';
-  if (/medium|normal/i.test(p)) return 'medium';
-  return '';
-}
-function priorityBadge(p) {
-  if (/urgent|high/i.test(p)) return '<span class="badge b-high">' + p + '</span>';
-  if (/medium|normal/i.test(p)) return '<span class="badge b-med">' + p + '</span>';
-  return '<span class="badge" style="background:#F0F4F8;color:#64748B">' + p + '</span>';
-}
-
-// ── Render task list ──
-function renderTasks(tasks) {
-  const container = document.getElementById('taskItems');
-  const { overdue, today, upcoming, completed } = categorizeTasks(tasks);
-  const openCount = overdue.length + today.length + upcoming.length;
-
-  // Update card title
-  document.getElementById('taskCardTitle').innerHTML = 'My Tasks &mdash; <span style="color:#B71234">' + openCount + ' open</span>';
-  document.getElementById('taskCardDate').textContent = 'Today: ' + todayStr();
-
-  let html = '';
-
-  function renderGroup(label, items, labelStyle) {
-    if (items.length === 0) return '';
-    let h = '<div class="section-label"' + (labelStyle ? ' style="' + labelStyle + '"' : '') + '>' + label + '</div>';
-    items.forEach(t => {
-      const cls = priorityClass(t.priority);
-      const desc = t.text || (t.client ? t.client + (t.type ? ' — ' + t.type : '') : 'Task #' + t.key);
-      h += '<div class="task-item ' + cls + '" data-key="' + t.key + '">';
-      h += '<div class="task-check"></div>';
-      h += '<div style="flex:1">';
-      h += '<div class="task-text">' + desc + '</div>';
-      h += '<div class="task-meta">';
-      if (t.dueDate) h += '<span class="task-due">Due ' + fmtDate(t.dueDate) + '</span>';
-      if (t.client) h += '<span class="task-due" style="margin-left:6px">' + t.client + '</span>';
-      h += priorityBadge(t.priority);
-      h += '</div></div></div>';
-    });
-    return h;
+// ── Edit Mode ─────────────────────────────────────────────────────────────────
+function toggleEditMode() {
+  editMode = !editMode;
+  var btn = document.getElementById('btnEditLayout');
+  if (editMode) {
+    btn.textContent = '✓ Done';
+    btn.style.background = 'var(--navy)';
+    btn.style.color = '#fff';
+    btn.style.border = 'none';
+  } else {
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit Layout';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.border = '';
+    closePicker();
   }
-
-  html += renderGroup('Overdue', overdue, 'color:#B71234;border-bottom-color:#FECACA');
-  html += renderGroup('Due Today', today, 'color:#D97706;border-bottom-color:#FDE68A');
-  html += renderGroup('Upcoming', upcoming);
-
-  if (completed.length > 0) {
-    html += '<div class="section-label">Completed</div>';
-    completed.forEach(t => {
-      const desc = t.text || (t.client ? t.client + (t.type ? ' — ' + t.type : '') : 'Task #' + t.key);
-      html += '<div class="task-item done" style="display:flex;align-items:center;gap:12px;padding:8px 16px">';
-      html += '<div class="task-check checked">&#10003;</div>';
-      html += '<div class="task-text done">' + desc + '</div>';
-      html += '</div>';
-    });
-  }
-
-  if (tasks.length === 0) {
-    html = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No tasks found.</div>';
-  }
-
-  container.innerHTML = html;
+  renderGrid();
 }
 
-// ── Add Task ──
-document.getElementById('addTaskBtn').addEventListener('click', async () => {
-  const text = document.getElementById('newTaskText').value.trim();
-  if (!text) return;
-  const priSel = document.getElementById('newTaskPriority');
-  const dueVal = document.getElementById('newTaskDue').value;
+function removeWidget(id) {
+  currentLayout = currentLayout.filter(function(x){ return x !== id; });
+  savePrefs(currentLayout);
+  renderGrid();
+  refreshPickerList();
+}
 
-  if (_liveMode) {
-    try {
-      await API.addTask({
-        psNotes: text,
-        plTaskPriorityKey: parseInt(priSel.value) || 2,
-        pdtDueDate: dueVal || null
-      });
-      document.getElementById('newTaskText').value = '';
-      document.getElementById('newTaskDue').value = '';
-      await loadTasks();
-      return;
-    } catch (e) {
-      console.warn('[Workspace] Add task API error:', e.message);
-    }
-  }
-  // Demo fallback — add locally
-  const priText = priSel.options[priSel.selectedIndex].text;
-  _tasks.unshift({
-    key: Date.now(),
-    text: text,
-    client: '',
-    dept: '',
-    type: '',
-    priority: priText,
-    status: 'Not Started',
-    dueDate: dueVal || '',
-    models: ''
-  });
-  document.getElementById('newTaskText').value = '';
-  document.getElementById('newTaskDue').value = '';
-  renderTasks(_tasks);
+// ── Widget Picker ─────────────────────────────────────────────────────────────
+function openPicker() {
+  refreshPickerList();
+  document.getElementById('pickerOverlay').classList.add('open');
+  document.getElementById('pickerPanel').classList.add('open');
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+  document.getElementById('pickerPanel').classList.remove('open');
+}
+
+function refreshPickerList() {
+  var list = document.getElementById('pickerList');
+  list.innerHTML = '<div class="picker-section">Available Widgets</div>' +
+    WIDGET_DEFS.map(function(def) {
+      var added = currentLayout.indexOf(def.id) >= 0;
+      return '<div class="picker-item ' + (added?'added':'') + '" onclick="addWidget(\'' + def.id + '\')">' +
+        '<div class="pi-icon">' + def.icon + '</div>' +
+        '<div class="pi-info"><div class="pi-title">' + def.title + '</div><div class="pi-desc">' + def.desc + '</div></div>' +
+        '<button class="pi-add">' + (added ? '✓ Added' : '+ Add') + '</button>' +
+        '</div>';
+    }).join('');
+}
+
+function addWidget(id) {
+  if (currentLayout.indexOf(id) >= 0) return;
+  currentLayout.push(id);
+  savePrefs(currentLayout);
+  renderGrid();
+  refreshPickerList();
+}
+
+// ── Task toggle ───────────────────────────────────────────────────────────────
+function toggleTask(el) {
+  var isDone = el.classList.toggle('done');
+  el.textContent = isDone ? '✓' : '';
+  var textEl = el.nextElementSibling;
+  if (textEl) textEl.classList.toggle('done', isDone);
+}
+
+// ── Close new order menu on outside click ─────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('newOrderWrap');
+  var menu = document.getElementById('newOrderMenu');
+  if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
 });
 
-// ── Load Tasks from API ──
-async function loadTasks() {
-  const data = await API.getTasks({
-    Pagination: { PageNumber: 1, PageSize: 200 },
-    Filters: {}
-  });
-  const list = Array.isArray(data) ? data : (data?.items || data?.list || []);
-  _tasks = list.map(normalizeTask);
-  console.log('[Workspace] Loaded', _tasks.length, 'tasks from API');
-  renderTasks(_tasks);
-  // Task count is shown in card title (taskCardTitle) — no separate stat row needed
-}
-
-// ── Load Dashboard Stats ──
-async function loadStats() {
-  try {
-    const svcKey = parseInt(document.querySelector('.svc-select').value === 'Nashville' ? '2' : '1') || 1;
-    const data = await API.getDashboardScopes({ plServiceLocationKey: svcKey });
-    const list = Array.isArray(data) ? data : (data?.items || data?.list || []);
-    // Count repairs in progress
-    const inProgress = list.filter(r => {
-      const sts = (r.sStatus || r.sStatusName || '').toLowerCase();
-      return sts.includes('in progress') || sts.includes('in process') || sts.includes('open');
-    }).length;
-    if (inProgress > 0) document.getElementById('statRepairs').textContent = String(inProgress);
-    console.log('[Workspace] Dashboard scopes loaded:', list.length, 'repairs in progress:', inProgress);
-    // TODO: Wire other KPI cards from their respective API endpoints:
-    // - Financial: statRevenue, statAR, statOverdue, statDaysPay
-    // - Contracts: statActiveContracts, statExpiring, statACV, statOpenSales
-    // - Assets: statScopes, statLowStock, statLoaners, statOutMargin
-    // - Repairs: statTAT, statWaiting, statCompleted
-    // For now, all values are demo-hardcoded in the HTML.
-  } catch (e) {
-    console.warn('[Workspace] Dashboard stats error:', e.message);
-    // Keep demo values
-  }
-}
-
-// ── Init ──
-(async function init() {
-  API.UI.init();
-
-  // Set today's date
-  document.getElementById('taskCardDate').textContent = 'Today: ' + todayStr();
-
-  try {
-    // Load tasks from API
-    await loadTasks();
-    _liveMode = true;
-    API.UI.updateDemoBadge('api');
-
-    // Also load dashboard stats (non-blocking)
-    loadStats();
-
-  } catch (e) {
-    console.warn('[Workspace] API error, using demo data:', e.message);
-    _liveMode = false;
-    API.UI.updateDemoBadge('demo');
-    // Keep existing demo HTML — it's already in taskItems
-  }
-})();
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderGrid();
 </script>
 </body>
 </html>

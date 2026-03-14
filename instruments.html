@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Instruments | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .page-body{overflow:hidden;display:flex;flex-direction:column}
+
+    /* ── Page-level tab bar ── */
+    .page-tabs{display:flex;background:var(--card);border-bottom:2px solid var(--border-dk);flex-shrink:0;padding:0 16px}
+    .page-tab{padding:10px 18px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;user-select:none}
+    .page-tab:hover{color:var(--navy)}
+    .page-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+    .page-pane{display:none;flex:1;overflow:hidden;flex-direction:column}
+    .page-pane.active{display:flex}
+
+    /* ── Stat strip (shared) ── */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:pointer;transition:background .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#ECFEFF}
+    .stat-chip.info-only{cursor:default}
+    .stat-chip.info-only:hover{background:inherit}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap}
+    .s-navy{color:var(--navy)}.s-red{color:var(--red)}.s-green{color:var(--green)}.s-amber{color:var(--amber)}.s-blue{color:var(--blue)}.s-purple{color:#7C3AED}
+
+    /* ── Toolbar ── */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .search-input{height:30px;width:200px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:140px}
+
+    /* ── Table ── */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:9px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:pointer;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none}
+    .table-wrap thead th:hover{background:var(--steel)}
+    .table-wrap thead th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .table-wrap thead th.sorted .sort{opacity:1}
+    .table-wrap thead th.sorted.asc .sort::after{content:'▲'}
+    .table-wrap thead th.sorted.desc .sort::after{content:'▼'}
+    .table-wrap tbody td{padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#CFFAFE;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+    .code-link{font-weight:700;color:var(--navy)}
+
+    /* ── Table footer ── */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .pg-btn{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--border-dk);border-radius:4px;background:#fff;font-size:11px;color:var(--label);cursor:pointer;font-family:inherit}
+    .pg-btn:hover{background:var(--bg);border-color:var(--navy)}
+    .pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+    .pg-btn:disabled{opacity:.4;cursor:default}
+    .pagination{display:flex;gap:3px;align-items:center}
+
+    /* ── IR Badges ── */
+    .ir-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .ir-b-received{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .ir-b-inprog{background:#FFF7ED;color:#C2410C;border-color:#FED7AA}
+    .ir-b-out{background:#F5F3FF;color:#7C3AED;border-color:#DDD6FE}
+    .ir-b-hold{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .ir-b-complete{background:#F0FDF4;color:var(--green);border-color:#BBF7D0}
+    .ir-b-invoiced{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .ir-overdue td{color:var(--red)!important;font-weight:600}
+    .ir-due-soon td{color:var(--amber)!important;font-weight:600}
+    .ir-lvl-badge{display:inline-block;background:var(--bg);border:1px solid var(--border-dk);border-radius:3px;padding:1px 5px;font-size:9.5px;font-weight:700;color:var(--label)}
+    .ir-out-dot{font-size:13px;color:#7C3AED;cursor:default}
+    .ir-ref-link{font-size:10px;color:var(--blue);cursor:default}
+    .ir-margin-pos{color:var(--green);font-weight:600}
+    .ir-margin-neg{color:var(--red);font-weight:600}
+
+    /* ── IQ Badges (quotes) ── */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-draft{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-sent{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-approved{background:#F0FDF4;color:var(--green);border-color:#BBF7D0}
+    .b-partial{background:#FFF7ED;color:#C2410C;border-color:#FED7AA}
+    .b-declined{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .gpo-tag{display:inline-block;background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;border-radius:4px;padding:1px 6px;font-size:9.5px;font-weight:700}
+    .out-badge{display:inline-block;background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;border-radius:4px;padding:1px 6px;font-size:9.5px;font-weight:700}
+
+    /* ── Slide-out Drawer (shared pattern) ── */
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;display:none}
+    .drawer-overlay.open{display:block}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:600px;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.18);z-index:401;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+    .drawer.open{transform:translateX(0)}
+    .drawer-head{background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);padding:14px 16px;flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between}
+    .drawer-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}
+    .drawer-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+    .drawer-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:10px}
+    .drawer-close:hover{background:rgba(255,255,255,.3)}
+    .drawer-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;padding:0 14px}
+    .ir-dtab,.iq-dtab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;user-select:none}
+    .ir-dtab:hover,.iq-dtab:hover{color:var(--navy)}
+    .ir-dtab.active,.iq-dtab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .ir-dpane,.iq-dpane{display:none;flex:1;overflow-y:auto;padding:14px;flex-direction:column;gap:10px;background:var(--bg)}
+    .ir-dpane.active,.iq-dpane.active{display:flex}
+    .drawer-footer{background:#F7F8FC;border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .drawer-save-status{font-size:11px;color:var(--muted);margin-left:4px}
+
+    /* Drawer section cards */
+    .dc{background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+    .dc-head{background:#F0F4FA;padding:5px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);border-bottom:1px solid var(--border)}
+    .dc-body{padding:10px 12px}
+    .fg{display:grid;gap:6px 10px}
+    .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .span2{grid-column:span 2}.span3{grid-column:span 3}.span4{grid-column:span 4}
+    .ff{display:flex;flex-direction:column;gap:2px}
+    .ff label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
+    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    select.inp{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px}
+    textarea.inp{height:auto;padding:6px 8px;resize:vertical;line-height:1.5}
+
+    /* Drawer items table */
+    .items-table{width:100%;border-collapse:collapse}
+    .items-table th{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:5px 8px;text-align:left;white-space:nowrap}
+    .items-table td{padding:6px 8px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .items-table tbody tr:nth-child(even){background:var(--row-alt)}
+    .drawer-totals{display:flex;gap:12px;padding:8px 12px;background:#F0F4FA;border-top:1px solid var(--border);border-radius:0 0 6px 6px;flex-wrap:wrap}
+    .dt-chip{display:flex;flex-direction:column;gap:1px;min-width:70px}
+    .dt-val{font-size:13px;font-weight:800;color:var(--navy)}
+    .dt-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+
+    /* Outsource table */
+    .ir-out-table,.out-table{width:100%;border-collapse:collapse}
+    .ir-out-table th,.out-table th{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:5px 8px;text-align:left}
+    .ir-out-table td,.out-table td{padding:6px 8px;font-size:11px;border-bottom:1px solid var(--border)}
+    .ir-out-table tfoot tr,.out-table tfoot tr{font-weight:700;background:#F0F4FA}
+    .ir-out-empty,.out-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px}
+
+    /* ── Wizard Overlay ── */
+    .wiz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center}
+    .wiz-overlay.open{display:flex}
+    .wiz-box{background:#fff;border-radius:10px;width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+    .wiz-head{background:linear-gradient(135deg,var(--navy),var(--steel));padding:16px 20px;display:flex;align-items:center;gap:12px}
+    .wiz-title{font-size:14px;font-weight:800;color:#fff;flex:1}
+    .wiz-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+    .wiz-steps{display:flex;border-bottom:1px solid var(--border);background:var(--bg);padding:0 20px}
+    .wiz-step-tab{padding:10px 16px;font-size:11px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+    .wiz-step-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+    .wiz-step-tab.done{color:var(--green)}
+    .wiz-step-num{width:18px;height:18px;border-radius:50%;background:var(--border-dk);color:var(--muted);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .wiz-step-tab.active .wiz-step-num{background:var(--navy);color:#fff}
+    .wiz-step-tab.done .wiz-step-num{background:var(--green);color:#fff}
+    .wiz-panel{display:none;flex:1;overflow-y:auto;padding:16px 20px;flex-direction:column;gap:10px}
+    .wiz-panel.active{display:flex}
+    .wiz-search{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;width:100%;margin-bottom:8px;transition:border-color .15s}
+    .wiz-search:focus{border-color:var(--navy)}
+    .wiz-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+    .wiz-card{border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;transition:all .12s;background:#fff}
+    .wiz-card:hover{border-color:var(--blue);background:#EFF6FF}
+    .wiz-card.selected{border-color:var(--navy);background:#EEF2FF;box-shadow:0 0 0 2px rgba(0,37,122,.1)}
+    .wiz-card-name{font-size:11.5px;font-weight:700;color:var(--navy)}
+    .wiz-card-detail{font-size:10px;color:var(--muted);margin-top:2px}
+    .wiz-client-bar{background:#EEF2FF;border:1px solid #C7D2FE;border-radius:6px;padding:8px 12px;font-size:11.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-shrink:0}
+    .wiz-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);background:#F7F8FC;flex-shrink:0}
+    .wiz-summary-name{font-size:13px;font-weight:700;color:var(--navy);padding:10px 12px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:6px;margin-bottom:4px}
+
+    /* ── Repair Items tab (ri_) split layout ── */
+    .ri-split{display:flex;flex:1;overflow:hidden}
+    .ri-left{width:420px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .ri-left-head{background:#F0F4FA;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .ri-list{flex:1;overflow-y:auto}
+    .ri-right{flex:1;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+    .ri-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:8px}
+    .ri-filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#DDEEF0;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
+    .ri-filter-search{flex:0 0 200px;height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px 0 26px;font-size:11px;font-family:inherit;color:var(--text);outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 7px center}
+    .ri-detail-header{background:#fff;border-bottom:1px solid var(--border);padding:8px 14px;flex-shrink:0}
+    .ri-dh-title{font-size:14px;font-weight:800;color:var(--navy);line-height:1.2}
+    .ri-dh-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .ri-tabs{display:flex;border-bottom:2px solid var(--border-dk);background:#DDEEF0;flex-shrink:0;padding:0 10px}
+    .ri-tab{padding:6px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;white-space:nowrap;user-select:none}
+    .ri-tab:hover{color:var(--navy)}
+    .ri-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .ri-pane{display:none;flex:1;overflow-y:auto;padding:10px 14px;flex-direction:column;gap:8px;background:var(--bg)}
+    .ri-pane.active{display:flex}
+    table.item-list{width:100%;border-collapse:collapse}
+    table.item-list th{background:var(--navy);color:#fff;font-size:9.5px;padding:5px 10px;text-align:left;font-weight:700;white-space:nowrap;position:sticky;top:0;z-index:1}
+    table.item-list td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    table.item-list tbody tr:nth-child(even){background:var(--row-alt)}
+    table.item-list tbody tr:hover{background:#CFFAFE;cursor:pointer}
+    table.item-list tbody tr.selected{background:#C8D8F0;font-weight:600}
+    .type-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:700}
+    .type-f{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE}
+    .type-r{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
+    .pl-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:700}
+    .pl-p{background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE}
+    .pl-l{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA}
+    .active-dot{display:inline-block;width:7px;height:7px;border-radius:50%}
+    .dot-yes{background:var(--green)}.dot-no{background:var(--muted)}
+    .tsi-code-badge{background:var(--bg);border:1px solid var(--border-dk);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel);font-family:monospace}
+    .pid-badge{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;color:#7C3AED}
+    .ri-detail-footer{background:#fff;border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .save-status{font-size:11px;display:flex;align-items:center;gap:5px}
+    .save-ready .save-icon,.save-dirty .save-icon,.save-saving .save-icon,.save-saved .save-icon,.save-error .save-icon{font-size:9px}
+    .save-ready .save-icon{color:#aaa}.save-dirty .save-icon{color:var(--amber)}.save-saving .save-icon{color:var(--blue)}.save-saved .save-icon{color:var(--green)}.save-error .save-icon{color:var(--red)}
+    .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+    .tg-head{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:5px 10px;text-align:center;letter-spacing:.3px}
+    .tg-sub{background:#ECF4F5;color:var(--navy);font-size:9px;font-weight:700;padding:3px 10px;text-align:center;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
+    .tg-lbl{width:60px;flex-shrink:0;background:#F8FAFC;padding:4px 8px;font-size:10px;font-weight:700;color:var(--navy);border-right:1px solid var(--border);text-align:center}
+    .tg-cell{flex:1;padding:3px 6px}
+    .tg-cell .inp{height:22px;font-size:11px}
+    .toggle-row{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--border)}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-info{flex:1}
+    .toggle-label{font-size:12px;color:var(--text);font-weight:500}
+    .toggle-sub{font-size:10px;color:var(--muted);margin-top:1px}
+    .toggle{position:relative;width:38px;height:21px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:#CBD5E0;border-radius:11px;cursor:pointer;transition:.18s}
+    .toggle-slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--navy)}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(17px)}
+    .req{color:var(--red)}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
+    .data-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+    .data-badge.live{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
+    .data-badge.demo{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:none;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#fff;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:#F0F4FA}
+    .modal-header h3{font-size:13px;font-weight:700;color:var(--navy);margin:0}
+    .modal-header-red{background:#FEF2F2}
+    .modal-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 6px}
+    .modal-body{padding:16px;overflow-y:auto;flex:1}
+    .modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:#F7F8FC}
+    .btn-cancel{padding:6px 14px;border:1.5px solid var(--border-dk);border-radius:5px;background:#fff;font-size:11.5px;cursor:pointer;font-family:inherit;color:var(--text)}
+    .btn-save{padding:6px 14px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+
+    /* IQ-specific */
+    .iq-items-table{width:100%;border-collapse:collapse}
+    .iq-items-table th{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:5px 8px;text-align:left;white-space:nowrap}
+    .iq-items-table td{padding:5px 6px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .iq-items-table input[type=text],.iq-items-table input[type=number]{height:22px;border:1px solid var(--border-dk);border-radius:3px;padding:0 5px;font-size:11px;font-family:inherit;width:100%;outline:none}
+    .iq-items-table select{height:22px;border:1px solid var(--border-dk);border-radius:3px;font-size:11px;font-family:inherit;outline:none}
+    .appr-btns{display:flex;gap:2px}
+    .appr-btn{width:20px;height:20px;border:1px solid var(--border-dk);border-radius:3px;background:#fff;cursor:pointer;font-size:10px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center}
+    .appr-btn.ay{background:#F0FDF4;border-color:var(--green);color:var(--green)}
+    .appr-btn.an{background:#FEF2F2;border-color:var(--red);color:var(--red)}
+    .appr-btn.ap{background:#FFFBEB;border-color:var(--amber);color:var(--amber)}
+    .out-chk{width:14px;height:14px;cursor:pointer}
+    .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px}
+    .del-btn:hover{color:var(--red)}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
+      <div class="nav-item" onclick="location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item" onclick="location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item" onclick="location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');ir_newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');iq_newQuote()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              <div>Instrument Quote<div style="font-size:10px;color:var(--muted);font-weight:400">New instrument repair quote</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div>
+            </a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- PAGE-LEVEL TABS -->
+      <div class="page-tabs">
+        <div class="page-tab active" id="ptab-repairs" onclick="switchPageTab('repairs',this)">Instrument Repairs</div>
+        <div class="page-tab" id="ptab-quotes" onclick="switchPageTab('quotes',this)">Instrument Quotes</div>
+        <div class="page-tab" id="ptab-catalog" onclick="switchPageTab('catalog',this)">Repair Items Catalog</div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════
+           PANE 1 — INSTRUMENT REPAIRS
+      ════════════════════════════════════════════════════════ -->
+      <div class="page-pane active" id="ppane-repairs">
+
+        <!-- Stat Strip -->
+        <div class="stat-strip" id="ir_statStrip">
+          <div class="stat-chip active-chip" id="ir_kpiAll" onclick="ir_chipFilter('')">
+            <div class="s-icon" style="background:#EEF2FF">📋</div>
+            <div class="s-data"><div class="s-val s-navy" id="ir_kpiAllVal">—</div><div class="s-lbl">All Orders</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiReceived" onclick="ir_chipFilter('Received')">
+            <div class="s-icon" style="background:#EFF6FF">📥</div>
+            <div class="s-data"><div class="s-val s-blue" id="ir_kpiReceivedVal">—</div><div class="s-lbl">Received</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiInprog" onclick="ir_chipFilter('In Progress')">
+            <div class="s-icon" style="background:#FFF7ED">⚙️</div>
+            <div class="s-data"><div class="s-val s-amber" id="ir_kpiInprogVal">—</div><div class="s-lbl">In Progress</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiOut" onclick="ir_chipFilter('Outsourced')">
+            <div class="s-icon" style="background:#F5F3FF">↥</div>
+            <div class="s-data"><div class="s-val s-purple" id="ir_kpiOutVal">—</div><div class="s-lbl">Outsourced</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiHold" onclick="ir_chipFilter('On Hold')">
+            <div class="s-icon" style="background:#FFFBEB">⏸</div>
+            <div class="s-data"><div class="s-val s-amber" id="ir_kpiHoldVal">—</div><div class="s-lbl">On Hold</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiComplete" onclick="ir_chipFilter('Complete')">
+            <div class="s-icon" style="background:#F0FDF4">✓</div>
+            <div class="s-data"><div class="s-val s-green" id="ir_kpiCompleteVal">—</div><div class="s-lbl">Complete</div></div>
+          </div>
+          <div class="stat-chip" id="ir_kpiInvoiced" onclick="ir_chipFilter('Invoiced')">
+            <div class="s-icon" style="background:#E8F5E9">💲</div>
+            <div class="s-data"><div class="s-val s-green" id="ir_kpiInvoicedVal">—</div><div class="s-lbl">Invoiced</div></div>
+          </div>
+          <div class="stat-chip info-only">
+            <div class="s-icon" style="background:#F0FDF4">$</div>
+            <div class="s-data"><div class="s-val s-green" id="ir_kpiValueVal">—</div><div class="s-lbl">Total Value</div></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <button class="btn btn-navy" onclick="ir_newRepair()" style="gap:5px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Repair
+          </button>
+          <div class="filter-sep"></div>
+          <input class="search-input" id="ir_searchInput" placeholder="Search order, client, dept, PO…" oninput="ir_debounceSearch()"/>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px" onclick="ir_sortBy('orderNum')">Order # <span class="sort"></span></th>
+                <th style="width:180px" onclick="ir_sortBy('clientName')">Client <span class="sort"></span></th>
+                <th onclick="ir_sortBy('deptName')">Department <span class="sort"></span></th>
+                <th style="width:90px" onclick="ir_sortBy('dateReceived')">Received <span class="sort"></span></th>
+                <th style="width:90px" onclick="ir_sortBy('dateDue')">Due <span class="sort"></span></th>
+                <th style="width:60px" onclick="ir_sortBy('items')">Items <span class="sort"></span></th>
+                <th style="width:90px" onclick="ir_sortBy('total')">Total <span class="sort"></span></th>
+                <th style="width:110px" onclick="ir_sortBy('status')">Status <span class="sort"></span></th>
+              </tr>
+            </thead>
+            <tbody id="ir_tableBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer -->
+        <div class="table-footer">
+          <span id="ir_recordInfo" class="record-info">—</span>
+          <div class="pagination" id="ir_pagination"></div>
+        </div>
+      </div><!-- /ppane-repairs -->
+
+
+      <!-- ═══════════════════════════════════════════════════════
+           PANE 2 — INSTRUMENT QUOTES
+      ════════════════════════════════════════════════════════ -->
+      <div class="page-pane" id="ppane-quotes">
+
+        <!-- IQ Stat Strip -->
+        <div class="stat-strip" id="iq_statStrip">
+          <div class="stat-chip active-chip" id="iq_kpiAll" onclick="iq_chipFilter('')">
+            <div class="s-icon" style="background:#EEF2FF">📋</div>
+            <div class="s-data"><div class="s-val s-navy" id="iq_kpiAllVal">—</div><div class="s-lbl">All Quotes</div></div>
+          </div>
+          <div class="stat-chip" id="iq_kpiDraft" onclick="iq_chipFilter('Draft')">
+            <div class="s-icon" style="background:#FFFBEB">✏️</div>
+            <div class="s-data"><div class="s-val s-amber" id="iq_kpiDraftVal">—</div><div class="s-lbl">Draft</div></div>
+          </div>
+          <div class="stat-chip" id="iq_kpiSent" onclick="iq_chipFilter('Sent')">
+            <div class="s-icon" style="background:#EFF6FF">📤</div>
+            <div class="s-data"><div class="s-val s-blue" id="iq_kpiSentVal">—</div><div class="s-lbl">Sent</div></div>
+          </div>
+          <div class="stat-chip" id="iq_kpiApproved" onclick="iq_chipFilter('Approved')">
+            <div class="s-icon" style="background:#F0FDF4">✓</div>
+            <div class="s-data"><div class="s-val s-green" id="iq_kpiApprovedVal">—</div><div class="s-lbl">Approved</div></div>
+          </div>
+          <div class="stat-chip" id="iq_kpiPartial" onclick="iq_chipFilter('Partially Approved')">
+            <div class="s-icon" style="background:#FFF7ED">◑</div>
+            <div class="s-data"><div class="s-val s-amber" id="iq_kpiPartialVal">—</div><div class="s-lbl">Partial</div></div>
+          </div>
+          <div class="stat-chip" id="iq_kpiDeclined" onclick="iq_chipFilter('Declined')">
+            <div class="s-icon" style="background:#FEF2F2">✗</div>
+            <div class="s-data"><div class="s-val s-red" id="iq_kpiDeclinedVal">—</div><div class="s-lbl">Declined</div></div>
+          </div>
+          <div class="stat-chip info-only">
+            <div class="s-icon" style="background:#F0FDF4">$</div>
+            <div class="s-data"><div class="s-val s-green" id="iq_kpiValueVal">—</div><div class="s-lbl">Total Value</div></div>
+          </div>
+        </div>
+
+        <!-- IQ Toolbar -->
+        <div class="toolbar">
+          <button class="btn btn-navy" onclick="iq_newQuote()" style="gap:5px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Quote
+          </button>
+          <div class="filter-sep"></div>
+          <input class="search-input" id="iq_searchInput" placeholder="Search quote, client, dept…" oninput="iq_debounceSearch()"/>
+          <div class="filter-sep"></div>
+          <span class="filter-label">GPO</span>
+          <div class="seg-group">
+            <button class="seg-btn active" onclick="iq_setGpoFilter('',this)">All</button>
+            <button class="seg-btn" onclick="iq_setGpoFilter('std',this)">Std</button>
+            <button class="seg-btn" onclick="iq_setGpoFilter('hpg',this)">HPG</button>
+            <button class="seg-btn" onclick="iq_setGpoFilter('viz',this)">Vizient</button>
+            <button class="seg-btn" onclick="iq_setGpoFilter('s3',this)">S3</button>
+          </div>
+          <div class="filter-sep"></div>
+          <select class="filter-dd" id="iq_filterClient" onchange="iq_applyFilters()">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+
+        <!-- IQ Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px" onclick="iq_sortBy('quoteNum')">Quote # <span class="sort"></span></th>
+                <th style="width:180px" onclick="iq_sortBy('clientName')">Client <span class="sort"></span></th>
+                <th onclick="iq_sortBy('deptName')">Department <span class="sort"></span></th>
+                <th style="width:90px" onclick="iq_sortBy('quoteDate')">Date <span class="sort"></span></th>
+                <th style="width:55px" onclick="iq_sortBy('itemCount')">Items <span class="sort"></span></th>
+                <th style="width:70px">Outsourced</th>
+                <th style="width:90px" onclick="iq_sortBy('total')">Total <span class="sort"></span></th>
+                <th style="width:65px">GPO</th>
+                <th style="width:120px" onclick="iq_sortBy('status')">Status <span class="sort"></span></th>
+              </tr>
+            </thead>
+            <tbody id="iq_tableBody">
+              <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span id="iq_recordInfo" class="record-info">—</span>
+          <div class="pagination" id="iq_pagination"></div>
+        </div>
+      </div><!-- /ppane-quotes -->
+
+
+      <!-- ═══════════════════════════════════════════════════════
+           PANE 3 — REPAIR ITEMS CATALOG
+      ════════════════════════════════════════════════════════ -->
+      <div class="page-pane" id="ppane-catalog">
+
+        <!-- RI Status Strip -->
+        <div class="status-strip" style="gap:5px;padding:4px 14px">
+          <div class="ss-chip ss-info">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            <span class="ss-label">Items</span> <span class="ss-val" id="ri_ssTotal">—</span>
+          </div>
+          <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val" id="ri_ssActive">—</span></div>
+          <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="ri_ssInactive">—</span></div>
+          <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val" id="ri_ssFlexible">—</span></div>
+          <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val" id="ri_ssRigid">—</span></div>
+          <div class="ss-chip ss-neutral"><span class="ss-label">Showing</span> <span class="ss-val" id="ri_ssShowing">—</span></div>
+          <div style="flex:1"></div>
+          <span style="font-size:10px;color:var(--muted)" id="ri_ssLastSync"></span>
+        </div>
+
+        <!-- RI Toolbar -->
+        <div class="toolbar">
+          <button class="btn btn-navy" onclick="ri_openAddModal()" style="gap:5px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Item
+          </button>
+          <div class="filter-sep"></div>
+          <span class="filter-label">Type</span>
+          <div class="seg-group" id="ri_typeGroup">
+            <button class="seg-btn active" onclick="ri_setTypeFilter('',this)">All</button>
+            <button class="seg-btn" onclick="ri_setTypeFilter('F',this)">Flexible</button>
+            <button class="seg-btn" onclick="ri_setTypeFilter('R',this)">Rigid</button>
+          </div>
+          <div class="filter-sep"></div>
+          <span class="filter-label">Status</span>
+          <div class="seg-group" id="ri_activeGroup">
+            <button class="seg-btn active" onclick="ri_setActiveFilter('',this)">All</button>
+            <button class="seg-btn" onclick="ri_setActiveFilter('true',this)">Active</button>
+            <button class="seg-btn" onclick="ri_setActiveFilter('false',this)">Inactive</button>
+          </div>
+          <div class="filter-sep"></div>
+          <input class="ri-filter-search" id="ri_searchInp" placeholder="Search description or code…" oninput="ri_applyFilters()"/>
+        </div>
+
+        <!-- RI Split -->
+        <div class="ri-split">
+          <div class="ri-left">
+            <div class="ri-left-head">
+              Repair Items
+              <span style="background:var(--navy);color:#fff;font-size:8px;font-weight:700;padding:1px 6px;border-radius:8px" id="ri_listCount">0</span>
+            </div>
+            <div class="ri-list" id="ri_itemList"><div class="empty-state">Loading repair items…</div></div>
+          </div>
+
+          <div class="ri-right" id="ri_detailPanel">
+            <div class="ri-empty" id="ri_detailEmpty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.25"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+              <p style="font-size:13px">Select a repair item to view details</p>
+            </div>
+
+            <div id="ri_detailContents" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+              <div class="ri-detail-header">
+                <div class="ri-dh-title" id="ri_dhTitle">—</div>
+                <div class="ri-dh-meta">
+                  <span class="tsi-code-badge" id="ri_dhTsiCode">—</span>
+                  <span class="pid-badge" id="ri_dhProductId" style="display:none"></span>
+                  <span id="ri_dhTypeBadge"></span>
+                  <span id="ri_dhPlBadge"></span>
+                </div>
+              </div>
+              <div class="ri-tabs">
+                <div class="ri-tab active" onclick="ri_switchTab('overview',this)">Overview</div>
+                <div class="ri-tab" onclick="ri_switchTab('pricing',this)">Pricing &amp; Time</div>
+                <div class="ri-tab" onclick="ri_switchTab('flags',this)">Flags</div>
+              </div>
+
+              <!-- Overview -->
+              <div class="ri-pane active" id="ri_pane-overview">
+                <div class="dc"><div class="dc-head">Identification</div><div class="dc-body">
+                  <div class="fg g2">
+                    <div class="ff span2"><label>Description <span class="req">*</span></label><input class="inp" id="ri_fDescription" type="text"/></div>
+                    <div class="ff"><label>TSI Code</label><input class="inp" id="ri_fTsiCode" type="text"/></div>
+                    <div class="ff"><label>Product ID</label><input class="inp" id="ri_fProductId" type="text"/></div>
+                  </div>
+                </div></div>
+                <div class="dc"><div class="dc-head">Classification</div><div class="dc-body">
+                  <div class="fg g4">
+                    <div class="ff"><label>Type <span class="req">*</span></label><select class="inp" id="ri_fType"><option value="F">Flexible</option><option value="R">Rigid</option></select></div>
+                    <div class="ff"><label>Part/Labor <span class="req">*</span></label><select class="inp" id="ri_fPartOrLabor"><option value="L">Labor</option><option value="P">Part</option></select></div>
+                    <div class="ff"><label>Repair Level</label><select class="inp" id="ri_fRepairLevel"><option value="">— none —</option></select></div>
+                    <div class="ff"><label>Status</label><select class="inp" id="ri_fRepairStatus"><option value="">— none —</option></select></div>
+                    <div class="ff"><label>Turnaround (days)</label><input class="inp" id="ri_fTurnaround" type="number" min="0"/></div>
+                  </div>
+                </div></div>
+              </div>
+
+              <!-- Pricing & Time -->
+              <div class="ri-pane" id="ri_pane-pricing">
+                <div class="dc"><div class="dc-head">Average Costs</div><div class="dc-body">
+                  <div class="fg g2">
+                    <div class="ff"><label>Avg Cost — Material ($)</label><input class="inp" id="ri_fCostMaterial" type="number" step="0.01" min="0"/></div>
+                    <div class="ff"><label>Avg Cost — Labor ($)</label><input class="inp" id="ri_fCostLabor" type="number" step="0.01" min="0"/></div>
+                  </div>
+                </div></div>
+                <div class="dc"><div class="dc-head">Technician Time (minutes)</div><div class="dc-body" style="padding:0">
+                  <div class="time-grid">
+                    <div class="tg-head" style="border-right:2px solid rgba(255,255,255,.2)">Standard</div>
+                    <div class="tg-head">Small Diameter</div>
+                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border);border-right:2px solid var(--border-dk)">
+                      <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
+                      <div class="tg-sub">Tech 1</div><div class="tg-sub">Tech 2</div><div class="tg-sub">Tech 3</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border)">
+                      <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
+                      <div class="tg-sub">Tech 1</div><div class="tg-sub">Tech 2</div><div class="tg-sub">Tech 3</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-right:2px solid var(--border-dk)">
+                      <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT1" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT2" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT3" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr">
+                      <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT1SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT2SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                      <div class="tg-cell"><input class="inp" id="ri_fT3SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    </div>
+                  </div>
+                </div></div>
+              </div>
+
+              <!-- Flags -->
+              <div class="ri-pane" id="ri_pane-flags">
+                <div class="dc"><div class="dc-head">Behavior Flags</div><div class="dc-body">
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Active</div><div class="toggle-sub">Available for use on work orders</div></div><label class="toggle"><input type="checkbox" id="ri_fActive"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Okay to Skip</div><div class="toggle-sub">Can be bypassed during repair flow</div></div><label class="toggle"><input type="checkbox" id="ri_fOkayToSkip"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Is Adjustment</div><div class="toggle-sub">Represents a price adjustment line</div></div><label class="toggle"><input type="checkbox" id="ri_fIsAdjustment"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Skip Pick List</div><div class="toggle-sub">Do not include in technician pick lists</div></div><label class="toggle"><input type="checkbox" id="ri_fSkipPickList"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Profit Item (+)</div><div class="toggle-sub">Positive profit line item marker</div></div><label class="toggle"><input type="checkbox" id="ri_fProfitPlus"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Profit Item (−)</div><div class="toggle-sub">Negative profit line item marker</div></div><label class="toggle"><input type="checkbox" id="ri_fProfitMinus"/><span class="toggle-slider"></span></label></div>
+                  <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Locked</div><div class="toggle-sub">Prevents editing outside administration</div></div><label class="toggle"><input type="checkbox" id="ri_fLocked"/><span class="toggle-slider"></span></label></div>
+                </div></div>
+              </div>
+
+              <div class="ri-detail-footer">
+                <button class="btn btn-danger" onclick="ri_deleteCurrentItem()" style="gap:5px">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
+                </button>
+                <div style="flex:1"></div>
+                <span id="ri_saveStatus" class="save-status save-ready">
+                  <span class="save-icon" id="ri_saveIcon">&#9679;</span>
+                  <span id="ri_saveText">Ready</span>
+                </span>
+                <button class="btn btn-outline" onclick="ri_saveCurrentItem()" style="gap:5px">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
+                </button>
+              </div>
+            </div><!-- /ri_detailContents -->
+          </div><!-- /ri-right -->
+        </div><!-- /ri-split -->
+      </div><!-- /ppane-catalog -->
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     IR DRAWER — Instrument Repair Detail
+════════════════════════════════════════════════════════════ -->
+<div class="drawer-overlay" id="ir_drawerOverlay" onclick="ir_closeDrawer()"></div>
+<div class="drawer" id="ir_drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title" id="ir_dhOrderNum">—</div>
+      <div class="drawer-sub" id="ir_dhSub">—</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="ir_dhStatusBadge"></span>
+      <button class="drawer-close" onclick="ir_closeDrawer()">&#10005;</button>
+    </div>
+  </div>
+  <div class="drawer-tabs">
+    <div class="ir-dtab active" onclick="ir_drawerSwitchTab('details',this)">Details</div>
+    <div class="ir-dtab" onclick="ir_drawerSwitchTab('items',this)">Line Items</div>
+    <div class="ir-dtab" onclick="ir_drawerSwitchTab('outsource',this)">Outsource</div>
+  </div>
+
+  <!-- Details Pane -->
+  <div class="ir-dpane active" id="ir_dpane-details">
+    <div class="dc"><div class="dc-head">Order Info</div><div class="dc-body">
+      <div class="fg g2">
+        <div class="ff"><label>Status</label>
+          <select class="inp" id="ir_dStatus" onchange="ir_onStatusChange()">
+            <option>Received</option><option>In Progress</option><option>Outsourced</option><option>On Hold</option><option>Complete</option><option>Invoiced</option>
+          </select>
+        </div>
+        <div class="ff"><label>Tech Assigned</label><input class="inp" id="ir_dTechAssigned" type="text" onchange="ir_markDirty()"/></div>
+        <div class="ff"><label>Date Received</label><input class="inp" id="ir_dDateReceived" type="date" onchange="ir_markDirty()"/></div>
+        <div class="ff"><label>Date Due</label><input class="inp" id="ir_dDateDue" type="date" onchange="ir_markDirty()"/></div>
+        <div class="ff span2" id="ir_dCompletedRow" style="display:none"><label>Date Completed</label><input class="inp" id="ir_dDateCompleted" type="date" onchange="ir_markDirty()"/></div>
+      </div>
+    </div></div>
+    <div class="dc"><div class="dc-head">Client &amp; Billing</div><div class="dc-body">
+      <div class="fg g2">
+        <div class="ff"><label>Client</label><input class="inp" id="ir_dClient" type="text" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
+        <div class="ff"><label>Department</label><input class="inp" id="ir_dDept" type="text" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
+        <div class="ff"><label>PO Number</label><input class="inp" id="ir_dPoNumber" type="text" onchange="ir_markDirty()"/></div>
+        <div class="ff"><label>Quote Reference</label><input class="inp" id="ir_dQuoteRef" type="text" onchange="ir_markDirty()"/></div>
+      </div>
+    </div></div>
+    <div class="dc"><div class="dc-head">Notes</div><div class="dc-body">
+      <textarea class="inp" id="ir_dNotes" rows="3" onchange="ir_markDirty()"></textarea>
+    </div></div>
+  </div>
+
+  <!-- Line Items Pane -->
+  <div class="ir-dpane" id="ir_dpane-items">
+    <div class="dc" style="overflow:hidden">
+      <div class="dc-head">Instruments</div>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width:70px">Code</th>
+            <th style="width:140px">Instrument</th>
+            <th>Description</th>
+            <th style="width:40px;text-align:center">Lvl</th>
+            <th style="width:75px;text-align:right">Amount</th>
+            <th style="width:20px"></th>
+            <th style="width:90px">Status</th>
+          </tr>
+        </thead>
+        <tbody id="ir_itemsBody">
+          <tr><td colspan="7" style="text-align:center;padding:16px;color:var(--muted)">No items.</td></tr>
+        </tbody>
+      </table>
+      <div class="drawer-totals">
+        <div class="dt-chip"><div class="dt-val" id="ir_qtItems">—</div><div class="dt-lbl">Items</div></div>
+        <div class="dt-chip"><div class="dt-val s-green" id="ir_qtComplete">—</div><div class="dt-lbl">Complete</div></div>
+        <div class="dt-chip"><div class="dt-val s-amber" id="ir_qtInprog">—</div><div class="dt-lbl">In Progress</div></div>
+        <div class="dt-chip"><div class="dt-val s-purple" id="ir_qtOut">—</div><div class="dt-lbl">Outsourced</div></div>
+        <div style="flex:1"></div>
+        <div class="dt-chip" style="align-items:flex-end"><div class="dt-val s-navy" id="ir_qtTotal">—</div><div class="dt-lbl">Total</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outsource Pane -->
+  <div class="ir-dpane" id="ir_dpane-outsource">
+    <div class="dc" style="overflow:hidden">
+      <div class="dc-head">Outsourced Items</div>
+      <div id="ir_outsourceContent"><div class="ir-out-empty">No items marked for outsource.</div></div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn btn-danger" onclick="ir_deleteRepair()" style="gap:5px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
+    </button>
+    <div style="flex:1"></div>
+    <span class="drawer-save-status" id="ir_drawerSaveStatus"></span>
+    <button class="btn btn-outline" onclick="ir_saveDrawer(false)" style="gap:5px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
+    </button>
+  </div>
+</div><!-- /ir_drawer -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     IQ DRAWER — Instrument Quote Detail
+════════════════════════════════════════════════════════════ -->
+<div class="drawer-overlay" id="iq_drawerOverlay" onclick="iq_closeDrawer()"></div>
+<div class="drawer" id="iq_quoteDrawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title" id="iq_dhQuoteNum">—</div>
+      <div class="drawer-sub" id="iq_dhSub">—</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="iq_dhStatusBadge"></span>
+      <button class="drawer-close" onclick="iq_closeDrawer()">&#10005;</button>
+    </div>
+  </div>
+  <div class="drawer-tabs">
+    <div class="iq-dtab dtab active" onclick="iq_switchTab('details',this)">Details</div>
+    <div class="iq-dtab dtab" onclick="iq_switchTab('items',this)">Line Items</div>
+    <div class="iq-dtab dtab" onclick="iq_switchTab('outsource',this)">Outsource</div>
+  </div>
+
+  <!-- IQ Details Pane -->
+  <div class="iq-dpane dpane active" id="iq_dpane-details">
+    <div class="dc"><div class="dc-head">Quote Info</div><div class="dc-body">
+      <div class="fg g2">
+        <div class="ff"><label>Quote #</label><input class="inp" id="iq_dQuoteNum" type="text" onchange="iq_markDirty()"/></div>
+        <div class="ff"><label>Status</label>
+          <select class="inp" id="iq_dStatus" onchange="iq_onStatusChange()">
+            <option>Draft</option><option>Sent</option><option>Approved</option><option>Partially Approved</option><option>Declined</option>
+          </select>
+        </div>
+        <div class="ff"><label>Quote Date</label><input class="inp" id="iq_dQuoteDate" type="date" onchange="iq_markDirty()"/></div>
+        <div class="ff" id="iq_dSentDateRow" style="display:none"><label>Sent Date</label><input class="inp" id="iq_dSentDate" type="date" onchange="iq_markDirty()"/></div>
+        <div class="ff"><label>Client</label><input class="inp" id="iq_dClient" type="text" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
+        <div class="ff"><label>Department</label><input class="inp" id="iq_dDept" type="text" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
+        <div class="ff"><label>GPO</label>
+          <select class="inp" id="iq_dGpo" onchange="iq_onGpoChange()">
+            <option value="">Standard</option><option value="hpg">HPG</option><option value="viz">Vizient</option><option value="s3">S3</option>
+          </select>
+        </div>
+        <div class="ff"><label>PO Number</label><input class="inp" id="iq_dPo" type="text" onchange="iq_markDirty()"/></div>
+        <div class="ff"><label>Sales Rep</label><input class="inp" id="iq_dSalesRep" type="text" onchange="iq_markDirty()"/></div>
+        <div class="ff"><label>Reviewed By</label><input class="inp" id="iq_dReviewedBy" type="text" onchange="iq_markDirty()"/></div>
+        <div class="ff span2"><label>Visit Reference</label><input class="inp" id="iq_dVisitRef" type="text" onchange="iq_markDirty()"/></div>
+        <div class="ff span2"><label>Notes</label><textarea class="inp" id="iq_dNotes" rows="2" onchange="iq_markDirty()"></textarea></div>
+      </div>
+    </div></div>
+    <div class="dc"><div class="dc-head">Addresses</div><div class="dc-body">
+      <div class="fg g2">
+        <div class="ff"><label>Bill To</label><div id="iq_dBillTo" style="font-size:11px;line-height:1.6;color:var(--text)">—</div></div>
+        <div class="ff"><label>Ship To</label><div id="iq_dShipTo" style="font-size:11px;line-height:1.6;color:var(--text)">—</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- IQ Line Items Pane -->
+  <div class="iq-dpane dpane" id="iq_dpane-items">
+    <div class="dc" style="overflow:hidden">
+      <div class="dc-head" style="display:flex;align-items:center;justify-content:space-between">
+        Line Items
+        <button class="btn btn-navy" onclick="iq_addItem()" style="padding:2px 10px;font-size:10.5px;height:22px">+ Add</button>
+      </div>
+      <table class="iq-items-table">
+        <thead>
+          <tr>
+            <th style="width:65px">Code</th>
+            <th style="width:120px">Instrument</th>
+            <th style="width:70px">Serial</th>
+            <th>Issue / Tech Note</th>
+            <th style="width:55px">Level</th>
+            <th style="width:70px;text-align:right">Amount</th>
+            <th style="width:55px;text-align:center">Approval</th>
+            <th style="width:30px;text-align:center">Out</th>
+            <th style="width:24px"></th>
+          </tr>
+        </thead>
+        <tbody id="iq_itemsTableBody"></tbody>
+      </table>
+      <div class="drawer-totals">
+        <div class="dt-chip"><div class="dt-val" id="iq_qtItems">—</div><div class="dt-lbl">Items</div></div>
+        <div class="dt-chip"><div class="dt-val s-green" id="iq_qtApproved">—</div><div class="dt-lbl">Approved</div></div>
+        <div class="dt-chip"><div class="dt-val s-amber" id="iq_qtPending">—</div><div class="dt-lbl">Pending</div></div>
+        <div style="flex:1"></div>
+        <div class="dt-chip" style="align-items:flex-end"><div class="dt-val s-navy" id="iq_qtTotal">—</div><div class="dt-lbl">Total</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IQ Outsource Pane -->
+  <div class="iq-dpane dpane" id="iq_dpane-outsource">
+    <div class="dc" style="overflow:hidden">
+      <div class="dc-head">Outsourced Items</div>
+      <div id="iq_outsourceContent"><div class="out-empty">No items marked for outsource.</div></div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn btn-danger" onclick="iq_deleteQuote()" style="gap:5px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
+    </button>
+    <button class="btn btn-outline" id="iq_btnMarkSent" onclick="iq_markSent()" style="display:none;gap:5px">Mark Sent</button>
+    <div style="flex:1"></div>
+    <span class="drawer-save-status" id="iq_drawerSaveStatus"></span>
+    <button class="btn btn-outline" onclick="iq_saveDrawer(false)" style="gap:5px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
+    </button>
+  </div>
+</div><!-- /iq_quoteDrawer -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     IR WIZARD — New Instrument Repair
+════════════════════════════════════════════════════════════ -->
+<div class="wiz-overlay" id="ir_wizOverlay">
+  <div class="wiz-box">
+    <div class="wiz-head">
+      <div class="wiz-title">New Instrument Repair Order</div>
+      <button class="wiz-close" onclick="ir_closeWiz()">&#10005;</button>
+    </div>
+    <div class="wiz-steps">
+      <div class="wiz-step-tab active" id="ir_wTab1"><div class="wiz-step-num">1</div>Client</div>
+      <div class="wiz-step-tab" id="ir_wTab2"><div class="wiz-step-num">2</div>Department</div>
+      <div class="wiz-step-tab" id="ir_wTab3"><div class="wiz-step-num">3</div>Confirm</div>
+    </div>
+    <div class="wiz-panel active" id="ir_wPanel1">
+      <input class="wiz-search" id="ir_wClientSearch" placeholder="Search clients…" oninput="ir_wizFilterClients(this.value)"/>
+      <div class="wiz-card-grid" id="ir_wClientGrid"></div>
+    </div>
+    <div class="wiz-panel" id="ir_wPanel2">
+      <div class="wiz-client-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span id="ir_wClientBarName"></span></div>
+      <input class="wiz-search" id="ir_wDeptSearch" placeholder="Search departments…" oninput="ir_wizFilterDepts(this.value)"/>
+      <div class="wiz-card-grid" id="ir_wDeptGrid"></div>
+    </div>
+    <div class="wiz-panel" id="ir_wPanel3">
+      <div class="wiz-summary-name" id="ir_wSummaryName"></div>
+      <div class="dc"><div class="dc-head">Order Details</div><div class="dc-body">
+        <div class="fg g2">
+          <div class="ff"><label>Date Due</label><input class="inp" id="ir_wDateDue" type="date"/></div>
+          <div class="ff"><label>Tech Assigned</label><input class="inp" id="ir_wTech" type="text" placeholder="Optional"/></div>
+          <div class="ff"><label>Quote Reference</label><input class="inp" id="ir_wQuoteRef" type="text" placeholder="e.g. IQ-2026-001"/></div>
+          <div class="ff"><label>PO Number</label><input class="inp" id="ir_wPoNumber" type="text" placeholder="Optional"/></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="wiz-footer">
+      <button class="btn btn-outline" id="ir_wBtnBack" style="display:none" onclick="ir_wizBack()">&#8592; Back</button>
+      <button class="btn btn-navy" id="ir_wBtnNext" onclick="ir_wizNext()">Next &#8594;</button>
+      <button class="btn btn-navy" id="ir_wBtnCreate" style="display:none" onclick="ir_wizCreate()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Create Order
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     IQ WIZARD — New Instrument Quote
+════════════════════════════════════════════════════════════ -->
+<div class="wiz-overlay" id="iq_wizOverlay">
+  <div class="wiz-box">
+    <div class="wiz-head">
+      <div class="wiz-title">New Instrument Quote</div>
+      <button class="wiz-close" onclick="iq_closeWiz()">&#10005;</button>
+    </div>
+    <div class="wiz-steps">
+      <div class="wiz-step-tab active" id="iq_wTab1"><div class="wiz-step-num">1</div>Client</div>
+      <div class="wiz-step-tab" id="iq_wTab2"><div class="wiz-step-num">2</div>Department</div>
+      <div class="wiz-step-tab" id="iq_wTab3"><div class="wiz-step-num">3</div>Confirm</div>
+    </div>
+    <div class="wiz-panel active" id="iq_wPanel1">
+      <input class="wiz-search" id="iq_wClientSearch" placeholder="Search clients…" oninput="iq_wizFilterClients(this.value)"/>
+      <div class="wiz-card-grid" id="iq_wClientGrid"></div>
+    </div>
+    <div class="wiz-panel" id="iq_wPanel2">
+      <div class="wiz-client-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span id="iq_wClientBarName"></span></div>
+      <input class="wiz-search" id="iq_wDeptSearch" placeholder="Search departments…" oninput="iq_wizFilterDepts(this.value)"/>
+      <div class="wiz-card-grid" id="iq_wDeptGrid"></div>
+    </div>
+    <div class="wiz-panel" id="iq_wPanel3">
+      <div class="wiz-summary-name" id="iq_wSummaryName"></div>
+      <div class="dc"><div class="dc-head">Quote Details</div><div class="dc-body">
+        <div class="fg g2">
+          <div class="ff"><label>GPO</label><select class="inp" id="iq_wGpo"><option value="">Standard</option><option value="hpg">HPG</option><option value="viz">Vizient</option><option value="s3">S3</option></select></div>
+          <div class="ff"><label>Sales Rep / Reviewed By</label><input class="inp" id="iq_wReviewedBy" type="text"/></div>
+          <div class="ff span2"><label>Visit Reference</label><input class="inp" id="iq_wVisitRef" type="text" placeholder="e.g. Van service 03/13/2026"/></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="wiz-footer">
+      <button class="btn btn-outline" id="iq_wBtnBack" style="display:none" onclick="iq_wizBack()">&#8592; Back</button>
+      <button class="btn btn-navy" id="iq_wBtnNext" onclick="iq_wizNext()">Next &#8594;</button>
+      <button class="btn btn-navy" id="iq_wBtnCreate" style="display:none" onclick="iq_wizCreate()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Create Quote
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- RI Modals -->
+<div class="modal-overlay" id="ri_addModal">
+  <div class="modal-box" style="width:480px">
+    <div class="modal-header"><h3>Add Repair Item</h3><button class="modal-close" onclick="ri_closeAddModal()">&#10005;</button></div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="ff"><label>Description <span class="req">*</span></label><input class="inp" id="ri_mDescription" type="text" style="height:30px"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="ff"><label>TSI Code</label><input class="inp" id="ri_mTsiCode" type="text" style="height:30px"/></div>
+          <div class="ff"><label>Product ID</label><input class="inp" id="ri_mProductId" type="text" style="height:30px"/></div>
+          <div class="ff"><label>Type <span class="req">*</span></label><select class="inp" id="ri_mType" style="height:30px"><option value="F">Flexible</option><option value="R">Rigid</option></select></div>
+          <div class="ff"><label>Part/Labor <span class="req">*</span></label><select class="inp" id="ri_mPartOrLabor" style="height:30px"><option value="L">Labor</option><option value="P">Part</option></select></div>
+          <div class="ff"><label>Turnaround (days)</label><input class="inp" id="ri_mTurnaround" type="number" min="0" value="1" style="height:30px"/></div>
+          <div class="ff"><label>Repair Level</label><select class="inp" id="ri_mRepairLevel" style="height:30px"><option value="">— none —</option></select></div>
+        </div>
+        <div id="ri_addModalError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:5px;padding:6px 10px;font-size:11px;color:var(--red)"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="ri_closeAddModal()">Cancel</button>
+      <button class="btn-save" onclick="ri_submitAddItem()">+ Add Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ri_deleteModal">
+  <div class="modal-box" style="width:400px">
+    <div class="modal-header modal-header-red"><h3>Delete Repair Item</h3><button class="modal-close" onclick="ri_closeDeleteModal()">&#10005;</button></div>
+    <div class="modal-body"><p style="font-size:12px;color:var(--text);line-height:1.6">Delete <strong id="ri_deleteItemName"></strong>? This cannot be undone.</p></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="ri_closeDeleteModal()">Cancel</button>
+      <button class="btn-save" style="background:var(--red)" onclick="ri_confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="api.js"></script>
+<script src="js/instrument-repairs-tab.js"></script>
+<script src="js/quotes-tab.js"></script>
+<script src="js/repair-items-tab.js"></script>
+<script>
+// ── Auth ──
+try {
+  if (!API.requireAuth()) throw new Error('redirect');
+} catch(e) {
+  if (e.message === 'redirect') window.location = 'login.html';
+}
+
+// ── Shared helpers ──
+function showDataBadge(live) {
+  var el = document.getElementById('dataBadge');
+  if (live) { el.textContent = 'Live Data'; el.className = 'data-badge live'; }
+  else       { el.textContent = 'Demo Data'; el.className = 'data-badge demo'; }
+}
+
+function fmtCur(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+var REPAIR_LEVELS = [
+  {level:1, name:'Level 1 — Minor',    pct:0.25},
+  {level:2, name:'Level 2 — Moderate', pct:0.60},
+  {level:3, name:'Level 3 — Major',    pct:1.00}
+];
+
+// ── Page-level tab switching (lazy init) ──
+var _tabInited = {};
+function switchPageTab(name, el) {
+  document.querySelectorAll('.page-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.page-pane').forEach(function(p){ p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('ppane-' + name).classList.add('active');
+  if (!_tabInited[name]) {
+    _tabInited[name] = true;
+    if (name === 'quotes')  iq_initPage();
+    if (name === 'catalog') ri_init();
+  }
+}
+
+// ── Close New Order menu on outside click ──
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('newOrderWrap');
+  var menu = document.getElementById('newOrderMenu');
+  if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
+});
+
+// ── Init repairs tab (default) ──
+_tabInited['repairs'] = true;
+ir_initPage();
+</script>
+</body>
+</html>
