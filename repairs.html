@@ -1129,27 +1129,50 @@
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
   </div>
   <div class="qc-drawer-body">
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Existing Slips</div>
-    <table class="items" style="margin-bottom:12px">
-      <thead><tr><th>Date</th><th>Reason</th><th>Resp. Tech</th><th style="width:30px"></th></tr></thead>
-      <tbody id="slipsBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr></tbody>
+    <!-- Slip list -->
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Update Slips</div>
+    <table class="items" style="margin-bottom:8px">
+      <thead><tr><th>#</th><th>Date</th><th>Reason</th><th>Resp. Tech</th><th>Status</th><th style="width:60px"></th></tr></thead>
+      <tbody id="slipsBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr></tbody>
     </table>
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Slip</div>
-    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
-      <div class="field"><label>Request Date</label><input type="date" id="slipDate" onchange="markDirty()"/></div>
-      <div class="field"><label>Reason</label><select id="slipReason" onchange="markDirty()"><option value="">— Select —</option><option>Root Cause / 40 Day</option><option>Customer Request</option><option>Quality Issue</option><option>Warranty</option></select></div>
-      <div class="field"><label>Resp. Tech</label><select id="slipTech" onchange="markDirty()"></select></div>
-      <div class="field"><label>Resp. Tech 2</label><select id="slipTech2" onchange="markDirty()"></select></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button class="btn btn-navy" onclick="showNewSlipForm()">+ New Slip</button>
+      <button class="btn btn-outline" onclick="printSlip()">Print Selected</button>
     </div>
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Update Details</div>
-    <div class="form-grid" style="grid-template-columns:1fr;gap:6px;margin-bottom:10px">
-      <div class="field"><label>Update Reason</label><select id="slipUpdateReason" onchange="markDirty()"><option value="">— Select —</option><option>Video Features</option><option>Angulation</option><option>Insertion Tube</option><option>Light Guide</option><option>Leak</option><option>Other</option></select></div>
-      <div class="field"><label>Comment</label><textarea id="slipComment" rows="2" style="resize:vertical" oninput="markDirty()"></textarea></div>
-      <div class="field"><label>Findings</label><textarea id="slipFindings" rows="2" style="resize:vertical" oninput="markDirty()"></textarea></div>
+
+    <!-- New slip form (hidden until + New Slip clicked) -->
+    <div id="slipNewForm" style="display:none;border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:14px;background:#FAFBFD">
+      <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Create New Slip</div>
+      <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+        <div class="field"><label>Reason</label><select id="slipReason"><option value="">— Select —</option><option>Root Cause / 40 Day</option><option>Customer Request</option><option>Quality Issue</option><option>Warranty</option></select></div>
+        <div class="field"><label>Resp. Tech</label><select id="slipTech"></select></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-navy" onclick="createSlip()">Create</button>
+        <button class="btn btn-outline" onclick="hideNewSlipForm()">Cancel</button>
+      </div>
     </div>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-navy" style="flex:1" onclick="addSlip()">+ Add Slip</button>
-      <button class="btn btn-outline" style="flex:1" onclick="printSlip()">Print Selected</button>
+
+    <!-- Selected slip detail (hidden until a slip is clicked) -->
+    <div id="slipDetail" style="display:none;border:1px solid var(--border);border-radius:6px;padding:10px;background:#FAFBFD">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px">Slip Detail</span>
+        <span id="slipDetailLabel" style="font-size:10px;font-weight:600;color:var(--navy)"></span>
+        <span id="slipDetailStatus" style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;margin-left:auto"></span>
+      </div>
+      <div class="form-grid g2" style="gap:6px 10px;margin-bottom:8px">
+        <div class="field"><label>Request Date</label><input type="date" id="slipDate" onchange="saveSlipField()"/></div>
+        <div class="field"><label>Resp. Tech 2</label><select id="slipTech2" onchange="saveSlipField()"></select></div>
+      </div>
+      <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 6px">Findings (enter after tech returns form)</div>
+      <div class="form-grid" style="grid-template-columns:1fr;gap:6px;margin-bottom:10px">
+        <div class="field"><label>Update Reason</label><select id="slipUpdateReason" onchange="saveSlipField()"><option value="">— Select —</option><option>Video Features</option><option>Angulation</option><option>Insertion Tube</option><option>Light Guide</option><option>Leak</option><option>Other</option></select></div>
+        <div class="field"><label>Comment</label><textarea id="slipComment" rows="2" style="resize:vertical" oninput="saveSlipField()"></textarea></div>
+        <div class="field"><label>Findings</label><textarea id="slipFindings" rows="2" style="resize:vertical" oninput="saveSlipField()"></textarea></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" style="font-size:10px" onclick="markSlipComplete()">Mark Complete</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1161,24 +1184,50 @@
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
   </div>
   <div class="qc-drawer-body">
+    <!-- Amendment history -->
     <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Amendment History</div>
-    <table class="items" style="margin-bottom:12px">
-      <thead><tr><th>Amendment</th><th>Type</th><th>Reason</th><th>Date</th></tr></thead>
-      <tbody id="amendBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr></tbody>
+    <table class="items" style="margin-bottom:8px">
+      <thead><tr><th>#</th><th>Reason</th><th>Items Added</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody id="amendBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr></tbody>
     </table>
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">New Amendment</div>
-    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
-      <div class="field"><label>Amendment Type</label><select id="amendType" onchange="markDirty()"><option value="">— Select —</option><option>Additional Findings</option><option>Not Repairable</option><option>Rework</option></select></div>
-      <div class="field"><label>Reason</label><select id="amendReason" onchange="markDirty()"><option value="">— Select —</option><option>Failure found during repair</option><option>Failure missed during D &amp; I</option><option>Failure missed during update</option><option>Misquote by operations</option><option>Result of another repair being performed</option></select></div>
+
+    <!-- Open Amendment button (shown when no amendment is active) -->
+    <div id="amendStartPanel">
+      <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Start New Amendment</div>
+      <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+        <div class="field"><label>Reason</label><select id="amendReason"><option value="">— Select —</option><option>Failure found during repair</option><option>Failure missed during D &amp; I</option><option>Failure missed during update</option><option>Misquote by operations</option><option>Result of another repair being performed</option></select></div>
+        <div class="field"><label>Comment</label><input type="text" id="amendComment" placeholder="Optional note"/></div>
+      </div>
+      <button class="btn btn-navy" onclick="openAmendment()">Open Amendment</button>
     </div>
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Repair Item</div>
-    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
-      <div class="field"><label>Repair Item</label><select id="amendItem" onchange="markDirty()"></select></div>
-      <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><label class="toggle"><input type="checkbox" id="amendIsBlind" onchange="markDirty()"/><span class="toggle-slider"></span></label><span style="font-size:10px;font-weight:600">Is Blind</span></div>
-    </div>
-    <div class="field" style="margin-bottom:10px"><label>Additional Comment</label><textarea id="amendComment" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-navy" style="flex:1" onclick="submitAmendment()">+ Add Amendment</button>
+
+    <!-- Active amendment session (shown while amendment is open) -->
+    <div id="amendActivePanel" style="display:none;border:2px solid var(--amber,#E8A735);border-radius:6px;padding:10px;background:#FFFBF0">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px">Amendment Open</span>
+        <span id="amendActiveLabel" style="font-size:10px;font-weight:600;color:#B8860B"></span>
+      </div>
+      <p style="font-size:10px;color:#666;margin:0 0 10px">Add repair items below. They will be marked as amended on the quote.</p>
+
+      <!-- Items added in this amendment -->
+      <table class="items" style="margin-bottom:8px">
+        <thead><tr><th>Repair Item</th><th>Blind</th><th style="width:30px"></th></tr></thead>
+        <tbody id="amendItemsBody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:8px;font-size:11px">No items added yet</td></tr></tbody>
+      </table>
+
+      <!-- Add item to amendment -->
+      <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Add Repair Item</div>
+      <div class="form-grid g2" style="gap:6px 10px;margin-bottom:8px">
+        <div class="field"><label>Repair Item</label><select id="amendItem"></select></div>
+        <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><label class="toggle"><input type="checkbox" id="amendIsBlind"/><span class="toggle-slider"></span></label><span style="font-size:10px;font-weight:600">Is Blind</span></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="btn btn-navy" onclick="addAmendItem()">+ Add Item</button>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;gap:6px">
+        <button class="btn btn-navy" onclick="closeAmendment()">Close Amendment</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2915,6 +2964,7 @@ async function confirmDeleteRepair() {
 // ═══════════════════════════════════════════════════════
 
 // ── Update Slips ──────────────────────────────────────
+// Two-step workflow: create slip (reason+tech) → print blank form → enter findings later
 // Stored as JSON array in mCommentsHidden with [UPDATE_SLIP] tag
 let _updateSlips = [];
 let _selectedSlipIdx = -1;
@@ -2922,67 +2972,129 @@ let _selectedSlipIdx = -1;
 function loadSlips() {
   _updateSlips = [];
   if (!_currentRepair) return;
-  // Parse slips from mCommentsHidden
   const raw = _currentRepair.mCommentsHidden || '';
   const m = raw.match(/\[UPDATE_SLIP\]([\s\S]*?)\[\/UPDATE_SLIP\]/);
   if (m) {
     try { _updateSlips = JSON.parse(m[1]); } catch(e) { _updateSlips = []; }
   }
+  _selectedSlipIdx = -1;
   renderSlips();
+  hideSlipDetail();
 }
 
 function renderSlips() {
   const tbody = document.getElementById('slipsBody');
   if (!_updateSlips.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr>';
     return;
   }
   tbody.innerHTML = _updateSlips.map((s, i) => {
     const techName = _techs.find(t => t.lTechnicianKey == s.techKey);
-    const cls = i === _selectedSlipIdx ? 'style="background:#EDF2FF;cursor:pointer"' : 'style="cursor:pointer"';
-    return '<tr ' + cls + ' onclick="selectSlip(' + i + ')"><td>' + esc(s.date || '') + '</td><td>' + esc(s.reason || '') + '</td><td>' + esc(techName ? techName.sTechName : '—') + '</td><td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="event.stopPropagation();removeSlip(' + i + ')">&times;</button></td></tr>';
+    const sel = i === _selectedSlipIdx ? 'background:#EDF2FF;' : '';
+    const status = s.status || 'Open';
+    const statusColor = status === 'Complete' ? 'background:#E6F4EA;color:#1B7A3D' : 'background:#FFF3E0;color:#B8860B';
+    return '<tr style="' + sel + 'cursor:pointer" onclick="selectSlip(' + i + ')">'
+      + '<td>US-' + (i+1) + '</td>'
+      + '<td>' + esc(s.date || '') + '</td>'
+      + '<td>' + esc(s.reason || '') + '</td>'
+      + '<td>' + esc(techName ? techName.sTechName : '—') + '</td>'
+      + '<td><span style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + statusColor + '">' + esc(status) + '</span></td>'
+      + '<td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="event.stopPropagation();removeSlip(' + i + ')">&times;</button></td>'
+      + '</tr>';
   }).join('');
 }
 
-function selectSlip(idx) { _selectedSlipIdx = idx; renderSlips(); }
+function selectSlip(idx) {
+  _selectedSlipIdx = idx;
+  renderSlips();
+  showSlipDetail(idx);
+}
 
-function addSlip() {
-  const date = document.getElementById('slipDate').value;
+function showNewSlipForm() {
+  document.getElementById('slipNewForm').style.display = 'block';
+  hideSlipDetail();
+}
+function hideNewSlipForm() {
+  document.getElementById('slipNewForm').style.display = 'none';
+}
+
+function createSlip() {
   const reason = document.getElementById('slipReason').value;
   const techKey = document.getElementById('slipTech').value;
-  const updateReason = document.getElementById('slipUpdateReason').value;
-  const comment = document.getElementById('slipComment').value;
-  const findings = document.getElementById('slipFindings').value;
   if (!reason) { showToast('Select a reason'); return; }
-  if (!comment && !findings) { showToast('Comment or findings required'); return; }
   _updateSlips.push({
-    date: date || new Date().toISOString().slice(0,10),
-    reason, techKey: techKey || null,
-    updateReason, comment, findings,
+    date: new Date().toISOString().slice(0,10),
+    reason,
+    techKey: techKey || null,
+    updateReason: '', comment: '', findings: '',
+    status: 'Open',
     createdBy: (API.getUser() || {}).sUserName || 'demo',
     createdAt: new Date().toISOString()
   });
   serializeSlips();
   renderSlips();
-  // Clear form
-  document.getElementById('slipDate').value = '';
+  hideNewSlipForm();
   document.getElementById('slipReason').value = '';
-  document.getElementById('slipUpdateReason').value = '';
-  document.getElementById('slipComment').value = '';
-  document.getElementById('slipFindings').value = '';
-  showToast('Update slip added');
+  showToast('Slip created — print blank form or enter findings later');
+  // Auto-select the new slip
+  selectSlip(_updateSlips.length - 1);
 }
 
-function removeSlip(idx) {
-  _updateSlips.splice(idx, 1);
-  _selectedSlipIdx = -1;
+function showSlipDetail(idx) {
+  const s = _updateSlips[idx];
+  if (!s) return;
+  const panel = document.getElementById('slipDetail');
+  panel.style.display = 'block';
+  hideNewSlipForm();
+  document.getElementById('slipDetailLabel').textContent = 'US-' + (idx+1) + ' — ' + (s.reason || '');
+  const statusEl = document.getElementById('slipDetailStatus');
+  const isComplete = s.status === 'Complete';
+  statusEl.textContent = s.status || 'Open';
+  statusEl.style.cssText = 'font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + (isComplete ? 'background:#E6F4EA;color:#1B7A3D' : 'background:#FFF3E0;color:#B8860B');
+  // Fill fields
+  document.getElementById('slipDate').value = s.date || '';
+  setSelectVal_safe('slipTech2', s.tech2Key || '');
+  setSelectVal_safe('slipUpdateReason', s.updateReason || '');
+  document.getElementById('slipComment').value = s.comment || '';
+  document.getElementById('slipFindings').value = s.findings || '';
+}
+
+function hideSlipDetail() {
+  document.getElementById('slipDetail').style.display = 'none';
+}
+
+function saveSlipField() {
+  if (_selectedSlipIdx < 0 || !_updateSlips[_selectedSlipIdx]) return;
+  const s = _updateSlips[_selectedSlipIdx];
+  s.date = document.getElementById('slipDate').value || s.date;
+  s.tech2Key = document.getElementById('slipTech2').value || null;
+  s.updateReason = document.getElementById('slipUpdateReason').value;
+  s.comment = document.getElementById('slipComment').value;
+  s.findings = document.getElementById('slipFindings').value;
   serializeSlips();
   renderSlips();
 }
 
+function markSlipComplete() {
+  if (_selectedSlipIdx < 0 || !_updateSlips[_selectedSlipIdx]) return;
+  _updateSlips[_selectedSlipIdx].status = 'Complete';
+  serializeSlips();
+  renderSlips();
+  showSlipDetail(_selectedSlipIdx);
+  showToast('Slip marked complete');
+}
+
+function removeSlip(idx) {
+  if (!confirm('Delete slip US-' + (idx+1) + '?')) return;
+  _updateSlips.splice(idx, 1);
+  _selectedSlipIdx = -1;
+  serializeSlips();
+  renderSlips();
+  hideSlipDetail();
+}
+
 function serializeSlips() {
   if (!_currentRepair) return;
-  // Strip old slip block from comments, append new
   let raw = (_currentRepair.mCommentsHidden || '').replace(/\[UPDATE_SLIP\][\s\S]*?\[\/UPDATE_SLIP\]\n?/, '');
   if (_updateSlips.length) {
     raw += '\n[UPDATE_SLIP]' + JSON.stringify(_updateSlips) + '[/UPDATE_SLIP]';
@@ -2996,55 +3108,121 @@ function printSlip() {
   const s = _updateSlips[_selectedSlipIdx];
   const d = _currentRepair || {};
   const techName = _techs.find(t => t.lTechnicianKey == s.techKey);
-  const w = window.open('', '_blank', 'width=600,height=500');
-  w.document.write('<html><head><title>Update Slip — ' + esc(d.sWorkOrderNumber || '') + '</title><style>body{font-family:Calibri,sans-serif;font-size:12px;padding:20px}h2{color:#00257A;margin:0 0 10px}table{border-collapse:collapse;width:100%;margin:10px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4fa;font-size:10px;text-transform:uppercase}</style></head><body>');
+  const hasFindings = s.comment || s.findings || s.updateReason;
+  const w = window.open('', '_blank', 'width=700,height=700');
+  w.document.write('<html><head><title>Update Slip — ' + esc(d.sWorkOrderNumber || '') + '</title>');
+  w.document.write('<style>body{font-family:Calibri,sans-serif;font-size:12px;padding:20px}h2{color:#00257A;margin:0 0 10px}table{border-collapse:collapse;width:100%;margin:10px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4fa;font-size:10px;text-transform:uppercase}.blank-line{border-bottom:1px solid #999;height:22px;margin:4px 0}.section{margin:16px 0 6px;font-weight:700;font-size:11px;text-transform:uppercase;color:#00257A}</style>');
+  w.document.write('</head><body>');
   w.document.write('<h2>UPDATE SLIP</h2>');
-  w.document.write('<p><b>Work Order:</b> ' + esc(d.sWorkOrderNumber || '') + ' &nbsp; <b>Date:</b> ' + esc(s.date) + '</p>');
-  w.document.write('<p><b>Serial Number:</b> ' + esc(d.sSerialNumber || '') + ' &nbsp; <b>Model:</b> ' + esc(d.sScopeTypeDesc || '') + '</p>');
-  w.document.write('<table><tr><th>Reason</th><th>Update Reason</th><th>Resp. Tech</th></tr>');
-  w.document.write('<tr><td>' + esc(s.reason) + '</td><td>' + esc(s.updateReason || '—') + '</td><td>' + esc(techName ? techName.sTechName : '—') + '</td></tr></table>');
-  w.document.write('<p><b>Comment:</b> ' + esc(s.comment || '—') + '</p>');
-  w.document.write('<p><b>Findings:</b> ' + esc(s.findings || '—') + '</p>');
-  w.document.write('<br><p style="border-top:1px solid #000;width:200px;padding-top:4px">Signature / Date</p>');
+  w.document.write('<table><tr><td style="width:50%"><b>Work Order:</b> ' + esc(d.sWorkOrderNumber || '') + '</td><td><b>Date:</b> ' + esc(s.date) + '</td></tr>');
+  w.document.write('<tr><td><b>Serial Number:</b> ' + esc(d.sSerialNumber || '') + '</td><td><b>Model:</b> ' + esc(d.sScopeTypeDesc || '') + '</td></tr>');
+  w.document.write('<tr><td><b>Client:</b> ' + esc(d.sClientName1 || '') + '</td><td><b>Resp. Tech:</b> ' + esc(techName ? techName.sTechName : '—') + '</td></tr>');
+  w.document.write('<tr><td colspan="2"><b>Reason:</b> ' + esc(s.reason) + '</td></tr></table>');
+  if (hasFindings) {
+    // Print with entered data
+    w.document.write('<p class="section">Update Reason</p><p>' + esc(s.updateReason || '—') + '</p>');
+    w.document.write('<p class="section">Comment</p><p>' + esc(s.comment || '—') + '</p>');
+    w.document.write('<p class="section">Findings</p><p>' + esc(s.findings || '—') + '</p>');
+  } else {
+    // Print blank form for tech to fill in
+    w.document.write('<p class="section">Update Reason (circle one)</p>');
+    w.document.write('<p style="font-size:11px">Video Features &nbsp;&nbsp; Angulation &nbsp;&nbsp; Insertion Tube &nbsp;&nbsp; Light Guide &nbsp;&nbsp; Leak &nbsp;&nbsp; Other: ________</p>');
+    w.document.write('<p class="section">Comment</p>');
+    for (let i = 0; i < 4; i++) w.document.write('<div class="blank-line"></div>');
+    w.document.write('<p class="section">Findings</p>');
+    for (let i = 0; i < 6; i++) w.document.write('<div class="blank-line"></div>');
+  }
+  w.document.write('<br><br><table style="border:none"><tr><td style="border:none;width:50%"><div style="border-top:1px solid #000;width:200px;padding-top:4px">Technician Signature</div></td><td style="border:none"><div style="border-top:1px solid #000;width:150px;padding-top:4px">Date</div></td></tr></table>');
   w.document.write('</body></html>');
   w.document.close();
   w.print();
 }
 
 // ── Amendments ────────────────────────────────────────
-// Amendments are tracked as modified repair line items with bAmended flag
-// Stored in _repairItems array + amendment metadata in mCommentsISO
-let _amendments = [];
+// Session-based: open amendment → add repair items → close amendment
+// Each amendment is a session with its own list of added items
+// Stored in mCommentsISO with [AMENDMENTS] tag
+let _amendments = [];       // History of closed amendments
+let _activeAmendment = null; // Currently open amendment session
 
 function loadAmendments() {
   _amendments = [];
+  _activeAmendment = null;
   if (!_currentRepair) return;
-  // Parse amendment metadata from mCommentsISO
   const raw = _currentRepair.mCommentsISO || '';
   const m = raw.match(/\[AMENDMENTS\]([\s\S]*?)\[\/AMENDMENTS\]/);
   if (m) {
-    try { _amendments = JSON.parse(m[1]); } catch(e) { _amendments = []; }
+    try {
+      const parsed = JSON.parse(m[1]);
+      // Separate active (open) from closed amendments
+      _amendments = parsed.filter(a => a.status === 'Closed');
+      _activeAmendment = parsed.find(a => a.status === 'Open') || null;
+    } catch(e) { _amendments = []; _activeAmendment = null; }
   }
   renderAmendments();
-  populateAmendItemDropdown();
+  updateAmendPanels();
 }
 
 function renderAmendments() {
   const tbody = document.getElementById('amendBody');
-  if (!_amendments.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr>';
+  const all = [..._amendments];
+  if (_activeAmendment) all.push(_activeAmendment);
+  if (!all.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr>';
     return;
   }
-  tbody.innerHTML = _amendments.map((a, i) => {
-    return '<tr><td>A-' + (i+1) + '</td><td>' + esc(a.type || '') + '</td><td>' + esc(a.reason || '') + '</td><td>' + esc(a.date || '') + '</td></tr>';
+  tbody.innerHTML = all.map((a, i) => {
+    const isActive = a.status === 'Open';
+    const statusColor = isActive ? 'background:#FFF3E0;color:#B8860B' : 'background:#E6F4EA;color:#1B7A3D';
+    const itemCount = (a.items || []).length;
+    return '<tr' + (isActive ? ' style="background:#FFFBF0"' : '') + '>'
+      + '<td>A-' + (i+1) + '</td>'
+      + '<td>' + esc(a.reason || '') + '</td>'
+      + '<td>' + itemCount + ' item' + (itemCount !== 1 ? 's' : '') + '</td>'
+      + '<td>' + esc(a.date || '') + '</td>'
+      + '<td><span style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + statusColor + '">' + esc(a.status) + '</span></td>'
+      + '</tr>';
   }).join('');
+}
+
+function updateAmendPanels() {
+  const startPanel = document.getElementById('amendStartPanel');
+  const activePanel = document.getElementById('amendActivePanel');
+  if (_activeAmendment) {
+    startPanel.style.display = 'none';
+    activePanel.style.display = 'block';
+    document.getElementById('amendActiveLabel').textContent = 'A-' + (_amendments.length + 1) + ' — ' + (_activeAmendment.reason || '');
+    populateAmendItemDropdown();
+    renderAmendItems();
+  } else {
+    startPanel.style.display = 'block';
+    activePanel.style.display = 'none';
+  }
+}
+
+function openAmendment() {
+  const reason = document.getElementById('amendReason').value;
+  const comment = document.getElementById('amendComment').value;
+  if (!reason) { showToast('Select a reason'); return; }
+  _activeAmendment = {
+    reason, comment,
+    items: [],
+    status: 'Open',
+    date: new Date().toISOString().slice(0,10),
+    createdBy: (API.getUser() || {}).sUserName || 'demo'
+  };
+  serializeAmendments();
+  renderAmendments();
+  updateAmendPanels();
+  document.getElementById('amendReason').value = '';
+  document.getElementById('amendComment').value = '';
+  showToast('Amendment opened — add repair items to amend the quote');
 }
 
 function populateAmendItemDropdown() {
   const sel = document.getElementById('amendItem');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select repair item —</option>';
-  // If we have repair items catalog loaded, use that; otherwise use current line items
   const items = _repairItems || [];
   items.forEach(item => {
     const opt = document.createElement('option');
@@ -3054,54 +3232,85 @@ function populateAmendItemDropdown() {
   });
 }
 
-async function submitAmendment() {
-  const type = document.getElementById('amendType').value;
-  const reason = document.getElementById('amendReason').value;
-  const itemKey = document.getElementById('amendItem').value;
-  const isBlind = document.getElementById('amendIsBlind').checked;
-  const comment = document.getElementById('amendComment').value;
-  if (!type) { showToast('Select an amendment type'); return; }
-  if (!reason) { showToast('Select a reason'); return; }
+function renderAmendItems() {
+  const tbody = document.getElementById('amendItemsBody');
+  if (!_activeAmendment || !_activeAmendment.items.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:8px;font-size:11px">No items added yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _activeAmendment.items.map((item, i) => {
+    return '<tr><td>' + esc(item.description || '') + '</td>'
+      + '<td>' + (item.isBlind ? '<span style="font-size:9px;font-weight:600;color:#B8860B">Yes</span>' : '—') + '</td>'
+      + '<td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="removeAmendItem(' + i + ')">&times;</button></td></tr>';
+  }).join('');
+}
 
-  const amendment = {
-    type, reason, isBlind, comment,
-    itemKey: itemKey || null,
-    date: new Date().toISOString().slice(0,10),
-    createdBy: (API.getUser() || {}).sUserName || 'demo'
-  };
+async function addAmendItem() {
+  if (!_activeAmendment) return;
+  const sel = document.getElementById('amendItem');
+  const itemKey = sel.value;
+  const itemDesc = sel.options[sel.selectedIndex]?.textContent || '';
+  const isBlind = document.getElementById('amendIsBlind').checked;
+  if (!itemKey) { showToast('Select a repair item'); return; }
+
+  _activeAmendment.items.push({
+    itemKey, description: itemDesc, isBlind,
+    addedAt: new Date().toISOString()
+  });
 
   // Try API call to add amended line item
-  if (_liveMode && itemKey) {
+  if (_liveMode && _currentRepair) {
     try {
       await API.addRepairDetail({
         plRepairKey: _currentRepair.lRepairKey,
         plRepairItemKey: parseInt(itemKey),
         pbAmended: true,
-        pbBlind: isBlind,
-        psComment: comment
+        pbBlind: isBlind
       });
-      // Reload line items to see the amendment
       loadRepairItems(_currentRepair.lRepairKey);
     } catch (e) {
       console.warn('[TSI Repairs] AddRepairDetail not available:', e.message);
     }
   }
 
-  // Store amendment metadata
-  _amendments.push(amendment);
+  serializeAmendments();
+  renderAmendItems();
+  renderAmendments();
+  sel.value = '';
+  document.getElementById('amendIsBlind').checked = false;
+  showToast('Item added to amendment' + (isBlind ? ' (blind)' : ''));
+}
+
+function removeAmendItem(idx) {
+  if (!_activeAmendment) return;
+  _activeAmendment.items.splice(idx, 1);
+  serializeAmendments();
+  renderAmendItems();
+  renderAmendments();
+}
+
+function closeAmendment() {
+  if (!_activeAmendment) return;
+  if (!_activeAmendment.items.length) {
+    if (!confirm('No items added. Discard this amendment?')) return;
+    _activeAmendment = null;
+    serializeAmendments();
+    renderAmendments();
+    updateAmendPanels();
+    showToast('Amendment discarded');
+    return;
+  }
+  _activeAmendment.status = 'Closed';
+  _activeAmendment.closedAt = new Date().toISOString();
+  _amendments.push(_activeAmendment);
+  _activeAmendment = null;
   serializeAmendments();
   renderAmendments();
-
-  // Clear form
-  document.getElementById('amendType').value = '';
-  document.getElementById('amendReason').value = '';
-  document.getElementById('amendItem').value = '';
-  document.getElementById('amendIsBlind').checked = false;
-  document.getElementById('amendComment').value = '';
-  showToast('Amendment recorded' + (isBlind ? ' (blind — hidden from customer docs)' : ''));
+  updateAmendPanels();
+  showToast('Amendment closed — ' + _amendments[_amendments.length-1].items.length + ' item(s) amended');
 
   // Prompt: Reset Approval Date?
-  if (confirm('Reset Approval Date? Click OK to revert to quoting stage (new Requisition needed), or Cancel to continue.')) {
+  if (confirm('Reset Approval Date?\n\nOK = revert to quoting stage (new Requisition needed)\nCancel = continue without resetting')) {
     if (_currentRepair) {
       _currentRepair.dtAprRecvd = null;
       if (document.getElementById('fRecvdApproval')) document.getElementById('fRecvdApproval').value = '';
@@ -3114,8 +3323,10 @@ async function submitAmendment() {
 function serializeAmendments() {
   if (!_currentRepair) return;
   let raw = (_currentRepair.mCommentsISO || '').replace(/\[AMENDMENTS\][\s\S]*?\[\/AMENDMENTS\]\n?/, '');
-  if (_amendments.length) {
-    raw += '\n[AMENDMENTS]' + JSON.stringify(_amendments) + '[/AMENDMENTS]';
+  const all = [..._amendments];
+  if (_activeAmendment) all.push(_activeAmendment);
+  if (all.length) {
+    raw += '\n[AMENDMENTS]' + JSON.stringify(all) + '[/AMENDMENTS]';
   }
   _currentRepair.mCommentsISO = raw;
   markDirty();
