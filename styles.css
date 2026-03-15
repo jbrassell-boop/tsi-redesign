@@ -65,7 +65,7 @@ html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;backgr
 .btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--red)}
 .divider{width:1px;height:24px;background:var(--border);margin:0 4px}
 
-/* STATUS STRIP */
+/* STATUS STRIP (legacy — used by repairs, suppliers, development-list, repair-items) */
 .status-strip{display:flex;align-items:center;gap:6px;padding:6px 20px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
 .ss-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid var(--border)}
 .ss-chip .ss-label{font-weight:500;color:var(--muted);text-transform:uppercase;font-size:9.5px;letter-spacing:.3px}
@@ -74,6 +74,16 @@ html,body{height:100%;font-family:'Inter',Arial,sans-serif;font-size:12px;backgr
 .ss-warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
 .ss-neutral{background:#F8FAFF;border-color:var(--border)}
 .ss-info{background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)}
+
+/* STAT STRIP (shared — record editors & cockpit pages) */
+.stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+.stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+.stat-chip:last-child{border-right:none}
+.s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.s-data{min-width:0;overflow:hidden}
+.s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px}
+.s-navy{color:var(--navy)}.s-red{color:var(--red)}.s-green{color:var(--green)}.s-amber{color:var(--amber)}.s-blue{color:var(--blue)}.s-purple{color:#7C3AED}.s-muted{color:var(--muted)}
 
 /* TABS */
 .tab-bar{display:flex;padding:0 14px;background:var(--card);border-bottom:2px solid var(--border-dk);margin-top:0}
@@ -197,3 +207,11 @@ tbody tr:hover{background:var(--row-hover);cursor:pointer}
 .data-badge{display:none;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
 .data-badge.live{display:inline-flex;background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0}
 .data-badge.demo{display:inline-flex;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+
+/* RESPONSIVE — stat strip wraps at narrow viewports */
+@media(max-width:1280px){
+  .stat-strip{flex-wrap:wrap}
+  .stat-chip{min-width:80px}
+  .s-val{font-size:clamp(12px,1.2vw,15px)}
+  .s-lbl{font-size:clamp(8px,0.8vw,9.5px)}
+}
