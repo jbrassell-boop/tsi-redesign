@@ -392,12 +392,12 @@
               </tr>
             </thead>
             <tbody id="departments-tbody">
-              <tr onclick="window.location='departments.html'">
+              <tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'3502',name:'88th Medical Group'}));window.location='departments.html?clientKey=3502'">
                 <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">Biomedical Engineering</td>
                 <td>Upper Chichester</td>
                 <td><span class="badge b-active">Active</span></td>
               </tr>
-              <tr onclick="window.location='departments.html'">
+              <tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'3502',name:'88th Medical Group'}));window.location='departments.html?clientKey=3502'">
                 <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">Endoscopy Unit</td>
                 <td>Upper Chichester</td>
                 <td><span class="badge b-active">Active</span></td>
@@ -1471,7 +1471,8 @@ function renderDepartments(c) {
     const badge = d.active
       ? '<span class="badge b-active">Active</span>'
       : '<span class="badge b-inactive">Inactive</span>';
-    return `<tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'${c.id||''}',name:${JSON.stringify(c.name||'')}}));window.location='departments?clientKey=${c.id || ''}&dept=${d.key || ''}'"${bg}>
+    const safeName = (c.name||'').replace(/'/g, "\\'");
+    return `<tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'${c.id||''}',name:'${safeName}'}));window.location='departments.html?clientKey=${c.id || ''}&amp;dept=${d.key || ''}'"${bg}>
       <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">${d.name}</td>
       <td>${d.location || '—'}</td>
       <td>${badge}</td>
