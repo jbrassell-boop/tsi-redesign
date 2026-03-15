@@ -39,12 +39,12 @@
 
     /* SCOPE HISTORY — dropdown off SN# */
     .history-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;padding:0 5px;margin-left:4px;cursor:pointer;line-height:1}
-    .scope-history-panel{display:none;position:absolute;top:100%;left:0;z-index:500;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 6px 24px rgba(var(--primary-rgb),.18);width:520px;max-height:300px;overflow:hidden;margin-top:4px}
+    .scope-history-panel{display:none;position:absolute;top:100%;left:0;z-index:500;background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:0 6px 24px rgba(var(--primary-rgb),.18);width:700px;max-height:300px;overflow:hidden;margin-top:4px}
     .scope-history-panel.open{display:block}
     .scope-history-panel .sh-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;font-size:11px;font-weight:700}
     .scope-history-panel .sh-header .sh-close{cursor:pointer;opacity:.7;font-size:16px;line-height:1}
     .scope-history-panel .sh-header .sh-close:hover{opacity:1}
-    .scope-history-panel .sh-body{overflow-y:auto;max-height:240px}
+    .scope-history-panel .sh-body{overflow-y:auto;overflow-x:auto;max-height:240px}
     table.sh-table{width:100%;border-collapse:collapse}
     table.sh-table th{background:#F0F4FA;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;padding:5px 10px;text-align:left;letter-spacing:.3px;position:sticky;top:0}
     table.sh-table td{padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
@@ -275,7 +275,7 @@
 .wf-divider{width:1px;height:18px;background:var(--border-dk);margin:0 8px;flex-shrink:0}
 .wf-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:600;border:1.5px solid transparent;cursor:default;transition:all .15s;white-space:nowrap;font-family:inherit;background:none}
 .wf-pill svg{width:11px;height:11px;flex-shrink:0}
-.wf-locked{background:#F0F2F5;color:#999;border-color:#DDE3EE}
+.wf-locked{background:#F0F2F5;color:#999;border-color:#DDE3EE;cursor:not-allowed;opacity:.7}
 .wf-locked svg{stroke:#bbb}
 .wf-available{background:#EFF6FF;color:var(--navy);border-color:var(--blue);cursor:pointer;animation:wfPulse 2s ease-in-out infinite}
 .wf-available:hover{background:#DBEAFE;box-shadow:0 0 0 2px rgba(46,116,181,.15)}
@@ -288,7 +288,8 @@
 .wf-toast{position:fixed;top:72px;right:16px;z-index:900;background:var(--navy);color:#fff;padding:8px 14px;border-radius:6px;font-size:11px;font-weight:600;box-shadow:0 4px 16px rgba(0,20,60,.25);transform:translateX(120%);transition:transform .3s ease;max-width:340px}
 .wf-toast.show{transform:translateX(0)}
 /* FORM PREVIEW DRAWER (wider for inspection forms) */
-.wf-drawer{width:540px;right:-560px}
+.wf-drawer{width:540px;right:0;transform:translateX(calc(100% + 4px));transition:transform .25s ease,visibility 0s .25s;visibility:hidden}
+.qc-drawer.open.wf-drawer{transform:translateX(0);transition:transform .25s ease,visibility 0s 0s;visibility:visible}
 .wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px}
 .wf-form-header .wf-fh-item{font-size:10.5px;color:var(--text)}
 .wf-form-header .wf-fh-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-right:4px}
@@ -335,7 +336,6 @@
       <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
       <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
       <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
-      <div class="nav-item" onclick="location='repair-items.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Repair Items</div>
       <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
       <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
       <div class="nav-item" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
@@ -359,7 +359,7 @@
       </div>
       <div class="topbar-right">
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
-          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Orders <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:220px;z-index:9999;overflow:hidden">
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--border);transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>Find / Open Repair<div style="font-size:10px;color:var(--muted);font-weight:400">Search open work orders</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');newRepair();nwoRevealCreate()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
@@ -503,7 +503,7 @@
                 <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
-                <span class="ref-item"><b>Days Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
+                <span class="ref-item"><b>Days Since Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
                 <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
                 <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
                 <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
@@ -578,9 +578,9 @@
             </div>
 
             <!-- NOTES -->
-            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:4px">
-              <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;flex-shrink:0">Notes</span>
-              <input id="fScopeNotes" onchange="markDirty()" placeholder="Scope-in notes..." style="flex:1;height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+            <div style="margin-top:6px;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Notes</div>
+              <textarea id="fScopeNotes" rows="3" oninput="markDirty()" placeholder="Scope-in notes..." style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:60px"></textarea>
             </div>
 
             <!-- TOTALS + ACTIONS (sticky footer feel) -->
@@ -602,52 +602,99 @@
           <!-- ═══ PAGE 2: DETAILS ═══ -->
           <div class="tab-pane" id="pane-details">
 
-            <!-- 3-COLUMN LAYOUT: Settings | Shipping | Billing -->
-            <div style="display:grid;grid-template-columns:380px 1fr 1fr;gap:8px">
+            <!-- ROW 1: 3 tight panels -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
 
-              <!-- LEFT: Settings — all the billing/order/toggle fields stacked -->
+              <!-- Panel 1: Pricing & Payment -->
               <div class="section-card" style="margin-bottom:0">
-                <div class="section-head" style="padding:5px 12px;font-size:9.5px">
-                  Settings
-                  <div style="display:flex;gap:4px">
-                    <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">Labels</button>
-                    <button class="btn" style="height:20px;font-size:9px;padding:0 8px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">GP</button>
-                  </div>
-                </div>
-                <div class="section-body" style="padding:8px 12px">
-                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:4px 8px">
-                    <div class="field"><label>Pricing Cat</label><select id="fPricingCat" onchange="markDirty()"></select></div>
-                    <div class="field"><label>Discount %</label><input id="fDiscount" onchange="markDirty()"/></div>
-                    <div class="field"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"></select></div>
-                    <div class="field"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"></select></div>
-                    <div class="field"><label>Bill To</label><select id="fBillTo" onchange="markDirty()"><option value="C">Customer</option><option value="D">Distributor</option></select></div>
-                    <div class="field"><label>Distributor</label><select id="fDistributor" onchange="markDirty()"></select></div>
-                    <div class="field"><label>Ship Cost</label><input id="fShipCost" onchange="markDirty()"/></div>
-                    <div class="field"><label>Report Group</label><input id="fReportGroup" onchange="markDirty()"/></div>
-                    <div class="field"><label>Requisition</label><input id="fRequisition" onchange="markDirty()"/></div>
-                    <div class="field"><label>Approval Name</label><input id="fApprName" onchange="markDirty()"/></div>
-                    <div class="field span2"><label>Inbound Tracking</label><input id="fTrackIn" onchange="markDirty()"/></div>
-                    <div class="field"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
-                    <div class="field"><label>Pickup Req</label><select id="fPickupReq" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></div>
-                  </div>
-                  <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
-                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispAmounts" onchange="markDirty()"/><span class="toggle-slider"></span></label>Itemized Amounts</label>
-                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispDescrip" onchange="markDirty()"/><span class="toggle-slider"></span></label>Itemized Descriptions</label>
-                    <label style="font-size:10.5px;display:flex;align-items:center;gap:8px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fDispComp" onchange="markDirty()"/><span class="toggle-slider"></span></label>Customer Complaint</label>
+                <div class="section-head" style="padding:4px 10px;font-size:9px">Pricing &amp; Payment</div>
+                <div class="section-body" style="padding:6px 10px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
+                    <div class="field" style="margin:0"><label>Pricing Cat</label><select id="fPricingCat" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>Discount %</label><input id="fDiscount" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>Ship Cost</label><input id="fShipCost" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Report Group</label><input id="fReportGroup" onchange="markDirty()"/></div>
                   </div>
                 </div>
               </div>
 
-              <!-- CENTER+RIGHT: Addresses -->
-              <div class="section-card" style="margin-bottom:0;grid-column:span 2">
-                <div class="section-head" style="padding:5px 12px;font-size:9.5px;display:flex;align-items:center;justify-content:space-between">
-                  Addresses
-                  <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To</label>
+              <!-- Panel 2: Invoice / Billing -->
+              <div class="section-card" style="margin-bottom:0">
+                <div class="section-head" style="padding:4px 10px;font-size:9px">
+                  Invoice &amp; Billing
+                  <div style="display:flex;gap:3px;margin-left:auto">
+                    <button class="btn" style="height:18px;font-size:9px;padding:0 7px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">Labels</button>
+                    <button class="btn" style="height:18px;font-size:9px;padding:0 7px;background:transparent;color:var(--blue);border:1px solid var(--border-dk)">GP</button>
+                  </div>
                 </div>
-                <div class="section-body" style="padding:8px 12px">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                    <div class="field"><label>Bill To</label><textarea id="fBillAddr" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)toggleShipSame()"></textarea></div>
-                    <div class="field"><label>Ship To</label><textarea id="fShipAddr" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
+                <div class="section-body" style="padding:6px 10px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
+                    <div class="field" style="margin:0"><label>Bill To</label><select id="fBillTo" onchange="markDirty()"><option value="C">Customer</option><option value="D">Distributor</option></select></div>
+                    <div class="field" style="margin:0"><label>Distributor</label><select id="fDistributor" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0;grid-column:span 2"><label>Bill Email</label><input id="fBillEmail" type="email" placeholder="billing@customer.com" oninput="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Requisition</label><input id="fRequisition" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Approval Name</label><input id="fApprName" onchange="markDirty()"/></div>
+                  </div>
+                  <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px">
+                    <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle" style="transform:scale(.85);transform-origin:left center"><input type="checkbox" id="fDispAmounts" onchange="markDirty()"/><span class="toggle-slider"></span></label>Itemized Amounts</label>
+                    <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle" style="transform:scale(.85);transform-origin:left center"><input type="checkbox" id="fDispDescrip" onchange="markDirty()"/><span class="toggle-slider"></span></label>Itemized Descriptions</label>
+                    <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle" style="transform:scale(.85);transform-origin:left center"><input type="checkbox" id="fDispComp" onchange="markDirty()"/><span class="toggle-slider"></span></label>Customer Complaint</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panel 3: Logistics -->
+              <div class="section-card" style="margin-bottom:0">
+                <div class="section-head" style="padding:4px 10px;font-size:9px">Logistics</div>
+                <div class="section-body" style="padding:6px 10px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
+                    <div class="field" style="margin:0;grid-column:span 2"><label>Inbound Tracking</label><input id="fTrackIn" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Service Level</label><input id="fInboundSvcLevel" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Pickup Req</label><select id="fPickupReq" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ROW 2: Addresses (2 cols, full width) -->
+            <div class="section-card" style="margin-bottom:0">
+              <div class="section-head" style="padding:4px 10px;font-size:9px;display:flex;align-items:center;justify-content:space-between">
+                Addresses
+                <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">Defaults from department · editable per order</span>
+              </div>
+              <div class="section-body" style="padding:6px 10px">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <!-- Bill To -->
+                  <div>
+                    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Bill To</div>
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <input id="fBillName1" placeholder="Company name" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      <input id="fBillAddr1" placeholder="Address line 1" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
+                        <input id="fBillCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <input id="fBillState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
+                        <input id="fBillZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Ship To -->
+                  <div>
+                    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+                      Ship To
+                      <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:3px;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--muted)"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To</label>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <input id="fShipName1" placeholder="Company name" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      <input id="fShipAddr1" placeholder="Address line 1" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
+                        <input id="fShipCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <input id="fShipState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
+                        <input id="fShipZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1655,7 +1702,11 @@ function printFormDocument(formId) {
 
 function openFormPreview(formId) {
   const pill = document.getElementById('wf-' + formId);
-  if (pill && pill.classList.contains('wf-locked')) return;
+  if (pill && pill.classList.contains('wf-locked')) {
+    const name = pill.title.split(' — ')[0] || 'This step';
+    showToast(name + ' is locked — status not yet reached');
+    return;
+  }
   closeDrawer();
   // Amendment & Defect pills open the existing operational drawers (no duplicates)
   if (formId === 'amendment') { openDrawer('amend'); return; }
@@ -2165,7 +2216,7 @@ function populateDetail(d) {
   document.getElementById('hPO').value = d.sPurchaseOrder || '';
   document.getElementById('hWO').textContent = d.sWorkOrderNumber || '—';
   document.getElementById('hRack').value = d.sRackPosition || '';
-  setSelectVal('hRepairLevel', '');
+  setSelectVal('hRepairLevel', d.lRepairLevelKey);
   setSelectVal('hRepairStatus', d.lRepairStatusID);
 
   // Scope row (spans, not inputs)
@@ -2178,9 +2229,10 @@ function populateDetail(d) {
   document.getElementById('hWithin40').textContent = '—';
 
   // Details tab — TAT / Dates (now spans, not inputs)
-  if (d.dtDateIn && d.dtDateOut) {
-    const days = Math.round((new Date(d.dtDateOut) - new Date(d.dtDateIn)) / 86400000);
-    document.getElementById('hTAT').textContent = days + ' days';
+  if (d.dtDateIn) {
+    const end = d.dtDateOut ? new Date(d.dtDateOut) : new Date();
+    const days = Math.round((end - new Date(d.dtDateIn)) / 86400000);
+    document.getElementById('hTAT').textContent = days + 'd' + (d.dtDateOut ? '' : ' (open)');
   } else { document.getElementById('hTAT').textContent = '—'; }
   document.getElementById('hLeadTime').textContent = '—';
   document.getElementById('hDateOutRO').textContent = d.dtDateOut ? fmtDate(d.dtDateOut) : '—';
@@ -2223,24 +2275,22 @@ function populateDetail(d) {
   document.getElementById('fRecvdApproval').value = toDateInput(d.dtAprRecvd);
   document.getElementById('fApprName').value = d.sApprName || '';
 
-  // Addresses — structured text blocks for report/invoice pull
-  function addrBlock(lines) { return lines.filter(Boolean).join('\n'); }
-  var shipText = addrBlock([
-    d.sShipName1, d.sShipAttention ? 'Attn: '+d.sShipAttention : d.sShipName2,
-    d.sShipAddr1, d.sShipAddr2,
-    [d.sShipCity, d.sShipState].filter(Boolean).join(', ') + (d.sShipZip ? ' '+d.sShipZip : '')
-  ]);
-  var billText = addrBlock([
-    d.sBillName1, d.sBillName2,
-    d.sBillAddr1, d.sBillAddr2,
-    [d.sBillCity, d.sBillState].filter(Boolean).join(', ') + (d.sBillZip ? ' '+d.sBillZip : ''),
-    d.sBillEmail
-  ]);
-  document.getElementById('fBillAddr').value = billText;
-  document.getElementById('fShipAddr').value = shipText;
-  var sameBill = (billText === shipText);
+  // Addresses — editable fields, default from department
+  // Bill To address fields
+  document.getElementById('fBillName1').value = d.sBillName1 || '';
+  document.getElementById('fBillAddr1').value = d.sBillAddr1 || '';
+  document.getElementById('fBillCity').value = d.sBillCity || '';
+  document.getElementById('fBillState').value = d.sBillState || '';
+  document.getElementById('fBillZip').value = d.sBillZip || '';
+  document.getElementById('fBillEmail').value = d.sBillEmail || '';
+  // Ship To address fields
+  document.getElementById('fShipName1').value = d.sShipName1 || '';
+  document.getElementById('fShipAddr1').value = d.sShipAddr1 || '';
+  document.getElementById('fShipCity').value = d.sShipCity || '';
+  document.getElementById('fShipState').value = d.sShipState || '';
+  document.getElementById('fShipZip').value = d.sShipZip || '';
+  var sameBill = (d.sShipAddr1 === d.sBillAddr1 && d.sShipName1 === d.sBillName1);
   document.getElementById('fShipSameBill').checked = sameBill;
-  if (sameBill) { document.getElementById('fShipAddr').readOnly = true; document.getElementById('fShipAddr').style.background = '#F8FAFF'; }
 
   // Inbound
   document.getElementById('fTrackIn').value = d.sShipTrackingNumberIn || '';
@@ -2732,15 +2782,19 @@ function resetMaxCharge() {
 
 // ── Address toggle ──
 function toggleShipSame() {
-  var shipTo = document.getElementById('fShipAddr');
-  if (document.getElementById('fShipSameBill').checked) {
-    shipTo.value = document.getElementById('fBillAddr').value;
-    shipTo.readOnly = true;
-    shipTo.style.background = '#F8FAFF';
-  } else {
-    shipTo.readOnly = false;
-    shipTo.style.background = '#fff';
-  }
+  var same = document.getElementById('fShipSameBill').checked;
+  var shipFields = ['Name1','Addr1','City','State','Zip'];
+  shipFields.forEach(function(f) {
+    var shipEl = document.getElementById('fShip' + f);
+    if (same) {
+      shipEl.value = document.getElementById('fBill' + f).value;
+      shipEl.disabled = true;
+      shipEl.style.opacity = '.6';
+    } else {
+      shipEl.disabled = false;
+      shipEl.style.opacity = '1';
+    }
+  });
   markDirty();
 }
 
@@ -2818,6 +2872,18 @@ function buildRepairPayload() {
     psApprName: document.getElementById('fApprName').value || '',
     // Bill To
     psBillTo: getSelectVal('fBillTo') || d.sBillTo || 'C',
+    // Addresses
+    psBillName1: document.getElementById('fBillName1').value || '',
+    psBillAddr1: document.getElementById('fBillAddr1').value || '',
+    psBillCity: document.getElementById('fBillCity').value || '',
+    psBillState: document.getElementById('fBillState').value || '',
+    psBillZip: document.getElementById('fBillZip').value || '',
+    psBillEmail: document.getElementById('fBillEmail').value || '',
+    psShipName1: document.getElementById('fShipName1').value || '',
+    psShipAddr1: document.getElementById('fShipAddr1').value || '',
+    psShipCity: document.getElementById('fShipCity').value || '',
+    psShipState: document.getElementById('fShipState').value || '',
+    psShipZip: document.getElementById('fShipZip').value || '',
     // Accessories
     psIncludesCaseYN: document.getElementById('fInclCase').checked ? 'Y' : 'N',
     psIncludesCapYN: document.getElementById('fInclCap').checked ? 'Y' : 'N',
@@ -2904,6 +2970,17 @@ function syncFormToRepair() {
   d.sReqAprTotalsOnly = document.getElementById('fRequisition').value || '';
   d.sApprName = document.getElementById('fApprName').value || '';
   d.sBillTo = getSelectVal('fBillTo') || d.sBillTo || 'C';
+  d.sBillName1 = document.getElementById('fBillName1').value || '';
+  d.sBillAddr1 = document.getElementById('fBillAddr1').value || '';
+  d.sBillCity = document.getElementById('fBillCity').value || '';
+  d.sBillState = document.getElementById('fBillState').value || '';
+  d.sBillZip = document.getElementById('fBillZip').value || '';
+  d.sBillEmail = document.getElementById('fBillEmail').value || '';
+  d.sShipName1 = document.getElementById('fShipName1').value || '';
+  d.sShipAddr1 = document.getElementById('fShipAddr1').value || '';
+  d.sShipCity = document.getElementById('fShipCity').value || '';
+  d.sShipState = document.getElementById('fShipState').value || '';
+  d.sShipZip = document.getElementById('fShipZip').value || '';
   d.sIncludesCaseYN = document.getElementById('fInclCase').checked ? 'Y' : 'N';
   d.sIncludesCapYN = document.getElementById('fInclCap').checked ? 'Y' : 'N';
   d.sIncludesWaterResCapYN = document.getElementById('fInclWaterCap').checked ? 'Y' : 'N';
@@ -3227,7 +3304,7 @@ function populateAmendItemDropdown() {
   items.forEach(item => {
     const opt = document.createElement('option');
     opt.value = item.lRepairItemTranKey || item.lRepairItemKey || '';
-    opt.textContent = item.sDescription || item.sRepairItemDesc || '(unnamed)';
+    opt.textContent = item.sItemDescription || item.sDescription || item.sRepairItem || item.sRepairItemDesc || '(unnamed)';
     sel.appendChild(opt);
   });
 }

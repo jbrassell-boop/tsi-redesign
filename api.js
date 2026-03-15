@@ -828,3 +828,12 @@ const API = (() => {
     isDemoMode
   };
 })();
+
+// Close New Order dropdown when clicking outside it (runs on every page)
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('newOrderWrap');
+  var menu = document.getElementById('newOrderMenu');
+  if (wrap && menu && !wrap.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
