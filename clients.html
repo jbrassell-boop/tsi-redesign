@@ -16,8 +16,8 @@
     .status-pill{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:3px 12px;font-size:11.5px;font-weight:700;color:var(--green)}
 
     /* Stat-strip (replaces old ss-chip) */
-    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
-    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0;overflow-x:auto}
+    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0;flex-shrink:0}
     .stat-chip:last-of-type{border-right:none}
     .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
     .s-data{min-width:0}
@@ -108,6 +108,21 @@
             New
           </button>
         </div>
+        <!-- Overflow menu (Deactivate + Delete) -->
+        <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
+          <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:#6b7c93;border-color:#d0d6dd">&#x22EF;</button>
+          <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #d0d6dd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:200px;padding:6px 0;font-size:13px">
+            <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#b8860b" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+              Deactivate Client
+            </button>
+            <div style="height:1px;background:#e8eaed;margin:4px 12px"></div>
+            <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#c53030" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Delete Client
+            </button>
+          </div>
+        </div>
         <div class="divider"></div>
 
         <!-- CLIENT SELECTOR inline -->
@@ -128,11 +143,6 @@
         </button>
         <span class="id-badge" id="clientBadge">#3502</span>
         <div style="flex:1"></div>
-        <button class="btn btn-danger" style="gap:4px" onclick="document.getElementById('deleteClientModal').classList.add('open')">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Delete
-        </button>
-        <div class="divider"></div>
         <span id="saveStatus" style="font-size:11px;display:flex;align-items:center;gap:5px" class="save-ready">
           <span id="saveIcon">&#9679;</span> <span id="saveText">Ready</span>
         </span>
@@ -207,7 +217,7 @@
                 </div>
                 <div class="ff span2">
                   <label>Address Line 2</label>
-                  <input id="ci-addr2" class="inp" placeholder="Optional"/>
+                  <input id="ci-addr2" class="inp" placeholder="Suite, floor, building (optional)"/>
                 </div>
                 <div class="ff">
                   <label>Zip <span class="req">*</span></label>
@@ -243,10 +253,10 @@
                 <div class="fg g3 span2" style="gap:6px 10px">
                   <div class="ff">
                     <label>Client Since</label>
-                    <input id="ci-since" class="inp" value="06/04/2006"/>
+                    <input id="ci-since" class="inp" type="date" value="2006-06-04"/>
                   </div>
                   <div class="ff">
-                    <label>Portal Months</label>
+                    <label title="Number of months this client has portal access">Portal Months</label>
                     <input id="ci-portal" class="inp" value="24" placeholder="e.g. 12"/>
                   </div>
                   <div class="ff">
@@ -316,15 +326,15 @@
                 <div style="border-top:1px solid var(--border);padding-top:7px;margin-top:4px">
                   <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Invoice Display</div>
                   <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label">Blind PS3</div>
+                    <div class="toggle-label" title="Hides PS3 patient safety level from customer-facing documents">Blind PS3</div>
                     <label class="toggle"><input id="def-blind-ps3" type="checkbox" checked/><span class="toggle-slider"></span></label>
                   </div>
                   <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label">Req. Totals Only</div>
+                    <div class="toggle-label" title="Shows only totals (no line items) on requisition forms">Req. Totals Only</div>
                     <label class="toggle"><input id="def-req-totals" type="checkbox" checked/><span class="toggle-slider"></span></label>
                   </div>
                   <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label">Blind Totals On Final</div>
+                    <div class="toggle-label" title="Hides individual line item totals on final invoice">Blind Totals On Final</div>
                     <label class="toggle"><input id="def-blind-final" type="checkbox" checked/><span class="toggle-slider"></span></label>
                   </div>
                 </div>
@@ -583,12 +593,12 @@
 
 <!-- ADD CLIENT MODAL -->
 <div class="modal-overlay" id="addClientModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal-box" style="width:700px">
+  <div class="modal-box" style="width:700px;display:flex;flex-direction:column;max-height:85vh">
     <div class="modal-header">
       <h3>Add New Client</h3>
       <button class="modal-close" onclick="document.getElementById('addClientModal').classList.remove('open')">&times;</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:18px">
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:18px;flex:1;overflow-y:auto">
 
       <!-- ── Client Information ── -->
       <div>
@@ -904,6 +914,11 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
+// Close overflow menu on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.toolbar-more-dropdown').forEach(d => d.style.display = 'none');
+});
+
 const CLIENTS = {
   '88th Medical Group': {
     id:'3502', active:true, name:'88th Medical Group', unit:'Wright Patterson AFB, Bldg. 830123',
@@ -1099,7 +1114,9 @@ function loadClient(c) {
   setVal('ci-city', c.city); setOpt('ci-state', c.state);
   setVal('ci-addr1', c.addr1); setVal('ci-addr2', c.addr2);
   setVal('ci-phone', c.phone); setVal('ci-fax', c.fax);
-  setVal('ci-since', c.since); setVal('ci-portal', c.portal);
+  // Convert MM/DD/YYYY to YYYY-MM-DD for date input
+  const sinceVal = (c.since || '').includes('/') ? c.since.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2') : c.since;
+  setVal('ci-since', sinceVal); setVal('ci-portal', c.portal);
   setChk('ci-active', c.active);
   const lbl = document.getElementById('ci-active-lbl');
   lbl.textContent = c.active ? 'Yes' : 'No';
