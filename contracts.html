@@ -84,6 +84,15 @@
     .tab-content{flex:1;overflow-y:auto;padding:10px 14px}
     .tab-content.show{display:block}
 
+    /* Expired contract banner */
+    .expired-banner{display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:6px 14px;margin:8px 14px 0;font-size:11px;font-weight:600;color:var(--red);align-items:center;gap:6px}
+    .expired-banner.show{display:flex}
+
+    /* Tab bar scroll fade indicator */
+    .tab-bar-wrap{position:relative}
+    .tab-bar-wrap::after{content:'';position:absolute;right:0;top:0;bottom:0;width:32px;pointer-events:none;background:linear-gradient(to right,transparent,#fff);opacity:0;transition:opacity .2s}
+    .tab-bar-wrap.has-scroll::after{opacity:1}
+
     /* PANEL OVERRIDES (contracts uses slightly different spacing) */
     .panel{margin-bottom:10px}
     .panel-head{letter-spacing:.6px}
@@ -309,8 +318,14 @@
             <div class="ss-chip ss-neutral"><span class="ss-label">Sales Rep</span><span class="ss-val">J. Miller</span></div>
           </div>
 
+          <!-- EXPIRED BANNER -->
+          <div class="expired-banner" id="expiredBanner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>This contract has expired. Changes may not be applicable.</span>
+          </div>
+
           <!-- DETAIL TABS -->
-          <div class="tab-bar">
+          <div class="tab-bar-wrap"><div class="tab-bar">
             <div class="tab active" onclick="switchTab('specs',this)">Specifications</div>
             <div class="tab" onclick="switchTab('address',this)">Address</div>
             <div class="tab" onclick="switchTab('departments',this)">Departments</div>
@@ -325,7 +340,7 @@
             <div class="tab" onclick="switchTab('expense',this)">Expense Trending</div>
             <div class="tab" onclick="switchTab('reportcard',this)">Report Card</div>
             <div class="tab" onclick="switchTab('commission',this)">Commission Rates</div>
-          </div>
+          </div></div>
 
           <!-- TAB: SPECIFICATIONS -->
           <div class="tab-content show" id="tab-specs">
@@ -335,22 +350,22 @@
                   <div class="panel-head">Contract Information</div>
                   <div class="panel-body">
                     <div class="fg g2">
-                      <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" value="88th Medical Group - Capitated Service"/></div>
+                      <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" id="ctName" value=""/></div>
                       <div class="ff"><label>Contract Type <span class="req">*</span></label>
-                        <select class="inp">
-                          <option selected>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option>
+                        <select class="inp" id="ctType">
+                          <option>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option>
                         </select>
                       </div>
-                      <div class="ff"><label>Client <span class="req">*</span></label><input class="inp" value="88th Medical Group"/></div>
+                      <div class="ff"><label>Client <span class="req">*</span></label><input class="inp" id="ctClient" value=""/></div>
                       <div class="ff"><label>Sales Representative <span class="req">*</span></label>
-                        <select class="inp"><option selected>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
+                        <select class="inp" id="ctSalesRep"><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
                       </div>
-                      <div class="ff"><label>Purchase Order #</label><input class="inp" value="PO-2025-1184"/></div>
+                      <div class="ff"><label>Purchase Order #</label><input class="inp" id="ctPO" value=""/></div>
                       <div class="ff"><label>Invoice Frequency</label>
-                        <select class="inp"><option>None</option><option>18 Months</option><option>Annual</option><option>Monthly</option><option>Once</option><option selected>Quarterly</option></select>
+                        <select class="inp" id="ctFrequency"><option>None</option><option>18 Months</option><option>Annual</option><option>Monthly</option><option>Once</option><option>Quarterly</option></select>
                       </div>
                       <div class="ff"><label>Payment Terms</label>
-                        <select class="inp"><option>Due Upon Receipt</option><option>Net 15</option><option selected>Net 30</option><option>Net 45</option><option>Net 60</option><option>Net 90</option></select>
+                        <select class="inp" id="ctPaymentTerms"><option>Due Upon Receipt</option><option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Net 90</option></select>
                       </div>
                     </div>
                   </div>
@@ -358,7 +373,7 @@
                 <div class="panel">
                   <div class="panel-head">Notes</div>
                   <div class="panel-body">
-                    <textarea class="inp" style="height:70px">Annual capitated service contract. Covers all flexible endoscopes in Biomedical Engineering dept. Renewal pending review by Q4.</textarea>
+                    <textarea class="inp" id="ctNotes" style="height:70px"></textarea>
                   </div>
                 </div>
               </div>
@@ -367,10 +382,10 @@
                   <div class="panel-head">Term &amp; Financials</div>
                   <div class="panel-body">
                     <div class="fg g2">
-                      <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" type="date" value="2025-11-14"/></div>
-                      <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date" value="2026-11-14"/></div>
-                      <div class="ff"><label>Contract Total</label><input class="inp" value="$22,400.00" style="font-weight:700"/></div>
-                      <div class="ff"><label>Annual Value</label><input class="inp" value="$22,400.00" style="font-weight:700;color:var(--green)"/></div>
+                      <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" id="ctStartDate" type="date" value=""/></div>
+                      <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" id="ctEndDate" type="date" value=""/></div>
+                      <div class="ff"><label>Contract Total</label><input class="inp" id="ctTotal" value="" style="font-weight:700"/></div>
+                      <div class="ff"><label>Annual Value</label><input class="inp" id="ctAnnualValue" value="" style="font-weight:700;color:var(--green)"/></div>
                     </div>
                     <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
                       <div class="fg g2">
@@ -385,10 +400,10 @@
                 <div class="panel">
                   <div class="panel-head">Options</div>
                   <div class="panel-body">
-                    <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Auto-Renew</span></div>
-                    <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Send Renewal Reminders</span></div>
-                    <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Include on Client Portal</span></div>
-                    <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Require PO for Repairs</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctAutoRenew"/><span class="toggle-slider"></span></label><span class="toggle-label">Auto-Renew</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctReminders"/><span class="toggle-slider"></span></label><span class="toggle-label">Send Renewal Reminders</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctPortal"/><span class="toggle-slider"></span></label><span class="toggle-label">Include on Client Portal</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctRequirePO"/><span class="toggle-slider"></span></label><span class="toggle-label">Require PO for Repairs</span></div>
                   </div>
                 </div>
               </div>
@@ -567,7 +582,7 @@
             <div class="two-col">
               <div class="col-l">
                 <div class="panel">
-                  <div class="panel-head"><span>Renewal Scopes</span><span style="font-weight:500;font-size:9px;color:var(--muted)">16 scopes</span></div>
+                  <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between"><span>Renewal Scopes</span><span style="font-weight:500;font-size:9px;color:var(--muted)" id="renewalScopeCount">16 scopes</span></div>
                   <div class="panel-body"><p class="empty-state" style="padding:20px">Click "Initialize Renewal" to populate renewal scopes from current contract.</p></div>
                 </div>
               </div>
@@ -671,7 +686,7 @@
                       <span style="font-size:9px;color:var(--muted)">Nov</span>
                     </div>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:4px;opacity:.3"></div>
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:0px;opacity:.3"></div>
                       <span style="font-size:9px;color:var(--muted)">Dec</span>
                     </div>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
@@ -683,7 +698,7 @@
                       <span style="font-size:9px;color:var(--muted)">Feb</span>
                     </div>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-                      <div style="background:var(--amber);width:100%;border-radius:4px 4px 0 0;height:80px"></div>
+                      <div style="background:var(--navy);width:100%;border-radius:4px 4px 0 0;height:80px"></div>
                       <span style="font-size:9px;color:var(--muted)">Mar</span>
                     </div>
                   </div>
@@ -1067,14 +1082,17 @@ function fmtCurrencyFull(v) {
 }
 
 function deriveStatus(c) {
-  // If the API provides a status string, use it; otherwise derive from dates
-  if (c.sContractStatus) return c.sContractStatus;
-  if (!c.dtEndDate) return 'Active';
-  const end = new Date(c.dtEndDate);
+  // Explicit Expired / Expiring always respected
+  if (c.sContractStatus === 'Expired') return 'Expired';
+  if (c.sContractStatus === 'Expiring') return 'Expiring';
+  // Derive from dates (overrides stale 'Active' when end date is near)
+  if (!c.dtEndDate && !c.dtDateTermination) return c.sContractStatus || 'Active';
+  const end = new Date(c.dtEndDate || c.dtDateTermination);
+  if (isNaN(end)) return c.sContractStatus || 'Active';
   const now = new Date();
-  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const ninetyDays = 90 * 24 * 60 * 60 * 1000;
   if (end < now) return 'Expired';
-  if (end - now < thirtyDays) return 'Expiring';
+  if (end - now <= ninetyDays) return 'Expiring';
   return 'Active';
 }
 
@@ -1175,6 +1193,10 @@ async function selectContract(el, contractKey) {
 
     // Update status strip
     updateStatusStrip(c);
+
+    // Show/hide expired banner
+    const banner = document.getElementById('expiredBanner');
+    if (banner) banner.classList.toggle('show', status === 'Expired');
   }
 
   // Load full detail from API
@@ -1225,54 +1247,62 @@ function updateStatusStrip(c) {
 
 // ── Populate Specifications Tab ───────────────────────
 function populateSpecsTab(d) {
-  const tab = document.getElementById('tab-specs');
-  if (!tab) return;
-
-  // Contract info fields
-  const inputs = tab.querySelectorAll('.inp');
-  // Map fields by position in the form grid
-  const fields = [
-    {val: d.sContractName},                          // Contract Name
-    {val: d.sContractType, type: 'select'},          // Contract Type
-    {val: d.sClientName1 || d.sClientName},          // Client
-    {val: d.sSalesRepName, type: 'select'},          // Sales Rep
-    {val: d.sPurchaseOrder || d.sPONumber || ''},     // Purchase Order
-    {val: d.sInvoiceFrequency, type: 'select'},      // Invoice Frequency
-    {val: d.sPaymentTerms, type: 'select'},          // Payment Terms
-  ];
-
-  // Try to set the contract name input
-  const nameInp = tab.querySelector('.panel:first-child .inp');
-  if (nameInp) nameInp.value = d.sContractName || '';
-
-  // Set date fields
-  const dateInputs = tab.querySelectorAll('input[type="date"]');
-  if (dateInputs[0] && d.dtStartDate) {
-    const sd = new Date(d.dtStartDate);
-    if (!isNaN(sd)) dateInputs[0].value = sd.toISOString().split('T')[0];
-  }
-  if (dateInputs[1] && d.dtEndDate) {
-    const ed = new Date(d.dtEndDate);
-    if (!isNaN(ed)) dateInputs[1].value = ed.toISOString().split('T')[0];
+  // Helper: set select value by matching option text (case-insensitive)
+  function setSelect(id, val) {
+    const sel = document.getElementById(id);
+    if (!sel || !val) return;
+    // Try exact value match first
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === val || sel.options[i].text === val) {
+        sel.selectedIndex = i; return;
+      }
+    }
+    // Try case-insensitive text match
+    const lc = val.toLowerCase();
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].text.toLowerCase() === lc) {
+        sel.selectedIndex = i; return;
+      }
+    }
   }
 
-  // Contract total / annual value
-  const financialInputs = tab.querySelectorAll('.col-r .panel:first-child .inp:not([type="date"]):not(select)');
-  if (financialInputs.length >= 2) {
-    financialInputs[0].value = fmtCurrencyFull(d.dblContractTotal || d.dblAnnualValue);
-    financialInputs[1].value = fmtCurrencyFull(d.dblAnnualValue || d.dblContractTotal);
+  function setInput(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
   }
 
-  // Notes textarea
-  const notesArea = tab.querySelector('.col-l .panel:nth-child(2) textarea');
-  if (notesArea) notesArea.value = d.mContractNotes || d.mNotes || '';
+  function setDate(id, val) {
+    const el = document.getElementById(id);
+    if (!el || !val) { if (el) el.value = ''; return; }
+    const dt = new Date(val);
+    if (!isNaN(dt)) el.value = dt.toISOString().split('T')[0];
+  }
+
+  // Contract Information (handle both normalized + raw API field names)
+  setInput('ctName', d.sContractName || d.sContractName1 || '');
+  setSelect('ctType', d.sContractType);
+  setInput('ctClient', d.sClientName1 || d.sClientName || '');
+  setSelect('ctSalesRep', d.sSalesRepName);
+  setInput('ctPO', d.sPurchaseOrder || d.sPONumber || '');
+  setSelect('ctFrequency', d.sInvoiceFrequency);
+  setSelect('ctPaymentTerms', d.sPaymentTerms);
+
+  // Term & Financials (handle dtDateEffective/dtDateTermination + dblAmtTotal)
+  setDate('ctStartDate', d.dtStartDate || d.dtDateEffective || '');
+  setDate('ctEndDate', d.dtEndDate || d.dtDateTermination || '');
+  const total = d.dblContractTotal ?? d.dblAmtTotal ?? d.dblAnnualValue ?? 0;
+  const annual = d.dblAnnualValue ?? d.dblAmtTotal ?? d.dblContractTotal ?? 0;
+  setInput('ctTotal', fmtCurrencyFull(total));
+  setInput('ctAnnualValue', fmtCurrencyFull(annual));
+
+  // Notes
+  setInput('ctNotes', d.mContractNotes || d.mNotes || '');
 
   // Toggle options
-  const toggles = tab.querySelectorAll('.col-r .toggle input');
-  if (toggles[0]) toggles[0].checked = !!d.bAutoRenew;
-  if (toggles[1]) toggles[1].checked = !!d.bSendRenewalReminder;
-  if (toggles[2]) toggles[2].checked = !!d.bClientPortal;
-  if (toggles[3]) toggles[3].checked = !!d.bRequirePO;
+  const ar = document.getElementById('ctAutoRenew');     if (ar) ar.checked = !!d.bAutoRenew;
+  const rm = document.getElementById('ctReminders');     if (rm) rm.checked = !!d.bSendRenewalReminder;
+  const cp = document.getElementById('ctPortal');        if (cp) cp.checked = !!d.bClientPortal;
+  const rp = document.getElementById('ctRequirePO');     if (rp) rp.checked = !!d.bRequirePO;
 }
 
 // ── Populate Address Tab ──────────────────────────────
@@ -1427,6 +1457,7 @@ async function loadAmendmentsTab(contractKey) {
     const data = await API.getContractAmendments(contractKey);
     const amendments = Array.isArray(data) ? data : [];
 
+    // Populate amendments table (first panel)
     const tbody = tab.querySelector('.panel:first-child tbody');
     if (tbody) {
       tbody.innerHTML = amendments.map(a =>
@@ -1439,8 +1470,20 @@ async function loadAmendmentsTab(contractKey) {
         '</tr>'
       ).join('') || '<tr><td colspan="5" class="empty-state">No amendments</td></tr>';
     }
+
+    // Clear amendment scopes table (second panel) — will be populated from amendment detail
+    const scopesTbody = tab.querySelector('.panel:nth-child(2) tbody');
+    if (scopesTbody) {
+      if (amendments.length === 0) {
+        scopesTbody.innerHTML = '<tr><td colspan="6" class="empty-state">No amendment scopes</td></tr>';
+      }
+      // If amendments exist, scopes stay as-is (populated from amendment data or demo)
+    }
   } catch (err) {
     console.warn('[Contracts] Amendments load failed:', err.message);
+    // Clear stale data on error
+    const scopesTbody = tab.querySelector('.panel:nth-child(2) tbody');
+    if (scopesTbody) scopesTbody.innerHTML = '<tr><td colspan="6" class="empty-state">No amendment scopes</td></tr>';
   }
 }
 
@@ -1480,41 +1523,73 @@ async function loadInvoicesTab(contractKey) {
 }
 
 // ── Report Card Tab ───────────────────────────────────
+function populateReportCard(tab, data) {
+  const kpis = tab.querySelectorAll('.kpi-val');
+  if (kpis[0]) kpis[0].textContent = fmtCurrency(data.dblContractTotal ?? data.dblAnnualValue);
+  if (kpis[1]) kpis[1].textContent = fmtCurrency(data.dblRevenue);
+  if (kpis[2]) kpis[2].textContent = fmtCurrency(data.dblConsumption ?? data.dblTotalConsumption);
+  if (kpis[3]) kpis[3].textContent = (data.dblMargin != null ? data.dblMargin.toFixed(1) + '%' : '—');
+  if (kpis[4]) kpis[4].textContent = fmtCurrency(data.dblExpenses ?? data.dblTotalExpenses);
+
+  // Efficiency rating
+  const effDiv = tab.querySelector('.col-l .panel:first-child .panel-body div');
+  if (effDiv && data.dblEfficiency != null) {
+    effDiv.textContent = data.dblEfficiency.toFixed(1) + '%';
+  }
+
+  // Contract index fields (expenses)
+  const expenseInputs = tab.querySelectorAll('.col-l .panel:nth-child(2) .inp');
+  if (expenseInputs[0]) expenseInputs[0].value = fmtCurrencyFull(data.dblTotalExpenses ?? data.dblExpenses);
+  if (expenseInputs[1]) expenseInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
+  if (expenseInputs[2]) expenseInputs[2].value = data.dblExpenseIndex != null ? data.dblExpenseIndex.toFixed(3) : '—';
+  if (expenseInputs[3]) expenseInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
+
+  // Contract index fields (consumption)
+  const consInputs = tab.querySelectorAll('.col-r .panel:first-child .inp');
+  if (consInputs[0]) consInputs[0].value = fmtCurrencyFull(data.dblTotalConsumption ?? data.dblConsumption);
+  if (consInputs[1]) consInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
+  if (consInputs[2]) consInputs[2].value = data.dblConsumptionIndex != null ? data.dblConsumptionIndex.toFixed(3) : '—';
+  if (consInputs[3]) consInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
+}
+
+function getDemoReportCard(contractKey) {
+  const c = contracts.find(x => x.lContractKey === contractKey);
+  if (!c) return null;
+  const annual = c.dblAnnualValue ?? c.dblContractTotal ?? 0;
+  const expenses = 3010;  // from demo expense data
+  const revenue = Math.round(annual * 0.75);
+  const margin = annual > 0 ? ((annual - expenses) / annual * 100) : 0;
+  const startDate = c.dtStartDate ? new Date(c.dtStartDate) : new Date();
+  const endDate = c.dtEndDate ? new Date(c.dtEndDate) : new Date();
+  const totalDays = Math.max(1, (endDate - startDate) / (24*60*60*1000));
+  const elapsedDays = Math.max(0, (new Date() - startDate) / (24*60*60*1000));
+  const pctElapsed = Math.min(100, (elapsedDays / totalDays) * 100);
+  const budget = annual * (pctElapsed / 100);
+  const idx = budget > 0 ? (expenses / budget) : 0;
+  return {
+    dblContractTotal: annual, dblAnnualValue: annual, dblRevenue: revenue,
+    dblConsumption: expenses, dblTotalConsumption: expenses,
+    dblMargin: margin, dblExpenses: expenses, dblTotalExpenses: expenses,
+    dblEfficiency: 100 - (expenses / annual * 100),
+    dblBudgetAllocation: budget, dblExpenseIndex: idx, dblConsumptionIndex: idx,
+    dblPercentTimeElapsed: pctElapsed
+  };
+}
+
 async function loadReportCardTab(contractKey) {
   const tab = document.getElementById('tab-reportcard');
   if (!tab) return;
   try {
     const data = await API.getContractReportCard(contractKey);
-    if (data) {
-      const kpis = tab.querySelectorAll('.kpi-val');
-      if (kpis[0]) kpis[0].textContent = fmtCurrency(data.dblContractTotal || data.dblAnnualValue);
-      if (kpis[1]) kpis[1].textContent = fmtCurrency(data.dblRevenue);
-      if (kpis[2]) kpis[2].textContent = fmtCurrency(data.dblConsumption || data.dblTotalConsumption);
-      if (kpis[3]) kpis[3].textContent = (data.dblMargin != null ? data.dblMargin.toFixed(1) + '%' : '—');
-      if (kpis[4]) kpis[4].textContent = fmtCurrency(data.dblExpenses || data.dblTotalExpenses);
-
-      // Efficiency rating
-      const effDiv = tab.querySelector('.col-l .panel:first-child .panel-body div');
-      if (effDiv && data.dblEfficiency != null) {
-        effDiv.textContent = data.dblEfficiency.toFixed(1) + '%';
-      }
-
-      // Contract index fields (expenses)
-      const expenseInputs = tab.querySelectorAll('.col-l .panel:nth-child(2) .inp');
-      if (expenseInputs[0]) expenseInputs[0].value = fmtCurrencyFull(data.dblTotalExpenses || data.dblExpenses);
-      if (expenseInputs[1]) expenseInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
-      if (expenseInputs[2]) expenseInputs[2].value = data.dblExpenseIndex != null ? data.dblExpenseIndex.toFixed(3) : '—';
-      if (expenseInputs[3]) expenseInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
-
-      // Contract index fields (consumption)
-      const consInputs = tab.querySelectorAll('.col-r .panel:first-child .inp');
-      if (consInputs[0]) consInputs[0].value = fmtCurrencyFull(data.dblTotalConsumption || data.dblConsumption);
-      if (consInputs[1]) consInputs[1].value = fmtCurrencyFull(data.dblBudgetAllocation);
-      if (consInputs[2]) consInputs[2].value = data.dblConsumptionIndex != null ? data.dblConsumptionIndex.toFixed(3) : '—';
-      if (consInputs[3]) consInputs[3].value = data.dblPercentTimeElapsed != null ? data.dblPercentTimeElapsed.toFixed(1) + '%' : '—';
+    if (data && (data.dblContractTotal || data.dblAnnualValue || data.dblRevenue)) {
+      populateReportCard(tab, data);
+    } else {
+      throw new Error('empty');
     }
   } catch (err) {
-    console.warn('[Contracts] Report card load failed:', err.message);
+    // Demo fallback — compute from contract data
+    const demo = getDemoReportCard(contractKey);
+    if (demo) populateReportCard(tab, demo);
   }
 }
 
@@ -1753,8 +1828,8 @@ async function loadPendingContracts() {
     tbody.innerHTML = pending.map(p =>
       '<tr>' +
         '<td>' + (p.sContractType || '—') + '</td>' +
-        '<td>' + (p.sContractName || p.sPendingContractName || '—') + '</td>' +
-        '<td>' + (p.sClientName1 || p.sClientName || '—') + '</td>' +
+        '<td>' + (p.sContractName || p.sPendingContractName || p.sContractName1 || '—') + '</td>' +
+        '<td>' + (p.sClientName1 || p.sClientName || p.sClientName1 || '—') + '</td>' +
         '<td>' + (p.sSalesRepName || '—') + '</td>' +
         '<td>' + fmtDate(p.dtCreated || p.dtDateCreated) + '</td>' +
         '<td><span class="li-badge b-pending">PENDING</span></td>' +
@@ -1817,24 +1892,24 @@ async function loadLookups() {
 async function saveContract() {
   if (!selectedContractKey) { showToast('No contract selected', true); return; }
 
-  const tab = document.getElementById('tab-specs');
-  if (!tab) return;
-
-  const nameInp = tab.querySelector('.panel:first-child .inp');
-  const dateInputs = tab.querySelectorAll('input[type="date"]');
-  const notesArea = tab.querySelector('.col-l .panel:nth-child(2) textarea');
-  const toggles = tab.querySelectorAll('.col-r .toggle input');
+  const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const ch = id => { const el = document.getElementById(id); return el ? el.checked : false; };
 
   const payload = {
     plContractKey: selectedContractKey,
-    psContractName: nameInp ? nameInp.value : '',
-    pdtStartDate: dateInputs[0] ? dateInputs[0].value : '',
-    pdtEndDate: dateInputs[1] ? dateInputs[1].value : '',
-    pmContractNotes: notesArea ? notesArea.value : '',
-    pbAutoRenew: toggles[0] ? toggles[0].checked : false,
-    pbSendRenewalReminder: toggles[1] ? toggles[1].checked : false,
-    pbClientPortal: toggles[2] ? toggles[2].checked : false,
-    pbRequirePO: toggles[3] ? toggles[3].checked : false,
+    psContractName: v('ctName'),
+    psContractType: v('ctType'),
+    psSalesRepName: v('ctSalesRep'),
+    psPurchaseOrder: v('ctPO'),
+    psInvoiceFrequency: v('ctFrequency'),
+    psPaymentTerms: v('ctPaymentTerms'),
+    pdtStartDate: v('ctStartDate'),
+    pdtEndDate: v('ctEndDate'),
+    pmContractNotes: v('ctNotes'),
+    pbAutoRenew: ch('ctAutoRenew'),
+    pbSendRenewalReminder: ch('ctReminders'),
+    pbClientPortal: ch('ctPortal'),
+    pbRequirePO: ch('ctRequirePO'),
   };
 
   try {
@@ -1954,11 +2029,11 @@ async function loadContracts() {
     contracts = getDemoContracts();
   }
 
-    API.UI.updateDemoBadge(_liveMode ? 'api' : 'demo');
+  API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'demo');
   updateStatusCounts();
 
   // Update list header count
-  const listHeadCount = document.querySelector('.list-head span:last-child');
+  const listHeadCount = document.getElementById('listRecordCount');
   if (listHeadCount) listHeadCount.textContent = contracts.length + ' records';
 
   renderList(contracts);
@@ -1973,6 +2048,19 @@ API.UI.init();
 wireButtons();
 loadContracts();
 loadLookups();
+
+// Tab bar scroll-fade indicator
+(function() {
+  const bar = document.querySelector('.tab-bar');
+  const wrap = document.querySelector('.tab-bar-wrap');
+  if (!bar || !wrap) return;
+  function checkScroll() {
+    wrap.classList.toggle('has-scroll', bar.scrollWidth > bar.clientWidth + 8 && bar.scrollLeft < bar.scrollWidth - bar.clientWidth - 8);
+  }
+  bar.addEventListener('scroll', checkScroll);
+  window.addEventListener('resize', checkScroll);
+  setTimeout(checkScroll, 500);
+})();
 </script>
 <script src="js/new-order-wizard.js"></script>
 </body>
