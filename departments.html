@@ -30,6 +30,26 @@
     .readonly-tbl tbody tr:hover{background:inherit;cursor:default}
     .readonly-tbl tbody tr:nth-child(even):hover{background:var(--row-alt)}
 
+    /* Scope drawer */
+    .scope-drawer{position:fixed;right:0;top:64px;bottom:0;width:420px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .scope-drawer.open{transform:translateX(0)}
+    .scope-drawer .dh{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .scope-drawer .dh-title{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .scope-drawer .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px}
+    .scope-drawer .d-body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+    .scope-drawer .d-foot{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0}
+    .scope-drawer .sc-section{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .scope-drawer .sc-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .scope-drawer .sc-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .scope-drawer .f-row{display:flex;flex-direction:column;gap:2px}
+    .scope-drawer .f-row label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .scope-drawer .f-row input,.scope-drawer .f-row select,.scope-drawer .f-row textarea{height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .scope-drawer .f-row textarea{height:60px;padding:6px 8px;resize:none}
+    .scope-drawer .f-row input:focus,.scope-drawer .f-row select:focus,.scope-drawer .f-row textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .scope-drawer .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+
     /* Table head (page-specific naming) */
     .tbl-head{background:#F0F4FA;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
     .tbl-title{font-size:12px;font-weight:700;color:var(--navy)}
@@ -411,9 +431,9 @@
             <span class="tbl-title">Scopes</span>
             <div style="display:flex;align-items:center;gap:10px">
               <span id="scopesSummary" style="font-size:11px;color:var(--muted)">16 instruments &bull; 5 with active contract</span>
-              <button class="btn btn-outline" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="window.location='scope-model.html'">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                Manage in Scopes
+              <button class="btn btn-navy" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="openScopeDrawer()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Scope
               </button>
             </div>
           </div>
@@ -801,6 +821,103 @@
   </div>
 </div>
 
+<!-- SCOPE DRAWER OVERLAY -->
+<div class="drawer-overlay" id="scopeOverlay" onclick="closeScopeDrawer()"></div>
+
+<!-- ADD SCOPE DRAWER -->
+<div class="scope-drawer" id="scopeDrawer">
+  <div class="dh">
+    <div>
+      <div class="dh-title">Add Scope</div>
+      <div class="dh-sub" id="scopeDrawerSub">New instrument for this department</div>
+    </div>
+    <button onclick="closeScopeDrawer()" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center">&times;</button>
+  </div>
+  <div class="d-body">
+    <!-- Identification -->
+    <div class="sc-section">
+      <div class="sc-head">Identification</div>
+      <div class="sc-body">
+        <div class="g2">
+          <div class="f-row">
+            <label>Instrument Type</label>
+            <select id="asType" onchange="onScopeTypeChange()">
+              <option value="">Select…</option>
+              <option value="F">Flexible</option>
+              <option value="R">Rigid</option>
+              <option value="C">Camera</option>
+              <option value="I">Instrument</option>
+            </select>
+          </div>
+          <div class="f-row">
+            <label>Model</label>
+            <select id="asModel">
+              <option value="">Select type first…</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-row">
+          <label>Serial Number</label>
+          <input type="text" id="asSN" placeholder="Enter serial number…"/>
+        </div>
+        <div class="g2">
+          <div class="f-row">
+            <label>UPC / Barcode</label>
+            <input type="text" id="asUPC" placeholder="Optional"/>
+          </div>
+          <div class="f-row">
+            <label>Location</label>
+            <input type="text" id="asLocation" placeholder="e.g. GI Lab, OR 2"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="sc-section">
+      <div class="sc-head">Options</div>
+      <div class="sc-body">
+        <div class="g2">
+          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text);cursor:pointer">
+            <div class="toggle" style="width:34px;height:19px">
+              <input type="checkbox" id="asLoaner"/>
+              <span class="toggle-slider" style="border-radius:10px"></span>
+            </div>
+            On-Site Loaner
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text);cursor:pointer">
+            <div class="toggle" style="width:34px;height:19px">
+              <input type="checkbox" id="asInactive"/>
+              <span class="toggle-slider" style="border-radius:10px"></span>
+            </div>
+            Inactive (BER)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="sc-section">
+      <div class="sc-head">Comments</div>
+      <div class="sc-body">
+        <div class="f-row">
+          <label>Notes</label>
+          <textarea id="asComments" placeholder="Optional notes…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add button -->
+    <button class="btn btn-navy" style="height:34px;font-size:12px;padding:0 20px;gap:6px;align-self:flex-end" onclick="submitNewScope()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Scope
+    </button>
+  </div>
+  <div class="d-foot">
+    <button class="btn btn-outline" style="height:28px;font-size:11px;padding:0 14px" onclick="closeScopeDrawer()">Close</button>
+  </div>
+</div>
+
 <script src="api.js"></script>
 <script>
 /* ── Tab switching (preserved) ────────────────────────── */
@@ -1016,6 +1133,7 @@ function openContactModal(mode){
   /* ── Load full department detail ────────────────────── */
   async function loadDepartmentDetail(deptKey){
     currentDeptKey = deptKey;
+    _curDeptName = '';
     $('deptIdBadge').textContent = '#' + deptKey;
 
     try {
@@ -1039,6 +1157,7 @@ function openContactModal(mode){
   /* ── Populate Main tab form from API data ──────────── */
   function populateMainTab(d){
     if(!d) return;
+    _curDeptName = d.sDepartmentName || d.psDepartmentName || '';
     // Department info
     const f = (id,val) => { const el=$(id); if(el) el.value = val ?? ''; };
     f('fDeptName', d.sDepartmentName);
@@ -1188,6 +1307,84 @@ function openContactModal(mode){
       }
     });
   }
+
+  /* ═══ SCOPE DRAWER ═══════════════════════════════════ */
+  function openScopeDrawer(){
+    if(!currentDeptKey){ console.warn('No department selected'); return; }
+    document.getElementById('scopeDrawer').classList.add('open');
+    document.getElementById('scopeOverlay').classList.add('open');
+    document.getElementById('scopeDrawerSub').textContent = 'New instrument for ' + (_curDeptName || 'this department');
+    // Reset form
+    document.getElementById('asType').value = '';
+    document.getElementById('asModel').innerHTML = '<option value="">Select type first…</option>';
+    document.getElementById('asSN').value = '';
+    document.getElementById('asUPC').value = '';
+    document.getElementById('asLocation').value = '';
+    document.getElementById('asLoaner').checked = false;
+    document.getElementById('asInactive').checked = false;
+    document.getElementById('asComments').value = '';
+  }
+  function closeScopeDrawer(){
+    document.getElementById('scopeDrawer').classList.remove('open');
+    document.getElementById('scopeOverlay').classList.remove('open');
+  }
+  async function onScopeTypeChange(){
+    var instType = document.getElementById('asType').value;
+    var dd = document.getElementById('asModel');
+    if(!instType){ dd.innerHTML = '<option value="">Select type first…</option>'; return; }
+    dd.innerHTML = '<option value="">Loading…</option>';
+    try {
+      var models = await API.getScopeTypeNames(instType);
+      if(!Array.isArray(models)) models = [];
+      dd.innerHTML = '<option value="">Select model…</option>';
+      models.forEach(function(m){
+        var key  = m.lScopeTypeKey || m.plScopeTypeKey;
+        var name = m.sScopeTypeDesc || m.sScopeTypeName || '';
+        dd.innerHTML += '<option value="'+key+'">'+name+'</option>';
+      });
+    } catch(e){
+      dd.innerHTML = '<option value="">Error loading models</option>';
+      console.warn('[AddScope] getScopeTypeNames:', e.message);
+    }
+  }
+  async function submitNewScope(){
+    var typeKey = parseInt(document.getElementById('asModel').value);
+    var sn      = document.getElementById('asSN').value.trim();
+    if(!typeKey){ alert('Please select a model.'); return; }
+    if(!sn){ alert('Please enter a serial number.'); return; }
+    var data = {
+      plScopeTypeKey: typeKey,
+      plDepartmentKey: currentDeptKey,
+      psSerialNumber: sn,
+      psUPC: document.getElementById('asUPC').value.trim(),
+      psLocation: document.getElementById('asLocation').value.trim(),
+      pbOnSiteLoaner: document.getElementById('asLoaner').checked,
+      psScopeIsDead: document.getElementById('asInactive').checked ? 'Y' : null,
+      pmComments: document.getElementById('asComments').value.trim()
+    };
+    try {
+      await API.addScope(data);
+      closeScopeDrawer();
+      loadScopes(currentDeptKey);
+    } catch(e){
+      // Demo mode fallback — just add to table visually
+      var instType = document.getElementById('asType').value;
+      var modelText = document.getElementById('asModel').options[document.getElementById('asModel').selectedIndex].text;
+      var typeLabels = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
+      var tbody = document.getElementById('tbodyScopes');
+      var tr = document.createElement('tr');
+      tr.style.background = '#F0FDF4';
+      tr.innerHTML = '<td>'+modelText+'</td><td style="color:var(--blue);font-weight:600;cursor:pointer">'+sn+'</td><td>'+(typeLabels[instType]||instType)+'</td><td style="color:var(--muted)">N/A</td><td></td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+      closeScopeDrawer();
+    }
+  }
+  var _curDeptName = '';
+  // Expose drawer functions to global scope (called from onclick in HTML)
+  window.openScopeDrawer = openScopeDrawer;
+  window.closeScopeDrawer = closeScopeDrawer;
+  window.onScopeTypeChange = onScopeTypeChange;
+  window.submitNewScope = submitNewScope;
 
   /* ═══ TAB DATA LOADERS ═══════════════════════════════ */
 
@@ -1783,6 +1980,7 @@ function openContactModal(mode){
       e.preventDefault();
       saveDepartment();
     }
+    if(e.key === 'Escape') closeScopeDrawer();
   });
 
   /* ═══ INIT ═══════════════════════════════════════════ */
@@ -1824,9 +2022,17 @@ function openContactModal(mode){
     showDemoBadge();
   }
 
+  // Demo mode: set currentDeptKey from pre-rendered dropdown if not already set
+  if(!currentDeptKey){
+    var demoSel = $('selDept');
+    if(demoSel && demoSel.value) {
+      currentDeptKey = parseInt(demoSel.value) || demoSel.value;
+      _curDeptName = demoSel.options[demoSel.selectedIndex]?.text || '';
+    }
+  }
+
 })();
 </script>
-<script src="js/sn-search.js"></script>
 <script src="js/new-order-wizard.js"></script>
 </body>
 </html>
