@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reports &amp; Extracts | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC: Reports & Extracts ── */
+
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:default;transition:background .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .search-input{height:30px;width:240px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    .toggle-btn{height:30px;padding:0 14px;border:1.5px solid var(--border-dk);border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;background:#fff;color:var(--label);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+    .toggle-btn:hover{border-color:var(--navy);color:var(--navy)}
+    .toggle-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .toggle-btn svg{width:13px;height:13px}
+
+    /* Content area */
+    .reports-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:16px;background:var(--bg)}
+
+    /* Category section */
+    .category-section{background:#fff;border:1.5px solid var(--border-dk);border-radius:8px;overflow:hidden}
+    .category-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#F0F4FA;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .1s}
+    .category-header:hover{background:#E3ECF8}
+    .category-title{font-size:13px;font-weight:700;color:var(--navy);flex:1}
+    .category-count{font-size:10px;font-weight:700;background:var(--navy);color:#fff;padding:1px 7px;border-radius:10px;min-width:18px;text-align:center}
+    .category-chevron{font-size:10px;color:var(--steel);transition:transform .2s}
+    .category-section.collapsed .category-chevron{transform:rotate(-90deg)}
+    .category-section.collapsed .category-body{display:none}
+
+    /* Report card grid */
+    .category-body{padding:12px 16px}
+    .report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:1200px){.report-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:800px){.report-grid{grid-template-columns:1fr}}
+
+    /* Report card */
+    .report-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;transition:box-shadow .15s,border-color .15s}
+    .report-card:hover{box-shadow:0 4px 12px rgba(var(--primary-rgb),.08);border-color:var(--blue)}
+    .report-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .report-name{font-size:12.5px;font-weight:700;color:var(--navy)}
+    .report-desc{font-size:11px;color:var(--label);line-height:1.4}
+    .report-meta{font-size:10px;color:var(--muted)}
+    .report-actions{display:flex;align-items:center;gap:6px;margin-top:2px}
+    .star-btn{background:none;border:none;font-size:16px;cursor:pointer;color:var(--border-dk);transition:color .15s;padding:0;line-height:1}
+    .star-btn:hover{color:var(--amber)}
+    .star-btn.favorited{color:var(--amber)}
+    .run-btn{height:26px;padding:0 12px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .1s;margin-left:auto}
+    .run-btn:hover{background:var(--steel)}
+
+    /* Parameter panel */
+    .param-panel{display:none;margin-top:8px;padding:10px 12px;background:#F8FAFF;border:1px solid var(--border);border-radius:5px}
+    .param-panel.open{display:block}
+    .param-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .param-row:last-child{margin-bottom:0}
+    .param-label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;min-width:55px}
+    .param-input{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none}
+    .param-input:focus{border-color:var(--navy)}
+    .param-select{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:120px}
+    .param-select:focus{border-color:var(--navy)}
+    .generate-btn{height:28px;padding:0 16px;border:none;border-radius:5px;background:#22C55E;color:#fff;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .1s}
+    .generate-btn:hover{background:#16A34A}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 24px;border-radius:8px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:10000;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="window.location='quality.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item" onclick="window.location='administration.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Orders <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--border);transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>Find / Open Repair<div style="font-size:10px;color:var(--muted);font-weight:400">Search open work orders</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='instruments?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('product-sale','New Product Sale','sale')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('endocarts','New Endocart Order','endocart')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiAvailable">21</div><div class="s-lbl">Reports Available</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" style="width:14px;height:14px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiFavorites">5</div><div class="s-lbl">Favorites</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="width:14px;height:14px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
+          <div class="s-data"><div class="s-val s-green" id="kpiRecent">8</div><div class="s-lbl">Recently Run</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiScheduled">3</div><div class="s-lbl">Scheduled</div></div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" placeholder="Search reports..." oninput="filterReports()"/>
+        <button class="toggle-btn" id="favToggle" onclick="toggleFavoritesOnly()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Show Favorites Only
+        </button>
+      </div>
+
+      <!-- REPORTS CONTENT -->
+      <div class="reports-body" id="reportsBody"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ────────────────────────────────────────────
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ── Data Badge ────────────────────────────────────────────
+function showDataBadge(live) {
+  var b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.textContent = live ? 'Live Data' : 'Demo Data';
+  b.className = 'data-badge ' + (live ? 'badge-live' : 'badge-demo');
+}
+showDataBadge(false);
+
+// ── Report Definitions ────────────────────────────────────
+var REPORTS = [
+  // Repair Reports
+  { id:'repair-volume',     cat:'Repair Reports',    name:'Repair Volume by Period',    desc:'Total repair count broken down by month, quarter, or year.',            lastRun:2 },
+  { id:'repair-tat',        cat:'Repair Reports',    name:'Repair TAT Analysis',        desc:'Turn-around time distribution and SLA compliance rates.',               lastRun:5 },
+  { id:'tech-productivity', cat:'Repair Reports',    name:'Technician Productivity',    desc:'Repairs completed per technician with average turnaround.',              lastRun:1 },
+  { id:'repair-cost',       cat:'Repair Reports',    name:'Repair Cost Summary',        desc:'Parts, labor, and total cost breakdown per repair order.',              lastRun:null },
+  { id:'warranty-claims',   cat:'Repair Reports',    name:'Warranty Claims',            desc:'Warranty repair volume, cost, and claim status tracking.',               lastRun:14 },
+
+  // Financial Reports
+  { id:'revenue-client',    cat:'Financial Reports',  name:'Revenue by Client',          desc:'Revenue totals grouped by client with year-over-year comparison.',      lastRun:3 },
+  { id:'outstanding-aging', cat:'Financial Reports',  name:'Outstanding Invoices Aging', desc:'Open invoice aging buckets: 0-30, 31-60, 61-90, 90+ days.',            lastRun:1 },
+  { id:'monthly-revenue',   cat:'Financial Reports',  name:'Monthly Revenue Trend',      desc:'12-month revenue trend line with forecast projection.',                 lastRun:7 },
+  { id:'cogs',              cat:'Financial Reports',  name:'Cost of Goods Sold',         desc:'Direct material and labor costs by product category.',                  lastRun:null },
+  { id:'profit-margin',     cat:'Financial Reports',  name:'Profit Margin Analysis',     desc:'Gross and net margin by service type, client, and period.',             lastRun:10 },
+
+  // Contract Reports
+  { id:'contract-expiry',   cat:'Contract Reports',   name:'Contract Expiration Schedule',desc:'Upcoming contract expirations sorted by date with renewal status.',    lastRun:4 },
+  { id:'contract-value',    cat:'Contract Reports',   name:'Contract Value Summary',     desc:'Total and average contract values by client and type.',                 lastRun:null },
+  { id:'sla-compliance',    cat:'Contract Reports',   name:'SLA Compliance',             desc:'Service level agreement adherence rates across all contracts.',         lastRun:6 },
+  { id:'contract-util',     cat:'Contract Reports',   name:'Contract Utilization',       desc:'Actual usage vs. contracted capacity by department.',                   lastRun:12 },
+
+  // Inventory Reports
+  { id:'stock-level',       cat:'Inventory Reports',  name:'Stock Level Summary',        desc:'Current on-hand quantities with min/max thresholds.',                   lastRun:1 },
+  { id:'reorder-point',     cat:'Inventory Reports',  name:'Reorder Point Analysis',     desc:'Items at or below reorder threshold with suggested order quantities.',  lastRun:3 },
+  { id:'parts-usage',       cat:'Inventory Reports',  name:'Parts Usage Trend',          desc:'Parts consumption over time by category and repair type.',              lastRun:null },
+  { id:'dead-stock',        cat:'Inventory Reports',  name:'Dead Stock Report',          desc:'Inventory items with zero movement in the past 6+ months.',             lastRun:21 },
+
+  // Client Reports
+  { id:'client-activity',   cat:'Client Reports',     name:'Client Activity Summary',    desc:'Repair volume, revenue, and open orders per client.',                   lastRun:2 },
+  { id:'dept-scope-census', cat:'Client Reports',     name:'Department Scope Census',    desc:'Scope count and type distribution by department.',                      lastRun:8 },
+  { id:'client-satisfaction',cat:'Client Reports',    name:'Client Satisfaction Scores', desc:'NPS and satisfaction survey results by client and period.',              lastRun:null }
+];
+
+var CATEGORIES = ['Repair Reports','Financial Reports','Contract Reports','Inventory Reports','Client Reports'];
+var DEMO_CLIENTS = ['All Clients','Memorial Health System','St. Joseph Medical Center','Valley Regional Hospital','Lakeside Surgery Center','Northwest Endoscopy Clinic'];
+
+// ── Favorites (localStorage) ──────────────────────────────
+var FAV_KEY = 'tsi_report_favorites';
+var favorites = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+var showFavsOnly = false;
+var openParamId = null;
+
+function saveFavorites() {
+  localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+  updateFavCount();
+}
+
+function toggleFavorite(id, e) {
+  e.stopPropagation();
+  var idx = favorites.indexOf(id);
+  if (idx >= 0) favorites.splice(idx, 1);
+  else favorites.push(id);
+  saveFavorites();
+  renderReports();
+}
+
+function updateFavCount() {
+  document.getElementById('kpiFavorites').textContent = favorites.length;
+}
+
+// ── Favorites-only toggle ─────────────────────────────────
+function toggleFavoritesOnly() {
+  showFavsOnly = !showFavsOnly;
+  document.getElementById('favToggle').classList.toggle('active', showFavsOnly);
+  renderReports();
+}
+
+// ── Search filter ─────────────────────────────────────────
+function filterReports() {
+  renderReports();
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ── Category collapse ─────────────────────────────────────
+function toggleCategory(catEl) {
+  catEl.classList.toggle('collapsed');
+}
+
+// ── Run / Parameter panel ─────────────────────────────────
+function toggleRunPanel(id, e) {
+  e.stopPropagation();
+  if (openParamId === id) {
+    openParamId = null;
+  } else {
+    openParamId = id;
+  }
+  renderReports();
+}
+
+function generateReport(id, e) {
+  e.stopPropagation();
+  openParamId = null;
+  showToast('Report generating... check Downloads shortly');
+  var r = null;
+  for (var i = 0; i < REPORTS.length; i++) {
+    if (REPORTS[i].id === id) { r = REPORTS[i]; break; }
+  }
+  if (r) r.lastRun = 0;
+  var recentCount = 0;
+  for (var j = 0; j < REPORTS.length; j++) {
+    if (REPORTS[j].lastRun !== null) recentCount++;
+  }
+  document.getElementById('kpiRecent').textContent = recentCount;
+  renderReports();
+}
+
+// ── Render ────────────────────────────────────────────────
+function renderReports() {
+  var search = document.getElementById('searchInput').value.toLowerCase().trim();
+  var body = document.getElementById('reportsBody');
+
+  // Track which categories were collapsed
+  var collapsedCats = {};
+  var sections = body.querySelectorAll('.category-section.collapsed');
+  for (var s = 0; s < sections.length; s++) {
+    collapsedCats[sections[s].dataset.cat] = true;
+  }
+
+  var html = '';
+
+  for (var ci = 0; ci < CATEGORIES.length; ci++) {
+    var cat = CATEGORIES[ci];
+    var reports = [];
+    for (var ri = 0; ri < REPORTS.length; ri++) {
+      if (REPORTS[ri].cat === cat) reports.push(REPORTS[ri]);
+    }
+
+    // Apply search
+    if (search) {
+      var filtered = [];
+      for (var si = 0; si < reports.length; si++) {
+        if (reports[si].name.toLowerCase().indexOf(search) >= 0 || reports[si].desc.toLowerCase().indexOf(search) >= 0) {
+          filtered.push(reports[si]);
+        }
+      }
+      reports = filtered;
+    }
+
+    // Apply favorites filter
+    if (showFavsOnly) {
+      var favFiltered = [];
+      for (var fi = 0; fi < reports.length; fi++) {
+        if (favorites.indexOf(reports[fi].id) >= 0) favFiltered.push(reports[fi]);
+      }
+      reports = favFiltered;
+    }
+
+    if (reports.length === 0 && (search || showFavsOnly)) continue;
+
+    var collapsed = collapsedCats[cat] ? ' collapsed' : '';
+
+    html += '<div class="category-section' + collapsed + '" data-cat="' + cat + '">' +
+      '<div class="category-header" onclick="toggleCategory(this.parentElement)">' +
+        '<span class="category-chevron">&#9654;</span>' +
+        '<span class="category-title">' + cat + '</span>' +
+        '<span class="category-count">' + reports.length + '</span>' +
+      '</div>' +
+      '<div class="category-body">' +
+        '<div class="report-grid">';
+
+    for (var k = 0; k < reports.length; k++) {
+      var r = reports[k];
+      var isFav = favorites.indexOf(r.id) >= 0;
+      var lastRunText = r.lastRun === null ? 'Never run' : r.lastRun === 0 ? 'Just now' : 'Last run: ' + r.lastRun + 'd ago';
+      var paramOpen = openParamId === r.id;
+
+      var clientOpts = '';
+      for (var di = 0; di < DEMO_CLIENTS.length; di++) {
+        clientOpts += '<option>' + DEMO_CLIENTS[di] + '</option>';
+      }
+
+      html += '<div class="report-card">' +
+        '<div class="report-card-top">' +
+          '<div class="report-name">' + r.name + '</div>' +
+          '<button class="star-btn' + (isFav ? ' favorited' : '') + '" onclick="toggleFavorite(\'' + r.id + '\',event)" title="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFav ? '&#9733;' : '&#9734;') + '</button>' +
+        '</div>' +
+        '<div class="report-desc">' + r.desc + '</div>' +
+        '<div class="report-actions">' +
+          '<span class="report-meta">' + lastRunText + '</span>' +
+          '<button class="run-btn" onclick="toggleRunPanel(\'' + r.id + '\',event)">Run</button>' +
+        '</div>' +
+        '<div class="param-panel' + (paramOpen ? ' open' : '') + '" id="param-' + r.id + '">' +
+          '<div class="param-row">' +
+            '<span class="param-label">Date Range</span>' +
+            '<input type="date" class="param-input" style="width:130px"/>' +
+            '<span style="font-size:10px;color:var(--muted)">to</span>' +
+            '<input type="date" class="param-input" style="width:130px"/>' +
+          '</div>' +
+          '<div class="param-row">' +
+            '<span class="param-label">Client</span>' +
+            '<select class="param-select">' + clientOpts + '</select>' +
+          '</div>' +
+          '<div class="param-row">' +
+            '<span class="param-label">Format</span>' +
+            '<select class="param-select">' +
+              '<option>PDF</option>' +
+              '<option>Excel</option>' +
+              '<option>CSV</option>' +
+            '</select>' +
+            '<button class="generate-btn" onclick="generateReport(\'' + r.id + '\',event)" style="margin-left:auto">Generate Report</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    html += '</div></div></div>';
+  }
+
+  if (!html) {
+    html = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">No reports match your search.</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+// ── Init ──────────────────────────────────────────────────
+updateFavCount();
+renderReports();
+</script>
+<script src="js/new-order-wizard.js"></script>
+</body>
+</html>

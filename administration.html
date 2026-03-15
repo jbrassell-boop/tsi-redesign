@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Administration | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── PAGE-SPECIFIC: Administration ── */
+
+    /* KPI Stat Strip */
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
+    .stat-chip{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);cursor:default;transition:background .12s;min-width:0;position:relative}
+    .stat-chip:last-child{border-right:none}
+    .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .s-data{min-width:0}
+    .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#F7F8FC;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:11px;font-family:inherit;outline:none;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;transition:border-color .15s}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    .filter-dd{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:120px}
+    .filter-dd:focus{border-color:var(--navy)}
+    .date-input{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer;width:130px}
+    .date-input:focus{border-color:var(--navy)}
+
+    /* Data Table */
+    .table-wrap{flex:1;overflow:auto;background:var(--card)}
+    .table-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .table-wrap thead th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:700;padding:8px 10px;text-align:left;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;cursor:default;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);user-select:none}
+    .table-wrap thead th:last-child{border-right:none}
+    .table-wrap tbody td{padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap tbody tr:nth-child(even){background:var(--row-alt)}
+    .table-wrap tbody tr:hover{background:#CFFAFE;cursor:pointer}
+    .table-wrap tbody tr.selected{background:#BFDBFE}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+    .b-active{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-locked{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+    .b-inactive{background:#F3F4F6;color:#6B7280;border-color:#D1D5DB}
+    .b-admin{background:#EDE9FE;color:#7C3AED;border-color:#C4B5FD}
+    .b-tech{background:#E0F2FE;color:#0369A1;border-color:#7DD3FC}
+    .b-sales{background:#FEF3C7;color:#92400E;border-color:#FDE68A}
+    .b-accounting{background:#ECFDF5;color:#065F46;border-color:#A7F3D0}
+    .b-standard{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-contract{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-volume{background:#FEF3C7;color:#92400E;border-color:#FDE68A}
+    .b-draft{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-login{background:#EFF6FF;color:var(--blue);border-color:#BFDBFE}
+    .b-create{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-update{background:#FFFBEB;color:var(--amber);border-color:#FDE68A}
+    .b-delete{background:#FEF2F2;color:var(--red);border-color:#FECACA}
+
+    /* Tab content */
+    .admin-tab{display:none;flex:1;flex-direction:column;overflow:hidden}
+    .admin-tab.show{display:flex}
+
+    /* Security Groups grid */
+    .sg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 20px;overflow-y:auto;flex:1}
+    .sg-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .15s,transform .15s}
+    .sg-card:hover{box-shadow:0 4px 12px rgba(var(--primary-rgb),.08);transform:translateY(-1px)}
+    .sg-card-title{font-size:14px;font-weight:700;color:var(--navy)}
+    .sg-card-desc{font-size:11.5px;color:var(--label);line-height:1.4}
+    .sg-card-meta{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+    .sg-card-members{font-size:11px;color:var(--muted);font-weight:600}
+    .sg-card-link{font-size:11px;color:var(--navy);font-weight:600;cursor:pointer;text-decoration:none}
+    .sg-card-link:hover{text-decoration:underline}
+
+    /* System Settings */
+    .settings-wrap{flex:1;overflow-y:auto;padding:16px 20px}
+    .settings-section{margin-bottom:20px}
+    .settings-section-title{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding-bottom:6px;border-bottom:2px solid var(--border-dk);margin-bottom:10px}
+    .setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+    .setting-row:last-child{border-bottom:none}
+    .setting-label{font-size:12px;font-weight:500;color:var(--text)}
+    .setting-label .setting-hint{font-size:10px;color:var(--muted);font-weight:400;display:block;margin-top:1px}
+    .setting-input input,.setting-input select{height:30px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 10px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;min-width:160px}
+    .setting-input input:focus,.setting-input select:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .setting-input input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+
+    /* Toggle switch */
+    .toggle{position:relative;width:36px;height:20px;display:inline-block;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:#CBD5E1;border-radius:20px;cursor:pointer;transition:background .2s}
+    .toggle-slider::before{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--navy)}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(16px)}
+
+    /* Drawer */
+    .admin-drawer{position:fixed;right:0;top:64px;bottom:0;width:480px;background:#fff;border-left:1.5px solid var(--border-dk);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .admin-drawer.open{transform:translateX(0);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12)}
+    .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .drawer-header .dh-info{min-width:0}
+    .drawer-header .dh-title{font-size:15px;font-weight:800;letter-spacing:-.2px}
+    .drawer-header .dh-sub{font-size:10.5px;opacity:.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:4px;transition:background .1s;display:flex;align-items:center;gap:4px;font-size:11px;font-family:inherit}
+    .drawer-close:hover{background:rgba(255,255,255,.15);color:#fff}
+    .drawer-close svg{width:18px;height:18px}
+    .drawer-body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+    .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
+    .drawer-overlay.open{display:block}
+
+    /* Section card in drawer */
+    .section-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .section-head{background:#F0F4FA;padding:6px 12px;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+    .section-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .field{display:flex;flex-direction:column;gap:2px}
+    .field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .field input,.field select,.field textarea{height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+    .field textarea{height:60px;padding:6px 8px;resize:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .field input[readonly]{background:#F8FAFF;color:var(--steel);cursor:default}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+    /* Permission matrix */
+    .perm-table{width:100%;border-collapse:collapse;font-size:11px}
+    .perm-table th{background:#F0F4FA;padding:6px 10px;font-size:9.5px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:center;border-bottom:1px solid var(--border)}
+    .perm-table th:first-child{text-align:left}
+    .perm-table td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:center}
+    .perm-table td:first-child{text-align:left;font-weight:500;color:var(--text)}
+    .perm-table tr:hover td{background:#EFF6FF}
+    .perm-table input[type="checkbox"]{width:15px;height:15px;cursor:pointer;accent-color:var(--navy)}
+
+    /* Table footer */
+    .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
+    .record-info{font-weight:500}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-white.png" alt="TSI" class="brand-logo"/>
+      <span class="brand-text">Total Scope</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="window.location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
+      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
+      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="window.location='quality.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
+      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item" onclick="window.location='reports.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
+      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+    </div>
+    <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;margin-right:12px" id="newOrderWrap">
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Orders <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--border);transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>Find / Open Repair<div style="font-size:10px;color:var(--muted);font-weight:400">Search open work orders</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='instruments?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('product-sale','New Product Sale','sale')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('endocarts','New Endocart Order','endocart')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+          </div>
+        </div>
+        <span id="dataBadge" class="data-badge"></span>
+        <span style="opacity:0.5;margin:0 4px">|</span>
+        Service Location
+        <select class="svc-select" id="svcLocation">
+          <option value="1">Upper Chichester</option>
+          <option value="2">Nashville</option>
+        </select>
+        <div class="topbar-avatar">JB</div>
+        <span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>
+        <button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body" style="display:flex;flex-direction:column;overflow:hidden">
+
+      <!-- KPI STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy">24</div><div class="s-lbl">Active Users</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="s-data"><div class="s-val s-blue">6</div><div class="s-lbl">Security Groups</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="width:14px;height:14px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="s-data"><div class="s-val s-green">8</div><div class="s-lbl">Pricing Lists</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" style="width:14px;height:14px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber">142</div><div class="s-lbl">Audit Entries 24h</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="s-data"><div class="s-val s-red">1</div><div class="s-lbl">Locked Accounts</div></div>
+        </div>
+      </div>
+
+      <!-- TAB BAR -->
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('users',this)">Staff &amp; Users</div>
+        <div class="tab" onclick="switchTab('security',this)">Security Groups</div>
+        <div class="tab" onclick="switchTab('pricing',this)">Pricing Lists</div>
+        <div class="tab" onclick="switchTab('settings',this)">System Settings</div>
+        <div class="tab" onclick="switchTab('audit',this)">Audit Log</div>
+      </div>
+
+      <!-- TAB: STAFF & USERS -->
+      <div class="admin-tab show" id="tab-users">
+        <div class="toolbar">
+          <input class="search-input" id="userSearch" placeholder="Search users..." oninput="filterUsers()"/>
+          <select class="filter-dd" id="userRoleFilter" onchange="filterUsers()">
+            <option value="">All Roles</option>
+            <option value="Admin">Admin</option>
+            <option value="Technician">Technician</option>
+            <option value="Sales">Sales</option>
+            <option value="Accounting">Accounting</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openUserDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add User
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:160px">Name</th>
+                <th style="width:220px">Email</th>
+                <th style="width:100px">Role</th>
+                <th style="width:140px">Location</th>
+                <th style="width:130px">Last Login</th>
+                <th style="width:90px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="usersTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="userCount">8 users</span>
+        </div>
+      </div>
+
+      <!-- TAB: SECURITY GROUPS -->
+      <div class="admin-tab" id="tab-security">
+        <div class="sg-grid" id="sgGrid"></div>
+      </div>
+
+      <!-- TAB: PRICING LISTS -->
+      <div class="admin-tab" id="tab-pricing">
+        <div class="toolbar">
+          <input class="search-input" id="pricingSearch" placeholder="Search pricing lists..." oninput="filterPricing()"/>
+          <div style="flex:1"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:200px">List Name</th>
+                <th style="width:100px">Type</th>
+                <th style="width:100px">Client Count</th>
+                <th style="width:80px">Items</th>
+                <th style="width:130px">Last Updated</th>
+                <th style="width:80px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="pricingTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="pricingCount">8 pricing lists</span>
+        </div>
+      </div>
+
+      <!-- TAB: SYSTEM SETTINGS -->
+      <div class="admin-tab" id="tab-settings">
+        <div class="settings-wrap" id="settingsWrap"></div>
+      </div>
+
+      <!-- TAB: AUDIT LOG -->
+      <div class="admin-tab" id="tab-audit">
+        <div class="toolbar">
+          <input class="search-input" id="auditSearch" placeholder="Search audit log..." oninput="filterAudit()"/>
+          <div class="filter-sep"></div>
+          <input type="date" class="date-input" id="auditDateFrom" onchange="filterAudit()" title="From date"/>
+          <span style="font-size:10px;color:var(--muted)">to</span>
+          <input type="date" class="date-input" id="auditDateTo" onchange="filterAudit()" title="To date"/>
+          <div class="filter-sep"></div>
+          <select class="filter-dd" id="auditActionFilter" onchange="filterAudit()">
+            <option value="">All Actions</option>
+            <option value="Login">Login</option>
+            <option value="Create">Create</option>
+            <option value="Update">Update</option>
+            <option value="Delete">Delete</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:150px">Timestamp</th>
+                <th style="width:140px">User</th>
+                <th style="width:80px">Action</th>
+                <th style="width:110px">Module</th>
+                <th style="width:280px">Description</th>
+                <th style="width:120px">IP Address</th>
+              </tr>
+            </thead>
+            <tbody id="auditTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="auditCount">10 entries</span>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- Drawer overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- User Detail Drawer -->
+<div class="admin-drawer" id="userDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerUserName">User Details</div>
+      <div class="dh-sub" id="drawerUserSub">Edit user account</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerUserBody"></div>
+</div>
+
+<!-- Security Group Permissions Drawer -->
+<div class="admin-drawer" id="permDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerPermName">Group Permissions</div>
+      <div class="dh-sub" id="drawerPermSub">Edit permission matrix</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerPermBody"></div>
+</div>
+
+<!-- Pricing Detail Drawer -->
+<div class="admin-drawer" id="pricingDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerPricingName">Pricing List</div>
+      <div class="dh-sub" id="drawerPricingSub">View pricing details</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerPricingBody"></div>
+</div>
+
+<script src="api.js"></script>
+<script src="js/new-order-wizard.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* Auth guard */
+  if (!API.requireAuth()) throw new Error('redirect');
+
+  /* Data badge (demo only) */
+  function showDataBadge(live){
+    var b=document.getElementById('dataBadge');
+    if(!b)return;
+    b.style.cssText='display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:600;';
+    if(live){b.textContent='Live Data';b.style.background='#166534';b.style.color='#BBF7D0';b.style.border='1px solid #22C55E';}
+    else{b.textContent='Demo Data';b.style.background='#92400E';b.style.color='#FDE68A';b.style.border='1px solid #D97706';}
+  }
+  showDataBadge(false);
+
+  /* ==============================
+     DEMO DATA
+     ============================== */
+
+  var USERS = [
+    {id:1,name:'Joseph Brassell',email:'jbrassell@totalscope.com',role:'Admin',location:'Upper Chichester',lastLogin:'2026-03-15 09:14 AM',status:'Active'},
+    {id:2,name:'Sarah Mitchell',email:'smitchell@totalscope.com',role:'Admin',location:'Upper Chichester',lastLogin:'2026-03-15 08:42 AM',status:'Active'},
+    {id:3,name:'Mike Chen',email:'mchen@totalscope.com',role:'Technician',location:'Upper Chichester',lastLogin:'2026-03-15 07:55 AM',status:'Active'},
+    {id:4,name:'David Rodriguez',email:'drodriguez@totalscope.com',role:'Technician',location:'Nashville',lastLogin:'2026-03-14 04:30 PM',status:'Active'},
+    {id:5,name:'Emily Watson',email:'ewatson@totalscope.com',role:'Sales',location:'Upper Chichester',lastLogin:'2026-03-15 08:10 AM',status:'Active'},
+    {id:6,name:'Tom Parker',email:'tparker@totalscope.com',role:'Sales',location:'Nashville',lastLogin:'2026-03-13 03:22 PM',status:'Inactive'},
+    {id:7,name:'Lisa Johnson',email:'ljohnson@totalscope.com',role:'Accounting',location:'Upper Chichester',lastLogin:'2026-03-15 09:01 AM',status:'Active'},
+    {id:8,name:'James Wilson',email:'jwilson@totalscope.com',role:'Technician',location:'Nashville',lastLogin:'2026-03-12 11:45 AM',status:'Locked'}
+  ];
+
+  var SEC_GROUPS = [
+    {id:1,name:'Administrators',desc:'Full system access including user management, security settings, and audit log.',members:3,perms:{Repairs:[1,1,1,1],Clients:[1,1,1,1],Financial:[1,1,1,1],Inventory:[1,1,1,1],Reports:[1,1,1,1],Admin:[1,1,1,1]}},
+    {id:2,name:'Technicians',desc:'Access to repairs, scope management, and inventory for day-to-day operations.',members:8,perms:{Repairs:[1,1,1,0],Clients:[1,0,0,0],Financial:[0,0,0,0],Inventory:[1,1,1,0],Reports:[1,0,0,0],Admin:[0,0,0,0]}},
+    {id:3,name:'Sales Representatives',desc:'Client and department management, quotes, product sales, and contract access.',members:4,perms:{Repairs:[1,0,0,0],Clients:[1,1,1,0],Financial:[1,0,0,0],Inventory:[1,0,0,0],Reports:[1,0,0,0],Admin:[0,0,0,0]}},
+    {id:4,name:'Accounting',desc:'Financial management, invoicing, payment processing, and reporting.',members:3,perms:{Repairs:[1,0,0,0],Clients:[1,0,0,0],Financial:[1,1,1,1],Inventory:[1,0,0,0],Reports:[1,1,0,0],Admin:[0,0,0,0]}},
+    {id:5,name:'Managers',desc:'Oversight access with reporting, approvals, and limited administration capabilities.',members:4,perms:{Repairs:[1,1,1,0],Clients:[1,1,1,0],Financial:[1,1,0,0],Inventory:[1,1,1,0],Reports:[1,1,1,0],Admin:[1,0,0,0]}},
+    {id:6,name:'Read Only',desc:'View-only access to all modules. No create, edit, or delete capabilities.',members:2,perms:{Repairs:[1,0,0,0],Clients:[1,0,0,0],Financial:[1,0,0,0],Inventory:[1,0,0,0],Reports:[1,0,0,0],Admin:[1,0,0,0]}}
+  ];
+
+  var PRICING = [
+    {id:1,name:'Standard Repair Pricing',type:'Standard',clients:18,items:245,updated:'2026-03-10',status:'Active'},
+    {id:2,name:'Volume Discount Tier A',type:'Volume',clients:5,items:245,updated:'2026-03-08',status:'Active'},
+    {id:3,name:'Volume Discount Tier B',type:'Volume',clients:3,items:245,updated:'2026-03-08',status:'Active'},
+    {id:4,name:'HCA Healthcare Contract',type:'Contract',clients:1,items:180,updated:'2026-02-28',status:'Active'},
+    {id:5,name:'Ascension Health Contract',type:'Contract',clients:1,items:195,updated:'2026-02-15',status:'Active'},
+    {id:6,name:'Standard Product Sale',type:'Standard',clients:24,items:312,updated:'2026-03-12',status:'Active'},
+    {id:7,name:'Instrument Repair Pricing',type:'Standard',clients:12,items:88,updated:'2026-03-05',status:'Active'},
+    {id:8,name:'Q2 2026 Promo Pricing',type:'Volume',clients:0,items:150,updated:'2026-03-14',status:'Draft'}
+  ];
+
+  var AUDIT = [
+    {ts:'2026-03-15 09:14:22',user:'Joseph Brassell',action:'Login',module:'Authentication',desc:'User logged in successfully',ip:'192.168.1.105'},
+    {ts:'2026-03-15 09:12:05',user:'Sarah Mitchell',action:'Update',module:'Repairs',desc:'Updated repair #WO-2026-0487 status to Complete',ip:'192.168.1.110'},
+    {ts:'2026-03-15 09:08:33',user:'Mike Chen',action:'Create',module:'Repairs',desc:'Created new repair order #WO-2026-0492',ip:'192.168.1.118'},
+    {ts:'2026-03-15 08:55:10',user:'Emily Watson',action:'Update',module:'Clients',desc:'Updated contact info for Penn Medicine',ip:'192.168.1.122'},
+    {ts:'2026-03-15 08:42:17',user:'Sarah Mitchell',action:'Login',module:'Authentication',desc:'User logged in successfully',ip:'192.168.1.110'},
+    {ts:'2026-03-15 08:30:44',user:'Lisa Johnson',action:'Create',module:'Financial',desc:'Generated invoice #INV-2026-0155 for $4,280.00',ip:'192.168.1.130'},
+    {ts:'2026-03-15 08:15:02',user:'Joseph Brassell',action:'Delete',module:'Inventory',desc:'Removed expired inventory item SKU-4412',ip:'192.168.1.105'},
+    {ts:'2026-03-14 16:45:30',user:'David Rodriguez',action:'Update',module:'Repairs',desc:'Added repair notes to #WO-2026-0485',ip:'10.0.2.55'},
+    {ts:'2026-03-14 16:30:18',user:'Tom Parker',action:'Login',module:'Authentication',desc:'Login attempt failed - account inactive',ip:'10.0.2.60'},
+    {ts:'2026-03-14 15:20:05',user:'Joseph Brassell',action:'Update',module:'Admin',desc:'Updated security group permissions for Technicians',ip:'192.168.1.105'}
+  ];
+
+  var SETTINGS = {
+    General:[
+      {key:'companyName',label:'Company Name',hint:'Legal entity name',type:'text',value:'Total Scope, Inc.'},
+      {key:'defaultLocation',label:'Default Location',hint:'Primary service location',type:'select',options:['Upper Chichester','Nashville'],value:'Upper Chichester'},
+      {key:'sessionTimeout',label:'Session Timeout',hint:'Auto-logout after inactivity',type:'select',options:['15 min','30 min','60 min','120 min'],value:'60 min'},
+      {key:'dateFormat',label:'Date Format',hint:'Display format across the system',type:'select',options:['MM/DD/YYYY','DD/MM/YYYY','YYYY-MM-DD'],value:'MM/DD/YYYY'}
+    ],
+    Notifications:[
+      {key:'emailNotifications',label:'Email Notifications',hint:'Send email alerts for key events',type:'toggle',value:true},
+      {key:'slaThreshold',label:'SLA Alert Threshold',hint:'Days before SLA breach to trigger alert',type:'select',options:['1 day','2 days','3 days','5 days'],value:'1 day'},
+      {key:'dailyDigest',label:'Daily Digest',hint:'Send daily summary email to managers',type:'toggle',value:true},
+      {key:'overdueAlerts',label:'Overdue Alerts',hint:'Notify when repairs exceed SLA',type:'toggle',value:true}
+    ],
+    Integrations:[
+      {key:'apiEndpoint',label:'API Endpoint',hint:'BrightLogix API base URL',type:'text',value:'https://totalscopetestapi.mol-tech.com/api',readonly:true},
+      {key:'webhookUrl',label:'Webhook URL',hint:'URL for outbound event notifications',type:'text',value:''},
+      {key:'syncInterval',label:'Sync Interval',hint:'How often to sync with external systems',type:'select',options:['15 min','30 min','1 hr'],value:'15 min'}
+    ],
+    Security:[
+      {key:'passwordMinLength',label:'Password Min Length',hint:'Minimum characters required',type:'number',value:8},
+      {key:'requireMfa',label:'Require MFA',hint:'Multi-factor authentication for all users',type:'toggle',value:false},
+      {key:'maxLoginAttempts',label:'Max Login Attempts',hint:'Before account lockout',type:'number',value:5},
+      {key:'lockDuration',label:'Account Lock Duration',hint:'Minutes before auto-unlock',type:'select',options:['15 min','30 min','60 min','Never (manual)'],value:'30 min'}
+    ]
+  };
+
+  /* ==============================
+     TAB SWITCHING
+     ============================== */
+
+  window.switchTab = function(name, el){
+    document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('show');});
+    document.querySelectorAll('.tab-bar .tab').forEach(function(t){t.classList.remove('active');});
+    var target = document.getElementById('tab-'+name);
+    if(target) target.classList.add('show');
+    if(el) el.classList.add('active');
+  };
+
+  /* ==============================
+     STAFF & USERS
+     ============================== */
+
+  function roleBadge(role){
+    var map={Admin:'b-admin',Technician:'b-tech',Sales:'b-sales',Accounting:'b-accounting'};
+    return '<span class="badge '+(map[role]||'')+'">'+role+'</span>';
+  }
+  function statusBadge(s){
+    var map={Active:'b-active',Locked:'b-locked',Inactive:'b-inactive'};
+    return '<span class="badge '+(map[s]||'')+'">'+s+'</span>';
+  }
+
+  function renderUsers(list){
+    var tb=document.getElementById('usersTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No users found</td></tr>';return;}
+    tb.innerHTML=list.map(function(u){return '<tr onclick="openUserDrawer('+u.id+')"><td style="font-weight:600">'+u.name+'</td><td>'+u.email+'</td><td>'+roleBadge(u.role)+'</td><td>'+u.location+'</td><td>'+u.lastLogin+'</td><td>'+statusBadge(u.status)+'</td></tr>';}).join('');
+    document.getElementById('userCount').textContent=list.length+' user'+(list.length!==1?'s':'');
+  }
+
+  window.filterUsers = function(){
+    var q=document.getElementById('userSearch').value.toLowerCase();
+    var role=document.getElementById('userRoleFilter').value;
+    var filtered=USERS.filter(function(u){
+      if(role && u.role!==role) return false;
+      if(q && u.name.toLowerCase().indexOf(q)===-1 && u.email.toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    });
+    renderUsers(filtered);
+  };
+
+  window.openUserDrawer = function(id){
+    var user = id ? USERS.find(function(u){return u.id===id;}) : {id:0,name:'',email:'',role:'Technician',location:'Upper Chichester',lastLogin:'\u2014',status:'Active'};
+    if(!user) return;
+    var first = user.name.split(' ')[0]||'';
+    var last = user.name.split(' ').slice(1).join(' ')||'';
+    document.getElementById('drawerUserName').textContent = id ? user.name : 'New User';
+    document.getElementById('drawerUserSub').textContent = id ? user.email : 'Create a new user account';
+    var html = '<div class="section-card"><div class="section-head">Account Information</div><div class="section-body">';
+    html += '<div class="g2"><div class="field"><label>First Name</label><input type="text" value="'+first+'"/></div>';
+    html += '<div class="field"><label>Last Name</label><input type="text" value="'+last+'"/></div></div>';
+    html += '<div class="field"><label>Email Address</label><input type="email" value="'+user.email+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Role</label><select>';
+    ['Admin','Technician','Sales','Accounting'].forEach(function(r){html+='<option'+(user.role===r?' selected':'')+'>'+r+'</option>';});
+    html += '</select></div><div class="field"><label>Location</label><select>';
+    ['Upper Chichester','Nashville'].forEach(function(l){html+='<option'+(user.location===l?' selected':'')+'>'+l+'</option>';});
+    html += '</select></div></div></div></div>';
+    html += '<div class="section-card"><div class="section-head">Account Status</div><div class="section-body">';
+    html += '<div class="g2"><div class="field"><label>Status</label><select>';
+    ['Active','Locked','Inactive'].forEach(function(s){html+='<option'+(user.status===s?' selected':'')+'>'+s+'</option>';});
+    html += '</select></div><div class="field"><label>Last Login</label><input type="text" value="'+user.lastLogin+'" readonly/></div></div>';
+    html += '<div class="field"><label>Security Group</label><select>';
+    ['Administrators','Technicians','Sales Representatives','Accounting','Managers','Read Only'].forEach(function(g){html+='<option>'+g+'</option>';});
+    html += '</select></div></div></div>';
+    if(id){
+      html += '<div class="section-card"><div class="section-head">Actions</div><div class="section-body" style="flex-direction:row;gap:8px">';
+      html += '<button class="btn btn-outline" style="font-size:11px">Reset Password</button>';
+      if(user.status==='Locked') html += '<button class="btn btn-outline" style="font-size:11px;color:var(--green);border-color:#81C784">Unlock Account</button>';
+      html += '</div></div>';
+    }
+    document.getElementById('drawerUserBody').innerHTML = html;
+    openDrawer('userDrawer');
+  };
+
+  /* ==============================
+     SECURITY GROUPS
+     ============================== */
+
+  function renderSecurityGroups(){
+    var grid=document.getElementById('sgGrid');
+    grid.innerHTML=SEC_GROUPS.map(function(g){
+      return '<div class="sg-card"><div class="sg-card-title">'+g.name+'</div><div class="sg-card-desc">'+g.desc+'</div><div class="sg-card-meta"><span class="sg-card-members">'+g.members+' member'+(g.members!==1?'s':'')+'</span><a class="sg-card-link" onclick="openPermDrawer('+g.id+')">Edit Permissions</a></div></div>';
+    }).join('');
+  }
+
+  window.openPermDrawer = function(id){
+    var group = SEC_GROUPS.find(function(g){return g.id===id;});
+    if(!group) return;
+    document.getElementById('drawerPermName').textContent = group.name;
+    document.getElementById('drawerPermSub').textContent = group.members+' member'+(group.members!==1?'s':'')+' in this group';
+    var modules = ['Repairs','Clients','Financial','Inventory','Reports','Admin'];
+    var actions = ['View','Create','Edit','Delete'];
+    var html = '<div class="section-card"><div class="section-head">Permission Matrix</div><div class="section-body" style="padding:0"><table class="perm-table"><thead><tr><th>Module</th>';
+    actions.forEach(function(a){html+='<th>'+a+'</th>';});
+    html+='</tr></thead><tbody>';
+    modules.forEach(function(m){
+      var p = group.perms[m]||[0,0,0,0];
+      html+='<tr><td>'+m+'</td>';
+      actions.forEach(function(a,i){html+='<td><input type="checkbox" '+(p[i]?'checked':'')+'/></td>';});
+      html+='</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    document.getElementById('drawerPermBody').innerHTML = html;
+    openDrawer('permDrawer');
+  };
+
+  /* ==============================
+     PRICING LISTS
+     ============================== */
+
+  function typeBadge(t){
+    var map={Standard:'b-standard',Contract:'b-contract',Volume:'b-volume'};
+    return '<span class="badge '+(map[t]||'')+'">'+t+'</span>';
+  }
+  function pricingStatusBadge(s){
+    return '<span class="badge '+(s==='Active'?'b-active':'b-draft')+'">'+s+'</span>';
+  }
+
+  function renderPricing(list){
+    var tb=document.getElementById('pricingTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No pricing lists found</td></tr>';return;}
+    tb.innerHTML=list.map(function(p){return '<tr onclick="openPricingDrawer('+p.id+')"><td style="font-weight:600">'+p.name+'</td><td>'+typeBadge(p.type)+'</td><td>'+p.clients+'</td><td>'+p.items+'</td><td>'+p.updated+'</td><td>'+pricingStatusBadge(p.status)+'</td></tr>';}).join('');
+    document.getElementById('pricingCount').textContent=list.length+' pricing list'+(list.length!==1?'s':'');
+  }
+
+  window.filterPricing = function(){
+    var q=document.getElementById('pricingSearch').value.toLowerCase();
+    renderPricing(PRICING.filter(function(p){return !q || p.name.toLowerCase().indexOf(q)!==-1 || p.type.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openPricingDrawer = function(id){
+    var item = PRICING.find(function(p){return p.id===id;});
+    if(!item) return;
+    document.getElementById('drawerPricingName').textContent = item.name;
+    document.getElementById('drawerPricingSub').textContent = item.type+' pricing \u2014 '+item.status;
+    var html = '<div class="section-card"><div class="section-head">Pricing List Details</div><div class="section-body">';
+    html += '<div class="field"><label>List Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Type</label><select>';
+    ['Standard','Contract','Volume'].forEach(function(t){html+='<option'+(item.type===t?' selected':'')+'>'+t+'</option>';});
+    html += '</select></div><div class="field"><label>Status</label><select>';
+    ['Active','Draft'].forEach(function(s){html+='<option'+(item.status===s?' selected':'')+'>'+s+'</option>';});
+    html += '</select></div></div>';
+    html += '<div class="g2"><div class="field"><label>Assigned Clients</label><input type="text" value="'+item.clients+'" readonly/></div>';
+    html += '<div class="field"><label>Line Items</label><input type="text" value="'+item.items+'" readonly/></div></div>';
+    html += '<div class="field"><label>Last Updated</label><input type="text" value="'+item.updated+'" readonly/></div>';
+    html += '</div></div>';
+    document.getElementById('drawerPricingBody').innerHTML = html;
+    openDrawer('pricingDrawer');
+  };
+
+  /* ==============================
+     SYSTEM SETTINGS
+     ============================== */
+
+  function renderSettings(){
+    var wrap=document.getElementById('settingsWrap');
+    var html='';
+    var sections=Object.keys(SETTINGS);
+    for(var si=0;si<sections.length;si++){
+      var section=sections[si];
+      html+='<div class="settings-section"><div class="settings-section-title">'+section+'</div>';
+      var items=SETTINGS[section];
+      for(var i=0;i<items.length;i++){
+        var s=items[i];
+        html+='<div class="setting-row"><div class="setting-label">'+s.label+(s.hint?'<span class="setting-hint">'+s.hint+'</span>':'')+'</div><div class="setting-input">';
+        if(s.type==='toggle'){
+          html+='<label class="toggle"><input type="checkbox" '+(s.value?'checked':'')+'><span class="toggle-slider"></span></label>';
+        } else if(s.type==='select'){
+          html+='<select>';
+          for(var j=0;j<(s.options||[]).length;j++){
+            var o=s.options[j];
+            html+='<option '+(o===s.value?'selected':'')+'>'+o+'</option>';
+          }
+          html+='</select>';
+        } else if(s.type==='number'){
+          html+='<input type="number" value="'+s.value+'" style="width:80px"/>';
+        } else {
+          html+='<input type="text" value="'+s.value+'"'+(s.readonly?' readonly':'')+'/>';
+        }
+        html+='</div></div>';
+      }
+      html+='</div>';
+    }
+    wrap.innerHTML=html;
+  }
+
+  /* ==============================
+     AUDIT LOG
+     ============================== */
+
+  function actionBadge(a){
+    var map={Login:'b-login',Create:'b-create',Update:'b-update',Delete:'b-delete'};
+    return '<span class="badge '+(map[a]||'')+'">'+a+'</span>';
+  }
+
+  function renderAudit(list){
+    var tb=document.getElementById('auditTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No audit entries found</td></tr>';return;}
+    tb.innerHTML=list.map(function(a){return '<tr><td>'+a.ts+'</td><td>'+a.user+'</td><td>'+actionBadge(a.action)+'</td><td>'+a.module+'</td><td>'+a.desc+'</td><td style="font-family:monospace;font-size:10.5px">'+a.ip+'</td></tr>';}).join('');
+    document.getElementById('auditCount').textContent=list.length+' entr'+(list.length!==1?'ies':'y');
+  }
+
+  window.filterAudit = function(){
+    var q=document.getElementById('auditSearch').value.toLowerCase();
+    var action=document.getElementById('auditActionFilter').value;
+    var from=document.getElementById('auditDateFrom').value;
+    var to=document.getElementById('auditDateTo').value;
+    var filtered=AUDIT.filter(function(a){
+      if(action && a.action!==action) return false;
+      if(q && a.user.toLowerCase().indexOf(q)===-1 && a.desc.toLowerCase().indexOf(q)===-1 && a.module.toLowerCase().indexOf(q)===-1) return false;
+      var date=a.ts.split(' ')[0];
+      if(from && date<from) return false;
+      if(to && date>to) return false;
+      return true;
+    });
+    renderAudit(filtered);
+  };
+
+  /* ==============================
+     DRAWER MANAGEMENT
+     ============================== */
+
+  var activeDrawerId = null;
+
+  function openDrawer(id){
+    closeDrawer();
+    activeDrawerId = id;
+    document.getElementById(id).classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  }
+
+  window.closeDrawer = function(){
+    if(activeDrawerId){
+      document.getElementById(activeDrawerId).classList.remove('open');
+      activeDrawerId = null;
+    }
+    document.getElementById('drawerOverlay').classList.remove('open');
+  };
+
+  /* ==============================
+     INIT
+     ============================== */
+
+  renderUsers(USERS);
+  renderSecurityGroups();
+  renderPricing(PRICING);
+  renderSettings();
+  renderAudit(AUDIT);
+
+})();
+</script>
+</body>
+</html>
