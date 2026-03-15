@@ -18,16 +18,19 @@
     .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:7px;margin-left:4px}
 
     /* Department layout overrides */
-    .col-left{flex:1.3}
+    .col-left{flex:1.3;min-width:340px}
     .panel-body{padding:10px 12px}
 
     /* Checkbox sections (options / service locations) */
     .cb-section{padding-top:8px;border-top:1px solid var(--border);margin-top:8px}
     .cb-section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-    .cb-grid{grid-template-columns:1fr 1fr 1fr}
+    .cb-grid{grid-template-columns:1fr 1fr}
+    .cb-grid .toggle-label{width:auto;white-space:normal}
 
     /* Readonly table (scopes) */
     .readonly-tbl tbody tr:hover{background:inherit;cursor:default}
+    /* D-9: Hide Avg Daily Uses column (4th col) when empty */
+    .readonly-tbl.hide-avg-uses th:nth-child(4),.readonly-tbl.hide-avg-uses td:nth-child(4){display:none}
     .readonly-tbl tbody tr:nth-child(even):hover{background:var(--row-alt)}
 
     /* Scope drawer */
@@ -99,13 +102,13 @@
     .file-drop-formats{font-size:10px;color:var(--border-dk)}
 
     /* Stat-strip (replaces old ss-chip) */
-    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0}
-    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:0}
+    .stat-strip{display:flex;align-items:stretch;background:var(--card);border-bottom:1.5px solid var(--border-dk);flex-shrink:0;flex-wrap:wrap}
+    .stat-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid var(--border);min-width:80px}
     .stat-chip:last-of-type{border-right:none}
     .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
     .s-data{min-width:0}
     .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
-    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px}
     .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-blue{color:var(--blue)}
   </style>
 </head>
@@ -193,15 +196,22 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New
         </button>
-        <button class="btn btn-outline" title="Duplicate Department" style="gap:4px">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
         <div style="flex:1"></div>
-        <button class="btn btn-danger" id="btnOpenDelete" style="gap:4px">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Delete
-        </button>
+        <!-- ⋯ overflow menu (Deactivate + Delete) -->
+        <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
+          <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:#6b7c93;border-color:#d0d6dd">&#x22EF;</button>
+          <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #d0d6dd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:200px;padding:6px 0;font-size:13px">
+            <button onclick="confirmDeactivateDept();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#b8860b" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              Deactivate Department
+            </button>
+            <div style="height:1px;background:#e8eaed;margin:4px 12px"></div>
+            <button id="btnOpenDelete" onclick="this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#c53030" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete Department
+            </button>
+          </div>
+        </div>
         <div class="divider"></div>
         <span id="saveStatus" style="font-size:11px;display:flex;align-items:center;gap:5px" class="save-ready">
           <span id="saveIcon">&#9679;</span> <span id="saveText">Ready</span>
@@ -316,7 +326,7 @@
                 <div class="ff span2">
                   <div class="toggle-row" style="padding:0">
                     <label class="toggle"><input type="checkbox" id="fAcquisitions" checked/><span class="toggle-slider"></span></label>
-                    <span class="toggle-label">Acquisitions Dept</span>
+                    <span class="toggle-label" title="Marks this department as an acquisitions department for specialized purchasing workflows">Acquisitions Dept</span>
                   </div>
                 </div>
               </div>
@@ -353,6 +363,7 @@
           <div class="panel">
             <div class="panel-head">Profile</div>
             <div class="panel-body">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Facility profile — used for contract sizing and reporting</div>
               <div class="fg" style="gap:10px">
                 <div class="ff">
                   <label>Cleaning System</label>
@@ -391,7 +402,7 @@
           <div class="panel">
             <div class="panel-head">Notes</div>
             <div class="panel-body">
-              <textarea class="inp" id="fNotes" style="height:140px">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</textarea>
+              <textarea class="inp" id="fNotes" style="height:140px" placeholder="Add department notes…"></textarea>
             </div>
           </div>
         </div>
@@ -649,7 +660,7 @@
       <p id="deleteConfirmText" style="font-size:12px;color:var(--text);line-height:1.6">Are you sure you want to permanently delete this department? All associated contacts, documents, and charge overrides will also be removed.</p>
       <div style="margin-top:14px">
         <label style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Type department name to confirm</label>
-        <input class="inp" placeholder="Biomedical Engineering" style="border-color:#FECACA"/>
+        <input class="inp" placeholder="Type the department name here…" style="border-color:#FECACA"/>
       </div>
     </div>
     <div class="modal-footer">
@@ -1156,6 +1167,12 @@ function openContactModal(mode){
   /* ── Populate Main tab form from API data ──────────── */
   function populateMainTab(d){
     if(!d) return;
+    // D-2: Auto-set client dropdown to department's parent client
+    const clientKey = d.lClientKey || d.plClientKey;
+    if(clientKey){
+      const sel = $('selClient');
+      if(sel && sel.value != clientKey) sel.value = clientKey;
+    }
     _curDeptName = d.sDepartmentName || d.psDepartmentName || '';
     // Department info
     const f = (id,val) => { const el=$(id); if(el) el.value = val ?? ''; };
@@ -1794,6 +1811,16 @@ function openContactModal(mode){
   }
 
   /* ── Delete department ───────────────────────────── */
+  function confirmDeactivateDept(){
+    if(!currentDeptKey) return;
+    const name = $('fDeptName').value || 'this department';
+    if(!confirm('Deactivate "' + name + '"? It will be hidden from active lists but can be reactivated later.')) return;
+    const el = $('fActive');
+    if(el){ el.checked = false; $('fActiveLabel').textContent = 'No'; $('fActiveLabel').style.color = 'var(--red)'; }
+    deptDirty();
+    saveDepartment();
+  }
+
   async function confirmDeleteDepartment(){
     if(!currentDeptKey || isDemo) return;
     const confirmInput = document.querySelector('#deleteModal .inp');
@@ -2004,7 +2031,7 @@ function openContactModal(mode){
     const txt = $('deleteConfirmText');
     if(txt) txt.innerHTML = 'Are you sure you want to permanently delete <strong>'+deptName+'</strong>' + (clientName ? ' from <strong>'+clientName+'</strong>' : '') + '? All associated contacts, documents, and charge overrides will also be removed.';
     const confirmInp = document.querySelector('#deleteModal .inp');
-    if(confirmInp){ confirmInp.placeholder = deptName; confirmInp.value = ''; }
+    if(confirmInp){ confirmInp.placeholder = 'Type the department name here\u2026'; confirmInp.value = ''; }
     document.getElementById('deleteModal').classList.add('open');
   });
 
@@ -2013,6 +2040,54 @@ function openContactModal(mode){
 
   const btnSaveContact = $('btnSaveContact');
   if(btnSaveContact) btnSaveContact.addEventListener('click', saveContact);
+
+  // D-9: Hide "Avg Daily Uses" column if all values are N/A
+  (function hideEmptyAvgUses(){
+    const tbl = document.querySelector('.readonly-tbl');
+    if(!tbl) return;
+    const cells = tbl.querySelectorAll('tbody td:nth-child(4)');
+    const allNA = Array.from(cells).every(td => td.textContent.trim() === 'N/A');
+    if(allNA && cells.length) tbl.classList.add('hide-avg-uses');
+  })();
+
+  // D-5: Inline delete confirmation — "Sure?" pattern on all .del-btn
+  document.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const b = this;
+      if(b.dataset.confirming) return; // already in confirm state
+      const origText = b.textContent;
+      const origBg = b.style.background;
+      const origColor = b.style.color;
+      b.textContent = 'Sure?';
+      b.style.background = '#c53030';
+      b.style.color = '#fff';
+      b.dataset.confirming = '1';
+      const timer = setTimeout(() => {
+        b.textContent = origText;
+        b.style.background = origBg;
+        b.style.color = origColor;
+        delete b.dataset.confirming;
+      }, 3000);
+      b.addEventListener('click', function confirmHandler(e2){
+        e2.stopPropagation();
+        clearTimeout(timer);
+        b.removeEventListener('click', confirmHandler);
+        delete b.dataset.confirming;
+        b.textContent = origText;
+        b.style.background = origBg;
+        b.style.color = origColor;
+        // Execute the actual delete — remove the row
+        const row = b.closest('tr');
+        if(row) row.remove();
+      }, {once: true});
+    });
+  });
+
+  // Close overflow menu on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.toolbar-more-dropdown').forEach(d => d.style.display = 'none');
+  });
 
   // Ctrl+S shortcut
   document.addEventListener('keydown', function(e){
