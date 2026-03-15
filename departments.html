@@ -928,6 +928,8 @@
   </div>
 </div>
 
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 /* ── Tab switching (preserved) ────────────────────────── */
@@ -1091,6 +1093,8 @@ function openContactModal(mode){
         if(seen.has(c.lClientKey)) return false;
         seen.add(c.lClientKey); return true;
       });
+      // Only replace dropdown if we actually got clients — preserve demo HTML otherwise
+      if(allClients.length === 0){ showDemoBadge(); return; }
       const sel = $('selClient');
       sel.innerHTML = '<option value="">-- Select Client --</option>';
       allClients.sort((a,b)=>(a.sClientName1||'').localeCompare(b.sClientName1||''));
@@ -1168,7 +1172,12 @@ function openContactModal(mode){
   function populateMainTab(d){
     if(!d) return;
     // D-2: Auto-set client dropdown to department's parent client
-    const clientKey = d.lClientKey || d.plClientKey;
+    let clientKey = d.lClientKey || d.plClientKey;
+    // Detail endpoint may omit clientKey — fall back to cached department list
+    if(!clientKey && currentDeptKey){
+      const cached = allDepartments.find(dep => dep.lDepartmentKey == currentDeptKey);
+      if(cached) clientKey = cached.lClientKey;
+    }
     if(clientKey){
       const sel = $('selClient');
       if(sel && sel.value != clientKey) sel.value = clientKey;
@@ -1996,10 +2005,13 @@ function openContactModal(mode){
     loadDepartments(key, null);
   });
 
-  $('selDept').addEventListener('change', function(){
+  $('selDept').addEventListener('change', async function(){
     const key = this.value;
     if(!key) return;
-    loadDepartmentDetail(key);
+    const clientBefore = $('selClient').value;
+    await loadDepartmentDetail(key);
+    // Preserve client selection if detail API didn't include clientKey
+    if(!$('selClient').value && clientBefore) $('selClient').value = clientBefore;
   });
 
   // Active toggle label sync
@@ -2129,7 +2141,10 @@ function openContactModal(mode){
       } else {
         sel.selectedIndex = 1;
       }
+      const savedClientVal = sel.value;
       await loadDepartments(sel.value, paramDept || null);
+      // Ensure client dropdown wasn't cleared by populateMainTab (detail API may omit clientKey)
+      if(!sel.value && savedClientVal) sel.value = savedClientVal;
       showLiveBadge();
     }
   } catch(e){

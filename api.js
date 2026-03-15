@@ -18,6 +18,10 @@ const API = (() => {
     return getToken() === 'demo';
   }
 
+  function isMockMode() {
+    return typeof MockAPI !== 'undefined' && typeof MockDB !== 'undefined';
+  }
+
   function setToken(token) {
     localStorage.setItem('tsi_token', token);
   }
@@ -54,6 +58,15 @@ const API = (() => {
 
   // ── Login ─────────────────────────────────────────────
   async function login(email, password) {
+    // ── Mock mode: instant login ────────────────────────
+    if (isMockMode()) {
+      const mockUser = MockDB.getByKey('users', 2);
+      const tokenStr = 'mock-token-' + Date.now();
+      setToken(tokenStr);
+      if (mockUser) setUser(mockUser);
+      return { success: true, user: mockUser, data: { isAuthenticated: true, token: tokenStr, user: mockUser } };
+    }
+
     const res = await fetch(BASE_URL + '/Authentication/UserLogin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -133,7 +146,13 @@ const API = (() => {
 
   // ── Core Fetch Wrapper ────────────────────────────────
   // Handles token attachment, 401 detection, JSON parsing
+  // When MockAPI is loaded, routes all calls through the mock layer.
   async function request(method, endpoint, body) {
+    // ── Mock mode: bypass network entirely ──────────────
+    if (isMockMode()) {
+      return MockAPI.handleRequest(method, endpoint, body);
+    }
+
     const token = getToken();
     const headers = { 'Content-Type': 'application/json' };
     if (token) {
@@ -598,6 +617,15 @@ const API = (() => {
     updateDemoBadge: function(status) {
       const indicator = document.querySelector('.save-indicator') || document.getElementById('saveIndicator');
       if (!indicator) return;
+      if (isMockMode()) {
+        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg> Mock Data';
+        indicator.style.display = 'inline-flex';
+        indicator.style.alignItems = 'center';
+        indicator.style.color = '#93C5FD';
+        indicator.style.fontSize = '11px';
+        indicator.style.fontWeight = '600';
+        return;
+      }
       if (isDemoMode()) {
         indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data';
         indicator.style.display = 'inline-flex';
@@ -825,7 +853,8 @@ const API = (() => {
 
     // Config
     BASE_URL,
-    isDemoMode
+    isDemoMode,
+    isMockMode
   };
 })();
 
