@@ -2,43 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Repair Items | TSI Redesign</title>
+  <title>Repair Items Catalog | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* PAGE LAYOUT */
     .page-body{overflow:hidden;display:flex;flex-direction:column}
 
-    /* STATUS STRIP density */
-    .status-strip{gap:5px;padding:4px 14px}
-    .ss-chip{gap:4px;padding:2px 8px;border-radius:5px;font-size:10.5px}
+    /* Filter toolbar extras not in styles.css */
+    .filter-sep{width:1px;height:22px;background:var(--border-dk);flex-shrink:0}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;letter-spacing:.3px}
+    .seg-group{display:flex;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);border:none;background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .1s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
 
-    /* FILTER BAR */
-    .filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#DDEEF0;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
-    .filter-search{flex:0 0 200px;height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px 0 26px;font-size:11px;font-family:inherit;color:var(--text);outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 7px center}
-    .filter-search:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
-    .seg-group{display:inline-flex;border:1.5px solid var(--border-dk);border-radius:5px;overflow:hidden;background:#fff}
-    .seg-btn{padding:0 10px;height:24px;border:none;background:transparent;color:var(--label);font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit;border-right:1px solid var(--border-dk);transition:all .12s}
-    .seg-btn:last-child{border-right:none}
-    .seg-btn:hover{background:var(--bg)}
-    .seg-btn.active{background:var(--navy);color:#fff}
-    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-    .divider{height:20px;width:1px;background:var(--border-dk);margin:0 2px}
+    /* Section cards (dc) not in styles.css */
+    .dc{background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+    .dc-head{background:#F0F4FA;padding:5px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);border-bottom:1px solid var(--border)}
+    .dc-body{padding:10px 12px}
+    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
+    .span3{grid-column:span 3}.span4{grid-column:span 4}
 
-    /* MASTER-DETAIL SPLIT */
-    .split-layout{display:flex;flex:1;overflow:hidden}
-
-    /* LEFT PANEL — item list */
-    .split-left{width:420px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .split-left-head{background:#ECF4F5;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .split-left-list{flex:1;overflow-y:auto}
-    .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
-
-    /* LIST TABLE */
+    /* ── Repair Items split layout ── */
+    .ri-split{display:flex;flex:1;overflow:hidden}
+    .ri-left{width:420px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .ri-left-head{background:#F0F4FA;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .ri-list{flex:1;overflow-y:auto}
+    .ri-right{flex:1;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+    .ri-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:8px}
+    .ri-filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#DDEEF0;border-bottom:1px solid var(--border-dk);flex-wrap:wrap;flex-shrink:0}
+    .ri-filter-search{flex:0 0 200px;height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px 0 26px;font-size:11px;font-family:inherit;color:var(--text);outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 7px center}
+    .ri-detail-header{background:#fff;border-bottom:1px solid var(--border);padding:8px 14px;flex-shrink:0}
+    .ri-dh-title{font-size:14px;font-weight:800;color:var(--navy);line-height:1.2}
+    .ri-dh-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .ri-tabs{display:flex;border-bottom:2px solid var(--border-dk);background:#DDEEF0;flex-shrink:0;padding:0 10px}
+    .ri-tab{padding:6px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;white-space:nowrap;user-select:none}
+    .ri-tab:hover{color:var(--navy)}
+    .ri-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .ri-pane{display:none;flex:1;overflow-y:auto;padding:10px 14px;flex-direction:column;gap:8px;background:var(--bg)}
+    .ri-pane.active{display:flex}
     table.item-list{width:100%;border-collapse:collapse}
     table.item-list th{background:var(--navy);color:#fff;font-size:9.5px;padding:5px 10px;text-align:left;font-weight:700;white-space:nowrap;position:sticky;top:0;z-index:1}
     table.item-list td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    table.item-list td.td-desc{max-width:160px}
     table.item-list tbody tr:nth-child(even){background:var(--row-alt)}
     table.item-list tbody tr:hover{background:#CFFAFE;cursor:pointer}
     table.item-list tbody tr.selected{background:#C8D8F0;font-weight:600}
@@ -49,63 +54,19 @@
     .pl-p{background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE}
     .pl-l{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA}
     .active-dot{display:inline-block;width:7px;height:7px;border-radius:50%}
-    .dot-yes{background:var(--green)}
-    .dot-no{background:var(--muted)}
-
-    /* RIGHT PANEL — detail */
-    .split-right{flex:1;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
-    .detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:8px}
-    .detail-empty svg{opacity:.25}
-    .detail-empty p{font-size:13px}
-
-    /* DETAIL HEADER */
-    .detail-header{background:#fff;border-bottom:1px solid var(--border);padding:8px 14px;flex-shrink:0}
-    .dh-title{font-size:14px;font-weight:800;color:var(--navy);line-height:1.2}
-    .dh-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .dot-yes{background:var(--green)}.dot-no{background:var(--muted)}
     .tsi-code-badge{background:var(--bg);border:1px solid var(--border-dk);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel);font-family:monospace}
     .pid-badge{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;color:#7C3AED}
-
-    /* TABS — compact override */
-    .ri-tabs{display:flex;border-bottom:2px solid var(--border-dk);background:#DDEEF0;flex-shrink:0;padding:0 10px}
-    .ri-tab{padding:6px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;white-space:nowrap;user-select:none}
-    .ri-tab:hover{color:var(--navy)}
-    .ri-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
-
-    /* TAB PANES */
-    .ri-pane{display:none;flex:1;overflow-y:auto;padding:10px 14px;flex-direction:column;gap:8px;background:var(--bg)}
-    .ri-pane.active{display:flex}
-
-    /* SECTION CARDS in detail */
-    .dc{background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(var(--primary-rgb),.05)}
-    .dc-head{background:linear-gradient(135deg,#E3EAF6 0%,#EDF1F9 100%);padding:5px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);border-bottom:1px solid var(--border)}
-    .dc-body{padding:10px 12px}
-    .fg{display:grid;gap:6px 10px}
-    .g2{grid-template-columns:1fr 1fr}
-    .g3{grid-template-columns:1fr 1fr 1fr}
-    .g4{grid-template-columns:1fr 1fr 1fr 1fr}
-    .span2{grid-column:span 2}
-    .span3{grid-column:span 3}
-    .span4{grid-column:span 4}
-    .ff{display:flex;flex-direction:column;gap:2px}
-    .ff label{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-    .inp{height:26px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11.5px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .15s}
-    .inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
-    select.inp{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896AA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px}
-
-    /* TECH TIME GRID */
+    .ri-detail-footer{background:#fff;border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .save-status{font-size:11px;display:flex;align-items:center;gap:5px}
+    .save-ready .save-icon,.save-dirty .save-icon,.save-saving .save-icon,.save-saved .save-icon,.save-error .save-icon{font-size:9px}
+    .save-ready .save-icon{color:#aaa}.save-dirty .save-icon{color:var(--amber)}.save-saving .save-icon{color:var(--blue)}.save-saved .save-icon{color:var(--green)}.save-error .save-icon{color:var(--red)}
     .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
     .tg-head{background:var(--navy);color:#fff;font-size:9.5px;font-weight:700;padding:5px 10px;text-align:center;letter-spacing:.3px}
     .tg-sub{background:#ECF4F5;color:var(--navy);font-size:9px;font-weight:700;padding:3px 10px;text-align:center;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
-    .tg-row{display:flex;align-items:center;border-bottom:1px solid var(--border)}
-    .tg-row:last-child{border-bottom:none}
     .tg-lbl{width:60px;flex-shrink:0;background:#F8FAFC;padding:4px 8px;font-size:10px;font-weight:700;color:var(--navy);border-right:1px solid var(--border);text-align:center}
     .tg-cell{flex:1;padding:3px 6px}
     .tg-cell .inp{height:22px;font-size:11px}
-    .tg-divider{border-left:2px solid var(--border-dk)}
-    .tg-col-head{background:var(--navy)}
-    .cost-row{display:flex;gap:10px}
-
-    /* TOGGLE rows in Flags tab */
     .toggle-row{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--border)}
     .toggle-row:last-child{border-bottom:none}
     .toggle-info{flex:1}
@@ -117,21 +78,24 @@
     .toggle-slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
     .toggle input:checked+.toggle-slider{background:var(--navy)}
     .toggle input:checked+.toggle-slider::before{transform:translateX(17px)}
-
-    /* DETAIL FOOTER */
-    .detail-footer{background:#fff;border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .save-status{font-size:11px;display:flex;align-items:center;gap:5px}
-    .save-ready .save-icon{color:#aaa}
-    .save-dirty .save-icon{color:var(--amber)}
-    .save-saving .save-icon{color:var(--blue)}
-    .save-saved .save-icon{color:var(--green)}
-    .save-error .save-icon{color:var(--red)}
-    .save-icon{font-size:9px}
-
-    /* DATA BADGE */
+    .req{color:var(--red)}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
     .data-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
     .data-badge.live{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
     .data-badge.demo{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:none;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#fff;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:#F0F4FA}
+    .modal-header h3{font-size:13px;font-weight:700;color:var(--navy);margin:0}
+    .modal-header-red{background:#FEF2F2}
+    .modal-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 6px}
+    .modal-body{padding:16px;overflow-y:auto;flex:1}
+    .modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:#F7F8FC}
+    .btn-cancel{padding:6px 14px;border:1.5px solid var(--border-dk);border-radius:5px;background:#fff;font-size:11.5px;cursor:pointer;font-family:inherit;color:var(--text)}
+    .btn-save{padding:6px 14px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
   </style>
 </head>
 <body>
@@ -140,37 +104,33 @@
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </div>
-      <div class="brand-text">
-        <div class="t1">Total Scope, Inc.</div>
-        <div class="t2">The Leader in Medical Device Repair</div>
-      </div>
+      <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>
     </div>
     <div class="nav-group">
-      <div class="nav-item" onclick="window.location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
-      <div class="nav-item" onclick="window.location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
-      <div class="nav-item" onclick="window.location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
-      <div class="nav-item" onclick="window.location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
-      <div class="nav-item" onclick="window.location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
-      <div class="nav-item" onclick="window.location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
-      <div class="nav-item" onclick="window.location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
-      <div class="nav-item" onclick="window.location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
-      <div class="nav-item" onclick="window.location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
-      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Repair Items</div>
-      <div class="nav-item" onclick="window.location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
-      <div class="nav-item" onclick="window.location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
-      <div class="nav-item" onclick="window.location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
-      <div class="nav-item" onclick="window.location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
-      <div class="nav-item" onclick="window.location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
-      <div class="nav-item" onclick="window.location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
-      <div class="nav-item" onclick="window.location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
+      <div class="nav-item" onclick="location='workspace.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>My Workspace</div>
+      <div class="nav-item" onclick="location='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Dashboard</div>
+      <div class="nav-item" onclick="location='clients.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</div>
+      <div class="nav-item" onclick="location='departments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Departments</div>
+      <div class="nav-item" onclick="location='repairs.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Repairs</div>
+      <div class="nav-item" onclick="location='inventory.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Inventory</div>
+      <div class="nav-item" onclick="location='suppliers.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Suppliers</div>
+      <div class="nav-item" onclick="location='scopes.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Scopes</div>
+      <div class="nav-item" onclick="location='scope-model.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>Scope Model</div>
+      <div class="nav-item" onclick="location='instruments.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Instruments</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Repair Items</div>
+      <div class="nav-item" onclick="location='contracts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Contracts</div>
+      <div class="nav-item" onclick="location='acquisitions.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Acquisitions</div>
+      <div class="nav-item" onclick="location='endocarts.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Carts</div>
+      <div class="nav-item" onclick="location='loaners.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loaners</div>
+      <div class="nav-item" onclick="location='onsite-services.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Onsite Services</div>
+      <div class="nav-item" onclick="location='outsource-vindication.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l4.58-4.58c.94-.94.94-2.48 0-3.42L9 5z"/><path d="M6 9.01V9"/><path d="M22 8l-5 5"/><path d="M19 5l-5 5"/></svg>Outsource Validation</div>
+      <div class="nav-item" onclick="location='product-sale.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Product Sale</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Quality</div>
-      <div class="nav-item" onclick="window.location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
+      <div class="nav-item" onclick="location='financial.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reports/Extracts</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Administration</div>
-      <div class="nav-item" onclick="window.location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
+      <div class="nav-item" onclick="location='development-list.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Development List</div>
     </div>
     <div class="sidebar-footer">&copy; 2026 Total Scope, Inc.</div>
   </nav>
@@ -183,11 +143,24 @@
       </div>
       <div class="topbar-right">
         <div style="position:relative;margin-right:12px" id="newOrderWrap">
-          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button onclick="document.getElementById('newOrderMenu').classList.toggle('open')" style="height:30px;padding:0 12px;border-radius:6px;border:none;background:#22C55E;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.15)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
-            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='endocarts?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='instruments?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='product-sale?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div>
+            </a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='endocarts?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg>
+              <div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div>
+            </a>
           </div>
         </div>
         <span id="dataBadge" class="data-badge"></span>
@@ -205,931 +178,243 @@
 
     <div class="page-body">
 
-      <!-- TOOLBAR -->
-      <div class="toolbar">
-        <button class="btn btn-navy" onclick="openAddModal()" style="gap:5px">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Repair Item
-        </button>
-        <div class="divider"></div>
-        <span id="saveStatus" class="save-status save-ready">
-          <span class="save-icon" id="saveIcon">&#9679;</span>
-          <span id="saveText">Ready</span>
-        </span>
-        <div style="flex:1"></div>
-        <button class="btn btn-outline" onclick="loadItems()" style="gap:5px">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
-          Refresh
-        </button>
-      </div>
-
-      <!-- STATUS STRIP -->
-      <div class="status-strip">
+      <!-- Status Strip -->
+      <div class="status-strip" style="gap:5px;padding:4px 14px">
         <div class="ss-chip ss-info">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          <span class="ss-label">Items</span> <span class="ss-val" id="ssTotal">—</span>
+          <span class="ss-label">Items</span> <span class="ss-val" id="ri_ssTotal">—</span>
         </div>
-        <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val" id="ssActive">—</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="ssInactive">—</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val" id="ssFlexible">—</span></div>
-        <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val" id="ssRigid">—</span></div>
-        <div class="ss-chip ss-neutral"><span class="ss-label">Showing</span> <span class="ss-val" id="ssShowing">—</span></div>
+        <div class="ss-chip ss-active"><span class="ss-label">Active</span> <span class="ss-val" id="ri_ssActive">—</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Inactive</span> <span class="ss-val" id="ri_ssInactive">—</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Flexible</span> <span class="ss-val" id="ri_ssFlexible">—</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Rigid</span> <span class="ss-val" id="ri_ssRigid">—</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Showing</span> <span class="ss-val" id="ri_ssShowing">—</span></div>
         <div style="flex:1"></div>
-        <span style="font-size:10px;color:var(--muted)" id="ssLastSync"></span>
+        <span style="font-size:10px;color:var(--muted)" id="ri_ssLastSync"></span>
       </div>
 
-      <!-- FILTER BAR -->
-      <div class="filter-bar">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="ri_openAddModal()" style="gap:5px">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Item
+        </button>
+        <div class="filter-sep"></div>
         <span class="filter-label">Type</span>
-        <div class="seg-group" id="typeGroup">
-          <button class="seg-btn active" data-type="" onclick="setTypeFilter('',this)">All</button>
-          <button class="seg-btn" data-type="F" onclick="setTypeFilter('F',this)">Flexible</button>
-          <button class="seg-btn" data-type="R" onclick="setTypeFilter('R',this)">Rigid</button>
+        <div class="seg-group" id="ri_typeGroup">
+          <button class="seg-btn active" onclick="ri_setTypeFilter('',this)">All</button>
+          <button class="seg-btn" onclick="ri_setTypeFilter('F',this)">Flexible</button>
+          <button class="seg-btn" onclick="ri_setTypeFilter('R',this)">Rigid</button>
         </div>
-        <div class="divider"></div>
+        <div class="filter-sep"></div>
         <span class="filter-label">Status</span>
-        <div class="seg-group" id="activeGroup">
-          <button class="seg-btn active" data-active="" onclick="setActiveFilter('',this)">All</button>
-          <button class="seg-btn" data-active="true" onclick="setActiveFilter('true',this)">Active</button>
-          <button class="seg-btn" data-active="false" onclick="setActiveFilter('false',this)">Inactive</button>
+        <div class="seg-group" id="ri_activeGroup">
+          <button class="seg-btn active" onclick="ri_setActiveFilter('',this)">All</button>
+          <button class="seg-btn" onclick="ri_setActiveFilter('true',this)">Active</button>
+          <button class="seg-btn" onclick="ri_setActiveFilter('false',this)">Inactive</button>
         </div>
-        <div class="divider"></div>
-        <input class="filter-search" id="searchInp" placeholder="Search description or code…" oninput="applyFilters()"/>
+        <div class="filter-sep"></div>
+        <input class="ri-filter-search" id="ri_searchInp" placeholder="Search description or code…" oninput="ri_applyFilters()"/>
       </div>
 
-      <!-- MASTER-DETAIL -->
-      <div class="split-layout">
-
-        <!-- LEFT: Item List -->
-        <div class="split-left">
-          <div class="split-left-head">
+      <!-- RI Split -->
+      <div class="ri-split">
+        <div class="ri-left">
+          <div class="ri-left-head">
             Repair Items
-            <span style="background:var(--navy);color:#fff;font-size:8px;font-weight:700;padding:1px 6px;border-radius:8px" id="listCount">0</span>
+            <span style="background:var(--navy);color:#fff;font-size:8px;font-weight:700;padding:1px 6px;border-radius:8px" id="ri_listCount">0</span>
           </div>
-          <div class="split-left-list" id="itemList">
-            <div class="empty-state">Loading repair items…</div>
-          </div>
+          <div class="ri-list" id="ri_itemList"><div class="empty-state">Loading repair items…</div></div>
         </div>
 
-        <!-- RIGHT: Detail Panel -->
-        <div class="split-right" id="detailPanel">
-          <div class="detail-empty" id="detailEmpty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-            <p>Select a repair item to view details</p>
+        <div class="ri-right" id="ri_detailPanel">
+          <div class="ri-empty" id="ri_detailEmpty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.25"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            <p style="font-size:13px">Select a repair item to view details</p>
           </div>
 
-          <!-- Detail contents — hidden until item selected -->
-          <div id="detailContents" style="display:none;flex:1;flex-direction:column;overflow:hidden">
-
-            <!-- DETAIL HEADER -->
-            <div class="detail-header">
-              <div class="dh-title" id="dhTitle">—</div>
-              <div class="dh-meta">
-                <span class="tsi-code-badge" id="dhTsiCode">—</span>
-                <span class="pid-badge" id="dhProductId" style="display:none"></span>
-                <span id="dhTypeBadge"></span>
-                <span id="dhPlBadge"></span>
+          <div id="ri_detailContents" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+            <div class="ri-detail-header">
+              <div class="ri-dh-title" id="ri_dhTitle">—</div>
+              <div class="ri-dh-meta">
+                <span class="tsi-code-badge" id="ri_dhTsiCode">—</span>
+                <span class="pid-badge" id="ri_dhProductId" style="display:none"></span>
+                <span id="ri_dhTypeBadge"></span>
+                <span id="ri_dhPlBadge"></span>
               </div>
             </div>
-
-            <!-- TABS -->
             <div class="ri-tabs">
-              <div class="ri-tab active" onclick="switchTab('overview',this)">Overview</div>
-              <div class="ri-tab" onclick="switchTab('pricing',this)">Pricing &amp; Time</div>
-              <div class="ri-tab" onclick="switchTab('flags',this)">Flags</div>
+              <div class="ri-tab active" onclick="ri_switchTab('overview',this)">Overview</div>
+              <div class="ri-tab" onclick="ri_switchTab('pricing',this)">Pricing &amp; Time</div>
+              <div class="ri-tab" onclick="ri_switchTab('flags',this)">Flags</div>
             </div>
 
-            <!-- OVERVIEW TAB -->
-            <div class="ri-pane active" id="pane-overview">
-              <div class="dc">
-                <div class="dc-head">Identification</div>
-                <div class="dc-body">
-                  <div class="fg g2">
-                    <div class="ff span2">
-                      <label>Description <span class="req">*</span></label>
-                      <input class="inp" id="fDescription" type="text" placeholder="Repair item description"/>
-                    </div>
-                    <div class="ff">
-                      <label>TSI Code</label>
-                      <input class="inp" id="fTsiCode" type="text" placeholder="e.g. BEND-001"/>
-                    </div>
-                    <div class="ff">
-                      <label>Product ID</label>
-                      <input class="inp" id="fProductId" type="text" placeholder="e.g. P-BEND"/>
-                    </div>
-                  </div>
+            <!-- Overview -->
+            <div class="ri-pane active" id="ri_pane-overview">
+              <div class="dc"><div class="dc-head">Identification</div><div class="dc-body">
+                <div class="fg g2">
+                  <div class="ff span2"><label>Description <span class="req">*</span></label><input class="inp" id="ri_fDescription" type="text"/></div>
+                  <div class="ff"><label>TSI Code</label><input class="inp" id="ri_fTsiCode" type="text"/></div>
+                  <div class="ff"><label>Product ID</label><input class="inp" id="ri_fProductId" type="text"/></div>
                 </div>
-              </div>
-              <div class="dc">
-                <div class="dc-head">Classification</div>
-                <div class="dc-body">
-                  <div class="fg g4">
-                    <div class="ff">
-                      <label>Instrument Type <span class="req">*</span></label>
-                      <select class="inp" id="fType">
-                        <option value="F">Flexible</option>
-                        <option value="R">Rigid</option>
-                      </select>
-                    </div>
-                    <div class="ff">
-                      <label>Part or Labor <span class="req">*</span></label>
-                      <select class="inp" id="fPartOrLabor">
-                        <option value="L">Labor</option>
-                        <option value="P">Part</option>
-                      </select>
-                    </div>
-                    <div class="ff">
-                      <label>Repair Level</label>
-                      <select class="inp" id="fRepairLevel">
-                        <option value="">— none —</option>
-                      </select>
-                    </div>
-                    <div class="ff">
-                      <label>Status</label>
-                      <select class="inp" id="fRepairStatus">
-                        <option value="">— none —</option>
-                      </select>
-                    </div>
-                    <div class="ff">
-                      <label>Turnaround (days)</label>
-                      <input class="inp" id="fTurnaround" type="number" min="0" placeholder="0"/>
-                    </div>
-                  </div>
+              </div></div>
+              <div class="dc"><div class="dc-head">Classification</div><div class="dc-body">
+                <div class="fg g4">
+                  <div class="ff"><label>Type <span class="req">*</span></label><select class="inp" id="ri_fType"><option value="F">Flexible</option><option value="R">Rigid</option></select></div>
+                  <div class="ff"><label>Part/Labor <span class="req">*</span></label><select class="inp" id="ri_fPartOrLabor"><option value="L">Labor</option><option value="P">Part</option></select></div>
+                  <div class="ff"><label>Repair Level</label><select class="inp" id="ri_fRepairLevel"><option value="">— none —</option></select></div>
+                  <div class="ff"><label>Status</label><select class="inp" id="ri_fRepairStatus"><option value="">— none —</option></select></div>
+                  <div class="ff"><label>Turnaround (days)</label><input class="inp" id="ri_fTurnaround" type="number" min="0"/></div>
                 </div>
-              </div>
+              </div></div>
             </div>
 
-            <!-- PRICING & TIME TAB -->
-            <div class="ri-pane" id="pane-pricing">
-              <div class="dc">
-                <div class="dc-head">Average Costs</div>
-                <div class="dc-body">
-                  <div class="fg g2">
-                    <div class="ff">
-                      <label>Avg Cost — Material ($)</label>
-                      <input class="inp" id="fCostMaterial" type="number" step="0.01" min="0" placeholder="0.00"/>
-                    </div>
-                    <div class="ff">
-                      <label>Avg Cost — Labor ($)</label>
-                      <input class="inp" id="fCostLabor" type="number" step="0.01" min="0" placeholder="0.00"/>
-                    </div>
+            <!-- Pricing & Time -->
+            <div class="ri-pane" id="ri_pane-pricing">
+              <div class="dc"><div class="dc-head">Average Costs</div><div class="dc-body">
+                <div class="fg g2">
+                  <div class="ff"><label>Avg Cost — Material ($)</label><input class="inp" id="ri_fCostMaterial" type="number" step="0.01" min="0"/></div>
+                  <div class="ff"><label>Avg Cost — Labor ($)</label><input class="inp" id="ri_fCostLabor" type="number" step="0.01" min="0"/></div>
+                </div>
+              </div></div>
+              <div class="dc"><div class="dc-head">Technician Time (minutes)</div><div class="dc-body" style="padding:0">
+                <div class="time-grid">
+                  <div class="tg-head" style="border-right:2px solid rgba(255,255,255,.2)">Standard</div>
+                  <div class="tg-head">Small Diameter</div>
+                  <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border);border-right:2px solid var(--border-dk)">
+                    <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
+                    <div class="tg-sub">Tech 1</div><div class="tg-sub">Tech 2</div><div class="tg-sub">Tech 3</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border)">
+                    <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
+                    <div class="tg-sub">Tech 1</div><div class="tg-sub">Tech 2</div><div class="tg-sub">Tech 3</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-right:2px solid var(--border-dk)">
+                    <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT1" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT2" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT3" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr">
+                    <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT1SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT2SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
+                    <div class="tg-cell"><input class="inp" id="ri_fT3SD" type="number" min="0" style="height:22px;font-size:11px"/></div>
                   </div>
                 </div>
-              </div>
-              <div class="dc">
-                <div class="dc-head">Technician Time (minutes)</div>
-                <div class="dc-body" style="padding:0">
-                  <div class="time-grid">
-                    <!-- header row -->
-                    <div class="tg-head" style="border-right:2px solid rgba(255,255,255,.2)">Standard</div>
-                    <div class="tg-head">Small Diameter</div>
-                    <!-- sub-head -->
-                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border);border-right:2px solid var(--border-dk)">
-                      <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
-                      <div class="tg-sub">Tech 1</div>
-                      <div class="tg-sub">Tech 2</div>
-                      <div class="tg-sub">Tech 3</div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-bottom:1px solid var(--border)">
-                      <div style="background:#F8FAFC;border-right:1px solid var(--border)"></div>
-                      <div class="tg-sub">Tech 1</div>
-                      <div class="tg-sub">Tech 2</div>
-                      <div class="tg-sub">Tech 3</div>
-                    </div>
-                    <!-- data rows -->
-                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr;border-right:2px solid var(--border-dk)">
-                      <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
-                      <div class="tg-cell"><input class="inp" id="fT1" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                      <div class="tg-cell"><input class="inp" id="fT2" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                      <div class="tg-cell"><input class="inp" id="fT3" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr">
-                      <div class="tg-lbl" style="display:flex;align-items:center;justify-content:center">Mins</div>
-                      <div class="tg-cell"><input class="inp" id="fT1SD" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                      <div class="tg-cell"><input class="inp" id="fT2SD" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                      <div class="tg-cell"><input class="inp" id="fT3SD" type="number" min="0" placeholder="0" style="height:22px;font-size:11px"/></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </div></div>
             </div>
 
-            <!-- FLAGS TAB -->
-            <div class="ri-pane" id="pane-flags">
-              <div class="dc">
-                <div class="dc-head">Behavior Flags</div>
-                <div class="dc-body">
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Active</div>
-                      <div class="toggle-sub">Item is available for use on work orders</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fActive"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Okay to Skip</div>
-                      <div class="toggle-sub">This item can be bypassed during repair flow</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fOkayToSkip"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Is Adjustment</div>
-                      <div class="toggle-sub">Item represents a price adjustment line</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fIsAdjustment"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Skip Pick List</div>
-                      <div class="toggle-sub">Do not include in technician pick lists</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fSkipPickList"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Profit Item (+)</div>
-                      <div class="toggle-sub">Positive profit line item marker</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fProfitPlus"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Profit Item (−)</div>
-                      <div class="toggle-sub">Negative profit line item marker</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fProfitMinus"/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row">
-                    <div class="toggle-info">
-                      <div class="toggle-label">Locked</div>
-                      <div class="toggle-sub">Prevents editing outside administration</div>
-                    </div>
-                    <label class="toggle"><input type="checkbox" id="fLocked"/><span class="toggle-slider"></span></label>
-                  </div>
-                </div>
-              </div>
+            <!-- Flags -->
+            <div class="ri-pane" id="ri_pane-flags">
+              <div class="dc"><div class="dc-head">Behavior Flags</div><div class="dc-body">
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Active</div><div class="toggle-sub">Available for use on work orders</div></div><label class="toggle"><input type="checkbox" id="ri_fActive"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Okay to Skip</div><div class="toggle-sub">Can be bypassed during repair flow</div></div><label class="toggle"><input type="checkbox" id="ri_fOkayToSkip"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Is Adjustment</div><div class="toggle-sub">Represents a price adjustment line</div></div><label class="toggle"><input type="checkbox" id="ri_fIsAdjustment"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Skip Pick List</div><div class="toggle-sub">Do not include in technician pick lists</div></div><label class="toggle"><input type="checkbox" id="ri_fSkipPickList"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Profit Item (+)</div><div class="toggle-sub">Positive profit line item marker</div></div><label class="toggle"><input type="checkbox" id="ri_fProfitPlus"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Profit Item (−)</div><div class="toggle-sub">Negative profit line item marker</div></div><label class="toggle"><input type="checkbox" id="ri_fProfitMinus"/><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Locked</div><div class="toggle-sub">Prevents editing outside administration</div></div><label class="toggle"><input type="checkbox" id="ri_fLocked"/><span class="toggle-slider"></span></label></div>
+              </div></div>
             </div>
 
-            <!-- DETAIL FOOTER -->
-            <div class="detail-footer">
-              <button class="btn btn-danger" onclick="deleteCurrentItem()" style="gap:5px">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                Delete
+            <div class="ri-detail-footer">
+              <button class="btn btn-danger" onclick="ri_deleteCurrentItem()" style="gap:5px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
               </button>
               <div style="flex:1"></div>
-              <span id="detailSaveStatus" class="save-status save-ready">
-                <span class="save-icon" id="detailSaveIcon">&#9679;</span>
-                <span id="detailSaveText">Ready</span>
+              <span id="ri_saveStatus" class="save-status save-ready">
+                <span class="save-icon" id="ri_saveIcon">&#9679;</span>
+                <span id="ri_saveText">Ready</span>
               </span>
-              <button class="btn btn-outline" onclick="saveCurrentItem()" style="gap:5px">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                Save
+              <button class="btn btn-outline" onclick="ri_saveCurrentItem()" style="gap:5px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Save
               </button>
             </div>
-          </div>
-        </div><!-- /split-right -->
-
-      </div><!-- /split-layout -->
+          </div><!-- /ri_detailContents -->
+        </div><!-- /ri-right -->
+      </div><!-- /ri-split -->
 
     </div><!-- /page-body -->
   </div><!-- /main -->
 </div><!-- /shell -->
 
-<!-- ADD REPAIR ITEM MODAL -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal-box sm" style="width:480px">
-    <div class="modal-header">
-      <h3>Add Repair Item</h3>
-      <button class="modal-close" onclick="closeAddModal()">&#10005;</button>
-    </div>
+
+<!-- RI Modals -->
+<div class="modal-overlay" id="ri_addModal">
+  <div class="modal-box" style="width:480px">
+    <div class="modal-header"><h3>Add Repair Item</h3><button class="modal-close" onclick="ri_closeAddModal()">&#10005;</button></div>
     <div class="modal-body">
-      <div class="fg g1" style="display:flex;flex-direction:column;gap:10px">
-        <div class="ff">
-          <label>Description <span class="req">*</span></label>
-          <input class="inp" id="mDescription" type="text" placeholder="e.g. Bending Section Replacement" style="height:30px"/>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="ff"><label>Description <span class="req">*</span></label><input class="inp" id="ri_mDescription" type="text" style="height:30px"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="ff"><label>TSI Code</label><input class="inp" id="ri_mTsiCode" type="text" style="height:30px"/></div>
+          <div class="ff"><label>Product ID</label><input class="inp" id="ri_mProductId" type="text" style="height:30px"/></div>
+          <div class="ff"><label>Type <span class="req">*</span></label><select class="inp" id="ri_mType" style="height:30px"><option value="F">Flexible</option><option value="R">Rigid</option></select></div>
+          <div class="ff"><label>Part/Labor <span class="req">*</span></label><select class="inp" id="ri_mPartOrLabor" style="height:30px"><option value="L">Labor</option><option value="P">Part</option></select></div>
+          <div class="ff"><label>Turnaround (days)</label><input class="inp" id="ri_mTurnaround" type="number" min="0" value="1" style="height:30px"/></div>
+          <div class="ff"><label>Repair Level</label><select class="inp" id="ri_mRepairLevel" style="height:30px"><option value="">— none —</option></select></div>
         </div>
-        <div class="fg g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="ff">
-            <label>TSI Code</label>
-            <input class="inp" id="mTsiCode" type="text" placeholder="e.g. BEND-001" style="height:30px"/>
-          </div>
-          <div class="ff">
-            <label>Product ID</label>
-            <input class="inp" id="mProductId" type="text" placeholder="e.g. P-BEND" style="height:30px"/>
-          </div>
-          <div class="ff">
-            <label>Instrument Type <span class="req">*</span></label>
-            <select class="inp" id="mType" style="height:30px">
-              <option value="F">Flexible</option>
-              <option value="R">Rigid</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>Part or Labor <span class="req">*</span></label>
-            <select class="inp" id="mPartOrLabor" style="height:30px">
-              <option value="L">Labor</option>
-              <option value="P">Part</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>Turnaround (days)</label>
-            <input class="inp" id="mTurnaround" type="number" min="0" value="1" style="height:30px"/>
-          </div>
-          <div class="ff">
-            <label>Repair Level</label>
-            <select class="inp" id="mRepairLevel" style="height:30px">
-              <option value="">— none —</option>
-            </select>
-          </div>
-        </div>
-        <div id="addModalError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:5px;padding:6px 10px;font-size:11px;color:var(--red)"></div>
+        <div id="ri_addModalError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:5px;padding:6px 10px;font-size:11px;color:var(--red)"></div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
-      <button class="btn-save" onclick="submitAddItem()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Item
-      </button>
+      <button class="btn-cancel" onclick="ri_closeAddModal()">Cancel</button>
+      <button class="btn-save" onclick="ri_submitAddItem()">+ Add Item</button>
     </div>
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal-box sm" style="width:400px">
-    <div class="modal-header modal-header-red">
-      <h3>Delete Repair Item</h3>
-      <button class="modal-close" onclick="closeDeleteModal()">&#10005;</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:12px;color:var(--text);line-height:1.6">Are you sure you want to delete <strong id="deleteItemName"></strong>? This action cannot be undone.</p>
-    </div>
+<div class="modal-overlay" id="ri_deleteModal">
+  <div class="modal-box" style="width:400px">
+    <div class="modal-header modal-header-red"><h3>Delete Repair Item</h3><button class="modal-close" onclick="ri_closeDeleteModal()">&#10005;</button></div>
+    <div class="modal-body"><p style="font-size:12px;color:var(--text);line-height:1.6">Delete <strong id="ri_deleteItemName"></strong>? This cannot be undone.</p></div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-      <button class="btn-save" style="background:var(--red)" onclick="confirmDelete()">Delete</button>
+      <button class="btn-cancel" onclick="ri_closeDeleteModal()">Cancel</button>
+      <button class="btn-save" style="background:var(--red)" onclick="ri_confirmDelete()">Delete</button>
     </div>
   </div>
 </div>
+
 
 <script src="api.js"></script>
+<script src="js/repair-items-tab.js"></script>
 <script>
-// Auth guard
+// ── Auth ──
 try {
   if (!API.requireAuth()) throw new Error('redirect');
 } catch(e) {
   if (e.message === 'redirect') window.location = 'login.html';
 }
 
-// ─── State ───────────────────────────────────────────────────────────────────
-let allItems      = [];
-let filteredItems = [];
-let selectedKey   = null;
-let selectedItem  = null;
-let isLive        = false;
-let repairLevels  = [];
-let repairStatuses = [];
+// ── Shared helpers ──
+function showDataBadge(live) {
+  var el = document.getElementById('dataBadge');
+  if (!el) return;
+  if (live) { el.textContent = 'Live Data'; el.className = 'data-badge live'; }
+  else       { el.textContent = 'Demo Data'; el.className = 'data-badge demo'; }
+}
 
-// Active filter state
-let filterType   = '';
-let filterActive = '';
+function fmtCur(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-// ─── Demo data ───────────────────────────────────────────────────────────────
-const DEMO_ITEMS = [
-  {lRepairItemKey:1,psItemDescription:'Bending Section Replacement',psTSICode:'BEND-001',psProductID:'P-BEND',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:3,plRepairLevelKey:2,plRepairStatusID:0,pdblAvgCostMaterial:45.00,pdblAvgCostLabor:85.00,ptMinutesTech1:45,ptMinutesTech2:60,ptMinutesTech3:75,ptMinutesTech1SmallDiameter:50,ptMinutesTech2SmallDiameter:65,ptMinutesTech3SmallDiameter:80,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:2,psItemDescription:'Insertion Tube Replacement',psTSICode:'TUBE-001',psProductID:'P-TUBE',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:5,plRepairLevelKey:3,plRepairStatusID:0,pdblAvgCostMaterial:120.00,pdblAvgCostLabor:110.00,ptMinutesTech1:90,ptMinutesTech2:105,ptMinutesTech3:120,ptMinutesTech1SmallDiameter:100,ptMinutesTech2SmallDiameter:115,ptMinutesTech3SmallDiameter:130,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:3,psItemDescription:'CCD Camera Replacement',psTSICode:'CCD-001',psProductID:'P-CCD',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:7,plRepairLevelKey:3,plRepairStatusID:0,pdblAvgCostMaterial:350.00,pdblAvgCostLabor:150.00,ptMinutesTech1:120,ptMinutesTech2:135,ptMinutesTech3:150,ptMinutesTech1SmallDiameter:130,ptMinutesTech2SmallDiameter:145,ptMinutesTech3SmallDiameter:160,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:true},
-  {lRepairItemKey:4,psItemDescription:'Light Guide Replacement',psTSICode:'LG-001',psProductID:'P-LG',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:2,plRepairLevelKey:1,plRepairStatusID:0,pdblAvgCostMaterial:25.00,pdblAvgCostLabor:40.00,ptMinutesTech1:30,ptMinutesTech2:40,ptMinutesTech3:50,ptMinutesTech1SmallDiameter:35,ptMinutesTech2SmallDiameter:45,ptMinutesTech3SmallDiameter:55,pbOkayToSkip:true,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:5,psItemDescription:'Sheath Replacement - Rigid',psTSICode:'SHEATH-R01',psProductID:'P-SHR',psRigidOrFlexible:'R',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:1,plRepairLevelKey:1,plRepairStatusID:0,pdblAvgCostMaterial:15.00,pdblAvgCostLabor:30.00,ptMinutesTech1:20,ptMinutesTech2:25,ptMinutesTech3:30,ptMinutesTech1SmallDiameter:20,ptMinutesTech2SmallDiameter:25,ptMinutesTech3SmallDiameter:30,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
+var REPAIR_LEVELS = [
+  {level:1, name:'Level 1 — Minor',    pct:0.25},
+  {level:2, name:'Level 2 — Moderate', pct:0.60},
+  {level:3, name:'Level 3 — Major',    pct:1.00}
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function showDataBadge(live) {
-  const el = document.getElementById('dataBadge');
-  if (live) {
-    el.textContent = 'Live Data';
-    el.className = 'data-badge live';
-  } else {
-    el.textContent = 'Demo Data';
-    el.className = 'data-badge demo';
-  }
-  isLive = live;
-}
-
-function setDetailSaveStatus(state, text) {
-  const wrap = document.getElementById('detailSaveStatus');
-  const icon = document.getElementById('detailSaveIcon');
-  const txt  = document.getElementById('detailSaveText');
-  wrap.className = 'save-status ' + state;
-  txt.textContent = text;
-}
-
-function num(val) {
-  const n = parseFloat(val);
-  return isNaN(n) ? 0 : n;
-}
-
-function intVal(val) {
-  const n = parseInt(val, 10);
-  return isNaN(n) ? 0 : n;
-}
-
-// ─── Load Lookups ─────────────────────────────────────────────────────────────
-async function loadLookups() {
-  try {
-    const lvlResp = await API.getRepairLevels();
-    if (lvlResp && Array.isArray(lvlResp)) repairLevels = lvlResp;
-  } catch(e) {
-    repairLevels = [
-      {lRepairLevelKey:1, sRepairLevelDescription:'Level 1 - Minor'},
-      {lRepairLevelKey:2, sRepairLevelDescription:'Level 2 - Moderate'},
-      {lRepairLevelKey:3, sRepairLevelDescription:'Level 3 - Major'},
-    ];
-  }
-
-  try {
-    const stResp = await API.getRepairStatuses();
-    if (stResp && Array.isArray(stResp)) repairStatuses = stResp;
-  } catch(e) {
-    repairStatuses = [
-      {lRepairStatusID:1, sRepairStatusDescription:'Standard'},
-      {lRepairStatusID:2, sRepairStatusDescription:'Rush'},
-    ];
-  }
-
-  // Populate dropdowns
-  populateSelect('fRepairLevel', repairLevels, 'lRepairLevelKey', 'sRepairLevelDescription', '— none —');
-  populateSelect('fRepairStatus', repairStatuses, 'lRepairStatusID', 'sRepairStatusDescription', '— none —');
-  populateSelect('mRepairLevel', repairLevels, 'lRepairLevelKey', 'sRepairLevelDescription', '— none —');
-}
-
-function populateSelect(id, items, keyField, labelField, blankLabel) {
-  const sel = document.getElementById(id);
-  if (!sel) return;
-  sel.innerHTML = `<option value="">${blankLabel}</option>`;
-  items.forEach(it => {
-    const opt = document.createElement('option');
-    opt.value = it[keyField] || '';
-    opt.textContent = it[labelField] || String(it[keyField]);
-    sel.appendChild(opt);
-  });
-}
-
-// ─── Load Items ───────────────────────────────────────────────────────────────
-async function loadItems() {
-  document.getElementById('itemList').innerHTML = '<div class="empty-state">Loading…</div>';
-  try {
-    // getRepairItemsList is per-repair; use getRepairItemsCatalog for the master catalog
-    const [flex, rigid] = await Promise.all([
-      API.getRepairItemsCatalog('Flexible'),
-      API.getRepairItemsCatalog('Rigid')
-    ]);
-    // Normalize catalog fields: API returns sItemDescription (not psItemDescription),
-    // psRigidOrFlexible is null — inject from which catalog call returned the item.
-    const norm = (items, type) => (Array.isArray(items) ? items : []).map(r => ({
-      ...r,
-      psItemDescription: r.psItemDescription || r.sItemDescription || '',
-      psTSICode:         r.psTSICode         || r.sTSICode         || '',
-      psPartOrLabor:     r.psPartOrLabor     || r.sPartOrLabor     || 'L',
-      psRigidOrFlexible: r.psRigidOrFlexible || type,
-      pbActive:          r.pbActive          ?? r.bActive          ?? true,
-    }));
-    allItems = [...norm(flex, 'F'), ...norm(rigid, 'R')];
-    if (allItems.length === 0) throw new Error('Empty catalog response');
-    showDataBadge(true);
-  } catch(e) {
-    allItems = DEMO_ITEMS;
-    showDataBadge(false);
-  }
-
-  // Update summary stats
-  const activeCount   = allItems.filter(i => i.pbActive).length;
-  const inactiveCount = allItems.length - activeCount;
-  const flexCount     = allItems.filter(i => i.psRigidOrFlexible === 'F').length;
-  const rigidCount    = allItems.filter(i => i.psRigidOrFlexible === 'R').length;
-  document.getElementById('ssTotal').textContent    = allItems.length;
-  document.getElementById('ssActive').textContent   = activeCount;
-  document.getElementById('ssInactive').textContent = inactiveCount;
-  document.getElementById('ssFlexible').textContent = flexCount;
-  document.getElementById('ssRigid').textContent    = rigidCount;
-  document.getElementById('ssLastSync').textContent = 'Last sync ' + new Date().toLocaleString('en-US', {month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-
-  applyFilters();
-}
-
-// ─── Filter & Render List ─────────────────────────────────────────────────────
-function setTypeFilter(val, btn) {
-  filterType = val;
-  document.querySelectorAll('#typeGroup .seg-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function setActiveFilter(val, btn) {
-  filterActive = val;
-  document.querySelectorAll('#activeGroup .seg-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function applyFilters() {
-  const search = (document.getElementById('searchInp').value || '').toLowerCase();
-
-  filteredItems = allItems.filter(item => {
-    if (filterType && item.psRigidOrFlexible !== filterType) return false;
-    if (filterActive === 'true'  && !item.pbActive) return false;
-    if (filterActive === 'false' &&  item.pbActive) return false;
-    if (search) {
-      const desc = (item.psItemDescription || '').toLowerCase();
-      const code = (item.psTSICode || '').toLowerCase();
-      if (!desc.includes(search) && !code.includes(search)) return false;
-    }
-    return true;
-  });
-
-  document.getElementById('ssShowing').textContent = filteredItems.length;
-  document.getElementById('listCount').textContent  = filteredItems.length;
-  renderList();
-}
-
-function renderList() {
-  const container = document.getElementById('itemList');
-  if (filteredItems.length === 0) {
-    container.innerHTML = '<div class="empty-state">No repair items match the current filter.</div>';
-    return;
-  }
-
-  const rows = filteredItems.map(item => {
-    const sel    = item.lRepairItemKey === selectedKey ? ' selected' : '';
-    const typeC  = item.psRigidOrFlexible === 'F' ? 'type-f' : 'type-r';
-    const typeL  = item.psRigidOrFlexible === 'F' ? 'F' : 'R';
-    const plC    = item.psPartOrLabor === 'P' ? 'pl-p' : 'pl-l';
-    const plL    = item.psPartOrLabor === 'P' ? 'Part' : 'Labor';
-    const dotC   = item.pbActive ? 'dot-yes' : 'dot-no';
-    const code   = item.psTSICode || '—';
-    const desc   = item.psItemDescription || '—';
-
-    return `<tr class="${sel}" onclick="selectItem(${item.lRepairItemKey})">
-      <td style="font-family:monospace;font-size:10.5px;color:var(--blue)">${code}</td>
-      <td class="td-desc" style="max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${desc}">${desc}</td>
-      <td><span class="type-badge ${typeC}">${typeL}</span></td>
-      <td><span class="pl-badge ${plC}">${plL}</span></td>
-      <td style="text-align:center"><span class="active-dot ${dotC}"></span></td>
-    </tr>`;
-  }).join('');
-
-  container.innerHTML = `
-    <table class="item-list">
-      <thead>
-        <tr>
-          <th>TSI Code</th>
-          <th>Description</th>
-          <th>Type</th>
-          <th>Part/Labor</th>
-          <th style="text-align:center">Active</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
-
-// ─── Select Item ──────────────────────────────────────────────────────────────
-async function selectItem(key) {
-  selectedKey = key;
-  renderList(); // update selection highlight
-
-  // Show detail contents
-  document.getElementById('detailEmpty').style.display    = 'none';
-  document.getElementById('detailContents').style.display = 'flex';
-
-  setDetailSaveStatus('save-ready', 'Ready');
-
-  // Try to load detail from API first
-  let item = null;
-  try {
-    const resp = await API.getRepairItemDetail(key);
-    if (resp && resp.lRepairItemKey) {
-      // Normalize detail response same as catalog (API returns sItemDescription etc.)
-      item = {
-        ...resp,
-        psItemDescription: resp.psItemDescription || resp.sItemDescription || '',
-        psTSICode:         resp.psTSICode         || resp.sTSICode         || '',
-        psPartOrLabor:     resp.psPartOrLabor     || resp.sPartOrLabor     || 'L',
-        psRigidOrFlexible: resp.psRigidOrFlexible || resp.sRigidOrFlexible || '',
-      };
-    } else {
-      throw new Error('empty');
-    }
-  } catch(e) {
-    item = allItems.find(i => i.lRepairItemKey === key) || null;
-  }
-
-  if (!item) return;
-  selectedItem = item;
-  populateDetail(item);
-}
-
-function populateDetail(item) {
-  // Header
-  document.getElementById('dhTitle').textContent    = item.psItemDescription || '(unnamed)';
-  document.getElementById('dhTsiCode').textContent  = item.psTSICode || '—';
-
-  const pid = document.getElementById('dhProductId');
-  if (item.psProductID) {
-    pid.textContent  = item.psProductID;
-    pid.style.display = '';
-  } else {
-    pid.style.display = 'none';
-  }
-
-  const typeC = item.psRigidOrFlexible === 'F' ? 'type-f' : 'type-r';
-  const typeL = item.psRigidOrFlexible === 'F' ? 'Flexible' : 'Rigid';
-  document.getElementById('dhTypeBadge').innerHTML = `<span class="type-badge ${typeC}">${typeL}</span>`;
-
-  const plC = item.psPartOrLabor === 'P' ? 'pl-p' : 'pl-l';
-  const plL = item.psPartOrLabor === 'P' ? 'Part' : 'Labor';
-  document.getElementById('dhPlBadge').innerHTML = `<span class="pl-badge ${plC}">${plL}</span>`;
-
-  // Overview fields
-  document.getElementById('fDescription').value = item.psItemDescription || '';
-  document.getElementById('fTsiCode').value      = item.psTSICode || '';
-  document.getElementById('fProductId').value    = item.psProductID || '';
-  document.getElementById('fType').value         = item.psRigidOrFlexible || 'F';
-  document.getElementById('fPartOrLabor').value  = item.psPartOrLabor || 'L';
-  document.getElementById('fRepairLevel').value  = item.plRepairLevelKey || '';
-  document.getElementById('fRepairStatus').value = item.plRepairStatusID || '';
-  document.getElementById('fTurnaround').value   = item.pnTurnAroundTime || 0;
-
-  // Pricing & Time
-  document.getElementById('fCostMaterial').value = item.pdblAvgCostMaterial != null ? item.pdblAvgCostMaterial.toFixed(2) : '0.00';
-  document.getElementById('fCostLabor').value    = item.pdblAvgCostLabor != null ? item.pdblAvgCostLabor.toFixed(2) : '0.00';
-  document.getElementById('fT1').value   = item.ptMinutesTech1 || 0;
-  document.getElementById('fT2').value   = item.ptMinutesTech2 || 0;
-  document.getElementById('fT3').value   = item.ptMinutesTech3 || 0;
-  document.getElementById('fT1SD').value = item.ptMinutesTech1SmallDiameter || 0;
-  document.getElementById('fT2SD').value = item.ptMinutesTech2SmallDiameter || 0;
-  document.getElementById('fT3SD').value = item.ptMinutesTech3SmallDiameter || 0;
-
-  // Flags
-  document.getElementById('fActive').checked        = !!item.pbActive;
-  document.getElementById('fOkayToSkip').checked    = !!item.pbOkayToSkip;
-  document.getElementById('fIsAdjustment').checked  = !!item.pbIsAdjustment;
-  document.getElementById('fSkipPickList').checked  = !!item.pbSkipPickList;
-  document.getElementById('fProfitPlus').checked    = !!item.pbProfitItemPlus;
-  document.getElementById('fProfitMinus').checked   = !!item.pbProfitItemMinus;
-  document.getElementById('fLocked').checked        = !!item.pbLocked;
-}
-
-// ─── Save ─────────────────────────────────────────────────────────────────────
-async function saveCurrentItem() {
-  if (!selectedItem) return;
-
-  const payload = {
-    plRepairItemKey:          selectedItem.lRepairItemKey,
-    psItemDescription:        document.getElementById('fDescription').value.trim(),
-    psTSICode:                document.getElementById('fTsiCode').value.trim(),
-    psProductID:              document.getElementById('fProductId').value.trim(),
-    psRigidOrFlexible:        document.getElementById('fType').value,
-    psPartOrLabor:            document.getElementById('fPartOrLabor').value,
-    pnTurnAroundTime:         intVal(document.getElementById('fTurnaround').value),
-    plRepairLevelKey:         intVal(document.getElementById('fRepairLevel').value),
-    plRepairStatusID:         intVal(document.getElementById('fRepairStatus').value),
-    pbActive:                 document.getElementById('fActive').checked,
-    pdblAvgCostMaterial:      num(document.getElementById('fCostMaterial').value),
-    pdblAvgCostLabor:         num(document.getElementById('fCostLabor').value),
-    ptMinutesTech1:           intVal(document.getElementById('fT1').value),
-    ptMinutesTech2:           intVal(document.getElementById('fT2').value),
-    ptMinutesTech3:           intVal(document.getElementById('fT3').value),
-    ptMinutesTech1SmallDiameter: intVal(document.getElementById('fT1SD').value),
-    ptMinutesTech2SmallDiameter: intVal(document.getElementById('fT2SD').value),
-    ptMinutesTech3SmallDiameter: intVal(document.getElementById('fT3SD').value),
-    pbOkayToSkip:             document.getElementById('fOkayToSkip').checked,
-    pbIsAdjustment:           document.getElementById('fIsAdjustment').checked,
-    pbSkipPickList:           document.getElementById('fSkipPickList').checked,
-    pbProfitItemPlus:         document.getElementById('fProfitPlus').checked,
-    pbProfitItemMinus:        document.getElementById('fProfitMinus').checked,
-    pbLocked:                 document.getElementById('fLocked').checked,
-  };
-
-  if (!payload.psItemDescription) {
-    setDetailSaveStatus('save-error', 'Description required');
-    return;
-  }
-
-  setDetailSaveStatus('save-saving', 'Saving…');
-
-  try {
-    await API.updateRepairItem(payload);
-
-    // Update local state
-    Object.assign(selectedItem, {
-      psItemDescription:    payload.psItemDescription,
-      psTSICode:            payload.psTSICode,
-      psProductID:          payload.psProductID,
-      psRigidOrFlexible:    payload.psRigidOrFlexible,
-      psPartOrLabor:        payload.psPartOrLabor,
-      pnTurnAroundTime:     payload.pnTurnAroundTime,
-      plRepairLevelKey:     payload.plRepairLevelKey,
-      plRepairStatusID:     payload.plRepairStatusID,
-      pbActive:             payload.pbActive,
-      pdblAvgCostMaterial:  payload.pdblAvgCostMaterial,
-      pdblAvgCostLabor:     payload.pdblAvgCostLabor,
-      ptMinutesTech1:       payload.ptMinutesTech1,
-      ptMinutesTech2:       payload.ptMinutesTech2,
-      ptMinutesTech3:       payload.ptMinutesTech3,
-      ptMinutesTech1SmallDiameter: payload.ptMinutesTech1SmallDiameter,
-      ptMinutesTech2SmallDiameter: payload.ptMinutesTech2SmallDiameter,
-      ptMinutesTech3SmallDiameter: payload.ptMinutesTech3SmallDiameter,
-      pbOkayToSkip:         payload.pbOkayToSkip,
-      pbIsAdjustment:       payload.pbIsAdjustment,
-      pbSkipPickList:       payload.pbSkipPickList,
-      pbProfitItemPlus:     payload.pbProfitItemPlus,
-      pbProfitItemMinus:    payload.pbProfitItemMinus,
-      pbLocked:             payload.pbLocked,
-    });
-    // sync into allItems
-    const idx = allItems.findIndex(i => i.lRepairItemKey === selectedItem.lRepairItemKey);
-    if (idx >= 0) allItems[idx] = Object.assign({}, allItems[idx], selectedItem);
-
-    setDetailSaveStatus('save-saved', 'Saved at ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'}));
-    // Refresh header
-    document.getElementById('dhTitle').textContent = payload.psItemDescription;
-    document.getElementById('dhTsiCode').textContent = payload.psTSICode || '—';
-    // Refresh list row
-    applyFilters();
-  } catch(e) {
-    if (isLive) {
-      setDetailSaveStatus('save-error', 'Save failed');
-    } else {
-      // Demo mode — update in-memory only
-      const idx = allItems.findIndex(i => i.lRepairItemKey === selectedItem.lRepairItemKey);
-      if (idx >= 0) {
-        allItems[idx] = Object.assign({}, allItems[idx], {
-          psItemDescription:    payload.psItemDescription,
-          psTSICode:            payload.psTSICode,
-          psProductID:          payload.psProductID,
-          psRigidOrFlexible:    payload.psRigidOrFlexible,
-          psPartOrLabor:        payload.psPartOrLabor,
-          pbActive:             payload.pbActive,
-          pnTurnAroundTime:     payload.pnTurnAroundTime,
-          plRepairLevelKey:     payload.plRepairLevelKey,
-          pdblAvgCostMaterial:  payload.pdblAvgCostMaterial,
-          pdblAvgCostLabor:     payload.pdblAvgCostLabor,
-          ptMinutesTech1:       payload.ptMinutesTech1,
-          ptMinutesTech2:       payload.ptMinutesTech2,
-          ptMinutesTech3:       payload.ptMinutesTech3,
-          ptMinutesTech1SmallDiameter: payload.ptMinutesTech1SmallDiameter,
-          ptMinutesTech2SmallDiameter: payload.ptMinutesTech2SmallDiameter,
-          ptMinutesTech3SmallDiameter: payload.ptMinutesTech3SmallDiameter,
-          pbOkayToSkip:         payload.pbOkayToSkip,
-          pbIsAdjustment:       payload.pbIsAdjustment,
-          pbSkipPickList:       payload.pbSkipPickList,
-          pbProfitItemPlus:     payload.pbProfitItemPlus,
-          pbProfitItemMinus:    payload.pbProfitItemMinus,
-          pbLocked:             payload.pbLocked,
-        });
-        selectedItem = allItems[idx];
-      }
-      setDetailSaveStatus('save-saved', 'Saved (demo)');
-      document.getElementById('dhTitle').textContent = payload.psItemDescription;
-      document.getElementById('dhTsiCode').textContent = payload.psTSICode || '—';
-      applyFilters();
-    }
-  }
-}
-
-// ─── Delete ───────────────────────────────────────────────────────────────────
-function deleteCurrentItem() {
-  if (!selectedItem) return;
-  document.getElementById('deleteItemName').textContent = selectedItem.psItemDescription || 'this item';
-  document.getElementById('deleteModal').classList.add('open');
-}
-
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.remove('open');
-}
-
-async function confirmDelete() {
-  if (!selectedItem) return;
-  const key = selectedItem.lRepairItemKey;
-  closeDeleteModal();
-
-  try {
-    await API.deleteRepairItem(key);
-  } catch(e) {
-    // Demo mode — just remove locally
-  }
-
-  allItems = allItems.filter(i => i.lRepairItemKey !== key);
-  selectedKey  = null;
-  selectedItem = null;
-  document.getElementById('detailEmpty').style.display    = '';
-  document.getElementById('detailContents').style.display = 'none';
-  applyFilters();
-
-  // Update stats
-  const activeCount   = allItems.filter(i => i.pbActive).length;
-  document.getElementById('ssTotal').textContent    = allItems.length;
-  document.getElementById('ssActive').textContent   = activeCount;
-  document.getElementById('ssInactive').textContent = allItems.length - activeCount;
-  document.getElementById('ssFlexible').textContent = allItems.filter(i => i.psRigidOrFlexible === 'F').length;
-  document.getElementById('ssRigid').textContent    = allItems.filter(i => i.psRigidOrFlexible === 'R').length;
-}
-
-// ─── Add Modal ────────────────────────────────────────────────────────────────
-function openAddModal() {
-  document.getElementById('mDescription').value  = '';
-  document.getElementById('mTsiCode').value      = '';
-  document.getElementById('mProductId').value    = '';
-  document.getElementById('mType').value         = 'F';
-  document.getElementById('mPartOrLabor').value  = 'L';
-  document.getElementById('mTurnaround').value   = '1';
-  document.getElementById('mRepairLevel').value  = '';
-  document.getElementById('addModalError').style.display = 'none';
-  document.getElementById('addModal').classList.add('open');
-  setTimeout(() => document.getElementById('mDescription').focus(), 80);
-}
-
-function closeAddModal() {
-  document.getElementById('addModal').classList.remove('open');
-}
-
-async function submitAddItem() {
-  const desc = document.getElementById('mDescription').value.trim();
-  if (!desc) {
-    const err = document.getElementById('addModalError');
-    err.textContent = 'Description is required.';
-    err.style.display = '';
-    return;
-  }
-
-  const payload = {
-    psItemDescription: desc,
-    psTSICode:         document.getElementById('mTsiCode').value.trim(),
-    psProductID:       document.getElementById('mProductId').value.trim(),
-    psRigidOrFlexible: document.getElementById('mType').value,
-    psPartOrLabor:     document.getElementById('mPartOrLabor').value,
-    pnTurnAroundTime:  intVal(document.getElementById('mTurnaround').value),
-    plRepairLevelKey:  intVal(document.getElementById('mRepairLevel').value),
-    pbActive:          true,
-    pdblAvgCostMaterial: 0, pdblAvgCostLabor: 0,
-    ptMinutesTech1: 0, ptMinutesTech2: 0, ptMinutesTech3: 0,
-    ptMinutesTech1SmallDiameter: 0, ptMinutesTech2SmallDiameter: 0, ptMinutesTech3SmallDiameter: 0,
-    pbOkayToSkip: false, pbIsAdjustment: false, pbSkipPickList: false,
-    pbProfitItemPlus: false, pbProfitItemMinus: false, pbLocked: false,
-  };
-
-  let newKey = null;
-  try {
-    const resp = await API.addRepairItem(payload);
-    if (resp && resp.lRepairItemKey) newKey = resp.lRepairItemKey;
-    else if (resp && resp.data && resp.data.lRepairItemKey) newKey = resp.data.lRepairItemKey;
-  } catch(e) {
-    // Demo fallback — assign local key
-    newKey = Math.max(0, ...allItems.map(i => i.lRepairItemKey)) + 1;
-  }
-
-  if (!newKey) newKey = Math.max(0, ...allItems.map(i => i.lRepairItemKey)) + 1;
-
-  const newItem = Object.assign({lRepairItemKey: newKey, plRepairStatusID: 0}, payload);
-  allItems.push(newItem);
-  closeAddModal();
-
-  // Update stats
-  const activeCount = allItems.filter(i => i.pbActive).length;
-  document.getElementById('ssTotal').textContent    = allItems.length;
-  document.getElementById('ssActive').textContent   = activeCount;
-  document.getElementById('ssInactive').textContent = allItems.length - activeCount;
-  document.getElementById('ssFlexible').textContent = allItems.filter(i => i.psRigidOrFlexible === 'F').length;
-  document.getElementById('ssRigid').textContent    = allItems.filter(i => i.psRigidOrFlexible === 'R').length;
-
-  applyFilters();
-  selectItem(newKey);
-}
-
-// ─── Tab Switching ────────────────────────────────────────────────────────────
-function switchTab(name, btn) {
-  document.querySelectorAll('.ri-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.ri-pane').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  const pane = document.getElementById('pane-' + name);
-  if (pane) pane.classList.add('active');
-}
-
-// ─── Close New Order Menu on outside click ────────────────────────────────────
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
+// ── Close New Order menu on outside click ──
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('newOrderWrap');
+  var menu = document.getElementById('newOrderMenu');
   if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
 });
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-(async function init() {
-  await loadLookups();
-  await loadItems();
-})();
+// ── Init ──
+ri_init();
 </script>
 </body>
 </html>
