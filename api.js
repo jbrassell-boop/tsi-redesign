@@ -333,7 +333,7 @@ const API = (() => {
   async function updateModelMaxCharge(data) { return post('/ModelMaxCharges/UpdateModelMaxCharge', data); }
   async function deleteModelMaxCharge(scopeTypeKey, deptKey) { return del('/ModelMaxCharges/DeleteModelMaxCharge?plScopeTypeKey=' + scopeTypeKey + '&plDepartmentKey=' + deptKey); }
 
-  // ── Repair (10) ───────────────────────────────────────
+  // ── Repair (13) ──────────────────────────────────────
   async function getRepairs(filters) { return post('/Repair/GetAllRepairList', filters); }
   async function getRepairList(svcKey, deptKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=' + (deptKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairDetail(repairKey, svcKey) { return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
@@ -344,6 +344,11 @@ const API = (() => {
   async function getRepairSuppliers(roleKey, includeKey) { return get('/Repair/GetAllsuppliers?plSupplierRoleKey=' + (roleKey||0) + (includeKey ? '&plSupplierKeyToInclude=' + includeKey : '')); }
   async function getPatientSafetyLevels() { return get('/Repair/GetAllPatientSafetyLevels'); }
   async function getRepairDistributors(key, includeBlank, includeInactive) { return get('/Repair/GetAllDistributors?plDistributorKey=' + (key||0) + '&pbIncludeBlank=' + (includeBlank||true) + '&pbIncludeInactive=' + (includeInactive||false)); }
+  // NOTE: AddRepair/UpdateRepair/DeleteRepair not yet in BrightLogix API (verified 2026-03-15).
+  // These stubs are ready to work the moment MOL-Tech adds the endpoints.
+  async function addRepair(data) { return post('/Repair/AddRepair', data); }
+  async function updateRepair(data) { return post('/Repair/UpdateRepair', data); }
+  async function deleteRepair(key) { return del('/Repair/DeleteRepair?plRepairKey=' + key); }
 
   // ── RepairItems (21) — Master catalog & pricing ───────
   async function getRepairItems(repairKey) { return post('/RepairItems/GetRepairItemsList', { plRepairKey: repairKey, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {} }); }
@@ -384,19 +389,28 @@ const API = (() => {
   async function deleteInstrumentManufacturerModel(key) { return del('/RepairItemInstruments/DeleteInstrumentManufacturerModel?plModelKey=' + key); }
   async function getInstrumentManufacturerModels(data) { return post('/RepairItemInstruments/GetInstrumentManufacturerModelsList', data); }
 
-  // ── Detail (6) — Repair line item transactions ────────
+  // ── Detail (8) — Repair line item transactions ────────
   async function getRepairDetailItems(repairKey) { return get('/Detail/GetAllRepairDetailsList?plRepairKey=' + repairKey); }
   async function getNewRepairDetails(data) { return post('/Detail/GetAllNewRepairDetails', data); }
   async function updateRepairItemComment(tranKey, comment) { return post('/Detail/UpdateRepairItemTranComment', { plRepairItemTranKey: tranKey, psComment: comment }); }
   async function updateRepairItemAmount(tranKey, amount) { return post('/Detail/UpdateRepairItemTranAmount', { plRepairItemTranKey: tranKey, pnRepairPrice: amount }); }
   async function updateRepairItemApproved(tranKey, approved) { return post('/Detail/UpdateRepairItemTranApproved', { plRepairItemTranKey: tranKey, psApproved: approved }); }
   async function updateRepairItemPrimary(repairKey, tranKey) { return post('/Detail/UpdateRepairDetailPrimary', { plRepairKey: repairKey, plRepairItemTranKey: tranKey }); }
+  // NOTE: AddRepairDetail/DeleteRepairDetail not yet in BrightLogix API (verified 2026-03-15).
+  async function addRepairDetail(data) { return post('/Detail/AddRepairDetail', data); }
+  async function deleteRepairDetail(tranKey) { return del('/Detail/DeleteRepairDetail?plRepairItemTranKey=' + tranKey); }
 
-  // ── RepairInventory (1) ───────────────────────────────
+  // ── RepairInventory (3) ───────────────────────────────
   async function getRepairInventory(repairKey) { return get('/RepairInventory/GetAllRepairInventoryList?plRepairKey=' + repairKey); }
+  // NOTE: Add/Delete not yet in BrightLogix API (verified 2026-03-15).
+  async function addRepairInventory(data) { return post('/RepairInventory/AddRepairInventory', data); }
+  async function deleteRepairInventory(key) { return del('/RepairInventory/DeleteRepairInventory?plRepairInventoryKey=' + key); }
 
-  // ── StatusTran (1) ────────────────────────────────────
+  // ── StatusTran (3) ────────────────────────────────────
   async function getRepairStatusHistory(repairKey) { return get('/StatusTran/GetAllRepairStatusesList?plRepairKey=' + repairKey); }
+  // NOTE: Add/Update not yet in BrightLogix API (verified 2026-03-15).
+  async function addRepairStatus(data) { return post('/StatusTran/AddRepairStatus', data); }
+  async function updateRepairStatus(data) { return post('/StatusTran/UpdateRepairStatus', data); }
 
   // ── Inventory (48) ────────────────────────────────────
   async function getInventoryList(filters) { return post('/Inventory/GetAllInventoryList', { plInventoryKey: 0, pbIncludeInactive: false, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {}, ...filters }); }
@@ -694,6 +708,7 @@ const API = (() => {
     getRepairs, getRepairList, getRepairDetail, getRepairScopes,
     getRepairReasons, getDeliveryMethods, getAllTechs,
     getRepairSuppliers, getPatientSafetyLevels, getRepairDistributors,
+    addRepair, updateRepair, deleteRepair,
 
     // Repair Items
     getRepairItems, getRepairItemsList, getRepairItemsCatalog, getRepairItemDetail,
@@ -717,10 +732,11 @@ const API = (() => {
     getRepairDetailItems, getNewRepairDetails,
     updateRepairItemComment, updateRepairItemAmount,
     updateRepairItemApproved, updateRepairItemPrimary,
+    addRepairDetail, deleteRepairDetail,
 
     // Repair Inventory & Status
-    getRepairInventory,
-    getRepairStatusHistory,
+    getRepairInventory, addRepairInventory, deleteRepairInventory,
+    getRepairStatusHistory, addRepairStatus, updateRepairStatus,
 
     // Inventory
     getInventoryList, getInventoryById, getInventorySizes,

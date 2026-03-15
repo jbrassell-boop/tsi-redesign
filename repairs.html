@@ -60,8 +60,8 @@
     /* QC INSPECTION DRAWER */
     .qc-backdrop{display:none;position:fixed;inset:0;background:rgba(0,20,60,.25);z-index:800}
     .qc-backdrop.open{display:block}
-    .qc-drawer{position:fixed;top:0;right:-440px;width:420px;height:100vh;background:#fff;z-index:810;box-shadow:-4px 0 24px rgba(var(--primary-rgb),.15);transition:right .25s ease;display:flex;flex-direction:column}
-    .qc-drawer.open{right:0 !important}
+    .qc-drawer{position:fixed;top:0;right:-440px;width:420px;height:100vh;background:#fff;z-index:810;box-shadow:none;transition:right .25s ease;display:flex;flex-direction:column}
+    .qc-drawer.open{right:0 !important;box-shadow:-4px 0 24px rgba(var(--primary-rgb),.15)}
     .qc-drawer-head{display:flex;align-items:center;padding:10px 16px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff}
     .qc-drawer-head span{color:#fff}
     .qc-drawer-head .btn{color:#fff;border-color:rgba(255,255,255,.4)}
@@ -267,6 +267,55 @@
     .fin-row .fin-val.positive{color:#0d7a3e}
     .fin-row .fin-val.negative{color:#dc3545}
     .fin-row .fin-val.amber{color:#c27803}
+/* WORKFLOW FORMS BAR */
+.wf-bar{display:flex;align-items:center;gap:0;padding:5px 12px;background:#F8FAFF;border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:5px;margin-bottom:6px;flex-wrap:wrap;min-height:30px}
+.wf-label{font-size:8px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-right:6px;flex-shrink:0}
+.wf-phase{display:flex;align-items:center;gap:3px}
+.wf-phase-label{font-size:7.5px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-right:2px;opacity:.6}
+.wf-divider{width:1px;height:18px;background:var(--border-dk);margin:0 8px;flex-shrink:0}
+.wf-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:600;border:1.5px solid transparent;cursor:default;transition:all .15s;white-space:nowrap;font-family:inherit;background:none}
+.wf-pill svg{width:11px;height:11px;flex-shrink:0}
+.wf-locked{background:#F0F2F5;color:#999;border-color:#DDE3EE}
+.wf-locked svg{stroke:#bbb}
+.wf-available{background:#EFF6FF;color:var(--navy);border-color:var(--blue);cursor:pointer;animation:wfPulse 2s ease-in-out infinite}
+.wf-available:hover{background:#DBEAFE;box-shadow:0 0 0 2px rgba(46,116,181,.15)}
+.wf-available svg{stroke:var(--blue)}
+.wf-generated{background:#F0FDF4;color:#166534;border-color:#BBF7D0;cursor:pointer}
+.wf-generated:hover{background:#DCFCE7}
+.wf-generated svg{stroke:#16a34a}
+@keyframes wfPulse{0%,100%{box-shadow:0 0 0 0 rgba(46,116,181,0)}50%{box-shadow:0 0 0 3px rgba(46,116,181,.12)}}
+/* WORKFLOW TOAST */
+.wf-toast{position:fixed;top:72px;right:16px;z-index:900;background:var(--navy);color:#fff;padding:8px 14px;border-radius:6px;font-size:11px;font-weight:600;box-shadow:0 4px 16px rgba(0,20,60,.25);transform:translateX(120%);transition:transform .3s ease;max-width:340px}
+.wf-toast.show{transform:translateX(0)}
+/* FORM PREVIEW DRAWER (wider for inspection forms) */
+.wf-drawer{width:540px;right:-560px}
+.wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px}
+.wf-form-header .wf-fh-item{font-size:10.5px;color:var(--text)}
+.wf-form-header .wf-fh-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-right:4px}
+.wf-section-label{font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.wf-pf-grid{display:flex;flex-direction:column;gap:0;margin-bottom:8px}
+.wf-pf-row{display:flex;align-items:center;padding:3px 8px;border-bottom:1px solid #f0f2f5;font-size:10.5px}
+.wf-pf-row:nth-child(odd){background:#F8FAFD}
+.wf-pf-row .wf-pf-label{flex:1;color:var(--text);font-weight:500}
+.wf-pf-row .wf-pf-result{display:flex;gap:8px;flex-shrink:0}
+.wf-pf-row .wf-pf-result label{display:flex;align-items:center;gap:2px;font-size:9px;font-weight:600;color:var(--steel);cursor:pointer}
+.wf-pf-row .wf-pf-result input[type="radio"]{margin:0;accent-color:var(--navy)}
+.wf-pf-defects{display:flex;flex-wrap:wrap;gap:3px;margin-left:8px}
+.wf-pf-defects label{font-size:8.5px;color:var(--muted);display:flex;align-items:center;gap:2px;cursor:pointer}
+.wf-pf-defects input[type="checkbox"]{margin:0;width:12px;height:12px;accent-color:var(--navy)}
+.wf-items-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:8px}
+.wf-items-table th{background:#F0F4FA;font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;padding:5px 8px;text-align:left;letter-spacing:.3px}
+.wf-items-table td{padding:5px 8px;border-bottom:1px solid #f0f2f5}
+.wf-items-table tr:hover td{background:#EFF6FF}
+.wf-signature-block{padding:12px;background:#F8FAFD;border:1px solid var(--border);border-radius:4px;margin-top:10px}
+.wf-signature-block .sig-line{border-bottom:1px solid var(--border-dk);height:24px;margin-bottom:4px}
+.wf-signature-block .sig-label{font-size:9px;color:var(--steel);font-weight:600;text-transform:uppercase}
+.wf-footer-actions{display:flex;gap:6px;padding:10px 16px;border-top:1px solid var(--border);background:#F8FAFD}
+.wf-footer-actions .btn{flex:1}
+.wf-placeholder{text-align:center;padding:40px 20px;color:var(--muted)}
+.wf-placeholder svg{width:48px;height:48px;stroke:var(--border-dk);margin-bottom:10px}
+.wf-placeholder p{font-size:12px;font-weight:600;margin:0 0 4px}
+.wf-placeholder small{font-size:10px}
   </style>
 </head>
 <body>
@@ -345,7 +394,7 @@
         <span class="save-icon" id="saveIcon">&#9679;</span><span id="saveText">Ready</span>
       </span>
       <span style="font-size:10px;color:var(--muted);margin:0 8px" id="ssModified"></span>
-      <button class="btn btn-danger" style="gap:4px;height:26px;font-size:11px;padding:0 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
+      <button class="btn btn-danger" onclick="confirmDeleteRepair()" style="gap:4px;height:26px;font-size:11px;padding:0 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
     </div>
 
     <!-- DETAIL PANEL (full width) -->
@@ -363,6 +412,66 @@
             <div class="tab" data-tab="status">Status</div>
             <div class="tab" data-tab="documents">Documents</div>
             <div class="tab" data-tab="financials">Financials</div>
+          </div>
+
+          <!-- WORKFLOW FORMS BAR — persistent across all tabs -->
+          <div class="wf-bar" id="workflowBar" style="margin:0 10px;border-radius:0 0 5px 5px;border-top:none">
+            <span class="wf-label">WORKFLOW</span>
+            <div class="wf-phase">
+              <span class="wf-phase-label">Intake</span>
+              <button class="wf-pill wf-locked" id="wf-disassemble" data-form="disassemble" onclick="openFormPreview('disassemble')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+                D&I
+              </button>
+            </div>
+            <span class="wf-divider"></span>
+            <div class="wf-phase">
+              <span class="wf-phase-label">Quote</span>
+              <button class="wf-pill wf-locked" id="wf-requisition" data-form="requisition" onclick="openFormPreview('requisition')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Req
+              </button>
+            </div>
+            <span class="wf-divider"></span>
+            <div class="wf-phase">
+              <span class="wf-phase-label">Repair</span>
+              <button class="wf-pill wf-locked" id="wf-inspection" data-form="inspection" onclick="openFormPreview('inspection')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Inspect
+              </button>
+              <button class="wf-pill wf-locked" id="wf-picklist" data-form="picklist" onclick="openFormPreview('picklist')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Pick List
+              </button>
+            </div>
+            <span class="wf-divider"></span>
+            <div class="wf-phase">
+              <span class="wf-phase-label">QA</span>
+              <button class="wf-pill wf-locked" id="wf-amendment" data-form="amendment" onclick="openFormPreview('amendment')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Amend
+              </button>
+              <button class="wf-pill wf-locked" id="wf-defect" data-form="defect" onclick="openFormPreview('defect')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Defect
+              </button>
+            </div>
+            <span class="wf-divider"></span>
+            <div class="wf-phase">
+              <span class="wf-phase-label">Close</span>
+              <button class="wf-pill wf-locked" id="wf-invoice" data-form="invoice" onclick="openFormPreview('invoice')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Invoice
+              </button>
+              <button class="wf-pill wf-locked" id="wf-packing" data-form="packing" onclick="openFormPreview('packing')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Packing
+              </button>
+              <button class="wf-pill wf-locked" id="wf-finalqc" data-form="finalqc" onclick="openFormPreview('finalqc')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Final QC
+              </button>
+            </div>
           </div>
 
           <!-- PERSISTENT CONTEXT — visible on all tabs -->
@@ -1039,8 +1148,8 @@
       <div class="field"><label>Findings</label><textarea id="slipFindings" rows="2" style="resize:vertical" oninput="markDirty()"></textarea></div>
     </div>
     <div style="display:flex;gap:6px">
-      <button class="btn btn-outline" style="flex:1">Print</button>
-      <button class="btn btn-outline" style="flex:1" onclick="closeDrawer()">Close</button>
+      <button class="btn btn-navy" style="flex:1" onclick="addSlip()">+ Add Slip</button>
+      <button class="btn btn-outline" style="flex:1" onclick="printSlip()">Print Selected</button>
     </div>
   </div>
 </div>
@@ -1048,7 +1157,7 @@
 <!-- AMEND DRAWER -->
 <div class="qc-drawer" id="drawer-amend">
   <div class="qc-drawer-head">
-    <span style="font-size:13px;font-weight:700;color:#fff">Repair Amendments</span>
+    <span style="font-size:13px;font-weight:700;color:#fff">Repair Amendments</span><span style="font-size:9px;opacity:.7;margin-left:6px;color:#fff">OM07-9</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
   </div>
   <div class="qc-drawer-body">
@@ -1068,24 +1177,32 @@
       <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><label class="toggle"><input type="checkbox" id="amendIsBlind" onchange="markDirty()"/><span class="toggle-slider"></span></label><span style="font-size:10px;font-weight:600">Is Blind</span></div>
     </div>
     <div class="field" style="margin-bottom:10px"><label>Additional Comment</label><textarea id="amendComment" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
-    <button class="btn btn-outline" style="width:100%" onclick="closeDrawer()">Close</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-navy" style="flex:1" onclick="submitAmendment()">+ Add Amendment</button>
+    </div>
   </div>
 </div>
 
 <!-- DEFECTS DRAWER -->
 <div class="qc-drawer" id="drawer-defects">
   <div class="qc-drawer-head">
-    <span style="font-size:13px;font-weight:700;color:#fff">Defect Tracking</span>
+    <span style="font-size:13px;font-weight:700;color:#fff">Defect Tracking</span><span style="font-size:9px;opacity:.7;margin-left:6px;color:#fff">OM07-8</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
   </div>
   <div class="qc-drawer-body">
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Defect History</div>
+    <table class="items" style="margin-bottom:12px">
+      <thead><tr><th>Date</th><th>Reason</th><th>Tech</th><th>Status</th><th style="width:30px"></th></tr></thead>
+      <tbody id="defectsBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No defects recorded</td></tr></tbody>
+    </table>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Log New Defect</div>
     <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
       <div class="field"><label>Date</label><input type="date" id="defectDate" onchange="markDirty()"/></div>
       <div class="field"><label>Time</label><input type="time" id="defectTime" onchange="markDirty()"/></div>
-      <div class="field"><label>Reason</label><select id="defectReason" onchange="markDirty()"><option value="">— Select —</option></select></div>
+      <div class="field"><label>Reason</label><select id="defectReason" onchange="markDirty()"><option value="">— Select —</option><option>Leak Test Failure</option><option>Image Quality</option><option>Angulation Out of Spec</option><option>Unrelated to previous repairs</option><option>Physical Damage Found</option><option>Other</option></select></div>
       <div class="field"><label>Technician</label><select id="defectTech" onchange="markDirty()"></select></div>
     </div>
-    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Defect Items</div>
+    <div style="font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Failed Tests</div>
     <div class="qc-check-grid" style="margin-bottom:10px">
       <div class="qc-row"><span class="qc-label">Leak Test</span><input type="checkbox" id="defLeakTest" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
       <div class="qc-row"><span class="qc-label">Control Buttons</span><input type="checkbox" id="defControlButtons" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
@@ -1096,7 +1213,9 @@
       <div class="qc-row"><span class="qc-label">Other</span><input type="checkbox" id="defOther" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
     </div>
     <div class="field" style="margin-bottom:10px"><label>Follow-up Notes</label><textarea id="defectNotes" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
-    <button class="btn btn-outline" style="width:100%" onclick="closeDrawer()">Close</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-danger" style="flex:1" onclick="logDefect()">Log Defect (QA Hold)</button>
+    </div>
   </div>
 </div>
 
@@ -1210,6 +1329,127 @@
   <div class="qc-drawer-body" id="techsDrawerBody"></div>
 </div>
 
+<!-- ═══ WORKFLOW FORM PREVIEW DRAWERS ═══ -->
+
+<!-- D&I PREVIEW (OM05-3) -->
+<div class="qc-drawer wf-drawer" id="drawer-form-disassemble">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Disassemble & Inspection — OM05-3</span>
+    <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfDITimestamp"></span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfDIBody">
+    <!-- Populated by JS -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('disassemble')">Print</button>
+    <button class="btn btn-outline">Email</button>
+    <button class="btn btn-navy" onclick="generateForm('disassemble')">Generate PDF</button>
+  </div>
+</div>
+
+<!-- REQUISITION PREVIEW (OM07-2) -->
+<div class="qc-drawer wf-drawer" id="drawer-form-requisition">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Requisition for Approval — OM07-2</span>
+    <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfReqTimestamp"></span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfReqBody">
+    <!-- Populated by JS -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('requisition')">Print</button>
+    <button class="btn btn-outline">Email to Customer</button>
+    <button class="btn btn-navy" onclick="generateForm('requisition')">Generate PDF</button>
+  </div>
+</div>
+
+<!-- BLANK INSPECTION PREVIEW (OM07-5) -->
+<div class="qc-drawer wf-drawer" id="drawer-form-inspection">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Blank Inspection — OM07-5</span>
+    <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfInspTimestamp"></span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfInspBody">
+    <!-- Populated by JS -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('inspection')">Print</button>
+    <button class="btn btn-outline">Email</button>
+    <button class="btn btn-navy" onclick="generateForm('inspection')">Generate PDF</button>
+  </div>
+</div>
+
+<!-- PICK LIST PREVIEW (OM07-6) -->
+<div class="qc-drawer wf-drawer" id="drawer-form-picklist">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Repair Inventory Pick List — OM07-6</span>
+    <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfPickTimestamp"></span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfPickBody">
+    <!-- Populated by JS -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('picklist')">Print</button>
+    <button class="btn btn-navy" onclick="generateForm('picklist')">Generate PDF</button>
+  </div>
+</div>
+
+<!-- Amendment (OM07-9) and Defect (OM07-8) pills open existing drawer-amend / drawer-defects above -->
+
+<!-- INVOICE -->
+<div class="qc-drawer wf-drawer" id="drawer-form-invoice">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Final Invoice</span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfInvoiceBody">
+    <!-- Populated by populateFormDrawer('invoice') -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('invoice')">Print & Generate</button>
+    <button class="btn btn-outline">Email to AP</button>
+    <button class="btn btn-navy" onclick="generateForm('invoice')">Generate</button>
+  </div>
+</div>
+
+<!-- PACKING SLIP -->
+<div class="qc-drawer wf-drawer" id="drawer-form-packing">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Scope Return Verification (Packing Slip)</span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfPackingBody">
+    <!-- Populated by populateFormDrawer('packing') -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('packing')">Print & Generate</button>
+    <button class="btn btn-navy" onclick="generateForm('packing')">Generate</button>
+  </div>
+</div>
+
+<!-- FINAL QC -->
+<div class="qc-drawer wf-drawer" id="drawer-form-finalqc">
+  <div class="qc-drawer-head">
+    <span style="font-size:13px;font-weight:700;color:#fff">Inspection Completed (Final QC)</span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body" id="wfFinalQCBody">
+    <!-- Populated by populateFormDrawer('finalqc') -->
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('finalqc')">Print & Generate</button>
+    <button class="btn btn-navy" onclick="generateForm('finalqc')">Generate</button>
+  </div>
+  </div>
+</div>
+
+<!-- WORKFLOW TOAST -->
+<div class="wf-toast" id="wfToast"></div>
+
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -1226,6 +1466,500 @@ let _currentRepair = null;
 let _dirty = false;
 let _saveTimer = null;
 let _clients = [], _departments = [];
+
+// ── WORKFLOW FORMS ──
+const WORKFLOW_FORMS = [
+  { id:'disassemble', name:'Disassemble & Inspection', shortName:'D&I', formNum:'OM05-3', phase:1, statuses:[1] },
+  { id:'requisition', name:'Requisition for Approval', shortName:'Req', formNum:'OM07-2', phase:2, statuses:[2] },
+  { id:'inspection',  name:'Blank Inspection', shortName:'Inspect', formNum:'OM07-5', phase:3, statuses:[3,4] },
+  { id:'picklist',    name:'Repair Inventory Pick List', shortName:'Pick List', formNum:'OM07-6', phase:3, statuses:[3,4] },
+  { id:'amendment',   name:'Amendment to Repair', shortName:'Amend', formNum:'OM07-9', phase:4, statuses:[5] },
+  { id:'defect',      name:'Defect Tracking', shortName:'Defect', formNum:'OM07-8', phase:4, statuses:[5] },
+  { id:'invoice',     name:'Final Invoice', shortName:'Invoice', formNum:'—', phase:5, statuses:[6,7] },
+  { id:'packing',     name:'Scope Return Verification', shortName:'Packing', formNum:'—', phase:5, statuses:[6,7] },
+  { id:'finalqc',     name:'Inspection Completed', shortName:'Final QC', formNum:'—', phase:5, statuses:[6,7] }
+];
+let _generatedForms = {};
+let _wfToastTimer = null;
+
+function getPhaseForStatus(statusId) {
+  if (statusId <= 1) return 1;
+  if (statusId === 2) return 2;
+  if (statusId === 3 || statusId === 4) return 3;
+  if (statusId === 5) return 4;
+  return 5;
+}
+
+function updateWorkflowForms(statusId) {
+  const currentPhase = getPhaseForStatus(statusId);
+  WORKFLOW_FORMS.forEach(f => {
+    const pill = document.getElementById('wf-' + f.id);
+    if (!pill) return;
+    pill.classList.remove('wf-locked', 'wf-available', 'wf-generated');
+    if (_generatedForms[f.id]) {
+      pill.classList.add('wf-generated');
+      pill.title = f.name + ' — Generated ' + _generatedForms[f.id];
+    } else if (f.phase <= currentPhase) {
+      pill.classList.add('wf-available');
+      pill.title = f.name + ' — Ready to generate';
+    } else {
+      pill.classList.add('wf-locked');
+      pill.title = f.name + ' — Locked (status not reached)';
+    }
+  });
+}
+
+function showWorkflowToast(message) {
+  const toast = document.getElementById('wfToast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  if (_wfToastTimer) clearTimeout(_wfToastTimer);
+  _wfToastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+// ── Status map: document generation → status transition ──
+const FORM_STATUS_MAP = {
+  disassemble: 1,   // Evaluation
+  requisition: 2,   // Waiting for Approval
+  inspection: 3,    // In Repair
+  picklist: null,    // No status change (same phase)
+  amendment: null,   // Exception, no status change
+  defect: null,      // Exception, no status change
+  invoice: 6,        // Completed
+  packing: 7,        // Shipped
+  finalqc: null      // Same phase as invoice
+};
+
+async function generateForm(formId) {
+  if (_generatedForms[formId]) return;
+
+  // Block invoice generation if unresolved defects
+  if (formId === 'invoice' && hasUnresolvedDefects()) {
+    showWorkflowToast('Cannot generate invoice — unresolved QA defects');
+    return;
+  }
+
+  const now = new Date();
+  _generatedForms[formId] = now.toLocaleString();
+  const form = WORKFLOW_FORMS.find(f => f.id === formId);
+
+  // Advance status if mapped
+  const targetStatus = FORM_STATUS_MAP[formId];
+  if (targetStatus && _currentRepair) {
+    _currentRepair.lRepairStatusID = targetStatus;
+    setSelectVal_safe('hRepairStatus', targetStatus);
+    updateWorkflowForms(targetStatus);
+
+    // Try API status transition (non-blocking)
+    if (_liveMode && _currentRepair.lRepairKey > 0) {
+      try {
+        await API.addRepairStatus({
+          plRepairKey: _currentRepair.lRepairKey,
+          plStatusKey: targetStatus,
+          psTranComments: form.name + ' generated'
+        });
+      } catch(e) { console.warn('[TSI Repairs] Status transition not available:', e.message); }
+      try {
+        await API.updateRepair(buildRepairPayload());
+      } catch(e) { console.warn('[TSI Repairs] UpdateRepair not available:', e.message); }
+    }
+
+    // Update status strip
+    const statusName = getStatusName(targetStatus);
+    const ssVal = document.querySelector('#ssStatus .ss-val');
+    if (ssVal) ssVal.textContent = statusName || '—';
+  } else {
+    const statusId = _currentRepair ? (_currentRepair.lRepairStatusID || 1) : 1;
+    updateWorkflowForms(statusId);
+  }
+
+  if (form) showWorkflowToast(form.name + ' generated');
+}
+
+function setSelectVal_safe(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ── Print document in new window ──
+function printFormDocument(formId) {
+  const drawer = document.getElementById('drawer-form-' + formId);
+  if (!drawer) return;
+  const body = drawer.querySelector('.qc-drawer-body');
+  if (!body) return;
+  const r = _currentRepair || {};
+  const form = WORKFLOW_FORMS.find(f => f.id === formId);
+  const w = window.open('', '_blank', 'width=800,height=900');
+  w.document.write('<html><head><title>' + (form ? form.name : formId) + ' — ' + (r.sWorkOrderNumber || '') + '</title>');
+  w.document.write('<style>body{font-family:Calibri,sans-serif;font-size:12px;padding:24px;max-width:760px;margin:auto}h2{color:#00257A;margin:0 0 8px}table{border-collapse:collapse;width:100%;margin:6px 0}td,th{border:1px solid #ccc;padding:4px 6px;text-align:left;font-size:10px}th{background:#f0f4fa;font-size:9px;text-transform:uppercase}.wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;font-size:10px;padding:6px 8px;background:#f0f4fa;border-radius:4px}.wf-fh-item b{color:#00257A}.sig-line{border-bottom:1px solid #000;height:30px;margin-bottom:2px}.sig-label{font-size:8px;color:#666}@media print{body{padding:0}}</style>');
+  w.document.write('</head><body>');
+  w.document.write('<h2>' + (form ? form.name : formId) + '</h2>');
+  w.document.write(body.innerHTML);
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(() => w.print(), 300);
+
+  // Mark as generated + advance status
+  generateForm(formId);
+}
+
+function openFormPreview(formId) {
+  const pill = document.getElementById('wf-' + formId);
+  if (pill && pill.classList.contains('wf-locked')) return;
+  closeDrawer();
+  // Amendment & Defect pills open the existing operational drawers (no duplicates)
+  if (formId === 'amendment') { openDrawer('amend'); return; }
+  if (formId === 'defect') { openDrawer('defects'); return; }
+  populateFormDrawer(formId);
+  const drawer = document.getElementById('drawer-form-' + formId);
+  if (drawer) {
+    drawer.classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+  }
+}
+
+function populateFormDrawer(formId) {
+  const r = _currentRepair;
+  if (!r) return;
+  const clientName = _clients.find(c => c.lClientKey === r.lClientKey)?.sClientName1 || 'Unknown Client';
+  const deptName = _departments.find(d => d.lDepartmentKey === r.lDepartmentKey)?.sDepartmentName || 'Unknown Dept';
+  const repName = _salesReps.find(s => s.lSalesRepNameKey === r.lSalesRepKey)?.sSalesRepName || '—';
+
+  const itemRows = document.querySelectorAll('#repairItemsBody tr');
+  const items = [];
+  itemRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 6) {
+      items.push({
+        code: cells[0]?.textContent?.trim() || '',
+        desc: cells[1]?.textContent?.trim() || '',
+        approved: cells[4]?.textContent?.trim() || '',
+        amount: cells[5]?.textContent?.trim() || '',
+        isBlind: row.dataset.blind === 'true',
+        isAmended: row.dataset.amended === 'true'
+      });
+    }
+  });
+
+  const headerHTML = `
+    <div class="wf-form-header">
+      <div class="wf-fh-item"><b>Client</b> ${clientName}</div>
+      <div class="wf-fh-item"><b>W.O. #</b> ${r.sWorkOrderNumber || '—'}</div>
+      <div class="wf-fh-item"><b>Department</b> ${deptName}</div>
+      <div class="wf-fh-item"><b>Serial #</b> ${r.sSerialNumber || '—'}</div>
+      <div class="wf-fh-item"><b>Model</b> ${r.sScopeTypeDesc || '—'}</div>
+      <div class="wf-fh-item"><b>Date</b> ${r.dtDateIn ? new Date(r.dtDateIn).toLocaleDateString() : '—'}</div>
+      <div class="wf-fh-item"><b>Rack #</b> ${r.sRackPosition || 'N/A'}</div>
+      <div class="wf-fh-item"><b>Type</b> ${r.sRigidOrFlexible || '—'}</div>
+    </div>`;
+
+  if (formId === 'disassemble') {
+    const body = document.getElementById('wfDIBody');
+    if (!body) return;
+    body.innerHTML = headerHTML + `
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div style="font-size:10.5px"><b style="font-size:9px;color:var(--steel)">COMPLAINT</b><br/>${r.sComplaintDesc || '—'}</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:8px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:10px">
+        <span><b>Customer Type:</b> ${r.lPricingCategoryKey === 4 ? 'CAP' : r.lPricingCategoryKey === 2 ? 'Contract' : 'FFS'}</span>
+        <span><b>Clean/Unclean:</b> <select style="font-size:10px;border:1px solid var(--border);border-radius:3px;padding:1px 4px"><option>Clean</option><option selected>Unclean</option></select></span>
+        <span><b>Shipping Container:</b> Yes</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;padding:4px 8px;background:#F8FAFD;border-radius:4px;font-size:10px">
+        <span><b>Scope Drawing:</b> <label><input type="radio" name="diScopeDraw" style="accent-color:var(--navy)"/> Y</label> <label><input type="radio" name="diScopeDraw" checked style="accent-color:var(--navy)"/> N</label></span>
+        <span><b>Tube System:</b> <label><input type="radio" name="diTube" style="accent-color:var(--navy)"/> 3</label> <label><input type="radio" name="diTube" checked style="accent-color:var(--navy)"/> 2</label></span>
+        <span><b>Lens:</b> Rod Lens / Acromat / IB</span>
+        <span><b>Autoclave:</b> <label><input type="radio" name="diAuto" style="accent-color:var(--navy)"/> Y</label> <label><input type="radio" name="diAuto" checked style="accent-color:var(--navy)"/> N</label></span>
+      </div>
+      ${renderInspectionCategories(true)}
+      <div class="wf-section-label">ITEMS IN NEED OF REPAIR</div>
+      <table class="wf-items-table">
+        <thead><tr><th>Item</th><th>Description</th></tr></thead>
+        <tbody>${items.map(i => '<tr><td>' + i.code + '</td><td>' + i.desc + '</td></tr>').join('') || '<tr><td colspan="2" style="color:var(--muted);text-align:center">No items</td></tr>'}</tbody>
+      </table>
+      <div class="wf-section-label">COMMENTS</div>
+      <textarea rows="2" style="width:100%;font-size:10.5px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-family:inherit;resize:vertical">${r.mCommentsDisIns || ''}</textarea>
+    `;
+  } else if (formId === 'requisition') {
+    const body = document.getElementById('wfReqBody');
+    if (!body) return;
+    // Exclude blind items from customer-facing requisition
+    const reqItems = items.filter(i => !i.isBlind);
+    const totalAmount = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g,'')) || 0), 0);
+    body.innerHTML = `
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:var(--navy)">Total Scope, Inc.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--steel)">Requisition For Approval</div>
+        <div style="font-size:10px;color:var(--muted)">${new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'})}</div>
+      </div>
+      <div class="wf-form-header">
+        <div class="wf-fh-item"><b>To</b> ${clientName}</div>
+        <div class="wf-fh-item"><b>W.O. #</b> ${r.sWorkOrderNumber || '—'}</div>
+        <div class="wf-fh-item"><b>Attn</b> ${r.sShipAttention || '—'}</div>
+        <div class="wf-fh-item"><b>PO #</b> ${r.sPurchaseOrder || '—'}</div>
+        <div class="wf-fh-item"><b>Ship To</b> ${r.sShipName1 || ''}, ${r.sShipCity || ''} ${r.sShipState || ''}</div>
+        <div class="wf-fh-item"><b>Model</b> ${r.sScopeTypeDesc || '—'}</div>
+      </div>
+      <div style="font-size:10.5px;margin-bottom:8px"><b style="font-size:9px;color:var(--steel)">CUSTOMER COMPLAINT</b><br/>${r.sComplaintDesc || '—'}</div>
+      <table class="wf-items-table">
+        <thead><tr><th>Problem / Description</th><th style="width:70px;text-align:right">Amount</th><th style="width:60px;text-align:center">Approved</th></tr></thead>
+        <tbody>${reqItems.map(i => '<tr><td>' + i.desc + '</td><td style="text-align:right">' + i.amount + '</td><td style="text-align:center">' + (i.approved === 'Y' ? '<span style="color:var(--green);font-weight:700">Y</span>' : '<span style="color:var(--red);font-weight:700">N</span>') + '</td></tr>').join('')}</tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;gap:16px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:8px">
+        <span>Sub Total: $${totalAmount.toFixed(2)}</span>
+        <span>Shipping: $${(r.dblAmtShipping || 0).toFixed(2)}</span>
+        <span style="color:var(--navy);font-size:12px">Repair Total: $${(totalAmount + (r.dblAmtShipping || 0)).toFixed(2)}</span>
+      </div>
+      <div style="font-size:9.5px;color:var(--muted);font-style:italic;margin-bottom:10px;padding:6px 8px;background:#FFFBEB;border:1px solid #F0C040;border-radius:4px">* This estimate is based on our initial inspections. As the scope is disassembled further there may be additional repair items identified that may require an adjustment to this estimate.</div>
+      <div class="wf-section-label">SUMMARY COMMENTS</div>
+      <div style="font-size:10.5px;padding:4px 0;margin-bottom:6px">Non-Contract Cost: <b>$${r.mMaxCharge ? r.mMaxCharge.toFixed(2) : '0.00'}</b></div>
+      <div class="wf-signature-block">
+        <div style="font-size:9.5px;color:var(--text);line-height:1.5;margin-bottom:10px">I have reviewed this appraisal, circled Y or N for the item(s) approved for repair and confirm that the scope indicated above will ship to the correct address.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div class="sig-line"></div><div class="sig-label">Customer Approval</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Date</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Customer Printed Name</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Reviewed By: ${repName}</div></div>
+        </div>
+        <div style="font-size:8px;color:var(--muted);margin-top:8px;text-align:center">An ISO Certified Company meeting the Medical Device Standards of ISO 13485</div>
+      </div>
+    `;
+  } else if (formId === 'inspection') {
+    const body = document.getElementById('wfInspBody');
+    if (!body) return;
+    body.innerHTML = headerHTML + `
+      <div style="font-size:10.5px;margin-bottom:6px"><b style="font-size:9px;color:var(--steel)">COMPLAINT</b> ${r.sComplaintDesc || '—'}</div>
+      <div style="font-size:10.5px;margin-bottom:8px;padding:4px 8px;background:#F0F4FA;border-radius:4px"><b>Customer Expected Delivery Date:</b> N/A</div>
+      <div class="wf-section-label">ITEMS FOUND TO BE IN NEED OF REPAIR</div>
+      <table class="wf-items-table">
+        <thead><tr><th>Item</th></tr></thead>
+        <tbody>${items.map(i => '<tr><td>' + i.desc + '</td></tr>').join('') || '<tr><td style="color:var(--muted)">No items</td></tr>'}</tbody>
+      </table>
+      <div class="wf-section-label">ITEMS APPROVED AND REPAIRED</div>
+      <table class="wf-items-table">
+        <thead><tr><th>Item</th><th style="width:100px">Repaired By</th></tr></thead>
+        <tbody>${items.filter(i => i.approved === 'Y').map(i => '<tr><td>' + i.desc + '</td><td><div style="border-bottom:1px solid var(--border-dk);height:18px"></div></td></tr>').join('') || '<tr><td colspan="2" style="color:var(--muted)">No approved items</td></tr>'}</tbody>
+      </table>
+      ${renderInspectionCategories(false)}
+      <div style="display:flex;gap:12px;padding:8px;background:#F0F4FA;border-radius:4px;font-size:10px;margin-top:8px">
+        <span><b>Commercial Q.C.:</b> ___/___/______</span>
+        <span><b>Inspected By:</b> ________</span>
+        <span><b>Rework:</b> <label><input type="radio" name="biRework" style="accent-color:var(--navy)"/> Y</label> <label><input type="radio" name="biRework" style="accent-color:var(--navy)"/> N</label></span>
+      </div>
+      <div style="font-size:10px;margin-top:6px"><b>Non-Contract Cost:</b> $${(r.dblAmtRepair || 0).toFixed(2)}</div>
+    `;
+  } else if (formId === 'picklist') {
+    const body = document.getElementById('wfPickBody');
+    if (!body) return;
+    body.innerHTML = headerHTML + `
+      <table class="wf-items-table">
+        <thead><tr><th>Inventory Item</th><th style="width:100px">Inventory Size</th><th style="width:90px">Lot Number</th><th style="width:55px">Quantity</th></tr></thead>
+        <tbody>${items.map(i => `
+          <tr><td colspan="4" style="font-weight:600;background:#F0F4FA;padding:6px 8px">${i.desc}</td></tr>
+          <tr><td style="padding-left:20px;color:var(--muted);font-size:10px">Additional Inventory</td><td><div style="border-bottom:1px solid var(--border-dk);height:16px"></div></td><td><div style="border-bottom:1px solid var(--border-dk);height:16px"></div></td><td><div style="border-bottom:1px solid var(--border-dk);height:16px"></div></td></tr>
+        `).join('') || '<tr><td colspan="4" style="color:var(--muted);text-align:center">No items</td></tr>'}</tbody>
+      </table>
+      <div class="wf-section-label">ADDITIONAL REPAIR ITEMS</div>
+      <textarea rows="3" style="width:100%;font-size:10.5px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-family:inherit;resize:vertical" placeholder="Additional items not listed above..."></textarea>
+    `;
+  } else if (formId === 'invoice') {
+    const body = document.getElementById('wfInvoiceBody');
+    if (!body) return;
+    // Filter out blind items from customer-facing invoice
+    const visibleItems = items.filter(i => !i.isBlind);
+    const totalAmount = visibleItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g,'')) || 0), 0);
+    const tax = parseFloat(r.dblAmtTax) || 0;
+    body.innerHTML = `
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:var(--navy)">Total Scope, Inc.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--steel)">Final Invoice</div>
+      </div>
+      ${headerHTML}
+      <div style="display:flex;gap:16px;font-size:10.5px;margin-bottom:8px;padding:4px 8px;background:#F0F4FA;border-radius:4px">
+        <span><b>Invoice #:</b> ${r.sInvoiceNumber || 'Pending'}</span>
+        <span><b>PO #:</b> ${r.sPurchaseOrder || '—'}</span>
+        <span><b>Date:</b> ${new Date().toLocaleDateString()}</span>
+      </div>
+      <table class="wf-items-table">
+        <thead><tr><th>Description</th><th style="width:70px;text-align:right">Amount</th></tr></thead>
+        <tbody>${visibleItems.map(i => '<tr><td>' + i.desc + '</td><td style="text-align:right">' + i.amount + '</td></tr>').join('') || '<tr><td colspan="2" style="color:var(--muted);text-align:center">No billable items</td></tr>'}</tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;gap:16px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:8px">
+        <span>Sub Total: $${totalAmount.toFixed(2)}</span>
+        <span>Shipping: $${(r.dblAmtShipping || 0).toFixed(2)}</span>
+        <span>Tax: $${tax.toFixed(2)}</span>
+        <span style="color:var(--navy);font-size:12px">Total Due: $${(totalAmount + (r.dblAmtShipping || 0) + tax).toFixed(2)}</span>
+      </div>
+      <div style="font-size:10px;padding:8px;background:#FFFBEB;border:1px solid #F0C040;border-radius:4px;margin-bottom:8px">
+        <b>Payment Terms:</b> ${r.lPaymentTermsKey || 'Net 30'} &nbsp; <b>Bill To:</b> ${r.sBillName1 || ''}, ${r.sBillCity || ''} ${r.sBillState || ''}
+      </div>
+    `;
+  } else if (formId === 'packing') {
+    const body = document.getElementById('wfPackingBody');
+    if (!body) return;
+    body.innerHTML = `
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:var(--navy)">Total Scope, Inc.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--steel)">Scope Return Verification</div>
+      </div>
+      ${headerHTML}
+      <div class="wf-section-label">SHIP TO</div>
+      <div style="font-size:11px;margin-bottom:10px;padding:8px;background:#F0F4FA;border-radius:4px;line-height:1.6">
+        ${r.sShipName1 || ''}<br/>
+        ${r.sShipAttention ? 'Attn: ' + r.sShipAttention + '<br/>' : (r.sShipName2 ? r.sShipName2 + '<br/>' : '')}
+        ${r.sShipAddr1 || ''}<br/>
+        ${r.sShipAddr2 ? r.sShipAddr2 + '<br/>' : ''}
+        ${r.sShipCity || ''}, ${r.sShipState || ''} ${r.sShipZip || ''}
+      </div>
+      <div class="wf-section-label">SCOPE DETAILS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10.5px;margin-bottom:10px">
+        <span><b>Model:</b> ${r.sScopeTypeDesc || '—'}</span>
+        <span><b>Serial #:</b> ${r.sSerialNumber || '—'}</span>
+        <span><b>Type:</b> ${r.sRigidOrFlexible || '—'}</span>
+        <span><b>Work Order:</b> ${r.sWorkOrderNumber || '—'}</span>
+      </div>
+      <div class="wf-section-label">ACCESSORIES INCLUDED</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:10px;margin-bottom:10px">
+        ${r.sIncludesCaseYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Case</span>' : ''}
+        ${r.sIncludesCapYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Cap</span>' : ''}
+        ${r.sIncludesWaterResCapYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Water Res Cap</span>' : ''}
+        ${r.sIncludesVideoPlugYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Video Plug</span>' : ''}
+        ${r.sIncludesMouthpieceYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Mouthpiece</span>' : ''}
+        ${r.sIncludesAngleKnobYN === 'Y' ? '<span style="padding:2px 8px;background:#E8F5E9;border-radius:3px">Angle Knob</span>' : ''}
+      </div>
+      <div style="font-size:9px;color:var(--muted);font-style:italic;padding:6px 8px;background:#FFFBEB;border:1px solid #F0C040;border-radius:4px"><b>Note:</b> This document does not include pricing information. For billing details refer to the Final Invoice.</div>
+    `;
+  } else if (formId === 'finalqc') {
+    const body = document.getElementById('wfFinalQCBody');
+    if (!body) return;
+    body.innerHTML = headerHTML + `
+      <div class="wf-section-label">REPAIR SUMMARY</div>
+      <table class="wf-items-table">
+        <thead><tr><th>Item</th><th>Description</th><th style="width:80px">Status</th></tr></thead>
+        <tbody>${items.map(i => '<tr><td>' + i.code + '</td><td>' + i.desc + '</td><td>' + (i.approved === 'Y' ? '<span style="color:var(--green)">Approved</span>' : '<span style="color:var(--red)">N/A</span>') + '</td></tr>').join('') || '<tr><td colspan="3" style="color:var(--muted);text-align:center">No items</td></tr>'}</tbody>
+      </table>
+      <div class="wf-section-label">OUTGOING INSPECTION</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10.5px;margin-bottom:8px;padding:6px 8px;background:#F0F4FA;border-radius:4px">
+        <span><b>Ang Out Up:</b> ${r.sAngOutUp || '—'}</span>
+        <span><b>Ang Out Down:</b> ${r.sAngOutDown || '—'}</span>
+        <span><b>Ang Out Right:</b> ${r.sAngOutRight || '—'}</span>
+        <span><b>Ang Out Left:</b> ${r.sAngOutLeft || '—'}</span>
+        <span><b>Broken Fibers Out:</b> ${r.sBrokenFibersOut || '—'}</span>
+      </div>
+      <div class="wf-section-label">QC SIGN-OFF</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div><div class="sig-line" style="border-bottom:1px solid #000;height:30px;margin-bottom:2px"></div><div style="font-size:8px;color:#666">Technician Signature</div></div>
+        <div><div class="sig-line" style="border-bottom:1px solid #000;height:30px;margin-bottom:2px"></div><div style="font-size:8px;color:#666">Date</div></div>
+        <div><div class="sig-line" style="border-bottom:1px solid #000;height:30px;margin-bottom:2px"></div><div style="font-size:8px;color:#666">QA Inspector Signature</div></div>
+        <div><div class="sig-line" style="border-bottom:1px solid #000;height:30px;margin-bottom:2px"></div><div style="font-size:8px;color:#666">Date</div></div>
+      </div>
+    `;
+  }
+  // Amendment & Defect pills redirect to existing operational drawers
+}
+
+function renderInspectionCategories(detailed) {
+  const categories = [
+    { name: 'IMAGE ACCEPTABLE', items: [
+      { label: 'Image is Clear and In focus', defects: [] },
+      { label: 'Image is Round and clear to edge', defects: [] },
+      { label: 'Image is free of contamination', defects: detailed ? ['Dirt','Fluid','Broken Glass'] : [] },
+      { label: 'Image Lens system is secure', defects: [] }
+    ]},
+    { name: 'EYEPIECE/OCULAR ACCEPTABLE', items: [
+      { label: 'Eyepiece Color', defects: [] },
+      { label: 'Eyepiece condition', defects: detailed ? ['Nicks','Scratches','Dirt','Other'] : [] },
+      { label: 'Eyepiece window', defects: detailed ? ['Chips','Scratches','Dirt','Leaks','Other'] : [] },
+      { label: 'Eyepiece glue seal', defects: [] },
+      { label: 'Ocular Lens (Intact and Clean)', defects: detailed ? ['Spots','Loose','Other'] : [] }
+    ]},
+    { name: 'TUBING ACCEPTABLE', items: [
+      { label: 'Insertion Tube Connection to Body', defects: detailed ? ['Loose','Cracks','Other'] : [] },
+      { label: 'Tubing Finish', defects: detailed ? ['Matte','Polished','Highly Polished'] : [] },
+      { label: 'Insertion Tube', defects: detailed ? ['Bent','Dents','Other'] : [] },
+      { label: 'Insertion Tube Damage to Plating', defects: [] },
+      { label: 'Insertion Tube Tip', defects: detailed ? ['Bent','Dents','Nicks','Other'] : [] }
+    ]},
+    { name: 'BODY/NOSECONE/LIGHT POST ACCEPTABLE', items: [
+      { label: 'ID Band in tact and proper color', defects: [] },
+      { label: 'Body condition', defects: detailed ? ['Nicks','Scratches','Dirt','Other'] : [] },
+      { label: 'Nosecone condition', defects: detailed ? ['Nicks','Scratches','Dirt','Other'] : [] },
+      { label: 'Glue/Solder Seals Intact', defects: [] },
+      { label: 'Light Post condition', defects: detailed ? ['Loose','Other'] : [] },
+      { label: 'Model # Clear and Visible', defects: [] },
+      { label: 'Light Post and Tip Angle in Alignment', defects: [] }
+    ]},
+    { name: 'OBJECTIVE/DISTAL END ACCEPTABLE', items: [
+      { label: 'Window (Intact and Clear)', defects: detailed ? ['Scratches','Chip','Cracks','Missing','Other'] : [] },
+      { label: 'Negative Lens (Intact and Clear)', defects: detailed ? ['Scratches','Chip','Cracks','Other'] : [] },
+      { label: 'Objective System (Intact and secure)', defects: [] },
+      { label: 'Free of Dust, Dirt and Fluid', defects: [] }
+    ]},
+    { name: 'LIGHT FIBERS ACCEPTABLE', items: [
+      { label: 'Color of Light at tip and Post acceptable', defects: [] },
+      { label: 'Fibers Intact and not loose', defects: [] },
+      { label: 'Fiber Glue Intact and Sealed', defects: [] }
+    ]}
+  ];
+
+  let html = '';
+  categories.forEach(cat => {
+    html += '<div class="wf-section-label">' + cat.name + '</div><div class="wf-pf-grid">';
+    cat.items.forEach((item, idx) => {
+      const uid = cat.name.replace(/[^a-zA-Z]/g,'').substring(0,6) + idx;
+      html += '<div class="wf-pf-row"><span class="wf-pf-label">' + item.label + '</span>';
+      html += '<span class="wf-pf-result"><label><input type="radio" name="pf' + uid + '" style="accent-color:var(--navy)"/> P</label><label><input type="radio" name="pf' + uid + '" style="accent-color:var(--navy)"/> F</label></span>';
+      if (item.defects.length > 0) {
+        html += '</div><div class="wf-pf-row" style="padding-left:24px"><span class="wf-pf-defects">';
+        item.defects.forEach(d => {
+          html += '<label><input type="checkbox"/> ' + d + '</label>';
+        });
+        html += '</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div class="wf-section-label">SPECIFICATIONS</div>';
+  html += '<div style="display:flex;gap:12px;margin-bottom:8px;font-size:10.5px">';
+  html += '<span>Insertion Tube Length (mm): <input style="width:60px;border:1px solid var(--border);border-radius:3px;padding:2px 4px;font-size:10px" value="N/A"/></span>';
+  html += '<span>Insertion Tube Diameter (mm): <input style="width:60px;border:1px solid var(--border);border-radius:3px;padding:2px 4px;font-size:10px" value="N/A"/></span>';
+  html += '</div>';
+
+  html += '<div class="wf-section-label">IMAGE SPECIFICATIONS</div><div class="wf-pf-grid">';
+  ['Degree','Marker Plate Location (Clock Time)','Direction of View','Field of View','Light Field covers the Image Field'].forEach((spec, i) => {
+    html += '<div class="wf-pf-row"><span class="wf-pf-label">' + spec + '</span>';
+    html += '<span class="wf-pf-result"><label><input type="radio" name="imgspec' + i + '" style="accent-color:var(--navy)"/> P</label><label><input type="radio" name="imgspec' + i + '" style="accent-color:var(--navy)"/> F</label></span></div>';
+  });
+  html += '</div>';
+
+  html += '<div style="display:flex;gap:12px;margin-top:6px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:10.5px;font-weight:600">';
+  html += '<span>Hot/Cold Leak Test: <label><input type="radio" name="leakTest" style="accent-color:var(--green)"/> Pass</label> <label><input type="radio" name="leakTest" style="accent-color:var(--red)"/> Fail</label></span>';
+  if (detailed) {
+    html += '<span style="margin-left:auto">Autoclave Test: <label><input type="radio" name="autoTest" style="accent-color:var(--green)"/> Pass</label> <label><input type="radio" name="autoTest" style="accent-color:var(--red)"/> Fail</label></span>';
+  }
+  html += '</div>';
+
+  return html;
+}
+
+setTimeout(function() {
+  const statusSel = document.getElementById('hRepairStatus');
+  if (statusSel) {
+    statusSel.addEventListener('change', function() {
+      const newStatus = parseInt(this.value) || 1;
+      const statusName = _statuses.find(s => s.lRepairStatusID === newStatus)?.sRepairStatus || 'Unknown';
+      updateWorkflowForms(newStatus);
+      const currentPhase = getPhaseForStatus(newStatus);
+      const available = WORKFLOW_FORMS.filter(f => f.phase === currentPhase && !_generatedForms[f.id]);
+      if (available.length > 0) {
+        showWorkflowToast('Status: ' + statusName + ' \u2014 ' + available.length + ' form' + (available.length > 1 ? 's' : '') + ' now available: ' + available.map(f => f.shortName).join(', '));
+      }
+    });
+  }
+}, 0);
 
 // Lookups
 let _statuses = [], _levels = [], _deliveryMethods = [], _techs = [], _safetyLevels = [];
@@ -1482,6 +2216,27 @@ function populateDetail(d) {
   document.getElementById('fInclVideoPlug').checked = d.sIncludesVideoPlugYN === 'Y';
   document.getElementById('fInclMouthpiece').checked = d.sIncludesMouthpieceYN === 'Y';
   document.getElementById('fInclAngleKnob').checked = d.sIncludesAngleKnobYN === 'Y';
+
+  // ── QC INSPECTION DRAWER ──
+  setRadioVal('qcAngulation', d.sInsAngulationPF);
+  setRadioVal('qcInsertionTube', d.sInsInsertionTubePF);
+  setRadioVal('qcUniversalCord', d.sInsUniversalCordPF);
+  setRadioVal('qcLightGuide', d.sInsLightGuidePF);
+  setRadioVal('qcDistalTip', d.sInsDistalTipPF);
+  setRadioVal('qcForcepChannel', d.sInsForcepChannelPF);
+  setRadioVal('qcSuction', d.sInsSuctionPF);
+  setRadioVal('qcAuxWater', d.sInsAuxWaterPF);
+  setRadioVal('qcImage', d.sInsImagePF);
+  setRadioVal('qcAirWater', d.sInsAirWaterPF);
+  setRadioVal('qcLeakTest', d.sInsLeakTestPF);
+  setRadioVal('qcFogTest', d.sInsFogTestPF);
+  setRadioVal('qcAlcoholWipe', d.sInsAlcoholWipePF);
+  setRadioVal('qcFinalInsp', d.sInsFinalInspPF);
+  setRadioVal('qcImageCentration', d.sInsImageCentrationPF);
+  document.getElementById('qcFibersIn').value = d.sBrokenFibersIn || '';
+  document.getElementById('qcFibersOut').value = d.sBrokenFibersOut || '';
+  document.getElementById('qcRepairable').checked = !!d.bRepairable;
+  document.getElementById('qcUsable').checked = !!d.bUsable;
 
   // ── EXPENSE TAB ──
   const labor = parseFloat(d.dblAmtCostLabor) || 0;
@@ -1945,10 +2700,518 @@ function markDirty() { _dirty = true; updateSaveStatus('unsaved'); clearTimeout(
 async function autoSave() {
   if (!_dirty || !_currentRepair) return;
   updateSaveStatus('saving');
-  console.log('[TSI Repairs] Autosave — key:', _currentRepair.lRepairKey);
-  _dirty = false;
-  updateSaveStatus('saved');
+  try {
+    if (_liveMode && _currentRepair.lRepairKey > 0) {
+      await API.updateRepair(buildRepairPayload());
+    }
+    // Always sync local state from form fields
+    syncFormToRepair();
+    _dirty = false;
+    updateSaveStatus('saved');
+    console.log('[TSI Repairs] Autosave — key:', _currentRepair.lRepairKey);
+  } catch (e) {
+    console.warn('[TSI Repairs] Autosave failed:', e.message);
+    updateSaveStatus('error');
+    _dirty = true;
+  }
 }
+
+// ── Build API payload from form fields (Hungarian notation, p-prefixed) ──
+function buildRepairPayload() {
+  const d = _currentRepair;
+  return {
+    plRepairKey: d.lRepairKey,
+    plScopeKey: d.lScopeKey,
+    plDepartmentKey: d.lDepartmentKey,
+    plRepairStatusID: getSelectVal('hRepairStatus') || d.lRepairStatusID,
+    plRepairLevelKey: getSelectVal('hRepairLevel') || d.lRepairLevelKey,
+    plRepairReasonKey: getSelectVal('fRepairReason') || d.lRepairReasonKey,
+    plPatientSafetyLevelKey: getSelectVal('fPSLevelIn') || d.lPatientSafetyLevelKey,
+    plTechnicianKey: d.lTechnicianKey,
+    plSalesRepKey: getSelectVal('fSalesRep') || d.lSalesRepKey,
+    plDeliveryMethodKey: d.lDeliveryMethodKey,
+    plDistributorKey: getSelectVal('fDistributor') || d.lDistributorKey,
+    plPricingCategoryKey: getSelectVal('fPricingCat') || d.lPricingCategoryKey,
+    plPaymentTermsKey: getSelectVal('fPaymentTerms') || d.lPaymentTermsKey,
+    // Complaint & notes
+    psComplaintDesc: document.getElementById('fComplaint').textContent || '',
+    psNotes: document.getElementById('fScopeNotes').value || '',
+    // Angulation in
+    psAngInUp: document.getElementById('fAngInUp').value || '',
+    psAngInDown: document.getElementById('fAngInDown').value || '',
+    psAngInRight: document.getElementById('fAngInRight').value || '',
+    psAngInLeft: document.getElementById('fAngInLeft').value || '',
+    // Angulation out
+    psAngOutUp: document.getElementById('fAngOutUp').value || '',
+    psAngOutDown: document.getElementById('fAngOutDown').value || '',
+    psAngOutRight: document.getElementById('fAngOutRight').value || '',
+    psAngOutLeft: document.getElementById('fAngOutLeft').value || '',
+    // Epoxy & jig
+    pnIncomingEpoxySize: document.getElementById('fEpoxyIn').value || '',
+    psBRJigSize: document.getElementById('fBRJig').value || '',
+    // Logistics
+    psRackPosition: document.getElementById('hRack').value || '',
+    psPurchaseOrder: document.getElementById('hPO').value || '',
+    psShipTrackingNumberIn: document.getElementById('fTrackIn').value || '',
+    psShipTrackingNumber: document.getElementById('fTrackOut').value || '',
+    psShipTrackingNumberVendor: document.getElementById('fOutTracking').value || '',
+    psShipWeight: document.getElementById('fShipWeight').value || '',
+    pbTrackingNumberRequired: document.getElementById('fTrackRequired').checked,
+    // Shipping
+    pdblAmtShipping: parseFloat(document.getElementById('fShipCost').value) || 0,
+    pdblOutSourceCost: parseFloat(document.getElementById('fOutCost').value) || 0,
+    // Display toggles
+    psDisplayItemAmount: document.getElementById('fDispAmounts').checked ? 'Y' : 'N',
+    psDisplayItemDescription: document.getElementById('fDispDescrip').checked ? 'Y' : 'N',
+    psDisplayCustomerComplaint: document.getElementById('fDispComp').checked ? 'Y' : 'N',
+    // Requisition
+    psReqAprTotalsOnly: document.getElementById('fRequisition').value || '',
+    psApprName: document.getElementById('fApprName').value || '',
+    // Bill To
+    psBillTo: getSelectVal('fBillTo') || d.sBillTo || 'C',
+    // Accessories
+    psIncludesCaseYN: document.getElementById('fInclCase').checked ? 'Y' : 'N',
+    psIncludesCapYN: document.getElementById('fInclCap').checked ? 'Y' : 'N',
+    psIncludesWaterResCapYN: document.getElementById('fInclWaterCap').checked ? 'Y' : 'N',
+    psIncludesVideoPlugYN: document.getElementById('fInclVideoPlug').checked ? 'Y' : 'N',
+    psIncludesMouthpieceYN: document.getElementById('fInclMouthpiece').checked ? 'Y' : 'N',
+    psIncludesAngleKnobYN: document.getElementById('fInclAngleKnob').checked ? 'Y' : 'N',
+    // Comments
+    pmComments: d.mComments || '',
+    pmCommentsHidden: d.mCommentsHidden || '',
+    pmCommentsRework: d.mCommentsRework || '',
+    pmCommentsDisIns: d.mCommentsDisIns || '',
+    pmCommentsISO: d.mCommentsISO || '',
+    // QC Inspection — pass/fail checks (sIns*PF columns)
+    psInsAngulationPF: getRadioVal('qcAngulation'),
+    psInsInsertionTubePF: getRadioVal('qcInsertionTube'),
+    psInsUniversalCordPF: getRadioVal('qcUniversalCord'),
+    psInsLightGuidePF: getRadioVal('qcLightGuide'),
+    psInsDistalTipPF: getRadioVal('qcDistalTip'),
+    psInsForcepChannelPF: getRadioVal('qcForcepChannel'),
+    psInsSuctionPF: getRadioVal('qcSuction'),
+    psInsAuxWaterPF: getRadioVal('qcAuxWater'),
+    psInsImagePF: getRadioVal('qcImage'),
+    psInsAirWaterPF: getRadioVal('qcAirWater'),
+    psInsLeakTestPF: getRadioVal('qcLeakTest'),
+    psInsFogTestPF: getRadioVal('qcFogTest'),
+    psInsAlcoholWipePF: getRadioVal('qcAlcoholWipe'),
+    psInsFinalInspPF: getRadioVal('qcFinalInsp'),
+    psInsImageCentrationPF: getRadioVal('qcImageCentration'),
+    // QC — broken fibers, repairable, usable
+    psBrokenFibersIn: document.getElementById('qcFibersIn').value || '',
+    psBrokenFibersOut: document.getElementById('qcFibersOut').value || '',
+    pbRepairable: document.getElementById('qcRepairable').checked,
+    pbUsable: document.getElementById('qcUsable').checked
+  };
+}
+
+function getRadioVal(name) {
+  const checked = document.querySelector('input[name="' + name + '"]:checked');
+  return checked ? checked.value : '';
+}
+function setRadioVal(name, val) {
+  if (!val) return;
+  const radio = document.querySelector('input[name="' + name + '"][value="' + val + '"]');
+  if (radio) radio.checked = true;
+}
+
+// ── Sync form field values back to local _currentRepair object ──
+function syncFormToRepair() {
+  const d = _currentRepair;
+  if (!d) return;
+  d.lRepairStatusID = getSelectVal('hRepairStatus') || d.lRepairStatusID;
+  d.lRepairLevelKey = getSelectVal('hRepairLevel') || d.lRepairLevelKey;
+  d.lRepairReasonKey = getSelectVal('fRepairReason') || d.lRepairReasonKey;
+  d.lPatientSafetyLevelKey = getSelectVal('fPSLevelIn') || d.lPatientSafetyLevelKey;
+  d.lSalesRepKey = getSelectVal('fSalesRep') || d.lSalesRepKey;
+  d.lDistributorKey = getSelectVal('fDistributor') || d.lDistributorKey;
+  d.lPricingCategoryKey = getSelectVal('fPricingCat') || d.lPricingCategoryKey;
+  d.lPaymentTermsKey = getSelectVal('fPaymentTerms') || d.lPaymentTermsKey;
+  d.sComplaintDesc = document.getElementById('fComplaint').textContent || '';
+  d.sNotes = document.getElementById('fScopeNotes').value || '';
+  d.sAngInUp = document.getElementById('fAngInUp').value || '';
+  d.sAngInDown = document.getElementById('fAngInDown').value || '';
+  d.sAngInRight = document.getElementById('fAngInRight').value || '';
+  d.sAngInLeft = document.getElementById('fAngInLeft').value || '';
+  d.sAngOutUp = document.getElementById('fAngOutUp').value || '';
+  d.sAngOutDown = document.getElementById('fAngOutDown').value || '';
+  d.sAngOutRight = document.getElementById('fAngOutRight').value || '';
+  d.sAngOutLeft = document.getElementById('fAngOutLeft').value || '';
+  d.nIncomingEpoxySize = document.getElementById('fEpoxyIn').value || '';
+  d.sBRJigSize = document.getElementById('fBRJig').value || '';
+  d.sRackPosition = document.getElementById('hRack').value || '';
+  d.sPurchaseOrder = document.getElementById('hPO').value || '';
+  d.sShipTrackingNumberIn = document.getElementById('fTrackIn').value || '';
+  d.sShipTrackingNumber = document.getElementById('fTrackOut').value || '';
+  d.sShipTrackingNumberVendor = document.getElementById('fOutTracking').value || '';
+  d.sShipWeight = document.getElementById('fShipWeight').value || '';
+  d.bTrackingNumberRequired = document.getElementById('fTrackRequired').checked;
+  d.dblAmtShipping = parseFloat(document.getElementById('fShipCost').value) || 0;
+  d.dblOutSourceCost = parseFloat(document.getElementById('fOutCost').value) || 0;
+  d.sDisplayItemAmount = document.getElementById('fDispAmounts').checked ? 'Y' : 'N';
+  d.sDisplayItemDescription = document.getElementById('fDispDescrip').checked ? 'Y' : 'N';
+  d.sDisplayCustomerComplaint = document.getElementById('fDispComp').checked ? 'Y' : 'N';
+  d.sReqAprTotalsOnly = document.getElementById('fRequisition').value || '';
+  d.sApprName = document.getElementById('fApprName').value || '';
+  d.sBillTo = getSelectVal('fBillTo') || d.sBillTo || 'C';
+  d.sIncludesCaseYN = document.getElementById('fInclCase').checked ? 'Y' : 'N';
+  d.sIncludesCapYN = document.getElementById('fInclCap').checked ? 'Y' : 'N';
+  d.sIncludesWaterResCapYN = document.getElementById('fInclWaterCap').checked ? 'Y' : 'N';
+  d.sIncludesVideoPlugYN = document.getElementById('fInclVideoPlug').checked ? 'Y' : 'N';
+  d.sIncludesMouthpieceYN = document.getElementById('fInclMouthpiece').checked ? 'Y' : 'N';
+  d.sIncludesAngleKnobYN = document.getElementById('fInclAngleKnob').checked ? 'Y' : 'N';
+  // QC Inspection
+  d.sInsAngulationPF = getRadioVal('qcAngulation');
+  d.sInsInsertionTubePF = getRadioVal('qcInsertionTube');
+  d.sInsUniversalCordPF = getRadioVal('qcUniversalCord');
+  d.sInsLightGuidePF = getRadioVal('qcLightGuide');
+  d.sInsDistalTipPF = getRadioVal('qcDistalTip');
+  d.sInsForcepChannelPF = getRadioVal('qcForcepChannel');
+  d.sInsSuctionPF = getRadioVal('qcSuction');
+  d.sInsAuxWaterPF = getRadioVal('qcAuxWater');
+  d.sInsImagePF = getRadioVal('qcImage');
+  d.sInsAirWaterPF = getRadioVal('qcAirWater');
+  d.sInsLeakTestPF = getRadioVal('qcLeakTest');
+  d.sInsFogTestPF = getRadioVal('qcFogTest');
+  d.sInsAlcoholWipePF = getRadioVal('qcAlcoholWipe');
+  d.sInsFinalInspPF = getRadioVal('qcFinalInsp');
+  d.sInsImageCentrationPF = getRadioVal('qcImageCentration');
+  d.sBrokenFibersIn = document.getElementById('qcFibersIn').value || '';
+  d.sBrokenFibersOut = document.getElementById('qcFibersOut').value || '';
+  d.bRepairable = document.getElementById('qcRepairable').checked;
+  d.bUsable = document.getElementById('qcUsable').checked;
+}
+
+// ── Helper: get select value safely ──
+function getSelectVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+// ── Delete Repair ──
+async function confirmDeleteRepair() {
+  if (!_currentRepair || !_currentRepair.lRepairKey) { showToast('No repair loaded'); return; }
+  const wo = _currentRepair.sWorkOrderNumber || _currentRepair.lRepairKey;
+  if (!confirm('Delete work order ' + wo + '? This cannot be undone.')) return;
+  try {
+    if (_liveMode && _currentRepair.lRepairKey > 0) {
+      await API.deleteRepair(_currentRepair.lRepairKey);
+    }
+    _currentRepair = null;
+    _dirty = false;
+    updateSaveStatus('ready');
+    showToast('Work order ' + wo + ' deleted');
+    // Clear form — redirect to dashboard after brief delay
+    document.getElementById('repairBadge').textContent = '#—';
+    document.getElementById('hWO').textContent = '—';
+    document.getElementById('fComplaint').textContent = '';
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+  } catch (e) {
+    console.warn('[TSI Repairs] Delete failed:', e.message);
+    showToast('Delete failed — API not available');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXCEPTION WORKFLOWS — Update Slips, Amendments, Defects
+// ═══════════════════════════════════════════════════════
+
+// ── Update Slips ──────────────────────────────────────
+// Stored as JSON array in mCommentsHidden with [UPDATE_SLIP] tag
+let _updateSlips = [];
+let _selectedSlipIdx = -1;
+
+function loadSlips() {
+  _updateSlips = [];
+  if (!_currentRepair) return;
+  // Parse slips from mCommentsHidden
+  const raw = _currentRepair.mCommentsHidden || '';
+  const m = raw.match(/\[UPDATE_SLIP\]([\s\S]*?)\[\/UPDATE_SLIP\]/);
+  if (m) {
+    try { _updateSlips = JSON.parse(m[1]); } catch(e) { _updateSlips = []; }
+  }
+  renderSlips();
+}
+
+function renderSlips() {
+  const tbody = document.getElementById('slipsBody');
+  if (!_updateSlips.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No slips recorded</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _updateSlips.map((s, i) => {
+    const techName = _techs.find(t => t.lTechnicianKey == s.techKey);
+    const cls = i === _selectedSlipIdx ? 'style="background:#EDF2FF;cursor:pointer"' : 'style="cursor:pointer"';
+    return '<tr ' + cls + ' onclick="selectSlip(' + i + ')"><td>' + esc(s.date || '') + '</td><td>' + esc(s.reason || '') + '</td><td>' + esc(techName ? techName.sTechName : '—') + '</td><td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="event.stopPropagation();removeSlip(' + i + ')">&times;</button></td></tr>';
+  }).join('');
+}
+
+function selectSlip(idx) { _selectedSlipIdx = idx; renderSlips(); }
+
+function addSlip() {
+  const date = document.getElementById('slipDate').value;
+  const reason = document.getElementById('slipReason').value;
+  const techKey = document.getElementById('slipTech').value;
+  const updateReason = document.getElementById('slipUpdateReason').value;
+  const comment = document.getElementById('slipComment').value;
+  const findings = document.getElementById('slipFindings').value;
+  if (!reason) { showToast('Select a reason'); return; }
+  if (!comment && !findings) { showToast('Comment or findings required'); return; }
+  _updateSlips.push({
+    date: date || new Date().toISOString().slice(0,10),
+    reason, techKey: techKey || null,
+    updateReason, comment, findings,
+    createdBy: (API.getUser() || {}).sUserName || 'demo',
+    createdAt: new Date().toISOString()
+  });
+  serializeSlips();
+  renderSlips();
+  // Clear form
+  document.getElementById('slipDate').value = '';
+  document.getElementById('slipReason').value = '';
+  document.getElementById('slipUpdateReason').value = '';
+  document.getElementById('slipComment').value = '';
+  document.getElementById('slipFindings').value = '';
+  showToast('Update slip added');
+}
+
+function removeSlip(idx) {
+  _updateSlips.splice(idx, 1);
+  _selectedSlipIdx = -1;
+  serializeSlips();
+  renderSlips();
+}
+
+function serializeSlips() {
+  if (!_currentRepair) return;
+  // Strip old slip block from comments, append new
+  let raw = (_currentRepair.mCommentsHidden || '').replace(/\[UPDATE_SLIP\][\s\S]*?\[\/UPDATE_SLIP\]\n?/, '');
+  if (_updateSlips.length) {
+    raw += '\n[UPDATE_SLIP]' + JSON.stringify(_updateSlips) + '[/UPDATE_SLIP]';
+  }
+  _currentRepair.mCommentsHidden = raw;
+  markDirty();
+}
+
+function printSlip() {
+  if (_selectedSlipIdx < 0 || !_updateSlips[_selectedSlipIdx]) { showToast('Select a slip first'); return; }
+  const s = _updateSlips[_selectedSlipIdx];
+  const d = _currentRepair || {};
+  const techName = _techs.find(t => t.lTechnicianKey == s.techKey);
+  const w = window.open('', '_blank', 'width=600,height=500');
+  w.document.write('<html><head><title>Update Slip — ' + esc(d.sWorkOrderNumber || '') + '</title><style>body{font-family:Calibri,sans-serif;font-size:12px;padding:20px}h2{color:#00257A;margin:0 0 10px}table{border-collapse:collapse;width:100%;margin:10px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4fa;font-size:10px;text-transform:uppercase}</style></head><body>');
+  w.document.write('<h2>UPDATE SLIP</h2>');
+  w.document.write('<p><b>Work Order:</b> ' + esc(d.sWorkOrderNumber || '') + ' &nbsp; <b>Date:</b> ' + esc(s.date) + '</p>');
+  w.document.write('<p><b>Serial Number:</b> ' + esc(d.sSerialNumber || '') + ' &nbsp; <b>Model:</b> ' + esc(d.sScopeTypeDesc || '') + '</p>');
+  w.document.write('<table><tr><th>Reason</th><th>Update Reason</th><th>Resp. Tech</th></tr>');
+  w.document.write('<tr><td>' + esc(s.reason) + '</td><td>' + esc(s.updateReason || '—') + '</td><td>' + esc(techName ? techName.sTechName : '—') + '</td></tr></table>');
+  w.document.write('<p><b>Comment:</b> ' + esc(s.comment || '—') + '</p>');
+  w.document.write('<p><b>Findings:</b> ' + esc(s.findings || '—') + '</p>');
+  w.document.write('<br><p style="border-top:1px solid #000;width:200px;padding-top:4px">Signature / Date</p>');
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+
+// ── Amendments ────────────────────────────────────────
+// Amendments are tracked as modified repair line items with bAmended flag
+// Stored in _repairItems array + amendment metadata in mCommentsISO
+let _amendments = [];
+
+function loadAmendments() {
+  _amendments = [];
+  if (!_currentRepair) return;
+  // Parse amendment metadata from mCommentsISO
+  const raw = _currentRepair.mCommentsISO || '';
+  const m = raw.match(/\[AMENDMENTS\]([\s\S]*?)\[\/AMENDMENTS\]/);
+  if (m) {
+    try { _amendments = JSON.parse(m[1]); } catch(e) { _amendments = []; }
+  }
+  renderAmendments();
+  populateAmendItemDropdown();
+}
+
+function renderAmendments() {
+  const tbody = document.getElementById('amendBody');
+  if (!_amendments.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No amendments</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _amendments.map((a, i) => {
+    return '<tr><td>A-' + (i+1) + '</td><td>' + esc(a.type || '') + '</td><td>' + esc(a.reason || '') + '</td><td>' + esc(a.date || '') + '</td></tr>';
+  }).join('');
+}
+
+function populateAmendItemDropdown() {
+  const sel = document.getElementById('amendItem');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select repair item —</option>';
+  // If we have repair items catalog loaded, use that; otherwise use current line items
+  const items = _repairItems || [];
+  items.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.lRepairItemTranKey || item.lRepairItemKey || '';
+    opt.textContent = item.sDescription || item.sRepairItemDesc || '(unnamed)';
+    sel.appendChild(opt);
+  });
+}
+
+async function submitAmendment() {
+  const type = document.getElementById('amendType').value;
+  const reason = document.getElementById('amendReason').value;
+  const itemKey = document.getElementById('amendItem').value;
+  const isBlind = document.getElementById('amendIsBlind').checked;
+  const comment = document.getElementById('amendComment').value;
+  if (!type) { showToast('Select an amendment type'); return; }
+  if (!reason) { showToast('Select a reason'); return; }
+
+  const amendment = {
+    type, reason, isBlind, comment,
+    itemKey: itemKey || null,
+    date: new Date().toISOString().slice(0,10),
+    createdBy: (API.getUser() || {}).sUserName || 'demo'
+  };
+
+  // Try API call to add amended line item
+  if (_liveMode && itemKey) {
+    try {
+      await API.addRepairDetail({
+        plRepairKey: _currentRepair.lRepairKey,
+        plRepairItemKey: parseInt(itemKey),
+        pbAmended: true,
+        pbBlind: isBlind,
+        psComment: comment
+      });
+      // Reload line items to see the amendment
+      loadRepairItems(_currentRepair.lRepairKey);
+    } catch (e) {
+      console.warn('[TSI Repairs] AddRepairDetail not available:', e.message);
+    }
+  }
+
+  // Store amendment metadata
+  _amendments.push(amendment);
+  serializeAmendments();
+  renderAmendments();
+
+  // Clear form
+  document.getElementById('amendType').value = '';
+  document.getElementById('amendReason').value = '';
+  document.getElementById('amendItem').value = '';
+  document.getElementById('amendIsBlind').checked = false;
+  document.getElementById('amendComment').value = '';
+  showToast('Amendment recorded' + (isBlind ? ' (blind — hidden from customer docs)' : ''));
+
+  // Prompt: Reset Approval Date?
+  if (confirm('Reset Approval Date? Click OK to revert to quoting stage (new Requisition needed), or Cancel to continue.')) {
+    if (_currentRepair) {
+      _currentRepair.dtAprRecvd = null;
+      if (document.getElementById('fRecvdApproval')) document.getElementById('fRecvdApproval').value = '';
+      markDirty();
+      showToast('Approval date reset — send new Requisition');
+    }
+  }
+}
+
+function serializeAmendments() {
+  if (!_currentRepair) return;
+  let raw = (_currentRepair.mCommentsISO || '').replace(/\[AMENDMENTS\][\s\S]*?\[\/AMENDMENTS\]\n?/, '');
+  if (_amendments.length) {
+    raw += '\n[AMENDMENTS]' + JSON.stringify(_amendments) + '[/AMENDMENTS]';
+  }
+  _currentRepair.mCommentsISO = raw;
+  markDirty();
+}
+
+// ── Defect Tracking ──────────────────────────────────
+// Stored as JSON array in mCommentsISO with [DEFECT] tag
+let _defects = [];
+
+function loadDefects() {
+  _defects = [];
+  if (!_currentRepair) return;
+  const raw = _currentRepair.mCommentsISO || '';
+  const m = raw.match(/\[DEFECTS\]([\s\S]*?)\[\/DEFECTS\]/);
+  if (m) {
+    try { _defects = JSON.parse(m[1]); } catch(e) { _defects = []; }
+  }
+  renderDefects();
+}
+
+function renderDefects() {
+  const tbody = document.getElementById('defectsBody');
+  if (!_defects.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No defects recorded</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _defects.map((df, i) => {
+    const techName = _techs.find(t => t.lTechnicianKey == df.techKey);
+    const statusCls = df.resolved ? 'color:var(--green)' : 'color:var(--red);font-weight:700';
+    return '<tr><td>' + esc(df.date || '') + '</td><td>' + esc(df.reason || '') + '</td><td>' + esc(techName ? techName.sTechName : '—') + '</td><td style="' + statusCls + '">' + (df.resolved ? 'Resolved' : 'Open') + '</td><td>' + (df.resolved ? '' : '<button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="resolveDefect(' + i + ')">Resolve</button>') + '</td></tr>';
+  }).join('');
+}
+
+function logDefect() {
+  const date = document.getElementById('defectDate').value;
+  const time = document.getElementById('defectTime').value;
+  const reason = document.getElementById('defectReason').value;
+  const techKey = document.getElementById('defectTech').value;
+  const notes = document.getElementById('defectNotes').value;
+  if (!reason) { showToast('Select a reason'); return; }
+
+  // Collect failed tests
+  const failedTests = [];
+  ['defLeakTest','defControlButtons','defImage','defVideoFunctions','defAngulation','defVariableFunction','defOther'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.checked) failedTests.push(el.closest('.qc-row').querySelector('.qc-label').textContent);
+  });
+  if (!failedTests.length) { showToast('Check at least one failed test'); return; }
+
+  _defects.push({
+    date: date || new Date().toISOString().slice(0,10),
+    time: time || new Date().toTimeString().slice(0,5),
+    reason, techKey: techKey || null,
+    failedTests, notes,
+    resolved: false,
+    createdBy: (API.getUser() || {}).sUserName || 'demo',
+    createdAt: new Date().toISOString()
+  });
+  serializeDefects();
+  renderDefects();
+  // Clear form
+  document.getElementById('defectDate').value = '';
+  document.getElementById('defectTime').value = '';
+  document.getElementById('defectReason').value = '';
+  document.getElementById('defectNotes').value = '';
+  ['defLeakTest','defControlButtons','defImage','defVideoFunctions','defAngulation','defVariableFunction','defOther'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.checked = false;
+  });
+  showToast('Defect logged — repair placed on QA hold');
+}
+
+function resolveDefect(idx) {
+  if (!_defects[idx]) return;
+  const notes = prompt('Resolution notes (optional):');
+  _defects[idx].resolved = true;
+  _defects[idx].resolvedAt = new Date().toISOString();
+  _defects[idx].resolvedNotes = notes || '';
+  serializeDefects();
+  renderDefects();
+  showToast('Defect resolved');
+}
+
+function hasUnresolvedDefects() {
+  return _defects.some(d => !d.resolved);
+}
+
+function serializeDefects() {
+  if (!_currentRepair) return;
+  let raw = (_currentRepair.mCommentsISO || '').replace(/\[DEFECTS\][\s\S]*?\[\/DEFECTS\]\n?/, '');
+  if (_defects.length) {
+    raw += '\n[DEFECTS]' + JSON.stringify(_defects) + '[/DEFECTS]';
+  }
+  _currentRepair.mCommentsISO = raw;
+  markDirty();
+}
+
 function showToast(msg, ms) {
   let t = document.getElementById('tsiToast');
   if (!t) { t = document.createElement('div'); t.id = 'tsiToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;font-family:inherit;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
@@ -2517,6 +3780,8 @@ function wizSubmit() {
   };
 
   populateDetail(_currentRepair);
+  // Initialize workflow forms
+  updateWorkflowForms(_currentRepair.lRepairStatusID);
   renderRepairItems([]);
   populateInventory([]);
   populateStatus([]);
@@ -2542,6 +3807,34 @@ function wizSubmit() {
   updateSaveStatus('ready');
   document.getElementById('fComplaint').focus();
   console.log('[TSI Repairs] New work order:', clientName, '/', deptName, '/ SN#', scopeSN);
+
+  // ── Attempt API create (non-blocking) ──
+  if (_liveMode) {
+    (async () => {
+      try {
+        const payload = {
+          plScopeKey: scopeKey,
+          plDepartmentKey: parseInt(deptKey),
+          plServiceLocationKey: parseInt(document.getElementById('svcLocation').value) || 1,
+          psComplaintDesc: '',
+          plRepairStatusID: 1
+        };
+        const result = await API.addRepair(payload);
+        if (result && result.lRepairKey) {
+          _currentRepair.lRepairKey = result.lRepairKey;
+          _currentRepair.sWorkOrderNumber = result.sWorkOrderNumber || _currentRepair.sWorkOrderNumber;
+          document.getElementById('repairBadge').textContent = '#' + result.lRepairKey;
+          document.getElementById('hWO').textContent = result.sWorkOrderNumber || _currentRepair.sWorkOrderNumber;
+          showToast('Work order created: ' + (result.sWorkOrderNumber || result.lRepairKey));
+          loadRepairItems(result.lRepairKey);
+        }
+      } catch (e) {
+        // AddRepair not yet available in API — expected until MOL-Tech adds it
+        console.warn('[TSI Repairs] AddRepair not available:', e.message);
+        showToast('New WO — API create pending (demo mode)');
+      }
+    })();
+  }
 }
 
 // ── Scope History (by SN#) ──
@@ -2559,8 +3852,27 @@ function closeScopeHistory() {
 /* Shared Drawer System */
 function openDrawer(id) {
   closeDrawer();
+  // Load data for exception drawers on open
+  if (id === 'slips') { loadSlips(); populateDrawerTechDropdowns(); }
+  if (id === 'amend') { loadAmendments(); }
+  if (id === 'defects') { loadDefects(); populateDrawerTechDropdowns(); }
+  if (id === 'qc') { populateDrawerTechDropdowns(); }
   document.getElementById('drawer-' + id).classList.add('open');
   document.getElementById('drawerBackdrop').classList.add('open');
+}
+
+function populateDrawerTechDropdowns() {
+  ['slipTech','slipTech2','defectTech','qcTechnician','qcInspectedBy'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel || sel.options.length > 1) return;
+    sel.innerHTML = '<option value="">— Select —</option>';
+    _techs.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.lTechnicianKey;
+      opt.textContent = t.sTechName;
+      sel.appendChild(opt);
+    });
+  });
 }
 function closeDrawer() {
   document.querySelectorAll('.qc-drawer.open').forEach(d => d.classList.remove('open'));
@@ -3059,6 +4371,12 @@ async function initPage() {
 
     // Populate the full UI
     populateDetail(_currentRepair);
+    // Demo: phases 1-2 already generated since status is "In Repair" (3)
+    _generatedForms = {
+      disassemble: '3/5/2026, 2:00 PM',
+      requisition: '3/5/2026, 4:30 PM'
+    };
+    updateWorkflowForms(_currentRepair.lRepairStatusID);
     document.getElementById('repairBadge').textContent = '#DEMO';
 
     // Demo repair line items
