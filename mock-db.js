@@ -259,5 +259,549 @@ const MockDB = (() => {
 //  Phase 3: Repairs, inventory, financial, suppliers
 // ═══════════════════════════════════════════════════════
 
-// Phase 2 seed data will go here
+// ═══════════════════════════════════════════════════════
+//  PHASE 2: Core Entity Seed Data
+//  Clients, Departments, Scopes, Scope Types, Lookups
+// ═══════════════════════════════════════════════════════
+
+// ── Service Locations ───────────────────────────────────
+MockDB.seed('serviceLocations', [
+  { lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', sAddress1: '2006 Market St', sCity: 'Upper Chichester', sState: 'PA', sZip: '19014', bActive: true },
+  { lServiceLocationKey: 2, sServiceLocationName: 'Nashville', sAddress1: '820 4th Ave S', sCity: 'Nashville', sState: 'TN', sZip: '37210', bActive: true },
+]);
+
+// ── Sales Reps ──────────────────────────────────────────
+MockDB.seed('salesReps', [
+  { lSalesRepKey: 1, sSalesRepName: 'Joseph Brassell', sFirstName: 'Joseph', sLastName: 'Brassell', bActive: true },
+  { lSalesRepKey: 2, sSalesRepName: 'Brandi Cook', sFirstName: 'Brandi', sLastName: 'Cook', bActive: true },
+  { lSalesRepKey: 3, sSalesRepName: 'Tom Velez', sFirstName: 'Tom', sLastName: 'Velez', bActive: true },
+  { lSalesRepKey: 4, sSalesRepName: 'Rob Mancini', sFirstName: 'Rob', sLastName: 'Mancini', bActive: true },
+  { lSalesRepKey: 5, sSalesRepName: 'Debbie Hightower', sFirstName: 'Debbie', sLastName: 'Hightower', bActive: true },
+  { lSalesRepKey: 6, sSalesRepName: 'J. Miller', sFirstName: 'Jim', sLastName: 'Miller', bActive: true },
+  { lSalesRepKey: 7, sSalesRepName: 'R. Thompson', sFirstName: 'Rick', sLastName: 'Thompson', bActive: true },
+  { lSalesRepKey: 8, sSalesRepName: 'S. Chen', sFirstName: 'Sarah', sLastName: 'Chen', bActive: true },
+  { lSalesRepKey: 9, sSalesRepName: 'K. Davis', sFirstName: 'Kevin', sLastName: 'Davis', bActive: true },
+]);
+
+// ── Employees / Technicians ─────────────────────────────
+MockDB.seed('employees', [
+  { lEmployeeKey: 1, sEmployeeFirst: 'Rob', sEmployeeLast: 'Martinez', sEmployeeEMail: 'r.martinez@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 2, sEmployeeFirst: 'Tom', sEmployeeLast: 'Bradley', sEmployeeEMail: 't.bradley@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 3, sEmployeeFirst: 'Mike', sEmployeeLast: 'Johnson', sEmployeeEMail: 'm.johnson@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 4, sEmployeeFirst: 'Chris', sEmployeeLast: 'Lee', sEmployeeEMail: 'c.lee@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 5, sEmployeeFirst: 'Amy', sEmployeeLast: 'Sanders', sEmployeeEMail: 'a.sanders@tsi.com', bActive: true, bIsTechnician: false },
+]);
+
+// ── Pricing Categories ──────────────────────────────────
+MockDB.seed('pricingCategories', [
+  { lPricingCategoryKey: 1, sPricingDescription: 'Standard', bActive: true, bDefault: true },
+  { lPricingCategoryKey: 2, sPricingDescription: 'Premier', bActive: true, bDefault: false },
+  { lPricingCategoryKey: 3, sPricingDescription: 'GSA 2014 (Joint)', bActive: true, bDefault: false },
+  { lPricingCategoryKey: 4, sPricingDescription: 'Government', bActive: true, bDefault: false },
+  { lPricingCategoryKey: 5, sPricingDescription: 'HPG', bActive: true, bDefault: false },
+]);
+
+// ── Payment Terms ───────────────────────────────────────
+MockDB.seed('paymentTerms', [
+  { lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt' },
+  { lPaymentTermsKey: 2, sTermsDesc: 'Net 30' },
+  { lPaymentTermsKey: 3, sTermsDesc: 'Net 60' },
+  { lPaymentTermsKey: 4, sTermsDesc: 'Net 90' },
+]);
+
+// ── Credit Limits ───────────────────────────────────────
+MockDB.seed('creditLimits', [
+  { lCreditLimitKey: 1, sItemText: '2,500' },
+  { lCreditLimitKey: 2, sItemText: '3,000' },
+  { lCreditLimitKey: 3, sItemText: '5,000' },
+  { lCreditLimitKey: 4, sItemText: '8,000' },
+  { lCreditLimitKey: 5, sItemText: '10,000' },
+  { lCreditLimitKey: 6, sItemText: '12,000' },
+  { lCreditLimitKey: 7, sItemText: '15,000' },
+  { lCreditLimitKey: 8, sItemText: '25,000' },
+]);
+
+// ── Distributors ────────────────────────────────────────
+MockDB.seed('distributors', [
+  { lDistributorKey: 1, sDistName1: 'Total Scope South' },
+  { lDistributorKey: 2, sDistName1: 'Total Scope North' },
+  { lDistributorKey: 3, sDistName1: 'Direct' },
+]);
+
+// ── Countries ───────────────────────────────────────────
+MockDB.seed('countries', [
+  { lCountryKey: 1, sCountryName: 'USA' },
+  { lCountryKey: 2, sCountryName: 'Canada' },
+  { lCountryKey: 3, sCountryName: 'Mexico' },
+]);
+
+// ── States ──────────────────────────────────────────────
+MockDB.seed('states', [
+  { lStateKey: 1, sStateAbbreviation: 'AL', sStateName: 'Alabama' },
+  { lStateKey: 2, sStateAbbreviation: 'AK', sStateName: 'Alaska' },
+  { lStateKey: 3, sStateAbbreviation: 'AZ', sStateName: 'Arizona' },
+  { lStateKey: 4, sStateAbbreviation: 'AR', sStateName: 'Arkansas' },
+  { lStateKey: 5, sStateAbbreviation: 'CA', sStateName: 'California' },
+  { lStateKey: 6, sStateAbbreviation: 'CO', sStateName: 'Colorado' },
+  { lStateKey: 7, sStateAbbreviation: 'CT', sStateName: 'Connecticut' },
+  { lStateKey: 8, sStateAbbreviation: 'DE', sStateName: 'Delaware' },
+  { lStateKey: 9, sStateAbbreviation: 'FL', sStateName: 'Florida' },
+  { lStateKey: 10, sStateAbbreviation: 'GA', sStateName: 'Georgia' },
+  { lStateKey: 11, sStateAbbreviation: 'HI', sStateName: 'Hawaii' },
+  { lStateKey: 12, sStateAbbreviation: 'ID', sStateName: 'Idaho' },
+  { lStateKey: 13, sStateAbbreviation: 'IL', sStateName: 'Illinois' },
+  { lStateKey: 14, sStateAbbreviation: 'IN', sStateName: 'Indiana' },
+  { lStateKey: 15, sStateAbbreviation: 'IA', sStateName: 'Iowa' },
+  { lStateKey: 16, sStateAbbreviation: 'KS', sStateName: 'Kansas' },
+  { lStateKey: 17, sStateAbbreviation: 'KY', sStateName: 'Kentucky' },
+  { lStateKey: 18, sStateAbbreviation: 'LA', sStateName: 'Louisiana' },
+  { lStateKey: 19, sStateAbbreviation: 'ME', sStateName: 'Maine' },
+  { lStateKey: 20, sStateAbbreviation: 'MD', sStateName: 'Maryland' },
+  { lStateKey: 21, sStateAbbreviation: 'MA', sStateName: 'Massachusetts' },
+  { lStateKey: 22, sStateAbbreviation: 'MI', sStateName: 'Michigan' },
+  { lStateKey: 23, sStateAbbreviation: 'MN', sStateName: 'Minnesota' },
+  { lStateKey: 24, sStateAbbreviation: 'MS', sStateName: 'Mississippi' },
+  { lStateKey: 25, sStateAbbreviation: 'MO', sStateName: 'Missouri' },
+  { lStateKey: 26, sStateAbbreviation: 'MT', sStateName: 'Montana' },
+  { lStateKey: 27, sStateAbbreviation: 'NE', sStateName: 'Nebraska' },
+  { lStateKey: 28, sStateAbbreviation: 'NV', sStateName: 'Nevada' },
+  { lStateKey: 29, sStateAbbreviation: 'NH', sStateName: 'New Hampshire' },
+  { lStateKey: 30, sStateAbbreviation: 'NJ', sStateName: 'New Jersey' },
+  { lStateKey: 31, sStateAbbreviation: 'NM', sStateName: 'New Mexico' },
+  { lStateKey: 32, sStateAbbreviation: 'NY', sStateName: 'New York' },
+  { lStateKey: 33, sStateAbbreviation: 'NC', sStateName: 'North Carolina' },
+  { lStateKey: 34, sStateAbbreviation: 'ND', sStateName: 'North Dakota' },
+  { lStateKey: 35, sStateAbbreviation: 'OH', sStateName: 'Ohio' },
+  { lStateKey: 36, sStateAbbreviation: 'OK', sStateName: 'Oklahoma' },
+  { lStateKey: 37, sStateAbbreviation: 'OR', sStateName: 'Oregon' },
+  { lStateKey: 38, sStateAbbreviation: 'PA', sStateName: 'Pennsylvania' },
+  { lStateKey: 39, sStateAbbreviation: 'RI', sStateName: 'Rhode Island' },
+  { lStateKey: 40, sStateAbbreviation: 'SC', sStateName: 'South Carolina' },
+  { lStateKey: 41, sStateAbbreviation: 'SD', sStateName: 'South Dakota' },
+  { lStateKey: 42, sStateAbbreviation: 'TN', sStateName: 'Tennessee' },
+  { lStateKey: 43, sStateAbbreviation: 'TX', sStateName: 'Texas' },
+  { lStateKey: 44, sStateAbbreviation: 'UT', sStateName: 'Utah' },
+  { lStateKey: 45, sStateAbbreviation: 'VT', sStateName: 'Vermont' },
+  { lStateKey: 46, sStateAbbreviation: 'VA', sStateName: 'Virginia' },
+  { lStateKey: 47, sStateAbbreviation: 'WA', sStateName: 'Washington' },
+  { lStateKey: 48, sStateAbbreviation: 'WV', sStateName: 'West Virginia' },
+  { lStateKey: 49, sStateAbbreviation: 'WI', sStateName: 'Wisconsin' },
+  { lStateKey: 50, sStateAbbreviation: 'WY', sStateName: 'Wyoming' },
+  { lStateKey: 51, sStateAbbreviation: 'DC', sStateName: 'District of Columbia' },
+]);
+
+// ── Instrument Types ────────────────────────────────────
+MockDB.seed('instrumentTypes', [
+  { sInstrumentType: 'F', sDescription: 'Flexible Endoscope' },
+  { sInstrumentType: 'R', sDescription: 'Rigid Endoscope' },
+  { sInstrumentType: 'C', sDescription: 'Camera / Video' },
+  { sInstrumentType: 'I', sDescription: 'Instrument' },
+]);
+
+// ── Shipping Carriers ───────────────────────────────────
+MockDB.seed('shippingCarriers', [
+  { lCarrierKey: 1, sCarrierName: 'FedEx', bActive: true },
+  { lCarrierKey: 2, sCarrierName: 'UPS', bActive: true },
+  { lCarrierKey: 3, sCarrierName: 'DHL', bActive: true },
+  { lCarrierKey: 4, sCarrierName: 'TSI Courier', bActive: true },
+  { lCarrierKey: 5, sCarrierName: 'Client Pickup', bActive: true },
+]);
+
+// ── Department Types ────────────────────────────────────
+MockDB.seed('departmentTypes', [
+  { lDepartmentTypeKey: 1, sDepartmentTypeName: 'Endoscopy' },
+  { lDepartmentTypeKey: 2, sDepartmentTypeName: 'GI Lab' },
+  { lDepartmentTypeKey: 3, sDepartmentTypeName: 'Surgery / OR' },
+  { lDepartmentTypeKey: 4, sDepartmentTypeName: 'Biomedical Engineering' },
+  { lDepartmentTypeKey: 5, sDepartmentTypeName: 'Pulmonology' },
+  { lDepartmentTypeKey: 6, sDepartmentTypeName: 'Urology' },
+  { lDepartmentTypeKey: 7, sDepartmentTypeName: 'Sterile Processing' },
+  { lDepartmentTypeKey: 8, sDepartmentTypeName: 'ICU / Critical Care' },
+  { lDepartmentTypeKey: 9, sDepartmentTypeName: 'Cardiology' },
+]);
+
+// ── Manufacturers ───────────────────────────────────────
+MockDB.seed('manufacturers', [
+  { lManufacturerKey: 1, sManufacturerName: 'Olympus', bActive: true },
+  { lManufacturerKey: 2, sManufacturerName: 'Fujifilm', bActive: true },
+  { lManufacturerKey: 3, sManufacturerName: 'Pentax', bActive: true },
+  { lManufacturerKey: 4, sManufacturerName: 'Karl Storz', bActive: true },
+  { lManufacturerKey: 5, sManufacturerName: 'Stryker', bActive: true },
+  { lManufacturerKey: 6, sManufacturerName: 'Smith & Nephew', bActive: true },
+  { lManufacturerKey: 7, sManufacturerName: 'Arthrex', bActive: true },
+  { lManufacturerKey: 8, sManufacturerName: 'ConMed', bActive: true },
+]);
+
+// ── Scope Categories ────────────────────────────────────
+MockDB.seed('scopeCategories', [
+  { lScopeCategoryKey: 1, sScopeCategoryName: 'Gastroscope', sRigidOrFlexible: 'F' },
+  { lScopeCategoryKey: 2, sScopeCategoryName: 'Colonoscope', sRigidOrFlexible: 'F' },
+  { lScopeCategoryKey: 3, sScopeCategoryName: 'Bronchoscope', sRigidOrFlexible: 'F' },
+  { lScopeCategoryKey: 4, sScopeCategoryName: 'Duodenoscope', sRigidOrFlexible: 'F' },
+  { lScopeCategoryKey: 5, sScopeCategoryName: 'Enteroscope', sRigidOrFlexible: 'F' },
+  { lScopeCategoryKey: 6, sScopeCategoryName: 'Cystoscope', sRigidOrFlexible: 'R' },
+  { lScopeCategoryKey: 7, sScopeCategoryName: 'Arthroscope', sRigidOrFlexible: 'R' },
+  { lScopeCategoryKey: 8, sScopeCategoryName: 'Laparoscope', sRigidOrFlexible: 'R' },
+  { lScopeCategoryKey: 9, sScopeCategoryName: 'Ureteroscope', sRigidOrFlexible: 'R' },
+  { lScopeCategoryKey: 10, sScopeCategoryName: 'Camera Head', sRigidOrFlexible: 'C' },
+  { lScopeCategoryKey: 11, sScopeCategoryName: 'Light Source', sRigidOrFlexible: 'C' },
+  { lScopeCategoryKey: 12, sScopeCategoryName: 'Biopsy Forceps', sRigidOrFlexible: 'I' },
+  { lScopeCategoryKey: 13, sScopeCategoryName: 'Resectoscope', sRigidOrFlexible: 'I' },
+]);
+
+// ── Scope Types (models) ────────────────────────────────
+MockDB.seed('scopeTypes', [
+  // Flexible — Gastroscopes
+  { lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 1, bActive: true, sInsertTubeDiameter: '9.9', sInsertTubeLength: '1030', sAngLeft: '100', sAngRight: '100', sAngUp: '210', sAngDown: '90', mMaxCharge: 2500 },
+  { lScopeTypeKey: 1002, sScopeTypeDesc: 'Olympus GIF-HQ190', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 1, bActive: true, sInsertTubeDiameter: '9.9', sInsertTubeLength: '1030', sAngLeft: '100', sAngRight: '100', sAngUp: '210', sAngDown: '90', mMaxCharge: 3000 },
+  { lScopeTypeKey: 1003, sScopeTypeDesc: 'Olympus GIF-H190', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 1, bActive: true, sInsertTubeDiameter: '9.9', sInsertTubeLength: '1030', sAngLeft: '100', sAngRight: '100', sAngUp: '210', sAngDown: '90', mMaxCharge: 3200 },
+  { lScopeTypeKey: 1004, sScopeTypeDesc: 'Olympus GIF-Q165', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 1, bActive: true, sInsertTubeDiameter: '9.2', sInsertTubeLength: '1030', mMaxCharge: 2200 },
+  { lScopeTypeKey: 1005, sScopeTypeDesc: 'Fujifilm EG-760Z', sRigidOrFlexible: 'F', lManufacturerKey: 2, lScopeCategoryKey: 1, bActive: true, sInsertTubeDiameter: '9.9', sInsertTubeLength: '1100', mMaxCharge: 2800 },
+  // Flexible — Colonoscopes
+  { lScopeTypeKey: 1010, sScopeTypeDesc: 'Olympus CF-HQ190L', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 2, bActive: true, sInsertTubeDiameter: '13.2', sInsertTubeLength: '1680', mMaxCharge: 3500 },
+  { lScopeTypeKey: 1011, sScopeTypeDesc: 'Olympus CF-H185L', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 2, bActive: true, sInsertTubeDiameter: '13.2', sInsertTubeLength: '1680', mMaxCharge: 3200 },
+  { lScopeTypeKey: 1012, sScopeTypeDesc: 'Olympus PCF-H190DL', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 2, bActive: true, sInsertTubeDiameter: '11.5', sInsertTubeLength: '1680', mMaxCharge: 3400 },
+  { lScopeTypeKey: 1013, sScopeTypeDesc: 'Olympus PCF-H190', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 2, bActive: true, sInsertTubeDiameter: '11.5', sInsertTubeLength: '1680', mMaxCharge: 3100 },
+  { lScopeTypeKey: 1014, sScopeTypeDesc: 'Fujifilm EC-760R', sRigidOrFlexible: 'F', lManufacturerKey: 2, lScopeCategoryKey: 2, bActive: true, sInsertTubeDiameter: '12.8', mMaxCharge: 3000 },
+  // Flexible — Bronchoscopes
+  { lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 3, bActive: true, sInsertTubeDiameter: '4.2', sInsertTubeLength: '600', mMaxCharge: 2800 },
+  { lScopeTypeKey: 1021, sScopeTypeDesc: 'Olympus BF-UC180F', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 3, bActive: true, sInsertTubeDiameter: '6.9', mMaxCharge: 4500 },
+  { lScopeTypeKey: 1022, sScopeTypeDesc: 'Olympus BF-1TH190', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 3, bActive: true, sInsertTubeDiameter: '6.0', mMaxCharge: 3200 },
+  { lScopeTypeKey: 1023, sScopeTypeDesc: 'Pentax EB-1990i', sRigidOrFlexible: 'F', lManufacturerKey: 3, lScopeCategoryKey: 3, bActive: true, sInsertTubeDiameter: '5.9', mMaxCharge: 3000 },
+  // Flexible — Duodenoscopes
+  { lScopeTypeKey: 1030, sScopeTypeDesc: 'Olympus TJF-Q180V', sRigidOrFlexible: 'F', lManufacturerKey: 1, lScopeCategoryKey: 4, bActive: true, sInsertTubeDiameter: '11.3', mMaxCharge: 5000 },
+  { lScopeTypeKey: 1031, sScopeTypeDesc: 'Pentax FG-34W', sRigidOrFlexible: 'F', lManufacturerKey: 3, lScopeCategoryKey: 4, bActive: true, sInsertTubeDiameter: '11.6', mMaxCharge: 4200 },
+  // Rigid
+  { lScopeTypeKey: 2001, sScopeTypeDesc: 'Storz 27005BA Cystoscope', sRigidOrFlexible: 'R', lManufacturerKey: 4, lScopeCategoryKey: 6, bActive: true, mMaxCharge: 1800 },
+  { lScopeTypeKey: 2002, sScopeTypeDesc: 'Storz 26003BA Resectoscope', sRigidOrFlexible: 'R', lManufacturerKey: 4, lScopeCategoryKey: 9, bActive: true, mMaxCharge: 2000 },
+  { lScopeTypeKey: 2003, sScopeTypeDesc: 'Olympus URF-V2', sRigidOrFlexible: 'R', lManufacturerKey: 1, lScopeCategoryKey: 9, bActive: true, mMaxCharge: 3500 },
+  { lScopeTypeKey: 2004, sScopeTypeDesc: 'Olympus CYF-V2', sRigidOrFlexible: 'R', lManufacturerKey: 1, lScopeCategoryKey: 6, bActive: true, mMaxCharge: 2500 },
+  { lScopeTypeKey: 2005, sScopeTypeDesc: 'Stryker 5mm Arthroscope', sRigidOrFlexible: 'R', lManufacturerKey: 5, lScopeCategoryKey: 7, bActive: true, mMaxCharge: 1500 },
+  // Camera / Video
+  { lScopeTypeKey: 3001, sScopeTypeDesc: 'Stryker 1288 Camera Head', sRigidOrFlexible: 'C', lManufacturerKey: 5, lScopeCategoryKey: 10, bActive: true, mMaxCharge: 2200 },
+  { lScopeTypeKey: 3002, sScopeTypeDesc: 'Stryker 1588 Camera Head', sRigidOrFlexible: 'C', lManufacturerKey: 5, lScopeCategoryKey: 10, bActive: true, mMaxCharge: 2800 },
+  { lScopeTypeKey: 3003, sScopeTypeDesc: 'Olympus OTV-SP1', sRigidOrFlexible: 'C', lManufacturerKey: 1, lScopeCategoryKey: 10, bActive: true, mMaxCharge: 2000 },
+  { lScopeTypeKey: 3004, sScopeTypeDesc: 'Olympus CLV-S200', sRigidOrFlexible: 'C', lManufacturerKey: 1, lScopeCategoryKey: 11, bActive: true, mMaxCharge: 1800 },
+  // Instruments
+  { lScopeTypeKey: 4001, sScopeTypeDesc: 'Olympus FG-47L Biopsy Forceps', sRigidOrFlexible: 'I', lManufacturerKey: 1, lScopeCategoryKey: 12, bActive: true, mMaxCharge: 800 },
+  { lScopeTypeKey: 4002, sScopeTypeDesc: 'Olympus SD-230U Snare', sRigidOrFlexible: 'I', lManufacturerKey: 1, lScopeCategoryKey: 12, bActive: true, mMaxCharge: 600 },
+  { lScopeTypeKey: 4003, sScopeTypeDesc: 'Olympus WA50012A Resectoscope', sRigidOrFlexible: 'I', lManufacturerKey: 1, lScopeCategoryKey: 13, bActive: true, mMaxCharge: 1200 },
+]);
+
+// ── Clients (8 — matching existing demo data) ──────────
+MockDB.seed('clients', [
+  { lClientKey: 3502, sClientName1: '88th Medical Group', sClientName2: '', sUnitBuilding: 'Wright Patterson AFB, Bldg. 830123',
+    sMailAddr1: '4881 Sugar Maple Drive', sMailAddr2: '', sMailCity: 'Coosada', sMailState: 'AL', sMailZip: '36020', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (222) 222-2222', sFaxNumber: '(111) 111-1111',
+    dtClientSince: '2006-06-04T00:00:00', nPortalMonths: 24,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 3, sPricingDescription: 'GSA 2014 (Joint)',
+    lSalesRepKey: 2, sSalesRepName: 'Brandi Cook',
+    lDistributorKey: 1, sDistName1: 'Total Scope South',
+    lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt',
+    sItemText: '5,000', sBillTo: 'Customer',
+    dblDiscountPct: 18, dblAdjustmentPct: 42,
+    bBlindPS3: true, bRequisitionTotalsOnly: true, bBlindTotalsOnFinal: true,
+    lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester',
+    sZipCode: '36020', sCity: 'Coosada', sState: 'AL' },
+
+  { lClientKey: 1084, sClientName1: 'Tift Regional Medical Center', sClientName2: '', sUnitBuilding: '',
+    sMailAddr1: '901 East 18th Street', sMailAddr2: '', sMailCity: 'Tifton', sMailState: 'GA', sMailZip: '31794', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (229) 382-7120', sFaxNumber: '(229) 382-0555',
+    dtClientSince: '2009-03-12T00:00:00', nPortalMonths: 12,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 1, sPricingDescription: 'Standard',
+    lSalesRepKey: 3, sSalesRepName: 'Tom Velez',
+    lDistributorKey: 1, sDistName1: 'Total Scope South',
+    lPaymentTermsKey: 2, sTermsDesc: 'Net 30',
+    sItemText: '10,000', sBillTo: 'Customer',
+    dblDiscountPct: 0, dblAdjustmentPct: 50,
+    bBlindPS3: false, bRequisitionTotalsOnly: false, bBlindTotalsOnFinal: true,
+    lServiceLocationKey: 2, sServiceLocationName: 'Nashville',
+    sZipCode: '31794', sCity: 'Tifton', sState: 'GA' },
+
+  { lClientKey: 2210, sClientName1: 'Nashville General Hospital', sClientName2: '', sUnitBuilding: '',
+    sMailAddr1: '1818 Albion Street', sMailAddr2: 'Suite 200', sMailCity: 'Nashville', sMailState: 'TN', sMailZip: '37201', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (615) 341-4000', sFaxNumber: '(615) 341-4100',
+    dtClientSince: '2011-07-22T00:00:00', nPortalMonths: 24,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: true, bNationalAccount: true,
+    lPricingCategoryKey: 2, sPricingDescription: 'Premier',
+    lSalesRepKey: 1, sSalesRepName: 'Joseph Brassell',
+    lDistributorKey: 2, sDistName1: 'Total Scope North',
+    lPaymentTermsKey: 2, sTermsDesc: 'Net 30',
+    sItemText: '25,000', sBillTo: 'Customer',
+    dblDiscountPct: 10, dblAdjustmentPct: 45,
+    bBlindPS3: true, bRequisitionTotalsOnly: false, bBlindTotalsOnFinal: false,
+    lServiceLocationKey: 2, sServiceLocationName: 'Nashville',
+    sZipCode: '37201', sCity: 'Nashville', sState: 'TN' },
+
+  { lClientKey: 917, sClientName1: 'Northside Hospital', sClientName2: '', sUnitBuilding: 'Biomed Dept',
+    sMailAddr1: '1000 Johnson Ferry Road NE', sMailAddr2: '', sMailCity: 'Atlanta', sMailState: 'GA', sMailZip: '30342', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (404) 851-8000', sFaxNumber: '(404) 851-8100',
+    dtClientSince: '2007-11-05T00:00:00', nPortalMonths: 24,
+    bActive: true, bSkipTracking: true, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 1, sPricingDescription: 'Standard',
+    lSalesRepKey: 2, sSalesRepName: 'Brandi Cook',
+    lDistributorKey: 1, sDistName1: 'Total Scope South',
+    lPaymentTermsKey: 3, sTermsDesc: 'Net 60',
+    sItemText: '15,000', sBillTo: 'Third Party',
+    dblDiscountPct: 5, dblAdjustmentPct: 55,
+    bBlindPS3: false, bRequisitionTotalsOnly: true, bBlindTotalsOnFinal: true,
+    lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester',
+    sZipCode: '30342', sCity: 'Atlanta', sState: 'GA' },
+
+  { lClientKey: 3341, sClientName1: 'West Side GI Center', sClientName2: '', sUnitBuilding: '',
+    sMailAddr1: '2100 W Harrison St', sMailAddr2: '', sMailCity: 'Chicago', sMailState: 'IL', sMailZip: '60607', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (312) 555-0192', sFaxNumber: '(312) 555-0193',
+    dtClientSince: '2015-02-14T00:00:00', nPortalMonths: 6,
+    bActive: false, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 1, sPricingDescription: 'Standard',
+    lSalesRepKey: 4, sSalesRepName: 'Rob Mancini',
+    lDistributorKey: 3, sDistName1: 'Direct',
+    lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt',
+    sItemText: '2,500', sBillTo: 'Customer',
+    dblDiscountPct: 0, dblAdjustmentPct: 60,
+    bBlindPS3: false, bRequisitionTotalsOnly: false, bBlindTotalsOnFinal: false,
+    lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester',
+    sZipCode: '60607', sCity: 'Chicago', sState: 'IL' },
+
+  { lClientKey: 2755, sClientName1: 'Metro Health Hospital', sClientName2: '', sUnitBuilding: '',
+    sMailAddr1: '2500 MetroHealth Drive', sMailAddr2: '', sMailCity: 'Cleveland', sMailState: 'OH', sMailZip: '44102', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (216) 778-7800', sFaxNumber: '(216) 778-5910',
+    dtClientSince: '2013-09-30T00:00:00', nPortalMonths: 24,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 1, sPricingDescription: 'Standard',
+    lSalesRepKey: 5, sSalesRepName: 'Debbie Hightower',
+    lDistributorKey: 2, sDistName1: 'Total Scope North',
+    lPaymentTermsKey: 2, sTermsDesc: 'Net 30',
+    sItemText: '8,000', sBillTo: 'Customer',
+    dblDiscountPct: 0, dblAdjustmentPct: 50,
+    bBlindPS3: true, bRequisitionTotalsOnly: true, bBlindTotalsOnFinal: false,
+    lServiceLocationKey: 2, sServiceLocationName: 'Nashville',
+    sZipCode: '44102', sCity: 'Cleveland', sState: 'OH' },
+
+  { lClientKey: 1650, sClientName1: 'Shreveport Endoscopy Center', sClientName2: '', sUnitBuilding: '',
+    sMailAddr1: '1 St Mary Place', sMailAddr2: '', sMailCity: 'Shreveport', sMailState: 'LA', sMailZip: '71101', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (318) 212-4000', sFaxNumber: '(318) 212-4100',
+    dtClientSince: '2016-05-18T00:00:00', nPortalMonths: 12,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 1, sPricingDescription: 'Standard',
+    lSalesRepKey: 3, sSalesRepName: 'Tom Velez',
+    lDistributorKey: 1, sDistName1: 'Total Scope South',
+    lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt',
+    sItemText: '3,000', sBillTo: 'Customer',
+    dblDiscountPct: 0, dblAdjustmentPct: 55,
+    bBlindPS3: false, bRequisitionTotalsOnly: false, bBlindTotalsOnFinal: true,
+    lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester',
+    sZipCode: '71101', sCity: 'Shreveport', sState: 'LA' },
+
+  { lClientKey: 3089, sClientName1: 'Tampa Minimally Invasive', sClientName2: '', sUnitBuilding: 'Suite 300',
+    sMailAddr1: '4 Columbia Drive', sMailAddr2: '', sMailCity: 'Tampa', sMailState: 'FL', sMailZip: '33606', sMailCountry: 'USA',
+    sPhoneNumber: '+1 (813) 844-7000', sFaxNumber: '(813) 844-7001',
+    dtClientSince: '2018-01-09T00:00:00', nPortalMonths: 24,
+    bActive: true, bSkipTracking: false, bOpenCreditMemo: false, bNationalAccount: false,
+    lPricingCategoryKey: 2, sPricingDescription: 'Premier',
+    lSalesRepKey: 1, sSalesRepName: 'Joseph Brassell',
+    lDistributorKey: 1, sDistName1: 'Total Scope South',
+    lPaymentTermsKey: 2, sTermsDesc: 'Net 30',
+    sItemText: '12,000', sBillTo: 'Customer',
+    dblDiscountPct: 8, dblAdjustmentPct: 48,
+    bBlindPS3: true, bRequisitionTotalsOnly: false, bBlindTotalsOnFinal: true,
+    lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester',
+    sZipCode: '33606', sCity: 'Tampa', sState: 'FL' },
+]);
+
+// ── Contacts ────────────────────────────────────────────
+MockDB.seed('contacts', [
+  // 88th Medical Group
+  { lContactKey: 101, lClientKey: 3502, lDepartmentKey: 0, sContactLast: 'Whitfield', sContactFirst: 'Karen', sTitle: 'Biomedical Director', sContactPhoneNumber: '+1 (937) 257-7650', sContactFaxNumber: '(937) 257-7700', sContactEMail: 'k.whitfield@wpafb.af.mil', bActive: true },
+  { lContactKey: 102, lClientKey: 3502, lDepartmentKey: 0, sContactLast: 'Tatum', sContactFirst: 'Marcus', sTitle: 'Dept. Coordinator', sContactPhoneNumber: '+1 (937) 257-1100', sContactFaxNumber: '(937) 257-1109', sContactEMail: 'm.tatum@wpafb.af.mil', bActive: true },
+  { lContactKey: 103, lClientKey: 3502, lDepartmentKey: 0, sContactLast: 'Orozco', sContactFirst: 'Lisa', sTitle: 'Accounts Payable', sContactPhoneNumber: '+1 (937) 257-8823', sContactFaxNumber: '(937) 257-8800', sContactEMail: 'l.orozco@wpafb.af.mil', bActive: true },
+  { lContactKey: 104, lClientKey: 3502, lDepartmentKey: 0, sContactLast: 'Hendrick', sContactFirst: 'James', sTitle: 'Chief, Medical Logistics', sContactPhoneNumber: '+1 (937) 257-4400', sContactFaxNumber: '(937) 257-4401', sContactEMail: 'j.hendrick@wpafb.af.mil', bActive: false },
+  // Tift Regional
+  { lContactKey: 105, lClientKey: 1084, lDepartmentKey: 0, sContactLast: 'Mitchell', sContactFirst: 'Sarah', sTitle: 'GI Lab Director', sContactPhoneNumber: '+1 (229) 382-7200', sContactFaxNumber: '(229) 382-7201', sContactEMail: 's.mitchell@tiftregional.com', bActive: true },
+  { lContactKey: 106, lClientKey: 1084, lDepartmentKey: 0, sContactLast: 'Patterson', sContactFirst: 'Mike', sTitle: 'Biomed Tech', sContactPhoneNumber: '+1 (229) 382-7150', sContactFaxNumber: '(229) 382-0555', sContactEMail: 'm.patterson@tiftregional.com', bActive: true },
+  // Nashville General
+  { lContactKey: 107, lClientKey: 2210, lDepartmentKey: 0, sContactLast: 'Brooks', sContactFirst: 'Amanda', sTitle: 'Central Sterile Manager', sContactPhoneNumber: '+1 (615) 341-4200', sContactFaxNumber: '(615) 341-4100', sContactEMail: 'a.brooks@nashvillegeneral.org', bActive: true },
+  { lContactKey: 108, lClientKey: 2210, lDepartmentKey: 0, sContactLast: 'Chen', sContactFirst: 'David', sTitle: 'Purchasing', sContactPhoneNumber: '+1 (615) 341-4050', sContactFaxNumber: '(615) 341-4100', sContactEMail: 'd.chen@nashvillegeneral.org', bActive: true },
+  // Northside
+  { lContactKey: 109, lClientKey: 917, lDepartmentKey: 0, sContactLast: 'Rivera', sContactFirst: 'Janet', sTitle: 'Biomed Manager', sContactPhoneNumber: '+1 (404) 851-8200', sContactFaxNumber: '(404) 851-8100', sContactEMail: 'j.rivera@northside.com', bActive: true },
+  { lContactKey: 110, lClientKey: 917, lDepartmentKey: 0, sContactLast: 'Nguyen', sContactFirst: 'Tom', sTitle: 'OR Coordinator', sContactPhoneNumber: '+1 (404) 851-8300', sContactFaxNumber: '(404) 851-8100', sContactEMail: 't.nguyen@northside.com', bActive: true },
+  // West Side GI
+  { lContactKey: 111, lClientKey: 3341, lDepartmentKey: 0, sContactLast: 'Kim', sContactFirst: 'Rachel', sTitle: 'Office Manager', sContactPhoneNumber: '+1 (312) 555-0200', sContactFaxNumber: '(312) 555-0193', sContactEMail: 'r.kim@westsidegi.com', bActive: true },
+  // Metro Health
+  { lContactKey: 112, lClientKey: 2755, lDepartmentKey: 0, sContactLast: 'Foster', sContactFirst: 'Diane', sTitle: 'Nurse Manager', sContactPhoneNumber: '+1 (216) 778-7900', sContactFaxNumber: '(216) 778-5910', sContactEMail: 'd.foster@metrohealth.org', bActive: true },
+  { lContactKey: 113, lClientKey: 2755, lDepartmentKey: 0, sContactLast: 'Watts', sContactFirst: 'Brian', sTitle: 'Supply Chain', sContactPhoneNumber: '+1 (216) 778-7850', sContactFaxNumber: '(216) 778-5910', sContactEMail: 'b.watts@metrohealth.org', bActive: true },
+  // Shreveport
+  { lContactKey: 114, lClientKey: 1650, lDepartmentKey: 0, sContactLast: 'Landry', sContactFirst: 'Paula', sTitle: 'Clinical Director', sContactPhoneNumber: '+1 (318) 212-4050', sContactFaxNumber: '(318) 212-4100', sContactEMail: 'p.landry@shreveportendo.com', bActive: true },
+  // Tampa
+  { lContactKey: 115, lClientKey: 3089, lDepartmentKey: 0, sContactLast: 'Vega', sContactFirst: 'Carlos', sTitle: 'Practice Administrator', sContactPhoneNumber: '+1 (813) 844-7050', sContactFaxNumber: '(813) 844-7001', sContactEMail: 'c.vega@tampamis.com', bActive: true },
+]);
+
+// ── Departments (18 — linked to clients) ────────────────
+MockDB.seed('departments', [
+  // 88th Medical Group (3502)
+  { lDepartmentKey: 10, lClientKey: 3502, sDepartmentName: 'Biomedical Engineering', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Coosada', sShipState: 'AL' },
+  { lDepartmentKey: 11, lClientKey: 3502, sDepartmentName: 'Endoscopy Unit', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Coosada', sShipState: 'AL' },
+  // Tift Regional (1084)
+  { lDepartmentKey: 12, lClientKey: 1084, sDepartmentName: 'GI Lab', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Tifton', sShipState: 'GA' },
+  { lDepartmentKey: 13, lClientKey: 1084, sDepartmentName: 'Surgery', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Tifton', sShipState: 'GA' },
+  { lDepartmentKey: 14, lClientKey: 1084, sDepartmentName: 'Central Sterile', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: false, sShipCity: 'Tifton', sShipState: 'GA' },
+  // Nashville General (2210)
+  { lDepartmentKey: 15, lClientKey: 2210, sDepartmentName: 'Endoscopy', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Nashville', sShipState: 'TN' },
+  { lDepartmentKey: 16, lClientKey: 2210, sDepartmentName: 'Pulmonology', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Nashville', sShipState: 'TN' },
+  { lDepartmentKey: 17, lClientKey: 2210, sDepartmentName: 'Cardiology', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Nashville', sShipState: 'TN' },
+  // Northside Hospital (917)
+  { lDepartmentKey: 18, lClientKey: 917, sDepartmentName: 'Biomedical Engineering', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Atlanta', sShipState: 'GA' },
+  { lDepartmentKey: 19, lClientKey: 917, sDepartmentName: 'Surgery / OR', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Atlanta', sShipState: 'GA' },
+  // West Side GI (3341)
+  { lDepartmentKey: 20, lClientKey: 3341, sDepartmentName: 'GI Lab', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Chicago', sShipState: 'IL' },
+  // Metro Health (2755)
+  { lDepartmentKey: 21, lClientKey: 2755, sDepartmentName: 'Endoscopy', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Cleveland', sShipState: 'OH' },
+  { lDepartmentKey: 22, lClientKey: 2755, sDepartmentName: 'ICU / Critical Care', lServiceLocationKey: 2, sServiceLocationName: 'Nashville', bActive: true, sShipCity: 'Cleveland', sShipState: 'OH' },
+  // Shreveport (1650)
+  { lDepartmentKey: 23, lClientKey: 1650, sDepartmentName: 'Endoscopy', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Shreveport', sShipState: 'LA' },
+  // Tampa (3089)
+  { lDepartmentKey: 24, lClientKey: 3089, sDepartmentName: 'GI Lab', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Tampa', sShipState: 'FL' },
+  { lDepartmentKey: 25, lClientKey: 3089, sDepartmentName: 'Surgery / OR', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true, sShipCity: 'Tampa', sShipState: 'FL' },
+  // Extra clients from NWO wizard (for client search coverage)
+  { lDepartmentKey: 26, lClientKey: 4001, sDepartmentName: 'Endoscopy', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true },
+  { lDepartmentKey: 27, lClientKey: 4001, sDepartmentName: 'Urology', lServiceLocationKey: 1, sServiceLocationName: 'Upper Chichester', bActive: true },
+]);
+
+// ── Scopes (16 — matching sn-search.js demo) ───────────
+MockDB.seed('scopes', [
+  { lScopeKey: 1001, lScopeTypeKey: 1001, lDepartmentKey: 26, sSerialNumber: 'GIF-H1234', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus GIF-H180' },
+  { lScopeKey: 1002, lScopeTypeKey: 1002, lDepartmentKey: 26, sSerialNumber: 'CF-HQ1890', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus CF-HQ190' },
+  { lScopeKey: 1003, lScopeTypeKey: 1020, lDepartmentKey: 26, sSerialNumber: 'BF-P290', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus BF-P290' },
+  { lScopeKey: 1004, lScopeTypeKey: 2003, lDepartmentKey: 27, sSerialNumber: 'URF-V2-001', sRigidOrFlexible: 'R', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Urology', sScopeTypeDesc: 'Olympus URF-V2' },
+  { lScopeKey: 1005, lScopeTypeKey: 1031, lDepartmentKey: 12, sSerialNumber: 'OLD-SCOPE-99', sRigidOrFlexible: 'F', sScopeIsDead: 'Y', bOnSiteLoaner: false, sClientName1: 'City General Medical', sDepartmentName: 'GI Lab', sScopeTypeDesc: 'Pentax FG-34W' },
+  { lScopeKey: 1006, lScopeTypeKey: 1014, lDepartmentKey: 12, sSerialNumber: 'EC-760R', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'City General Medical', sDepartmentName: 'GI Lab', sScopeTypeDesc: 'Fujifilm EC-760R' },
+  { lScopeKey: 1007, lScopeTypeKey: 2004, lDepartmentKey: 27, sSerialNumber: 'CYF-V2-100', sRigidOrFlexible: 'R', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Urology', sScopeTypeDesc: 'Olympus CYF-V2' },
+  { lScopeKey: 1008, lScopeTypeKey: 3003, lDepartmentKey: 19, sSerialNumber: 'OTV-SP1-22', sRigidOrFlexible: 'C', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Northside Surgery Center', sDepartmentName: 'Surgical Suite', sScopeTypeDesc: 'Olympus OTV-SP1' },
+  { lScopeKey: 1009, lScopeTypeKey: 3004, lDepartmentKey: 19, sSerialNumber: 'CLV-S200', sRigidOrFlexible: 'C', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Northside Surgery Center', sDepartmentName: 'Surgical Suite', sScopeTypeDesc: 'Olympus CLV-S200' },
+  { lScopeKey: 1010, lScopeTypeKey: 1022, lDepartmentKey: 16, sSerialNumber: 'BF-1TH190', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'City General Medical', sDepartmentName: 'Pulmonology', sScopeTypeDesc: 'Olympus BF-1TH190' },
+  { lScopeKey: 1011, lScopeTypeKey: 1005, lDepartmentKey: 12, sSerialNumber: 'EG-760Z', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'City General Medical', sDepartmentName: 'GI Lab', sScopeTypeDesc: 'Fujifilm EG-760Z' },
+  { lScopeKey: 1012, lScopeTypeKey: 2005, lDepartmentKey: 19, sSerialNumber: 'A5394-3', sRigidOrFlexible: 'I', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Northside Surgery Center', sDepartmentName: 'Surgical Suite', sScopeTypeDesc: 'Stryker 5mm Arthroscope' },
+  { lScopeKey: 1013, lScopeTypeKey: 1030, lDepartmentKey: 26, sSerialNumber: 'TJF-Q180V', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus TJF-Q180V' },
+  { lScopeKey: 1014, lScopeTypeKey: 1013, lDepartmentKey: 26, sSerialNumber: 'PCF-H190-7', sRigidOrFlexible: 'F', sScopeIsDead: 'Y', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus PCF-H190' },
+  { lScopeKey: 1015, lScopeTypeKey: 4003, lDepartmentKey: 27, sSerialNumber: 'WA50012A', sRigidOrFlexible: 'I', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'Memorial Hospital', sDepartmentName: 'Urology', sScopeTypeDesc: 'Olympus WA50012A Resectoscope' },
+  { lScopeKey: 1016, lScopeTypeKey: 1023, lDepartmentKey: 16, sSerialNumber: 'EB-1990i', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: false, sClientName1: 'City General Medical', sDepartmentName: 'Pulmonology', sScopeTypeDesc: 'Pentax EB-1990i' },
+  // Extra scopes for dashboard demo data
+  { lScopeKey: 1017, lScopeTypeKey: 1003, lDepartmentKey: 12, sSerialNumber: '3801442', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'Tift Regional Medical Center', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus GIF-H190' },
+  { lScopeKey: 1018, lScopeTypeKey: 1011, lDepartmentKey: 15, sSerialNumber: '2918371', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab', sScopeTypeDesc: 'Olympus CF-H185L' },
+  { lScopeKey: 1019, lScopeTypeKey: 1010, lDepartmentKey: 10, sSerialNumber: '3912087', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: '88th Medical Group', sDepartmentName: 'Biomedical Engineering', sScopeTypeDesc: 'Olympus CF-HQ190L' },
+  { lScopeKey: 1020, lScopeTypeKey: 1021, lDepartmentKey: 22, sSerialNumber: '3615290', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'Metro Health Hospital', sDepartmentName: 'Sterile Processing', sScopeTypeDesc: 'Olympus BF-UC180F' },
+  { lScopeKey: 1021, lScopeTypeKey: 1005, lDepartmentKey: 19, sSerialNumber: '4450188', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'Northside Hospital', sDepartmentName: 'Surgery', sScopeTypeDesc: 'Fujifilm EG-760Z' },
+  { lScopeKey: 1022, lScopeTypeKey: 1011, lDepartmentKey: 23, sSerialNumber: '3290118', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'West Bozeman Surgery Center', sDepartmentName: 'Endoscopy', sScopeTypeDesc: 'Olympus CF-H185L' },
+  { lScopeKey: 1023, lScopeTypeKey: 1004, lDepartmentKey: 20, sSerialNumber: '3290405', sRigidOrFlexible: 'F', sScopeIsDead: 'N', sClientName1: 'Coliseum Medical Center', sDepartmentName: 'GI Lab', sScopeTypeDesc: 'Olympus GIF-Q165' },
+]);
+
+// ── Repair Reasons ──────────────────────────────────────
+MockDB.seed('repairReasons', [
+  { lRepairReasonKey: 1, sRepairReasonDesc: 'Fluid Invasion' },
+  { lRepairReasonKey: 2, sRepairReasonDesc: 'Angulation Failure' },
+  { lRepairReasonKey: 3, sRepairReasonDesc: 'Insertion Tube Damage' },
+  { lRepairReasonKey: 4, sRepairReasonDesc: 'CCD/Image Failure' },
+  { lRepairReasonKey: 5, sRepairReasonDesc: 'Light Guide Damage' },
+  { lRepairReasonKey: 6, sRepairReasonDesc: 'Universal Cord Leak' },
+  { lRepairReasonKey: 7, sRepairReasonDesc: 'Suction Cylinder' },
+  { lRepairReasonKey: 8, sRepairReasonDesc: 'Biopsy Channel' },
+  { lRepairReasonKey: 9, sRepairReasonDesc: 'Preventive Maintenance' },
+  { lRepairReasonKey: 10, sRepairReasonDesc: 'Evaluation Only' },
+]);
+
+// ── Repair Levels ───────────────────────────────────────
+MockDB.seed('repairLevels', [
+  { lRepairLevelKey: 1, sRepairLevelDesc: 'Minor' },
+  { lRepairLevelKey: 2, sRepairLevelDesc: 'Mid-Level' },
+  { lRepairLevelKey: 3, sRepairLevelDesc: 'Major' },
+  { lRepairLevelKey: 4, sRepairLevelDesc: 'Rebuild' },
+]);
+
+// ── Repair Statuses ─────────────────────────────────────
+MockDB.seed('repairStatuses', [
+  { lRepairStatusID: 1, sRepairStatus: 'Received', nOrdinal: 1 },
+  { lRepairStatusID: 2, sRepairStatus: 'Evaluation', nOrdinal: 2 },
+  { lRepairStatusID: 3, sRepairStatus: 'Waiting for Approval', nOrdinal: 3 },
+  { lRepairStatusID: 4, sRepairStatus: 'In Repair', nOrdinal: 4 },
+  { lRepairStatusID: 5, sRepairStatus: 'On Hold', nOrdinal: 5 },
+  { lRepairStatusID: 6, sRepairStatus: 'Quality Check', nOrdinal: 6 },
+  { lRepairStatusID: 7, sRepairStatus: 'Ready to Ship', nOrdinal: 7 },
+  { lRepairStatusID: 8, sRepairStatus: 'Shipped', nOrdinal: 8 },
+  { lRepairStatusID: 9, sRepairStatus: 'Closed', nOrdinal: 9 },
+  { lRepairStatusID: 10, sRepairStatus: 'Cancelled', nOrdinal: 10 },
+]);
+
+// ── Delivery Methods ────────────────────────────────────
+MockDB.seed('deliveryMethods', [
+  { lDeliveryMethodKey: 1, sDeliveryMethodDesc: 'FedEx Standard' },
+  { lDeliveryMethodKey: 2, sDeliveryMethodDesc: 'FedEx Priority Overnight' },
+  { lDeliveryMethodKey: 3, sDeliveryMethodDesc: 'UPS Ground' },
+  { lDeliveryMethodKey: 4, sDeliveryMethodDesc: 'TSI Courier' },
+  { lDeliveryMethodKey: 5, sDeliveryMethodDesc: 'Client Pickup' },
+]);
+
+// ── Patient Safety Levels ───────────────────────────────
+MockDB.seed('patientSafetyLevels', [
+  { lPatientSafetyLevelKey: 1, sPatientSafetyLevelDesc: 'Level 1 — Low Risk' },
+  { lPatientSafetyLevelKey: 2, sPatientSafetyLevelDesc: 'Level 2 — Moderate Risk' },
+  { lPatientSafetyLevelKey: 3, sPatientSafetyLevelDesc: 'Level 3 — High Risk' },
+]);
+
+// ── Task Statuses & Priorities ──────────────────────────
+MockDB.seed('taskStatuses', [
+  { lTaskStatusKey: 1, sTaskStatusDesc: 'Open' },
+  { lTaskStatusKey: 2, sTaskStatusDesc: 'In Progress' },
+  { lTaskStatusKey: 3, sTaskStatusDesc: 'Completed' },
+  { lTaskStatusKey: 4, sTaskStatusDesc: 'Cancelled' },
+]);
+MockDB.seed('taskPriorities', [
+  { lTaskPriorityKey: 1, sTaskPriorityDesc: 'Low' },
+  { lTaskPriorityKey: 2, sTaskPriorityDesc: 'Normal' },
+  { lTaskPriorityKey: 3, sTaskPriorityDesc: 'High' },
+  { lTaskPriorityKey: 4, sTaskPriorityDesc: 'Urgent' },
+]);
+MockDB.seed('taskTypes', [
+  { lTaskTypeKey: 1, sTaskTypeDesc: 'Follow Up' },
+  { lTaskTypeKey: 2, sTaskTypeDesc: 'Loaner' },
+  { lTaskTypeKey: 3, sTaskTypeDesc: 'Parts Order' },
+  { lTaskTypeKey: 4, sTaskTypeDesc: 'Callback' },
+  { lTaskTypeKey: 5, sTaskTypeDesc: 'Quote' },
+]);
+
+// ── Contract Types ──────────────────────────────────────
+MockDB.seed('contractTypes', [
+  { lContractTypeKey: 1, sContractTypeName: 'CPO' },
+  { lContractTypeKey: 2, sContractTypeName: 'Fuse' },
+  { lContractTypeKey: 3, sContractTypeName: 'Capitated Service' },
+  { lContractTypeKey: 4, sContractTypeName: 'Shared Risk' },
+  { lContractTypeKey: 5, sContractTypeName: 'Cart' },
+  { lContractTypeKey: 6, sContractTypeName: 'Airway' },
+  { lContractTypeKey: 7, sContractTypeName: 'Rental' },
+]);
+
+// ── Users (mock login user) ────────────────────────────
+MockDB.seed('users', [
+  { lUserKey: 2, sFirstName: 'Joseph', sLastName: 'Brassell', sEmailAddress: 'joe@tsi.com', bActive: true, lSalesRepKey: 1, bIsAdmin: true },
+  { lUserKey: 3, sFirstName: 'Admin', sLastName: 'User', sEmailAddress: 'admin@tsi.com', bActive: true, lSalesRepKey: 0, bIsAdmin: true },
+]);
+
+// ── GL Accounts ─────────────────────────────────────────
+MockDB.seed('glAccounts', [
+  { lGLAccountKey: 1, sAccountNumber: '1000', sAccountName: 'Cash', sType: 'Asset', sDescription: 'Operating cash account' },
+  { lGLAccountKey: 2, sAccountNumber: '1200', sAccountName: 'Accounts Receivable', sType: 'Asset', sDescription: 'Trade receivables' },
+  { lGLAccountKey: 3, sAccountNumber: '4000', sAccountName: 'Repair Revenue', sType: 'Revenue', sDescription: 'Income from repair services' },
+  { lGLAccountKey: 4, sAccountNumber: '4100', sAccountName: 'Product Sales Revenue', sType: 'Revenue', sDescription: 'Income from product sales' },
+  { lGLAccountKey: 5, sAccountNumber: '5000', sAccountName: 'Cost of Goods Sold', sType: 'Expense', sDescription: 'Parts and materials' },
+]);
+
+console.log('[MockDB] Phase 2 seeded: ' +
+  MockDB.getAll('clients').length + ' clients, ' +
+  MockDB.getAll('departments').length + ' depts, ' +
+  MockDB.getAll('scopes').length + ' scopes, ' +
+  MockDB.getAll('scopeTypes').length + ' scope types, ' +
+  MockDB.getAll('contacts').length + ' contacts'
+);
+
 // Phase 3 seed data will go here
