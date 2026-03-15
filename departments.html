@@ -1632,14 +1632,38 @@ function openContactModal(mode){
         });
       });
       tbody.querySelectorAll('.del-btn').forEach(btn=>{
-        btn.addEventListener('click', async function(){
-          const ckey = this.dataset.ckey;
-          if(!ckey || !confirm('Delete this contact?')) return;
-          try {
-            // API may not have deleteContact — try using update with inactive
-            await API.updateContact({ plContactKey: parseInt(ckey), pbActive: false });
-            if(currentDeptKey) await loadContacts(currentDeptKey);
-          } catch(err){ console.error('[Dept] Delete contact:', err.message); alert('Could not delete contact.'); }
+        btn.addEventListener('click', function(e){
+          e.stopPropagation();
+          const b = this;
+          const ckey = b.dataset.ckey;
+          if(!ckey) return;
+          if(b.dataset.confirming) return; // already in confirm state
+          const origText = b.textContent;
+          const origBg = b.style.background;
+          const origColor = b.style.color;
+          b.textContent = 'Sure?';
+          b.style.background = '#c53030';
+          b.style.color = '#fff';
+          b.dataset.confirming = '1';
+          const timer = setTimeout(() => {
+            b.textContent = origText;
+            b.style.background = origBg;
+            b.style.color = origColor;
+            delete b.dataset.confirming;
+          }, 3000);
+          b.addEventListener('click', async function confirmHandler(e2){
+            e2.stopPropagation();
+            clearTimeout(timer);
+            b.removeEventListener('click', confirmHandler);
+            delete b.dataset.confirming;
+            b.textContent = origText;
+            b.style.background = origBg;
+            b.style.color = origColor;
+            try {
+              await API.updateContact({ plContactKey: parseInt(ckey), pbActive: false });
+              if(currentDeptKey) await loadContacts(currentDeptKey);
+            } catch(err){ console.error('[Dept] Delete contact:', err.message); alert('Could not delete contact.'); }
+          }, {once: true});
         });
       });
     } catch(e){ console.warn('[Dept] Contacts:', e.message); }
