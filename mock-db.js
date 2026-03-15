@@ -804,4 +804,243 @@ console.log('[MockDB] Phase 2 seeded: ' +
   MockDB.getAll('contacts').length + ' contacts'
 );
 
-// Phase 3 seed data will go here
+// ═══════════════════════════════════════════════════════
+//  PHASE 3: Repairs, Inventory, Financial, Suppliers
+// ═══════════════════════════════════════════════════════
+
+// ── Repairs (8 — matching dashboard demo data) ─────────
+MockDB.seed('repairs', [
+  { lRepairKey: 6601, lScopeKey: 1017, lDepartmentKey: 12, sWorkOrderNumber: 'NI26006601',
+    sSerialNumber: '3801442', sScopeTypeDesc: 'GIF-H190', sClientName1: 'Tift Regional Medical Center', sDepartmentName: 'Endoscopy',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',
+    dtDateIn: '2026-03-05T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-06T00:00:00', dtReqSent: '2026-03-05T00:00:00',
+    EstDelDate: '2026-03-14T00:00:00', DaysLastIn: 3,
+    lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
+    Approved: 485, dblAmtRepair: 650, sInvoiceNumber: '',
+    ResponsibleTech: 'Rob', lTechnicianKey: 1, Note: 'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
+    lRepairReasonKey: 1, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0412' },
+
+  { lRepairKey: 6587, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006587',
+    sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',
+    dtDateIn: '2026-03-04T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: '2026-03-05T00:00:00',
+    EstDelDate: null, DaysLastIn: 4,
+    lRepairStatusID: 3, sRepairStatus: 'Waiting for Approval', ProgBarStatus: 'Waiting for Approval',
+    Approved: 0, dblAmtRepair: 1250, sInvoiceNumber: '',
+    ResponsibleTech: '', lTechnicianKey: 0, Note: 'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
+    lRepairReasonKey: 2, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+
+  { lRepairKey: 6574, lScopeKey: 1019, lDepartmentKey: 10, sWorkOrderNumber: 'NI26006574',
+    sSerialNumber: '3912087', sScopeTypeDesc: 'CF-HQ190L', sClientName1: '88th Medical Group', sDepartmentName: 'Biomedical Engineering',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Insertion tube kink damage. Mid-level repair in progress.',
+    dtDateIn: '2026-03-03T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-04T00:00:00', dtReqSent: '2026-03-03T00:00:00',
+    EstDelDate: '2026-03-15T00:00:00', DaysLastIn: 5,
+    lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
+    Approved: 480, dblAmtRepair: 480, sInvoiceNumber: '',
+    ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Insertion tube kink damage. Mid-level repair in progress.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
+    lRepairReasonKey: 3, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0398' },
+
+  { lRepairKey: 6541, lScopeKey: 1020, lDepartmentKey: 22, sWorkOrderNumber: 'NI26006541',
+    sSerialNumber: '3615290', sScopeTypeDesc: 'BF-UC180F', sClientName1: 'Metro Health Hospital', sDepartmentName: 'Sterile Processing',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'CCD chip — no image. Part backordered.',
+    dtDateIn: '2026-03-01T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: null,
+    EstDelDate: null, DaysLastIn: 7,
+    lRepairStatusID: 5, sRepairStatus: 'On Hold', ProgBarStatus: 'On Hold',
+    Approved: 0, dblAmtRepair: 895, sInvoiceNumber: '',
+    ResponsibleTech: '', lTechnicianKey: 0, Note: 'CCD chip — no image. Part backordered.',
+    bHotList: true, IsCogentix: 0, VendorKey: 0, Diameter: '6.9',
+    lRepairReasonKey: 4, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+
+  { lRepairKey: 6530, lScopeKey: 1021, lDepartmentKey: 19, sWorkOrderNumber: 'NI26006530',
+    sSerialNumber: '4450188', sScopeTypeDesc: 'EG-760Z', sClientName1: 'Northside Hospital', sDepartmentName: 'Surgery',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Universal cord leak. Major repair.',
+    dtDateIn: '2026-02-28T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-01T00:00:00', dtReqSent: '2026-02-28T00:00:00',
+    EstDelDate: '2026-03-12T00:00:00', DaysLastIn: 8,
+    lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
+    Approved: 640, dblAmtRepair: 640, sInvoiceNumber: '',
+    ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Universal cord leak. Major repair.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
+    lRepairReasonKey: 6, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: 'PO-2026-0380' },
+
+  { lRepairKey: 6445, lScopeKey: 1022, lDepartmentKey: 23, sWorkOrderNumber: 'NI26006445',
+    sSerialNumber: '3290118', sScopeTypeDesc: 'CF-H185L', sClientName1: 'West Bozeman Surgery Center', sDepartmentName: 'Endoscopy',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Suction cylinder repair. QC complete.',
+    dtDateIn: '2026-02-20T00:00:00', dtDateOut: null, dtAprRecvd: '2026-02-21T00:00:00', dtReqSent: '2026-02-20T00:00:00',
+    EstDelDate: '2026-03-07T00:00:00', DaysLastIn: 16,
+    lRepairStatusID: 7, sRepairStatus: 'Ready to Ship', ProgBarStatus: 'Ready to Ship',
+    Approved: 380, dblAmtRepair: 380, sInvoiceNumber: 'INV-26-0455',
+    ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Suction cylinder repair. QC complete.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
+    lRepairReasonKey: 7, lRepairLevelKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0355' },
+
+  { lRepairKey: 6398, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006398',
+    sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Repair complete. Shipped via FedEx.',
+    dtDateIn: '2026-02-14T00:00:00', dtDateOut: '2026-03-04T00:00:00', dtAprRecvd: '2026-02-16T00:00:00', dtReqSent: '2026-02-14T00:00:00',
+    EstDelDate: '2026-03-05T00:00:00', DaysLastIn: 22,
+    lRepairStatusID: 8, sRepairStatus: 'Shipped', ProgBarStatus: 'Shipped',
+    Approved: 620, dblAmtRepair: 620, sInvoiceNumber: 'INV-26-0430',
+    ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Repair complete. Shipped via FedEx.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
+    lRepairReasonKey: 3, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0341' },
+
+  { lRepairKey: 6110, lScopeKey: 1023, lDepartmentKey: 20, sWorkOrderNumber: 'NI26006110',
+    sSerialNumber: '3290405', sScopeTypeDesc: 'GIF-Q165', sClientName1: 'Coliseum Medical Center', sDepartmentName: 'GI Lab',
+    sRigidOrFlexible: 'F', sComplaintDesc: 'Client requested hold.',
+    dtDateIn: '2026-01-10T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: null,
+    EstDelDate: null, DaysLastIn: 57,
+    lRepairStatusID: 5, sRepairStatus: 'On Hold', ProgBarStatus: 'On Hold',
+    Approved: 0, dblAmtRepair: 1800, sInvoiceNumber: '',
+    ResponsibleTech: '', lTechnicianKey: 0, Note: 'Client requested hold.',
+    bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.2',
+    lRepairReasonKey: 10, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+]);
+
+// ── Repair Items (catalog entries) ──────────────────────
+MockDB.seed('repairItems', [
+  { lRepairItemKey: 1, sItemDescription: 'Distal Tip Replacement', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 3, nUnitCost: 85.00, bActive: true, lRepairLevelKey: 2 },
+  { lRepairItemKey: 2, sItemDescription: 'Angulation Wire Repair', sRigidOrFlexible: 'F', sPartOrLabor: 'L', nTurnAroundTime: 4, nUnitCost: 120.00, bActive: true, lRepairLevelKey: 2 },
+  { lRepairItemKey: 3, sItemDescription: 'Insertion Tube Replacement', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 5, nUnitCost: 350.00, bActive: true, lRepairLevelKey: 3 },
+  { lRepairItemKey: 4, sItemDescription: 'CCD Chip Replacement', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 7, nUnitCost: 450.00, bActive: true, lRepairLevelKey: 3 },
+  { lRepairItemKey: 5, sItemDescription: 'Light Guide Bundle', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 3, nUnitCost: 150.00, bActive: true, lRepairLevelKey: 2 },
+  { lRepairItemKey: 6, sItemDescription: 'Universal Cord Repair', sRigidOrFlexible: 'F', sPartOrLabor: 'L', nTurnAroundTime: 4, nUnitCost: 200.00, bActive: true, lRepairLevelKey: 3 },
+  { lRepairItemKey: 7, sItemDescription: 'Suction Cylinder', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 2, nUnitCost: 60.00, bActive: true, lRepairLevelKey: 1 },
+  { lRepairItemKey: 8, sItemDescription: 'Biopsy Channel Repair', sRigidOrFlexible: 'F', sPartOrLabor: 'L', nTurnAroundTime: 3, nUnitCost: 95.00, bActive: true, lRepairLevelKey: 2 },
+  { lRepairItemKey: 9, sItemDescription: 'Lens Replacement (Rigid)', sRigidOrFlexible: 'R', sPartOrLabor: 'P', nTurnAroundTime: 5, nUnitCost: 280.00, bActive: true, lRepairLevelKey: 3 },
+  { lRepairItemKey: 10, sItemDescription: 'Rod Lens Realignment', sRigidOrFlexible: 'R', sPartOrLabor: 'L', nTurnAroundTime: 3, nUnitCost: 180.00, bActive: true, lRepairLevelKey: 2 },
+  { lRepairItemKey: 11, sItemDescription: 'Fluid Seal Kit', sRigidOrFlexible: 'F', sPartOrLabor: 'P', nTurnAroundTime: 1, nUnitCost: 40.00, bActive: true, lRepairLevelKey: 1 },
+  { lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', sRigidOrFlexible: 'F', sPartOrLabor: 'L', nTurnAroundTime: 1, nUnitCost: 75.00, bActive: true, lRepairLevelKey: 1 },
+]);
+
+// ── Repair Details (line items per repair) ──────────────
+MockDB.seed('repairDetails', [
+  // Repair 6601: Fluid invasion
+  { lRepairItemTranKey: 5001, lRepairKey: 6601, lRepairItemKey: 11, sItemDescription: 'Fluid Seal Kit', nRepairPrice: 40.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+  { lRepairItemTranKey: 5002, lRepairKey: 6601, lRepairItemKey: 1, sItemDescription: 'Distal Tip Replacement', nRepairPrice: 285.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  { lRepairItemTranKey: 5003, lRepairKey: 6601, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  // Repair 6587: Angulation cable
+  { lRepairItemTranKey: 5004, lRepairKey: 6587, lRepairItemKey: 2, sItemDescription: 'Angulation Wire Repair', nRepairPrice: 850.00, sApproved: 'P', bPrimary: true, mComment: 'Both up/down cables' },
+  { lRepairItemTranKey: 5005, lRepairKey: 6587, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  // Repair 6574: Insertion tube
+  { lRepairItemTranKey: 5006, lRepairKey: 6574, lRepairItemKey: 3, sItemDescription: 'Insertion Tube Replacement', nRepairPrice: 480.00, sApproved: 'Y', bPrimary: true, mComment: 'Kink at 60cm mark' },
+  // Repair 6530: Universal cord
+  { lRepairItemTranKey: 5007, lRepairKey: 6530, lRepairItemKey: 6, sItemDescription: 'Universal Cord Repair', nRepairPrice: 640.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+  // Repair 6445: Suction cylinder
+  { lRepairItemTranKey: 5008, lRepairKey: 6445, lRepairItemKey: 7, sItemDescription: 'Suction Cylinder', nRepairPrice: 380.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+]);
+
+// ── Contracts (12 — matching contracts.html demo) ───────
+MockDB.seed('contracts', [
+  { lContractKey: 9022, sContractName1: '88th Medical Group - Capitated', lClientKey: 3502, sClientName1: '88th Medical Group', sContractType: 'CPO', sContractStatus: 'Active', dtDateEffective: '2025-11-14T00:00:00', dtDateTermination: '2026-11-14T00:00:00', dblAmtTotal: 22400, sSalesRepName: 'J. Miller', sInvoiceFrequency: 'Quarterly', sPurchaseOrder: 'PO-2025-1184', sPaymentTerms: 'Net 30' },
+  { lContractKey: 8841, sContractName1: 'Halifax Medical - Preventive Maint', lClientKey: 0, sClientName1: 'Halifax Medical', sContractType: 'Fuse', sContractStatus: 'Active', dtDateEffective: '2025-08-22T00:00:00', dtDateTermination: '2026-08-22T00:00:00', dblAmtTotal: 14500, sSalesRepName: 'R. Thompson', sInvoiceFrequency: 'Annual' },
+  { lContractKey: 7720, sContractName1: 'Wills Eye - Full Service (Rigid)', lClientKey: 0, sClientName1: 'Wills Eye Hospital', sContractType: 'CPO', sContractStatus: 'Expired', dtDateEffective: '2025-01-15T00:00:00', dtDateTermination: '2026-01-15T00:00:00', dblAmtTotal: 9800, sSalesRepName: 'S. Chen', sInvoiceFrequency: 'Monthly' },
+  { lContractKey: 9105, sContractName1: 'Tift Regional - Flexible Service', lClientKey: 1084, sClientName1: 'Tift Regional Medical', sContractType: 'Capitated Service', sContractStatus: 'Active', dtDateEffective: '2025-12-31T00:00:00', dtDateTermination: '2026-12-31T00:00:00', dblAmtTotal: 31000, sSalesRepName: 'J. Miller', sInvoiceFrequency: 'Quarterly' },
+  { lContractKey: 9110, sContractName1: 'Memorial Health - Cart Service', lClientKey: 0, sClientName1: 'Memorial Health System', sContractType: 'Cart', sContractStatus: 'Active', dtDateEffective: '2026-03-31T00:00:00', dtDateTermination: '2027-03-31T00:00:00', dblAmtTotal: 18750, sSalesRepName: 'K. Davis', sInvoiceFrequency: 'Annual' },
+  { lContractKey: 8990, sContractName1: "St. Luke's - Airway Mgmt", lClientKey: 0, sClientName1: "St. Luke's University", sContractType: 'Airway', sContractStatus: 'Active', dtDateEffective: '2025-06-30T00:00:00', dtDateTermination: '2026-06-30T00:00:00', dblAmtTotal: 8200, sSalesRepName: 'R. Thompson', sInvoiceFrequency: 'Quarterly' },
+  { lContractKey: 9045, sContractName1: 'Christiana Care - Shared Risk', lClientKey: 0, sClientName1: 'Christiana Care Health', sContractType: 'Shared Risk', sContractStatus: 'Active', dtDateEffective: '2025-09-15T00:00:00', dtDateTermination: '2026-09-15T00:00:00', dblAmtTotal: 42000, sSalesRepName: 'J. Miller', sInvoiceFrequency: 'Monthly' },
+  { lContractKey: 8875, sContractName1: 'Lehigh Valley - Rental Fleet', lClientKey: 0, sClientName1: 'Lehigh Valley Health', sContractType: 'Rental', sContractStatus: 'Active', dtDateEffective: '2025-04-20T00:00:00', dtDateTermination: '2026-04-20T00:00:00', dblAmtTotal: 11600, sSalesRepName: 'S. Chen', sInvoiceFrequency: 'Monthly' },
+  { lContractKey: 7680, sContractName1: 'Jefferson - Capitated (Expired)', lClientKey: 0, sClientName1: 'Jefferson Health', sContractType: 'CPO', sContractStatus: 'Expired', dtDateEffective: '2024-12-01T00:00:00', dtDateTermination: '2025-12-01T00:00:00', dblAmtTotal: 27500, sSalesRepName: 'K. Davis', sInvoiceFrequency: 'Annual' },
+  { lContractKey: 9088, sContractName1: 'Geisinger - Comprehensive Svc', lClientKey: 0, sClientName1: 'Geisinger Health', sContractType: 'Fuse', sContractStatus: 'Active', dtDateEffective: '2025-10-01T00:00:00', dtDateTermination: '2026-10-01T00:00:00', dblAmtTotal: 38200, sSalesRepName: 'J. Miller', sInvoiceFrequency: 'Quarterly' },
+  { lContractKey: 9120, sContractName1: 'HCA Florida - Flex PM', lClientKey: 0, sClientName1: 'HCA Florida', sContractType: 'Capitated Service', sContractStatus: 'Active', dtDateEffective: '2026-02-28T00:00:00', dtDateTermination: '2027-02-28T00:00:00', dblAmtTotal: 15400, sSalesRepName: 'R. Thompson', sInvoiceFrequency: 'Annual' },
+  { lContractKey: 8950, sContractName1: 'Bayhealth - Full Service', lClientKey: 0, sClientName1: 'Bayhealth Medical', sContractType: 'CPO', sContractStatus: 'Expiring', dtDateEffective: '2025-04-15T00:00:00', dtDateTermination: '2026-04-15T00:00:00', dblAmtTotal: 19800, sSalesRepName: 'S. Chen', sInvoiceFrequency: 'Quarterly' },
+]);
+
+// ── Pending Contracts ───────────────────────────────────
+MockDB.seed('pendingContracts', [
+  { lPendingContractKey: 1, sContractType: 'Fuse', sContractName1: 'Regional Medical - Full Service 2026', sClientName1: 'Regional Medical Center', sSalesRepName: 'R. Thompson', dtCreated: '2026-03-02T00:00:00', sContractStatus: 'Pending' },
+  { lPendingContractKey: 2, sContractType: 'CPO', sContractName1: "St. Mary's Hospital - Capitated", sClientName1: "St. Mary's Hospital", sSalesRepName: 'J. Miller', dtCreated: '2026-02-28T00:00:00', sContractStatus: 'Pending' },
+  { lPendingContractKey: 3, sContractType: 'Shared Risk', sContractName1: 'Valley Health - Shared Risk Pilot', sClientName1: 'Valley Health System', sSalesRepName: 'S. Chen', dtCreated: '2026-02-15T00:00:00', sContractStatus: 'Pending' },
+]);
+
+// ── Suppliers ───────────────────────────────────────────
+MockDB.seed('suppliers', [
+  { lSupplierKey: 1, sSupplierName: 'Olympus America', sAddress1: '3500 Corporate Pkwy', sCity: 'Center Valley', sState: 'PA', sZip: '18034', sPhoneNumber: '(800) 848-9024', bActive: true, lSupplierRoleKey: 1 },
+  { lSupplierKey: 2, sSupplierName: 'Fujifilm Medical', sAddress1: '47 Hulfish St', sCity: 'Princeton', sState: 'NJ', sZip: '08542', sPhoneNumber: '(800) 431-1850', bActive: true, lSupplierRoleKey: 1 },
+  { lSupplierKey: 3, sSupplierName: 'Karl Storz Endoscopy', sAddress1: '2151 E Grand Ave', sCity: 'El Segundo', sState: 'CA', sZip: '90245', sPhoneNumber: '(800) 421-0837', bActive: true, lSupplierRoleKey: 1 },
+  { lSupplierKey: 4, sSupplierName: 'Stryker Medical', sAddress1: '1941 Stryker Way', sCity: 'Portage', sState: 'MI', sZip: '49002', sPhoneNumber: '(800) 253-3210', bActive: true, lSupplierRoleKey: 1 },
+  { lSupplierKey: 5, sSupplierName: 'MCE Parts & Supply', sAddress1: '100 Industrial Blvd', sCity: 'Nashville', sState: 'TN', sZip: '37210', sPhoneNumber: '(615) 555-0101', bActive: true, lSupplierRoleKey: 2 },
+]);
+
+MockDB.seed('supplierPOTypes', [
+  { lSupplierPOTypeKey: 1, sSupplierPOTypeName: 'Standard' },
+  { lSupplierPOTypeKey: 2, sSupplierPOTypeName: 'Rush' },
+  { lSupplierPOTypeKey: 3, sSupplierPOTypeName: 'Blanket' },
+]);
+
+// ── Inventory (10 items with sizes) ─────────────────────
+MockDB.seed('inventory', [
+  { lInventoryKey: 1, sItemDescription: 'Achromat Lens Assembly', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: false, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 2, sItemDescription: 'Adapter / Coupler', sRigidOrFlexible: 'R', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: false, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 3, sItemDescription: 'Angulation Wire Assembly', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: true, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 4, sItemDescription: 'Bending Section Mesh', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: false, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 5, sItemDescription: 'CCD Assembly', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: true, bAlwaysReOrder: false, bLargeDiameter: false, bSkipPickList: false },
+  { lInventoryKey: 6, sItemDescription: 'Control Body O-Ring Kit', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: true, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 7, sItemDescription: 'Distal Tip Cover', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: false, bLargeDiameter: true, bSkipPickList: false },
+  { lInventoryKey: 8, sItemDescription: 'Epoxy Resin', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: true, bLargeDiameter: true, bSkipPickList: true },
+  { lInventoryKey: 9, sItemDescription: 'Fiber Optic Bundle', sRigidOrFlexible: 'F', bActive: true, bNoCountAdjustment: false, bAlwaysReOrder: false, bLargeDiameter: false, bSkipPickList: false },
+  { lInventoryKey: 10, sItemDescription: 'Rod Lens (Rigid)', sRigidOrFlexible: 'R', bActive: true, bNoCountAdjustment: true, bAlwaysReOrder: false, bLargeDiameter: true, bSkipPickList: false },
+]);
+
+MockDB.seed('inventorySizes', [
+  // Achromat Lens Assembly
+  { lInventorySizeKey: 101, lInventoryKey: 1, sSizeName: 'DUR-B', sBinLocation: 'A-12', nUnitCost: 0.10, nLevelCurrent: 42, nLevelMinimum: 5, nLevelMaximum: 100, nReorderPoint: 10, bActive: true },
+  { lInventorySizeKey: 102, lInventoryKey: 1, sSizeName: '2.70 x 3.55 w/stop', sBinLocation: 'A-13', nUnitCost: 0.35, nLevelCurrent: 18, nLevelMinimum: 3, nLevelMaximum: 50, nReorderPoint: 8, bActive: true },
+  // Adapter / Coupler
+  { lInventorySizeKey: 103, lInventoryKey: 2, sSizeName: 'AC-100 Universal', sBinLocation: 'D-01', nUnitCost: 12.50, nLevelCurrent: 8, nLevelMinimum: 2, nLevelMaximum: 20, nReorderPoint: 4, bActive: true },
+  // Angulation Wire Assembly
+  { lInventorySizeKey: 104, lInventoryKey: 3, sSizeName: 'GIF-H180/190 Up', sBinLocation: 'B-05', nUnitCost: 25.00, nLevelCurrent: 12, nLevelMinimum: 4, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
+  { lInventorySizeKey: 105, lInventoryKey: 3, sSizeName: 'GIF-H180/190 Down', sBinLocation: 'B-06', nUnitCost: 25.00, nLevelCurrent: 10, nLevelMinimum: 4, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
+  { lInventorySizeKey: 106, lInventoryKey: 3, sSizeName: 'CF-HQ190L Up/Down', sBinLocation: 'B-07', nUnitCost: 30.00, nLevelCurrent: 6, nLevelMinimum: 2, nLevelMaximum: 20, nReorderPoint: 5, bActive: true },
+  // CCD Assembly
+  { lInventorySizeKey: 107, lInventoryKey: 5, sSizeName: 'GIF-H190 CCD', sBinLocation: 'C-01', nUnitCost: 350.00, nLevelCurrent: 3, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
+  { lInventorySizeKey: 108, lInventoryKey: 5, sSizeName: 'CF-HQ190L CCD', sBinLocation: 'C-02', nUnitCost: 380.00, nLevelCurrent: 2, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
+  // Control Body O-Ring Kit
+  { lInventorySizeKey: 109, lInventoryKey: 6, sSizeName: 'Olympus Standard', sBinLocation: 'A-20', nUnitCost: 5.00, nLevelCurrent: 50, nLevelMinimum: 10, nLevelMaximum: 100, nReorderPoint: 20, bActive: true },
+  // Distal Tip Cover
+  { lInventorySizeKey: 110, lInventoryKey: 7, sSizeName: 'GIF/CF Large', sBinLocation: 'A-25', nUnitCost: 15.00, nLevelCurrent: 22, nLevelMinimum: 5, nLevelMaximum: 40, nReorderPoint: 10, bActive: true },
+  { lInventorySizeKey: 111, lInventoryKey: 7, sSizeName: 'BF Small', sBinLocation: 'A-26', nUnitCost: 12.00, nLevelCurrent: 15, nLevelMinimum: 3, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
+  // Fiber Optic Bundle
+  { lInventorySizeKey: 112, lInventoryKey: 9, sSizeName: 'GIF-H190 Light Guide', sBinLocation: 'C-10', nUnitCost: 120.00, nLevelCurrent: 4, nLevelMinimum: 2, nLevelMaximum: 8, nReorderPoint: 3, bActive: true },
+  // Rod Lens
+  { lInventorySizeKey: 113, lInventoryKey: 10, sSizeName: '4mm 0° Storz', sBinLocation: 'E-01', nUnitCost: 200.00, nLevelCurrent: 3, nLevelMinimum: 1, nLevelMaximum: 6, nReorderPoint: 2, bActive: true },
+  { lInventorySizeKey: 114, lInventoryKey: 10, sSizeName: '4mm 30° Storz', sBinLocation: 'E-02', nUnitCost: 210.00, nLevelCurrent: 2, nLevelMinimum: 1, nLevelMaximum: 6, nReorderPoint: 2, bActive: true },
+]);
+
+// ── Financial: Outstanding Invoices ─────────────────────
+MockDB.seed('invoices', [
+  { lInvoiceKey: 284, sInvoiceNumber: 'INV-2026-0284', sClientName1: '88th Medical Group', dblAmount: 2840, dtIssuedDate: '2026-02-25T00:00:00', dtDueDate: '2026-03-25T00:00:00', sStatus: 'Unpaid' },
+  { lInvoiceKey: 271, sInvoiceNumber: 'INV-2026-0271', sClientName1: 'Tift Regional Medical Center', dblAmount: 5120, dtIssuedDate: '2026-02-18T00:00:00', dtDueDate: '2026-03-18T00:00:00', sStatus: 'Unpaid' },
+  { lInvoiceKey: 258, sInvoiceNumber: 'INV-2026-0258', sClientName1: 'Nashville General Hospital', dblAmount: 3650, dtIssuedDate: '2026-02-10T00:00:00', dtDueDate: '2026-03-10T00:00:00', sStatus: 'Partial' },
+  { lInvoiceKey: 241, sInvoiceNumber: 'INV-2026-0241', sClientName1: 'West Side GI Center', dblAmount: 9300, dtIssuedDate: '2026-01-31T00:00:00', dtDueDate: '2026-03-01T00:00:00', sStatus: 'Overdue' },
+  { lInvoiceKey: 229, sInvoiceNumber: 'INV-2026-0229', sClientName1: 'Northside Hospital', dblAmount: 4480, dtIssuedDate: '2026-01-22T00:00:00', dtDueDate: '2026-02-21T00:00:00', sStatus: 'Paid' },
+  { lInvoiceKey: 215, sInvoiceNumber: 'INV-2026-0215', sClientName1: 'Metro Health Hospital', dblAmount: 2100, dtIssuedDate: '2026-01-15T00:00:00', dtDueDate: '2026-02-14T00:00:00', sStatus: 'Paid' },
+  { lInvoiceKey: 198, sInvoiceNumber: 'INV-2026-0198', sClientName1: 'Shreveport Endoscopy Center', dblAmount: 1750, dtIssuedDate: '2026-01-08T00:00:00', dtDueDate: '2026-02-07T00:00:00', sStatus: 'Overdue' },
+]);
+
+MockDB.seed('draftInvoices', [
+  { lInvoiceKey: 50, sInvoiceNumber: 'DRF-2026-0050', sClientName1: '88th Medical Group', dblAmount: 1200, dtCreatedDate: '2026-03-05T00:00:00', sStatus: 'Draft' },
+  { lInvoiceKey: 49, sInvoiceNumber: 'DRF-2026-0049', sClientName1: 'Nashville General Hospital', dblAmount: 3400, dtCreatedDate: '2026-03-02T00:00:00', sStatus: 'Draft' },
+]);
+
+MockDB.seed('clientsOnHold', [
+  { lClientKey: 3341, sClientName1: 'West Side GI Center', sDepartmentName: 'Endoscopy', dtOnHoldDate: '2026-02-15T00:00:00', sReason: 'Past due > 60 days' },
+  { lClientKey: 1650, sClientName1: 'Shreveport Endoscopy Center', sDepartmentName: 'GI Lab', dtOnHoldDate: '2026-01-20T00:00:00', sReason: 'Billing dispute' },
+]);
+
+MockDB.seed('invoicePayments', [
+  { lInvoicePaymentID: 10, sInvoiceNumber: 'INV-2026-0229', sClientName1: 'Northside Hospital', dblAmount: 4480, dtPaymentDate: '2026-02-20T00:00:00', sPaymentMethod: 'ACH' },
+  { lInvoicePaymentID: 11, sInvoiceNumber: 'INV-2026-0215', sClientName1: 'Metro Health Hospital', dblAmount: 2100, dtPaymentDate: '2026-02-13T00:00:00', sPaymentMethod: 'Check' },
+  { lInvoicePaymentID: 12, sInvoiceNumber: 'INV-2026-0258', sClientName1: 'Nashville General Hospital', dblAmount: 2000, dtPaymentDate: '2026-03-01T00:00:00', sPaymentMethod: 'ACH' },
+]);
+
+console.log('[MockDB] Phase 3 seeded: ' +
+  MockDB.getAll('repairs').length + ' repairs, ' +
+  MockDB.getAll('repairItems').length + ' repair items, ' +
+  MockDB.getAll('contracts').length + ' contracts, ' +
+  MockDB.getAll('inventory').length + ' inventory items, ' +
+  MockDB.getAll('suppliers').length + ' suppliers, ' +
+  MockDB.getAll('invoices').length + ' invoices'
+);
