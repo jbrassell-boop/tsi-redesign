@@ -17,7 +17,7 @@
     .s-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
     .s-data{min-width:0}
     .s-val{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
-    .s-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .s-lbl{font-size:clamp(8px,0.8vw,9.5px);color:var(--muted);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:visible}
     .s-navy{color:var(--navy)} .s-red{color:var(--red)} .s-green{color:var(--green)} .s-amber{color:var(--amber)} .s-purple{color:#7C3AED} .s-blue{color:var(--blue)} .s-muted{color:var(--muted)}
 
     /* Extra button variants not in shared styles */
@@ -482,7 +482,7 @@
                 <div class="page-nav">
                   <button>&laquo;</button>
                   <input type="number" value="1" min="1" style="width:22px;height:18px;border:1px solid var(--border);border-radius:3px;text-align:center;font-size:9px"/>
-                  <span>/ 5</span>
+                  <span id="sizePageNav">/ 1</span>
                   <button>&raquo;</button>
                 </div>
               </div>
@@ -604,7 +604,7 @@
             
             <div class="split-left-list">
               <!-- PO Item Rows -->
-              <div class="item-row po-card selected">
+              <div class="item-row po-card selected" data-po="MP224030092">
                 <div class="po-card-top">
                   <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">MP224030092</span>
                   <span style="font-size:9.5px;font-weight:700;color:var(--green)">OPEN</span>
@@ -615,7 +615,7 @@
                 </div>
               </div>
 
-              <div class="item-row po-card">
+              <div class="item-row po-card" data-po="SPI2304891">
                 <div class="po-card-top">
                   <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2304891</span>
                   <span style="font-size:9.5px;font-weight:700;color:var(--muted)">CLOSED</span>
@@ -626,7 +626,7 @@
                 </div>
               </div>
 
-              <div class="item-row po-card" style="border-left:3px solid var(--amber)">
+              <div class="item-row po-card" data-po="SPI2306012" style="border-left:3px solid var(--amber)">
                 <div class="po-card-top">
                   <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2306012</span>
                   <span style="font-size:9.5px;font-weight:700;color:var(--amber)">DRAFT</span>
@@ -825,7 +825,7 @@
             
             <div class="split-left-list">
               <!-- PO Item Rows -->
-              <div class="item-row po-card selected">
+              <div class="item-row po-card selected" data-po="SPI2305078">
                 <div class="po-card-top">
                   <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2305078</span>
                   <span style="font-size:9.5px;font-weight:700;color:var(--amber)">PARTIAL</span>
@@ -836,7 +836,7 @@
                 </div>
               </div>
 
-              <div class="item-row po-card" style="opacity:0.6">
+              <div class="item-row po-card" data-po="SPI2304891_recv" style="opacity:0.6">
                 <div class="po-card-top">
                   <span style="font-family:monospace;font-size:12px;font-weight:800;color:var(--navy)">SPI2304891</span>
                   <span style="font-size:9.5px;font-weight:700;color:var(--green)">COMPLETE</span>
@@ -1060,7 +1060,7 @@
           <select class="inp"><option value="">-- Select --</option><option>Camera</option><option>Flexible</option><option>Instrument</option><option>Rigid</option></select>
         </div>
         <div style="display:flex;gap:16px;padding-top:8px;border-top:1px solid var(--border)">
-          <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
+          <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
           <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Not Used For Repair</span></div>
         </div>
         <div style="display:flex;gap:16px">
@@ -1760,6 +1760,8 @@ function selectItem(name) {
   if (sizeCount) sizeCount.textContent = data.sizes.length;
   const pagInfo = document.querySelector('.sizes-grid-col .pagination-bar span');
   if (pagInfo) pagInfo.textContent = '1–' + data.sizes.length + ' of ' + data.sizes.length;
+  const pageNav = document.getElementById('sizePageNav');
+  if (pageNav) pageNav.textContent = '/ 1';
 
   // Auto-select first size
   const firstRow = tbody.querySelector('.size-row');
@@ -2175,6 +2177,334 @@ async function initPage() {
 }
 
 initPage();
+
+// ═══════════════════════════════════════════════════════
+//  UX AUDIT FIXES (Sprint 1 + Sprint 2 low-effort)
+// ═══════════════════════════════════════════════════════
+
+// ── I-2: Item Search Filter ──
+(function() {
+  const inp = document.querySelector('#itab-inventory .split-left-search .search-inp');
+  if (!inp) return;
+  inp.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#itemList .item-row').forEach(row => {
+      const name = (row.dataset.item || '').toLowerCase();
+      row.style.display = (!q || name.includes(q)) ? '' : 'none';
+    });
+  });
+})();
+
+// ── I-3: Inactive Toggle — filter only, never touch grid columns ──
+(function() {
+  const toggle = document.querySelector('#itab-inventory .split-left-search .toggle input[type=checkbox]');
+  if (!toggle) return;
+  toggle.addEventListener('change', function() {
+    const showInactive = this.checked;
+    document.querySelectorAll('#itemList .item-row').forEach(row => {
+      const name = row.dataset.item;
+      const data = inventoryData[name];
+      if (!data) return;
+      // When toggle OFF (default): show all items (active + inactive)
+      // When toggle ON: show only inactive items
+      if (showInactive) {
+        row.style.display = data.active ? 'none' : '';
+      } else {
+        row.style.display = '';
+      }
+    });
+  });
+})();
+
+// ── I-4 & I-14: Inline "Sure?" Del Confirmation ──
+// Applies to: size detail Del button + suppliers modal Del buttons
+function wireDelConfirmation(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const b = this;
+    if (b.dataset.confirming) return;
+    const origHTML = b.innerHTML;
+    const origBg = b.style.background || '';
+    const origColor = b.style.color || '';
+    const origBorder = b.style.borderColor || '';
+    b.textContent = 'Sure?';
+    b.style.background = '#c53030';
+    b.style.color = '#fff';
+    b.style.borderColor = '#c53030';
+    b.dataset.confirming = '1';
+    const timer = setTimeout(() => {
+      b.innerHTML = origHTML;
+      b.style.background = origBg;
+      b.style.color = origColor;
+      b.style.borderColor = origBorder;
+      delete b.dataset.confirming;
+    }, 3000);
+    b.addEventListener('click', function confirmHandler(e2) {
+      e2.stopPropagation();
+      clearTimeout(timer);
+      b.removeEventListener('click', confirmHandler);
+      delete b.dataset.confirming;
+      b.innerHTML = origHTML;
+      b.style.background = origBg;
+      b.style.color = origColor;
+      b.style.borderColor = origBorder;
+      // Execute delete — remove table row for supplier del-btns
+      const row = b.closest('tr');
+      if (row) row.remove();
+    }, { once: true });
+  });
+}
+// Wire size detail footer Del button
+document.querySelectorAll('.sd-footer .btn-danger').forEach(wireDelConfirmation);
+// Wire suppliers modal Del buttons
+document.querySelectorAll('#suppliersModal .del-btn').forEach(wireDelConfirmation);
+
+// ── I-1: PO List Click Handlers (Purchase Orders tab) ──
+const poData = {
+  'MP224030092': {
+    number: 'MP224030092', supplier: 'Test GP Supplier', date: '2023-05-25',
+    type: 'Parts', total: '$925.06', lines: 4, units: 7, status: 'Open',
+    statusColor: 'var(--green)', avgUnit: '$132.15',
+    items: [
+      { item:'INSTRUMENTS PURCHASED', size:'Adtec Sovereign Grasping FC', part:'PL232R', qty:2, cost:'$145.50', itemTotal:'$291.00', status:'Pending', tech:'Mike Torres', reorder:5 },
+      { item:'INSTRUMENTS PURCHASED', size:'Bipolar Macro Forcep 5mm 31cm', part:'PM403R', qty:1, cost:'$212.00', itemTotal:'$212.00', status:'Pending', tech:'Sarah Chen', reorder:3 },
+      { item:'INSTRUMENTS PURCHASED', size:'Needle Holder 5mm 31cm', part:'PL407R', qty:3, cost:'$98.02', itemTotal:'$294.06', status:'Pending', tech:'Mike Torres', reorder:5 },
+      { item:'INSTRUMENTS PURCHASED', size:'Scissors 5mm 31cm', part:'PK115', qty:1, cost:'$128.00', itemTotal:'$128.00', status:'Pending', tech:'Sarah Chen', reorder:2 }
+    ]
+  },
+  'SPI2304891': {
+    number: 'SPI2304891', supplier: 'Surgical Products Inc.', date: '2023-04-12',
+    type: 'Parts', total: '$1,450.20', lines: 3, units: 5, status: 'Closed',
+    statusColor: 'var(--muted)', avgUnit: '$290.04',
+    items: [
+      { item:'FIBER BUNDLE', size:'Coherent Fiber Bundle 3.1mm', part:'FB-310K', qty:2, cost:'$175.00', itemTotal:'$350.00', status:'Received', tech:'Mike Torres', reorder:3 },
+      { item:'CCD', size:'CCD Chip Assembly 1/6&quot;', part:'CCD-160', qty:1, cost:'$340.00', itemTotal:'$340.00', status:'Received', tech:'Sarah Chen', reorder:2 },
+      { item:'LIGHT GUIDE', size:'Light Guide Bundle 5.0mm', part:'LG-050', qty:2, cost:'$380.10', itemTotal:'$760.20', status:'Received', tech:'Mike Torres', reorder:2 }
+    ]
+  },
+  'SPI2306012': {
+    number: 'SPI2306012', supplier: 'Olympus America', date: '2023-06-01',
+    type: 'Parts', total: '$0.00', lines: 0, units: 0, status: 'Draft',
+    statusColor: 'var(--amber)', avgUnit: '$0.00',
+    items: []
+  }
+};
+
+function selectPO(poNum) {
+  const po = poData[poNum];
+  if (!po) return;
+  const tab = document.getElementById('itab-po');
+  // Highlight selected card
+  tab.querySelectorAll('.po-card').forEach(c => c.classList.remove('selected'));
+  tab.querySelectorAll('.po-card').forEach(c => {
+    if (c.dataset.po === poNum) c.classList.add('selected');
+  });
+
+  const detail = tab.querySelector('.split-right');
+  // PO header fields
+  const ffVals = detail.querySelectorAll('.panel-body .ff');
+  if (ffVals[0]) ffVals[0].querySelector('.ff-val span').textContent = po.number;
+  if (ffVals[1]) ffVals[1].querySelector('.ff-val .id-badge').textContent = po.supplier;
+  if (ffVals[2]) ffVals[2].querySelector('.ff-val input').value = po.date;
+
+  // Summary strip chips
+  const chips = detail.querySelectorAll('.po-summary-strip .po-ss-chip');
+  if (chips[0]) chips[0].querySelector('.po-ss-val').textContent = po.total;
+  if (chips[1]) chips[1].querySelector('.po-ss-val').textContent = po.lines;
+  if (chips[2]) chips[2].querySelector('.po-ss-val').textContent = po.units;
+  if (chips[3]) {
+    const sv = chips[3].querySelector('.po-ss-val');
+    sv.textContent = po.status;
+    sv.style.color = po.statusColor;
+  }
+  if (chips[4]) chips[4].querySelector('.po-ss-val').textContent = po.avgUnit;
+
+  // Line items table
+  const tbody = detail.querySelector('.po-tbl tbody');
+  if (!tbody) return;
+  if (po.items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--muted)">No line items — use "+ Add Items" to add inventory to this PO</td></tr>';
+  } else {
+    tbody.innerHTML = po.items.map(li => `<tr>
+      <td style="font-weight:600">${li.item}</td>
+      <td style="color:var(--muted)">${li.size}</td>
+      <td><span class="mono-chip">${li.part}</span></td>
+      <td style="text-align:center;font-weight:700">${li.qty}</td>
+      <td style="text-align:right;font-family:monospace">${li.cost}</td>
+      <td style="text-align:right;font-weight:800;font-family:monospace;color:var(--navy)">${li.itemTotal}</td>
+      <td style="text-align:center"><span class="badge b-inactive" style="font-size:10px">${li.status}</span></td>
+      <td style="text-align:center;color:var(--muted)">${li.tech}</td>
+      <td style="text-align:center;font-weight:600">${li.reorder}</td>
+      <td style="text-align:center"><button class="edit-btn" style="padding:3px 8px">Edit</button></td>
+    </tr>`).join('');
+  }
+
+  // Bottom bar
+  const bottomSpan = detail.querySelector('.pagination-bar span');
+  if (bottomSpan) {
+    bottomSpan.innerHTML = po.lines + ' line items &bull; ' + po.units + ' total units &bull; PO Total: <strong style="color:var(--navy);font-family:monospace;font-size:12px">' + po.total + '</strong>';
+  }
+}
+
+// Wire PO tab card click handlers
+document.querySelectorAll('#itab-po .split-left-list .po-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', function() { selectPO(this.dataset.po); });
+});
+
+// ── I-1: Receive Inventory Tab PO Click Handlers ──
+const recvPoData = {
+  'SPI2305078': {
+    number: 'SPI2305078', supplier: 'Surgical Products Inc.', date: '05/25/2023',
+    progress: 33, progressText: '33% Complete',
+    totalLines: 6, complete: 2, partial: 1, pending: 3,
+    ordered: 10, received: 4, remaining: 6,
+    items: [
+      { part:'PL232R', item:'INSTRUMENTS PURCHASED', size:'Adtec Sovereign Grasping FC', ordered:2, received:0, remaining:2, status:'Pending', statusClass:'b-inactive', barWidth:'0%', barClass:'recv-mini-fill', rowClass:'recv-clickable', action:'receive', lot:'59111', bin:'N-01', cost:'$145.50' },
+      { part:'PM403R', item:'INSTRUMENTS PURCHASED', size:'Bipolar Macro Forcep 5mm 31cm', ordered:1, received:1, remaining:0, status:'Complete', statusClass:'b-active', barWidth:'100%', barClass:'recv-mini-fill recv-mini-done', rowClass:'recv-complete-row', action:'done' },
+      { part:'PL407R', item:'INSTRUMENTS PURCHASED', size:'Needle Holder 5mm 31cm', ordered:3, received:1, remaining:2, status:'Partial', statusClass:'b-static', barWidth:'33%', barClass:'recv-mini-fill recv-mini-partial', rowClass:'recv-clickable', action:'receive', lot:'59112', bin:'N-03', cost:'$98.02' },
+      { part:'PK115', item:'INSTRUMENTS PURCHASED', size:'Scissors 5mm 31cm', ordered:1, received:0, remaining:1, status:'Pending', statusClass:'b-inactive', barWidth:'0%', barClass:'recv-mini-fill', rowClass:'recv-clickable', action:'receive', lot:'59113', bin:'N-04', cost:'$128.00' },
+      { part:'BS-2800', item:'BENDING SECTION', size:'2.8mm Flex Tip Assembly', ordered:2, received:2, remaining:0, status:'Complete', statusClass:'b-active', barWidth:'100%', barClass:'recv-mini-fill recv-mini-done', rowClass:'recv-complete-row', action:'done' },
+      { part:'CCD-160', item:'CCD', size:'CCD Chip Assembly 1/6"', ordered:1, received:0, remaining:1, status:'Pending', statusClass:'b-inactive', barWidth:'0%', barClass:'recv-mini-fill', rowClass:'recv-clickable', action:'receive', lot:'59114', bin:'J-01', cost:'$340.00' }
+    ]
+  },
+  'SPI2304891_recv': {
+    number: 'SPI2304891', supplier: 'Surgical Products Inc.', date: '04/12/2023',
+    progress: 100, progressText: '100% Complete',
+    totalLines: 3, complete: 3, partial: 0, pending: 0,
+    ordered: 15, received: 15, remaining: 0,
+    items: [
+      { part:'FB-310K', item:'FIBER BUNDLE', size:'Coherent Fiber Bundle 3.1mm', ordered:5, received:5, remaining:0, status:'Complete', statusClass:'b-active', barWidth:'100%', barClass:'recv-mini-fill recv-mini-done', rowClass:'recv-complete-row', action:'done' },
+      { part:'LG-050', item:'LIGHT GUIDE', size:'Light Guide Bundle 5.0mm', ordered:5, received:5, remaining:0, status:'Complete', statusClass:'b-active', barWidth:'100%', barClass:'recv-mini-fill recv-mini-done', rowClass:'recv-complete-row', action:'done' },
+      { part:'IT-290', item:'INSERTION TUBE', size:'Insertion Tube 2.9mm OD', ordered:5, received:5, remaining:0, status:'Complete', statusClass:'b-active', barWidth:'100%', barClass:'recv-mini-fill recv-mini-done', rowClass:'recv-complete-row', action:'done' }
+    ]
+  }
+};
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;'); }
+
+function selectRecvPO(poNum) {
+  const po = recvPoData[poNum];
+  if (!po) return;
+  const tab = document.getElementById('itab-receive');
+  tab.querySelectorAll('.po-card').forEach(c => c.classList.remove('selected'));
+  tab.querySelectorAll('.po-card').forEach(c => {
+    if (c.dataset.po === poNum) c.classList.add('selected');
+  });
+  // Remove completed-PO dimming from selected, restore on others
+  tab.querySelectorAll('.po-card').forEach(c => {
+    c.style.opacity = c.dataset.po === poNum ? '1' : (c.dataset.po === poNum ? '1' : '');
+  });
+
+  const detail = tab.querySelector('.split-right');
+  // Header fields
+  const ffVals = detail.querySelectorAll('.panel-body .ff');
+  if (ffVals[0]) ffVals[0].querySelector('.ff-val span').textContent = po.number;
+  if (ffVals[1]) ffVals[1].querySelector('.ff-val .id-badge').textContent = po.supplier;
+  if (ffVals[2]) {
+    const dateVal = ffVals[2].querySelector('.ff-val');
+    if (dateVal) dateVal.innerHTML = '<span style="font-weight:600">' + po.date + '</span>';
+  }
+
+  // Progress bar
+  detail.querySelector('.recv-progress-fill').style.width = po.progress + '%';
+  detail.querySelector('.recv-progress-text').textContent = po.progressText;
+  detail.querySelector('.recv-progress-text').style.color = po.progress === 100 ? 'var(--green)' : 'var(--navy)';
+
+  // Summary chips
+  const chips = detail.querySelectorAll('.recv-summary-strip .po-ss-chip');
+  if (chips[0]) chips[0].querySelector('.po-ss-val').textContent = po.totalLines;
+  if (chips[1]) chips[1].querySelector('.po-ss-val').textContent = po.complete;
+  if (chips[2]) chips[2].querySelector('.po-ss-val').textContent = po.partial;
+  if (chips[3]) chips[3].querySelector('.po-ss-val').textContent = po.pending;
+  if (chips[4]) chips[4].querySelector('.po-ss-val').textContent = po.ordered;
+  if (chips[5]) chips[5].querySelector('.po-ss-val').textContent = po.received;
+  if (chips[6]) chips[6].querySelector('.po-ss-val').textContent = po.remaining;
+
+  // Receive table
+  const tbody = detail.querySelector('.recv-tbl tbody');
+  tbody.innerHTML = po.items.map(li => {
+    const remainColor = li.remaining === 0 ? 'var(--green)' : li.status === 'Partial' ? 'var(--amber)' : 'var(--red)';
+    const recvStyle = li.received > 0 && li.remaining === 0 ? 'color:var(--green)' : '';
+    let actionCell;
+    if (li.action === 'done') {
+      actionCell = '<span style="font-size:9.5px;color:var(--muted)">&#10003; Fully received</span>';
+    } else {
+      actionCell = `<button class="btn btn-green" style="height:22px;padding:0 8px;font-size:9.5px;gap:2px" onclick="event.stopPropagation();openRecvEdit('${escHtml(li.part)}','${escHtml(li.item)}','${escHtml(li.size)}','${escHtml(po.number)}','${escHtml(li.cost)}',${li.ordered},${li.received},'${escHtml(li.lot)}','${escHtml(li.bin)}')">
+        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        Receive
+      </button>`;
+    }
+    const clickAttr = li.action === 'receive'
+      ? ` onclick="openRecvEdit('${escHtml(li.part)}','${escHtml(li.item)}','${escHtml(li.size)}','${escHtml(po.number)}','${escHtml(li.cost)}',${li.ordered},${li.received},'${escHtml(li.lot)}','${escHtml(li.bin)}')" style="cursor:pointer"`
+      : '';
+    return `<tr class="${li.rowClass}"${clickAttr}>
+      <td><span class="mono-chip">${li.part}</span></td>
+      <td>${li.item}</td>
+      <td style="font-size:10.5px">${li.size}</td>
+      <td style="text-align:center">${li.ordered}</td>
+      <td style="text-align:center;font-weight:600;${recvStyle}">${li.received}</td>
+      <td style="text-align:center;font-weight:700;color:${remainColor}">${li.remaining}</td>
+      <td><span class="badge ${li.statusClass}" style="font-size:10px">${li.status}</span></td>
+      <td style="text-align:center"><div class="recv-mini-bar"><div class="${li.barClass}" style="width:${li.barWidth}"></div></div></td>
+      <td style="text-align:center">${actionCell}</td>
+    </tr>`;
+  }).join('');
+
+  // Bottom bar
+  const bottomSpan = detail.querySelector('.pagination-bar span');
+  if (bottomSpan) {
+    const parts = [po.totalLines + ' line items'];
+    if (po.complete > 0) parts.push('<strong style="color:var(--green)">' + po.complete + ' complete</strong>');
+    if (po.partial > 0) parts.push('<strong style="color:var(--amber)">' + po.partial + ' partial</strong>');
+    if (po.pending > 0) parts.push('<strong style="color:var(--red)">' + po.pending + ' pending</strong>');
+    bottomSpan.innerHTML = parts.join(' &bull; ');
+  }
+}
+
+// Wire Receive tab card click handlers
+document.querySelectorAll('#itab-receive .split-left-list .po-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', function() { selectRecvPO(this.dataset.po); });
+});
+
+// ── I-8: PO Search Filters ──
+(function() {
+  const poSearch = document.querySelector('#itab-po .split-left-search .search-inp');
+  if (poSearch) {
+    poSearch.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#itab-po .split-left-list .po-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+  const recvSearch = document.querySelector('#itab-receive .split-left-search .search-inp');
+  if (recvSearch) {
+    recvSearch.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#itab-receive .split-left-list .po-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+})();
+
+// ── I-15: Sizes Search Filter ──
+(function() {
+  const inp = document.querySelector('.sizes-grid-col .tbl-head .search-inp');
+  if (!inp) return;
+  inp.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#sizeGrid tbody .size-row').forEach(row => {
+      const name = (row.cells[0]?.textContent || '').toLowerCase();
+      const desc2 = (row.cells[1]?.textContent || '').toLowerCase();
+      row.style.display = (!q || name.includes(q) || desc2.includes(q)) ? '' : 'none';
+    });
+  });
+})();
 </script>
 <script src="js/new-order-wizard.js"></script>
 </body>
