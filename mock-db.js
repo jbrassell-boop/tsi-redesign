@@ -285,11 +285,11 @@ MockDB.seed('salesReps', [
 
 // ── Employees / Technicians ─────────────────────────────
 MockDB.seed('employees', [
-  { lEmployeeKey: 1, sEmployeeFirst: 'Rob', sEmployeeLast: 'Martinez', sEmployeeEMail: 'r.martinez@tsi.com', bActive: true, bIsTechnician: true },
-  { lEmployeeKey: 2, sEmployeeFirst: 'Tom', sEmployeeLast: 'Bradley', sEmployeeEMail: 't.bradley@tsi.com', bActive: true, bIsTechnician: true },
-  { lEmployeeKey: 3, sEmployeeFirst: 'Mike', sEmployeeLast: 'Johnson', sEmployeeEMail: 'm.johnson@tsi.com', bActive: true, bIsTechnician: true },
-  { lEmployeeKey: 4, sEmployeeFirst: 'Chris', sEmployeeLast: 'Lee', sEmployeeEMail: 'c.lee@tsi.com', bActive: true, bIsTechnician: true },
-  { lEmployeeKey: 5, sEmployeeFirst: 'Amy', sEmployeeLast: 'Sanders', sEmployeeEMail: 'a.sanders@tsi.com', bActive: true, bIsTechnician: false },
+  { lEmployeeKey: 1, lTechnicianKey: 1, sEmployeeFirst: 'Rob', sEmployeeLast: 'Martinez', sTechName: 'Rob Martinez', sEmployeeEMail: 'r.martinez@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 2, lTechnicianKey: 2, sEmployeeFirst: 'Tom', sEmployeeLast: 'Bradley', sTechName: 'Tom Bradley', sEmployeeEMail: 't.bradley@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 3, lTechnicianKey: 3, sEmployeeFirst: 'Mike', sEmployeeLast: 'Johnson', sTechName: 'Mike Johnson', sEmployeeEMail: 'm.johnson@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 4, lTechnicianKey: 4, sEmployeeFirst: 'Chris', sEmployeeLast: 'Lee', sTechName: 'Chris Lee', sEmployeeEMail: 'c.lee@tsi.com', bActive: true, bIsTechnician: true },
+  { lEmployeeKey: 5, lTechnicianKey: 5, sEmployeeFirst: 'Amy', sEmployeeLast: 'Sanders', sTechName: 'Amy Sanders', sEmployeeEMail: 'a.sanders@tsi.com', bActive: true, bIsTechnician: false },
 ]);
 
 // ── Pricing Categories ──────────────────────────────────
@@ -699,24 +699,24 @@ MockDB.seed('scopes', [
 
 // ── Repair Reasons ──────────────────────────────────────
 MockDB.seed('repairReasons', [
-  { lRepairReasonKey: 1, sRepairReasonDesc: 'Fluid Invasion' },
-  { lRepairReasonKey: 2, sRepairReasonDesc: 'Angulation Failure' },
-  { lRepairReasonKey: 3, sRepairReasonDesc: 'Insertion Tube Damage' },
-  { lRepairReasonKey: 4, sRepairReasonDesc: 'CCD/Image Failure' },
-  { lRepairReasonKey: 5, sRepairReasonDesc: 'Light Guide Damage' },
-  { lRepairReasonKey: 6, sRepairReasonDesc: 'Universal Cord Leak' },
-  { lRepairReasonKey: 7, sRepairReasonDesc: 'Suction Cylinder' },
-  { lRepairReasonKey: 8, sRepairReasonDesc: 'Biopsy Channel' },
-  { lRepairReasonKey: 9, sRepairReasonDesc: 'Preventive Maintenance' },
-  { lRepairReasonKey: 10, sRepairReasonDesc: 'Evaluation Only' },
+  { lRepairReasonKey: 1, sRepairReasonDesc: 'Fluid Invasion', sRepairReason: 'Fluid Invasion' },
+  { lRepairReasonKey: 2, sRepairReasonDesc: 'Angulation Failure', sRepairReason: 'Angulation Failure' },
+  { lRepairReasonKey: 3, sRepairReasonDesc: 'Insertion Tube Damage', sRepairReason: 'Insertion Tube Damage' },
+  { lRepairReasonKey: 4, sRepairReasonDesc: 'CCD/Image Failure', sRepairReason: 'CCD/Image Failure' },
+  { lRepairReasonKey: 5, sRepairReasonDesc: 'Light Guide Damage', sRepairReason: 'Light Guide Damage' },
+  { lRepairReasonKey: 6, sRepairReasonDesc: 'Universal Cord Leak', sRepairReason: 'Universal Cord Leak' },
+  { lRepairReasonKey: 7, sRepairReasonDesc: 'Suction Cylinder', sRepairReason: 'Suction Cylinder' },
+  { lRepairReasonKey: 8, sRepairReasonDesc: 'Biopsy Channel', sRepairReason: 'Biopsy Channel' },
+  { lRepairReasonKey: 9, sRepairReasonDesc: 'Preventive Maintenance', sRepairReason: 'Preventive Maintenance' },
+  { lRepairReasonKey: 10, sRepairReasonDesc: 'Evaluation Only', sRepairReason: 'Evaluation Only' },
 ]);
 
 // ── Repair Levels ───────────────────────────────────────
 MockDB.seed('repairLevels', [
-  { lRepairLevelKey: 1, sRepairLevelDesc: 'Minor' },
-  { lRepairLevelKey: 2, sRepairLevelDesc: 'Mid-Level' },
-  { lRepairLevelKey: 3, sRepairLevelDesc: 'Major' },
-  { lRepairLevelKey: 4, sRepairLevelDesc: 'Rebuild' },
+  { lRepairLevelKey: 1, sRepairLevelDesc: 'Minor', sRepairLevel: 'Minor' },
+  { lRepairLevelKey: 2, sRepairLevelDesc: 'Mid-Level', sRepairLevel: 'Mid-Level' },
+  { lRepairLevelKey: 3, sRepairLevelDesc: 'Major', sRepairLevel: 'Major' },
+  { lRepairLevelKey: 4, sRepairLevelDesc: 'Rebuild', sRepairLevel: 'Rebuild' },
 ]);
 
 // ── Repair Statuses ─────────────────────────────────────
@@ -735,11 +735,11 @@ MockDB.seed('repairStatuses', [
 
 // ── Delivery Methods ────────────────────────────────────
 MockDB.seed('deliveryMethods', [
-  { lDeliveryMethodKey: 1, sDeliveryMethodDesc: 'FedEx Standard' },
-  { lDeliveryMethodKey: 2, sDeliveryMethodDesc: 'FedEx Priority Overnight' },
-  { lDeliveryMethodKey: 3, sDeliveryMethodDesc: 'UPS Ground' },
-  { lDeliveryMethodKey: 4, sDeliveryMethodDesc: 'TSI Courier' },
-  { lDeliveryMethodKey: 5, sDeliveryMethodDesc: 'Client Pickup' },
+  { lDeliveryMethodKey: 1, sDeliveryMethodDesc: 'FedEx Standard', sDeliveryDesc: 'FedEx Standard' },
+  { lDeliveryMethodKey: 2, sDeliveryMethodDesc: 'FedEx Priority Overnight', sDeliveryDesc: 'FedEx Priority Overnight' },
+  { lDeliveryMethodKey: 3, sDeliveryMethodDesc: 'UPS Ground', sDeliveryDesc: 'UPS Ground' },
+  { lDeliveryMethodKey: 4, sDeliveryMethodDesc: 'TSI Courier', sDeliveryDesc: 'TSI Courier' },
+  { lDeliveryMethodKey: 5, sDeliveryMethodDesc: 'Client Pickup', sDeliveryDesc: 'Client Pickup' },
 ]);
 
 // ── Patient Safety Levels ───────────────────────────────
@@ -812,91 +812,107 @@ console.log('[MockDB] Phase 2 seeded: ' +
 MockDB.seed('repairs', [
   { lRepairKey: 6601, lScopeKey: 1017, lDepartmentKey: 12, sWorkOrderNumber: 'NI26006601',
     sSerialNumber: '3801442', sScopeTypeDesc: 'GIF-H190', sClientName1: 'Tift Regional Medical Center', sDepartmentName: 'Endoscopy',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',
+    sShipName1: 'Tift Regional Medical Center', sShipName2: 'Endoscopy', sBillName1: 'Tift Regional Medical Center',
+    sManufacturer: 'Olympus', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',
     dtDateIn: '2026-03-05T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-06T00:00:00', dtReqSent: '2026-03-05T00:00:00',
     EstDelDate: '2026-03-14T00:00:00', DaysLastIn: 3,
     lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
     Approved: 485, dblAmtRepair: 650, sInvoiceNumber: '',
     ResponsibleTech: 'Rob', lTechnicianKey: 1, Note: 'Fluid invasion — distal end. Parts ordered from Olympus. ETA 03/12.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
-    lRepairReasonKey: 1, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0412' },
+    lRepairReasonKey: 1, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0412' },
 
   { lRepairKey: 6587, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006587',
     sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',
+    sShipName1: 'Nashville General Hospital', sShipName2: 'GI Lab', sBillName1: 'Nashville General Hospital',
+    sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',
     dtDateIn: '2026-03-04T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: '2026-03-05T00:00:00',
     EstDelDate: null, DaysLastIn: 4,
     lRepairStatusID: 3, sRepairStatus: 'Waiting for Approval', ProgBarStatus: 'Waiting for Approval',
     Approved: 0, dblAmtRepair: 1250, sInvoiceNumber: '',
     ResponsibleTech: '', lTechnicianKey: 0, Note: 'Angulation cable failure. Quote sent 03/05. Awaiting PO from client.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
-    lRepairReasonKey: 2, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+    lRepairReasonKey: 2, lRepairLevelKey: 3, lDeliveryMethodKey: 0, lContractKey: 0, sPurchaseOrder: '' },
 
   { lRepairKey: 6574, lScopeKey: 1019, lDepartmentKey: 10, sWorkOrderNumber: 'NI26006574',
     sSerialNumber: '3912087', sScopeTypeDesc: 'CF-HQ190L', sClientName1: '88th Medical Group', sDepartmentName: 'Biomedical Engineering',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Insertion tube kink damage. Mid-level repair in progress.',
+    sShipName1: '88th Medical Group', sShipName2: 'Biomedical Engineering', sBillName1: '88th Medical Group',
+    sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Insertion tube kink damage. Mid-level repair in progress.',
     dtDateIn: '2026-03-03T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-04T00:00:00', dtReqSent: '2026-03-03T00:00:00',
     EstDelDate: '2026-03-15T00:00:00', DaysLastIn: 5,
     lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
     Approved: 480, dblAmtRepair: 480, sInvoiceNumber: '',
     ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Insertion tube kink damage. Mid-level repair in progress.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
-    lRepairReasonKey: 3, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0398' },
+    lRepairReasonKey: 3, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0398' },
 
   { lRepairKey: 6541, lScopeKey: 1020, lDepartmentKey: 22, sWorkOrderNumber: 'NI26006541',
     sSerialNumber: '3615290', sScopeTypeDesc: 'BF-UC180F', sClientName1: 'Metro Health Hospital', sDepartmentName: 'Sterile Processing',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'CCD chip — no image. Part backordered.',
+    sShipName1: 'Metro Health Hospital', sShipName2: 'Sterile Processing', sBillName1: 'Metro Health Hospital',
+    sManufacturer: 'Olympus', sScopeCategory: 'Bronchoscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'CCD chip — no image. Part backordered.',
     dtDateIn: '2026-03-01T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: null,
     EstDelDate: null, DaysLastIn: 7,
     lRepairStatusID: 5, sRepairStatus: 'On Hold', ProgBarStatus: 'On Hold',
     Approved: 0, dblAmtRepair: 895, sInvoiceNumber: '',
     ResponsibleTech: '', lTechnicianKey: 0, Note: 'CCD chip — no image. Part backordered.',
     bHotList: true, IsCogentix: 0, VendorKey: 0, Diameter: '6.9',
-    lRepairReasonKey: 4, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+    lRepairReasonKey: 4, lRepairLevelKey: 3, lDeliveryMethodKey: 0, lContractKey: 0, sPurchaseOrder: '' },
 
   { lRepairKey: 6530, lScopeKey: 1021, lDepartmentKey: 19, sWorkOrderNumber: 'NI26006530',
     sSerialNumber: '4450188', sScopeTypeDesc: 'EG-760Z', sClientName1: 'Northside Hospital', sDepartmentName: 'Surgery',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Universal cord leak. Major repair.',
+    sShipName1: 'Northside Hospital', sShipName2: 'Surgery', sBillName1: 'Northside Hospital',
+    sManufacturer: 'Fujifilm', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Universal cord leak. Major repair.',
     dtDateIn: '2026-02-28T00:00:00', dtDateOut: null, dtAprRecvd: '2026-03-01T00:00:00', dtReqSent: '2026-02-28T00:00:00',
     EstDelDate: '2026-03-12T00:00:00', DaysLastIn: 8,
     lRepairStatusID: 4, sRepairStatus: 'In Repair', ProgBarStatus: 'In Repair',
     Approved: 640, dblAmtRepair: 640, sInvoiceNumber: '',
     ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Universal cord leak. Major repair.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
-    lRepairReasonKey: 6, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: 'PO-2026-0380' },
+    lRepairReasonKey: 6, lRepairLevelKey: 3, lDeliveryMethodKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0380' },
 
   { lRepairKey: 6445, lScopeKey: 1022, lDepartmentKey: 23, sWorkOrderNumber: 'NI26006445',
     sSerialNumber: '3290118', sScopeTypeDesc: 'CF-H185L', sClientName1: 'West Bozeman Surgery Center', sDepartmentName: 'Endoscopy',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Suction cylinder repair. QC complete.',
+    sShipName1: 'West Bozeman Surgery Center', sShipName2: 'Endoscopy', sBillName1: 'West Bozeman Surgery Center',
+    sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Suction cylinder repair. QC complete.',
     dtDateIn: '2026-02-20T00:00:00', dtDateOut: null, dtAprRecvd: '2026-02-21T00:00:00', dtReqSent: '2026-02-20T00:00:00',
     EstDelDate: '2026-03-07T00:00:00', DaysLastIn: 16,
     lRepairStatusID: 7, sRepairStatus: 'Ready to Ship', ProgBarStatus: 'Ready to Ship',
     Approved: 380, dblAmtRepair: 380, sInvoiceNumber: 'INV-26-0455',
     ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Suction cylinder repair. QC complete.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
-    lRepairReasonKey: 7, lRepairLevelKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0355' },
+    lRepairReasonKey: 7, lRepairLevelKey: 1, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0355' },
 
   { lRepairKey: 6398, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006398',
     sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Repair complete. Shipped via FedEx.',
+    sShipName1: 'Nashville General Hospital', sShipName2: 'GI Lab', sBillName1: 'Nashville General Hospital',
+    sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Repair complete. Shipped via FedEx.',
     dtDateIn: '2026-02-14T00:00:00', dtDateOut: '2026-03-04T00:00:00', dtAprRecvd: '2026-02-16T00:00:00', dtReqSent: '2026-02-14T00:00:00',
     EstDelDate: '2026-03-05T00:00:00', DaysLastIn: 22,
     lRepairStatusID: 8, sRepairStatus: 'Shipped', ProgBarStatus: 'Shipped',
     Approved: 620, dblAmtRepair: 620, sInvoiceNumber: 'INV-26-0430',
     ResponsibleTech: 'Tom', lTechnicianKey: 2, Note: 'Repair complete. Shipped via FedEx.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
-    lRepairReasonKey: 3, lRepairLevelKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0341' },
+    lRepairReasonKey: 3, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0341' },
 
   { lRepairKey: 6110, lScopeKey: 1023, lDepartmentKey: 20, sWorkOrderNumber: 'NI26006110',
     sSerialNumber: '3290405', sScopeTypeDesc: 'GIF-Q165', sClientName1: 'Coliseum Medical Center', sDepartmentName: 'GI Lab',
-    sRigidOrFlexible: 'F', sComplaintDesc: 'Client requested hold.',
+    sShipName1: 'Coliseum Medical Center', sShipName2: 'GI Lab', sBillName1: 'Coliseum Medical Center',
+    sManufacturer: 'Olympus', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
+    sComplaintDesc: 'Client requested hold.',
     dtDateIn: '2026-01-10T00:00:00', dtDateOut: null, dtAprRecvd: null, dtReqSent: null,
     EstDelDate: null, DaysLastIn: 57,
     lRepairStatusID: 5, sRepairStatus: 'On Hold', ProgBarStatus: 'On Hold',
     Approved: 0, dblAmtRepair: 1800, sInvoiceNumber: '',
     ResponsibleTech: '', lTechnicianKey: 0, Note: 'Client requested hold.',
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.2',
-    lRepairReasonKey: 10, lRepairLevelKey: 3, lContractKey: 0, sPurchaseOrder: '' },
+    lRepairReasonKey: 10, lRepairLevelKey: 3, lDeliveryMethodKey: 0, lContractKey: 0, sPurchaseOrder: '' },
 ]);
 
 // ── Repair Items (catalog entries) ──────────────────────
@@ -918,18 +934,18 @@ MockDB.seed('repairItems', [
 // ── Repair Details (line items per repair) ──────────────
 MockDB.seed('repairDetails', [
   // Repair 6601: Fluid invasion
-  { lRepairItemTranKey: 5001, lRepairKey: 6601, lRepairItemKey: 11, sItemDescription: 'Fluid Seal Kit', nRepairPrice: 40.00, sApproved: 'Y', bPrimary: true, mComment: '' },
-  { lRepairItemTranKey: 5002, lRepairKey: 6601, lRepairItemKey: 1, sItemDescription: 'Distal Tip Replacement', nRepairPrice: 285.00, sApproved: 'Y', bPrimary: false, mComment: '' },
-  { lRepairItemTranKey: 5003, lRepairKey: 6601, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  { lRepairItemTranKey: 5001, lRepairKey: 6601, lRepairItemKey: 11, sItemDescription: 'Fluid Seal Kit', nRepairPrice: 40.00, dblRepairPrice: 40.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+  { lRepairItemTranKey: 5002, lRepairKey: 6601, lRepairItemKey: 1, sItemDescription: 'Distal Tip Replacement', nRepairPrice: 285.00, dblRepairPrice: 285.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  { lRepairItemTranKey: 5003, lRepairKey: 6601, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, dblRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
   // Repair 6587: Angulation cable
-  { lRepairItemTranKey: 5004, lRepairKey: 6587, lRepairItemKey: 2, sItemDescription: 'Angulation Wire Repair', nRepairPrice: 850.00, sApproved: 'P', bPrimary: true, mComment: 'Both up/down cables' },
-  { lRepairItemTranKey: 5005, lRepairKey: 6587, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
+  { lRepairItemTranKey: 5004, lRepairKey: 6587, lRepairItemKey: 2, sItemDescription: 'Angulation Wire Repair', nRepairPrice: 850.00, dblRepairPrice: 850.00, sApproved: 'P', bPrimary: true, mComment: 'Both up/down cables' },
+  { lRepairItemTranKey: 5005, lRepairKey: 6587, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, dblRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: '' },
   // Repair 6574: Insertion tube
-  { lRepairItemTranKey: 5006, lRepairKey: 6574, lRepairItemKey: 3, sItemDescription: 'Insertion Tube Replacement', nRepairPrice: 480.00, sApproved: 'Y', bPrimary: true, mComment: 'Kink at 60cm mark' },
+  { lRepairItemTranKey: 5006, lRepairKey: 6574, lRepairItemKey: 3, sItemDescription: 'Insertion Tube Replacement', nRepairPrice: 480.00, dblRepairPrice: 480.00, sApproved: 'Y', bPrimary: true, mComment: 'Kink at 60cm mark' },
   // Repair 6530: Universal cord
-  { lRepairItemTranKey: 5007, lRepairKey: 6530, lRepairItemKey: 6, sItemDescription: 'Universal Cord Repair', nRepairPrice: 640.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+  { lRepairItemTranKey: 5007, lRepairKey: 6530, lRepairItemKey: 6, sItemDescription: 'Universal Cord Repair', nRepairPrice: 640.00, dblRepairPrice: 640.00, sApproved: 'Y', bPrimary: true, mComment: '' },
   // Repair 6445: Suction cylinder
-  { lRepairItemTranKey: 5008, lRepairKey: 6445, lRepairItemKey: 7, sItemDescription: 'Suction Cylinder', nRepairPrice: 380.00, sApproved: 'Y', bPrimary: true, mComment: '' },
+  { lRepairItemTranKey: 5008, lRepairKey: 6445, lRepairItemKey: 7, sItemDescription: 'Suction Cylinder', nRepairPrice: 380.00, dblRepairPrice: 380.00, sApproved: 'Y', bPrimary: true, mComment: '' },
 ]);
 
 // ── Contracts (12 — matching contracts.html demo) ───────
