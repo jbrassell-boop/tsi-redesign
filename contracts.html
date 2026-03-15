@@ -1931,7 +1931,14 @@ async function loadContracts() {
     }
 
     if (list.length > 0) {
-      contracts = list;
+      // Normalize API field names (sContractName1 → sContractName, etc.)
+      contracts = list.map(c => ({
+        ...c,
+        sContractName:  c.sContractName  || c.sContractName1  || '',
+        dtEndDate:      c.dtEndDate      || c.dtDateTermination || '',
+        dtStartDate:    c.dtStartDate    || c.dtDateEffective   || '',
+        dblAnnualValue: c.dblAnnualValue ?? c.dblAmtTotal       ?? 0
+      }));
       DATA_SOURCE = 'api';
       console.log('[Contracts] Loaded ' + contracts.length + ' contracts from API');
     } else {
