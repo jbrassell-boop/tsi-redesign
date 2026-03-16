@@ -1060,3 +1060,45 @@ console.log('[MockDB] Phase 3 seeded: ' +
   MockDB.getAll('suppliers').length + ' suppliers, ' +
   MockDB.getAll('invoices').length + ' invoices'
 );
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 4: Loaners
+// ═══════════════════════════════════════════════════════
+
+// ── Loaner Scopes (flag existing scopes + add TSI-owned loaners) ──
+(function seedLoanerScopes() {
+  const scopes = MockDB.getAll('scopes');
+  // Flag a few existing scopes as loaners
+  [1001, 1002, 1003].forEach(key => {
+    const s = scopes.find(r => r.lScopeKey === key);
+    if (s) { s.bOnSiteLoaner = true; s.pbOnSiteLoaner = true; s.psLoanerRackPosition = 'A-' + (key - 1000); }
+  });
+  // Add TSI-owned loaner pool scopes
+  const loanerPool = [
+    { lScopeKey: 2001, lScopeTypeKey: 1001, sSerialNumber: 'LOAN-001', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'A-1', sScopeTypeDesc: 'Olympus GIF-H180',  sClientName1: 'Memorial Hospital',       sDepartmentName: 'Endoscopy',   lDepartmentKey: 26 },
+    { lScopeKey: 2002, lScopeTypeKey: 1002, sSerialNumber: 'LOAN-002', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'A-2', sScopeTypeDesc: 'Olympus CF-HQ190',  sClientName1: 'City General Medical',    sDepartmentName: 'GI Lab',      lDepartmentKey: 12 },
+    { lScopeKey: 2003, lScopeTypeKey: 1020, sSerialNumber: 'LOAN-003', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'B-1', sScopeTypeDesc: 'Olympus BF-P290',   sClientName1: 'Regional Medical Center', sDepartmentName: 'Pulmonology', lDepartmentKey: 16 },
+    { lScopeKey: 2004, lScopeTypeKey: 1003, sSerialNumber: 'LOAN-004', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'C-3', sScopeTypeDesc: 'Olympus GIF-H190',  sClientName1: '',                        sDepartmentName: '',            lDepartmentKey: 0 },
+    { lScopeKey: 2005, lScopeTypeKey: 1013, sSerialNumber: 'LOAN-005', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'B-4', sScopeTypeDesc: 'Olympus PCF-H190',  sClientName1: '',                        sDepartmentName: '',            lDepartmentKey: 0 },
+    { lScopeKey: 2006, lScopeTypeKey: 1010, sSerialNumber: 'LOAN-006', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'D-1', sScopeTypeDesc: 'Olympus CF-HQ190L', sClientName1: '',                        sDepartmentName: '',            lDepartmentKey: 0 },
+    { lScopeKey: 2007, lScopeTypeKey: 1022, sSerialNumber: 'LOAN-007', sRigidOrFlexible: 'F', sScopeIsDead: 'N', bOnSiteLoaner: true, pbOnSiteLoaner: true, psLoanerRackPosition: 'D-2', sScopeTypeDesc: 'Olympus BF-1TH190', sClientName1: '',                        sDepartmentName: '',            lDepartmentKey: 0 },
+  ];
+  loanerPool.forEach(s => MockDB.insert('scopes', s));
+})();
+
+// ── Task Loaners (8 records — mix of Out, Returned, Overdue) ──
+MockDB.seed('taskLoaners', [
+  { lTaskLoanerKey: 1, lTaskKey: 6601, sTaskNumber: 'NI26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Memorial Hospital',       psLoanerRackPosition: 'A-1', sStatus: 'Out',      dtLoanerOut: '2026-03-01T00:00:00', dtExpectedReturn: '2026-03-20T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 2, lTaskKey: 6602, sTaskNumber: 'NI26006602', lScopeTypeKey: 1002, sScopeTypeDesc: 'Olympus CF-HQ190',  sSerialNumber: 'LOAN-002', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'City General Medical',    psLoanerRackPosition: 'A-2', sStatus: 'Out',      dtLoanerOut: '2026-03-04T00:00:00', dtExpectedReturn: '2026-03-18T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 3, lTaskKey: 6603, sTaskNumber: 'NI26006603', lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290',   sSerialNumber: 'LOAN-003', lQuantity: 2, sDepartmentName: 'Pulmonology', sClientName: 'Regional Medical Center', psLoanerRackPosition: 'B-1', sStatus: 'Out',      dtLoanerOut: '2026-02-20T00:00:00', dtExpectedReturn: '2026-03-10T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 4, lTaskKey: 6604, sTaskNumber: 'NI26006604', lScopeTypeKey: 1003, sScopeTypeDesc: 'Olympus GIF-H190',  sSerialNumber: 'LOAN-004', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Tift Regional Medical Center', psLoanerRackPosition: 'C-3', sStatus: 'Returned', dtLoanerOut: '2026-02-10T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: '2026-02-26T00:00:00' },
+  { lTaskLoanerKey: 5, lTaskKey: 6605, sTaskNumber: 'NI26006605', lScopeTypeKey: 1013, sScopeTypeDesc: 'Olympus PCF-H190',  sSerialNumber: 'LOAN-005', lQuantity: 1, sDepartmentName: 'Surgery',     sClientName: 'Northside Hospital',      psLoanerRackPosition: 'B-4', sStatus: 'Returned', dtLoanerOut: '2026-01-15T00:00:00', dtExpectedReturn: '2026-02-15T00:00:00', dtActualReturn: '2026-02-12T00:00:00' },
+  { lTaskLoanerKey: 6, lTaskKey: 6606, sTaskNumber: 'NI26006606', lScopeTypeKey: 1010, sScopeTypeDesc: 'Olympus CF-HQ190L', sSerialNumber: 'LOAN-006', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'Nashville General Hospital', psLoanerRackPosition: 'D-1', sStatus: 'Out',   dtLoanerOut: '2026-02-01T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 7, lTaskKey: 6607, sTaskNumber: 'NI26006607', lScopeTypeKey: 1022, sScopeTypeDesc: 'Olympus BF-1TH190', sSerialNumber: 'LOAN-007', lQuantity: 1, sDepartmentName: 'Pulmonology', sClientName: 'Metro Health Hospital',   psLoanerRackPosition: 'D-2', sStatus: 'Out',   dtLoanerOut: '2026-01-20T00:00:00', dtExpectedReturn: '2026-02-20T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 8, lTaskKey: 6601, sTaskNumber: 'NI26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Sterile Processing', sClientName: 'Metro Health Hospital', psLoanerRackPosition: 'A-1', sStatus: 'Returned', dtLoanerOut: '2026-01-05T00:00:00', dtExpectedReturn: '2026-01-25T00:00:00', dtActualReturn: '2026-01-22T00:00:00' },
+]);
+
+console.log('[MockDB] Phase 4 seeded: ' +
+  MockDB.getAll('taskLoaners').length + ' task loaners, ' +
+  MockDB.getAll('scopes').filter(s => s.pbOnSiteLoaner || s.bOnSiteLoaner).length + ' loaner scopes'
+);

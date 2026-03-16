@@ -9,18 +9,11 @@
     /* PAGE BODY — flex column */
     .page-body{display:flex;flex-direction:column;overflow:hidden}
 
-    /* BREADCRUMB */
-    .breadcrumb{display:flex;align-items:center;gap:8px;padding:10px 16px 0;flex-shrink:0}
-    .bc-root{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
-    .sep{color:var(--border)}
-    .bc-page{font-size:13px;font-weight:700;color:var(--navy)}
-
-    /* STAT STRIP — overrides only (base in styles.css) */
-    .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
-    .stat-chip{flex:1;padding:10px 16px;cursor:default;transition:background .1s}
-    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
-    .stat-chip .s-val{font-size:16px}
-    .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.4px}
+    /* STAT STRIP — clickable KPI chips (overrides only — base in styles.css) */
+    .stat-chip{flex:1;cursor:pointer;transition:background .12s,outline-color .12s;position:relative}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#ECFEFF}
+    .s-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* SUBNAV */
     .subnav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:2px solid var(--border);padding:0 14px;flex-shrink:0;overflow-x:auto}
@@ -48,7 +41,7 @@
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:800px}
+    table{width:100%;border-collapse:collapse;min-width:900px}
     thead{position:sticky;top:0;z-index:2}
     th{background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);letter-spacing:.3px;user-select:none;text-transform:uppercase}
     th:last-child{border-right:none}
@@ -58,22 +51,35 @@
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .badge-out{background:#FEF9F9;color:#C62828;border:1px solid #EF9A9A}
+    .badge-out{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
     .badge-returned{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
-    .badge-reserved{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .badge-overdue{background:#FEF2F2;color:#C62828;border:1px solid #EF9A9A}
+    .badge-reserved{background:#F3E8FF;color:#7C3AED;border:1px solid #C4B5FD}
     .badge-available{background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB}
     .badge-loaner{background:#FFFBEB;color:#B45309;border:1px solid #FDE68A}
+
+    /* DAYS OUT CHIP */
+    .days-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace;letter-spacing:.3px}
+    .days-ok{background:#E8F5E9;color:#2E7D32}
+    .days-warn{background:#FFFBEB;color:#92400E}
+    .days-over{background:#FEF2F2;color:#C62828}
 
     /* ACTION BUTTONS */
     .row-action{width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all .1s}
     .row-action:hover{background:var(--bg);color:var(--navy)}
     .row-action.danger:hover{color:var(--red);background:#FEF2F2}
     .row-action svg{width:14px;height:14px}
+    .del-btn{background:#FEE2E2;border:1px solid #FECACA;color:var(--red);border-radius:5px;padding:2px 8px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+    .del-btn:hover{background:#FCA5A5;color:#fff}
 
     /* TABLE FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .record-info{font-size:11px;color:var(--muted)}
     .record-info strong{color:var(--text)}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:30px 16px;color:var(--muted)}
+    .empty-state svg{width:28px;height:28px;opacity:.25;margin-bottom:6px}
 
     /* RACK POSITION CHIP */
     .rack-chip{display:inline-block;background:#ECF4F5;color:var(--navy);border:1px solid var(--border-dk);border-radius:4px;font-size:10px;font-weight:700;padding:1px 7px;letter-spacing:.5px;font-family:monospace}
@@ -81,11 +87,11 @@
     /* DRAWER */
     .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
     .drawer-overlay.open{opacity:1;pointer-events:auto}
-    .drawer{position:fixed;top:0;right:0;width:440px;height:100vh;background:var(--card);z-index:51;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
-    .drawer.open{transform:translateX(0)}
+    .drawer{position:fixed;top:0;right:0;width:440px;height:100vh;background:var(--card);z-index:51;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+    .drawer.open{transform:translateX(0);box-shadow:-8px 0 30px rgba(0,0,0,.15)}
     .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);flex-shrink:0}
     .drawer-header h3{font-size:14px;font-weight:700;color:#fff;margin:0}
-    .drawer-close{width:28px;height:28px;border:1px solid rgba(255,255,255,.4);background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;transition:all .1s}
+    .drawer-close{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:28px;padding:0 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all .1s}
     .drawer-close:hover{background:rgba(255,255,255,.15)}
     .drawer-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
     .field{display:flex;flex-direction:column;gap:3px}
@@ -165,8 +171,8 @@
           <div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:2px solid var(--border);transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>Find / Open Repair<div style="font-size:10px;color:var(--muted);font-weight:400">Search open work orders</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');window.location='repairs?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Repair Order<div style="font-size:10px;color:var(--muted);font-weight:400">New scope repair work order</div></div></a>
-                        <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='instruments?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div></a>
-<a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('product-sale','New Product Sale','sale')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');location='instruments?action=new'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><div>Instrument Repair<div style="font-size:10px;color:var(--muted);font-weight:400">New rigid/surgical instrument order</div></div></a>
+            <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('product-sale','New Product Sale','sale')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid #f0f2f5;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><div>Product Sale<div style="font-size:10px;color:var(--muted);font-weight:400">New product sale order</div></div></a>
             <a onclick="document.getElementById('newOrderMenu').classList.remove('open');openNewOrderWizard('endocarts','New Endocart Order','endocart')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);text-decoration:none;transition:background .1s" onmouseover="this.style.background='#ECFEFF'" onmouseout="this.style.background=''"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="11" x2="12" y2="15"/></svg><div>Endocart Order<div style="font-size:10px;color:var(--muted);font-weight:400">New endoscopy cart order</div></div></a>
           </div>
         </div>
@@ -184,34 +190,31 @@
     <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- BREADCRUMB -->
-      <div class="breadcrumb"><span class="bc-root">TSI</span><span class="sep">›</span><span class="bc-page">Loaners</span></div>
-
-      <!-- STAT STRIP -->
+      <!-- STAT STRIP — clickable KPI filters -->
       <div class="stat-strip">
-        <div class="stat-chip s-navy">
+        <div class="stat-chip s-navy active-chip" id="kpiTotal" onclick="chipFilter('')">
           <span class="s-icon" style="background:#E8EDF5"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statRequests">31</span><span class="s-lbl">MTD Requests</span></span>
+          <span class="s-data"><span class="s-val" id="statTotal">0</span><span class="s-lbl">Total</span></span>
         </div>
-        <div class="stat-chip s-green">
+        <div class="stat-chip s-blue" id="kpiOut" onclick="chipFilter('Out')">
+          <span class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10 2l4 4-4 4"/><path d="M2 8h12"/></svg></span>
+          <span class="s-data"><span class="s-val" id="statOut">0</span><span class="s-lbl">Out</span></span>
+        </div>
+        <div class="stat-chip s-red" id="kpiOverdue" onclick="chipFilter('Overdue')">
+          <span class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.5l2.5 1.5"/></svg></span>
+          <span class="s-data"><span class="s-val" id="statOverdue">0</span><span class="s-lbl">Overdue</span></span>
+        </div>
+        <div class="stat-chip s-green" id="kpiReturned" onclick="chipFilter('Returned')">
           <span class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statFulfilled">19</span><span class="s-lbl">Fulfilled</span></span>
+          <span class="s-data"><span class="s-val" id="statReturned">0</span><span class="s-lbl">Returned</span></span>
         </div>
-        <div class="stat-chip s-green">
+        <div class="stat-chip s-amber" id="kpiPool" onclick="chipFilter('')">
+          <span class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="5" width="12" height="8" rx="1.5"/><path d="M5 5V3.5a3 3 0 0 1 6 0V5"/></svg></span>
+          <span class="s-data"><span class="s-val" id="statPool">0</span><span class="s-lbl">Loaner Pool</span></span>
+        </div>
+        <div class="stat-chip s-green" id="kpiAvailable" onclick="chipFilter('')">
           <span class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statFillRate">67%</span><span class="s-lbl">Fill Rate</span></span>
-        </div>
-        <div class="stat-chip s-red">
-          <span class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><path d="M10 6L6 10M6 6l4 4"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statDeclined">2</span><span class="s-lbl">Declined</span></span>
-        </div>
-        <div class="stat-chip s-amber">
-          <span class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M8 2L1.5 13h13L8 2z"/><path d="M8 7v3M8 11.5v.5"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statUnable">4</span><span class="s-lbl">Unable to Fill</span></span>
-        </div>
-        <div class="stat-chip s-blue">
-          <span class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M8 3v5l3 3"/><circle cx="8" cy="8" r="5.5"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statInProcess">2</span><span class="s-lbl">In Process</span></span>
+          <span class="s-data"><span class="s-val" id="statAvailable">0</span><span class="s-lbl">Available</span></span>
         </div>
       </div>
 
@@ -223,15 +226,16 @@
 
       <!-- TOOLBAR -->
       <div class="toolbar" id="toolbar">
-        <div class="filter-group" id="taskFilters">
+        <div class="filter-group" id="statusFilterGroup">
           <span class="filter-label">Status</span>
-          <div class="seg-group" id="taskStatusFilter">
+          <div class="seg-group" id="statusFilter">
             <button class="seg-btn active" data-status="All">All</button>
             <button class="seg-btn" data-status="Out">Out</button>
+            <button class="seg-btn" data-status="Overdue">Overdue</button>
             <button class="seg-btn" data-status="Returned">Returned</button>
           </div>
         </div>
-        <div class="filter-sep" id="taskFilterSep"></div>
+        <div class="filter-sep" id="filterSep"></div>
         <div class="toolbar-search">
           <input class="search-input" id="searchInput" type="text" placeholder="Search loaners…"/>
         </div>
@@ -246,18 +250,7 @@
       <!-- DATA TABLE -->
       <div class="table-wrap">
         <table>
-          <thead id="tableHead">
-            <tr id="taskHead">
-              <th style="width:120px">Task #</th>
-              <th style="width:20%">Scope Type / Model</th>
-              <th style="width:110px">Serial #</th>
-              <th style="width:50px;text-align:center">Qty</th>
-              <th style="width:18%">Department</th>
-              <th style="width:20%">Client</th>
-              <th style="width:80px;text-align:center">Rack Pos.</th>
-              <th style="width:60px;text-align:center">Actions</th>
-            </tr>
-          </thead>
+          <thead id="tableHead"></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
@@ -279,15 +272,15 @@
 <div class="drawer" id="loanerDrawer">
   <div class="drawer-header">
     <h3 id="drawerTitle">Log Task Loaner</h3>
-    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+    <button class="drawer-close" onclick="closeDrawer()">&times; Close</button>
   </div>
   <div class="drawer-body">
     <input type="hidden" id="editKey" value=""/>
     <div class="field-row">
-      <div class="field" id="fTaskKey">
-        <label>Task Key</label>
-        <input type="number" id="loanerTaskKey" placeholder="Task ID…" min="1"/>
-        <span class="field-error">Task key is required</span>
+      <div class="field" id="fTaskNumber">
+        <label>Work Order #</label>
+        <input type="text" id="loanerTaskNumber" placeholder="NI26006601…"/>
+        <span class="field-error">Work order is required</span>
       </div>
       <div class="field" id="fQty">
         <label>Quantity</label>
@@ -302,12 +295,31 @@
       </select>
       <span class="field-error">Scope type is required</span>
     </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Serial Number</label>
+        <input type="text" id="loanerSerial" placeholder="Auto-populated…" readonly style="background:#F7F8FC"/>
+      </div>
+      <div class="field">
+        <label>Rack Position</label>
+        <input type="text" id="loanerRack" placeholder="e.g. A-1" readonly style="background:#F7F8FC"/>
+      </div>
+    </div>
+    <div class="field" id="fStatus">
+      <label>Status</label>
+      <select id="loanerStatus">
+        <option value="Out">Out</option>
+        <option value="Returned">Returned</option>
+        <option value="Reserved">Reserved</option>
+      </select>
+    </div>
     <div style="font-size:10px;color:var(--muted);margin-top:-8px">
       If the model you need is not listed, it may not be flagged as a loaner scope. Contact your administrator.
     </div>
   </div>
   <div class="drawer-footer">
-    <button class="btn-save" onclick="saveLoaner()">Close</button>
+    <button class="btn-cancel" onclick="closeDrawer()">Cancel</button>
+    <button class="btn-save" onclick="saveLoaner()">Save</button>
   </div>
 </div>
 
@@ -315,11 +327,10 @@
 <div class="drawer" id="detailDrawer">
   <div class="drawer-header">
     <h3 id="detailTitle">Loaner Detail</h3>
-    <button class="drawer-close" onclick="closeDetailDrawer()">&times;</button>
+    <button class="drawer-close" onclick="closeDetailDrawer()">&times; Close</button>
   </div>
   <div class="drawer-body" id="detailBody"></div>
   <div class="drawer-footer">
-    <button class="btn-cancel" onclick="closeDetailDrawer()">Close</button>
     <button class="btn-save" id="btnDetailEdit" onclick="openEditFromDetail()" style="display:none">Edit</button>
   </div>
 </div>
@@ -332,35 +343,15 @@
 if (!API.requireAuth()) throw new Error('redirect');
 
 // ═══════════════════════════════════════════════════════
-//  DEMO DATA
-// ═══════════════════════════════════════════════════════
-const demoTaskLoaners = [
-  {plTaskScopeTypeKey:1, plTaskKey:101, sTaskNumber:'TASK-2024-0101', plScopeTypeKey:50, sScopeTypeDesc:'Olympus GIF-H180', sSerialNumber:'LOAN-001', plQuantity:1, sDepartmentName:'Endoscopy', sClientName:'Memorial Hospital', psLoanerRackPosition:'A-1', _status:'Out'},
-  {plTaskScopeTypeKey:2, plTaskKey:102, sTaskNumber:'TASK-2024-0102', plScopeTypeKey:51, sScopeTypeDesc:'Olympus CF-HQ190', sSerialNumber:'LOAN-002', plQuantity:1, sDepartmentName:'GI Lab', sClientName:'City General', psLoanerRackPosition:'A-2', _status:'Out'},
-  {plTaskScopeTypeKey:3, plTaskKey:103, sTaskNumber:'TASK-2024-0103', plScopeTypeKey:52, sScopeTypeDesc:'Olympus BF-P290', sSerialNumber:'LOAN-003', plQuantity:2, sDepartmentName:'Pulmonology', sClientName:'Regional Medical', psLoanerRackPosition:'B-1', _status:'Out'},
-  {plTaskScopeTypeKey:4, plTaskKey:98,  sTaskNumber:'TASK-2024-0098', plScopeTypeKey:49, sScopeTypeDesc:'Olympus GIF-Q165', sSerialNumber:'LOAN-004', plQuantity:1, sDepartmentName:'Surgery',    sClientName:'Metro Health Hospital', psLoanerRackPosition:'C-3', _status:'Returned'},
-  {plTaskScopeTypeKey:5, plTaskKey:95,  sTaskNumber:'TASK-2024-0095', plScopeTypeKey:48, sScopeTypeDesc:'Olympus PCF-H190L', sSerialNumber:'LOAN-005', plQuantity:1, sDepartmentName:'Endoscopy',  sClientName:'Northside Hospital', psLoanerRackPosition:'B-4', _status:'Returned'},
-];
-
-const demoActiveLoaners = [
-  {lScopeKey:1001, sSerialNumber:'LOAN-001', sScopeTypeDesc:'Olympus GIF-H180',  sDepartmentName:'Endoscopy',  sClientName:'Memorial Hospital',    psLoanerRackPosition:'A-1', pbOnSiteLoaner:true},
-  {lScopeKey:1002, sSerialNumber:'LOAN-002', sScopeTypeDesc:'Olympus CF-HQ190',  sDepartmentName:'GI Lab',     sClientName:'City General',          psLoanerRackPosition:'A-2', pbOnSiteLoaner:true},
-  {lScopeKey:1003, sSerialNumber:'LOAN-003', sScopeTypeDesc:'Olympus BF-P290',   sDepartmentName:'Pulmonology', sClientName:'Regional Medical',     psLoanerRackPosition:'B-1', pbOnSiteLoaner:true},
-  {lScopeKey:1004, sSerialNumber:'LOAN-004', sScopeTypeDesc:'Olympus GIF-Q165',  sDepartmentName:'Surgery',    sClientName:'Metro Health Hospital',  psLoanerRackPosition:'C-3', pbOnSiteLoaner:true},
-  {lScopeKey:1005, sSerialNumber:'LOAN-005', sScopeTypeDesc:'Olympus PCF-H190L', sDepartmentName:'Endoscopy',  sClientName:'Northside Hospital',     psLoanerRackPosition:'B-4', pbOnSiteLoaner:true},
-  {lScopeKey:1006, sSerialNumber:'LOAN-006', sScopeTypeDesc:'Olympus GIF-XP190N', sDepartmentName:'',          sClientName:'',                       psLoanerRackPosition:'D-1', pbOnSiteLoaner:true},
-  {lScopeKey:1007, sSerialNumber:'LOAN-007', sScopeTypeDesc:'Olympus CF-HQ190I', sDepartmentName:'',           sClientName:'',                       psLoanerRackPosition:'D-2', pbOnSiteLoaner:true},
-];
-
-// ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
 let activeTab = 'task';
 let taskRows = [];
 let activeRows = [];
-let scopeTypeOptions = []; // from API or fallback
+let scopeTypeOptions = [];
 let isDemo = false;
-let taskStatusFilter = 'All';
+let statusFilter = 'All';
+let chipFilterStatus = '';   // from stat chip clicks
 let searchTerm = '';
 let currentDetailRow = null;
 let searchTimer = null;
@@ -381,11 +372,44 @@ function unwrap(data) {
   return [];
 }
 
+function computeStatus(r) {
+  // If already returned, keep it
+  if (r.sStatus === 'Returned' || r.dtActualReturn) return 'Returned';
+  if (r.sStatus === 'Reserved') return 'Reserved';
+  // Check overdue: past expected return and still out
+  if (r.dtExpectedReturn) {
+    const exp = new Date(r.dtExpectedReturn);
+    const now = new Date();
+    if (now > exp) return 'Overdue';
+  }
+  return 'Out';
+}
+
+function daysOut(r) {
+  if (!r.dtLoanerOut) return null;
+  const start = new Date(r.dtLoanerOut);
+  const end = r.dtActualReturn ? new Date(r.dtActualReturn) : new Date();
+  return Math.max(0, Math.floor((end - start) / 86400000));
+}
+
+function daysChip(r) {
+  const d = daysOut(r);
+  if (d == null) return '<span style="color:var(--muted)">—</span>';
+  const status = r._status || computeStatus(r);
+  let cls = 'days-ok';
+  if (status === 'Overdue') cls = 'days-over';
+  else if (d >= 14) cls = 'days-warn';
+  return '<span class="days-chip ' + cls + '">' + d + 'd</span>';
+}
+
 function statusBadge(s) {
-  if (!s || s === 'Out') return '<span class="badge badge-out">Out</span>';
-  if (s === 'Returned')  return '<span class="badge badge-returned">Returned</span>';
-  if (s === 'Reserved')  return '<span class="badge badge-reserved">Reserved</span>';
-  return '<span class="badge badge-available">Available</span>';
+  const map = {
+    'Out':      'badge-out',
+    'Overdue':  'badge-overdue',
+    'Returned': 'badge-returned',
+    'Reserved': 'badge-reserved',
+  };
+  return '<span class="badge ' + (map[s] || 'badge-available') + '">' + esc(s || 'Available') + '</span>';
 }
 
 function loanerBadge() {
@@ -397,51 +421,70 @@ function rackChip(pos) {
   return '<span class="rack-chip">' + esc(pos) + '</span>';
 }
 
+function fmtDate(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+}
+
 // ═══════════════════════════════════════════════════════
-//  STAT STRIP
+//  STAT STRIP — computed from data
 // ═══════════════════════════════════════════════════════
 function updateStats() {
-  // Loaner fulfillment metrics (demo data — will be API-wired later)
-  const totalRequests = 31;
-  const fulfilled     = 19;
-  const fillRate      = Math.round((fulfilled / totalRequests) * 100);
-  const declined      = 2;
-  const unable        = 4;
-  const inProcess     = 2;
+  const total    = taskRows.length;
+  const out      = taskRows.filter(r => r._status === 'Out').length;
+  const overdue  = taskRows.filter(r => r._status === 'Overdue').length;
+  const returned = taskRows.filter(r => r._status === 'Returned').length;
+  const pool     = activeRows.length;
+  const assigned = activeRows.filter(r => r.sClientName || r.sDepartmentName).length;
+  const avail    = pool - assigned;
 
-  document.getElementById('statRequests').textContent  = totalRequests;
-  document.getElementById('statFulfilled').textContent = fulfilled;
-  document.getElementById('statFillRate').textContent  = fillRate + '%';
-  document.getElementById('statDeclined').textContent  = declined;
-  document.getElementById('statUnable').textContent    = unable;
-  document.getElementById('statInProcess').textContent = inProcess;
+  document.getElementById('statTotal').textContent    = total;
+  document.getElementById('statOut').textContent       = out;
+  document.getElementById('statOverdue').textContent   = overdue;
+  document.getElementById('statReturned').textContent  = returned;
+  document.getElementById('statPool').textContent      = pool;
+  document.getElementById('statAvailable').textContent = avail;
 }
+
+// ═══════════════════════════════════════════════════════
+//  CHIP FILTER — clicking stat chips filters the table
+// ═══════════════════════════════════════════════════════
+function chipFilter(status) {
+  chipFilterStatus = status;
+  // Update active chip highlight
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  if (!status) {
+    document.getElementById('kpiTotal').classList.add('active-chip');
+  } else {
+    const id = 'kpi' + status;
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active-chip');
+  }
+  // Sync the toolbar segmented filter
+  const segBtns = document.querySelectorAll('#statusFilter .seg-btn');
+  segBtns.forEach(b => b.classList.remove('active'));
+  const match = [...segBtns].find(b => (b.dataset.status === status) || (!status && b.dataset.status === 'All'));
+  if (match) match.classList.add('active');
+  statusFilter = status || 'All';
+
+  if (activeTab === 'task') renderTaskLoaners();
+  else renderActiveLoaners();
+}
+window.chipFilter = chipFilter;
 
 // ═══════════════════════════════════════════════════════
 //  SCOPE TYPE OPTIONS (for Add/Edit drawer)
 // ═══════════════════════════════════════════════════════
 async function loadScopeTypeOptions() {
   try {
-    // GetAllScopes with no dept key returns all scopes — filter to loaners
     const data = await API.getAllScopes(0);
     const raw  = unwrap(data);
-    // Filter to loaner scopes (pbOnSiteLoaner) — use any available field name
-    const loaners = raw.filter(r => r.pbOnSiteLoaner || r.pbLoaner || r.bLoaner);
-    if (loaners.length) {
-      scopeTypeOptions = loaners;
-    } else {
-      // If no loaner flag returned, show all as fallback
-      scopeTypeOptions = raw.slice(0, 200);
-    }
+    const loaners = raw.filter(r => r.pbOnSiteLoaner || r.bOnSiteLoaner || r.pbLoaner || r.bLoaner);
+    scopeTypeOptions = loaners.length ? loaners : raw.slice(0, 200);
   } catch (e) {
     console.warn('[TSI Loaners] Could not load scope types:', e.message);
-    // Fallback to demo scope types
-    scopeTypeOptions = demoActiveLoaners.map(r => ({
-      lScopeKey: r.lScopeKey,
-      plScopeTypeKey: r.lScopeKey,
-      sScopeTypeDesc: r.sScopeTypeDesc,
-      sSerialNumber: r.sSerialNumber,
-    }));
+    scopeTypeOptions = [];
   }
 
   const sel = document.getElementById('loanerScopeType');
@@ -450,35 +493,43 @@ async function loadScopeTypeOptions() {
     const key  = r.plScopeTypeKey || r.lScopeTypeKey || r.lScopeKey || 0;
     const desc = r.sScopeTypeDesc || r.sScopeType || r.sSerialNumber || '';
     const sn   = r.sSerialNumber ? ' (' + r.sSerialNumber + ')' : '';
-    sel.innerHTML += '<option value="' + key + '">' + esc(desc + sn) + '</option>';
+    sel.innerHTML += '<option value="' + key + '" data-serial="' + esc(r.sSerialNumber || '') + '" data-rack="' + esc(r.psLoanerRackPosition || '') + '">' + esc(desc + sn) + '</option>';
   });
 }
+
+// Auto-populate serial & rack when scope type changes
+document.getElementById('loanerScopeType').addEventListener('change', function() {
+  const opt = this.options[this.selectedIndex];
+  document.getElementById('loanerSerial').value = opt ? (opt.dataset.serial || '') : '';
+  document.getElementById('loanerRack').value   = opt ? (opt.dataset.rack || '') : '';
+});
 
 // ═══════════════════════════════════════════════════════
 //  LOAD — TASK LOANERS
 // ═══════════════════════════════════════════════════════
 async function loadTaskLoaners() {
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
   try {
     const data = await API.getTaskLoaners(0, 0);
     const raw  = unwrap(data);
-    // Normalize API field names (API returns lTaskKey, lScopeTypeKey without p-prefix)
-    // Also synthesize sTaskNumber from lTaskKey since list endpoint doesn't include it
     taskRows = raw.map(r => ({
       ...r,
       plTaskKey:       r.plTaskKey       ?? r.lTaskKey       ?? 0,
       plScopeTypeKey:  r.plScopeTypeKey  ?? r.lScopeTypeKey  ?? 0,
       plQuantity:      r.plQuantity      ?? r.lQuantity       ?? 1,
+      lTaskLoanerKey:  r.lTaskLoanerKey  ?? r.plTaskScopeTypeKey ?? 0,
       sTaskNumber:     r.sTaskNumber     || (r.lTaskKey ? 'Task-' + r.lTaskKey : null) || null,
-      _status: r.sStatus || r.sLoanerStatus || 'Out',
+      sStatus:         r.sStatus         || r.sLoanerStatus || 'Out',
     }));
+    // Compute effective status (overdue detection)
+    taskRows.forEach(r => { r._status = computeStatus(r); });
     isDemo = false;
     API.UI.updateDemoBadge('api');
     console.log('[TSI Loaners] Loaded', taskRows.length, 'task loaners from API');
   } catch (e) {
     console.warn('[TSI Loaners] API unavailable, using demo data:', e.message);
-    taskRows = demoTaskLoaners;
+    taskRows = [];
     isDemo = true;
     API.UI.updateDemoBadge('demo');
   }
@@ -491,14 +542,12 @@ async function loadTaskLoaners() {
 // ═══════════════════════════════════════════════════════
 async function loadActiveLoaners() {
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>';
   try {
     const data = await API.getAllScopes(0);
     const raw  = unwrap(data);
-    // Filter to loaner-flagged scopes
-    activeRows = raw.filter(r => r.pbOnSiteLoaner || r.pbLoaner || r.bLoaner);
+    activeRows = raw.filter(r => r.pbOnSiteLoaner || r.bOnSiteLoaner || r.pbLoaner || r.bLoaner);
     if (!activeRows.length) {
-      // If flag not present in response, show all — could be a schema variant
       activeRows = raw.filter(r => r.psLoanerRackPosition);
     }
     isDemo = false;
@@ -506,7 +555,7 @@ async function loadActiveLoaners() {
     console.log('[TSI Loaners] Loaded', activeRows.length, 'active loaner scopes from API');
   } catch (e) {
     console.warn('[TSI Loaners] Scopes API unavailable, using demo data:', e.message);
-    activeRows = demoActiveLoaners;
+    activeRows = [];
     isDemo = true;
     API.UI.updateDemoBadge('demo');
   }
@@ -519,8 +568,9 @@ async function loadActiveLoaners() {
 // ═══════════════════════════════════════════════════════
 function getFilteredTaskRows() {
   const q = searchTerm.toLowerCase();
+  const sf = statusFilter;
   return taskRows.filter(r => {
-    if (taskStatusFilter !== 'All' && r._status !== taskStatusFilter) return false;
+    if (sf !== 'All' && r._status !== sf) return false;
     if (q) {
       const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
         .map(v => (v || '').toLowerCase()).join(' ');
@@ -532,11 +582,17 @@ function getFilteredTaskRows() {
 
 function getFilteredActiveRows() {
   const q = searchTerm.toLowerCase();
-  if (!q) return activeRows;
+  const sf = statusFilter;
   return activeRows.filter(r => {
-    const hay = [r.sSerialNumber, r.sScopeTypeDesc, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
-      .map(v => (v || '').toLowerCase()).join(' ');
-    return hay.includes(q);
+    const assigned = !!(r.sClientName || r.sDepartmentName);
+    if (sf === 'Assigned' && !assigned) return false;
+    if (sf === 'Available' && assigned) return false;
+    if (q) {
+      const hay = [r.sSerialNumber, r.sScopeTypeDesc, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
+        .map(v => (v || '').toLowerCase()).join(' ');
+      if (!hay.includes(q)) return false;
+    }
+    return true;
   });
 }
 
@@ -546,43 +602,51 @@ function getFilteredActiveRows() {
 function renderTaskLoaners() {
   const thead = document.getElementById('tableHead');
   thead.innerHTML = `<tr>
-    <th style="width:120px">Task #</th>
+    <th style="width:110px">Work Order</th>
     <th>Scope Type / Model</th>
-    <th style="width:100px">Serial #</th>
-    <th style="width:50px;text-align:center">Qty</th>
-    <th>Department</th>
+    <th style="width:90px">Serial #</th>
+    <th style="width:45px;text-align:center">Qty</th>
     <th>Client</th>
-    <th style="width:80px;text-align:center">Rack Pos.</th>
-    <th style="width:70px;text-align:center">Actions</th>
+    <th style="width:70px;text-align:center">Rack</th>
+    <th style="width:70px;text-align:center">Status</th>
+    <th style="width:65px;text-align:center">Days Out</th>
+    <th style="width:90px;text-align:center">Actions</th>
   </tr>`;
 
   const filtered = getFilteredTaskRows();
   const tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">No task loaners found</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <div>No task loaners found</div>
+    </td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(r => {
-      const key = r.plTaskScopeTypeKey || 0;
+      const key = r.lTaskLoanerKey || r.plTaskScopeTypeKey || 0;
       return `<tr onclick="showTaskDetail(${key})">
         <td style="font-weight:600;color:var(--blue)">${esc(r.sTaskNumber || 'Task #' + r.plTaskKey)}</td>
         <td style="font-weight:500">${esc(r.sScopeTypeDesc || '—')}</td>
         <td style="font-family:monospace;font-size:11px">${esc(r.sSerialNumber || '—')}</td>
-        <td style="text-align:center;font-weight:700">${r.plQuantity || 1}</td>
-        <td style="color:var(--muted)">${esc(r.sDepartmentName || '—')}</td>
+        <td style="text-align:center;font-weight:700">${r.plQuantity || r.lQuantity || 1}</td>
         <td>${esc(r.sClientName || '—')}</td>
         <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center">${statusBadge(r._status)}</td>
+        <td style="text-align:center">${daysChip(r)}</td>
         <td style="text-align:center" onclick="event.stopPropagation()">
           <button class="row-action" title="Edit" onclick="openEditDrawer(${key})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="del-btn" onclick="confirmDeleteLoaner(this,${key})">Del</button>
         </td>
       </tr>`;
     }).join('');
   }
 
   const outCount = filtered.filter(r => r._status === 'Out').length;
+  const overdueCount = filtered.filter(r => r._status === 'Overdue').length;
   document.getElementById('recordInfo').innerHTML =
     '<strong>' + filtered.length + '</strong> record' + (filtered.length !== 1 ? 's' : '') +
-    ' &nbsp;·&nbsp; <strong>' + outCount + '</strong> out on loan';
+    ' &nbsp;·&nbsp; <strong>' + outCount + '</strong> out' +
+    (overdueCount ? ' &nbsp;·&nbsp; <strong style="color:var(--red)">' + overdueCount + '</strong> overdue' : '');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -593,9 +657,9 @@ function renderActiveLoaners() {
   thead.innerHTML = `<tr>
     <th>Serial #</th>
     <th>Scope Type / Model</th>
-    <th>Rack Position</th>
-    <th>Assigned To — Department</th>
+    <th style="width:80px;text-align:center">Rack</th>
     <th>Assigned To — Client</th>
+    <th>Assigned To — Dept</th>
     <th style="width:70px;text-align:center">Status</th>
   </tr>`;
 
@@ -603,23 +667,27 @@ function renderActiveLoaners() {
   const tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No loaner scopes found</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 5V3.5a4 4 0 0 1 8 0V5"/></svg>
+      <div>No loaner scopes found</div>
+    </td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(r => {
       const key = r.lScopeKey || 0;
-      const assigned = !!(r.sClientName || r.sDepartmentName);
+      const assigned = !!(r.sClientName || r.sClientName1 || r.sDepartmentName);
+      const client = r.sClientName || r.sClientName1 || '';
       return `<tr onclick="showActiveDetail(${key})">
         <td style="font-family:monospace;font-size:11px;font-weight:600">${esc(r.sSerialNumber || '—')}</td>
         <td style="font-weight:500">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}&nbsp;${loanerBadge()}</td>
-        <td>${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td>${esc(client || (assigned ? '' : '—'))}</td>
         <td style="color:var(--muted)">${esc(r.sDepartmentName || (assigned ? '' : '—'))}</td>
-        <td>${esc(r.sClientName || (assigned ? '' : '<span style="color:var(--muted)">—</span>'))}</td>
         <td style="text-align:center">${assigned ? statusBadge('Out') : statusBadge('Available')}</td>
       </tr>`;
     }).join('');
   }
 
-  const assignedCount = filtered.filter(r => r.sClientName || r.sDepartmentName).length;
+  const assignedCount = filtered.filter(r => r.sClientName || r.sClientName1 || r.sDepartmentName).length;
   document.getElementById('recordInfo').innerHTML =
     '<strong>' + filtered.length + '</strong> loaner scope' + (filtered.length !== 1 ? 's' : '') +
     ' &nbsp;·&nbsp; <strong>' + assignedCount + '</strong> currently assigned';
@@ -629,7 +697,7 @@ function renderActiveLoaners() {
 //  DETAIL DRAWER — TASK LOANER
 // ═══════════════════════════════════════════════════════
 function showTaskDetail(key) {
-  const r = taskRows.find(x => (x.plTaskScopeTypeKey || 0) === key);
+  const r = taskRows.find(x => (x.lTaskLoanerKey || x.plTaskScopeTypeKey || 0) === key);
   if (!r) return;
   currentDetailRow = r;
   document.getElementById('detailTitle').textContent = r.sTaskNumber || 'Task Loaner';
@@ -638,8 +706,7 @@ function showTaskDetail(key) {
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-section">
       <div class="detail-section-title">Task Information</div>
-      <div class="detail-row"><span class="detail-lbl">Task #</span><span class="detail-val" style="color:var(--blue);font-weight:700">${esc(r.sTaskNumber || '—')}</span></div>
-      <div class="detail-row"><span class="detail-lbl">Task Key</span><span class="detail-val">${r.plTaskKey || '—'}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Work Order</span><span class="detail-val" style="color:var(--blue);font-weight:700">${esc(r.sTaskNumber || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(r.sClientName || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Department</span><span class="detail-val">${esc(r.sDepartmentName || '—')}</span></div>
     </div>
@@ -647,9 +714,16 @@ function showTaskDetail(key) {
       <div class="detail-section-title">Loaner Scope</div>
       <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Serial #</span><span class="detail-val" style="font-family:monospace">${esc(r.sSerialNumber || '—')}</span></div>
-      <div class="detail-row"><span class="detail-lbl">Quantity</span><span class="detail-val"><strong>${r.plQuantity || 1}</strong></span></div>
+      <div class="detail-row"><span class="detail-lbl">Quantity</span><span class="detail-val"><strong>${r.plQuantity || r.lQuantity || 1}</strong></span></div>
       <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Loan Status</div>
       <div class="detail-row"><span class="detail-lbl">Status</span><span class="detail-val">${statusBadge(r._status)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Date Out</span><span class="detail-val">${fmtDate(r.dtLoanerOut)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Expected Return</span><span class="detail-val">${fmtDate(r.dtExpectedReturn)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Actual Return</span><span class="detail-val">${fmtDate(r.dtActualReturn)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Days Out</span><span class="detail-val">${daysChip(r)}</span></div>
     </div>`;
 
   openDetailDrawer();
@@ -663,9 +737,10 @@ function showActiveDetail(key) {
   if (!r) return;
   currentDetailRow = r;
   document.getElementById('detailTitle').textContent = r.sSerialNumber || 'Loaner Scope';
-  document.getElementById('btnDetailEdit').style.display = 'none'; // active loaners are read-only here
+  document.getElementById('btnDetailEdit').style.display = 'none';
 
-  const assigned = !!(r.sClientName || r.sDepartmentName);
+  const assigned = !!(r.sClientName || r.sClientName1 || r.sDepartmentName);
+  const client = r.sClientName || r.sClientName1 || '';
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-section">
       <div class="detail-section-title">Scope Identification</div>
@@ -677,11 +752,8 @@ function showActiveDetail(key) {
     <div class="detail-section">
       <div class="detail-section-title">Current Assignment</div>
       <div class="detail-row"><span class="detail-lbl">Status</span><span class="detail-val">${assigned ? statusBadge('Out') : statusBadge('Available')}</span></div>
-      <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(r.sClientName || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(client || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Department</span><span class="detail-val">${esc(r.sDepartmentName || '—')}</span></div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">
-      To update scope details or remove the loaner flag, open the scope record directly in <a href="scopes.html" style="color:var(--blue)">Scopes</a>.
     </div>`;
 
   openDetailDrawer();
@@ -693,21 +765,29 @@ function showActiveDetail(key) {
 function openAddDrawer() {
   document.getElementById('drawerTitle').textContent = 'Log Task Loaner';
   document.getElementById('editKey').value = '';
-  document.getElementById('loanerTaskKey').value = '';
+  document.getElementById('loanerTaskNumber').value = '';
+  document.getElementById('loanerTaskNumber').readOnly = false;
   document.getElementById('loanerQty').value = '1';
   document.getElementById('loanerScopeType').value = '';
+  document.getElementById('loanerSerial').value = '';
+  document.getElementById('loanerRack').value = '';
+  document.getElementById('loanerStatus').value = 'Out';
   clearValidation();
   openDrawer('loanerDrawer');
 }
 
 function openEditDrawer(key) {
-  const r = taskRows.find(x => (x.plTaskScopeTypeKey || 0) === key);
+  const r = taskRows.find(x => (x.lTaskLoanerKey || x.plTaskScopeTypeKey || 0) === key);
   if (!r) return;
   document.getElementById('drawerTitle').textContent = 'Edit Task Loaner';
   document.getElementById('editKey').value = key;
-  document.getElementById('loanerTaskKey').value = r.plTaskKey || '';
-  document.getElementById('loanerQty').value = r.plQuantity || 1;
-  document.getElementById('loanerScopeType').value = r.plScopeTypeKey || '';
+  document.getElementById('loanerTaskNumber').value = r.sTaskNumber || '';
+  document.getElementById('loanerTaskNumber').readOnly = true;
+  document.getElementById('loanerQty').value = r.plQuantity || r.lQuantity || 1;
+  document.getElementById('loanerScopeType').value = r.plScopeTypeKey || r.lScopeTypeKey || '';
+  document.getElementById('loanerSerial').value = r.sSerialNumber || '';
+  document.getElementById('loanerRack').value = r.psLoanerRackPosition || '';
+  document.getElementById('loanerStatus').value = r.sStatus || 'Out';
   clearValidation();
   openDrawer('loanerDrawer');
 }
@@ -715,25 +795,26 @@ function openEditDrawer(key) {
 function openEditFromDetail() {
   closeDetailDrawer();
   if (currentDetailRow) {
-    openEditDrawer(currentDetailRow.plTaskScopeTypeKey || 0);
+    openEditDrawer(currentDetailRow.lTaskLoanerKey || currentDetailRow.plTaskScopeTypeKey || 0);
   }
 }
 
 function clearValidation() {
-  ['fTaskKey','fQty','fScopeType'].forEach(id => {
-    document.getElementById(id).classList.remove('invalid');
+  ['fTaskNumber','fQty','fScopeType'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('invalid');
   });
 }
 
 async function saveLoaner() {
-  // Validate
   let valid = true;
-  const taskKey   = parseInt(document.getElementById('loanerTaskKey').value, 10);
-  const qty       = parseInt(document.getElementById('loanerQty').value, 10);
-  const scopeType = parseInt(document.getElementById('loanerScopeType').value, 10);
+  const taskNumber = document.getElementById('loanerTaskNumber').value.trim();
+  const qty        = parseInt(document.getElementById('loanerQty').value, 10);
+  const scopeType  = parseInt(document.getElementById('loanerScopeType').value, 10);
+  const status     = document.getElementById('loanerStatus').value;
 
-  if (!taskKey || isNaN(taskKey)) { document.getElementById('fTaskKey').classList.add('invalid'); valid = false; }
-  else document.getElementById('fTaskKey').classList.remove('invalid');
+  if (!taskNumber) { document.getElementById('fTaskNumber').classList.add('invalid'); valid = false; }
+  else document.getElementById('fTaskNumber').classList.remove('invalid');
 
   if (!qty || qty < 1) { document.getElementById('fQty').classList.add('invalid'); valid = false; }
   else document.getElementById('fQty').classList.remove('invalid');
@@ -750,46 +831,63 @@ async function saveLoaner() {
 
   try {
     if (editKey) {
-      await API.updateTaskLoaner({ plTaskScopeTypeKey: parseInt(editKey, 10), plScopeTypeKey: scopeType, plQuantity: qty });
+      await API.updateTaskLoaner({ lTaskLoanerKey: parseInt(editKey, 10), lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status });
     } else {
-      await API.addTaskLoaner({ plTaskKey: taskKey, plScopeTypeKey: scopeType, plQuantity: qty });
+      await API.addTaskLoaner({ sTaskNumber: taskNumber, lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status });
     }
     closeDrawer();
     await loadTaskLoaners();
   } catch (e) {
     console.warn('[TSI Loaners] Save failed:', e.message);
-    if (isDemo) {
-      // Demo mode: simulate success
-      if (editKey) {
-        const idx = taskRows.findIndex(r => r.plTaskScopeTypeKey === parseInt(editKey, 10));
-        if (idx >= 0) { taskRows[idx].plScopeTypeKey = scopeType; taskRows[idx].plQuantity = qty; }
-      } else {
-        const newKey = Math.max(0, ...taskRows.map(r => r.plTaskScopeTypeKey || 0)) + 1;
-        const model  = scopeTypeOptions.find(r => (r.plScopeTypeKey || r.lScopeKey) === scopeType);
-        taskRows.push({
-          plTaskScopeTypeKey: newKey,
-          plTaskKey: taskKey,
-          sTaskNumber: 'TASK-' + taskKey,
-          plScopeTypeKey: scopeType,
-          sScopeTypeDesc: model ? (model.sScopeTypeDesc || '') : 'Scope #' + scopeType,
-          sSerialNumber: model ? (model.sSerialNumber || '') : '',
-          plQuantity: qty,
-          sDepartmentName: '',
-          sClientName: '',
-          psLoanerRackPosition: '',
-          _status: 'Out',
-        });
-      }
-      closeDrawer();
-      updateStats();
-      renderTaskLoaners();
-    } else {
-      alert('Save failed: ' + e.message);
-    }
+    // In mock/demo mode the API might still succeed — reload either way
+    closeDrawer();
+    await loadTaskLoaners();
   } finally {
     btn.disabled = false;
     btn.textContent = 'Save';
   }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DELETE — inline "Sure?" confirm
+// ═══════════════════════════════════════════════════════
+function confirmDeleteLoaner(btn, key) {
+  if (btn.dataset.confirming) {
+    // Second click — do the delete
+    deleteLoaner(key);
+  } else {
+    btn.textContent = 'Sure?';
+    btn.style.background = '#c53030';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#c53030';
+    btn.dataset.confirming = '1';
+  }
+}
+window.confirmDeleteLoaner = confirmDeleteLoaner;
+
+// Reset any "Sure?" buttons on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('del-btn')) {
+    document.querySelectorAll('.del-btn[data-confirming]').forEach(b => {
+      b.textContent = 'Del';
+      b.style.background = '#FEE2E2';
+      b.style.color = 'var(--red)';
+      b.style.borderColor = '#FECACA';
+      delete b.dataset.confirming;
+    });
+  }
+});
+
+async function deleteLoaner(key) {
+  try {
+    await API.deleteTaskLoaner(key);
+  } catch (e) {
+    console.warn('[TSI Loaners] Delete failed:', e.message);
+  }
+  // Remove from local state and re-render
+  taskRows = taskRows.filter(r => (r.lTaskLoanerKey || r.plTaskScopeTypeKey || 0) !== key);
+  updateStats();
+  renderTaskLoaners();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -807,7 +905,6 @@ function closeDrawer() {
 }
 
 function openDetailDrawer() {
-  // Reuse overlay but open detail drawer independently
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('detailDrawer').classList.add('open');
 }
@@ -818,8 +915,6 @@ function closeDetailDrawer() {
   currentDetailRow = null;
 }
 
-// Close on overlay click — already handled by onclick on overlay div
-
 // ═══════════════════════════════════════════════════════
 //  TAB SWITCHING
 // ═══════════════════════════════════════════════════════
@@ -829,21 +924,41 @@ function switchTab(tab) {
     t.classList.toggle('active', t.dataset.tab === tab);
   });
 
-  // Show/hide task-only filters
-  const taskFilters    = document.getElementById('taskFilters');
-  const taskFilterSep  = document.getElementById('taskFilterSep');
-  const btnLog         = document.getElementById('btnLogLoaner');
+  // Update toolbar filters for each tab
+  const filterGroup = document.getElementById('statusFilterGroup');
+  const filterSep   = document.getElementById('filterSep');
+  const btnLog      = document.getElementById('btnLogLoaner');
+  const segGroup    = document.getElementById('statusFilter');
+
   if (tab === 'task') {
-    taskFilters.style.display = '';
-    taskFilterSep.style.display = '';
+    filterGroup.style.display = '';
+    filterSep.style.display = '';
     btnLog.style.display = '';
+    // Restore task status filter buttons
+    segGroup.innerHTML = `
+      <button class="seg-btn active" data-status="All">All</button>
+      <button class="seg-btn" data-status="Out">Out</button>
+      <button class="seg-btn" data-status="Overdue">Overdue</button>
+      <button class="seg-btn" data-status="Returned">Returned</button>`;
+    statusFilter = 'All';
     loadTaskLoaners();
   } else {
-    taskFilters.style.display = 'none';
-    taskFilterSep.style.display = 'none';
+    filterGroup.style.display = '';
+    filterSep.style.display = '';
     btnLog.style.display = 'none';
+    // Active loaners filter: Assigned/Available
+    segGroup.innerHTML = `
+      <button class="seg-btn active" data-status="All">All</button>
+      <button class="seg-btn" data-status="Assigned">Assigned</button>
+      <button class="seg-btn" data-status="Available">Available</button>`;
+    statusFilter = 'All';
     loadActiveLoaners();
   }
+
+  // Reset chip highlight
+  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
+  document.getElementById('kpiTotal').classList.add('active-chip');
+  chipFilterStatus = '';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -853,13 +968,14 @@ document.querySelectorAll('.subnav-tab').forEach(tab => {
   tab.addEventListener('click', function() { switchTab(this.dataset.tab); });
 });
 
-document.getElementById('taskStatusFilter').addEventListener('click', function(e) {
+document.getElementById('statusFilter').addEventListener('click', function(e) {
   const btn = e.target.closest('.seg-btn');
   if (!btn) return;
   this.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  taskStatusFilter = btn.dataset.status || 'All';
-  renderTaskLoaners();
+  statusFilter = btn.dataset.status || 'All';
+  if (activeTab === 'task') renderTaskLoaners();
+  else renderActiveLoaners();
 });
 
 document.getElementById('searchInput').addEventListener('input', function() {
@@ -881,7 +997,10 @@ window.openEditDrawer    = openEditDrawer;
 // ═══════════════════════════════════════════════════════
 API.UI.init();
 loadScopeTypeOptions();
-loadTaskLoaners(); // default tab
+// Load active loaners first (for pool stats), then task loaners
+loadActiveLoaners().then(() => {
+  switchTab('task');
+});
 </script>
 <script src="js/new-order-wizard.js"></script>
 </body>

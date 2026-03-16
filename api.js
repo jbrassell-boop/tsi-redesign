@@ -253,10 +253,11 @@ const API = (() => {
   async function getTaskStatuses(includeBlank, includeNotCompleted) { return get('/DashBoardTask/GetAllTaskStatus?pbIncludeBlank=' + (includeBlank||true) + '&pbIncludeNotCompleted=' + (includeNotCompleted||false)); }
   async function getTaskPriorities(includeBlank) { return get('/DashBoardTask/GetAllTaskPriorities?pbIncludeBlank=' + (includeBlank||true)); }
 
-  // ── DashBoardTaskLoaner (3) ───────────────────────────
+  // ── DashBoardTaskLoaner (4) ───────────────────────────
   async function addTaskLoaner(data) { return post('/DashBoardTaskLoaner/AddTaskLoaner', data); }
   async function updateTaskLoaner(data) { return post('/DashBoardTaskLoaner/UpdateTaskLoaner', data); }
   async function getTaskLoaners(taskKey, scopeTypeKey) { return get('/DashBoardTaskLoaner/GetAllTaskLoanerList?plTaskKey=' + taskKey + '&plTaskScopeTypeKey=' + (scopeTypeKey||0)); }
+  async function deleteTaskLoaner(key) { return del('/DashBoardTaskLoaner/DeleteTaskLoaner?plTaskLoanerKey=' + key); }
 
   // ── DashboardTaskTypes (5) ────────────────────────────
   async function getTaskTypes() { return get('/DashboardTaskTypes/GetAllTaskTypeList'); }
@@ -693,7 +694,7 @@ const API = (() => {
     // Tasks
     getTasks, addTask, updateTask, deleteTask,
     getTaskStatuses, getTaskPriorities,
-    addTaskLoaner, updateTaskLoaner, getTaskLoaners,
+    addTaskLoaner, updateTaskLoaner, getTaskLoaners, deleteTaskLoaner,
     getTaskTypes, getTaskType, addTaskType, updateTaskType, deleteTaskType,
 
     // Clients

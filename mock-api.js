@@ -134,7 +134,8 @@ const MockAPI = (() => {
   // ── DashBoardTaskLoaner (3) ───────────────────────────
   route('POST', '/DashBoardTaskLoaner/AddTaskLoaner', (p, body) => MockDB.insert('taskLoaners', body));
   route('POST', '/DashBoardTaskLoaner/UpdateTaskLoaner', (p, body) => { MockDB.update('taskLoaners', body.lTaskLoanerKey, body); return body; });
-  route('GET', '/DashBoardTaskLoaner/GetAllTaskLoanerList', (p) => MockDB.getFiltered('taskLoaners', t => t.lTaskKey === int(p.plTaskKey)));
+  route('GET', '/DashBoardTaskLoaner/GetAllTaskLoanerList', (p) => { const tk = int(p.plTaskKey); return tk ? MockDB.getFiltered('taskLoaners', t => t.lTaskKey === tk) : MockDB.getAll('taskLoaners'); });
+  route('DELETE', '/DashBoardTaskLoaner/DeleteTaskLoaner', (p) => MockDB.remove('taskLoaners', int(p.plTaskLoanerKey)));
 
   // ── DashboardTaskTypes (5) ────────────────────────────
   route('GET', '/DashboardTaskTypes/GetAllTaskTypeList', () => MockDB.getAll('taskTypes'));
