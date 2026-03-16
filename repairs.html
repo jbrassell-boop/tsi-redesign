@@ -1523,21 +1523,20 @@ const WORKFLOW_FORMS = [
   { id:'requisition', name:'Requisition for Approval', shortName:'Req', formNum:'OM07-2', phase:2, statuses:[2] },
   { id:'inspection',  name:'Blank Inspection', shortName:'Inspect', formNum:'OM07-3', phase:3, statuses:[3,4] },
   { id:'picklist',    name:'Repair Inventory Pick List', shortName:'Pick List', formNum:'OM07-6', phase:3, statuses:[3,4] },
-  { id:'amendment',   name:'Amendment to Repair', shortName:'Amend', formNum:'OM07-9', phase:4, statuses:[5] },
-  { id:'defect',      name:'Defect Tracking', shortName:'Defect', formNum:'OM07-8', phase:4, statuses:[5] },
-  { id:'invoice',     name:'Final Invoice', shortName:'Invoice', formNum:'—', phase:5, statuses:[6,7] },
-  { id:'packing',     name:'Scope Return Verification', shortName:'Packing', formNum:'—', phase:5, statuses:[6,7] },
-  { id:'finalqc',     name:'Inspection Completed', shortName:'Final QC', formNum:'OM07-3', phase:5, statuses:[6,7] }
+  { id:'amendment',   name:'Amendment to Repair', shortName:'Amend', formNum:'OM07-9', phase:3, statuses:[3,4,5] },
+  { id:'defect',      name:'Defect Tracking', shortName:'Defect', formNum:'OM07-8', phase:3, statuses:[3,4,5] },
+  { id:'invoice',     name:'Final Invoice', shortName:'Invoice', formNum:'—', phase:4, statuses:[6,7] },
+  { id:'packing',     name:'Scope Return Verification', shortName:'Packing', formNum:'—', phase:4, statuses:[6,7] },
+  { id:'finalqc',     name:'Inspection Completed', shortName:'Final QC', formNum:'OM07-3', phase:4, statuses:[6,7] }
 ];
 let _generatedForms = {};
 let _wfToastTimer = null;
 
 function getPhaseForStatus(statusId) {
-  if (statusId <= 1) return 1;
-  if (statusId === 2) return 2;
-  if (statusId === 3 || statusId === 4) return 3;
-  if (statusId === 5) return 4;
-  return 5;
+  if (statusId <= 1) return 1;   // Received → D&I available (print for incoming inspection)
+  if (statusId === 2) return 2;   // Evaluation → Req available
+  if (statusId >= 3 && statusId <= 5) return 3; // WfA / In Repair / QC → Inspect, Pick List, Amend, Defect
+  return 4;                       // Ready to Ship / Shipped / Closed → Invoice, Packing, Final QC
 }
 
 function updateWorkflowForms(statusId) {
@@ -1570,9 +1569,9 @@ function showWorkflowToast(message) {
 
 // ── Status map: document generation → status transition ──
 const FORM_STATUS_MAP = {
-  disassemble: 1,   // Evaluation
-  requisition: 2,   // Waiting for Approval
-  inspection: 3,    // In Repair
+  disassemble: 2,   // Received → Evaluation (D&I printed on intake)
+  requisition: 3,   // Evaluation → Waiting for Approval
+  inspection: 4,    // Waiting for Approval → In Repair
   picklist: null,    // No status change (same phase)
   amendment: null,   // Exception, no status change
   defect: null,      // Exception, no status change
