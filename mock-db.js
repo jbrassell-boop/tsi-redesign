@@ -810,7 +810,7 @@ console.log('[MockDB] Phase 2 seeded: ' +
 
 // ── Repairs (8 — matching dashboard demo data) ─────────
 MockDB.seed('repairs', [
-  { lRepairKey: 6601, lScopeKey: 1017, lDepartmentKey: 12, sWorkOrderNumber: 'NI26006601',
+  { lRepairKey: 6601, lScopeKey: 1017, lDepartmentKey: 12, sWorkOrderNumber: 'NR26006601',
     sSerialNumber: '3801442', sScopeTypeDesc: 'GIF-H190', sClientName1: 'Tift Regional Medical Center', sDepartmentName: 'Endoscopy',
     sShipName1: 'Tift Regional Medical Center', sShipName2: 'Endoscopy', sBillName1: 'Tift Regional Medical Center',
     sManufacturer: 'Olympus', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
@@ -823,7 +823,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
     lRepairReasonKey: 1, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0412' },
 
-  { lRepairKey: 6587, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006587',
+  { lRepairKey: 6587, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NR26006587',
     sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
     sShipName1: 'Nashville General Hospital', sShipName2: 'GI Lab', sBillName1: 'Nashville General Hospital',
     sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
@@ -836,7 +836,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
     lRepairReasonKey: 2, lRepairLevelKey: 3, lDeliveryMethodKey: 0, lContractKey: 0, sPurchaseOrder: '' },
 
-  { lRepairKey: 6574, lScopeKey: 1019, lDepartmentKey: 10, sWorkOrderNumber: 'NI26006574',
+  { lRepairKey: 6574, lScopeKey: 1019, lDepartmentKey: 10, sWorkOrderNumber: 'NR26006574',
     sSerialNumber: '3912087', sScopeTypeDesc: 'CF-HQ190L', sClientName1: '88th Medical Group', sDepartmentName: 'Biomedical Engineering',
     sShipName1: '88th Medical Group', sShipName2: 'Biomedical Engineering', sBillName1: '88th Medical Group',
     sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
@@ -849,7 +849,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
     lRepairReasonKey: 3, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0398' },
 
-  { lRepairKey: 6541, lScopeKey: 1020, lDepartmentKey: 22, sWorkOrderNumber: 'NI26006541',
+  { lRepairKey: 6541, lScopeKey: 1020, lDepartmentKey: 22, sWorkOrderNumber: 'NR26006541',
     sSerialNumber: '3615290', sScopeTypeDesc: 'BF-UC180F', sClientName1: 'Metro Health Hospital', sDepartmentName: 'Sterile Processing',
     sShipName1: 'Metro Health Hospital', sShipName2: 'Sterile Processing', sBillName1: 'Metro Health Hospital',
     sManufacturer: 'Olympus', sScopeCategory: 'Bronchoscope', sRigidOrFlexible: 'F',
@@ -862,7 +862,7 @@ MockDB.seed('repairs', [
     bHotList: true, IsCogentix: 0, VendorKey: 0, Diameter: '6.9',
     lRepairReasonKey: 4, lRepairLevelKey: 3, lDeliveryMethodKey: 0, lContractKey: 0, sPurchaseOrder: '' },
 
-  { lRepairKey: 6530, lScopeKey: 1021, lDepartmentKey: 19, sWorkOrderNumber: 'NI26006530',
+  { lRepairKey: 6530, lScopeKey: 1021, lDepartmentKey: 19, sWorkOrderNumber: 'NR26006530',
     sSerialNumber: '4450188', sScopeTypeDesc: 'EG-760Z', sClientName1: 'Northside Hospital', sDepartmentName: 'Surgery',
     sShipName1: 'Northside Hospital', sShipName2: 'Surgery', sBillName1: 'Northside Hospital',
     sManufacturer: 'Fujifilm', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
@@ -875,7 +875,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '9.9',
     lRepairReasonKey: 6, lRepairLevelKey: 3, lDeliveryMethodKey: 2, lContractKey: 0, sPurchaseOrder: 'PO-2026-0380' },
 
-  { lRepairKey: 6445, lScopeKey: 1022, lDepartmentKey: 23, sWorkOrderNumber: 'NI26006445',
+  { lRepairKey: 6445, lScopeKey: 1022, lDepartmentKey: 23, sWorkOrderNumber: 'NR26006445',
     sSerialNumber: '3290118', sScopeTypeDesc: 'CF-H185L', sClientName1: 'West Bozeman Surgery Center', sDepartmentName: 'Endoscopy',
     sShipName1: 'West Bozeman Surgery Center', sShipName2: 'Endoscopy', sBillName1: 'West Bozeman Surgery Center',
     sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
@@ -888,7 +888,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
     lRepairReasonKey: 7, lRepairLevelKey: 1, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0355' },
 
-  { lRepairKey: 6398, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NI26006398',
+  { lRepairKey: 6398, lScopeKey: 1018, lDepartmentKey: 15, sWorkOrderNumber: 'NR26006398',
     sSerialNumber: '2918371', sScopeTypeDesc: 'CF-H185L', sClientName1: 'Nashville General Hospital', sDepartmentName: 'GI Lab',
     sShipName1: 'Nashville General Hospital', sShipName2: 'GI Lab', sBillName1: 'Nashville General Hospital',
     sManufacturer: 'Olympus', sScopeCategory: 'Colonoscope', sRigidOrFlexible: 'F',
@@ -901,7 +901,7 @@ MockDB.seed('repairs', [
     bHotList: false, IsCogentix: 0, VendorKey: 0, Diameter: '13.2',
     lRepairReasonKey: 3, lRepairLevelKey: 2, lDeliveryMethodKey: 1, lContractKey: 0, sPurchaseOrder: 'PO-2026-0341' },
 
-  { lRepairKey: 6110, lScopeKey: 1023, lDepartmentKey: 20, sWorkOrderNumber: 'NI26006110',
+  { lRepairKey: 6110, lScopeKey: 1023, lDepartmentKey: 20, sWorkOrderNumber: 'NR26006110',
     sSerialNumber: '3290405', sScopeTypeDesc: 'GIF-Q165', sClientName1: 'Coliseum Medical Center', sDepartmentName: 'GI Lab',
     sShipName1: 'Coliseum Medical Center', sShipName2: 'GI Lab', sBillName1: 'Coliseum Medical Center',
     sManufacturer: 'Olympus', sScopeCategory: 'Gastroscope', sRigidOrFlexible: 'F',
@@ -1100,19 +1100,19 @@ console.log('[MockDB] Phase 3 seeded: ' +
 
 // ── Task Loaners (8 records — mix of Out, Returned, Overdue) ──
 MockDB.seed('taskLoaners', [
-  { lTaskLoanerKey: 1, lTaskKey: 6601, sTaskNumber: 'NI26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Memorial Hospital',       psLoanerRackPosition: 'A-1', sStatus: 'Out',      dtLoanerOut: '2026-03-01T00:00:00', dtExpectedReturn: '2026-03-20T00:00:00', dtActualReturn: null },
-  { lTaskLoanerKey: 2, lTaskKey: 6602, sTaskNumber: 'NI26006602', lScopeTypeKey: 1002, sScopeTypeDesc: 'Olympus CF-HQ190',  sSerialNumber: 'LOAN-002', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'City General Medical',    psLoanerRackPosition: 'A-2', sStatus: 'Out',      dtLoanerOut: '2026-03-04T00:00:00', dtExpectedReturn: '2026-03-18T00:00:00', dtActualReturn: null },
-  { lTaskLoanerKey: 3, lTaskKey: 6603, sTaskNumber: 'NI26006603', lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290',   sSerialNumber: 'LOAN-003', lQuantity: 2, sDepartmentName: 'Pulmonology', sClientName: 'Regional Medical Center', psLoanerRackPosition: 'B-1', sStatus: 'Out',      dtLoanerOut: '2026-02-20T00:00:00', dtExpectedReturn: '2026-03-10T00:00:00', dtActualReturn: null },
-  { lTaskLoanerKey: 4, lTaskKey: 6604, sTaskNumber: 'NI26006604', lScopeTypeKey: 1003, sScopeTypeDesc: 'Olympus GIF-H190',  sSerialNumber: 'LOAN-004', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Tift Regional Medical Center', psLoanerRackPosition: 'C-3', sStatus: 'Returned', dtLoanerOut: '2026-02-10T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: '2026-02-26T00:00:00' },
-  { lTaskLoanerKey: 5, lTaskKey: 6605, sTaskNumber: 'NI26006605', lScopeTypeKey: 1013, sScopeTypeDesc: 'Olympus PCF-H190',  sSerialNumber: 'LOAN-005', lQuantity: 1, sDepartmentName: 'Surgery',     sClientName: 'Northside Hospital',      psLoanerRackPosition: 'B-4', sStatus: 'Returned', dtLoanerOut: '2026-01-15T00:00:00', dtExpectedReturn: '2026-02-15T00:00:00', dtActualReturn: '2026-02-12T00:00:00' },
-  { lTaskLoanerKey: 6, lTaskKey: 6606, sTaskNumber: 'NI26006606', lScopeTypeKey: 1010, sScopeTypeDesc: 'Olympus CF-HQ190L', sSerialNumber: 'LOAN-006', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'Nashville General Hospital', psLoanerRackPosition: 'D-1', sStatus: 'Out',   dtLoanerOut: '2026-02-01T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: null },
-  { lTaskLoanerKey: 7, lTaskKey: 6607, sTaskNumber: 'NI26006607', lScopeTypeKey: 1022, sScopeTypeDesc: 'Olympus BF-1TH190', sSerialNumber: 'LOAN-007', lQuantity: 1, sDepartmentName: 'Pulmonology', sClientName: 'Metro Health Hospital',   psLoanerRackPosition: 'D-2', sStatus: 'Out',   dtLoanerOut: '2026-01-20T00:00:00', dtExpectedReturn: '2026-02-20T00:00:00', dtActualReturn: null },
-  { lTaskLoanerKey: 8, lTaskKey: 6601, sTaskNumber: 'NI26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Sterile Processing', sClientName: 'Metro Health Hospital', psLoanerRackPosition: 'A-1', sStatus: 'Returned', dtLoanerOut: '2026-01-05T00:00:00', dtExpectedReturn: '2026-01-25T00:00:00', dtActualReturn: '2026-01-22T00:00:00' },
+  { lTaskLoanerKey: 1, lTaskKey: 6601, sTaskNumber: 'NR26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Memorial Hospital',       psLoanerRackPosition: 'A-1', sStatus: 'Out',      dtLoanerOut: '2026-03-01T00:00:00', dtExpectedReturn: '2026-03-20T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 2, lTaskKey: 6602, sTaskNumber: 'NR26006602', lScopeTypeKey: 1002, sScopeTypeDesc: 'Olympus CF-HQ190',  sSerialNumber: 'LOAN-002', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'City General Medical',    psLoanerRackPosition: 'A-2', sStatus: 'Out',      dtLoanerOut: '2026-03-04T00:00:00', dtExpectedReturn: '2026-03-18T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 3, lTaskKey: 6603, sTaskNumber: 'NR26006603', lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290',   sSerialNumber: 'LOAN-003', lQuantity: 2, sDepartmentName: 'Pulmonology', sClientName: 'Regional Medical Center', psLoanerRackPosition: 'B-1', sStatus: 'Out',      dtLoanerOut: '2026-02-20T00:00:00', dtExpectedReturn: '2026-03-10T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 4, lTaskKey: 6604, sTaskNumber: 'NR26006604', lScopeTypeKey: 1003, sScopeTypeDesc: 'Olympus GIF-H190',  sSerialNumber: 'LOAN-004', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Tift Regional Medical Center', psLoanerRackPosition: 'C-3', sStatus: 'Returned', dtLoanerOut: '2026-02-10T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: '2026-02-26T00:00:00' },
+  { lTaskLoanerKey: 5, lTaskKey: 6605, sTaskNumber: 'NR26006605', lScopeTypeKey: 1013, sScopeTypeDesc: 'Olympus PCF-H190',  sSerialNumber: 'LOAN-005', lQuantity: 1, sDepartmentName: 'Surgery',     sClientName: 'Northside Hospital',      psLoanerRackPosition: 'B-4', sStatus: 'Returned', dtLoanerOut: '2026-01-15T00:00:00', dtExpectedReturn: '2026-02-15T00:00:00', dtActualReturn: '2026-02-12T00:00:00' },
+  { lTaskLoanerKey: 6, lTaskKey: 6606, sTaskNumber: 'NR26006606', lScopeTypeKey: 1010, sScopeTypeDesc: 'Olympus CF-HQ190L', sSerialNumber: 'LOAN-006', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'Nashville General Hospital', psLoanerRackPosition: 'D-1', sStatus: 'Out',   dtLoanerOut: '2026-02-01T00:00:00', dtExpectedReturn: '2026-02-28T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 7, lTaskKey: 6607, sTaskNumber: 'NR26006607', lScopeTypeKey: 1022, sScopeTypeDesc: 'Olympus BF-1TH190', sSerialNumber: 'LOAN-007', lQuantity: 1, sDepartmentName: 'Pulmonology', sClientName: 'Metro Health Hospital',   psLoanerRackPosition: 'D-2', sStatus: 'Out',   dtLoanerOut: '2026-01-20T00:00:00', dtExpectedReturn: '2026-02-20T00:00:00', dtActualReturn: null },
+  { lTaskLoanerKey: 8, lTaskKey: 6601, sTaskNumber: 'NR26006601', lScopeTypeKey: 1001, sScopeTypeDesc: 'Olympus GIF-H180',  sSerialNumber: 'LOAN-001', lQuantity: 1, sDepartmentName: 'Sterile Processing', sClientName: 'Metro Health Hospital', psLoanerRackPosition: 'A-1', sStatus: 'Returned', dtLoanerOut: '2026-01-05T00:00:00', dtExpectedReturn: '2026-01-25T00:00:00', dtActualReturn: '2026-01-22T00:00:00' },
   // Declined / Unable — models with no pool availability create demand gaps
-  { lTaskLoanerKey: 9,  lTaskKey: 6608, sTaskNumber: 'NI26006608', lScopeTypeKey: 1030, sScopeTypeDesc: 'Olympus TJF-Q180V', sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Memorial Hospital',          psLoanerRackPosition: '', sStatus: 'Declined', dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
-  { lTaskLoanerKey: 10, lTaskKey: 6609, sTaskNumber: 'NI26006609', lScopeTypeKey: 1030, sScopeTypeDesc: 'Olympus TJF-Q180V', sSerialNumber: '', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'Nashville General Hospital', psLoanerRackPosition: '', sStatus: 'Declined', dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
-  { lTaskLoanerKey: 11, lTaskKey: 6610, sTaskNumber: 'NI26006610', lScopeTypeKey: 1004, sScopeTypeDesc: 'Olympus GIF-Q165',  sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Coliseum Medical Center',    psLoanerRackPosition: '', sStatus: 'Unable',   dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
-  { lTaskLoanerKey: 12, lTaskKey: 6611, sTaskNumber: 'NI26006611', lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290',   sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Pulmonology', sClientName: 'City General Medical',       psLoanerRackPosition: '', sStatus: 'Unable',   dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
+  { lTaskLoanerKey: 9,  lTaskKey: 6608, sTaskNumber: 'NR26006608', lScopeTypeKey: 1030, sScopeTypeDesc: 'Olympus TJF-Q180V', sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Memorial Hospital',          psLoanerRackPosition: '', sStatus: 'Declined', dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
+  { lTaskLoanerKey: 10, lTaskKey: 6609, sTaskNumber: 'NR26006609', lScopeTypeKey: 1030, sScopeTypeDesc: 'Olympus TJF-Q180V', sSerialNumber: '', lQuantity: 1, sDepartmentName: 'GI Lab',      sClientName: 'Nashville General Hospital', psLoanerRackPosition: '', sStatus: 'Declined', dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
+  { lTaskLoanerKey: 11, lTaskKey: 6610, sTaskNumber: 'NR26006610', lScopeTypeKey: 1004, sScopeTypeDesc: 'Olympus GIF-Q165',  sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Endoscopy',   sClientName: 'Coliseum Medical Center',    psLoanerRackPosition: '', sStatus: 'Unable',   dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
+  { lTaskLoanerKey: 12, lTaskKey: 6611, sTaskNumber: 'NR26006611', lScopeTypeKey: 1020, sScopeTypeDesc: 'Olympus BF-P290',   sSerialNumber: '', lQuantity: 1, sDepartmentName: 'Pulmonology', sClientName: 'City General Medical',       psLoanerRackPosition: '', sStatus: 'Unable',   dtLoanerOut: null, dtExpectedReturn: null, dtActualReturn: null },
 ]);
 
 console.log('[MockDB] Phase 4 seeded: ' +
