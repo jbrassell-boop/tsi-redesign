@@ -948,6 +948,18 @@ MockDB.seed('repairDetails', [
   { lRepairItemTranKey: 5008, lRepairKey: 6445, lRepairItemKey: 7, sItemDescription: 'Suction Cylinder', nRepairPrice: 380.00, dblRepairPrice: 380.00, sApproved: 'Y', bPrimary: true, mComment: '' },
 ]);
 
+// ── Repair Inventory (parts consumed per repair) ───────
+MockDB.seed('repairInventory', [
+  // Repair 6601 — Fluid invasion / distal rebuild
+  { lRepairInventoryKey: 1, lRepairKey: 6601, lRepairItemTranKey: 1001, sRepairItemDesc: 'CCD Replacement (GIF-H190)', lInventoryKey: 5, sItemDescription: 'CCD Assembly', sSizeName: 'GIF-H190 CCD', sLotNumber: 'LOT-2026-0089', nQuantity: 1 },
+  { lRepairInventoryKey: 2, lRepairKey: 6601, lRepairItemTranKey: 1002, sRepairItemDesc: 'Bending Section — Distal End Rebuild', lInventoryKey: 4, sItemDescription: 'Bending Section Mesh', sSizeName: '9.8mm', sLotNumber: 'LOT-2026-0112', nQuantity: 2 },
+  { lRepairInventoryKey: 3, lRepairKey: 6601, lRepairItemTranKey: 1003, sRepairItemDesc: 'Water Resistance Cap Replacement', lInventoryKey: 6, sItemDescription: 'Control Body O-Ring Kit', sSizeName: 'Olympus Standard', sLotNumber: 'LOT-2025-0847', nQuantity: 1 },
+  { lRepairInventoryKey: 4, lRepairKey: 6601, lRepairItemTranKey: 1004, sRepairItemDesc: 'Epoxy Application — Standard', lInventoryKey: 8, sItemDescription: 'Epoxy Resin', sSizeName: '3M DP125 Gray', sLotNumber: 'LOT-2026-0034', nQuantity: 1 },
+  { lRepairInventoryKey: 5, lRepairKey: 6601, lRepairItemTranKey: 1004, sRepairItemDesc: 'Epoxy Application — Standard', lInventoryKey: 8, sItemDescription: 'Epoxy Resin', sSizeName: 'Araldite 2014 50ml cartridge', sLotNumber: 'LOT-2026-0035', nQuantity: 1 },
+  { lRepairInventoryKey: 6, lRepairKey: 6601, lRepairItemTranKey: 1002, sRepairItemDesc: 'Bending Section — Distal End Rebuild', lInventoryKey: 6, sItemDescription: 'Control Body O-Ring Kit', sSizeName: 'Olympus Standard', sLotNumber: 'LOT-2026-0091', nQuantity: 3 },
+  { lRepairInventoryKey: 7, lRepairKey: 6601, lRepairItemTranKey: 1007, sRepairItemDesc: 'Angulation Calibration & Adjustment', lInventoryKey: 3, sItemDescription: 'Angulation Wire Assembly', sSizeName: 'GIF-H180/190 Up', sLotNumber: 'LOT-2025-0723', nQuantity: 1 },
+]);
+
 // ── Contracts (12 — matching contracts.html demo) ───────
 MockDB.seed('contracts', [
   { lContractKey: 9022, sContractName1: '88th Medical Group - Capitated', lClientKey: 3502, sClientName1: '88th Medical Group', sContractType: 'CPO', sContractStatus: 'Active', dtDateEffective: '2025-11-14T00:00:00', dtDateTermination: '2026-11-14T00:00:00', dblAmtTotal: 22400, sSalesRepName: 'J. Miller', sInvoiceFrequency: 'Quarterly', sPurchaseOrder: 'PO-2025-1184', sPaymentTerms: 'Net 30' },
