@@ -450,32 +450,10 @@ const API = (() => {
       }
     },
     updateDemoBadge: function(status) {
-      const indicator = document.querySelector('.save-indicator') || document.getElementById('saveIndicator');
-      if (!indicator) return;
-      if (isMockMode()) {
-        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg> Mock Data';
-        indicator.style.display = 'inline-flex';
-        indicator.style.alignItems = 'center';
-        indicator.style.color = '#93C5FD';
-        indicator.style.fontSize = '11px';
-        indicator.style.fontWeight = '600';
-        return;
-      }
-      if (isDemoMode()) {
-        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Demo Data';
-        indicator.style.display = 'inline-flex';
-        indicator.style.alignItems = 'center';
-        indicator.style.color = '#FDE68A';
-        indicator.style.fontSize = '11px';
-        indicator.style.fontWeight = '600';
-      } else if (status === 'api') {
-        indicator.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> Live Data';
-        indicator.style.display = 'inline-flex';
-        indicator.style.alignItems = 'center';
-        indicator.style.color = '#A7F3D0';
-        indicator.style.fontSize = '11px';
-        indicator.style.fontWeight = '600';
-      }
+      const badge = document.getElementById('dataBadge');
+      if (!badge) return;
+      badge.className = 'data-badge demo';
+      badge.textContent = 'Demo Data';
     },
     setupNewOrderDropdown: function() {
       document.addEventListener('click', function(e) {

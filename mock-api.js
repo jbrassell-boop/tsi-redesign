@@ -259,6 +259,7 @@ const MockAPI = (() => {
   route('POST', '/Repair/GetAllRepairList', (p, body) => MockDB.paginate(MockDB.getAll('repairs'), body?.Pagination));
   route('GET', '/Repair/GetAllRepairs', (p) => {
     let repairs = MockDB.getAll('repairs');
+    if (int(p.plServiceLocationKey)) repairs = repairs.filter(r => r.lServiceLocationKey === int(p.plServiceLocationKey));
     if (int(p.plDepartmentKey)) repairs = repairs.filter(r => r.lDepartmentKey === int(p.plDepartmentKey));
     return repairs;
   });
