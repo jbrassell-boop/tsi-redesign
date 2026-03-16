@@ -123,6 +123,29 @@
     /* Table footer */
     .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#F7F8FC;border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
     .record-info{font-weight:500}
+
+    /* Tab bar overflow for 10 tabs */
+    .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+    .tab-bar::-webkit-scrollbar{height:3px}
+    .tab-bar::-webkit-scrollbar-thumb{background:var(--border-dk);border-radius:2px}
+
+    /* Tab separator */
+    .tab-sep{width:1px;height:20px;background:var(--border-dk);flex-shrink:0;margin:0 4px;align-self:center}
+
+    /* Yes/No default badges */
+    .b-yes{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
+    .b-no{background:#F3F4F6;color:#6B7280;border-color:#D1D5DB}
+    .b-flexible{background:#E0F2FE;color:#0369A1;border-color:#7DD3FC}
+    .b-rigid{background:#FEF3C7;color:#92400E;border-color:#FDE68A}
+    .b-camera{background:#EDE9FE;color:#7C3AED;border-color:#C4B5FD}
+    .b-instrument{background:#FCE7F3;color:#9D174D;border-color:#F9A8D4}
+
+    /* Drawer sub-tabs (for Companies) */
+    .drawer-tabs{display:flex;border-bottom:1.5px solid var(--border-dk);margin:-16px -18px 0;padding:0 18px}
+    .drawer-tab{padding:8px 14px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+    .drawer-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .drawer-tab-content{display:none}
+    .drawer-tab-content.show{display:block}
   </style>
 </head>
 <body>
@@ -170,6 +193,24 @@
         <div class="tab" onclick="switchTab('pricing',this)">Pricing Lists</div>
         <div class="tab" onclick="switchTab('settings',this)">System Settings</div>
         <div class="tab" onclick="switchTab('audit',this)">Audit Log</div>
+        <div class="tab-sep"></div>
+        <div class="tab" onclick="switchTab('delivery',this)">Delivery Methods</div>
+        <div class="tab" onclick="switchTab('payterms',this)">Payment Terms</div>
+        <div class="tab" onclick="switchTab('scopecat',this)">Scope Categories</div>
+        <div class="tab" onclick="switchTab('distrib',this)">Distributors</div>
+        <div class="tab" onclick="switchTab('companies',this)">Companies</div>
+        <div class="tab" onclick="switchTab('creditlimits',this)">Credit Limits</div>
+        <div class="tab" onclick="switchTab('repairreasons',this)">Repair Reasons</div>
+        <div class="tab" onclick="switchTab('repairstatuses',this)">Repair Statuses</div>
+        <div class="tab" onclick="switchTab('reportgroups',this)">Reporting Groups</div>
+        <div class="tab" onclick="switchTab('stddepts',this)">Standard Depts</div>
+        <div class="tab" onclick="switchTab('cleaningsys',this)">Cleaning Systems</div>
+        <div class="tab" onclick="switchTab('countries',this)">Countries</div>
+        <div class="tab-sep"></div>
+        <div class="tab" onclick="switchTab('salesreassign',this)">Sales Rep Reassignment</div>
+        <div class="tab" onclick="switchTab('holidays',this)">Holidays</div>
+        <div class="tab" onclick="switchTab('bonuspools',this)">Bonus Pools</div>
+        <div class="tab" onclick="switchTab('salestax',this)">Sales Tax Config</div>
       </div>
 
       <!-- TAB: STAFF & USERS -->
@@ -282,6 +323,409 @@
         </div>
       </div>
 
+      <!-- TAB: DELIVERY METHODS -->
+      <div class="admin-tab" id="tab-delivery">
+        <div class="toolbar">
+          <input class="search-input" id="deliverySearch" placeholder="Search delivery methods..." oninput="filterDelivery()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openDeliveryDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Method
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:260px">Method Name</th>
+                <th style="width:100px">Cost</th>
+                <th style="width:100px">Default</th>
+                <th style="width:90px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="deliveryTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="deliveryCount">5 methods</span>
+        </div>
+      </div>
+
+      <!-- TAB: PAYMENT TERMS -->
+      <div class="admin-tab" id="tab-payterms">
+        <div class="toolbar">
+          <input class="search-input" id="paytermsSearch" placeholder="Search payment terms..." oninput="filterPayterms()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openPaytermsDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Terms
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:240px">Description</th>
+                <th style="width:140px">Great Plains ID</th>
+                <th style="width:100px">Due Days</th>
+                <th style="width:180px">Due Date Mode</th>
+                <th style="width:120px">Default</th>
+              </tr>
+            </thead>
+            <tbody id="paytermsTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="paytermsCount">4 terms</span>
+        </div>
+      </div>
+
+      <!-- TAB: SCOPE CATEGORIES -->
+      <div class="admin-tab" id="tab-scopecat">
+        <div class="toolbar">
+          <input class="search-input" id="scopecatSearch" placeholder="Search categories..." oninput="filterScopecat()"/>
+          <select class="filter-dd" id="scopecatTypeFilter" onchange="filterScopecat()">
+            <option value="">All Types</option>
+            <option value="F">Flexible</option>
+            <option value="R">Rigid</option>
+            <option value="C">Camera</option>
+            <option value="I">Instrument</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openScopecatDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Category
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:220px">Category Name</th>
+                <th style="width:140px">Instrument Type</th>
+                <th style="width:100px">Size</th>
+                <th style="width:90px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="scopecatTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="scopecatCount">13 categories</span>
+        </div>
+      </div>
+
+      <!-- TAB: DISTRIBUTORS -->
+      <div class="admin-tab" id="tab-distrib">
+        <div class="toolbar">
+          <input class="search-input" id="distribSearch" placeholder="Search distributors..." oninput="filterDistrib()"/>
+          <select class="filter-dd" id="distribActiveFilter" onchange="filterDistrib()">
+            <option value="">All</option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openDistribDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Distributor
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:200px">Distributor Name</th>
+                <th style="width:160px">Contact</th>
+                <th style="width:130px">Phone</th>
+                <th style="width:140px">TSI Company</th>
+                <th style="width:160px">City, State</th>
+                <th style="width:80px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="distribTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="distribCount">3 distributors</span>
+        </div>
+      </div>
+
+      <!-- TAB: COMPANIES -->
+      <div class="admin-tab" id="tab-companies">
+        <div class="toolbar">
+          <input class="search-input" id="companySearch" placeholder="Search companies..." oninput="filterCompanies()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openCompanyDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Company
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:220px">Company Name</th>
+                <th style="width:100px">Abbreviation</th>
+                <th style="width:130px">Phone</th>
+                <th style="width:160px">City, State</th>
+                <th style="width:120px">PeachTree ID</th>
+                <th style="width:100px">Distributors</th>
+              </tr>
+            </thead>
+            <tbody id="companyTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="record-info" id="companyCount">2 companies</span>
+        </div>
+      </div>
+
+      <!-- TAB: CREDIT LIMITS -->
+      <div class="admin-tab" id="tab-creditlimits">
+        <div class="toolbar">
+          <input class="search-input" id="creditSearch" placeholder="Search credit limits..." oninput="filterCredit()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openCreditDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Limit
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th>Credit Limit Amount</th></tr></thead>
+            <tbody id="creditTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="creditCount">0 limits</span></div>
+      </div>
+
+      <!-- TAB: REPAIR REASONS -->
+      <div class="admin-tab" id="tab-repairreasons">
+        <div class="toolbar">
+          <input class="search-input" id="reasonSearch" placeholder="Search repair reasons..." oninput="filterReasons()"/>
+          <select class="filter-dd" id="reasonCatFilter" onchange="filterReasons()">
+            <option value="">All Categories</option>
+            <option value="Normal Wear &amp; Tear">Normal Wear &amp; Tear</option>
+            <option value="Avoidable">Avoidable</option>
+            <option value="Preventive">Preventive</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openReasonDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Reason
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:240px">Repair Reason</th><th style="width:180px">Category</th><th style="width:90px">Status</th></tr></thead>
+            <tbody id="reasonTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="reasonCount">0 reasons</span></div>
+      </div>
+
+      <!-- TAB: REPAIR STATUSES -->
+      <div class="admin-tab" id="tab-repairstatuses">
+        <div class="toolbar">
+          <input class="search-input" id="rstatusSearch" placeholder="Search statuses..." oninput="filterRstatuses()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openRstatusDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Status
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">Order</th><th style="width:240px">Status Name</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="rstatusTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="rstatusCount">0 statuses</span></div>
+      </div>
+
+      <!-- TAB: REPORTING GROUPS -->
+      <div class="admin-tab" id="tab-reportgroups">
+        <div class="toolbar">
+          <input class="search-input" id="rgroupSearch" placeholder="Search reporting groups..." oninput="filterRgroups()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openRgroupDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Group
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th>Group Name</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="rgroupTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="rgroupCount">0 groups</span></div>
+      </div>
+
+      <!-- TAB: STANDARD DEPARTMENTS -->
+      <div class="admin-tab" id="tab-stddepts">
+        <div class="toolbar">
+          <input class="search-input" id="stddeptSearch" placeholder="Search standard departments..." oninput="filterStddepts()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openStddeptDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Department
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th>Department Name</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="stddeptTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="stddeptCount">0 departments</span></div>
+      </div>
+
+      <!-- TAB: CLEANING SYSTEMS -->
+      <div class="admin-tab" id="tab-cleaningsys">
+        <div class="toolbar">
+          <input class="search-input" id="cleanSearch" placeholder="Search cleaning systems..." oninput="filterCleanSys()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openCleanSysDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add System
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th>System Name</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="cleanTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="cleanCount">0 systems</span></div>
+      </div>
+
+      <!-- TAB: COUNTRIES -->
+      <div class="admin-tab" id="tab-countries">
+        <div class="toolbar">
+          <input class="search-input" id="countrySearch" placeholder="Search countries..." oninput="filterCountries()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openCountryDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Country
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th>Country Name</th></tr></thead>
+            <tbody id="countryTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="countryCount">0 countries</span></div>
+      </div>
+
+      <!-- TAB: SALES REP REASSIGNMENT -->
+      <div class="admin-tab" id="tab-salesreassign">
+        <div class="toolbar">
+          <span style="font-size:11px;font-weight:600;color:var(--label)">Company</span>
+          <select class="filter-dd" id="reassignCompany" style="min-width:180px">
+            <option>Total Scope, Inc.</option>
+            <option>Total Scope South, LLC</option>
+          </select>
+          <div class="filter-sep"></div>
+          <span style="font-size:11px;font-weight:600;color:var(--label)">Previous Rep</span>
+          <select class="filter-dd" id="reassignFrom" onchange="filterReassign()">
+            <option value="">Select Rep...</option>
+          </select>
+          <span style="font-size:10px;color:var(--muted)">&#10132;</span>
+          <span style="font-size:11px;font-weight:600;color:var(--label)">New Rep</span>
+          <select class="filter-dd" id="reassignTo">
+            <option value="">Select Rep...</option>
+          </select>
+          <div class="filter-sep"></div>
+          <button class="btn btn-outline" onclick="filterReassign()" style="height:30px;padding:0 14px;font-size:11px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Refresh
+          </button>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" id="reassignBtn" onclick="proceedReassign()" style="height:30px;padding:0 14px;font-size:12px;font-weight:700" disabled>
+            Proceed With Change
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px"><input type="checkbox" id="reassignSelectAll" onchange="toggleSelectAllReassign(this)"/></th>
+                <th style="width:180px">Client</th>
+                <th style="width:180px">Department</th>
+                <th style="width:180px">City</th>
+                <th style="width:60px">State</th>
+                <th style="width:80px">Zip</th>
+                <th style="width:140px">Current Rep</th>
+              </tr>
+            </thead>
+            <tbody id="reassignTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="reassignCount">Select a previous rep to load accounts</span></div>
+      </div>
+
+      <!-- TAB: HOLIDAYS -->
+      <div class="admin-tab" id="tab-holidays">
+        <div class="toolbar">
+          <input class="search-input" id="holidaySearch" placeholder="Search holidays..." oninput="filterHolidays()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openHolidayDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Holiday
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th style="width:200px">Holiday Name</th><th style="width:120px">Date</th><th style="width:80px">Day</th><th style="width:90px">Recurring</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="holidayTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="holidayCount">0 holidays</span></div>
+      </div>
+
+      <!-- TAB: BONUS POOLS -->
+      <div class="admin-tab" id="tab-bonuspools">
+        <div class="toolbar">
+          <select class="param-select" id="bonusPoolType" onchange="filterBonusPools()" style="height:30px;min-width:180px">
+            <option value="tech">Tech Bonus Pool</option>
+            <option value="ops">Ops Bonus Pool</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openBonusPoolDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Entry
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th style="width:180px">Name</th><th style="width:120px">Period</th><th style="width:120px">Target</th><th style="width:120px">Actual</th><th style="width:100px">Payout %</th><th style="width:90px">Active</th></tr></thead>
+            <tbody id="bonusTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="bonusCount">0 entries</span></div>
+      </div>
+
+      <!-- TAB: SALES TAX CONFIG -->
+      <div class="admin-tab" id="tab-salestax">
+        <div class="toolbar">
+          <input class="search-input" id="taxSearch" placeholder="Search states..." oninput="filterSalesTax()"/>
+          <div style="flex:1"></div>
+          <button class="btn btn-navy" onclick="openSalesTaxDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add State
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:80px">#</th><th style="width:60px">Code</th><th style="width:200px">State</th><th style="width:100px">Rate %</th><th style="width:140px">Effective Date</th><th style="width:90px">Taxable</th></tr></thead>
+            <tbody id="taxTbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span class="record-info" id="taxCount">0 states</span></div>
+      </div>
+
     </div><!-- /page-body -->
   </div><!-- /main -->
 </div><!-- /shell -->
@@ -323,6 +767,186 @@
     <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
   </div>
   <div class="drawer-body" id="drawerPricingBody"></div>
+</div>
+
+<!-- Delivery Method Drawer -->
+<div class="admin-drawer" id="deliveryDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerDeliveryName">Delivery Method</div>
+      <div class="dh-sub" id="drawerDeliverySub">Edit delivery method</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerDeliveryBody"></div>
+</div>
+
+<!-- Payment Terms Drawer -->
+<div class="admin-drawer" id="paytermsDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerPaytermsName">Payment Terms</div>
+      <div class="dh-sub" id="drawerPaytermsSub">Edit payment terms</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerPaytermsBody"></div>
+</div>
+
+<!-- Scope Category Drawer -->
+<div class="admin-drawer" id="scopecatDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerScopecatName">Scope Category</div>
+      <div class="dh-sub" id="drawerScopecatSub">Edit scope category</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerScopecatBody"></div>
+</div>
+
+<!-- Distributor Drawer -->
+<div class="admin-drawer" id="distribDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerDistribName">Distributor</div>
+      <div class="dh-sub" id="drawerDistribSub">Edit distributor</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerDistribBody"></div>
+</div>
+
+<!-- Company Drawer -->
+<div class="admin-drawer" id="companyDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerCompanyName">Company</div>
+      <div class="dh-sub" id="drawerCompanySub">Edit company details</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerCompanyBody"></div>
+</div>
+
+<!-- Credit Limit Drawer -->
+<div class="admin-drawer" id="creditDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerCreditName">Credit Limit</div>
+      <div class="dh-sub" id="drawerCreditSub">Edit credit limit</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerCreditBody"></div>
+</div>
+
+<!-- Repair Reason Drawer -->
+<div class="admin-drawer" id="reasonDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerReasonName">Repair Reason</div>
+      <div class="dh-sub" id="drawerReasonSub">Edit repair reason</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerReasonBody"></div>
+</div>
+
+<!-- Repair Status Drawer -->
+<div class="admin-drawer" id="rstatusDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerRstatusName">Repair Status</div>
+      <div class="dh-sub" id="drawerRstatusSub">Edit repair status</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerRstatusBody"></div>
+</div>
+
+<!-- Reporting Group Drawer -->
+<div class="admin-drawer" id="rgroupDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerRgroupName">Reporting Group</div>
+      <div class="dh-sub" id="drawerRgroupSub">Edit reporting group</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerRgroupBody"></div>
+</div>
+
+<!-- Standard Department Drawer -->
+<div class="admin-drawer" id="stddeptDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerStddeptName">Standard Department</div>
+      <div class="dh-sub" id="drawerStddeptSub">Edit standard department</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerStddeptBody"></div>
+</div>
+
+<!-- Cleaning System Drawer -->
+<div class="admin-drawer" id="cleanSysDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerCleanSysName">Cleaning System</div>
+      <div class="dh-sub" id="drawerCleanSysSub">Edit cleaning system</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerCleanSysBody"></div>
+</div>
+
+<!-- Country Drawer -->
+<div class="admin-drawer" id="countryDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerCountryName">Country</div>
+      <div class="dh-sub" id="drawerCountrySub">Edit country</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerCountryBody"></div>
+</div>
+
+<!-- Holiday Drawer -->
+<div class="admin-drawer" id="holidayDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerHolidayName">Holiday</div>
+      <div class="dh-sub" id="drawerHolidaySub">Edit holiday</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerHolidayBody"></div>
+</div>
+
+<!-- Bonus Pool Drawer -->
+<div class="admin-drawer" id="bonusPoolDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerBonusName">Bonus Pool Entry</div>
+      <div class="dh-sub" id="drawerBonusSub">Edit bonus pool</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerBonusBody"></div>
+</div>
+
+<!-- Sales Tax Drawer -->
+<div class="admin-drawer" id="salesTaxDrawer">
+  <div class="drawer-header">
+    <div class="dh-info">
+      <div class="dh-title" id="drawerTaxName">Sales Tax</div>
+      <div class="dh-sub" id="drawerTaxSub">Edit state tax rate</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+  </div>
+  <div class="drawer-body" id="drawerTaxBody"></div>
 </div>
 
 <script src="shell.js"></script>
@@ -420,6 +1044,158 @@
       {key:'lockDuration',label:'Account Lock Duration',hint:'Minutes before auto-unlock',type:'select',options:['15 min','30 min','60 min','Never (manual)'],value:'30 min'}
     ]
   };
+
+  /* ==============================
+     REFERENCE DATA — INLINE MOCK DATA
+     ============================== */
+
+  var DELIVERY_METHODS = [
+    {id:1, name:'FedEx Standard',           cost:18.50, defaultRepair:false, active:true},
+    {id:2, name:'FedEx Priority Overnight', cost:42.75, defaultRepair:true,  active:true},
+    {id:3, name:'UPS Ground',               cost:14.00, defaultRepair:false, active:true},
+    {id:4, name:'TSI Courier',              cost:0,     defaultRepair:false, active:true},
+    {id:5, name:'Client Pickup',            cost:0,     defaultRepair:false, active:true}
+  ];
+
+  var PAY_TERMS = [
+    {id:1, desc:'Due Upon Receipt', gpId:'DUEUPON', dueDays:0,  dueMode:'Next Month',    defaultRepair:true},
+    {id:2, desc:'Net 30',          gpId:'NET30',    dueDays:30, dueMode:'Due in N Days',  defaultRepair:false},
+    {id:3, desc:'Net 60',          gpId:'NET60',    dueDays:60, dueMode:'Due in N Days',  defaultRepair:false},
+    {id:4, desc:'Net 90',          gpId:'NET90',    dueDays:90, dueMode:'Due in N Days',  defaultRepair:false}
+  ];
+
+  var SCOPE_CATS = [
+    {id:1,  name:'Gastroscope',     type:'F', size:'Large',  active:true},
+    {id:2,  name:'Colonoscope',     type:'F', size:'Large',  active:true},
+    {id:3,  name:'Bronchoscope',    type:'F', size:'Small',  active:true},
+    {id:4,  name:'Duodenoscope',    type:'F', size:'Large',  active:true},
+    {id:5,  name:'Enteroscope',     type:'F', size:'Large',  active:true},
+    {id:6,  name:'Cystoscope',      type:'R', size:'Small',  active:true},
+    {id:7,  name:'Arthroscope',     type:'R', size:'Small',  active:true},
+    {id:8,  name:'Laparoscope',     type:'R', size:'Small',  active:true},
+    {id:9,  name:'Ureteroscope',    type:'R', size:'Small',  active:true},
+    {id:10, name:'Camera Head',     type:'C', size:'Small',  active:true},
+    {id:11, name:'Light Source',    type:'C', size:'Large',  active:true},
+    {id:12, name:'Biopsy Forceps',  type:'I', size:'Small',  active:true},
+    {id:13, name:'Resectoscope',    type:'I', size:'Small',  active:true}
+  ];
+
+  var DISTRIBUTORS_DATA = [
+    {id:1, name:'Total Scope South', phone:'615-555-0100', fax:'615-555-0101', contact:'Mike Davis',
+     company:'Total Scope South LLC', active:true,
+     address:{street:'100 Commerce Way',city:'Nashville',state:'TN',zip:'37210'},
+     billing:{street:'100 Commerce Way',city:'Nashville',state:'TN',zip:'37210'},
+     shipping:{street:'100 Commerce Way',city:'Nashville',state:'TN',zip:'37210'}},
+    {id:2, name:'Total Scope North', phone:'610-485-0200', fax:'610-485-0201', contact:'Sarah Kim',
+     company:'Total Scope, Inc.', active:true,
+     address:{street:'200 Industrial Blvd',city:'Upper Chichester',state:'PA',zip:'19061'},
+     billing:{street:'200 Industrial Blvd',city:'Upper Chichester',state:'PA',zip:'19061'},
+     shipping:{street:'200 Industrial Blvd',city:'Upper Chichester',state:'PA',zip:'19061'}},
+    {id:3, name:'Direct', phone:'', fax:'', contact:'', company:'Total Scope, Inc.', active:true,
+     address:{street:'',city:'',state:'',zip:''},
+     billing:{street:'',city:'',state:'',zip:''},
+     shipping:{street:'',city:'',state:'',zip:''}}
+  ];
+
+  var COMPANIES = [
+    {id:1, name:'Total Scope, Inc.', abbr:'TSI', phone:'610-485-0001', fax:'610-485-0002',
+     peachtreeId:'TSI-001',
+     address:{street:'200 Industrial Blvd',city:'Upper Chichester',state:'PA',zip:'19061'},
+     remitAddress:{street:'PO Box 1234',city:'Upper Chichester',state:'PA',zip:'19061'},
+     distributors:[1,2,3]},
+    {id:2, name:'Total Scope South, LLC', abbr:'TSS', phone:'615-555-0100', fax:'615-555-0101',
+     peachtreeId:'TSS-001',
+     address:{street:'100 Commerce Way',city:'Nashville',state:'TN',zip:'37210'},
+     remitAddress:{street:'100 Commerce Way',city:'Nashville',state:'TN',zip:'37210'},
+     distributors:[1]}
+  ];
+
+  var CREDIT_LIMITS = [
+    {id:1, amount:'2,500'}, {id:2, amount:'3,000'}, {id:3, amount:'5,000'},
+    {id:4, amount:'8,000'}, {id:5, amount:'10,000'}, {id:6, amount:'12,000'},
+    {id:7, amount:'15,000'}, {id:8, amount:'25,000'}
+  ];
+
+  var REPAIR_REASONS = [
+    {id:1, reason:'Fluid Invasion', category:'Normal Wear & Tear', active:true},
+    {id:2, reason:'Angulation Failure', category:'Normal Wear & Tear', active:true},
+    {id:3, reason:'Insertion Tube Damage', category:'Avoidable', active:true},
+    {id:4, reason:'CCD/Image Failure', category:'Normal Wear & Tear', active:true},
+    {id:5, reason:'Light Guide Damage', category:'Normal Wear & Tear', active:true},
+    {id:6, reason:'Universal Cord Leak', category:'Normal Wear & Tear', active:true},
+    {id:7, reason:'Suction Cylinder', category:'Normal Wear & Tear', active:true},
+    {id:8, reason:'Biopsy Channel', category:'Normal Wear & Tear', active:true},
+    {id:9, reason:'Preventive Maintenance', category:'Preventive', active:true},
+    {id:10, reason:'Evaluation Only', category:'Preventive', active:true}
+  ];
+
+  var REPAIR_STATUSES = [
+    {id:1, name:'Received', ordinal:1, active:true},
+    {id:2, name:'Evaluation', ordinal:2, active:true},
+    {id:3, name:'Waiting for Approval', ordinal:3, active:true},
+    {id:4, name:'In Repair', ordinal:4, active:true},
+    {id:5, name:'On Hold', ordinal:5, active:true},
+    {id:6, name:'Quality Check', ordinal:6, active:true},
+    {id:7, name:'Ready to Ship', ordinal:7, active:true},
+    {id:8, name:'Shipped', ordinal:8, active:true},
+    {id:9, name:'Closed', ordinal:9, active:true},
+    {id:10, name:'Cancelled', ordinal:10, active:true}
+  ];
+
+  var REPORTING_GROUPS = [
+    {id:1, name:'HPG', active:true},
+    {id:2, name:'Healthnet', active:true},
+    {id:3, name:'Novation', active:true},
+    {id:4, name:'Surgical Solutions', active:true},
+    {id:5, name:'Vizient', active:true},
+    {id:6, name:'Vizient Carts', active:true},
+    {id:7, name:'Capital L, LLC', active:true}
+  ];
+
+  var STD_DEPARTMENTS = [
+    {id:1, name:'Endoscopy', active:true},
+    {id:2, name:'GI Lab', active:true},
+    {id:3, name:'Surgery / OR', active:true},
+    {id:4, name:'Biomedical Engineering', active:true},
+    {id:5, name:'Pulmonology', active:true},
+    {id:6, name:'Urology', active:true},
+    {id:7, name:'Sterile Processing', active:true},
+    {id:8, name:'ICU / Critical Care', active:true},
+    {id:9, name:'Cardiology', active:true},
+    {id:10, name:'Otolaryngology', active:true},
+    {id:11, name:'Purchasing', active:true},
+    {id:12, name:'Materials Management', active:true}
+  ];
+
+  var CLEANING_SYSTEMS = [
+    {id:1, name:'Medivator', active:true},
+    {id:2, name:'Steris', active:true},
+    {id:3, name:'EvoTech', active:true}
+  ];
+
+  var COUNTRIES = [
+    {id:1, name:'USA'},
+    {id:2, name:'Canada'},
+    {id:3, name:'Mexico'}
+  ];
+
+  var SALES_REPS_LIST = ['Joe Repso','Brian Kenney','Susan Oravits','Deanna Craven','Timothy Reilly','Alfred Zieniatz','House Account'];
+
+  // Demo accounts for reassignment (generated from client/dept combos)
+  var REASSIGN_ACCOUNTS = [
+    {client:'Memorial Health System', dept:'Endoscopy', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Joe Repso'},
+    {client:'Memorial Health System', dept:'GI Lab', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Joe Repso'},
+    {client:'Memorial Health System', dept:'Surgery / OR', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Joe Repso'},
+    {client:'St. Joseph Medical Center', dept:'Endoscopy', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Susan Oravits'},
+    {client:'St. Joseph Medical Center', dept:'Pulmonology', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Susan Oravits'},
+    {client:'Valley Regional Hospital', dept:'GI Lab', city:'Nashville', state:'TN', zip:'37210', rep:'Brian Kenney'},
+    {client:'Valley Regional Hospital', dept:'Surgery / OR', city:'Nashville', state:'TN', zip:'37210', rep:'Brian Kenney'},
+    {client:'Lakeside Surgery Center', dept:'Endoscopy', city:'Nashville', state:'TN', zip:'37210', rep:'Brian Kenney'},
+    {client:'Northwest Endoscopy Clinic', dept:'Endoscopy', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Deanna Craven'},
+    {client:'Northwest Endoscopy Clinic', dept:'Sterile Processing', city:'Upper Chichester', state:'PA', zip:'19061', rep:'Deanna Craven'},
+    {client:'Coliseum Medical Center', dept:'GI Lab', city:'Nashville', state:'TN', zip:'37210', rep:'Timothy Reilly'},
+    {client:'Piedmont Healthcare', dept:'Endoscopy', city:'Nashville', state:'TN', zip:'37210', rep:'Timothy Reilly'}
+  ];
 
   /* ==============================
      TAB SWITCHING
@@ -642,6 +1418,701 @@
   };
 
   /* ==============================
+     DELIVERY METHODS
+     ============================== */
+
+  function defaultBadge(v){ return '<span class="badge '+(v?'b-yes':'b-no')+'">'+(v?'Yes':'No')+'</span>'; }
+  function activeBadge(v){ return '<span class="badge '+(v?'b-active':'b-inactive')+'">'+(v?'Active':'Inactive')+'</span>'; }
+
+  var TYPE_MAP = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
+  var TYPE_BADGE = {F:'b-flexible',R:'b-rigid',C:'b-camera',I:'b-instrument'};
+  function instTypeBadge(t){ return '<span class="badge '+(TYPE_BADGE[t]||'')+'">'+(TYPE_MAP[t]||t)+'</span>'; }
+
+  function renderDeliveryMethods(list){
+    var tb=document.getElementById('deliveryTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted)">No delivery methods found</td></tr>';return;}
+    tb.innerHTML=list.map(function(d){return '<tr onclick="openDeliveryDrawer('+d.id+')"><td style="font-weight:600">'+d.name+'</td><td>$'+d.cost.toFixed(2)+'</td><td>'+defaultBadge(d.defaultRepair)+'</td><td>'+activeBadge(d.active)+'</td></tr>';}).join('');
+    document.getElementById('deliveryCount').textContent=list.length+' method'+(list.length!==1?'s':'');
+  }
+
+  window.filterDelivery = function(){
+    var q=document.getElementById('deliverySearch').value.toLowerCase();
+    renderDeliveryMethods(DELIVERY_METHODS.filter(function(d){return !q || d.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openDeliveryDrawer = function(id){
+    var item = id ? DELIVERY_METHODS.find(function(d){return d.id===id;}) : {id:0,name:'',cost:0,defaultRepair:false,active:true};
+    if(!item) return;
+    document.getElementById('drawerDeliveryName').textContent = id ? item.name : 'New Delivery Method';
+    document.getElementById('drawerDeliverySub').textContent = id ? 'Edit delivery method' : 'Create a new delivery method';
+    var html = '<div class="section-card"><div class="section-head">Method Details</div><div class="section-body">';
+    html += '<div class="field"><label>Method Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Cost ($)</label><input type="number" step="0.01" value="'+item.cost.toFixed(2)+'"/></div>';
+    html += '<div class="field"><label>Status</label><select><option'+(item.active?' selected':'')+'>Active</option><option'+(!item.active?' selected':'')+'>Inactive</option></select></div></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.defaultRepair?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Default for new repairs</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerDeliveryBody').innerHTML = html;
+    openDrawer('deliveryDrawer');
+  };
+
+  /* ==============================
+     PAYMENT TERMS
+     ============================== */
+
+  function renderPaymentTerms(list){
+    var tb=document.getElementById('paytermsTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No payment terms found</td></tr>';return;}
+    tb.innerHTML=list.map(function(p){return '<tr onclick="openPaytermsDrawer('+p.id+')"><td style="font-weight:600">'+p.desc+'</td><td style="font-family:monospace;font-size:10.5px">'+(p.gpId||'\u2014')+'</td><td>'+p.dueDays+'</td><td>'+p.dueMode+'</td><td>'+defaultBadge(p.defaultRepair)+'</td></tr>';}).join('');
+    document.getElementById('paytermsCount').textContent=list.length+' term'+(list.length!==1?'s':'');
+  }
+
+  window.filterPayterms = function(){
+    var q=document.getElementById('paytermsSearch').value.toLowerCase();
+    renderPaymentTerms(PAY_TERMS.filter(function(p){return !q || p.desc.toLowerCase().indexOf(q)!==-1 || (p.gpId||'').toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openPaytermsDrawer = function(id){
+    var item = id ? PAY_TERMS.find(function(p){return p.id===id;}) : {id:0,desc:'',gpId:'',dueDays:0,dueMode:'Due in N Days',defaultRepair:false};
+    if(!item) return;
+    document.getElementById('drawerPaytermsName').textContent = id ? item.desc : 'New Payment Terms';
+    document.getElementById('drawerPaytermsSub').textContent = id ? 'Edit payment terms' : 'Create new payment terms';
+    var modes = ['Due in N Days','Day of Current Month','Next Month'];
+    var html = '<div class="section-card"><div class="section-head">Terms Details</div><div class="section-body">';
+    html += '<div class="field"><label>Description</label><input type="text" value="'+item.desc+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Great Plains ID</label><input type="text" value="'+(item.gpId||'')+'"/></div>';
+    html += '<div class="field"><label>Due Days</label><input type="number" value="'+item.dueDays+'"/></div></div>';
+    html += '<div class="field"><label>Due Date Mode</label><select>';
+    modes.forEach(function(m){html+='<option'+(item.dueMode===m?' selected':'')+'>'+m+'</option>';});
+    html += '</select></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.defaultRepair?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Default for new repairs</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerPaytermsBody').innerHTML = html;
+    openDrawer('paytermsDrawer');
+  };
+
+  /* ==============================
+     SCOPE CATEGORIES
+     ============================== */
+
+  function renderScopeCats(list){
+    var tb=document.getElementById('scopecatTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted)">No categories found</td></tr>';return;}
+    tb.innerHTML=list.map(function(c){return '<tr onclick="openScopecatDrawer('+c.id+')"><td style="font-weight:600">'+c.name+'</td><td>'+instTypeBadge(c.type)+'</td><td>'+c.size+'</td><td>'+activeBadge(c.active)+'</td></tr>';}).join('');
+    document.getElementById('scopecatCount').textContent=list.length+' categor'+(list.length!==1?'ies':'y');
+  }
+
+  window.filterScopecat = function(){
+    var q=document.getElementById('scopecatSearch').value.toLowerCase();
+    var t=document.getElementById('scopecatTypeFilter').value;
+    renderScopeCats(SCOPE_CATS.filter(function(c){
+      if(t && c.type!==t) return false;
+      return !q || c.name.toLowerCase().indexOf(q)!==-1;
+    }));
+  };
+
+  window.openScopecatDrawer = function(id){
+    var item = id ? SCOPE_CATS.find(function(c){return c.id===id;}) : {id:0,name:'',type:'F',size:'Small',active:true};
+    if(!item) return;
+    document.getElementById('drawerScopecatName').textContent = id ? item.name : 'New Scope Category';
+    document.getElementById('drawerScopecatSub').textContent = id ? (TYPE_MAP[item.type]||item.type)+' \u2014 '+item.size : 'Create a new category';
+    var html = '<div class="section-card"><div class="section-head">Category Details</div><div class="section-body">';
+    html += '<div class="field"><label>Category Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Instrument Type</label><select>';
+    [{v:'F',l:'Flexible'},{v:'R',l:'Rigid'},{v:'C',l:'Camera'},{v:'I',l:'Instrument'}].forEach(function(o){html+='<option value="'+o.v+'"'+(item.type===o.v?' selected':'')+'>'+o.l+'</option>';});
+    html += '</select></div><div class="field"><label>Size</label><select>';
+    ['Small','Large'].forEach(function(s){html+='<option'+(item.size===s?' selected':'')+'>'+s+'</option>';});
+    html += '</select></div></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerScopecatBody').innerHTML = html;
+    openDrawer('scopecatDrawer');
+  };
+
+  /* ==============================
+     DISTRIBUTORS
+     ============================== */
+
+  function renderDistributors(list){
+    var tb=document.getElementById('distribTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No distributors found</td></tr>';return;}
+    tb.innerHTML=list.map(function(d){
+      var loc = [d.address.city,d.address.state].filter(Boolean).join(', ');
+      return '<tr onclick="openDistribDrawer('+d.id+')"><td style="font-weight:600">'+d.name+'</td><td>'+(d.contact||'\u2014')+'</td><td>'+(d.phone||'\u2014')+'</td><td>'+(d.company||'\u2014')+'</td><td>'+(loc||'\u2014')+'</td><td>'+activeBadge(d.active)+'</td></tr>';
+    }).join('');
+    document.getElementById('distribCount').textContent=list.length+' distributor'+(list.length!==1?'s':'');
+  }
+
+  window.filterDistrib = function(){
+    var q=document.getElementById('distribSearch').value.toLowerCase();
+    var af=document.getElementById('distribActiveFilter').value;
+    renderDistributors(DISTRIBUTORS_DATA.filter(function(d){
+      if(af==='1' && !d.active) return false;
+      if(af==='0' && d.active) return false;
+      return !q || d.name.toLowerCase().indexOf(q)!==-1 || (d.contact||'').toLowerCase().indexOf(q)!==-1 || (d.company||'').toLowerCase().indexOf(q)!==-1;
+    }));
+  };
+
+  function addressSection(title, addr){
+    var html = '<div class="section-card"><div class="section-head">'+title+'</div><div class="section-body">';
+    html += '<div class="field"><label>Street Address</label><input type="text" value="'+(addr.street||'')+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>City</label><input type="text" value="'+(addr.city||'')+'"/></div>';
+    html += '<div class="field"><label>State</label><input type="text" value="'+(addr.state||'')+'" maxlength="2" style="width:60px"/></div></div>';
+    html += '<div class="field"><label>Zip Code</label><input type="text" value="'+(addr.zip||'')+'" style="width:100px"/></div>';
+    html += '</div></div>';
+    return html;
+  }
+
+  window.openDistribDrawer = function(id){
+    var item = id ? DISTRIBUTORS_DATA.find(function(d){return d.id===id;}) : {id:0,name:'',phone:'',fax:'',contact:'',company:'Total Scope, Inc.',active:true,address:{street:'',city:'',state:'',zip:''},billing:{street:'',city:'',state:'',zip:''},shipping:{street:'',city:'',state:'',zip:''}};
+    if(!item) return;
+    document.getElementById('drawerDistribName').textContent = id ? item.name : 'New Distributor';
+    document.getElementById('drawerDistribSub').textContent = id ? item.company : 'Create a new distributor';
+    var html = '<div class="section-card"><div class="section-head">General Information</div><div class="section-body">';
+    html += '<div class="field"><label>Distributor Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Phone</label><input type="text" value="'+(item.phone||'')+'"/></div>';
+    html += '<div class="field"><label>FAX</label><input type="text" value="'+(item.fax||'')+'"/></div></div>';
+    html += '<div class="g2"><div class="field"><label>Contact Name</label><input type="text" value="'+(item.contact||'')+'"/></div>';
+    html += '<div class="field"><label>TSI Company</label><select>';
+    COMPANIES.forEach(function(c){html+='<option'+(item.company===c.name?' selected':'')+'>'+c.name+'</option>';});
+    html += '</select></div></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    html += addressSection('Mailing Address', item.address);
+    html += addressSection('Billing Address', item.billing);
+    html += addressSection('Shipping Address', item.shipping);
+    document.getElementById('drawerDistribBody').innerHTML = html;
+    openDrawer('distribDrawer');
+  };
+
+  /* ==============================
+     COMPANIES
+     ============================== */
+
+  function renderCompanies(list){
+    var tb=document.getElementById('companyTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No companies found</td></tr>';return;}
+    tb.innerHTML=list.map(function(c){
+      var loc = [c.address.city,c.address.state].filter(Boolean).join(', ');
+      var distCount = (c.distributors||[]).length;
+      return '<tr onclick="openCompanyDrawer('+c.id+')"><td style="font-weight:600">'+c.name+'</td><td>'+(c.abbr||'\u2014')+'</td><td>'+(c.phone||'\u2014')+'</td><td>'+(loc||'\u2014')+'</td><td style="font-family:monospace;font-size:10.5px">'+(c.peachtreeId||'\u2014')+'</td><td><span class="badge b-standard">'+distCount+'</span></td></tr>';
+    }).join('');
+    document.getElementById('companyCount').textContent=list.length+' compan'+(list.length!==1?'ies':'y');
+  }
+
+  window.filterCompanies = function(){
+    var q=document.getElementById('companySearch').value.toLowerCase();
+    renderCompanies(COMPANIES.filter(function(c){return !q || c.name.toLowerCase().indexOf(q)!==-1 || (c.abbr||'').toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openCompanyDrawer = function(id){
+    var item = id ? COMPANIES.find(function(c){return c.id===id;}) : {id:0,name:'',abbr:'',phone:'',fax:'',peachtreeId:'',address:{street:'',city:'',state:'',zip:''},remitAddress:{street:'',city:'',state:'',zip:''},distributors:[]};
+    if(!item) return;
+    document.getElementById('drawerCompanyName').textContent = id ? item.name : 'New Company';
+    document.getElementById('drawerCompanySub').textContent = id ? item.abbr+' \u2014 '+(item.address.city||'')+', '+(item.address.state||'') : 'Create a new company';
+
+    // Drawer sub-tabs
+    var html = '<div class="drawer-tabs">';
+    html += '<div class="drawer-tab active" onclick="switchCompanyTab(\'main\',this)">Main</div>';
+    html += '<div class="drawer-tab" onclick="switchCompanyTab(\'addr\',this)">Address</div>';
+    html += '<div class="drawer-tab" onclick="switchCompanyTab(\'remit\',this)">Remit Address</div>';
+    html += '<div class="drawer-tab" onclick="switchCompanyTab(\'dists\',this)">Distributors</div>';
+    html += '</div>';
+
+    // Main tab
+    html += '<div class="drawer-tab-content show" id="cmpTab-main">';
+    html += '<div class="section-card" style="margin-top:12px"><div class="section-head">Company Information</div><div class="section-body">';
+    html += '<div class="field"><label>Company Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="g2"><div class="field"><label>Abbreviation</label><input type="text" value="'+(item.abbr||'')+'"/></div>';
+    html += '<div class="field"><label>PeachTree Subsidiary ID</label><input type="text" value="'+(item.peachtreeId||'')+'"/></div></div>';
+    html += '<div class="g2"><div class="field"><label>Phone</label><input type="text" value="'+(item.phone||'')+'"/></div>';
+    html += '<div class="field"><label>FAX</label><input type="text" value="'+(item.fax||'')+'"/></div></div>';
+    html += '</div></div></div>';
+
+    // Address tab
+    html += '<div class="drawer-tab-content" id="cmpTab-addr">';
+    html += '<div style="margin-top:12px">'+addressSection('Main Address', item.address)+'</div>';
+    html += '</div>';
+
+    // Remit Address tab
+    html += '<div class="drawer-tab-content" id="cmpTab-remit">';
+    html += '<div style="margin-top:12px">'+addressSection('Remit Address', item.remitAddress)+'</div>';
+    html += '</div>';
+
+    // Distributors tab
+    html += '<div class="drawer-tab-content" id="cmpTab-dists">';
+    html += '<div class="section-card" style="margin-top:12px"><div class="section-head">Linked Distributors</div><div class="section-body" style="padding:0">';
+    if(item.distributors.length){
+      html += '<table style="width:100%;border-collapse:collapse"><tbody>';
+      item.distributors.forEach(function(dId){
+        var dist = DISTRIBUTORS_DATA.find(function(d){return d.id===dId;});
+        if(dist) html += '<tr><td style="padding:8px 12px;font-size:11.5px;font-weight:500;border-bottom:1px solid var(--border)">'+dist.name+'</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--border)"><a style="font-size:10px;color:var(--red);cursor:pointer;font-weight:600">Remove</a></td></tr>';
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<div style="padding:20px;text-align:center;color:var(--muted);font-size:11px">No distributors linked</div>';
+    }
+    html += '</div></div></div>';
+
+    document.getElementById('drawerCompanyBody').innerHTML = html;
+    openDrawer('companyDrawer');
+  };
+
+  window.switchCompanyTab = function(name, el){
+    document.querySelectorAll('#companyDrawer .drawer-tab-content').forEach(function(t){t.classList.remove('show');});
+    document.querySelectorAll('#companyDrawer .drawer-tab').forEach(function(t){t.classList.remove('active');});
+    var target = document.getElementById('cmpTab-'+name);
+    if(target) target.classList.add('show');
+    if(el) el.classList.add('active');
+  };
+
+  /* ==============================
+     CREDIT LIMITS
+     ============================== */
+
+  function renderCreditLimits(list){
+    var tb=document.getElementById('creditTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="2" style="text-align:center;padding:30px;color:var(--muted)">No credit limits found</td></tr>';return;}
+    tb.innerHTML=list.map(function(c,i){return '<tr onclick="openCreditDrawer('+c.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600;font-family:monospace;font-size:12px">$'+c.amount+'</td></tr>';}).join('');
+    document.getElementById('creditCount').textContent=list.length+' limit'+(list.length!==1?'s':'');
+  }
+
+  window.filterCredit = function(){
+    var q=document.getElementById('creditSearch').value.toLowerCase();
+    renderCreditLimits(CREDIT_LIMITS.filter(function(c){return !q || c.amount.indexOf(q)!==-1;}));
+  };
+
+  window.openCreditDrawer = function(id){
+    var item = id ? CREDIT_LIMITS.find(function(c){return c.id===id;}) : {id:0,amount:''};
+    if(!item) return;
+    document.getElementById('drawerCreditName').textContent = id ? '$'+item.amount : 'New Credit Limit';
+    document.getElementById('drawerCreditSub').textContent = id ? 'Edit credit limit tier' : 'Create a new credit limit tier';
+    var html = '<div class="section-card"><div class="section-head">Credit Limit Details</div><div class="section-body">';
+    html += '<div class="field"><label>Amount (formatted)</label><input type="text" value="'+item.amount+'" placeholder="e.g. 50,000"/></div>';
+    html += '</div></div>';
+    document.getElementById('drawerCreditBody').innerHTML = html;
+    openDrawer('creditDrawer');
+  };
+
+  /* ==============================
+     REPAIR REASONS
+     ============================== */
+
+  var CAT_BADGE = {'Normal Wear & Tear':'b-standard','Avoidable':'b-delete','Preventive':'b-create'};
+  function catBadge(c){ return '<span class="badge '+(CAT_BADGE[c]||'')+'">'+c+'</span>'; }
+
+  function renderReasons(list){
+    var tb=document.getElementById('reasonTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--muted)">No repair reasons found</td></tr>';return;}
+    tb.innerHTML=list.map(function(r){return '<tr onclick="openReasonDrawer('+r.id+')"><td style="font-weight:600">'+r.reason+'</td><td>'+catBadge(r.category)+'</td><td>'+activeBadge(r.active)+'</td></tr>';}).join('');
+    document.getElementById('reasonCount').textContent=list.length+' reason'+(list.length!==1?'s':'');
+  }
+
+  window.filterReasons = function(){
+    var q=document.getElementById('reasonSearch').value.toLowerCase();
+    var cat=document.getElementById('reasonCatFilter').value;
+    renderReasons(REPAIR_REASONS.filter(function(r){
+      if(cat && r.category!==cat) return false;
+      return !q || r.reason.toLowerCase().indexOf(q)!==-1;
+    }));
+  };
+
+  window.openReasonDrawer = function(id){
+    var item = id ? REPAIR_REASONS.find(function(r){return r.id===id;}) : {id:0,reason:'',category:'Normal Wear & Tear',active:true};
+    if(!item) return;
+    document.getElementById('drawerReasonName').textContent = id ? item.reason : 'New Repair Reason';
+    document.getElementById('drawerReasonSub').textContent = id ? item.category : 'Create a new repair reason';
+    var cats = ['Normal Wear & Tear','Avoidable','Preventive'];
+    var html = '<div class="section-card"><div class="section-head">Reason Details</div><div class="section-body">';
+    html += '<div class="field"><label>Repair Reason</label><input type="text" value="'+item.reason+'"/></div>';
+    html += '<div class="field"><label>Category</label><select>';
+    cats.forEach(function(c){html+='<option'+(item.category===c?' selected':'')+'>'+c+'</option>';});
+    html += '</select></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerReasonBody').innerHTML = html;
+    openDrawer('reasonDrawer');
+  };
+
+  /* ==============================
+     REPAIR STATUSES
+     ============================== */
+
+  function renderRstatuses(list){
+    var tb=document.getElementById('rstatusTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--muted)">No repair statuses found</td></tr>';return;}
+    tb.innerHTML=list.map(function(s){return '<tr onclick="openRstatusDrawer('+s.id+')"><td style="color:var(--muted);font-weight:500">'+s.ordinal+'</td><td style="font-weight:600">'+s.name+'</td><td>'+activeBadge(s.active)+'</td></tr>';}).join('');
+    document.getElementById('rstatusCount').textContent=list.length+' status'+(list.length!==1?'es':'');
+  }
+
+  window.filterRstatuses = function(){
+    var q=document.getElementById('rstatusSearch').value.toLowerCase();
+    renderRstatuses(REPAIR_STATUSES.filter(function(s){return !q || s.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openRstatusDrawer = function(id){
+    var item = id ? REPAIR_STATUSES.find(function(s){return s.id===id;}) : {id:0,name:'',ordinal:REPAIR_STATUSES.length+1,active:true};
+    if(!item) return;
+    document.getElementById('drawerRstatusName').textContent = id ? item.name : 'New Repair Status';
+    document.getElementById('drawerRstatusSub').textContent = id ? 'Ordinal: '+item.ordinal : 'Create a new repair status';
+    var html = '<div class="section-card"><div class="section-head">Status Details</div><div class="section-body">';
+    html += '<div class="field"><label>Status Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field"><label>Display Order</label><input type="number" value="'+item.ordinal+'" min="1"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerRstatusBody').innerHTML = html;
+    openDrawer('rstatusDrawer');
+  };
+
+  /* ==============================
+     REPORTING GROUPS
+     ============================== */
+
+  function renderRgroups(list){
+    var tb=document.getElementById('rgroupTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--muted)">No reporting groups found</td></tr>';return;}
+    tb.innerHTML=list.map(function(g,i){return '<tr onclick="openRgroupDrawer('+g.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+g.name+'</td><td>'+activeBadge(g.active)+'</td></tr>';}).join('');
+    document.getElementById('rgroupCount').textContent=list.length+' group'+(list.length!==1?'s':'');
+  }
+
+  window.filterRgroups = function(){
+    var q=document.getElementById('rgroupSearch').value.toLowerCase();
+    renderRgroups(REPORTING_GROUPS.filter(function(g){return !q || g.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openRgroupDrawer = function(id){
+    var item = id ? REPORTING_GROUPS.find(function(g){return g.id===id;}) : {id:0,name:'',active:true};
+    if(!item) return;
+    document.getElementById('drawerRgroupName').textContent = id ? item.name : 'New Reporting Group';
+    document.getElementById('drawerRgroupSub').textContent = id ? 'GPO / affiliation group' : 'Create a new reporting group';
+    var html = '<div class="section-card"><div class="section-head">Group Details</div><div class="section-body">';
+    html += '<div class="field"><label>Group Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerRgroupBody').innerHTML = html;
+    openDrawer('rgroupDrawer');
+  };
+
+  /* ==============================
+     STANDARD DEPARTMENTS
+     ============================== */
+
+  function renderStddepts(list){
+    var tb=document.getElementById('stddeptTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--muted)">No standard departments found</td></tr>';return;}
+    tb.innerHTML=list.map(function(d,i){return '<tr onclick="openStddeptDrawer('+d.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+d.name+'</td><td>'+activeBadge(d.active)+'</td></tr>';}).join('');
+    document.getElementById('stddeptCount').textContent=list.length+' department'+(list.length!==1?'s':'');
+  }
+
+  window.filterStddepts = function(){
+    var q=document.getElementById('stddeptSearch').value.toLowerCase();
+    renderStddepts(STD_DEPARTMENTS.filter(function(d){return !q || d.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openStddeptDrawer = function(id){
+    var item = id ? STD_DEPARTMENTS.find(function(d){return d.id===id;}) : {id:0,name:'',active:true};
+    if(!item) return;
+    document.getElementById('drawerStddeptName').textContent = id ? item.name : 'New Standard Department';
+    document.getElementById('drawerStddeptSub').textContent = id ? 'Managed department name' : 'Create a new standard department name';
+    var html = '<div class="section-card"><div class="section-head">Department Details</div><div class="section-body">';
+    html += '<div class="field"><label>Department Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerStddeptBody').innerHTML = html;
+    openDrawer('stddeptDrawer');
+  };
+
+  /* ==============================
+     CLEANING SYSTEMS
+     ============================== */
+
+  function renderCleanSys(list){
+    var tb=document.getElementById('cleanTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--muted)">No cleaning systems found</td></tr>';return;}
+    tb.innerHTML=list.map(function(c,i){return '<tr onclick="openCleanSysDrawer('+c.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+c.name+'</td><td>'+activeBadge(c.active)+'</td></tr>';}).join('');
+    document.getElementById('cleanCount').textContent=list.length+' system'+(list.length!==1?'s':'');
+  }
+
+  window.filterCleanSys = function(){
+    var q=document.getElementById('cleanSearch').value.toLowerCase();
+    renderCleanSys(CLEANING_SYSTEMS.filter(function(c){return !q || c.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openCleanSysDrawer = function(id){
+    var item = id ? CLEANING_SYSTEMS.find(function(c){return c.id===id;}) : {id:0,name:'',active:true};
+    if(!item) return;
+    document.getElementById('drawerCleanSysName').textContent = id ? item.name : 'New Cleaning System';
+    document.getElementById('drawerCleanSysSub').textContent = id ? 'Dept profile cleaning system' : 'Create a new cleaning system';
+    var html = '<div class="section-card"><div class="section-head">System Details</div><div class="section-body">';
+    html += '<div class="field"><label>System Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerCleanSysBody').innerHTML = html;
+    openDrawer('cleanSysDrawer');
+  };
+
+  /* ==============================
+     COUNTRIES
+     ============================== */
+
+  function renderCountries(list){
+    var tb=document.getElementById('countryTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="2" style="text-align:center;padding:30px;color:var(--muted)">No countries found</td></tr>';return;}
+    tb.innerHTML=list.map(function(c,i){return '<tr onclick="openCountryDrawer('+c.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+c.name+'</td></tr>';}).join('');
+    document.getElementById('countryCount').textContent=list.length+' countr'+(list.length!==1?'ies':'y');
+  }
+
+  window.filterCountries = function(){
+    var q=document.getElementById('countrySearch').value.toLowerCase();
+    renderCountries(COUNTRIES.filter(function(c){return !q || c.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openCountryDrawer = function(id){
+    var item = id ? COUNTRIES.find(function(c){return c.id===id;}) : {id:0,name:''};
+    if(!item) return;
+    document.getElementById('drawerCountryName').textContent = id ? item.name : 'New Country';
+    document.getElementById('drawerCountrySub').textContent = id ? 'Edit country' : 'Create a new country';
+    var html = '<div class="section-card"><div class="section-head">Country Details</div><div class="section-body">';
+    html += '<div class="field"><label>Country Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '</div></div>';
+    document.getElementById('drawerCountryBody').innerHTML = html;
+    openDrawer('countryDrawer');
+  };
+
+  /* ==============================
+     SALES REP REASSIGNMENT
+     ============================== */
+
+  // Populate rep dropdowns
+  (function(){
+    var fromSel = document.getElementById('reassignFrom');
+    var toSel = document.getElementById('reassignTo');
+    SALES_REPS_LIST.forEach(function(r){
+      fromSel.innerHTML += '<option value="'+r+'">'+r+'</option>';
+      toSel.innerHTML += '<option value="'+r+'">'+r+'</option>';
+    });
+  })();
+
+  var reassignSelected = {};
+
+  window.filterReassign = function(){
+    var rep = document.getElementById('reassignFrom').value;
+    var tb = document.getElementById('reassignTbody');
+    reassignSelected = {};
+    document.getElementById('reassignSelectAll').checked = false;
+    updateReassignBtn();
+
+    if(!rep){
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Select a previous rep to load accounts</td></tr>';
+      document.getElementById('reassignCount').textContent = 'Select a previous rep to load accounts';
+      return;
+    }
+
+    var accounts = REASSIGN_ACCOUNTS.filter(function(a){ return a.rep === rep; });
+    if(!accounts.length){
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No accounts found for '+rep+'</td></tr>';
+      document.getElementById('reassignCount').textContent = '0 accounts';
+      return;
+    }
+
+    tb.innerHTML = accounts.map(function(a,i){
+      return '<tr><td style="text-align:center"><input type="checkbox" data-idx="'+i+'" onchange="toggleReassignRow('+i+',this)"/></td>' +
+        '<td style="font-weight:600">'+a.client+'</td>' +
+        '<td>'+a.dept+'</td>' +
+        '<td>'+a.city+'</td>' +
+        '<td>'+a.state+'</td>' +
+        '<td>'+a.zip+'</td>' +
+        '<td>'+a.rep+'</td></tr>';
+    }).join('');
+    document.getElementById('reassignCount').textContent = accounts.length + ' account'+(accounts.length!==1?'s':'');
+  };
+
+  window.toggleReassignRow = function(idx, el){
+    if(el.checked) reassignSelected[idx] = true;
+    else delete reassignSelected[idx];
+    updateReassignBtn();
+  };
+
+  window.toggleSelectAllReassign = function(el){
+    var cbs = document.querySelectorAll('#reassignTbody input[type="checkbox"]');
+    reassignSelected = {};
+    cbs.forEach(function(cb){
+      cb.checked = el.checked;
+      if(el.checked) reassignSelected[cb.dataset.idx] = true;
+    });
+    updateReassignBtn();
+  };
+
+  function updateReassignBtn(){
+    var count = Object.keys(reassignSelected).length;
+    var btn = document.getElementById('reassignBtn');
+    btn.disabled = count === 0 || !document.getElementById('reassignTo').value;
+    btn.textContent = count > 0 ? 'Reassign '+count+' Account'+(count!==1?'s':'') : 'Proceed With Change';
+  }
+
+  window.proceedReassign = function(){
+    var count = Object.keys(reassignSelected).length;
+    var toRep = document.getElementById('reassignTo').value;
+    if(!count || !toRep) return;
+    alert('Reassigned '+count+' account'+(count!==1?'s':'')+' to '+toRep+'\n\n(Demo mode — no data changed)');
+    reassignSelected = {};
+    filterReassign();
+  };
+
+  // Enable button when "to" rep changes
+  document.getElementById('reassignTo').addEventListener('change', updateReassignBtn);
+
+  /* ==============================
+     HOLIDAYS
+     ============================== */
+
+  var HOLIDAYS = [
+    {id:1, name:'New Year\'s Day',       date:'2026-01-01', recurring:true, active:true},
+    {id:2, name:'Martin Luther King Jr.', date:'2026-01-19', recurring:true, active:true},
+    {id:3, name:'Presidents\' Day',       date:'2026-02-16', recurring:true, active:true},
+    {id:4, name:'Memorial Day',           date:'2026-05-25', recurring:true, active:true},
+    {id:5, name:'Independence Day',       date:'2026-07-04', recurring:true, active:true},
+    {id:6, name:'Labor Day',              date:'2026-09-07', recurring:true, active:true},
+    {id:7, name:'Thanksgiving',           date:'2026-11-26', recurring:true, active:true},
+    {id:8, name:'Day After Thanksgiving', date:'2026-11-27', recurring:true, active:true},
+    {id:9, name:'Christmas Eve',          date:'2026-12-24', recurring:true, active:true},
+    {id:10,name:'Christmas Day',          date:'2026-12-25', recurring:true, active:true},
+    {id:11,name:'Company Anniversary',    date:'2026-06-15', recurring:false, active:false}
+  ];
+
+  var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function renderHolidays(list){
+    var tb=document.getElementById('holidayTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No holidays found</td></tr>';return;}
+    tb.innerHTML=list.map(function(h,i){
+      var d=new Date(h.date+'T12:00:00');
+      var day=DAYS[d.getDay()];
+      var fmt=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+      return '<tr onclick="openHolidayDrawer('+h.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+h.name+'</td><td>'+fmt+'</td><td>'+day+'</td><td>'+(h.recurring?'<span class="badge b-blue">Yearly</span>':'<span class="badge b-gray">One-time</span>')+'</td><td>'+activeBadge(h.active)+'</td></tr>';
+    }).join('');
+    document.getElementById('holidayCount').textContent=list.length+' holiday'+(list.length!==1?'s':'');
+  }
+
+  window.filterHolidays = function(){
+    var q=document.getElementById('holidaySearch').value.toLowerCase();
+    renderHolidays(HOLIDAYS.filter(function(h){return !q || h.name.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openHolidayDrawer = function(id){
+    var item = id ? HOLIDAYS.find(function(h){return h.id===id;}) : {id:0,name:'',date:'',recurring:true,active:true};
+    if(!item) return;
+    document.getElementById('drawerHolidayName').textContent = id ? item.name : 'New Holiday';
+    document.getElementById('drawerHolidaySub').textContent = id ? 'Edit holiday details' : 'Create a new holiday';
+    var html = '<div class="section-card"><div class="section-head">Holiday Details</div><div class="section-body">';
+    html += '<div class="field"><label>Holiday Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field"><label>Date</label><input type="date" value="'+item.date+'"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.recurring?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Recurring Yearly</span></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerHolidayBody').innerHTML = html;
+    openDrawer('holidayDrawer');
+  };
+
+  /* ==============================
+     BONUS POOLS
+     ============================== */
+
+  var BONUS_POOLS = [
+    {id:1, type:'tech', name:'Mike Chen',        period:'Q1 2026', target:'$4,200', actual:'$3,850', payout:92, active:true},
+    {id:2, type:'tech', name:'David Rodriguez',   period:'Q1 2026', target:'$4,200', actual:'$4,400', payout:105, active:true},
+    {id:3, type:'tech', name:'James Wilson',      period:'Q1 2026', target:'$3,800', actual:'$3,100', payout:82, active:true},
+    {id:4, type:'tech', name:'Tom Harris',        period:'Q1 2026', target:'$4,000', actual:'$4,000', payout:100, active:true},
+    {id:5, type:'tech', name:'Kevin Wright',      period:'Q1 2026', target:'$3,500', actual:'$3,650', payout:104, active:true},
+    {id:6, type:'ops',  name:'Operations Pool A', period:'Q1 2026', target:'$12,000', actual:'$11,200', payout:93, active:true},
+    {id:7, type:'ops',  name:'Operations Pool B', period:'Q1 2026', target:'$8,500', actual:'$9,100', payout:107, active:true},
+    {id:8, type:'ops',  name:'Shipping Team',     period:'Q1 2026', target:'$3,000', actual:'$2,800', payout:93, active:true}
+  ];
+
+  function renderBonusPools(list){
+    var tb=document.getElementById('bonusTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No bonus pool entries found</td></tr>';return;}
+    tb.innerHTML=list.map(function(b,i){
+      var cls = b.payout>=100 ? 's-green' : b.payout>=90 ? 's-amber' : 's-red';
+      return '<tr onclick="openBonusPoolDrawer('+b.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:600">'+b.name+'</td><td>'+b.period+'</td><td>'+b.target+'</td><td>'+b.actual+'</td><td><span class="'+cls+'" style="font-weight:700">'+b.payout+'%</span></td><td>'+activeBadge(b.active)+'</td></tr>';
+    }).join('');
+    document.getElementById('bonusCount').textContent=list.length+' entr'+(list.length!==1?'ies':'y');
+  }
+
+  window.filterBonusPools = function(){
+    var t=document.getElementById('bonusPoolType').value;
+    renderBonusPools(BONUS_POOLS.filter(function(b){return b.type===t;}));
+  };
+
+  window.openBonusPoolDrawer = function(id){
+    var item = id ? BONUS_POOLS.find(function(b){return b.id===id;}) : {id:0,type:'tech',name:'',period:'',target:'',actual:'',payout:0,active:true};
+    if(!item) return;
+    document.getElementById('drawerBonusName').textContent = id ? item.name : 'New Bonus Entry';
+    document.getElementById('drawerBonusSub').textContent = id ? (item.type==='tech'?'Tech':'Ops')+' bonus pool entry' : 'Create a new bonus pool entry';
+    var html = '<div class="section-card"><div class="section-head">Bonus Pool Details</div><div class="section-body">';
+    html += '<div class="field"><label>Pool Type</label><select><option value="tech" '+(item.type==='tech'?'selected':'')+'>Tech Bonus Pool</option><option value="ops" '+(item.type==='ops'?'selected':'')+'>Ops Bonus Pool</option></select></div>';
+    html += '<div class="field"><label>Name</label><input type="text" value="'+item.name+'"/></div>';
+    html += '<div class="field"><label>Period</label><input type="text" value="'+item.period+'" placeholder="e.g. Q1 2026"/></div>';
+    html += '<div class="field"><label>Target Amount</label><input type="text" value="'+item.target+'" placeholder="$0.00"/></div>';
+    html += '<div class="field"><label>Actual Amount</label><input type="text" value="'+item.actual+'" placeholder="$0.00"/></div>';
+    html += '<div class="field"><label>Payout %</label><input type="number" value="'+item.payout+'" min="0" max="200"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.active?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Active</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerBonusBody').innerHTML = html;
+    openDrawer('bonusPoolDrawer');
+  };
+
+  /* ==============================
+     SALES TAX CONFIGURATION
+     ============================== */
+
+  var SALES_TAX = [
+    {id:1, code:'PA', state:'Pennsylvania',   rate:6.00, effective:'2024-01-01', taxable:true},
+    {id:2, code:'TN', state:'Tennessee',      rate:7.00, effective:'2024-01-01', taxable:true},
+    {id:3, code:'NJ', state:'New Jersey',     rate:6.625, effective:'2024-01-01', taxable:true},
+    {id:4, code:'NY', state:'New York',       rate:8.00, effective:'2024-01-01', taxable:true},
+    {id:5, code:'FL', state:'Florida',        rate:6.00, effective:'2024-01-01', taxable:true},
+    {id:6, code:'TX', state:'Texas',          rate:6.25, effective:'2024-01-01', taxable:true},
+    {id:7, code:'CA', state:'California',     rate:7.25, effective:'2024-01-01', taxable:true},
+    {id:8, code:'OH', state:'Ohio',           rate:5.75, effective:'2024-01-01', taxable:true},
+    {id:9, code:'DE', state:'Delaware',       rate:0.00, effective:'2024-01-01', taxable:false},
+    {id:10,code:'MT', state:'Montana',        rate:0.00, effective:'2024-01-01', taxable:false},
+    {id:11,code:'OR', state:'Oregon',         rate:0.00, effective:'2024-01-01', taxable:false},
+    {id:12,code:'NH', state:'New Hampshire',  rate:0.00, effective:'2024-01-01', taxable:false}
+  ];
+
+  function renderSalesTax(list){
+    var tb=document.getElementById('taxTbody');
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No states found</td></tr>';return;}
+    tb.innerHTML=list.map(function(t,i){
+      var d=new Date(t.effective+'T12:00:00');
+      var fmt=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+      return '<tr onclick="openSalesTaxDrawer('+t.id+')"><td style="color:var(--muted);font-weight:500">'+(i+1)+'</td><td style="font-weight:700">'+t.code+'</td><td style="font-weight:600">'+t.state+'</td><td>'+(t.rate>0?t.rate.toFixed(2)+'%':'<span style="color:var(--muted)">0.00%</span>')+'</td><td>'+fmt+'</td><td>'+(t.taxable?'<span class="badge b-green">Yes</span>':'<span class="badge b-gray">Exempt</span>')+'</td></tr>';
+    }).join('');
+    document.getElementById('taxCount').textContent=list.length+' state'+(list.length!==1?'s':'');
+  }
+
+  window.filterSalesTax = function(){
+    var q=document.getElementById('taxSearch').value.toLowerCase();
+    renderSalesTax(SALES_TAX.filter(function(t){return !q || t.state.toLowerCase().indexOf(q)!==-1 || t.code.toLowerCase().indexOf(q)!==-1;}));
+  };
+
+  window.openSalesTaxDrawer = function(id){
+    var item = id ? SALES_TAX.find(function(t){return t.id===id;}) : {id:0,code:'',state:'',rate:0,effective:'',taxable:true};
+    if(!item) return;
+    document.getElementById('drawerTaxName').textContent = id ? item.state : 'New State Tax';
+    document.getElementById('drawerTaxSub').textContent = id ? 'Edit tax configuration for '+item.code : 'Configure sales tax for a new state';
+    var html = '<div class="section-card"><div class="section-head">Tax Configuration</div><div class="section-body">';
+    html += '<div class="field"><label>State Code</label><input type="text" value="'+item.code+'" maxlength="2" style="width:80px;text-transform:uppercase"/></div>';
+    html += '<div class="field"><label>State Name</label><input type="text" value="'+item.state+'"/></div>';
+    html += '<div class="field"><label>Tax Rate (%)</label><input type="number" value="'+item.rate+'" min="0" max="15" step="0.001"/></div>';
+    html += '<div class="field"><label>Effective Date</label><input type="date" value="'+item.effective+'"/></div>';
+    html += '<div class="field" style="flex-direction:row;align-items:center;gap:10px;padding-top:4px"><label class="toggle"><input type="checkbox" '+(item.taxable?'checked':'')+'><span class="toggle-slider"></span></label><span style="font-size:11px;font-weight:500;color:var(--text)">Taxable</span></div>';
+    html += '</div></div>';
+    document.getElementById('drawerTaxBody').innerHTML = html;
+    openDrawer('salesTaxDrawer');
+  };
+
+  /* ==============================
      DRAWER MANAGEMENT
      ============================== */
 
@@ -671,6 +2142,21 @@
   renderPricing(PRICING);
   renderSettings();
   renderAudit(AUDIT);
+  renderDeliveryMethods(DELIVERY_METHODS);
+  renderPaymentTerms(PAY_TERMS);
+  renderScopeCats(SCOPE_CATS);
+  renderDistributors(DISTRIBUTORS_DATA);
+  renderCompanies(COMPANIES);
+  renderCreditLimits(CREDIT_LIMITS);
+  renderReasons(REPAIR_REASONS);
+  renderRstatuses(REPAIR_STATUSES);
+  renderRgroups(REPORTING_GROUPS);
+  renderStddepts(STD_DEPARTMENTS);
+  renderCleanSys(CLEANING_SYSTEMS);
+  renderCountries(COUNTRIES);
+  renderHolidays(HOLIDAYS);
+  renderBonusPools(BONUS_POOLS.filter(function(b){return b.type==='tech';}));
+  renderSalesTax(SALES_TAX);
 
 })();
 </script>

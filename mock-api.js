@@ -387,6 +387,74 @@ const MockAPI = (() => {
   route('GET', '/DistributorName/GetAllDistributorNames', () => MockDB.getAll('distributors'));
   route('GET', '/InstrumentType/GetInstrumentTypes', () => MockDB.getAll('instrumentTypes'));
 
+  // ── Admin Reference Data (CRUD) ──────────────────────
+  // Companies
+  route('GET', '/Company/GetAllCompanies', () => MockDB.getAll('companies'));
+  route('GET', '/Company/GetCompanyById', (p) => MockDB.getByKey('companies', int(p.plCompanyKey)));
+  route('POST', '/Company/AddCompany', (p, body) => MockDB.insert('companies', body));
+  route('POST', '/Company/UpdateCompany', (p, body) => { MockDB.update('companies', body.lCompanyKey, body); return body; });
+  route('DELETE', '/Company/DeleteCompany', (p) => MockDB.remove('companies', int(p.plCompanyKey)));
+
+  // Delivery Methods (CUD — GET already exists above)
+  route('POST', '/Repair/AddDeliveryMethod', (p, body) => MockDB.insert('deliveryMethods', body));
+  route('POST', '/Repair/UpdateDeliveryMethod', (p, body) => { MockDB.update('deliveryMethods', body.lDeliveryMethodKey, body); return body; });
+  route('DELETE', '/Repair/DeleteDeliveryMethod', (p) => MockDB.remove('deliveryMethods', int(p.plDeliveryMethodKey)));
+
+  // Payment Terms (CUD — GET already exists)
+  route('POST', '/PaymentTerms/AddPaymentTerms', (p, body) => MockDB.insert('paymentTerms', body));
+  route('POST', '/PaymentTerms/UpdatePaymentTerms', (p, body) => { MockDB.update('paymentTerms', body.lPaymentTermsKey, body); return body; });
+  route('DELETE', '/PaymentTerms/DeletePaymentTerms', (p) => MockDB.remove('paymentTerms', int(p.plPaymentTermsKey)));
+
+  // Distributors (CUD — GET already exists)
+  route('POST', '/DistributorName/AddDistributor', (p, body) => MockDB.insert('distributors', body));
+  route('POST', '/DistributorName/UpdateDistributor', (p, body) => { MockDB.update('distributors', body.lDistributorKey, body); return body; });
+  route('DELETE', '/DistributorName/DeleteDistributor', (p) => MockDB.remove('distributors', int(p.plDistributorKey)));
+
+  // Scope Categories
+  route('GET', '/ScopeCategory/GetAllScopeCategories', () => MockDB.getAll('scopeCategories'));
+  route('POST', '/ScopeCategory/AddScopeCategory', (p, body) => MockDB.insert('scopeCategories', body));
+  route('POST', '/ScopeCategory/UpdateScopeCategory', (p, body) => { MockDB.update('scopeCategories', body.lScopeCategoryKey, body); return body; });
+  route('DELETE', '/ScopeCategory/DeleteScopeCategory', (p) => MockDB.remove('scopeCategories', int(p.plScopeCategoryKey)));
+
+  // Reporting Groups
+  route('GET', '/ReportingGroup/GetAllReportingGroups', () => MockDB.getAll('reportingGroups'));
+  route('POST', '/ReportingGroup/AddReportingGroup', (p, body) => MockDB.insert('reportingGroups', body));
+  route('POST', '/ReportingGroup/UpdateReportingGroup', (p, body) => { MockDB.update('reportingGroups', body.lReportingGroupKey, body); return body; });
+  route('DELETE', '/ReportingGroup/DeleteReportingGroup', (p) => MockDB.remove('reportingGroups', int(p.plReportingGroupKey)));
+
+  // Cleaning Systems
+  route('GET', '/CleaningSystem/GetAllCleaningSystems', () => MockDB.getAll('cleaningSystems'));
+  route('POST', '/CleaningSystem/AddCleaningSystem', (p, body) => MockDB.insert('cleaningSystems', body));
+  route('POST', '/CleaningSystem/UpdateCleaningSystem', (p, body) => { MockDB.update('cleaningSystems', body.lCleaningSystemKey, body); return body; });
+  route('DELETE', '/CleaningSystem/DeleteCleaningSystem', (p) => MockDB.remove('cleaningSystems', int(p.plCleaningSystemKey)));
+
+  // Standard Departments
+  route('GET', '/StandardDepartment/GetAllStandardDepartments', () => MockDB.getAll('standardDepartments'));
+  route('POST', '/StandardDepartment/AddStandardDepartment', (p, body) => MockDB.insert('standardDepartments', body));
+  route('POST', '/StandardDepartment/UpdateStandardDepartment', (p, body) => { MockDB.update('standardDepartments', body.lStandardDeptKey, body); return body; });
+  route('DELETE', '/StandardDepartment/DeleteStandardDepartment', (p) => MockDB.remove('standardDepartments', int(p.plStandardDeptKey)));
+
+  // Credit Limits (CUD — GET already exists above)
+  route('POST', '/CreditLimit/AddCreditLimit', (p, body) => MockDB.insert('creditLimits', body));
+  route('POST', '/CreditLimit/UpdateCreditLimit', (p, body) => { MockDB.update('creditLimits', body.lCreditLimitKey, body); return body; });
+  route('DELETE', '/CreditLimit/DeleteCreditLimit', (p) => MockDB.remove('creditLimits', int(p.plCreditLimitKey)));
+
+  // Repair Reasons (CUD — GET already exists above)
+  route('POST', '/Repair/AddRepairReason', (p, body) => MockDB.insert('repairReasons', body));
+  route('POST', '/Repair/UpdateRepairReason', (p, body) => { MockDB.update('repairReasons', body.lRepairReasonKey, body); return body; });
+  route('DELETE', '/Repair/DeleteRepairReason', (p) => MockDB.remove('repairReasons', int(p.plRepairReasonKey)));
+
+  // Repair Statuses (CUD — GET already exists above)
+  route('POST', '/RepairItems/AddRepairStatus', (p, body) => MockDB.insert('repairStatuses', body));
+  route('POST', '/RepairItems/UpdateRepairStatus', (p, body) => { MockDB.update('repairStatuses', body.lRepairStatusID, body); return body; });
+  route('DELETE', '/RepairItems/DeleteRepairStatus', (p) => MockDB.remove('repairStatuses', int(p.plRepairStatusID)));
+
+  // Countries
+  route('GET', '/Country/GetAllCountries', () => MockDB.getAll('countries'));
+  route('POST', '/Country/AddCountry', (p, body) => MockDB.insert('countries', body));
+  route('POST', '/Country/UpdateCountry', (p, body) => { MockDB.update('countries', body.lCountryKey, body); return body; });
+  route('DELETE', '/Country/DeleteCountry', (p) => MockDB.remove('countries', int(p.plCountryKey)));
+
   // ── ServiceLocation (1) ───────────────────────────────
   route('GET', '/ServiceLocation/GetAllServiceLocation', () => MockDB.getAll('serviceLocations'));
 

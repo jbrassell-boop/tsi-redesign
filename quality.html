@@ -106,6 +106,17 @@
 
     .drawer-footer{padding:10px 18px;border-top:1.5px solid var(--border-dk);background:#F8FAFF;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0}
 
+    /* Quality Report Cards */
+    .qr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:1200px){.qr-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:800px){.qr-grid{grid-template-columns:1fr}}
+    .qr-card{background:#fff;border:1.5px solid var(--border-dk);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+    .qr-card:hover{box-shadow:0 4px 12px rgba(var(--primary-rgb),.08);border-color:var(--blue)}
+    .qr-card-title{font-size:12px;font-weight:700;color:var(--navy)}
+    .qr-card-desc{font-size:11px;color:var(--muted);line-height:1.4}
+    .qr-card-meta{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:6px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}
+    .qr-card-meta .b-type{font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;background:#EEF2FF;color:#4338CA}
+
     /* Overlay for drawer background click */
     .drawer-overlay{position:fixed;inset:0;top:64px;background:rgba(0,0,0,.08);z-index:49;display:none}
     .drawer-overlay.open{display:block}
@@ -159,6 +170,7 @@
         <button class="subnav-btn" onclick="switchTab('ncr',this)">Non-Conformances</button>
         <button class="subnav-btn" onclick="switchTab('capa',this)">CAPA Log</button>
         <button class="subnav-btn" onclick="switchTab('rework',this)">Rework Tracking</button>
+        <button class="subnav-btn" onclick="switchTab('reports',this)">Reports</button>
       </div>
 
       <!-- QC INSPECTIONS TAB -->
@@ -319,6 +331,16 @@
         </div>
       </div>
 
+      <!-- QUALITY REPORTS TAB -->
+      <div class="tab-pane" id="tab-reports">
+        <div class="toolbar">
+          <input class="search-input" id="qrSearch" placeholder="Search reports..." oninput="filterQualityReports()" style="margin-left:auto"/>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px" id="qrGrid">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
     </div><!-- /page-body -->
   </div><!-- /main -->
 </div><!-- /shell -->
@@ -406,7 +428,7 @@ var DEMO_REWORK = [
 // STATE
 // ══════════════════════════════════════════════════════════
 var activeTab = 'inspections';
-var _tabInited = { inspections: false, ncr: false, capa: false, rework: false };
+var _tabInited = { inspections: false, ncr: false, capa: false, rework: false, reports: false };
 var tabFilters = { inspections:'', ncr:'', ncrStatus:'', capaType:'', capaStatus:'', reworkStatus:'' };
 
 // ══════════════════════════════════════════════════════════
@@ -425,6 +447,7 @@ function switchTab(name, btnEl) {
     else if (name === 'ncr') renderNCR();
     else if (name === 'capa') renderCAPA();
     else if (name === 'rework') renderRework();
+    else if (name === 'reports') renderQualityReports();
   }
 }
 
@@ -761,6 +784,66 @@ function openReworkDrawer(idx) {
     +'<div class="section-body" style="font-size:11px;color:var(--muted);padding:12px">'
     +actMsg
     +'</div></div>'
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+// QUALITY REPORTS TAB
+// ══════════════════════════════════════════════════════════
+var QUALITY_REPORTS = [
+  { name:'Non-Conformance Report', desc:'Non-conformance events by date range and instrument type. Tracks deviations from quality standards.', type:'Date Range + Instrument Type' },
+  { name:'Purchase Order Receipts', desc:'PO receipt log with lot number tracking for incoming parts and materials quality verification.', type:'Date Range + Lot Number' },
+  { name:'Blank Inspection Sign Off Log', desc:'Printable inspection sign-off sheet for QC technicians to record manual inspection results.', type:'Date Range' },
+  { name:'Invoiced Repairs with Missing Docs', desc:'Identifies invoiced repairs lacking required documentation — compliance gap analysis.', type:'Date Range + Instrument Type' },
+  { name:'Defect Tracking Report', desc:'Defect frequency and categorization by instrument type for root cause analysis and trending.', type:'Date Range + Instrument Type' },
+  { name:'Repairs Within 40 Days', desc:'Repairs returning within the 40-day SLA/warranty window — repeat failure indicator.', type:'Date Range + Instrument Type' },
+  { name:'Repair Amendments Report', desc:'Tracks amendments made to repair work orders after initial completion — audit trail for changes.', type:'Date Range + Instrument Type' }
+];
+
+function renderQualityReports(filter) {
+  var q = (filter || '').toLowerCase();
+  var html = '<div class="qr-grid">';
+  QUALITY_REPORTS.forEach(function(r, i) {
+    if (q && r.name.toLowerCase().indexOf(q) < 0 && r.desc.toLowerCase().indexOf(q) < 0) return;
+    html += '<div class="qr-card" onclick="openQualityReportPanel(' + i + ')">'
+      + '<div class="qr-card-title">' + r.name + '</div>'
+      + '<div class="qr-card-desc">' + r.desc + '</div>'
+      + '<div class="qr-card-meta"><span class="b-type">Quality</span><span>' + r.type + '</span></div>'
+      + '</div>';
+  });
+  html += '</div>';
+  document.getElementById('qrGrid').innerHTML = html;
+}
+
+function filterQualityReports() {
+  renderQualityReports(document.getElementById('qrSearch').value);
+}
+
+function openQualityReportPanel(idx) {
+  var r = QUALITY_REPORTS[idx]; if (!r) return;
+  var params = '<div class="g2">'
+    + '<div class="field"><label>Date From</label><input type="date"/></div>'
+    + '<div class="field"><label>Date To</label><input type="date"/></div>'
+    + '</div>';
+  if (r.type.indexOf('Instrument Type') >= 0) {
+    params += '<div class="field"><label>Instrument Type</label>'
+      + '<select><option value="">All Types</option><option>Flexible Endoscope</option><option>Rigid Endoscope</option><option>Camera</option><option>Light Source</option><option>Instrument</option></select>'
+      + '</div>';
+  }
+  if (r.type.indexOf('Lot Number') >= 0) {
+    params += '<div class="field"><label>Lot Number</label><input type="text" placeholder="Enter lot number..."/></div>';
+  }
+  openDrawer(r.name, 'Quality Report',
+    '<div class="section-card">'
+    + '<div class="section-head">Report Parameters</div>'
+    + '<div class="section-body">' + params + '</div></div>'
+    + '<div style="padding:16px;display:flex;gap:8px">'
+    + '<button class="btn btn-navy" style="flex:1" onclick="showToast(\'Generating report...\',\'info\')">Generate Report</button>'
+    + '<button class="btn btn-outline" style="flex:1" onclick="showToast(\'Exporting to Excel...\',\'info\')">Export to Excel</button>'
+    + '</div>'
+    + '<div class="section-card">'
+    + '<div class="section-head">About This Report</div>'
+    + '<div class="section-body"><div class="field"><label>Description</label><div style="font-size:11px;color:var(--muted);line-height:1.5;padding:4px 0">' + r.desc + '</div></div></div></div>'
   );
 }
 

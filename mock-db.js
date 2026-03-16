@@ -59,6 +59,15 @@ const MockDB = (() => {
     acquisitions:       'lAcquisitionKey',
     glAccounts:         'lGLAccountKey',
     systemCodes:        'lSystemCodesKey',
+    companies:          'lCompanyKey',
+    deliveryMethods:    'lDeliveryMethodKey',
+    scopeCategories:    'lScopeCategoryKey',
+    reportingGroups:    'lReportingGroupKey',
+    cleaningSystems:    'lCleaningSystemKey',
+    standardDepartments:'lStandardDeptKey',
+    creditLimits:       'lCreditLimitKey',
+    repairReasons:      'lRepairReasonKey',
+    repairStatuses:     'lRepairStatusID',
   };
 
   // ── Data tables ───────────────────────────────────────
@@ -140,6 +149,10 @@ const MockDB = (() => {
     repairLevels:       [],
     repairStatuses:     [],
     deliveryMethods:    [],
+    companies:          [],
+    reportingGroups:    [],
+    cleaningSystems:    [],
+    standardDepartments:[],
     patientSafetyLevels:[],
     departmentTypes:    [],
     contractTypes:      [],
@@ -303,10 +316,10 @@ MockDB.seed('pricingCategories', [
 
 // ── Payment Terms ───────────────────────────────────────
 MockDB.seed('paymentTerms', [
-  { lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt' },
-  { lPaymentTermsKey: 2, sTermsDesc: 'Net 30' },
-  { lPaymentTermsKey: 3, sTermsDesc: 'Net 60' },
-  { lPaymentTermsKey: 4, sTermsDesc: 'Net 90' },
+  { lPaymentTermsKey: 1, sTermsDesc: 'Due Upon Receipt', sGreatPlainsID: 'DUEUPON', nDueDays: 0, sDueMode: 'Next Month', bDefaultForRepair: true },
+  { lPaymentTermsKey: 2, sTermsDesc: 'Net 30', sGreatPlainsID: 'NET30', nDueDays: 30, sDueMode: 'Due in N Days', bDefaultForRepair: false },
+  { lPaymentTermsKey: 3, sTermsDesc: 'Net 60', sGreatPlainsID: 'NET60', nDueDays: 60, sDueMode: 'Due in N Days', bDefaultForRepair: false },
+  { lPaymentTermsKey: 4, sTermsDesc: 'Net 90', sGreatPlainsID: 'NET90', nDueDays: 90, sDueMode: 'Due in N Days', bDefaultForRepair: false },
 ]);
 
 // ── Credit Limits ───────────────────────────────────────
@@ -323,9 +336,9 @@ MockDB.seed('creditLimits', [
 
 // ── Distributors ────────────────────────────────────────
 MockDB.seed('distributors', [
-  { lDistributorKey: 1, sDistName1: 'Total Scope South' },
-  { lDistributorKey: 2, sDistName1: 'Total Scope North' },
-  { lDistributorKey: 3, sDistName1: 'Direct' },
+  { lDistributorKey: 1, sDistName1: 'Total Scope South', sPhone: '615-555-0100', sFax: '615-555-0101', sContactName: 'Mike Davis', sCompanyName: 'Total Scope South LLC', bActive: true, sAddress1: '100 Commerce Way', sCity: 'Nashville', sState: 'TN', sZip: '37210' },
+  { lDistributorKey: 2, sDistName1: 'Total Scope North', sPhone: '610-485-0200', sFax: '610-485-0201', sContactName: 'Sarah Kim', sCompanyName: 'Total Scope, Inc.', bActive: true, sAddress1: '200 Industrial Blvd', sCity: 'Upper Chichester', sState: 'PA', sZip: '19061' },
+  { lDistributorKey: 3, sDistName1: 'Direct', sPhone: '', sFax: '', sContactName: '', sCompanyName: 'Total Scope, Inc.', bActive: true, sAddress1: '', sCity: '', sState: '', sZip: '' },
 ]);
 
 // ── Countries ───────────────────────────────────────────
@@ -434,19 +447,59 @@ MockDB.seed('manufacturers', [
 
 // ── Scope Categories ────────────────────────────────────
 MockDB.seed('scopeCategories', [
-  { lScopeCategoryKey: 1, sScopeCategoryName: 'Gastroscope', sRigidOrFlexible: 'F' },
-  { lScopeCategoryKey: 2, sScopeCategoryName: 'Colonoscope', sRigidOrFlexible: 'F' },
-  { lScopeCategoryKey: 3, sScopeCategoryName: 'Bronchoscope', sRigidOrFlexible: 'F' },
-  { lScopeCategoryKey: 4, sScopeCategoryName: 'Duodenoscope', sRigidOrFlexible: 'F' },
-  { lScopeCategoryKey: 5, sScopeCategoryName: 'Enteroscope', sRigidOrFlexible: 'F' },
-  { lScopeCategoryKey: 6, sScopeCategoryName: 'Cystoscope', sRigidOrFlexible: 'R' },
-  { lScopeCategoryKey: 7, sScopeCategoryName: 'Arthroscope', sRigidOrFlexible: 'R' },
-  { lScopeCategoryKey: 8, sScopeCategoryName: 'Laparoscope', sRigidOrFlexible: 'R' },
-  { lScopeCategoryKey: 9, sScopeCategoryName: 'Ureteroscope', sRigidOrFlexible: 'R' },
-  { lScopeCategoryKey: 10, sScopeCategoryName: 'Camera Head', sRigidOrFlexible: 'C' },
-  { lScopeCategoryKey: 11, sScopeCategoryName: 'Light Source', sRigidOrFlexible: 'C' },
-  { lScopeCategoryKey: 12, sScopeCategoryName: 'Biopsy Forceps', sRigidOrFlexible: 'I' },
-  { lScopeCategoryKey: 13, sScopeCategoryName: 'Resectoscope', sRigidOrFlexible: 'I' },
+  { lScopeCategoryKey: 1, sScopeCategoryName: 'Gastroscope', sRigidOrFlexible: 'F', sSize: 'Large', bActive: true },
+  { lScopeCategoryKey: 2, sScopeCategoryName: 'Colonoscope', sRigidOrFlexible: 'F', sSize: 'Large', bActive: true },
+  { lScopeCategoryKey: 3, sScopeCategoryName: 'Bronchoscope', sRigidOrFlexible: 'F', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 4, sScopeCategoryName: 'Duodenoscope', sRigidOrFlexible: 'F', sSize: 'Large', bActive: true },
+  { lScopeCategoryKey: 5, sScopeCategoryName: 'Enteroscope', sRigidOrFlexible: 'F', sSize: 'Large', bActive: true },
+  { lScopeCategoryKey: 6, sScopeCategoryName: 'Cystoscope', sRigidOrFlexible: 'R', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 7, sScopeCategoryName: 'Arthroscope', sRigidOrFlexible: 'R', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 8, sScopeCategoryName: 'Laparoscope', sRigidOrFlexible: 'R', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 9, sScopeCategoryName: 'Ureteroscope', sRigidOrFlexible: 'R', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 10, sScopeCategoryName: 'Camera Head', sRigidOrFlexible: 'C', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 11, sScopeCategoryName: 'Light Source', sRigidOrFlexible: 'C', sSize: 'Large', bActive: true },
+  { lScopeCategoryKey: 12, sScopeCategoryName: 'Biopsy Forceps', sRigidOrFlexible: 'I', sSize: 'Small', bActive: true },
+  { lScopeCategoryKey: 13, sScopeCategoryName: 'Resectoscope', sRigidOrFlexible: 'I', sSize: 'Small', bActive: true },
+]);
+
+// ── Companies ─────────────────────────────────────────
+MockDB.seed('companies', [
+  { lCompanyKey: 1, sCompanyName: 'Total Scope, Inc.', sAbbreviation: 'TSI', sPhone: '610-485-0001', sFax: '610-485-0002', sPeachtreeSubId: 'TSI-001', sAddress1: '200 Industrial Blvd', sCity: 'Upper Chichester', sState: 'PA', sZip: '19061', sRemitAddress1: 'PO Box 1234', sRemitCity: 'Upper Chichester', sRemitState: 'PA', sRemitZip: '19061' },
+  { lCompanyKey: 2, sCompanyName: 'Total Scope South, LLC', sAbbreviation: 'TSS', sPhone: '615-555-0100', sFax: '615-555-0101', sPeachtreeSubId: 'TSS-001', sAddress1: '100 Commerce Way', sCity: 'Nashville', sState: 'TN', sZip: '37210', sRemitAddress1: '100 Commerce Way', sRemitCity: 'Nashville', sRemitState: 'TN', sRemitZip: '37210' },
+]);
+
+// ── Reporting Groups (GPO affiliations) ───────────────
+MockDB.seed('reportingGroups', [
+  { lReportingGroupKey: 1, sGroupName: 'HPG', bActive: true },
+  { lReportingGroupKey: 2, sGroupName: 'Healthnet', bActive: true },
+  { lReportingGroupKey: 3, sGroupName: 'Novation', bActive: true },
+  { lReportingGroupKey: 4, sGroupName: 'Surgical Solutions', bActive: true },
+  { lReportingGroupKey: 5, sGroupName: 'Vizient', bActive: true },
+  { lReportingGroupKey: 6, sGroupName: 'Vizient Carts', bActive: true },
+  { lReportingGroupKey: 7, sGroupName: 'Capital L, LLC', bActive: true },
+]);
+
+// ── Cleaning Systems (Dept Profile) ───────────────────
+MockDB.seed('cleaningSystems', [
+  { lCleaningSystemKey: 1, sCleaningSystemName: 'Medivator', bActive: true },
+  { lCleaningSystemKey: 2, sCleaningSystemName: 'Steris', bActive: true },
+  { lCleaningSystemKey: 3, sCleaningSystemName: 'EvoTech', bActive: true },
+]);
+
+// ── Standard Departments (managed name list) ──────────
+MockDB.seed('standardDepartments', [
+  { lStandardDeptKey: 1, sStandardDeptName: 'Endoscopy', bActive: true },
+  { lStandardDeptKey: 2, sStandardDeptName: 'GI Lab', bActive: true },
+  { lStandardDeptKey: 3, sStandardDeptName: 'Surgery / OR', bActive: true },
+  { lStandardDeptKey: 4, sStandardDeptName: 'Biomedical Engineering', bActive: true },
+  { lStandardDeptKey: 5, sStandardDeptName: 'Pulmonology', bActive: true },
+  { lStandardDeptKey: 6, sStandardDeptName: 'Urology', bActive: true },
+  { lStandardDeptKey: 7, sStandardDeptName: 'Sterile Processing', bActive: true },
+  { lStandardDeptKey: 8, sStandardDeptName: 'ICU / Critical Care', bActive: true },
+  { lStandardDeptKey: 9, sStandardDeptName: 'Cardiology', bActive: true },
+  { lStandardDeptKey: 10, sStandardDeptName: 'Otolaryngology', bActive: true },
+  { lStandardDeptKey: 11, sStandardDeptName: 'Purchasing', bActive: true },
+  { lStandardDeptKey: 12, sStandardDeptName: 'Materials Management', bActive: true },
 ]);
 
 // ── Scope Types (models) ────────────────────────────────
@@ -699,16 +752,16 @@ MockDB.seed('scopes', [
 
 // ── Repair Reasons ──────────────────────────────────────
 MockDB.seed('repairReasons', [
-  { lRepairReasonKey: 1, sRepairReasonDesc: 'Fluid Invasion', sRepairReason: 'Fluid Invasion' },
-  { lRepairReasonKey: 2, sRepairReasonDesc: 'Angulation Failure', sRepairReason: 'Angulation Failure' },
-  { lRepairReasonKey: 3, sRepairReasonDesc: 'Insertion Tube Damage', sRepairReason: 'Insertion Tube Damage' },
-  { lRepairReasonKey: 4, sRepairReasonDesc: 'CCD/Image Failure', sRepairReason: 'CCD/Image Failure' },
-  { lRepairReasonKey: 5, sRepairReasonDesc: 'Light Guide Damage', sRepairReason: 'Light Guide Damage' },
-  { lRepairReasonKey: 6, sRepairReasonDesc: 'Universal Cord Leak', sRepairReason: 'Universal Cord Leak' },
-  { lRepairReasonKey: 7, sRepairReasonDesc: 'Suction Cylinder', sRepairReason: 'Suction Cylinder' },
-  { lRepairReasonKey: 8, sRepairReasonDesc: 'Biopsy Channel', sRepairReason: 'Biopsy Channel' },
-  { lRepairReasonKey: 9, sRepairReasonDesc: 'Preventive Maintenance', sRepairReason: 'Preventive Maintenance' },
-  { lRepairReasonKey: 10, sRepairReasonDesc: 'Evaluation Only', sRepairReason: 'Evaluation Only' },
+  { lRepairReasonKey: 1, sRepairReasonDesc: 'Fluid Invasion', sRepairReason: 'Fluid Invasion', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 2, sRepairReasonDesc: 'Angulation Failure', sRepairReason: 'Angulation Failure', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 3, sRepairReasonDesc: 'Insertion Tube Damage', sRepairReason: 'Insertion Tube Damage', sCategory: 'Avoidable', bActive: true },
+  { lRepairReasonKey: 4, sRepairReasonDesc: 'CCD/Image Failure', sRepairReason: 'CCD/Image Failure', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 5, sRepairReasonDesc: 'Light Guide Damage', sRepairReason: 'Light Guide Damage', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 6, sRepairReasonDesc: 'Universal Cord Leak', sRepairReason: 'Universal Cord Leak', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 7, sRepairReasonDesc: 'Suction Cylinder', sRepairReason: 'Suction Cylinder', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 8, sRepairReasonDesc: 'Biopsy Channel', sRepairReason: 'Biopsy Channel', sCategory: 'Normal Wear & Tear', bActive: true },
+  { lRepairReasonKey: 9, sRepairReasonDesc: 'Preventive Maintenance', sRepairReason: 'Preventive Maintenance', sCategory: 'Preventive', bActive: true },
+  { lRepairReasonKey: 10, sRepairReasonDesc: 'Evaluation Only', sRepairReason: 'Evaluation Only', sCategory: 'Preventive', bActive: true },
 ]);
 
 // ── Repair Levels ───────────────────────────────────────
@@ -721,25 +774,25 @@ MockDB.seed('repairLevels', [
 
 // ── Repair Statuses ─────────────────────────────────────
 MockDB.seed('repairStatuses', [
-  { lRepairStatusID: 1, sRepairStatus: 'Received', nOrdinal: 1 },
-  { lRepairStatusID: 2, sRepairStatus: 'Evaluation', nOrdinal: 2 },
-  { lRepairStatusID: 3, sRepairStatus: 'Waiting for Approval', nOrdinal: 3 },
-  { lRepairStatusID: 4, sRepairStatus: 'In Repair', nOrdinal: 4 },
-  { lRepairStatusID: 5, sRepairStatus: 'On Hold', nOrdinal: 5 },
-  { lRepairStatusID: 6, sRepairStatus: 'Quality Check', nOrdinal: 6 },
-  { lRepairStatusID: 7, sRepairStatus: 'Ready to Ship', nOrdinal: 7 },
-  { lRepairStatusID: 8, sRepairStatus: 'Shipped', nOrdinal: 8 },
-  { lRepairStatusID: 9, sRepairStatus: 'Closed', nOrdinal: 9 },
-  { lRepairStatusID: 10, sRepairStatus: 'Cancelled', nOrdinal: 10 },
+  { lRepairStatusID: 1, sRepairStatus: 'Received', nOrdinal: 1, bActive: true },
+  { lRepairStatusID: 2, sRepairStatus: 'Evaluation', nOrdinal: 2, bActive: true },
+  { lRepairStatusID: 3, sRepairStatus: 'Waiting for Approval', nOrdinal: 3, bActive: true },
+  { lRepairStatusID: 4, sRepairStatus: 'In Repair', nOrdinal: 4, bActive: true },
+  { lRepairStatusID: 5, sRepairStatus: 'On Hold', nOrdinal: 5, bActive: true },
+  { lRepairStatusID: 6, sRepairStatus: 'Quality Check', nOrdinal: 6, bActive: true },
+  { lRepairStatusID: 7, sRepairStatus: 'Ready to Ship', nOrdinal: 7, bActive: true },
+  { lRepairStatusID: 8, sRepairStatus: 'Shipped', nOrdinal: 8, bActive: true },
+  { lRepairStatusID: 9, sRepairStatus: 'Closed', nOrdinal: 9, bActive: true },
+  { lRepairStatusID: 10, sRepairStatus: 'Cancelled', nOrdinal: 10, bActive: true },
 ]);
 
 // ── Delivery Methods ────────────────────────────────────
 MockDB.seed('deliveryMethods', [
-  { lDeliveryMethodKey: 1, sDeliveryMethodDesc: 'FedEx Standard', sDeliveryDesc: 'FedEx Standard' },
-  { lDeliveryMethodKey: 2, sDeliveryMethodDesc: 'FedEx Priority Overnight', sDeliveryDesc: 'FedEx Priority Overnight' },
-  { lDeliveryMethodKey: 3, sDeliveryMethodDesc: 'UPS Ground', sDeliveryDesc: 'UPS Ground' },
-  { lDeliveryMethodKey: 4, sDeliveryMethodDesc: 'TSI Courier', sDeliveryDesc: 'TSI Courier' },
-  { lDeliveryMethodKey: 5, sDeliveryMethodDesc: 'Client Pickup', sDeliveryDesc: 'Client Pickup' },
+  { lDeliveryMethodKey: 1, sDeliveryMethodDesc: 'FedEx Standard', sDeliveryDesc: 'FedEx Standard', nCost: 18.50, bDefaultForRepair: false, bActive: true },
+  { lDeliveryMethodKey: 2, sDeliveryMethodDesc: 'FedEx Priority Overnight', sDeliveryDesc: 'FedEx Priority Overnight', nCost: 42.75, bDefaultForRepair: true, bActive: true },
+  { lDeliveryMethodKey: 3, sDeliveryMethodDesc: 'UPS Ground', sDeliveryDesc: 'UPS Ground', nCost: 14.00, bDefaultForRepair: false, bActive: true },
+  { lDeliveryMethodKey: 4, sDeliveryMethodDesc: 'TSI Courier', sDeliveryDesc: 'TSI Courier', nCost: 0, bDefaultForRepair: false, bActive: true },
+  { lDeliveryMethodKey: 5, sDeliveryMethodDesc: 'Client Pickup', sDeliveryDesc: 'Client Pickup', nCost: 0, bDefaultForRepair: false, bActive: true },
 ]);
 
 // ── Patient Safety Levels ───────────────────────────────

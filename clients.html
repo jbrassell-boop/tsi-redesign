@@ -126,6 +126,7 @@
         <div class="tab" onclick="showTab('departments',this)">Departments</div>
         <div class="tab" onclick="showTab('flags',this)">Flags</div>
         <div class="tab" onclick="showTab('contacts',this)">Contacts</div>
+        <div class="tab" onclick="showTab('reportcard',this)">Report Card</div>
       </div>
 
       <!-- ══════════ MAIN TAB ══════════ -->
@@ -427,6 +428,59 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ══════════ REPORT CARD TAB ══════════ -->
+      <div id="tab-reportcard" class="tab-content show-block" style="display:none">
+        <div style="padding:20px;max-width:700px">
+          <div class="panel">
+            <div class="panel-head">Client Report Card Generator</div>
+            <div class="panel-body">
+              <p style="font-size:11px;color:var(--muted);margin:0 0 16px">Generate a consolidated performance report for this client. Select parameters and click Generate.</p>
+              <div class="fg g2">
+                <div class="ff">
+                  <label>Department</label>
+                  <select id="rc-dept" class="inp"><option value="">All Departments</option></select>
+                </div>
+                <div class="ff">
+                  <label>Contract</label>
+                  <select id="rc-contract" class="inp"><option value="">All Contracts</option></select>
+                </div>
+              </div>
+              <div class="fg g2">
+                <div class="ff">
+                  <label>Date From</label>
+                  <input type="date" class="inp" id="rc-from"/>
+                </div>
+                <div class="ff">
+                  <label>Date To</label>
+                  <input type="date" class="inp" id="rc-to"/>
+                </div>
+              </div>
+              <div class="fg g2">
+                <div class="ff">
+                  <label>Report Type</label>
+                  <select id="rc-type" class="inp">
+                    <option>Monthly Breakdown (No Serial)</option>
+                    <option>Monthly Breakdown (With Serial)</option>
+                    <option>Total Counts by Serial</option>
+                    <option>Loaner Requests</option>
+                  </select>
+                </div>
+                <div class="ff" style="display:flex;align-items:flex-end;padding-bottom:2px">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px">
+                    <input type="checkbox" id="rc-inactive"/> Include Inactive Departments
+                  </label>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px">
+                <button class="btn btn-navy" onclick="generateReportCard()">Generate Report</button>
+                <button class="btn btn-outline" onclick="exportReportCard()">Export to Excel</button>
+              </div>
+            </div>
+          </div>
+          <div id="rc-preview" style="margin-top:16px"></div>
         </div>
       </div>
 
@@ -1809,13 +1863,14 @@ async function doDeleteClient() {
 }
 
 function showTab(name, el) {
-  ['main','departments','flags','contacts'].forEach(t => {
+  ['main','departments','flags','contacts','reportcard'].forEach(function(t) {
     document.getElementById('tab-'+t).style.display = 'none';
   });
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  const tab = document.getElementById('tab-'+name);
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  var tab = document.getElementById('tab-'+name);
   tab.style.display = (name === 'main') ? 'flex' : 'block';
   el.classList.add('active');
+  if (name === 'reportcard') initReportCard();
 }
 
 function filterClients(val) {
@@ -2261,6 +2316,64 @@ function formatPhone(e) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', formatPhone);
 });
+
+// ══════════════════════════════════════════════════════════
+// REPORT CARD TAB
+// ══════════════════════════════════════════════════════════
+function initReportCard() {
+  var deptSel = document.getElementById('rc-dept');
+  if (deptSel.options.length <= 1) {
+    ['Endoscopy', 'Surgery - Main OR', 'Sterile Processing', 'GI Lab', 'Pulmonology'].forEach(function(d) {
+      var o = document.createElement('option');
+      o.textContent = d;
+      deptSel.appendChild(o);
+    });
+  }
+  var cSel = document.getElementById('rc-contract');
+  if (cSel.options.length <= 1) {
+    ['NC26-001 (Performance)', 'NC26-002 (Preferred)', 'NC26-003 (PSA)'].forEach(function(c) {
+      var o = document.createElement('option');
+      o.textContent = c;
+      cSel.appendChild(o);
+    });
+  }
+}
+
+function generateReportCard() {
+  var type = document.getElementById('rc-type').value;
+  var html = '<div class="panel"><div class="panel-head">Report Preview — ' + type + '</div><div class="panel-body">';
+  if (type.indexOf('Monthly') >= 0) {
+    html += '<table class="tbl"><thead><tr><th>Month</th><th>Repairs</th><th>Revenue</th><th>Avg TAT</th><th>SLA %</th></tr></thead><tbody>';
+    var months = ['Oct 2025','Nov 2025','Dec 2025','Jan 2026','Feb 2026','Mar 2026'];
+    months.forEach(function(m) {
+      var repairs = 12 + Math.floor(Math.random() * 8);
+      var rev = (repairs * 850 + Math.floor(Math.random() * 2000)).toLocaleString();
+      var tat = (5 + Math.random() * 4).toFixed(1);
+      var sla = (88 + Math.random() * 12).toFixed(1);
+      html += '<tr><td>' + m + '</td><td>' + repairs + '</td><td>$' + rev + '</td><td>' + tat + 'd</td><td>' + sla + '%</td></tr>';
+    });
+    html += '</tbody></table>';
+  } else if (type === 'Total Counts by Serial') {
+    html += '<table class="tbl"><thead><tr><th>Serial #</th><th>Model</th><th>Repairs</th><th>Total Cost</th><th>Last Service</th></tr></thead><tbody>';
+    [['SN-FL2201','CF-HQ190L',4,'$3,400','03/01/2026'],['SN-FL2215','GIF-H190',3,'$2,650','02/28/2026'],['SN-FL2230','PCF-H190L',6,'$5,120','03/10/2026']].forEach(function(r) {
+      html += '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td>' + r[4] + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  } else {
+    html += '<table class="tbl"><thead><tr><th>Request #</th><th>Scope Type</th><th>Requested</th><th>Fulfilled</th><th>Duration</th></tr></thead><tbody>';
+    [['LR-2026-001','Colonoscope','02/15/2026','02/17/2026','2 days'],['LR-2026-003','Gastroscope','02/22/2026','02/24/2026','2 days'],['LR-2026-007','Duodenoscope','03/05/2026','03/08/2026','3 days']].forEach(function(r) {
+      html += '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td>' + r[4] + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div></div>';
+  document.getElementById('rc-preview').innerHTML = html;
+  if (typeof showToast === 'function') showToast('Report generated', 'success');
+}
+
+function exportReportCard() {
+  if (typeof showToast === 'function') showToast('Exporting to Excel...', 'info');
+}
 
 // ── Update flags count when flags change ─────────────
 const flagsTbody = document.getElementById('flags-tbody');

@@ -30,6 +30,17 @@
 
     /* TABLE WRAP */
     .tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(var(--primary-rgb),.06)}
+
+    /* RISK BADGES */
+    .b-high-risk{background:#FEF2F2;color:var(--red);font-weight:600;padding:2px 8px;border-radius:6px;font-size:11px;display:inline-block}
+    .b-moderate{background:#FFFBEB;color:var(--amber);font-weight:600;padding:2px 8px;border-radius:6px;font-size:11px;display:inline-block}
+    .b-low-risk{background:#F0FDF4;color:var(--green);font-weight:600;padding:2px 8px;border-radius:6px;font-size:11px;display:inline-block}
+
+    /* TOOLBAR ROW for At Risk / Trending */
+    .toolbar-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+    .toolbar-row label{font-size:11px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}
+    .toolbar-row label input[type="checkbox"]{margin:0}
+    .toolbar-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
   </style>
 </head>
 <body>
@@ -53,6 +64,8 @@
         <div class="subnav-tab" data-tab="hold">Clients on Hold</div>
         <div class="subnav-tab" data-tab="payments">Invoice Payments</div>
         <div class="subnav-tab" data-tab="gl">GL Accounts</div>
+        <div class="subnav-tab" data-tab="atrisk">At Risk</div>
+        <div class="subnav-tab" data-tab="trending">Trending</div>
       </div>
 
       <!-- STAT STRIP -->
@@ -104,6 +117,40 @@
           </select>
         </div>
         <button class="btn btn-navy" id="btnNewInvoice">+ New Invoice</button>
+      </div>
+
+      <!-- AT RISK TOOLBAR -->
+      <div class="toolbar-row" id="atriskToolbar" style="display:none">
+        <label><input type="checkbox" checked data-expense="outsource"/> Outsource</label>
+        <label><input type="checkbox" checked data-expense="gpo"/> GPO</label>
+        <label><input type="checkbox" checked data-expense="inventory"/> Inventory</label>
+        <label><input type="checkbox" checked data-expense="commissions"/> Commissions</label>
+        <label><input type="checkbox" checked data-expense="shipping"/> Shipping</label>
+        <label><input type="checkbox" checked data-expense="labor"/> Labor</label>
+        <div class="toolbar-sep"></div>
+        <label>Min Invoices <input class="inp" type="number" id="arMinInvoices" value="1" min="0" style="width:60px"/></label>
+        <div class="toolbar-sep"></div>
+        <label>Summary By
+          <select class="inp" id="arSummaryBy" style="width:140px;cursor:pointer">
+            <option value="department">Department</option>
+            <option value="client">Client</option>
+            <option value="salesrep">Sales Rep</option>
+          </select>
+        </label>
+        <div class="toolbar-sep"></div>
+        <input class="inp" id="arSearch" placeholder="Search…" style="width:200px"/>
+      </div>
+
+      <!-- TRENDING TOOLBAR -->
+      <div class="toolbar-row" id="trendingToolbar" style="display:none">
+        <label>Date From <input class="inp" type="date" id="trDateFrom" style="width:150px"/></label>
+        <label>Date To <input class="inp" type="date" id="trDateTo" style="width:150px"/></label>
+        <div class="toolbar-sep"></div>
+        <input class="inp" id="trRepairDetail" placeholder="Repair Detail…" style="width:160px"/>
+        <input class="inp" id="trClient" placeholder="Client…" style="width:160px"/>
+        <input class="inp" id="trDepartment" placeholder="Department…" style="width:160px"/>
+        <div class="toolbar-sep"></div>
+        <button class="btn btn-navy" id="btnTrSearch" onclick="filterTrending()">Search</button>
       </div>
 
       <!-- TABLE -->
@@ -208,7 +255,9 @@
     drafts:      '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Created</th><th>Status</th><th style="width:80px"></th></tr>',
     hold:        '<tr><th>Client</th><th>Department</th><th>On Hold Since</th><th>Reason</th><th style="width:100px"></th></tr>',
     payments:    '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment Date</th><th>Method</th><th style="width:80px"></th></tr>',
-    gl:          '<tr><th>Account #</th><th>Account Name</th><th>Type</th><th>Description</th><th style="width:80px"></th></tr>'
+    gl:          '<tr><th>Account #</th><th>Account Name</th><th>Type</th><th>Description</th><th style="width:80px"></th></tr>',
+    atrisk:      '<tr><th>Name</th><th style="text-align:right">Total Revenue</th><th style="text-align:right">Total Expenses</th><th style="text-align:right">Profit Margin</th><th style="text-align:right">Invoices</th><th>Risk Level</th></tr>',
+    trending:    '<tr><th>Period</th><th style="text-align:right">Repairs In</th><th style="text-align:right">Repairs Out</th><th style="text-align:right">Avg TAT</th><th style="text-align:right">Revenue</th><th style="text-align:right">Expenses</th><th style="text-align:right">Margin %</th></tr>'
   };
 
   // ── Demo data sets ──────────────────────────────────────
@@ -241,6 +290,24 @@
       { sAccountNumber:'4000', sAccountName:'Repair Revenue', sType:'Revenue', sDescription:'Income from repair services', lGLAccountKey:3 },
       { sAccountNumber:'4100', sAccountName:'Product Sales Revenue', sType:'Revenue', sDescription:'Income from product sales', lGLAccountKey:4 },
       { sAccountNumber:'5000', sAccountName:'Cost of Goods Sold', sType:'Expense', sDescription:'Parts and materials', lGLAccountKey:5 }
+    ],
+    atrisk: [
+      { sName:'Endoscopy Dept – West Side GI', dblRevenue:18200, dblExpenses:19800, dblMargin:-8.79, nInvoices:12, sRisk:'High Risk', expenses:{ outsource:6200, gpo:3100, inventory:4500, commissions:1800, shipping:1200, labor:3000 } },
+      { sName:'GI Lab – Shreveport Endoscopy', dblRevenue:9400, dblExpenses:10100, dblMargin:-7.45, nInvoices:6, sRisk:'High Risk', expenses:{ outsource:3200, gpo:1500, inventory:2400, commissions:900, shipping:600, labor:1500 } },
+      { sName:'Surgery – Tift Regional', dblRevenue:31500, dblExpenses:30200, dblMargin:4.13, nInvoices:18, sRisk:'Moderate', expenses:{ outsource:9000, gpo:5100, inventory:7200, commissions:3600, shipping:1800, labor:3500 } },
+      { sName:'Central Sterile – 88th Medical', dblRevenue:14800, dblExpenses:14200, dblMargin:4.05, nInvoices:9, sRisk:'Moderate', expenses:{ outsource:4200, gpo:2100, inventory:3500, commissions:1400, shipping:800, labor:2200 } },
+      { sName:'Pulmonology – Nashville General', dblRevenue:22100, dblExpenses:21500, dblMargin:2.71, nInvoices:14, sRisk:'Moderate', expenses:{ outsource:6500, gpo:3200, inventory:5100, commissions:2500, shipping:1200, labor:3000 } },
+      { sName:'Endoscopy – Northside Hospital', dblRevenue:27600, dblExpenses:22400, dblMargin:18.84, nInvoices:16, sRisk:'Low', expenses:{ outsource:6800, gpo:3400, inventory:5200, commissions:2800, shipping:1400, labor:2800 } },
+      { sName:'GI Lab – Metro Health', dblRevenue:19300, dblExpenses:16100, dblMargin:16.58, nInvoices:11, sRisk:'Low', expenses:{ outsource:4800, gpo:2400, inventory:3800, commissions:1900, shipping:1000, labor:2200 } },
+      { sName:'Surgery – Nashville General', dblRevenue:35200, dblExpenses:29800, dblMargin:15.34, nInvoices:22, sRisk:'Low', expenses:{ outsource:9200, gpo:4600, inventory:7000, commissions:3500, shipping:1800, labor:3700 } }
+    ],
+    trending: [
+      { sPeriod:'Oct 2025', nIn:42, nOut:38, sAvgTAT:'6.2d', dblRevenue:58400, dblExpenses:49200, dblMarginPct:15.75 },
+      { sPeriod:'Nov 2025', nIn:47, nOut:41, sAvgTAT:'5.8d', dblRevenue:63100, dblExpenses:54800, dblMarginPct:13.15 },
+      { sPeriod:'Dec 2025', nIn:35, nOut:44, sAvgTAT:'7.1d', dblRevenue:52800, dblExpenses:48600, dblMarginPct:7.95 },
+      { sPeriod:'Jan 2026', nIn:51, nOut:46, sAvgTAT:'5.4d', dblRevenue:71200, dblExpenses:62100, dblMarginPct:12.78 },
+      { sPeriod:'Feb 2026', nIn:48, nOut:50, sAvgTAT:'4.9d', dblRevenue:67500, dblExpenses:64300, dblMarginPct:4.74 },
+      { sPeriod:'Mar 2026', nIn:29, nOut:22, sAvgTAT:'5.6d', dblRevenue:38900, dblExpenses:41200, dblMarginPct:-5.91 }
     ]
   };
 
@@ -249,9 +316,11 @@
     activeTab = tab;
     head.innerHTML = HEADERS[tab] || HEADERS.outstanding;
 
-    // Show/hide filters based on tab
-    const showFilters = (tab === 'outstanding' || tab === 'drafts' || tab === 'payments');
+    // Show/hide filters and toolbars based on tab
+    var showFilters = (tab === 'outstanding' || tab === 'drafts' || tab === 'payments');
     filterRow.style.display = showFilters ? '' : 'none';
+    document.getElementById('atriskToolbar').style.display = (tab === 'atrisk') ? '' : 'none';
+    document.getElementById('trendingToolbar').style.display = (tab === 'trending') ? '' : 'none';
 
     // Update active chip highlight
     document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
@@ -268,6 +337,15 @@
     try {
       let raw;
       const pg = { Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} };
+      // At Risk and Trending use local demo data only (no API endpoint)
+      if (tab === 'atrisk' || tab === 'trending') {
+        rows = DEMO[tab] || [];
+        isLive = false;
+        API.UI.updateDemoBadge('demo');
+        if (tab === 'atrisk') { renderAtRisk(); return; }
+        if (tab === 'trending') { renderTrending(); return; }
+      }
+
       switch (tab) {
         case 'outstanding': raw = await API.getOutstandingInvoices(pg); break;
         case 'drafts':      raw = await API.getDraftInvoices(pg); break;
@@ -284,6 +362,9 @@
       rows = DEMO[tab] || [];
       isLive = false;
       API.UI.updateDemoBadge('demo');
+      // For atrisk/trending, use dedicated renderers
+      if (tab === 'atrisk') { renderAtRisk(); return; }
+      if (tab === 'trending') { renderTrending(); return; }
     }
 
     populateClientFilter();
@@ -367,6 +448,8 @@
       case 'hold':        renderHold(data); break;
       case 'payments':    renderPayments(data); break;
       case 'gl':          renderGL(data); break;
+      case 'atrisk':      renderAtRisk(); break;
+      case 'trending':    renderTrending(); break;
     }
   }
 
@@ -439,6 +522,108 @@
     }).join('');
   }
 
+  // ── At Risk: render & filter ───────────────────────────
+  function renderAtRisk() {
+    head.innerHTML = HEADERS.atrisk;
+    var data = filterAtRiskData();
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No at-risk records found</td></tr>';
+      return;
+    }
+    body.innerHTML = data.map(function(r) {
+      var marginStyle = r.dblMargin < 0 ? 'color:var(--red);font-weight:700' : (r.dblMargin < 10 ? 'color:var(--amber);font-weight:600' : 'color:var(--green);font-weight:600');
+      var riskClass = r.sRisk === 'High Risk' ? 'b-high-risk' : (r.sRisk === 'Moderate' ? 'b-moderate' : 'b-low-risk');
+      return '<tr>' +
+        '<td style="font-weight:600">' + esc(r.sName) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--navy)">' + fmt$(r._filteredRevenue != null ? r._filteredRevenue : r.dblRevenue) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--muted)">' + fmt$(r._filteredExpenses != null ? r._filteredExpenses : r.dblExpenses) + '</td>' +
+        '<td style="text-align:right;' + marginStyle + '">' + (r._filteredMargin != null ? r._filteredMargin : r.dblMargin).toFixed(2) + '%</td>' +
+        '<td style="text-align:right">' + r.nInvoices + '</td>' +
+        '<td><span class="' + riskClass + '">' + esc(r.sRisk) + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function filterAtRiskData() {
+    var q = (document.getElementById('arSearch').value || '').toLowerCase();
+    var minInv = parseInt(document.getElementById('arMinInvoices').value, 10) || 0;
+    var checkedExpenses = [];
+    document.querySelectorAll('#atriskToolbar input[data-expense]').forEach(function(cb) {
+      if (cb.checked) checkedExpenses.push(cb.getAttribute('data-expense'));
+    });
+
+    var data = (DEMO.atrisk || []).slice();
+    return data.filter(function(r) {
+      if (q && r.sName.toLowerCase().indexOf(q) === -1) return false;
+      if (r.nInvoices < minInv) return false;
+      // Recalculate expenses based on checked categories
+      if (r.expenses) {
+        var filteredExp = 0;
+        checkedExpenses.forEach(function(cat) { filteredExp += (r.expenses[cat] || 0); });
+        r._filteredExpenses = filteredExp;
+        r._filteredRevenue = r.dblRevenue;
+        r._filteredMargin = r._filteredRevenue > 0 ? ((r._filteredRevenue - filteredExp) / r._filteredRevenue) * 100 : 0;
+      }
+      return true;
+    });
+  }
+
+  window.filterAtRisk = function() {
+    renderAtRisk();
+  };
+
+  // ── Trending: render & filter ─────────────────────────
+  function renderTrending() {
+    head.innerHTML = HEADERS.trending;
+    var data = filterTrendingData();
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No trending data found</td></tr>';
+      return;
+    }
+    body.innerHTML = data.map(function(r) {
+      var marginStyle = r.dblMarginPct < 0 ? 'color:var(--red);font-weight:700' : (r.dblMarginPct < 10 ? 'color:var(--amber);font-weight:600' : 'color:var(--green);font-weight:600');
+      return '<tr>' +
+        '<td style="font-weight:600">' + esc(r.sPeriod) + '</td>' +
+        '<td style="text-align:right">' + r.nIn + '</td>' +
+        '<td style="text-align:right">' + r.nOut + '</td>' +
+        '<td style="text-align:right;color:var(--muted)">' + esc(r.sAvgTAT) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--navy)">' + fmt$(r.dblRevenue) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:var(--muted)">' + fmt$(r.dblExpenses) + '</td>' +
+        '<td style="text-align:right;' + marginStyle + '">' + r.dblMarginPct.toFixed(2) + '%</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function filterTrendingData() {
+    var dateFrom = document.getElementById('trDateFrom').value;
+    var dateTo = document.getElementById('trDateTo').value;
+    var repairQ = (document.getElementById('trRepairDetail').value || '').toLowerCase();
+    var clientQ = (document.getElementById('trClient').value || '').toLowerCase();
+    var deptQ = (document.getElementById('trDepartment').value || '').toLowerCase();
+
+    var data = (DEMO.trending || []).slice();
+    // Date filtering: parse period "Mon YYYY" to approximate date
+    var MONTHS = { 'jan':0,'feb':1,'mar':2,'apr':3,'may':4,'jun':5,'jul':6,'aug':7,'sep':8,'oct':9,'nov':10,'dec':11 };
+    return data.filter(function(r) {
+      if (dateFrom || dateTo) {
+        var parts = r.sPeriod.split(' ');
+        var mIdx = MONTHS[(parts[0] || '').toLowerCase().substring(0, 3)];
+        var yr = parseInt(parts[1], 10);
+        if (!isNaN(mIdx) && !isNaN(yr)) {
+          var periodDate = new Date(yr, mIdx, 1);
+          if (dateFrom && periodDate < new Date(dateFrom)) return false;
+          if (dateTo && periodDate > new Date(dateTo)) return false;
+        }
+      }
+      // Text filters are placeholders for future API integration; demo data has no client/dept/detail fields
+      return true;
+    });
+  }
+
+  window.filterTrending = function() {
+    renderTrending();
+  };
+
   // ── Global: switch tab from chip click ──────────────────
   window.switchTab = function(tab, filter) {
     document.querySelectorAll('.subnav-tab').forEach(t => {
@@ -485,6 +670,22 @@
   });
   filterStatus.addEventListener('change', renderRows);
   filterClient.addEventListener('change', renderRows);
+
+  // ── Wire At Risk toolbar ──────────────────────────────
+  document.querySelectorAll('#atriskToolbar input[data-expense]').forEach(function(cb) {
+    cb.addEventListener('change', function() { if (activeTab === 'atrisk') renderAtRisk(); });
+  });
+  document.getElementById('arMinInvoices').addEventListener('input', function() { if (activeTab === 'atrisk') renderAtRisk(); });
+  document.getElementById('arSummaryBy').addEventListener('change', function() { if (activeTab === 'atrisk') renderAtRisk(); });
+  var arSearchTimer = null;
+  document.getElementById('arSearch').addEventListener('input', function() {
+    clearTimeout(arSearchTimer);
+    arSearchTimer = setTimeout(function() { if (activeTab === 'atrisk') renderAtRisk(); }, 200);
+  });
+
+  // ── Wire Trending toolbar ────────────────────────────
+  document.getElementById('trDateFrom').addEventListener('change', function() { if (activeTab === 'trending') renderTrending(); });
+  document.getElementById('trDateTo').addEventListener('change', function() { if (activeTab === 'trending') renderTrending(); });
 
   // ── Init ───────────────────────────────────────────────
   API.UI.init();

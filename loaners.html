@@ -127,6 +127,20 @@
     .detail-val{font-size:12px;color:var(--text);font-weight:500;flex:1}
     .detail-section{background:#F7F8FC;border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column}
     .detail-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+
+    /* REQUEST STATUS BADGES */
+    .badge-pending{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+    .badge-approved{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}
+    .badge-fulfilled{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+    .badge-denied{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+
+    /* REQUESTS TAB TOOLBAR */
+    .field-inline{display:flex;align-items:center;gap:5px}
+    .field-inline label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .field-inline input,
+    .field-inline select{height:28px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:var(--text);outline:none;background:var(--card)}
+    .field-inline input:focus,
+    .field-inline select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
   </style>
 </head>
 <body>
@@ -179,6 +193,7 @@
         <div class="subnav-tab active" data-tab="task">Task Loaners</div>
         <div class="subnav-tab" data-tab="active">Active Loaners</div>
         <div class="subnav-tab" data-tab="needs">Scope Needs</div>
+        <div class="subnav-tab" data-tab="requests">Requests</div>
       </div>
 
       <!-- TOOLBAR -->
@@ -203,6 +218,22 @@
             Log Loaner
           </button>
         </div>
+      </div>
+
+      <!-- REQUESTS TOOLBAR (shown only on Requests tab) -->
+      <div class="toolbar" id="requestsToolbar" style="display:none">
+        <div class="field-inline"><label>From</label><input type="date" id="reqDateFrom" value=""/></div>
+        <div class="field-inline"><label>To</label><input type="date" id="reqDateTo" value=""/></div>
+        <div class="field-inline"><label>Status</label>
+          <select id="reqStatusFilter">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Fulfilled">Fulfilled</option>
+            <option value="Denied">Denied</option>
+          </select>
+        </div>
+        <div class="toolbar-search"><input class="search-input" id="reqSearchInput" type="text" placeholder="Search requests…"/></div>
       </div>
 
       <!-- DATA TABLE -->
@@ -992,7 +1023,12 @@ function switchTab(tab) {
   const btnLog      = document.getElementById('btnLogLoaner');
   const segGroup    = document.getElementById('statusFilter');
 
+  var mainToolbar = document.getElementById('toolbar');
+  var reqToolbar  = document.getElementById('requestsToolbar');
+
   if (tab === 'task') {
+    mainToolbar.style.display = '';
+    reqToolbar.style.display = 'none';
     filterGroup.style.display = '';
     filterSep.style.display = '';
     btnLog.style.display = '';
@@ -1005,6 +1041,8 @@ function switchTab(tab) {
     statusFilter = 'All';
     loadTaskLoaners();
   } else if (tab === 'active') {
+    mainToolbar.style.display = '';
+    reqToolbar.style.display = 'none';
     filterGroup.style.display = '';
     filterSep.style.display = '';
     btnLog.style.display = 'none';
@@ -1015,11 +1053,18 @@ function switchTab(tab) {
     statusFilter = 'All';
     loadActiveLoaners();
   } else if (tab === 'needs') {
+    mainToolbar.style.display = '';
+    reqToolbar.style.display = 'none';
     filterGroup.style.display = 'none';
     filterSep.style.display = 'none';
     btnLog.style.display = 'none';
     statusFilter = 'All';
     renderScopeNeeds();
+  } else if (tab === 'requests') {
+    mainToolbar.style.display = 'none';
+    reqToolbar.style.display = '';
+    statusFilter = 'All';
+    renderRequests();
   }
 
   // Reset chip highlight
@@ -1048,16 +1093,130 @@ document.getElementById('statusFilter').addEventListener('click', function(e) {
 document.getElementById('searchInput').addEventListener('input', function() {
   clearTimeout(searchTimer);
   searchTerm = this.value;
-  searchTimer = setTimeout(() => {
+  searchTimer = setTimeout(function() {
     if (activeTab === 'task') renderTaskLoaners();
-    else renderActiveLoaners();
+    else if (activeTab === 'active') renderActiveLoaners();
+    else if (activeTab === 'requests') filterRequests();
   }, 200);
+});
+
+// Requests toolbar events
+document.getElementById('reqDateFrom').addEventListener('change', function() { requestsDateFrom = this.value; filterRequests(); });
+document.getElementById('reqDateTo').addEventListener('change', function() { requestsDateTo = this.value; filterRequests(); });
+document.getElementById('reqStatusFilter').addEventListener('change', function() { requestsStatusFilter = this.value; filterRequests(); });
+document.getElementById('reqSearchInput').addEventListener('input', function() {
+  searchTerm = this.value;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() { filterRequests(); }, 200);
 });
 
 // Make row-click functions global
 window.showTaskDetail    = showTaskDetail;
 window.showActiveDetail  = showActiveDetail;
 window.openEditDrawer    = openEditDrawer;
+
+// ═══════════════════════════════════════════════════════
+//  REQUESTS TAB — demo data + render
+// ═══════════════════════════════════════════════════════
+var DEMO_REQUESTS = [
+  { requestNum: 'LR-2026-001', client: 'Penn Medicine', department: 'GI Lab', scopeType: 'Colonoscope', requestedDate: '2026-02-10', neededBy: '2026-02-14', status: 'Fulfilled', assignedLoaner: 'SN-4410827' },
+  { requestNum: 'LR-2026-002', client: 'Jefferson Health', department: 'Endoscopy', scopeType: 'Gastroscope', requestedDate: '2026-02-15', neededBy: '2026-02-20', status: 'Fulfilled', assignedLoaner: 'SN-3382910' },
+  { requestNum: 'LR-2026-003', client: 'Main Line Health', department: 'Pulmonology', scopeType: 'Bronchoscope', requestedDate: '2026-02-22', neededBy: '2026-02-28', status: 'Denied', assignedLoaner: '' },
+  { requestNum: 'LR-2026-004', client: 'ChristianaCare', department: 'GI Lab', scopeType: 'Duodenoscope', requestedDate: '2026-03-01', neededBy: '2026-03-05', status: 'Fulfilled', assignedLoaner: 'SN-5519034' },
+  { requestNum: 'LR-2026-005', client: 'WellSpan Health', department: 'Surgery', scopeType: 'Colonoscope', requestedDate: '2026-03-04', neededBy: '2026-03-10', status: 'Approved', assignedLoaner: '' },
+  { requestNum: 'LR-2026-006', client: 'Penn Medicine', department: 'Endoscopy', scopeType: 'Gastroscope', requestedDate: '2026-03-06', neededBy: '2026-03-12', status: 'Pending', assignedLoaner: '' },
+  { requestNum: 'LR-2026-007', client: 'Temple Health', department: 'GI Lab', scopeType: 'Sigmoidoscope', requestedDate: '2026-03-08', neededBy: '2026-03-14', status: 'Pending', assignedLoaner: '' },
+  { requestNum: 'LR-2026-008', client: 'Crozer Health', department: 'Pulmonology', scopeType: 'Bronchoscope', requestedDate: '2026-03-10', neededBy: '2026-03-16', status: 'Approved', assignedLoaner: '' },
+  { requestNum: 'LR-2026-009', client: 'Jefferson Health', department: 'Surgery', scopeType: 'Ureteroscope', requestedDate: '2026-03-12', neededBy: '2026-03-18', status: 'Pending', assignedLoaner: '' },
+  { requestNum: 'LR-2026-010', client: 'Main Line Health', department: 'GI Lab', scopeType: 'Duodenoscope', requestedDate: '2026-03-14', neededBy: '2026-03-20', status: 'Denied', assignedLoaner: '' }
+];
+
+var requestsStatusFilter = 'All';
+var requestsDateFrom = '';
+var requestsDateTo = '';
+
+function requestStatusBadge(s) {
+  var map = {
+    'Pending':   'badge-pending',
+    'Approved':  'badge-approved',
+    'Fulfilled': 'badge-fulfilled',
+    'Denied':    'badge-denied'
+  };
+  return '<span class="badge ' + (map[s] || '') + '">' + esc(s) + '</span>';
+}
+
+function renderRequests() {
+  // Sync toolbar state
+  document.getElementById('reqDateFrom').value = requestsDateFrom;
+  document.getElementById('reqDateTo').value = requestsDateTo;
+  document.getElementById('reqStatusFilter').value = requestsStatusFilter;
+  document.getElementById('reqSearchInput').value = searchTerm;
+  filterRequests();
+}
+
+function getFilteredRequests() {
+  var q = searchTerm.toLowerCase();
+  var sf = requestsStatusFilter;
+  return DEMO_REQUESTS.filter(function(r) {
+    if (sf !== 'All' && r.status !== sf) return false;
+    if (requestsDateFrom && r.requestedDate < requestsDateFrom) return false;
+    if (requestsDateTo && r.requestedDate > requestsDateTo) return false;
+    if (q) {
+      var hay = [r.requestNum, r.client, r.department, r.scopeType, r.status, r.assignedLoaner]
+        .map(function(v) { return (v || '').toLowerCase(); }).join(' ');
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function filterRequests() {
+  var thead = document.getElementById('tableHead');
+  thead.innerHTML = '<tr>' +
+    '<th style="width:100px">Request #</th>' +
+    '<th>Client</th>' +
+    '<th>Department</th>' +
+    '<th>Scope Type</th>' +
+    '<th style="width:100px">Requested</th>' +
+    '<th style="width:100px">Needed By</th>' +
+    '<th style="width:80px;text-align:center">Status</th>' +
+    '<th style="width:110px">Assigned Loaner</th>' +
+  '</tr>';
+
+  var filtered = getFilteredRequests();
+  var tbody = document.getElementById('tableBody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>' +
+      '<div>No requests found</div>' +
+    '</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(function(r) {
+      var neededDate = new Date(r.neededBy);
+      var now = new Date();
+      var urgent = (r.status === 'Pending' || r.status === 'Approved') && neededDate <= now;
+      var neededStyle = urgent ? 'color:var(--red);font-weight:700' : '';
+      return '<tr>' +
+        '<td style="font-weight:600;color:var(--blue)">' + esc(r.requestNum) + '</td>' +
+        '<td>' + esc(r.client) + '</td>' +
+        '<td style="color:var(--muted)">' + esc(r.department) + '</td>' +
+        '<td style="font-weight:500">' + esc(r.scopeType) + '</td>' +
+        '<td>' + fmtDate(r.requestedDate) + '</td>' +
+        '<td style="' + neededStyle + '">' + fmtDate(r.neededBy) + '</td>' +
+        '<td style="text-align:center">' + requestStatusBadge(r.status) + '</td>' +
+        '<td style="font-family:monospace;font-size:11px">' + esc(r.assignedLoaner || '\u2014') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  var pendingCount = filtered.filter(function(r) { return r.status === 'Pending'; }).length;
+  var fulfilledCount = filtered.filter(function(r) { return r.status === 'Fulfilled'; }).length;
+  document.getElementById('recordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> request' + (filtered.length !== 1 ? 's' : '') +
+    ' &nbsp;\u00b7&nbsp; <strong>' + pendingCount + '</strong> pending' +
+    ' &nbsp;\u00b7&nbsp; <strong>' + fulfilledCount + '</strong> fulfilled';
+}
 
 // ═══════════════════════════════════════════════════════
 //  INIT
