@@ -78,6 +78,30 @@
       <div class="mtab" onclick="switchTab('sold', this)">Sold</div>
     </div>
 
+    <!-- STAT STRIP -->
+    <div class="stat-strip" id="acqKpiStrip">
+      <div class="stat-chip">
+        <div class="s-icon" style="background:#E3F2FD;color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <div class="s-data"><div class="s-val s-navy" id="kpiInHouse">0</div><div class="s-lbl">In-House</div></div>
+      </div>
+      <div class="stat-chip">
+        <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">↺</div>
+        <div class="s-data"><div class="s-val s-amber" id="kpiConsigned">0</div><div class="s-lbl">Consigned</div></div>
+      </div>
+      <div class="stat-chip">
+        <div class="s-icon" style="background:#F0FDF4;color:var(--green)">✓</div>
+        <div class="s-data"><div class="s-val s-green" id="kpiSold">0</div><div class="s-lbl">Sold</div></div>
+      </div>
+      <div class="stat-chip">
+        <div class="s-icon" style="background:#E3EAF6;color:var(--navy)">$</div>
+        <div class="s-data"><div class="s-val s-navy" id="kpiInHouseCost">$0</div><div class="s-lbl">In-House Value</div></div>
+      </div>
+      <div class="stat-chip">
+        <div class="s-icon" style="background:#F0FDF4;color:var(--green)">$</div>
+        <div class="s-data"><div class="s-val s-green" id="kpiSoldRevenue">$0</div><div class="s-lbl">Sold Revenue</div></div>
+      </div>
+    </div>
+
     <!-- ═══════════ TAB: IN-HOUSE ═══════════ -->
     <div class="module-view show" id="mv-inhouse">
       <div class="toolbar">
@@ -321,6 +345,17 @@
   };
 
   // ── Render ────────────────────────────────────────────────────
+  function updateAcqKPIs() {
+    var ih = state.inhouse.rows, cn = state.consigned.rows, sl = state.sold.rows;
+    document.getElementById('kpiInHouse').textContent = ih.length;
+    document.getElementById('kpiConsigned').textContent = cn.length;
+    document.getElementById('kpiSold').textContent = sl.length;
+    var ihCost = ih.reduce(function(s,r){ return s + (Number(r.pnCost || r.dblCost) || 0); }, 0);
+    var slRev = sl.reduce(function(s,r){ return s + (Number(r.pnSalePrice || r.dblSalePrice) || 0); }, 0);
+    document.getElementById('kpiInHouseCost').textContent = '$' + ihCost.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+    document.getElementById('kpiSoldRevenue').textContent = '$' + slRev.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  }
+
   function renderTab(tab) {
     const s = state[tab];
     const slice = s.filtered.slice((s.page - 1) * PAGE_SIZE, s.page * PAGE_SIZE);
@@ -439,6 +474,7 @@
     state.inhouse.filtered = state.inhouse.rows.slice();
     state.inhouse.page = 1;
     renderTab('inhouse');
+    updateAcqKPIs();
   }
 
   async function loadConsigned() {
@@ -456,6 +492,7 @@
     state.consigned.filtered = state.consigned.rows.slice();
     state.consigned.page = 1;
     renderTab('consigned');
+    updateAcqKPIs();
   }
 
   window.loadSold = async function () {
@@ -483,6 +520,7 @@
     state.sold.filtered = state.sold.rows.slice();
     state.sold.page = 1;
     renderTab('sold');
+    updateAcqKPIs();
   };
 
   window.clearSoldDates = function () {

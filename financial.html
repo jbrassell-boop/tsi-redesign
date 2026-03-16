@@ -258,6 +258,11 @@
     const chipMap = { outstanding: 0, drafts: 3, hold: 4, payments: 5, gl: -1 };
     const idx = chipMap[tab]; if (idx >= 0) document.querySelectorAll('.stat-chip')[idx]?.classList.add('active-chip');
 
+    // Reset filters on tab switch
+    filterSearch.value = '';
+    filterStatus.value = '';
+    filterClient.value = '';
+
     body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
 
     try {
@@ -286,8 +291,7 @@
   }
 
   // ── Update financial KPI chips ──────────────────────────
-  // liveOutstanding: live data for outstanding tab (optional; falls back to DEMO)
-  function updateFinancialKPIs(liveOutstanding) {
+  async function updateFinancialKPIs(liveOutstanding) {
     const inv = liveOutstanding || DEMO.outstanding;
     const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
     const overdue = inv.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
@@ -300,15 +304,31 @@
       if (d > 0) { totalAgingDays += d; agingCount++; }
     });
 
-    const paymentSrc = liveOutstanding ? [] : DEMO.payments; // can't compute paid from outstanding tab
-    const totalPaid = paymentSrc.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
-
     document.getElementById('kpiAR').textContent = fmt$(totalAR);
     document.getElementById('kpiOverdue').textContent = String(overdue.length);
     document.getElementById('kpiAging').textContent = agingCount ? Math.round(totalAgingDays / agingCount) + 'd' : '0d';
-    document.getElementById('kpiDrafts').textContent = liveOutstanding ? '—' : String(DEMO.drafts.length);
-    document.getElementById('kpiHold').textContent = liveOutstanding ? '—' : String(DEMO.hold.length);
-    document.getElementById('kpiPaid').textContent = liveOutstanding ? '—' : fmt$(totalPaid);
+
+    // Load drafts, hold, payments counts independently
+    const pg = { Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} };
+    let draftsCount, holdCount, totalPaid;
+    try {
+      const [draftsRaw, holdRaw, paymentsRaw] = await Promise.all([
+        API.getDraftInvoices(pg).catch(() => null),
+        API.getClientsOnHold(pg).catch(() => null),
+        API.getInvoicePayments(pg).catch(() => null)
+      ]);
+      draftsCount = draftsRaw ? unwrap(draftsRaw).length : DEMO.drafts.length;
+      holdCount = holdRaw ? unwrap(holdRaw).length : DEMO.hold.length;
+      const payments = paymentsRaw ? unwrap(paymentsRaw) : DEMO.payments;
+      totalPaid = payments.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
+    } catch (e) {
+      draftsCount = DEMO.drafts.length;
+      holdCount = DEMO.hold.length;
+      totalPaid = DEMO.payments.reduce((s, r) => s + Number(r.dblAmount || r.dblPaymentAmount || 0), 0);
+    }
+    document.getElementById('kpiDrafts').textContent = String(draftsCount);
+    document.getElementById('kpiHold').textContent = String(holdCount);
+    document.getElementById('kpiPaid').textContent = fmt$(totalPaid);
   }
 
   // ── Populate client dropdown ────────────────────────────

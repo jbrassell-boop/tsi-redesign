@@ -973,11 +973,11 @@ MockDB.seed('pendingContracts', [
 
 // ── Suppliers ───────────────────────────────────────────
 MockDB.seed('suppliers', [
-  { lSupplierKey: 1, sSupplierName: 'Olympus America', sAddress1: '3500 Corporate Pkwy', sCity: 'Center Valley', sState: 'PA', sZip: '18034', sPhoneNumber: '(800) 848-9024', bActive: true, lSupplierRoleKey: 1 },
-  { lSupplierKey: 2, sSupplierName: 'Fujifilm Medical', sAddress1: '47 Hulfish St', sCity: 'Princeton', sState: 'NJ', sZip: '08542', sPhoneNumber: '(800) 431-1850', bActive: true, lSupplierRoleKey: 1 },
-  { lSupplierKey: 3, sSupplierName: 'Karl Storz Endoscopy', sAddress1: '2151 E Grand Ave', sCity: 'El Segundo', sState: 'CA', sZip: '90245', sPhoneNumber: '(800) 421-0837', bActive: true, lSupplierRoleKey: 1 },
-  { lSupplierKey: 4, sSupplierName: 'Stryker Medical', sAddress1: '1941 Stryker Way', sCity: 'Portage', sState: 'MI', sZip: '49002', sPhoneNumber: '(800) 253-3210', bActive: true, lSupplierRoleKey: 1 },
-  { lSupplierKey: 5, sSupplierName: 'MCE Parts & Supply', sAddress1: '100 Industrial Blvd', sCity: 'Nashville', sState: 'TN', sZip: '37210', sPhoneNumber: '(615) 555-0101', bActive: true, lSupplierRoleKey: 2 },
+  { lSupplierKey: 1, sSupplierName: 'Olympus America', sAddress1: '3500 Corporate Pkwy', sCity: 'Center Valley', sState: 'PA', sZip: '18034', sPhoneNumber: '(800) 848-9024', bActive: true, lSupplierRoleKey: 1, bPartsVendor: true, bRepairVendor: true, bAcquisitionVendor: false, bCartsVendor: false },
+  { lSupplierKey: 2, sSupplierName: 'Fujifilm Medical', sAddress1: '47 Hulfish St', sCity: 'Princeton', sState: 'NJ', sZip: '08542', sPhoneNumber: '(800) 431-1850', bActive: true, lSupplierRoleKey: 1, bPartsVendor: true, bRepairVendor: true, bAcquisitionVendor: false, bCartsVendor: false },
+  { lSupplierKey: 3, sSupplierName: 'Karl Storz Endoscopy', sAddress1: '2151 E Grand Ave', sCity: 'El Segundo', sState: 'CA', sZip: '90245', sPhoneNumber: '(800) 421-0837', bActive: true, lSupplierRoleKey: 1, bPartsVendor: true, bRepairVendor: true, bAcquisitionVendor: false, bCartsVendor: false },
+  { lSupplierKey: 4, sSupplierName: 'Stryker Medical', sAddress1: '1941 Stryker Way', sCity: 'Portage', sState: 'MI', sZip: '49002', sPhoneNumber: '(800) 253-3210', bActive: true, lSupplierRoleKey: 1, bPartsVendor: true, bRepairVendor: false, bAcquisitionVendor: true, bCartsVendor: true },
+  { lSupplierKey: 5, sSupplierName: 'MCE Parts & Supply', sAddress1: '100 Industrial Blvd', sCity: 'Nashville', sState: 'TN', sZip: '37210', sPhoneNumber: '(615) 555-0101', bActive: true, lSupplierRoleKey: 2, bPartsVendor: true, bRepairVendor: false, bAcquisitionVendor: false, bCartsVendor: false },
 ]);
 
 MockDB.seed('supplierPOTypes', [

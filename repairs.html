@@ -435,7 +435,7 @@
                 <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
                 <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:130px" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:120px" onchange="markDirty()"></select></span>
+                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:120px" onchange="updateStatusBadge(this.value); markDirty()"></select></span>
               </div>
               <div class="ref-group">
                 <span class="ref-group-label">Scope</span>
@@ -2040,6 +2040,12 @@ function toDateInput(v) { if (!v) return ''; const d = new Date(v); return isNaN
 function fmtMoney(v) { const n = parseFloat(v); return isNaN(n) ? '$0.00' : '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
 
 function getStatusName(id) { const s = _statuses.find(x => x.lRepairStatusID === id); return s ? s.sRepairStatus : ''; }
+
+function updateStatusBadge(statusId) {
+  const name = getStatusName(Number(statusId)) || statusId;
+  const chip = document.getElementById('ssStatus');
+  if (chip) chip.querySelector('.ss-val').textContent = name || '—';
+}
 
 function populateSelect(id, items, valKey, textKey, blank) {
   const sel = document.getElementById(id);

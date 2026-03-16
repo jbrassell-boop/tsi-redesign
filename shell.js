@@ -48,7 +48,7 @@
   function buildSidebar() {
     var cur = currentPage();
     var html = '';
-    html += '<div class="sidebar-brand">';
+    html += '<div class="sidebar-brand" onclick="window.location=\'index.html\'" style="cursor:pointer" title="Back to Hub">';
     html += '  <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>';
     html += '  <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>';
     html += '</div>';
@@ -80,7 +80,7 @@
     var html = '';
 
     /* Left — logo */
-    html += '<div class="topbar-left"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/></div>';
+    html += '<div class="topbar-left" onclick="window.location=\'index.html\'" style="cursor:pointer" title="Back to Hub"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px"/></div>';
 
     /* Right */
     html += '<div class="topbar-right">';

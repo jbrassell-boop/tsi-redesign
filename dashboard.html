@@ -82,7 +82,7 @@
     .wo-link:hover{text-decoration:underline}
 
     /* Status badges */
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
     .b-waiting{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
     .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
     .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
@@ -310,6 +310,7 @@
         <div class="filter-group">
           <span class="filter-label">Type</span>
           <div class="seg-group">
+            <button class="seg-btn">All</button>
             <button class="seg-btn active">Flexible</button>
             <button class="seg-btn">Rigid</button>
             <button class="seg-btn">Instrument</button>
@@ -352,8 +353,8 @@
         </div>
         <div class="toolbar-actions">
           <button class="tb-btn" onclick="generateTechSheets()">Tech Sheets</button>
-          <button class="tb-btn">⇅ Export</button>
-          <button class="tb-btn">🖨 Print</button>
+          <button class="tb-btn" onclick="exportCSV()">⇅ Export</button>
+          <button class="tb-btn" onclick="window.print()">🖨 Print</button>
         </div>
       </div>
 
@@ -718,8 +719,33 @@ function calcStats() {
 }
 
 function updateStats() {
-  // KPI strip (#kpiStrip) shows facility-wide totals — don't overwrite it.
-  // Only update footer record count if present.
+  const stats = calcStats();
+  const chips = document.querySelectorAll('#kpiStrip .stat-chip .s-val');
+  if (chips.length >= 7) {
+    chips[0].textContent = stats.inHouse;
+    chips[1].textContent = stats.waiting;
+    chips[2].textContent = stats.inRepair;
+    chips[3].textContent = stats.overdue;
+    chips[4].textContent = stats.ready;
+    chips[5].textContent = stats.loaners;
+    chips[6].textContent = stats.shipped;
+  }
+}
+
+function exportCSV() {
+  const filtered = sortList(getFiltered());
+  if (!filtered.length) { alert('No data to export.'); return; }
+  const headers = ['Date In','Client','Department','Work Order','Scope Type','Serial','Days In','Status','Date Approved','Est Delivery','Approved $','Tech','Notes'];
+  const csvRows = [headers.join(',')];
+  filtered.forEach(s => {
+    csvRows.push([s.dateIn, s.client, s.dept, s.wo, s.type, s.serial, s.daysIn, s.status, s.dateApproved||'', s.estDel||'', s.approved||0, s.tech||'', (s.notes||'').replace(/,/g,';')].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dashboard-scopes-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -831,7 +857,7 @@ function renderRow(s) {
       <td>${s.dateIn}</td>
       <td style="font-weight:500">${s.client}${hotBadge}</td>
       <td style="color:var(--muted)">${s.dept}</td>
-      <td><a class="wo-link" href="#" onclick="event.preventDefault();alert('Opening WO ${s.wo}')">${s.wo}</a></td>
+      <td><a class="wo-link" href="repairs.html?wo=${encodeURIComponent(s.wo)}" onclick="event.preventDefault();window.location='repairs.html?wo='+encodeURIComponent('${s.wo}')">${s.wo}</a></td>
       <td>${s.type}</td>
       <td>${s.serial}</td>
       <td style="text-align:center;white-space:nowrap">${tatLabel}</td>
