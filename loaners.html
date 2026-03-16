@@ -57,6 +57,16 @@
     .badge-reserved{background:#F3E8FF;color:#7C3AED;border:1px solid #C4B5FD}
     .badge-available{background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB}
     .badge-loaner{background:#FFFBEB;color:#B45309;border:1px solid #FDE68A}
+    .badge-declined{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+    .badge-unable{background:#FEF2F2;color:#C62828;border:1px solid #FECACA}
+
+    /* RECOMMENDATION BADGES (Scope Needs tab) */
+    .rec-acquire{background:#FEF2F2;color:#C62828;border:1px solid #FECACA;font-weight:700}
+    .rec-consider{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;font-weight:700}
+    .rec-adequate{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784;font-weight:700}
+    .gap-positive{color:#C62828;font-weight:800}
+    .gap-zero{color:var(--muted);font-weight:600}
+    .gap-negative{color:#2E7D32;font-weight:800}
 
     /* DAYS OUT CHIP */
     .days-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace;letter-spacing:.3px}
@@ -208,13 +218,13 @@
           <span class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></span>
           <span class="s-data"><span class="s-val" id="statReturned">0</span><span class="s-lbl">Returned</span></span>
         </div>
-        <div class="stat-chip s-amber" id="kpiPool" onclick="chipFilter('')">
-          <span class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="5" width="12" height="8" rx="1.5"/><path d="M5 5V3.5a3 3 0 0 1 6 0V5"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statPool">0</span><span class="s-lbl">Loaner Pool</span></span>
+        <div class="stat-chip s-amber" id="kpiDeclined" onclick="chipFilter('Declined')">
+          <span class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><path d="M10 6L6 10M6 6l4 4"/></svg></span>
+          <span class="s-data"><span class="s-val" id="statDeclined">0</span><span class="s-lbl">Declined</span></span>
         </div>
-        <div class="stat-chip s-green" id="kpiAvailable" onclick="chipFilter('')">
-          <span class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg></span>
-          <span class="s-data"><span class="s-val" id="statAvailable">0</span><span class="s-lbl">Available</span></span>
+        <div class="stat-chip s-green" id="kpiFillRate" onclick="chipFilter('')">
+          <span class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="2 12 6 6 10 9 14 3"/></svg></span>
+          <span class="s-data"><span class="s-val" id="statFillRate">0%</span><span class="s-lbl">Fill Rate</span></span>
         </div>
       </div>
 
@@ -222,6 +232,7 @@
       <div class="subnav" id="subnav">
         <div class="subnav-tab active" data-tab="task">Task Loaners</div>
         <div class="subnav-tab" data-tab="active">Active Loaners</div>
+        <div class="subnav-tab" data-tab="needs">Scope Needs</div>
       </div>
 
       <!-- TOOLBAR -->
@@ -233,6 +244,7 @@
             <button class="seg-btn" data-status="Out">Out</button>
             <button class="seg-btn" data-status="Overdue">Overdue</button>
             <button class="seg-btn" data-status="Returned">Returned</button>
+            <button class="seg-btn" data-status="Declined">Declined</button>
           </div>
         </div>
         <div class="filter-sep" id="filterSep"></div>
@@ -373,7 +385,9 @@ function unwrap(data) {
 }
 
 function computeStatus(r) {
-  // If already returned, keep it
+  // Preserve terminal statuses
+  if (r.sStatus === 'Declined') return 'Declined';
+  if (r.sStatus === 'Unable')   return 'Unable';
   if (r.sStatus === 'Returned' || r.dtActualReturn) return 'Returned';
   if (r.sStatus === 'Reserved') return 'Reserved';
   // Check overdue: past expected return and still out
@@ -408,6 +422,8 @@ function statusBadge(s) {
     'Overdue':  'badge-overdue',
     'Returned': 'badge-returned',
     'Reserved': 'badge-reserved',
+    'Declined': 'badge-declined',
+    'Unable':   'badge-unable',
   };
   return '<span class="badge ' + (map[s] || 'badge-available') + '">' + esc(s || 'Available') + '</span>';
 }
@@ -435,16 +451,23 @@ function updateStats() {
   const out      = taskRows.filter(r => r._status === 'Out').length;
   const overdue  = taskRows.filter(r => r._status === 'Overdue').length;
   const returned = taskRows.filter(r => r._status === 'Returned').length;
-  const pool     = activeRows.length;
-  const assigned = activeRows.filter(r => r.sClientName || r.sDepartmentName).length;
-  const avail    = pool - assigned;
+  const declined = taskRows.filter(r => r._status === 'Declined' || r._status === 'Unable').length;
+  const fulfilled = out + overdue + returned; // requests that were actually filled
+  const fillRate  = total > 0 ? Math.round((fulfilled / total) * 100) : 0;
 
   document.getElementById('statTotal').textContent    = total;
   document.getElementById('statOut').textContent       = out;
   document.getElementById('statOverdue').textContent   = overdue;
   document.getElementById('statReturned').textContent  = returned;
-  document.getElementById('statPool').textContent      = pool;
-  document.getElementById('statAvailable').textContent = avail;
+  document.getElementById('statDeclined').textContent  = declined;
+  document.getElementById('statFillRate').textContent   = fillRate + '%';
+
+  // Color the fill rate chip based on value
+  const frChip = document.getElementById('kpiFillRate');
+  if (frChip) {
+    frChip.classList.remove('s-green', 's-amber', 's-red');
+    frChip.classList.add(fillRate >= 80 ? 's-green' : fillRate >= 50 ? 's-amber' : 's-red');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -570,7 +593,10 @@ function getFilteredTaskRows() {
   const q = searchTerm.toLowerCase();
   const sf = statusFilter;
   return taskRows.filter(r => {
-    if (sf !== 'All' && r._status !== sf) return false;
+    if (sf !== 'All') {
+      if (sf === 'Declined') { if (r._status !== 'Declined' && r._status !== 'Unable') return false; }
+      else if (r._status !== sf) return false;
+    }
     if (q) {
       const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
         .map(v => (v || '').toLowerCase()).join(' ');
@@ -691,6 +717,95 @@ function renderActiveLoaners() {
   document.getElementById('recordInfo').innerHTML =
     '<strong>' + filtered.length + '</strong> loaner scope' + (filtered.length !== 1 ? 's' : '') +
     ' &nbsp;·&nbsp; <strong>' + assignedCount + '</strong> currently assigned';
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER — SCOPE NEEDS (demand analysis)
+// ═══════════════════════════════════════════════════════
+function renderScopeNeeds() {
+  const thead = document.getElementById('tableHead');
+  thead.innerHTML = `<tr>
+    <th>Scope Model</th>
+    <th style="width:90px;text-align:center">Requests</th>
+    <th style="width:90px;text-align:center">Fulfilled</th>
+    <th style="width:100px;text-align:center">Declined</th>
+    <th style="width:80px;text-align:center">Pool Qty</th>
+    <th style="width:80px;text-align:center">Available</th>
+    <th style="width:60px;text-align:center">Gap</th>
+    <th style="width:120px;text-align:center">Recommendation</th>
+  </tr>`;
+
+  // Build demand map from taskRows (all requests by scope model)
+  const demandMap = {};
+  taskRows.forEach(r => {
+    const model = r.sScopeTypeDesc || 'Unknown';
+    if (!demandMap[model]) demandMap[model] = { model, requests: 0, fulfilled: 0, declined: 0, lScopeTypeKey: r.plScopeTypeKey || r.lScopeTypeKey || 0 };
+    demandMap[model].requests++;
+    if (r._status === 'Out' || r._status === 'Overdue' || r._status === 'Returned') demandMap[model].fulfilled++;
+    if (r._status === 'Declined' || r._status === 'Unable') demandMap[model].declined++;
+  });
+
+  // Build supply map from activeRows (loaner pool)
+  const supplyMap = {};
+  activeRows.forEach(r => {
+    const model = r.sScopeTypeDesc || r.sScopeType || 'Unknown';
+    if (!supplyMap[model]) supplyMap[model] = { total: 0, assigned: 0 };
+    supplyMap[model].total++;
+    if (r.sClientName || r.sClientName1 || r.sDepartmentName) supplyMap[model].assigned++;
+  });
+
+  // Merge into a single analysis list
+  const allModels = new Set([...Object.keys(demandMap), ...Object.keys(supplyMap)]);
+  const analysis = [...allModels].map(model => {
+    const d = demandMap[model] || { requests: 0, fulfilled: 0, declined: 0 };
+    const s = supplyMap[model] || { total: 0, assigned: 0 };
+    const gap = d.requests - s.total;
+    return { model, requests: d.requests, fulfilled: d.fulfilled, declined: d.declined, poolQty: s.total, available: s.total - s.assigned, gap };
+  });
+
+  // Sort: highest gap first, then by requests desc
+  analysis.sort((a, b) => b.gap - a.gap || b.requests - a.requests);
+
+  const tbody = document.getElementById('tableBody');
+  if (!analysis.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 12 6 6 10 9 14 3 18 8 22 4"/></svg>
+      <div>No demand data available</div>
+    </td></tr>`;
+  } else {
+    tbody.innerHTML = analysis.map(r => {
+      // Recommendation logic
+      let recBadge;
+      if (r.poolQty === 0 && r.requests > 0) {
+        recBadge = '<span class="badge rec-acquire">Acquire</span>';
+      } else if (r.gap > 0 || r.declined > 0) {
+        recBadge = '<span class="badge rec-consider">Consider</span>';
+      } else {
+        recBadge = '<span class="badge rec-adequate">Adequate</span>';
+      }
+
+      const gapCls = r.gap > 0 ? 'gap-positive' : r.gap < 0 ? 'gap-negative' : 'gap-zero';
+      const gapText = r.gap > 0 ? '+' + r.gap : r.gap;
+
+      return `<tr>
+        <td style="font-weight:600">${esc(r.model)}</td>
+        <td style="text-align:center;font-weight:700">${r.requests}</td>
+        <td style="text-align:center">${r.fulfilled}</td>
+        <td style="text-align:center">${r.declined > 0 ? '<span style="color:var(--red);font-weight:700">' + r.declined + '</span>' : '<span style="color:var(--muted)">0</span>'}</td>
+        <td style="text-align:center;font-weight:600">${r.poolQty}</td>
+        <td style="text-align:center">${r.available}</td>
+        <td style="text-align:center" class="${gapCls}">${gapText}</td>
+        <td style="text-align:center">${recBadge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const acquireCount = analysis.filter(r => r.poolQty === 0 && r.requests > 0).length;
+  const considerCount = analysis.filter(r => (r.gap > 0 || r.declined > 0) && r.poolQty > 0).length;
+  document.getElementById('recordInfo').innerHTML =
+    '<strong>' + analysis.length + '</strong> model' + (analysis.length !== 1 ? 's' : '') +
+    ' analyzed &nbsp;·&nbsp; <strong style="color:var(--red)">' + acquireCount + '</strong> to acquire' +
+    ' &nbsp;·&nbsp; <strong style="color:#92400E">' + considerCount + '</strong> to consider';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -934,25 +1049,30 @@ function switchTab(tab) {
     filterGroup.style.display = '';
     filterSep.style.display = '';
     btnLog.style.display = '';
-    // Restore task status filter buttons
     segGroup.innerHTML = `
       <button class="seg-btn active" data-status="All">All</button>
       <button class="seg-btn" data-status="Out">Out</button>
       <button class="seg-btn" data-status="Overdue">Overdue</button>
-      <button class="seg-btn" data-status="Returned">Returned</button>`;
+      <button class="seg-btn" data-status="Returned">Returned</button>
+      <button class="seg-btn" data-status="Declined">Declined</button>`;
     statusFilter = 'All';
     loadTaskLoaners();
-  } else {
+  } else if (tab === 'active') {
     filterGroup.style.display = '';
     filterSep.style.display = '';
     btnLog.style.display = 'none';
-    // Active loaners filter: Assigned/Available
     segGroup.innerHTML = `
       <button class="seg-btn active" data-status="All">All</button>
       <button class="seg-btn" data-status="Assigned">Assigned</button>
       <button class="seg-btn" data-status="Available">Available</button>`;
     statusFilter = 'All';
     loadActiveLoaners();
+  } else if (tab === 'needs') {
+    filterGroup.style.display = 'none';
+    filterSep.style.display = 'none';
+    btnLog.style.display = 'none';
+    statusFilter = 'All';
+    renderScopeNeeds();
   }
 
   // Reset chip highlight
