@@ -8,10 +8,10 @@
 var iq_DEMO_QUOTES = [
   {
     id:1001, quoteNum:'IQ-2026-001', status:'Sent',
-    clientKey:1, clientName:'Inspira Medical Centers',
+    clientKey:1, clientName:'Shreveport Endoscopy Center',
     deptKey:11, deptName:'Endoscopy — Mullica Hill',
-    billTo:{name:'Inspira Medical Centers, Inc.',attn:'Accounts Payable',addr1:'333 Irving Avenue',city:'Bridgeton',state:'NJ',zip:'08302'},
-    shipTo:{name:'Inspira Medical Ctr — Mullica Hill',attn:'101 Sterile Processing',addr1:'700 Mullica Hill Road',city:'Mullica Hill',state:'NJ',zip:'08062'},
+    billTo:{name:'Shreveport Endoscopy Center, Inc.',attn:'Accounts Payable',addr1:'333 Irving Avenue',city:'Bridgeton',state:'NJ',zip:'08302'},
+    shipTo:{name:'Shreveport Endoscopy Ctr — Mullica Hill',attn:'101 Sterile Processing',addr1:'700 Mullica Hill Road',city:'Mullica Hill',state:'NJ',zip:'08062'},
     salesRep:'Jordan Martin', gpo:'', visitRef:'Van service 03/06/2026',
     quoteDate:'2026-03-13', sentDate:'2026-03-13', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
     items:[
@@ -23,10 +23,10 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1002, quoteNum:'IQ-2026-002', status:'Draft',
-    clientKey:2, clientName:'Johns Hopkins Hospital',
+    clientKey:2, clientName:'Northside Hospital',
     deptKey:21, deptName:'GI Lab — East Baltimore',
-    billTo:{name:'Johns Hopkins Hospital',attn:'Accounts Payable',addr1:'600 N. Wolfe Street',city:'Baltimore',state:'MD',zip:'21287'},
-    shipTo:{name:'Johns Hopkins — GI Lab',attn:'Sterile Processing',addr1:'600 N. Wolfe Street, Bldg B',city:'Baltimore',state:'MD',zip:'21287'},
+    billTo:{name:'Northside Hospital',attn:'Accounts Payable',addr1:'600 N. Wolfe Street',city:'Baltimore',state:'MD',zip:'21287'},
+    shipTo:{name:'Northside Hospital — GI Lab',attn:'Sterile Processing',addr1:'600 N. Wolfe Street, Bldg B',city:'Baltimore',state:'MD',zip:'21287'},
     salesRep:'Mike Rivera', gpo:'hpg', visitRef:'Field eval 02/28/2026',
     quoteDate:'2026-03-10', sentDate:null, poNumber:'', reviewedBy:'Alex Torres', notes:'Customer may want to bundle with scope repair.',
     items:[
@@ -36,9 +36,9 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1003, quoteNum:'IQ-2026-003', status:'Approved',
-    clientKey:3, clientName:'Penn Medicine',
+    clientKey:3, clientName:'Valley Health System',
     deptKey:31, deptName:'Endoscopy — Hospital of the University of PA',
-    billTo:{name:'Penn Medicine / UPHS',attn:'Accounts Payable',addr1:'3400 Civic Center Blvd',city:'Philadelphia',state:'PA',zip:'19104'},
+    billTo:{name:'Valley Health System / VHS',attn:'Accounts Payable',addr1:'3400 Civic Center Blvd',city:'Philadelphia',state:'PA',zip:'19104'},
     shipTo:{name:'HUP Endoscopy — Sterile Processing',attn:'SPD Department',addr1:'3400 Civic Center Blvd, 3rd Floor',city:'Philadelphia',state:'PA',zip:'19104'},
     salesRep:'Jordan Martin', gpo:'viz', visitRef:'Van service 03/01/2026',
     quoteDate:'2026-03-05', sentDate:'2026-03-05', poNumber:'PO-77423', reviewedBy:'Jordan Martin', notes:'',
@@ -50,12 +50,12 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1004, quoteNum:'IQ-2026-004', status:'Partially Approved',
-    clientKey:4, clientName:'UPMC Presbyterian',
-    deptKey:41, deptName:'Sterile Processing — UPMC Pres',
-    billTo:{name:'UPMC Presbyterian',attn:'Accounts Payable',addr1:'200 Lothrop Street',city:'Pittsburgh',state:'PA',zip:'15213'},
-    shipTo:{name:'UPMC Pres — SPD',attn:'Sterile Processing',addr1:'200 Lothrop St, Level B',city:'Pittsburgh',state:'PA',zip:'15213'},
+    clientKey:4, clientName:'Tampa General Hospital',
+    deptKey:41, deptName:'Sterile Processing — Tampa Gen',
+    billTo:{name:'Tampa General Hospital',attn:'Accounts Payable',addr1:'200 Lothrop Street',city:'Pittsburgh',state:'PA',zip:'15213'},
+    shipTo:{name:'Tampa Gen — SPD',attn:'Sterile Processing',addr1:'200 Lothrop St, Level B',city:'Pittsburgh',state:'PA',zip:'15213'},
     salesRep:'Dana Cole', gpo:'hpg', visitRef:'On-site eval 02/20/2026',
-    quoteDate:'2026-02-24', sentDate:'2026-02-25', poNumber:'UPMC-14892', reviewedBy:'Dana Cole', notes:'Customer approved 3 of 5 — two items under internal review.',
+    quoteDate:'2026-02-24', sentDate:'2026-02-25', poNumber:'TGH-14892', reviewedBy:'Dana Cole', notes:'Customer approved 3 of 5 — two items under internal review.',
     items:[
       {id:1,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-0042',issue:'Motor housing cracked — vibration and heat',techNote:'Housing replacement required',repairLevel:3,basePrice:890,amount:890,approval:true,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
       {id:2,instrCode:'OS321',mfr:'Stryker',model:'375-020-000',serial:'STR-0043',issue:'Motor housing cracked — same issue as STR-0042',techNote:'Same repair as above',repairLevel:3,basePrice:890,amount:890,approval:false,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
@@ -66,9 +66,9 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1005, quoteNum:'IQ-2026-005', status:'Sent',
-    clientKey:5, clientName:'Virtua Health',
+    clientKey:5, clientName:'Regional Medical Center',
     deptKey:51, deptName:'OR — Virtua Voorhees',
-    billTo:{name:'Virtua Health System',attn:'Accounts Payable',addr1:'401 Young Avenue',city:'Voorhees',state:'NJ',zip:'08043'},
+    billTo:{name:'Regional Medical Center',attn:'Accounts Payable',addr1:'401 Young Avenue',city:'Voorhees',state:'NJ',zip:'08043'},
     shipTo:{name:'Virtua Voorhees OR — SPD',attn:'Sterile Processing',addr1:'100 Bowman Drive',city:'Voorhees',state:'NJ',zip:'08043'},
     salesRep:'Jordan Martin', gpo:'', visitRef:'Field pick-up 03/10/2026',
     quoteDate:'2026-03-11', sentDate:'2026-03-12', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
@@ -79,9 +79,9 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1006, quoteNum:'IQ-2026-006', status:'Declined',
-    clientKey:6, clientName:'RWJ Barnabas Health',
+    clientKey:6, clientName:'Tift Regional Medical Center',
     deptKey:61, deptName:'Endoscopy — Robert Wood Johnson',
-    billTo:{name:'RWJ Barnabas Health',attn:'Accounts Payable',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
+    billTo:{name:'Tift Regional Medical Center',attn:'Accounts Payable',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
     shipTo:{name:'RWJ Endoscopy — SPD',attn:'SPD',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
     salesRep:'Mike Rivera', gpo:'viz', visitRef:'Drop-off 02/15/2026',
     quoteDate:'2026-02-17', sentDate:'2026-02-18', poNumber:'', reviewedBy:'Alex Torres', notes:'Customer declined — going to OEM for all repairs.',
@@ -93,10 +93,10 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1007, quoteNum:'IQ-2026-007', status:'Draft',
-    clientKey:7, clientName:'AtlantiCare Regional',
-    deptKey:71, deptName:'GI Lab — AtlantiCare City',
-    billTo:{name:'AtlantiCare Regional Medical Center',attn:'Accounts Payable',addr1:'1925 Pacific Avenue',city:'Atlantic City',state:'NJ',zip:'08401'},
-    shipTo:{name:'AtlantiCare GI Lab',attn:'Endoscopy SPD',addr1:'1925 Pacific Avenue, 4th Floor',city:'Atlantic City',state:'NJ',zip:'08401'},
+    clientKey:7, clientName:'West Side GI Center',
+    deptKey:71, deptName:'GI Lab — West Side City',
+    billTo:{name:'West Side GI Center',attn:'Accounts Payable',addr1:'1925 Pacific Avenue',city:'Atlantic City',state:'NJ',zip:'08401'},
+    shipTo:{name:'West Side GI Lab',attn:'Endoscopy SPD',addr1:'1925 Pacific Avenue, 4th Floor',city:'Atlantic City',state:'NJ',zip:'08401'},
     salesRep:'Jordan Martin', gpo:'s3', visitRef:'',
     quoteDate:'2026-03-13', sentDate:null, poNumber:'', reviewedBy:'', notes:'In-progress — instrument still being evaluated.',
     items:[
@@ -105,7 +105,7 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1008, quoteNum:'IQ-2026-008', status:'Approved',
-    clientKey:8, clientName:'Jefferson Health',
+    clientKey:8, clientName:'Coliseum Medical Center',
     deptKey:81, deptName:'Cath Lab — Thomas Jefferson',
     billTo:{name:'Thomas Jefferson University Hospital',attn:'Accounts Payable',addr1:'111 S. 11th Street',city:'Philadelphia',state:'PA',zip:'19107'},
     shipTo:{name:'Jefferson Cath Lab — SPD',attn:'Sterile Processing',addr1:'111 S. 11th Street, Level 1',city:'Philadelphia',state:'PA',zip:'19107'},
@@ -120,10 +120,10 @@ var iq_DEMO_QUOTES = [
   },
   {
     id:1009, quoteNum:'IQ-2026-009', status:'Sent',
-    clientKey:9, clientName:'Hackensack Meridian Health',
-    deptKey:91, deptName:'OR — Hackensack University MC',
-    billTo:{name:'Hackensack University Medical Center',attn:'Accounts Payable',addr1:'30 Prospect Avenue',city:'Hackensack',state:'NJ',zip:'07601'},
-    shipTo:{name:'HUMedC OR — SPD',attn:'Sterile Processing',addr1:'30 Prospect Avenue, 2nd Floor',city:'Hackensack',state:'NJ',zip:'07601'},
+    clientKey:9, clientName:'Baptist Health',
+    deptKey:91, deptName:'OR — Baptist Health MC',
+    billTo:{name:'Baptist Health Medical Center',attn:'Accounts Payable',addr1:'30 Prospect Avenue',city:'Hackensack',state:'NJ',zip:'07601'},
+    shipTo:{name:'Baptist OR — SPD',attn:'Sterile Processing',addr1:'30 Prospect Avenue, 2nd Floor',city:'Hackensack',state:'NJ',zip:'07601'},
     salesRep:'Mike Rivera', gpo:'viz', visitRef:'Field eval 03/08/2026',
     quoteDate:'2026-03-09', sentDate:'2026-03-10', poNumber:'', reviewedBy:'Mike Rivera', notes:'',
     items:[
@@ -136,26 +136,26 @@ var iq_DEMO_QUOTES = [
 
 // Demo clients for wizard
 var iq_DEMO_CLIENTS = [
-  {lClientKey:1,sClientName1:'Inspira Medical Centers',sClientCity:'Bridgeton',sClientState:'NJ'},
-  {lClientKey:2,sClientName1:'Johns Hopkins Hospital',sClientCity:'Baltimore',sClientState:'MD'},
-  {lClientKey:3,sClientName1:'Penn Medicine',sClientCity:'Philadelphia',sClientState:'PA'},
-  {lClientKey:4,sClientName1:'UPMC Presbyterian',sClientCity:'Pittsburgh',sClientState:'PA'},
-  {lClientKey:5,sClientName1:'Virtua Health',sClientCity:'Voorhees',sClientState:'NJ'},
-  {lClientKey:6,sClientName1:'RWJ Barnabas Health',sClientCity:'New Brunswick',sClientState:'NJ'},
-  {lClientKey:7,sClientName1:'AtlantiCare Regional',sClientCity:'Atlantic City',sClientState:'NJ'},
-  {lClientKey:8,sClientName1:'Jefferson Health',sClientCity:'Philadelphia',sClientState:'PA'},
-  {lClientKey:9,sClientName1:'Hackensack Meridian Health',sClientCity:'Hackensack',sClientState:'NJ'}
+  {lClientKey:1,sClientName1:'Shreveport Endoscopy Center',sClientCity:'Bridgeton',sClientState:'NJ'},
+  {lClientKey:2,sClientName1:'Northside Hospital',sClientCity:'Baltimore',sClientState:'MD'},
+  {lClientKey:3,sClientName1:'Valley Health System',sClientCity:'Philadelphia',sClientState:'PA'},
+  {lClientKey:4,sClientName1:'Tampa General Hospital',sClientCity:'Pittsburgh',sClientState:'PA'},
+  {lClientKey:5,sClientName1:'Regional Medical Center',sClientCity:'Voorhees',sClientState:'NJ'},
+  {lClientKey:6,sClientName1:'Tift Regional Medical Center',sClientCity:'New Brunswick',sClientState:'NJ'},
+  {lClientKey:7,sClientName1:'West Side GI Center',sClientCity:'Atlantic City',sClientState:'NJ'},
+  {lClientKey:8,sClientName1:'Coliseum Medical Center',sClientCity:'Philadelphia',sClientState:'PA'},
+  {lClientKey:9,sClientName1:'Baptist Health',sClientCity:'Hackensack',sClientState:'NJ'}
 ];
 var iq_DEMO_DEPTS = {
-  1:[{lDepartmentKey:11,sDepartmentName:'Endoscopy — Mullica Hill'},{lDepartmentKey:12,sDepartmentName:'OR — Inspira Bridgeton'}],
+  1:[{lDepartmentKey:11,sDepartmentName:'Endoscopy — Mullica Hill'},{lDepartmentKey:12,sDepartmentName:'OR — Shreveport Main'}],
   2:[{lDepartmentKey:21,sDepartmentName:'GI Lab — East Baltimore'},{lDepartmentKey:22,sDepartmentName:'Surgery — Hopkins Outpatient'}],
   3:[{lDepartmentKey:31,sDepartmentName:'Endoscopy — Hospital of the University of PA'},{lDepartmentKey:32,sDepartmentName:'OR — Penn Presbyterian'}],
-  4:[{lDepartmentKey:41,sDepartmentName:'Sterile Processing — UPMC Pres'},{lDepartmentKey:42,sDepartmentName:'GI — UPMC Shadyside'}],
+  4:[{lDepartmentKey:41,sDepartmentName:'Sterile Processing — Tampa Gen'},{lDepartmentKey:42,sDepartmentName:'GI — Tampa Gen Shadyside'}],
   5:[{lDepartmentKey:51,sDepartmentName:'OR — Virtua Voorhees'},{lDepartmentKey:52,sDepartmentName:'Endoscopy — Virtua Berlin'}],
   6:[{lDepartmentKey:61,sDepartmentName:'Endoscopy — Robert Wood Johnson'},{lDepartmentKey:62,sDepartmentName:'OR — Monmouth Medical'}],
-  7:[{lDepartmentKey:71,sDepartmentName:'GI Lab — AtlantiCare City'},{lDepartmentKey:72,sDepartmentName:'OR — AtlantiCare Mainland'}],
+  7:[{lDepartmentKey:71,sDepartmentName:'GI Lab — West Side City'},{lDepartmentKey:72,sDepartmentName:'OR — West Side Mainland'}],
   8:[{lDepartmentKey:81,sDepartmentName:'Cath Lab — Thomas Jefferson'},{lDepartmentKey:82,sDepartmentName:'Endoscopy — Jefferson Northeast'}],
-  9:[{lDepartmentKey:91,sDepartmentName:'OR — Hackensack University MC'},{lDepartmentKey:92,sDepartmentName:'GI — HMH Southern Ocean'}]
+  9:[{lDepartmentKey:91,sDepartmentName:'OR — Baptist Health MC'},{lDepartmentKey:92,sDepartmentName:'GI — Baptist Southern Ocean'}]
 };
 
 // ── State ──

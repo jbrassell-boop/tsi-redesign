@@ -8,7 +8,7 @@
 var ir_DEMO_REPAIRS = [
   {
     id:2001, orderNum:'IR-2026-001', status:'Complete',
-    clientKey:1, clientName:'Inspira Medical Centers',
+    clientKey:1, clientName:'Shreveport Endoscopy Center',
     deptKey:11, deptName:'Endoscopy — Mullica Hill',
     dateReceived:'2026-03-06', dateDue:'2026-03-13', dateCompleted:'2026-03-12',
     poNumber:'', quoteRef:'IQ-2026-001', techAssigned:'M. Santos',
@@ -21,7 +21,7 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2002, orderNum:'IR-2026-002', status:'In Progress',
-    clientKey:2, clientName:'Johns Hopkins Hospital',
+    clientKey:2, clientName:'Northside Hospital',
     deptKey:21, deptName:'GI Lab — East Baltimore',
     dateReceived:'2026-03-10', dateDue:'2026-03-17', dateCompleted:null,
     poNumber:'', quoteRef:'IQ-2026-002', techAssigned:'R. Okafor',
@@ -33,7 +33,7 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2003, orderNum:'IR-2026-003', status:'Invoiced',
-    clientKey:3, clientName:'Penn Medicine',
+    clientKey:3, clientName:'Valley Health System',
     deptKey:31, deptName:'Endoscopy — Hospital of the University of PA',
     dateReceived:'2026-03-05', dateDue:'2026-03-10', dateCompleted:'2026-03-09',
     poNumber:'PO-77423', quoteRef:'IQ-2026-003', techAssigned:'M. Santos',
@@ -46,10 +46,10 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2004, orderNum:'IR-2026-004', status:'Outsourced',
-    clientKey:4, clientName:'UPMC Presbyterian',
-    deptKey:41, deptName:'Sterile Processing — UPMC Pres',
+    clientKey:4, clientName:'Tampa General Hospital',
+    deptKey:41, deptName:'Sterile Processing — Tampa Gen',
     dateReceived:'2026-02-20', dateDue:'2026-03-06', dateCompleted:null,
-    poNumber:'UPMC-14892', quoteRef:'IQ-2026-004', techAssigned:'D. Haynes',
+    poNumber:'TGH-14892', quoteRef:'IQ-2026-004', techAssigned:'D. Haynes',
     notes:'Two Stryker motors sent to vendor. Awaiting return.',
     items:[
       {id:1,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-0042',description:'Motor housing cracked — vibration and heat',repairLevel:3,amount:890,status:'Outsourced',outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640,techNote:'Sent 02/22/2026'},
@@ -60,7 +60,7 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2005, orderNum:'IR-2026-005', status:'Received',
-    clientKey:5, clientName:'Virtua Health',
+    clientKey:5, clientName:'Regional Medical Center',
     deptKey:51, deptName:'OR — Virtua Voorhees',
     dateReceived:'2026-03-13', dateDue:'2026-03-20', dateCompleted:null,
     poNumber:'', quoteRef:'IQ-2026-005', techAssigned:'',
@@ -72,8 +72,8 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2006, orderNum:'IR-2026-006', status:'On Hold',
-    clientKey:7, clientName:'AtlantiCare Regional',
-    deptKey:71, deptName:'GI Lab — AtlantiCare City',
+    clientKey:7, clientName:'West Side GI Center',
+    deptKey:71, deptName:'GI Lab — West Side City',
     dateReceived:'2026-03-08', dateDue:'2026-03-15', dateCompleted:null,
     poNumber:'', quoteRef:'', techAssigned:'R. Okafor',
     notes:'Customer has not sent PO. Hold until approved.',
@@ -83,7 +83,7 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2007, orderNum:'IR-2026-007', status:'Invoiced',
-    clientKey:8, clientName:'Jefferson Health',
+    clientKey:8, clientName:'Coliseum Medical Center',
     deptKey:81, deptName:'Cath Lab — Thomas Jefferson',
     dateReceived:'2026-03-03', dateDue:'2026-03-08', dateCompleted:'2026-03-07',
     poNumber:'JEFF-5521', quoteRef:'IQ-2026-008', techAssigned:'M. Santos',
@@ -97,8 +97,8 @@ var ir_DEMO_REPAIRS = [
   },
   {
     id:2008, orderNum:'IR-2026-008', status:'In Progress',
-    clientKey:9, clientName:'Hackensack Meridian Health',
-    deptKey:91, deptName:'OR — Hackensack University MC',
+    clientKey:9, clientName:'Baptist Health',
+    deptKey:91, deptName:'OR — Baptist Health MC',
     dateReceived:'2026-03-09', dateDue:'2026-03-16', dateCompleted:null,
     poNumber:'', quoteRef:'IQ-2026-009', techAssigned:'D. Haynes',
     notes:'',

@@ -229,10 +229,6 @@ const API = (() => {
   //  Full coverage of BrightLogix .NET API (445 endpoints)
   // ═══════════════════════════════════════════════════════
 
-  // ── Authentication (2) ────────────────────────────────
-  // login() defined above
-  async function verifyOtp(data) { return post('/Authentication/AuthVerifyOtp', data); }
-
   // ── Dashboard (1) ─────────────────────────────────────
   async function getDashboardScopes(filters) {
     const user = getUser();
@@ -262,9 +258,6 @@ const API = (() => {
   // ── DashboardTaskTypes (5) ────────────────────────────
   async function getTaskTypes() { return get('/DashboardTaskTypes/GetAllTaskTypeList'); }
   async function getTaskType() { return get('/DashboardTaskTypes/GetAllTaskType'); }
-  async function addTaskType(data) { return post('/DashboardTaskTypes/AddTaskType', data); }
-  async function updateTaskType(data) { return post('/DashboardTaskTypes/UpdateTaskType', data); }
-  async function deleteTaskType(key) { return del('/DashboardTaskTypes/DeleteTaskType?plTaskTypeKey=' + key); }
 
   // ── Client (7) ────────────────────────────────────────
   async function getAllClients(svcKey) { return get('/Client/GetAllClientList?plServiceLocationKey=' + (svcKey||1)); }
@@ -272,7 +265,6 @@ const API = (() => {
   async function addClient(data) { return post('/Client/AddClient', data); }
   async function updateClient(data) { return post('/Client/UpdateClient', data); }
   async function deleteClient(key) { return del('/Client/DeleteClient?plClientKey=' + key); }
-  async function getNationalAccounts(includeKey) { return get('/Client/GetAllNationalAccounts?plClientKeyToInclude=' + (includeKey||0)); }
   async function getCityStateByZip(zip) { return get('/Client/GetCityStateUSA?zipCode=' + zip); }
 
   // ── Departments (8) ───────────────────────────────────
@@ -281,16 +273,9 @@ const API = (() => {
   async function addDepartment(data) { return post('/Departments/AddDepartment', data); }
   async function updateDepartment(data) { return post('/Departments/UpdateDepartment', data); }
   async function deleteDepartment(key) { return del('/Departments/DeleteDepartment?plDepartmentKey=' + key); }
-  async function getStandardDepartments(key) { return get('/Departments/GetAllStandardDepartments?plDepartmentKey=' + (key||0)); }
-  async function getShippingCarriers(includeBlank) { return get('/Departments/GetShippingCarriers?pbIncludeBlank=' + (includeBlank||true)); }
-  async function getDepartmentInvoiceSchedule(contractKey, deptKey) { return get('/Departments/GetcontractDepartmentInvoiceSchedule?plContractKey=' + contractKey + '&plDepartmentKey=' + deptKey); }
-
-  // ── DepartmentType (1) ────────────────────────────────
-  async function getDepartmentTypes() { return get('/DepartmentType/GetAllDepartmentTypes'); }
 
   // ── DepartmentReportingGroups (2) ─────────────────────
   async function getDepartmentGPOList(deptKey) { return get('/DepartmentReportingGroups/GetAllDepartmentGPOList?plDepartmentKey=' + deptKey); }
-  async function getGPOsList(deptKey) { return get('/DepartmentReportingGroups/GetAllGPOsList?plDepartmentKey=' + deptKey); }
 
   // ── SubGroups (4) ─────────────────────────────────────
   async function getSubGroups(deptKey) { return get('/SubGroups/GetAllSubGroupsList?plDepartmentKey=' + deptKey); }
@@ -306,19 +291,9 @@ const API = (() => {
 
   // ── Scopes (14) — Device/instrument records ───────────
   async function getAllScopes(deptKey, isDead) { return get('/Scopes/GetAllScopes?plDepartmentKey=' + deptKey + (isDead ? '&psScopeIsDead=' + isDead : '')); }
-  async function getScopesList(filters) { return post('/Scopes/GetAllScopesList', filters); }
-  async function getScopeById(scopeKey) { return get('/Scopes/GetScopeByScopeId?plScopeKey=' + scopeKey); }
-  async function getScopeRepairs(scopeKey) { return get('/Scopes/GetRepaireByScopeId?plScopeKey=' + scopeKey); }
-  async function getScopeTypes() { return get('/Scopes/GetAllScopeType'); }
   async function checkOpenRepairForScope(scopeKey) { return get('/Scopes/CheckOpenRepaireScope?plScopeKey=' + scopeKey); }
-  async function getScopeComment(scopeKey, checkType) { return get('/Scopes/GetScopeComment?plScopeKey=' + scopeKey + (checkType ? '&checkType=' + checkType : '')); }
-  async function updateScopeComment(data) { return post('/Scopes/UpdateScopeComment', data); }
   async function addScope(data) { return post('/Scopes/AddScope', data); }
-  async function updateScope(data) { return post('/Scopes/UpdateScope', data); }
   async function deleteScope(scopeKey) { return del('/Scopes/DeleteScope?plScopeKey=' + scopeKey); }
-  async function updateScopeSalePrice(data) { return post('/Scopes/UpdateScopeSalePrice', data); }
-  async function updateScopeSaleReturn(data) { return post('/Scopes/UpdateScopeSaleReturn', data); }
-  async function updateScopeSale(data) { return post('/Scopes/UpdateScopeSale', data); }
 
   // ── ScopeType (6) — Department scope type assignments ─
   async function getScopeTypeNames(instrumentType) { return get('/ScopeType/GetscopeTypeNameList' + (instrumentType ? '?psInstrumentType=' + instrumentType : '')); }
@@ -329,23 +304,9 @@ const API = (() => {
   async function deleteScopeTypes(key) { return del('/ScopeType/DeleteScopeTypes?plScopeTypeKey=' + key); }
 
   // ── ScopeModel (17) — Model/type master data ──────────
-  async function getManufacturers() { return post('/ScopeModel/GetAllManufacturersList', {}); }
   async function getScopeModels(filters) { return post('/ScopeModel/GetAllScopeTypeList', filters); }
-  async function getScopeModelDetail(scopeTypeKey) { return get('/ScopeModel/GetScopeTypeDetailsById?plScopeTypeKey=' + scopeTypeKey); }
-  async function getScopeModelCategories(opts) { return get('/ScopeModel/GetAllScopeModelCategories?pbIncludeBlank=' + (opts?.includeBlank||false) + '&pbIncludeInactive=' + (opts?.includeInactive||false) + (opts?.instrumentType ? '&psInstrumentType=' + opts.instrumentType : '') + (opts?.scopeTypeKey ? '&plScopeTypeKey=' + opts.scopeTypeKey : '')); }
-  async function getVideoImagesList(includeBlank) { return get('/ScopeModel/GetAllvideoImagesList?pbIncludeBlank=' + (includeBlank||false)); }
-  async function getDiTypes(includeBlank) { return get('/ScopeModel/GetAllDiTypes?pbIncludeBlank=' + (includeBlank||false)); }
   async function addUpdateScopeType(data) { return post('/ScopeModel/AddUpdateScopeType', data); }
-  async function getScopeTypeAvgDays(scopeTypeKey) { return get('/ScopeModel/GetScopeTypeGetAverageDaysSinceLastIn?plScopeTypeKey=' + scopeTypeKey); }
-  async function getScopeTypeEpoxyAvg(scopeTypeKey) { return get('/ScopeModel/GetscopeTypeEpoxySizeRollingAvg?plScopeTypeKey=' + scopeTypeKey); }
   async function getScopeTypeRepairItems(filters) { return post('/ScopeModel/GetScopeTypeRepairItem', filters); }
-  async function addScopeTypeRepairItems(data) { return post('/ScopeModel/AddScopeTypeRepairItems', data); }
-  async function updateScopeTypeRepairItems(data) { return post('/ScopeModel/UpdateScopeTypeRepairItems', data); }
-  async function deleteScopeTypeRepairItems(key) { return del('/ScopeModel/DeleteScopeTypeRepairItems?plScopeTypeRepairItemKey=' + key); }
-  async function getUnassignedRepairItems(rigidFlexible, scopeTypeKey) { return get('/ScopeModel/GetUnassignedRepairItemsList?psRigidOrFlexible=' + rigidFlexible + '&plScopeTypeKey=' + scopeTypeKey); }
-  async function getScopeTypeRepairItemInventory(data) { return post('/ScopeModel/GetScopeTypeRepairItemInventory', data); }
-  async function getScopeTypeRepairItemAvailableInventory(data) { return post('/ScopeModel/GetScopeTypeRepairItemAvailableInventory', data); }
-  async function addScopeTypeRepairItemInventoryLink(data) { return post('/ScopeModel/AddScopeTypeRepairItemInventoryLink', data); }
 
   // ── ModelMaxCharges (4) ───────────────────────────────
   async function getModelMaxCharges(deptKey) { return get('/ModelMaxCharges/GetAllModelMaxChargesList?plDepartmentKey=' + deptKey); }
@@ -354,16 +315,12 @@ const API = (() => {
   async function deleteModelMaxCharge(scopeTypeKey, deptKey) { return del('/ModelMaxCharges/DeleteModelMaxCharge?plScopeTypeKey=' + scopeTypeKey + '&plDepartmentKey=' + deptKey); }
 
   // ── Repair (13) ──────────────────────────────────────
-  async function getRepairs(filters) { return post('/Repair/GetAllRepairList', filters); }
   async function getRepairList(svcKey, deptKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=' + (deptKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairDetail(repairKey, svcKey) { return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
-  async function getRepairScopes(deptKey, scopeKey, repairKey, svcKey) { return get('/Repair/GetAllrepairsScopes?plDepartmentKey=' + (deptKey||0) + '&plScopeKey=' + (scopeKey||0) + '&plRepairKey=' + (repairKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairReasons() { return get('/Repair/GetAllRepairReasons?plRepairReasonKey=0'); }
   async function getDeliveryMethods() { return get('/Repair/GetAllDeliveryMethods'); }
   async function getAllTechs() { return get('/Repair/GetAllTechs'); }
-  async function getRepairSuppliers(roleKey, includeKey) { return get('/Repair/GetAllsuppliers?plSupplierRoleKey=' + (roleKey||0) + (includeKey ? '&plSupplierKeyToInclude=' + includeKey : '')); }
   async function getPatientSafetyLevels() { return get('/Repair/GetAllPatientSafetyLevels'); }
-  async function getRepairDistributors(key, includeBlank, includeInactive) { return get('/Repair/GetAllDistributors?plDistributorKey=' + (key||0) + '&pbIncludeBlank=' + (includeBlank||true) + '&pbIncludeInactive=' + (includeInactive||false)); }
   // NOTE: AddRepair/UpdateRepair/DeleteRepair not yet in BrightLogix API (verified 2026-03-15).
   // These stubs are ready to work the moment MOL-Tech adds the endpoints.
   async function addRepair(data) { return post('/Repair/AddRepair', data); }
@@ -380,104 +337,36 @@ const API = (() => {
   async function deleteRepairItem(key) { return del('/RepairItems/DeleteRepairItems?plRepairItemKey=' + key); }
   async function getRepairLevels() { return get('/RepairItems/GetRepairLevels'); }
   async function getRepairStatuses() { return get('/RepairItems/GetRepairStatus'); }
-  async function getRepairItemPricing(data) { return post('/RepairItems/GetRepairItemPricingList', data); }
-  async function updateRepairItemPricing(data) { return post('/RepairItems/UpdateRepairItemPricingDetails', data); }
-  async function getRepairItemImpliedInventory(data) { return post('/RepairItems/GetRepairItemsImpliedInventoryList', data); }
-  async function updateRepairItemImpliedInventory(data) { return post('/RepairItems/UpdateRepairItemsImpliedInventory', data); }
-  async function getRepairItemImpliedItems(data) { return post('/RepairItems/GetRepairItemImpliedItemsList', data); }
-  async function getRepairItemParentItems(data) { return post('/RepairItems/GetRepairItemParentItemsList', data); }
-  async function addImpliedItem(data) { return post('/RepairItems/AddImpliedItemByplRepairItemKey', data); }
-  async function updateImpliedItemTech(data) { return post('/RepairItems/UpdateImpliedItemBylTechKey', data); }
-  async function deleteImpliedItem(childKey, parentKey) { return del('/RepairItems/DeleteImpliedItemByplRepairItemKey?plRepairItemChildKey=' + childKey + '&plRepairItemParentKey=' + parentKey); }
-  async function getAllTechnicians() { return get('/RepairItems/GetAllTechnicians'); }
-  async function getTechnicianById(key) { return get('/RepairItems/GetTechnicianById?plTechnicianKey=' + key); }
-  async function getProductIDsByRepairItem(key) { return get('/RepairItems/GetProductIDsListByRepairItemKey?plRepairItemKey=' + key); }
-  async function getRepairReasonsByKey(key) { return get('/RepairItems/GetRepairReasons?plRepairReasonKey=' + (key||0)); }
-
-  // ── RepairItemInstruments (19) — Instrument/scope type config ─
-  async function getInstrumentsList(data) { return post('/RepairItemInstruments/GetInstrumentsList', data); }
-  async function getInstrumentDetail(scopeTypeKey) { return get('/RepairItemInstruments/InstrumentsDetailsBylScopeTypeKey?plScopeTypeKey=' + scopeTypeKey); }
-  async function updateInstruments(data) { return post('/RepairItemInstruments/UpdateInstruments', data); }
-  async function getInstrumentScopeCategories() { return get('/RepairItemInstruments/GetAllInstrumentsScopeCategories'); }
-  async function addInstrument(data) { return post('/RepairItemInstruments/AddInstrument', data); }
-  async function getInstrumentManufacturersAvailable(scopeTypeKey) { return get('/RepairItemInstruments/GetInstrumentManufacturersAvailable?plScopeTypeKey=' + scopeTypeKey); }
-  async function getInstrumentManufacturers(data) { return post('/RepairItemInstruments/GetInstrumentManufacturersList', data); }
-  async function addInstrumentManufacturer(data) { return post('/RepairItemInstruments/AddInstrumentManufacturer', data); }
-  async function deleteInstrumentManufacturer(scopeTypeKey, mfrKey) { return del('/RepairItemInstruments/DeleteInstrumentManufacturer?plScopeTypeKey=' + scopeTypeKey + '&plManufacturerKey=' + mfrKey); }
-  async function addInstrumentManufacturerModel(data) { return post('/RepairItemInstruments/AddInstrumentManufacturerModel', data); }
-  async function updateInstrumentManufacturerModel(data) { return post('/RepairItemInstruments/UpdateInstrumentManufacturerModel', data); }
-  async function deleteInstrumentManufacturerModel(key) { return del('/RepairItemInstruments/DeleteInstrumentManufacturerModel?plModelKey=' + key); }
-  async function getInstrumentManufacturerModels(data) { return post('/RepairItemInstruments/GetInstrumentManufacturerModelsList', data); }
 
   // ── Detail (8) — Repair line item transactions ────────
   async function getRepairDetailItems(repairKey) { return get('/Detail/GetAllRepairDetailsList?plRepairKey=' + repairKey); }
-  async function getNewRepairDetails(data) { return post('/Detail/GetAllNewRepairDetails', data); }
-  async function updateRepairItemComment(tranKey, comment) { return post('/Detail/UpdateRepairItemTranComment', { plRepairItemTranKey: tranKey, psComment: comment }); }
-  async function updateRepairItemAmount(tranKey, amount) { return post('/Detail/UpdateRepairItemTranAmount', { plRepairItemTranKey: tranKey, pnRepairPrice: amount }); }
-  async function updateRepairItemApproved(tranKey, approved) { return post('/Detail/UpdateRepairItemTranApproved', { plRepairItemTranKey: tranKey, psApproved: approved }); }
-  async function updateRepairItemPrimary(repairKey, tranKey) { return post('/Detail/UpdateRepairDetailPrimary', { plRepairKey: repairKey, plRepairItemTranKey: tranKey }); }
   // NOTE: AddRepairDetail/DeleteRepairDetail not yet in BrightLogix API (verified 2026-03-15).
   async function addRepairDetail(data) { return post('/Detail/AddRepairDetail', data); }
-  async function deleteRepairDetail(tranKey) { return del('/Detail/DeleteRepairDetail?plRepairItemTranKey=' + tranKey); }
 
   // ── RepairInventory (3) ───────────────────────────────
   async function getRepairInventory(repairKey) { return get('/RepairInventory/GetAllRepairInventoryList?plRepairKey=' + repairKey); }
   // NOTE: Add/Delete not yet in BrightLogix API (verified 2026-03-15).
   async function addRepairInventory(data) { return post('/RepairInventory/AddRepairInventory', data); }
-  async function deleteRepairInventory(key) { return del('/RepairInventory/DeleteRepairInventory?plRepairInventoryKey=' + key); }
 
   // ── StatusTran (3) ────────────────────────────────────
   async function getRepairStatusHistory(repairKey) { return get('/StatusTran/GetAllRepairStatusesList?plRepairKey=' + repairKey); }
   // NOTE: Add/Update not yet in BrightLogix API (verified 2026-03-15).
   async function addRepairStatus(data) { return post('/StatusTran/AddRepairStatus', data); }
-  async function updateRepairStatus(data) { return post('/StatusTran/UpdateRepairStatus', data); }
 
   // ── Inventory (48) ────────────────────────────────────
   async function getInventoryList(filters) { return post('/Inventory/GetAllInventoryList', { plInventoryKey: 0, pbIncludeInactive: false, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {}, ...filters }); }
-  async function getInventoryById(key) { return get('/Inventory/GetInventoryById?plInventoryKey=' + key); }
   async function getInventorySizes(invKey, filters) { return post('/Inventory/GetAllInventorySizesList', { plInventoryKey: invKey, Pagination: { PageNumber: 1, PageSize: 100 }, Filters: {}, ...filters }); }
   async function addInventory(data) { return post('/Inventory/AddInventory', data); }
-  async function updateInventory(data) { return post('/Inventory/UpdateInventory', data); }
-  async function deleteInventoryValidation(key) { return del('/Inventory/DeleteInventoryValidation?plInventoryKey=' + key); }
-  async function deleteInventory(key) { return del('/Inventory/DeleteInventory?plInventoryKey=' + key); }
-  async function getInventoryItemAndSize(svcKey, includeInactive, supplierKey) { return get('/Inventory/GetInventoryItemAndSize?plServiceLocationKey=' + (svcKey||1) + '&pbIncludeInactive=' + (includeInactive||false) + (supplierKey ? '&plSupplierKey=' + supplierKey : '')); }
-  async function getInventorySizeById(key) { return get('/Inventory/GetAllInventorySizesById?plInventorySizeKey=' + key); }
-  async function addInventorySize(data) { return post('/Inventory/AddInventorySize', data); }
-  async function updateInventorySize(data) { return post('/Inventory/UpdateInventorySize', data); }
-  async function deleteInventorySize(key) { return del('/Inventory/DeleteInventorySize?plInventorySizeKey=' + key); }
-  async function getInventoryFromLotNumber(lot, posOnly) { return get('/Inventory/GetInventorySizesFromLotNumber?psLotNumber=' + lot + '&pbPositiveQuantityOnly=' + (posOnly||false)); }
-  async function addInventorySizeBuild(data) { return post('/Inventory/AddInventorySizeBuild', data); }
-  async function getInventoryAssembly(data) { return post('/Inventory/GetAllInventoryAssemblyList', data); }
-  async function updateInventoryAssembly(data) { return post('/Inventory/UpdateInventoryAssembly', data); }
-  async function deleteInventoryAssembly(key) { return del('/Inventory/DeleteInventoryAssembly?plInventoryAssemblyKey=' + key); }
-  async function addLotNumberAdjustment(data) { return post('/Inventory/AddLotNumberAdjustment', data); }
-  async function getLotNumberQtyAvailable(lot) { return get('/Inventory/GetLotNumberQuantityAvailable?psLotNumber=' + lot); }
-  async function getInventorySuppliers() { return get('/Inventory/GetAllSuppliers'); }
-  async function getInventoryPOs(supplierKey, includeClosed, startDate, endDate) { return get('/Inventory/GetAllPO?plSupplierKey=' + supplierKey + '&pbIncludeClosed=' + (includeClosed||false) + (startDate ? '&pdtStartDate=' + startDate : '') + (endDate ? '&pdtEndDate=' + endDate : '')); }
-  async function getInventoryPODetail(key) { return get('/Inventory/GetPODetailsById?plSupplierPOKey=' + key); }
-  async function getSupplierPOTrans(poKey) { return get('/Inventory/GetSupplierPOTrans?plSupplierPOKey=' + poKey); }
-  async function addSupplierPOTran(data) { return post('/Inventory/AddSupplierPOTran', data); }
-  async function addSupplierPO(data) { return post('/Inventory/AddSupplierPO', data); }
-  async function updateSupplierPO(data) { return post('/Inventory/UpdateSupplierPO', data); }
-  async function deleteSupplierPO(key) { return del('/Inventory/DeletePO?plSupplierPOKey=' + key); }
-  async function addInventoryTran(data) { return post('/Inventory/AddInventoryTran', data); }
-  async function getInventorySizeSuppliers(data) { return post('/Inventory/GetInventorySizeSuppliers', data); }
-  async function assignInventorySize(data) { return post('/Inventory/AssignInventorySize', data); }
-  async function updateSupplierInventorySize(data) { return post('/Inventory/UpdateSupplierInventorySize', data); }
-  async function getSuppliersForDropdown(roleKey, includeInactive) { return get('/Inventory/GetSuppliersListForDropdown?plSupplierRoleKey=' + (roleKey||0) + '&pbIncludeInactive=' + (includeInactive||false)); }
 
   // ── Supplier (11) ─────────────────────────────────────
-  async function getSuppliersList(data) { return post('/Supplier/GetSuppliersList', data); }
   async function getSupplierById(key) { return get('/Supplier/GetSupplierBySupplierKey?plSupplierKey=' + key); }
   async function getSuppliers() { return get('/Supplier/GetAllSupplierList'); }
   async function addSupplier(data) { return post('/Supplier/AddSupplier', data); }
   async function updateSupplier(data) { return post('/Supplier/UpdateSupplier', data); }
   async function deleteSupplier(key) { return del('/Supplier/DeleteSupplier?plSupplierKey=' + key); }
-  async function getSupplierPOTypes(key, includeBlank) { return get('/Supplier/GetSupplierPOTypes?plSupplierPOTypeKey=' + (key||0) + '&pbIncludeBlank=' + (includeBlank||true)); }
   async function getSupplierRecentPOs(data) { return post('/Supplier/GetSupplierRecentPOsList', data); }
   async function getSuppliedItemAndSize(data) { return post('/Supplier/GetSuppliedItemAndSize', data); }
   async function getAvailableSuppliedItemAndSize(data) { return post('/Supplier/GetAvailableSuppliedItemAndSize', data); }
-  async function getNextSupplierPartNumber(key) { return get('/Supplier/GetsupplierGetNextPartNumber?plSupplierKey=' + key); }
 
   // ── Acquisitions (3) ──────────────────────────────────
   async function getAcquisitionsSold(data) { return post('/Acquisitions/GetAcquisitionsSoldList', data); }
@@ -485,85 +374,47 @@ const API = (() => {
   async function getAcquisitionsConsigned(data) { return post('/Acquisitions/GetAcquisitionsConsignedList', data); }
 
   // ── Product Sales (13) ────────────────────────────────
-  async function getInvoiceNumbers(productSaleKey, deptKey, includeCanceled) { return get('/ProductSales/GetAllInvoiceNumber?plProductSaleKey=' + (productSaleKey||0) + '&plDepartmentKey=' + (deptKey||0) + '&pbIncludeCanceled=' + (includeCanceled||false)); }
-  async function getSalesReps() { return get('/ProductSales/GetSalesRep?plSalesRepKey=0&pbIncludeBlank=true&pbIncludeAll=false&psActiveFlag=A&plCompanyKey=0&plSalesRepKeyToInclude=0'); }
-  async function getInventoryPricing() { return get('/ProductSales/GetAllInventoryPrice?plInventoryPricingListKey=0&pbIncludeBlank=true&pbIncludeInactive=false&plInventoryPricingListKeyToInclude=0'); }
-  async function addProductSale(data) { return post('/ProductSales/AddProductSales', data); }
-  async function updateProductSale(data) { return post('/ProductSales/UpdateProductSale', data); }
-  async function addProductSaleInventory(data) { return post('/ProductSales/AddProductSaleInventory', data); }
-  async function getProductSaleInventory(key) { return get('/ProductSales/GetProductSaleInventory?plProductSaleKey=' + key); }
-  async function deleteProductSaleInventory(key) { return del('/ProductSales/DeleteProductSaleInventory?plProductSaleInventoryKey=' + key); }
-  async function deleteProductSale(key) { return del('/ProductSales/DeleteProductSale?plProductSaleKey=' + key); }
   async function searchProductSales(invoice, po, desc) { return get('/ProductSales/ProductSalesSearch?psInvoiceNumber=' + (invoice||'') + '&psPONumber=' + (po||'') + '&psDescription2=' + (desc||'')); }
-  async function updateProductSaleInventoryQty(data) { return post('/ProductSales/UpdateProductSaleInverntoryQuantityAndUnitCost', data); }
-  async function addProductSaleInventoryLot(data) { return post('/ProductSales/AddProductSaleInverntoryLotNumberAndQuntity', data); }
-  async function updateProductSaleInventoryLot(data) { return post('/ProductSales/UpdateProductSaleInverntoryLotNumber', data); }
 
   // ── Contract (101) ────────────────────────────────────
   async function getContractsList(data) { return post('/Contract/GetAllContractsList', data); }
   async function getContractById(key) { return get('/Contract/GetContractById?plContractKey=' + key); }
   async function addContract(data) { return post('/Contract/AddContract', data); }
   async function updateContract(data) { return post('/Contract/UpdateContract', data); }
-  async function updateContractName(data) { return post('/Contract/UpdateContractName', data); }
   async function deleteContract(key) { return del('/Contract/DeleteContract?plContractKey=' + key); }
   async function getContractTypes(includeBlank) { return get('/Contract/GetAllContractType?pbIncludeBlank=' + (includeBlank||true)); }
-  async function getContractInstallmentTypes(includeNone, id) { return get('/Contract/GetAllContractInstallmentTypes?pbIncludeNone=' + (includeNone||false) + (id ? '&plInstallmentTypeID=' + id : '')); }
   async function getContractServicePlanTerms(includeBlank) { return get('/Contract/GetAllContractServicePlanTerms?pbIncludeBlank=' + (includeBlank||true)); }
   async function getContractDepartments(key, contractKey, clientKey) { return get('/Contract/GetContractDepartments?plContractDepartmentKey=' + (key||0) + '&plContractKey=' + (contractKey||0) + '&plClientKey=' + (clientKey||0)); }
   async function getContractDepartmentsAvailable(contractKey) { return get('/Contract/GetContractDepartmentsAvailable?plContractKey=' + contractKey); }
-  async function addContractDepartments(data) { return post('/Contract/AddContractDepartments', data); }
   async function getContractScopes(data) { return post('/Contract/GetAllContractScopes', data); }
-  async function addContractScopes(data) { return post('/Contract/AddContractScopes', data); }
-  async function updateContractScope(data) { return post('/Contract/UpdateContractScope', data); }
-  async function deleteContractScope(keys) { return del('/Contract/DeleteContractScope?plContractScopeKeys=' + keys); }
-  async function checkScopeSerialExists(serial) { return get('/Contract/CheckScopeSerialNumberExists?psSerialNumber=' + serial); }
-  async function insertNewScopesWithCheck(data) { return post('/Contract/InsertNewScopesWithCheckSerialNumber', data); }
   async function getContractRepairsList(contractKey) { return get('/Contract/GetContractRepairsList?plContractKey=' + contractKey); }
   async function getContractAmendments(contractKey) { return get('/Contract/GetContractAmendmentsList?plContractKey=' + contractKey); }
   async function getContractCoverageCounts(contractKey) { return get('/Contract/GetAllContractCoverageCounts?plContractKey=' + contractKey); }
   async function getContractReportCard(contractKey) { return get('/Contract/GetContractReportCardDetails?plContractKey=' + contractKey); }
   async function getContractExpenseBreakdown(contractKey) { return get('/Contract/GetContractExpenseBreakdown?plContractKey=' + contractKey); }
-  async function getContractRenewalScopes(data) { return post('/Contract/GetContractRenewalScopes', data); }
-  async function addContractRenewalScopes(data) { return post('/Contract/AddContractRenewalScopes', data); }
   async function getContractInvoices(data) { return post('/Contract/GetAllContractInvoice', data); }
   async function getContractClients(includeInactive) { return get('/Contract/GetAllContractClient?pbIncludeInactive=' + (includeInactive||false)); }
 
   // ── PendingContract (23) ──────────────────────────────
   async function getPendingContracts(data) { return post('/PendingContract/GetPendingContractsList', data); }
-  async function getPendingContractById(key) { return get('/PendingContract/GetPendingContractById?plPendingContractKey=' + key); }
-  async function addPendingContract(data) { return post('/PendingContract/AddPendingContract', data); }
-  async function updatePendingContract(data) { return post('/PendingContract/UpdatePendingContract', data); }
-  async function deletePendingContract(key) { return del('/PendingContract/DeletePendingContract?plPendingContractKey=' + key); }
-  async function convertPendingContract(data) { return post('/PendingContract/PendingContractConvertToContract', data); }
 
   // ── Financials (19) ───────────────────────────────────
   async function getOutstandingInvoices(data) { return post('/Financials/GetOutstandingInvoicesList', data); }
-  async function getOutstandingInvoiceById(key) { return get('/Financials/GetOutstandinInvoiceById?plInvoiceKey=' + key); }
-  async function updateInvoiceStatus(data) { return post('/Financials/UpdateInvoiceStatusAndFollowUpDate', data); }
-  async function importOutstandingInvoices(data) { return post('/Financials/ImportOutstandingInvoices', data); }
   async function getGLAccounts() { return get('/Financials/GetAllGLAccounts'); }
-  async function updateGLAccounts(data) { return post('/Financials/UpdateGLAccounts', data); }
   async function getClientsOnHold(data) { return post('/Financials/GetAllClientsOnHold', data); }
   async function clientUpdateOnHold(data) { return post('/Financials/clientUpdateOnHold', data); }
-  async function getWorkOrdersOnHold(data) { return post('/Financials/GetAllWorkOrdersOnHold', data); }
-  async function workOrderUpdateOnHold(data) { return post('/Financials/WorkOrderUpdateOnHold', data); }
   async function getInvoicePayments(data) { return post('/Financials/GetAllInvoicePayments', data); }
-  async function deleteInvoicePayment(key) { return del('/Financials/DeleteInvoicePayment?plInvoicePaymentID=' + key); }
   async function getDraftInvoices(data) { return post('/Financials/GetAllDraftInvoices', data); }
   async function deleteDraftInvoice(key) { return del('/Financials/DeleteDraftInvoice?plInvoiceKey=' + key); }
 
   // ── Documents (5) ─────────────────────────────────────
   async function getDocuments(ownerKey, catKey, catTypeKey) { let u = '/Documents/GetAllDocumentsList?plDocumentKey=0&plOwnerKey=' + ownerKey; if (catKey) u += '&plDocumentCategoryKey=' + catKey; if (catTypeKey) u += '&plDocumentCategoryTypeKey=' + catTypeKey; return get(u); }
-  async function addDocument(data) { return post('/Documents/AddDocuments', data); }
-  async function updateDocument(data) { return post('/Documents/UpdateDocuments', data); }
   async function deleteDocument(key) { return del('/Documents/DeleteDocuments?plDocumentKey=' + key); }
   async function downloadDocument(keyOrName) { const param = typeof keyOrName === 'number' ? 'plDocumentKey=' + keyOrName : 'sDocumentFileName=' + encodeURIComponent(keyOrName); return get('/Documents/DownloadDocument?' + param); }
 
   // ── Flags (4) ─────────────────────────────────────────
   async function getFlagsByOwner(ownerKey, flagTypeKey) { return get('/Flag/GetFlagList?plOwnerKey=' + ownerKey + '&plFlagTypeKey=' + (flagTypeKey||0)); }
-  async function getFlagsByClient(clientKey) { return get('/Flag/GetFlagList?plClientKey=' + clientKey); }
   async function addFlag(data) { return post('/Flag/AddFlag', data); }
-  async function updateFlag(data) { return post('/Flag/UpdateFlag', data); }
   async function deleteFlag(key) { return del('/Flag/DeleteFlag?plFlagKey=' + key); }
 
   // ── Lookups / Reference ───────────────────────────────
@@ -572,27 +423,10 @@ const API = (() => {
   async function getAllPaymentTerms() { return get('/PaymentTerms/GetAllPaymentTerms'); }
   async function getAllCreditLimits() { return get('/CreditLimit/GetAllCreditLimits'); }
   async function getAllDistributors() { return get('/DistributorName/GetAllDistributorNames'); }
-  async function getAllCountries() { return get('/Country/GetAllCountries'); }
-  async function getAllStates() { return get('/State/GetAllStates'); }
   async function getInstrumentTypes() { return get('/InstrumentType/GetInstrumentTypes'); }
-  async function getSystemCodes(key, hdrKey) { return get('/SystemCodes/GetAllSystemCodes?plSystemCodesKey=' + (key||0) + '&plSystemCodesHdrKey=' + (hdrKey||0)); }
-  async function getEmailTemplate(templateId) { return get('/EmailTemplate/GetEmailTemplatesById?templateId=' + templateId); }
-
-  // ── ServiceLocation (2) ───────────────────────────────
-  async function getServiceLocations() { return get('/ServiceLocation/GetServiceLocations'); }
-  async function getServiceLocationsByUser(userKey) { return get('/ServiceLocation/GetAllServiceLocation?plUserKey=' + userKey); }
-
-  // ── Security (1) ──────────────────────────────────────
-  async function getMenuItemsForUser(userKey) { return get('/Security/MenuItemsGetAllForUserKey?plUserKey=' + userKey); }
 
   // ── UserManagement (8) ────────────────────────────────
-  async function getUserList(data) { return post('/UserManagement/GetUserList', data); }
-  async function getUserById(key) { return get('/UserManagement/GetUserDetailsById?plUserKey=' + key); }
-  async function addUser(data) { return post('/UserManagement/AddUser', data); }
   async function updateUser(data) { return post('/UserManagement/UpdateUser', data); }
-  async function resetUserPassword(data) { return post('/UserManagement/ResetUserPassword', data); }
-  async function changeUserPassword(data) { return post('/UserManagement/ChangeUserPassword', data); }
-  async function forgotPassword(data) { return post('/UserManagement/ForgotPassword', data); }
 
   async function logout() {
     clearToken();
@@ -651,26 +485,6 @@ const API = (() => {
     }
   };
 
-  // ── AdminManageStaff (4) ──────────────────────────────
-  async function getJobTypes(data) { return post('/AdminManageStaff/GetJobTypes', data); }
-  async function getAllStaff(jobTypeKey, includeInactive) { return get('/AdminManageStaff/GetAllStaff?plJobTypeKey=' + (jobTypeKey||0) + '&pbIncludeInactive=' + (includeInactive||false)); }
-  async function createStaff(data) { return post('/AdminManageStaff/CreateStaff', data); }
-  async function updateSalesRep(data) { return post('/AdminManageStaff/UpdateSalesRep', data); }
-
-  // ── AdminPricingLists (11) ────────────────────────────
-  async function getPricingCategoryById(key) { return get('/AdminPricingLists/GetpricingCategoryBylPricingCategoryId?plPricingCategoryKey=' + key); }
-  async function getPricingDetails(catKey, itemKey) { return get('/AdminPricingLists/GetPricingDetails?plPricingCategoryKey=' + catKey + '&plRepairItemKey=' + (itemKey||0)); }
-  async function updatePricingDetail(data) { return post('/AdminPricingLists/PricingDetailUpdate', data); }
-  async function addPricingCategory(data) { return post('/AdminPricingLists/AddPricingCategory', data); }
-  async function updatePricingCategory(data) { return post('/AdminPricingLists/UpdatePricingCategory', data); }
-  async function deletePricingCategory(key) { return del('/AdminPricingLists/DeletePricingCategory?plPricingCategoryKey=' + key); }
-  async function getAllPricingGpo(includeBlank) { return get('/AdminPricingLists/GetAllPricingGpo?pbIncludeBlank=' + (includeBlank||false)); }
-
-  // ── AdminSecurity (26) — abbreviated, expose as needed
-  async function getSecurityGroups() { return get('/AdminSecurity/GetAllSecurityGroups'); }
-  async function getSecurityGroupMenuItems(groupKey, parentKey) { return get('/AdminSecurity/GetAllSecurityGroupMenuItemsList?plSecurityGroupKey=' + groupKey + '&plSecurityParentMenuItemKey=' + (parentKey||0)); }
-  async function getUserSecurityGroups(userKey) { return get('/AdminSecurity/GetAllUserSecurityGroups?plUserKey=' + userKey + '&pbIncludeGlobalAdmin=true'); }
-
   // ── DevelopmentList (13) — Dev todo tracker ───────────
   async function getDevTodoList(data) { return post('/DevelopmentList/GetDevelopmentTodoList', data); }
   async function addDevTodoItem(data) { return post('/DevelopmentList/AddDevelopmentTodoItem', data); }
@@ -686,7 +500,7 @@ const API = (() => {
     // Auth & Core
     login, logout, isLoggedIn, requireAuth, getToken, getUser,
     get, post, del,
-    verifyOtp, UI,
+    UI,
 
     // Dashboard
     getDashboardScopes,
@@ -695,158 +509,101 @@ const API = (() => {
     getTasks, addTask, updateTask, deleteTask,
     getTaskStatuses, getTaskPriorities,
     addTaskLoaner, updateTaskLoaner, getTaskLoaners, deleteTaskLoaner,
-    getTaskTypes, getTaskType, addTaskType, updateTaskType, deleteTaskType,
+    getTaskTypes, getTaskType,
 
     // Clients
     getAllClients, getClientById, addClient, updateClient, deleteClient,
-    getNationalAccounts, getCityStateByZip,
+    getCityStateByZip,
 
     // Departments
     getAllDepartments, getDepartmentDetail, addDepartment, updateDepartment, deleteDepartment,
-    getStandardDepartments, getShippingCarriers, getDepartmentInvoiceSchedule,
-    getDepartmentTypes,
-    getDepartmentGPOList, getGPOsList,
+    getDepartmentGPOList,
     getSubGroups, getSubGroupsAvailable, addDepartmentSubGroups, deleteDepartmentSubGroups,
 
     // Contacts
     getContactsByClient, getContactsByDepartment, addContact, updateContact,
 
     // Scopes
-    getAllScopes, getScopesList, getScopeById, getScopeRepairs,
-    getScopeTypes, checkOpenRepairForScope,
-    getScopeComment, updateScopeComment,
-    addScope, updateScope, deleteScope,
-    updateScopeSalePrice, updateScopeSaleReturn, updateScopeSale,
+    getAllScopes, checkOpenRepairForScope,
+    addScope, deleteScope,
 
     // Scope Types
     getScopeTypeNames, getDepartmentScopeTypes, getAvailableDepartmentScopeTypes,
     addDepartmentScopeTypes, deleteDepartmentScopeTypes, deleteScopeTypes,
 
     // Scope Models
-    getManufacturers, getScopeModels, getScopeModelDetail, getScopeModelCategories,
-    getVideoImagesList, getDiTypes, addUpdateScopeType,
-    getScopeTypeAvgDays, getScopeTypeEpoxyAvg,
-    getScopeTypeRepairItems, addScopeTypeRepairItems, updateScopeTypeRepairItems, deleteScopeTypeRepairItems,
-    getUnassignedRepairItems, getScopeTypeRepairItemInventory,
-    getScopeTypeRepairItemAvailableInventory, addScopeTypeRepairItemInventoryLink,
+    getScopeModels, addUpdateScopeType,
+    getScopeTypeRepairItems,
 
     // Model Max Charges
     getModelMaxCharges, addModelMaxCharge, updateModelMaxCharge, deleteModelMaxCharge,
 
     // Repairs
-    getRepairs, getRepairList, getRepairDetail, getRepairScopes,
+    getRepairList, getRepairDetail,
     getRepairReasons, getDeliveryMethods, getAllTechs,
-    getRepairSuppliers, getPatientSafetyLevels, getRepairDistributors,
+    getPatientSafetyLevels,
     addRepair, updateRepair, deleteRepair,
 
     // Repair Items
     getRepairItems, getRepairItemsList, getRepairItemsCatalog, getRepairItemDetail,
     addRepairItem, updateRepairItem, deleteRepairItem,
     getRepairLevels, getRepairStatuses,
-    getRepairItemPricing, updateRepairItemPricing,
-    getRepairItemImpliedInventory, updateRepairItemImpliedInventory,
-    getRepairItemImpliedItems, getRepairItemParentItems,
-    addImpliedItem, updateImpliedItemTech, deleteImpliedItem,
-    getAllTechnicians, getTechnicianById,
-    getProductIDsByRepairItem, getRepairReasonsByKey,
-
-    // Repair Item Instruments
-    getInstrumentsList, getInstrumentDetail, updateInstruments, getInstrumentScopeCategories,
-    addInstrument, getInstrumentManufacturersAvailable, getInstrumentManufacturers,
-    addInstrumentManufacturer, deleteInstrumentManufacturer,
-    addInstrumentManufacturerModel, updateInstrumentManufacturerModel, deleteInstrumentManufacturerModel,
-    getInstrumentManufacturerModels,
 
     // Repair Detail
-    getRepairDetailItems, getNewRepairDetails,
-    updateRepairItemComment, updateRepairItemAmount,
-    updateRepairItemApproved, updateRepairItemPrimary,
-    addRepairDetail, deleteRepairDetail,
+    getRepairDetailItems,
+    addRepairDetail,
 
     // Repair Inventory & Status
-    getRepairInventory, addRepairInventory, deleteRepairInventory,
-    getRepairStatusHistory, addRepairStatus, updateRepairStatus,
+    getRepairInventory, addRepairInventory,
+    getRepairStatusHistory, addRepairStatus,
 
     // Inventory
-    getInventoryList, getInventoryById, getInventorySizes,
-    addInventory, updateInventory, deleteInventoryValidation, deleteInventory,
-    getInventoryItemAndSize, getInventorySizeById,
-    addInventorySize, updateInventorySize, deleteInventorySize,
-    getInventoryFromLotNumber, addInventorySizeBuild,
-    getInventoryAssembly, updateInventoryAssembly, deleteInventoryAssembly,
-    addLotNumberAdjustment, getLotNumberQtyAvailable,
-    getInventorySuppliers, getInventoryPOs, getInventoryPODetail,
-    getSupplierPOTrans, addSupplierPOTran, addSupplierPO, updateSupplierPO, deleteSupplierPO,
-    addInventoryTran, getInventorySizeSuppliers,
-    assignInventorySize, updateSupplierInventorySize, getSuppliersForDropdown,
+    getInventoryList, getInventorySizes,
+    addInventory,
 
     // Suppliers
-    getSuppliersList, getSupplierById, getSuppliers,
+    getSupplierById, getSuppliers,
     addSupplier, updateSupplier, deleteSupplier,
-    getSupplierPOTypes, getSupplierRecentPOs,
-    getSuppliedItemAndSize, getAvailableSuppliedItemAndSize, getNextSupplierPartNumber,
+    getSupplierRecentPOs,
+    getSuppliedItemAndSize, getAvailableSuppliedItemAndSize,
 
     // Acquisitions
     getAcquisitionsSold, getAcquisitionsInHouse, getAcquisitionsConsigned,
 
     // Product Sales
-    getInvoiceNumbers, getSalesReps, getInventoryPricing,
-    addProductSale, updateProductSale,
-    addProductSaleInventory, getProductSaleInventory,
-    deleteProductSaleInventory, deleteProductSale, searchProductSales,
-    updateProductSaleInventoryQty, addProductSaleInventoryLot, updateProductSaleInventoryLot,
+    searchProductSales,
 
     // Contracts
-    getContractsList, getContractById, addContract, updateContract, updateContractName, deleteContract,
-    getContractTypes, getContractInstallmentTypes, getContractServicePlanTerms,
-    getContractDepartments, getContractDepartmentsAvailable, addContractDepartments,
-    getContractScopes, addContractScopes, updateContractScope, deleteContractScope,
-    checkScopeSerialExists, insertNewScopesWithCheck,
+    getContractsList, getContractById, addContract, updateContract, deleteContract,
+    getContractTypes, getContractServicePlanTerms,
+    getContractDepartments, getContractDepartmentsAvailable,
+    getContractScopes,
     getContractRepairsList, getContractAmendments, getContractCoverageCounts,
     getContractReportCard, getContractExpenseBreakdown,
-    getContractRenewalScopes, addContractRenewalScopes,
     getContractInvoices, getContractClients,
 
     // Pending Contracts
-    getPendingContracts, getPendingContractById,
-    addPendingContract, updatePendingContract, deletePendingContract, convertPendingContract,
+    getPendingContracts,
 
     // Financials
-    getOutstandingInvoices, getOutstandingInvoiceById, updateInvoiceStatus, importOutstandingInvoices,
-    getGLAccounts, updateGLAccounts,
-    getClientsOnHold, clientUpdateOnHold, getWorkOrdersOnHold, workOrderUpdateOnHold,
-    getInvoicePayments, deleteInvoicePayment, getDraftInvoices, deleteDraftInvoice,
+    getOutstandingInvoices,
+    getGLAccounts,
+    getClientsOnHold, clientUpdateOnHold,
+    getInvoicePayments, getDraftInvoices, deleteDraftInvoice,
 
     // Documents
-    getDocuments, addDocument, updateDocument, deleteDocument, downloadDocument,
+    getDocuments, deleteDocument, downloadDocument,
 
     // Flags
-    getFlagsByOwner, getFlagsByClient, addFlag, updateFlag, deleteFlag,
+    getFlagsByOwner, addFlag, deleteFlag,
 
     // Lookups / Reference
     getAllSalesReps, getAllPricingCategories, getAllPaymentTerms,
-    getAllCreditLimits, getAllDistributors, getAllCountries, getAllStates,
-    getInstrumentTypes, getSystemCodes, getEmailTemplate,
-
-    // Service Locations
-    getServiceLocations, getServiceLocationsByUser,
-
-    // Security
-    getMenuItemsForUser,
+    getAllCreditLimits, getAllDistributors,
+    getInstrumentTypes,
 
     // User Management
-    getUserList, getUserById, addUser, updateUser,
-    resetUserPassword, changeUserPassword, forgotPassword,
-
-    // Admin — Manage Staff
-    getJobTypes, getAllStaff, createStaff, updateSalesRep,
-
-    // Admin — Pricing Lists
-    getPricingCategoryById, getPricingDetails, updatePricingDetail,
-    addPricingCategory, updatePricingCategory, deletePricingCategory, getAllPricingGpo,
-
-    // Admin — Security
-    getSecurityGroups, getSecurityGroupMenuItems, getUserSecurityGroups,
+    updateUser,
 
     // Dev Todo
     getDevTodoList, addDevTodoItem, updateDevTodoStatus, getDevTodoDetails,
