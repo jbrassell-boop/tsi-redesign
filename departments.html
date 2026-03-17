@@ -365,15 +365,39 @@
                 <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="deptShipSameBill" style="width:auto;height:auto" onchange="deptToggleShipSame()"/> Same as Bill To</label>
               </div>
               <div class="addr-body">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                  <div class="ff"><label>Bill To</label><textarea id="deptBillTo" class="inp" rows="5" style="height:auto;font-size:11px;line-height:1.4;resize:none" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"></textarea></div>
-                  <div class="ff"><label>Ship To</label><textarea id="deptShipTo" class="inp" rows="5" style="height:auto;font-size:11px;line-height:1.4;resize:none" oninput="deptDirty()"></textarea></div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px">
-                  <div class="ff"><label>Bill Email</label><input id="deptBillEmail" class="inp" type="email" oninput="deptDirty()"/></div>
-                  <div class="ff"><label>Bill Phone</label><input id="deptBillPhone" class="inp" oninput="deptDirty()"/></div>
-                  <div class="ff"><label>Ship Phone</label><input id="deptShipPhone" class="inp" oninput="deptDirty()"/></div>
-                  <div class="ff"><label>Fax</label><input id="deptFax" class="inp" oninput="deptDirty()"/></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <!-- Bill To -->
+                  <div>
+                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                      <div class="ff" style="grid-column:span 2"><label>Name</label><input id="deptBillName1" class="inp" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Address</label><input id="deptBillAddr1" class="inp" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Address 2</label><input id="deptBillAddr2" class="inp" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                      <div class="ff"><label>City</label><input id="deptBillCity" class="inp" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                        <div class="ff"><label>State</label><input id="deptBillState" class="inp" maxlength="2" style="text-transform:uppercase" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                        <div class="ff"><label>Zip</label><input id="deptBillZip" class="inp" oninput="deptDirty();if(document.getElementById('deptShipSameBill').checked)deptToggleShipSame()"/></div>
+                      </div>
+                      <div class="ff"><label>Email</label><input id="deptBillEmail" class="inp" type="email" oninput="deptDirty()"/></div>
+                      <div class="ff"><label>Phone</label><input id="deptBillPhone" class="inp" oninput="deptDirty()"/></div>
+                    </div>
+                  </div>
+                  <!-- Ship To -->
+                  <div>
+                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                      <div class="ff" style="grid-column:span 2"><label>Name</label><input id="deptShipName1" class="inp" oninput="deptDirty()"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Address</label><input id="deptShipAddr1" class="inp" oninput="deptDirty()"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Address 2</label><input id="deptShipAddr2" class="inp" oninput="deptDirty()"/></div>
+                      <div class="ff"><label>City</label><input id="deptShipCity" class="inp" oninput="deptDirty()"/></div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                        <div class="ff"><label>State</label><input id="deptShipState" class="inp" maxlength="2" style="text-transform:uppercase" oninput="deptDirty()"/></div>
+                        <div class="ff"><label>Zip</label><input id="deptShipZip" class="inp" oninput="deptDirty()"/></div>
+                      </div>
+                      <div class="ff"><label>Phone</label><input id="deptShipPhone" class="inp" oninput="deptDirty()"/></div>
+                      <div class="ff"><label>Fax</label><input id="deptFax" class="inp" oninput="deptDirty()"/></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1709,7 +1733,24 @@ function openContactModal(mode){
       plProcedures: parseInt($('fProcedures').value) || 0,
       plBedSize: parseInt($('fBedSize').value) || 0,
       psDepartmentType: $('fDeptType').options[$('fDeptType').selectedIndex]?.text || '',
-      pmNotes: $('fNotes').value || ''
+      pmNotes: $('fNotes').value || '',
+      // Addresses
+      psBillingName1: $('deptBillName1').value || '',
+      psBillingAddress1: $('deptBillAddr1').value || '',
+      psBillingAddress2: $('deptBillAddr2').value || '',
+      psBillingCity: $('deptBillCity').value || '',
+      psBillingState: $('deptBillState').value || '',
+      psBillingZip: $('deptBillZip').value || '',
+      psBillingEmail: $('deptBillEmail').value || '',
+      psBillingPhone: $('deptBillPhone').value || '',
+      psShippingName1: $('deptShipName1').value || '',
+      psShippingAddress1: $('deptShipAddr1').value || '',
+      psShippingAddress2: $('deptShipAddr2').value || '',
+      psShippingCity: $('deptShipCity').value || '',
+      psShippingState: $('deptShipState').value || '',
+      psShippingZip: $('deptShipZip').value || '',
+      psShippingPhone: $('deptShipPhone').value || '',
+      psBillingFax: $('deptFax').value || ''
     };
   }
 
@@ -1741,15 +1782,13 @@ function openContactModal(mode){
   }
   window.deptDirty = function(){ triggerAutosave(); };
   window.deptToggleShipSame = function(){
-    const shipTo = document.getElementById('deptShipTo');
-    if(document.getElementById('deptShipSameBill').checked){
-      shipTo.value = document.getElementById('deptBillTo').value;
-      shipTo.readOnly = true;
-      shipTo.style.background = '#F8FAFF';
-    } else {
-      shipTo.readOnly = false;
-      shipTo.style.background = '#fff';
+    const same = $('deptShipSameBill').checked;
+    if(same){
+      ['Name1','Addr1','Addr2','City','State','Zip'].forEach(f => {
+        $('deptShip'+f).value = $('deptBill'+f).value;
+      });
     }
+    setShipFieldsReadonly(same);
     triggerAutosave();
   }
 
@@ -1944,41 +1983,50 @@ function openContactModal(mode){
   /* ═══ ADDRESSES TAB POPULATION ═════════════════════ */
   function populateAddresses(d){
     if(!d) return;
-    const addrBodies = document.querySelectorAll('#dtab-addresses .addr-body');
-    if(addrBodies.length < 2) return;
 
-    // Log available address-related keys to help diagnose field name mismatches
-    const addrKeys = Object.keys(d).filter(k => /bill|ship|addr|city|state|zip|phone|fax|email/i.test(k));
-    console.log('[Dept] Address fields in API response:', addrKeys, addrKeys.reduce((o,k)=>({...o,[k]:d[k]}),{}));
-
-    // Addresses — structured text blocks for report/invoice pull
-    function ab(lines) { return lines.filter(Boolean).join('\n'); }
+    // Bill To — structured fields with API field name fallbacks
     const bn1 = d.sBillingName1 || d.sBillToName1 || d.sBillName1 || '';
-    const bn2 = d.sBillingName2 || d.sBillToName2 || d.sBillName2 || '';
     const ba1 = d.sBillingAddress1 || d.sBillToAddress1 || d.sBillToAddr1 || d.sBillingAddr1 || d.sBillAddr1 || '';
     const ba2 = d.sBillingAddress2 || d.sBillToAddress2 || d.sBillToAddr2 || d.sBillingAddr2 || d.sBillAddr2 || '';
     const bc = d.sBillingCity || d.sBillToCity || d.sBillCity || '';
     const bs = d.sBillingState || d.sBillToState || d.sBillState || '';
     const bz = d.sBillingZip || d.sBillToZip || d.sBillToZipCode || d.sBillZip || '';
-    const billText = ab([bn1, bn2, ba1, ba2, [bc, bs].filter(Boolean).join(', ') + (bz ? ' '+bz : '')]);
-    document.getElementById('deptBillTo').value = billText;
-    document.getElementById('deptBillEmail').value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
-    document.getElementById('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneNumber || '';
-    document.getElementById('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactFaxNumber || '';
+    $('deptBillName1').value = bn1;
+    $('deptBillAddr1').value = ba1;
+    $('deptBillAddr2').value = ba2;
+    $('deptBillCity').value = bc;
+    $('deptBillState').value = bs;
+    $('deptBillZip').value = bz;
+    $('deptBillEmail').value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
+    $('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneNumber || '';
 
+    // Ship To
     const sn1 = d.sShippingName1 || d.sShipToName1 || d.sShipName1 || '';
-    const sn2 = d.sShippingName2 || d.sShipToName2 || d.sShipName2 || '';
     const sa1 = d.sShippingAddress1 || d.sShipToAddress1 || d.sShipToAddr1 || d.sShippingAddr1 || d.sShipAddr1 || '';
     const sa2 = d.sShippingAddress2 || d.sShipToAddress2 || d.sShipToAddr2 || d.sShippingAddr2 || d.sShipAddr2 || '';
     const sc = d.sShippingCity || d.sShipToCity || d.sShipCity || '';
     const ss = d.sShippingState || d.sShipToState || d.sShipState || '';
     const sz = d.sShippingZip || d.sShipToZip || d.sShipToZipCode || d.sShipZip || '';
-    const shipText = ab([sn1, sn2, sa1, sa2, [sc, ss].filter(Boolean).join(', ') + (sz ? ' '+sz : '')]);
-    document.getElementById('deptShipTo').value = shipText;
-    document.getElementById('deptShipPhone').value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
-    const sameBill = (billText === shipText);
-    document.getElementById('deptShipSameBill').checked = sameBill;
-    if(sameBill) { document.getElementById('deptShipTo').readOnly = true; document.getElementById('deptShipTo').style.background = '#F8FAFF'; }
+    $('deptShipName1').value = sn1;
+    $('deptShipAddr1').value = sa1;
+    $('deptShipAddr2').value = sa2;
+    $('deptShipCity').value = sc;
+    $('deptShipState').value = ss;
+    $('deptShipZip').value = sz;
+    $('deptShipPhone').value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
+    $('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactFaxNumber || '';
+
+    // Same as Bill To check
+    const sameBill = (bn1 === sn1 && ba1 === sa1 && bc === sc && bs === ss && bz === sz);
+    $('deptShipSameBill').checked = sameBill;
+    if(sameBill) setShipFieldsReadonly(true);
+  }
+
+  function setShipFieldsReadonly(ro) {
+    ['deptShipName1','deptShipAddr1','deptShipAddr2','deptShipCity','deptShipState','deptShipZip'].forEach(id => {
+      const el = $(id);
+      if(el) { el.readOnly = ro; el.style.opacity = ro ? '.6' : '1'; }
+    });
   }
 
   /* ═══ EVENT WIRING ═══════════════════════════════════ */
