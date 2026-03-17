@@ -305,6 +305,14 @@ const MockAPI = (() => {
   route('POST', '/Inventory/GetAllInventoryList', (p, body) => {
     let items = MockDB.getAll('inventory');
     if (!body?.pbIncludeInactive) items = items.filter(i => i.bActive);
+    const allSizes = MockDB.getAll('inventorySizes');
+    items = items.map(item => {
+      const sizes = allSizes.filter(s => s.lInventoryKey === item.lInventoryKey);
+      const totalCur = sizes.reduce((sum, s) => sum + (s.nLevelCurrent || 0), 0);
+      const totalMin = sizes.reduce((sum, s) => sum + (s.nLevelMinimum || 0), 0);
+      const lowCount = sizes.filter(s => (s.nLevelCurrent || 0) <= (s.nReorderPoint || 0)).length;
+      return { ...item, nLevelCurrent: totalCur, nLevelMinimum: totalMin, nSizeCount: sizes.length, nLowStockCount: lowCount };
+    });
     return MockDB.paginate(items, body?.Pagination);
   });
   route('POST', '/Inventory/GetAllInventorySizesList', (p, body) => {

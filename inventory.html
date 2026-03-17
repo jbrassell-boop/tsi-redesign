@@ -1979,8 +1979,9 @@ function populateItemList(items) {
     row.dataset.item = name;
     row.dataset.key = key;
     row.innerHTML = `<span class="stock-dot dot-${health}"></span><span class="item-name">${name}</span>`;
-    if (health === 'red' || health === 'amber') {
-      row.innerHTML += `<span class="low-stock-count">${item.nLevelCurrent || 0}</span>`;
+    const lowCount = item.nLowStockCount || 0;
+    if (lowCount > 0 && health !== 'green') {
+      row.innerHTML += `<span class="low-stock-count" title="${lowCount} size(s) at or below reorder level">${lowCount}</span>`;
     }
     row.addEventListener('click', function() {
       if (_liveMode) {
@@ -1997,6 +1998,8 @@ function populateItemList(items) {
   const activeCount = items.filter(i => i.bActive !== false).length;
   document.getElementById('ssActiveCount').textContent = activeCount;
   document.getElementById('ssInactiveCount').textContent = items.length - activeCount;
+  const lowStockCount = items.filter(i => getStockHealth(i) !== 'green').length;
+  document.getElementById('ssLowStockCount').textContent = lowStockCount;
 
   // Update tab count
   const tabCount = document.querySelector('.tab-bar .tab:first-child .tab-count');
@@ -2060,17 +2063,19 @@ function renderApiSizes(sizes) {
   const statusLabel = { 'A': 'Active', 'I': 'Inactive', 'S': 'Static' };
 
   tbody.innerHTML = sizes.map((s, i) => {
-    const desc = s.sSizeDescription || '';
+    const desc = s.sSizeDescription || s.sSizeName || '';
     const desc2 = s.sSizeDescription2 || '';
-    const bin = s.sBinNumber || '';
-    const status = s.sStatusDesc || s.sStatus || 'Active';
+    const bin = s.sBinNumber || s.sBinLocation || '';
+    const cost = s.dblUnitCost ?? s.nUnitCost ?? 0;
+    const reorder = s.nReorderPoint ?? s.nLevelMinimum ?? 0;
+    const status = s.sStatusDesc || s.sStatus || (s.bActive === false ? 'Inactive' : 'Active');
     const statusKey = s.sStatus || status;
     const cls = i === 0 ? 'size-row selected-size' : 'size-row';
     return `<tr class="${cls}" onclick="selectSizeRow(this)"
       data-key="${s.lInventorySizeKey || ''}"
       data-desc2="${desc2}" data-desc3="${s.sSizeDescription3 || ''}" data-bin="${bin}"
-      data-cost="$${(s.dblUnitCost || 0).toFixed(2)}" data-cur="${s.nLevelCurrent || 0}"
-      data-min="${s.nLevelMinimum || 0}" data-max="${s.nLevelMaximum || 0}" data-reorder="${s.nLevelMinimum || 0}">
+      data-cost="$${Number(cost).toFixed(2)}" data-cur="${s.nLevelCurrent || 0}"
+      data-min="${s.nLevelMinimum || 0}" data-max="${s.nLevelMaximum || 0}" data-reorder="${reorder}">
       <td>${desc}</td>
       <td>${desc2}</td>
       <td>${bin}</td>

@@ -1652,19 +1652,25 @@ MockDB.seed('inventorySizes', [
   { lInventorySizeKey: 104, lInventoryKey: 3, sSizeName: 'GIF-H180/190 Up', sBinLocation: 'B-05', nUnitCost: 25.00, nLevelCurrent: 12, nLevelMinimum: 4, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
   { lInventorySizeKey: 105, lInventoryKey: 3, sSizeName: 'GIF-H180/190 Down', sBinLocation: 'B-06', nUnitCost: 25.00, nLevelCurrent: 10, nLevelMinimum: 4, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
   { lInventorySizeKey: 106, lInventoryKey: 3, sSizeName: 'CF-HQ190L Up/Down', sBinLocation: 'B-07', nUnitCost: 30.00, nLevelCurrent: 6, nLevelMinimum: 2, nLevelMaximum: 20, nReorderPoint: 5, bActive: true },
+  // Bending Section Mesh (4)
+  { lInventorySizeKey: 150, lInventoryKey: 4, sSizeName: '2.8mm Flex Mesh', sBinLocation: 'B-10', nUnitCost: 45.00, nLevelCurrent: 8, nLevelMinimum: 3, nLevelMaximum: 20, nReorderPoint: 5, bActive: true },
+  { lInventorySizeKey: 151, lInventoryKey: 4, sSizeName: '4.2mm Flex Mesh', sBinLocation: 'B-11', nUnitCost: 52.00, nLevelCurrent: 6, nLevelMinimum: 2, nLevelMaximum: 15, nReorderPoint: 4, bActive: true },
   // CCD Assembly
-  { lInventorySizeKey: 107, lInventoryKey: 5, sSizeName: 'GIF-H190 CCD', sBinLocation: 'C-01', nUnitCost: 350.00, nLevelCurrent: 3, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
-  { lInventorySizeKey: 108, lInventoryKey: 5, sSizeName: 'CF-HQ190L CCD', sBinLocation: 'C-02', nUnitCost: 380.00, nLevelCurrent: 2, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
+  { lInventorySizeKey: 107, lInventoryKey: 5, sSizeName: 'GIF-H190 CCD', sBinLocation: 'C-01', nUnitCost: 350.00, nLevelCurrent: 1, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
+  { lInventorySizeKey: 108, lInventoryKey: 5, sSizeName: 'CF-HQ190L CCD', sBinLocation: 'C-02', nUnitCost: 380.00, nLevelCurrent: 0, nLevelMinimum: 1, nLevelMaximum: 5, nReorderPoint: 2, bActive: true },
   // Control Body O-Ring Kit
   { lInventorySizeKey: 109, lInventoryKey: 6, sSizeName: 'Olympus Standard', sBinLocation: 'A-20', nUnitCost: 5.00, nLevelCurrent: 50, nLevelMinimum: 10, nLevelMaximum: 100, nReorderPoint: 20, bActive: true },
   // Distal Tip Cover
   { lInventorySizeKey: 110, lInventoryKey: 7, sSizeName: 'GIF/CF Large', sBinLocation: 'A-25', nUnitCost: 15.00, nLevelCurrent: 22, nLevelMinimum: 5, nLevelMaximum: 40, nReorderPoint: 10, bActive: true },
   { lInventorySizeKey: 111, lInventoryKey: 7, sSizeName: 'BF Small', sBinLocation: 'A-26', nUnitCost: 12.00, nLevelCurrent: 15, nLevelMinimum: 3, nLevelMaximum: 30, nReorderPoint: 8, bActive: true },
+  // Epoxy Resin (8)
+  { lInventorySizeKey: 152, lInventoryKey: 8, sSizeName: 'Standard 2-Part 50ml', sBinLocation: 'A-40', nUnitCost: 8.50, nLevelCurrent: 35, nLevelMinimum: 10, nLevelMaximum: 60, nReorderPoint: 15, bActive: true },
+  { lInventorySizeKey: 153, lInventoryKey: 8, sSizeName: 'UV-Cure 10ml', sBinLocation: 'A-41', nUnitCost: 22.00, nLevelCurrent: 12, nLevelMinimum: 4, nLevelMaximum: 25, nReorderPoint: 8, bActive: true },
   // Fiber Optic Bundle
-  { lInventorySizeKey: 112, lInventoryKey: 9, sSizeName: 'GIF-H190 Light Guide', sBinLocation: 'C-10', nUnitCost: 120.00, nLevelCurrent: 4, nLevelMinimum: 2, nLevelMaximum: 8, nReorderPoint: 3, bActive: true },
+  { lInventorySizeKey: 112, lInventoryKey: 9, sSizeName: 'GIF-H190 Light Guide', sBinLocation: 'C-10', nUnitCost: 120.00, nLevelCurrent: 1, nLevelMinimum: 2, nLevelMaximum: 8, nReorderPoint: 3, bActive: true },
   // Rod Lens
   { lInventorySizeKey: 113, lInventoryKey: 10, sSizeName: '4mm 0° Storz', sBinLocation: 'E-01', nUnitCost: 200.00, nLevelCurrent: 3, nLevelMinimum: 1, nLevelMaximum: 6, nReorderPoint: 2, bActive: true },
-  { lInventorySizeKey: 114, lInventoryKey: 10, sSizeName: '4mm 30° Storz', sBinLocation: 'E-02', nUnitCost: 210.00, nLevelCurrent: 2, nLevelMinimum: 1, nLevelMaximum: 6, nReorderPoint: 2, bActive: true },
+  { lInventorySizeKey: 114, lInventoryKey: 10, sSizeName: '4mm 30° Storz', sBinLocation: 'E-02', nUnitCost: 210.00, nLevelCurrent: 1, nLevelMinimum: 1, nLevelMaximum: 6, nReorderPoint: 2, bActive: true },
 ]);
 
 // ── Financial: Outstanding Invoices ─────────────────────
