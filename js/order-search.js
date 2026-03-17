@@ -192,7 +192,8 @@
       '.os-results td{padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}' +
       '.os-results tr:hover td{background:#ECFEFF}' +
       '.os-results tr.selected td{background:#DBEAFE;font-weight:600}' +
-      '.os-results .msg-empty{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px;cursor:default}';
+      '.os-results .msg-empty{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px;cursor:default}' +
+      '#orderSearchInput:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}';
     document.head.appendChild(style);
 
     // Modal HTML
@@ -213,7 +214,6 @@
         '<div class="os-search">' +
           '<input type="text" id="orderSearchInput" placeholder="Search by WO#, SN#, PO#, or Order#\u2026" autocomplete="off"' +
           ' style="flex:1;height:32px;border:1.5px solid var(--border-dk);border-radius:4px 0 0 4px;padding:0 12px;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s"' +
-          ' onfocus="this.style.borderColor=\'var(--navy)\'" onblur="this.style.borderColor=\'\'"' +
           ' onkeydown="if(event.key===\'Enter\')orderSearchRun()">' +
           '<button onclick="orderSearchRun()" style="height:32px;padding:0 18px;background:var(--navy);color:#fff;border:none;border-radius:0 4px 4px 0;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Search</button>' +
         '</div>' +

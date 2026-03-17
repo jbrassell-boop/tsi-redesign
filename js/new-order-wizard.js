@@ -38,6 +38,10 @@
   function _inject() {
     if (document.getElementById('nowOverlay')) return;
 
+    var _s = document.createElement('style');
+    _s.textContent = '#nowClientSearch:focus,#nowDeptSearch:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}';
+    document.head.appendChild(_s);
+
     const el = document.createElement('div');
     el.id = 'nowOverlay';
     el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,37,.35);z-index:9998;align-items:center;justify-content:center;backdrop-filter:blur(2px)';
@@ -80,7 +84,7 @@
               oninput="nowFilterClients(this.value)"
               style="height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;font-size:12px;
                      font-family:inherit;outline:none;flex-shrink:0"
-              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='#DDE3EE'">
+>
             <div id="nowClientGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-y:auto;flex:1"></div>
           </div>
 
@@ -101,7 +105,7 @@
               oninput="nowFilterDepts(this.value)"
               style="height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;font-size:12px;
                      font-family:inherit;outline:none;flex-shrink:0"
-              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='#DDE3EE'">
+>
             <div id="nowDeptGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-y:auto;flex:1"></div>
           </div>
         </div>
@@ -208,13 +212,9 @@
       return;
     }
     grid.innerHTML = filtered.map(c => `
-      <div onclick="nowSelectClient(${c.lClientKey})"
-        style="padding:10px 12px;border:1.5px solid #DDE3EE;border-radius:6px;cursor:pointer;
-               transition:all .1s;background:#fff"
-        onmouseover="this.style.background='#EFF6FF';this.style.borderColor='#93C5FD'"
-        onmouseout="this.style.background='#fff';this.style.borderColor='#DDE3EE'">
-        <div style="font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:1px">${_esc(c.psClientName1)}</div>
-        <div style="font-size:10px;color:#8896AA">${_esc(c.psCity||'')}${c.psState?', '+c.psState:''}</div>
+      <div class="picker-card" onclick="nowSelectClient(${c.lClientKey})">
+        <div class="picker-card-name">${_esc(c.psClientName1)}</div>
+        <div class="picker-card-sub">${_esc(c.psCity||'')}${c.psState?', '+c.psState:''}</div>
       </div>
     `).join('');
   };
@@ -241,12 +241,8 @@
       return;
     }
     grid.innerHTML = filtered.map(d => `
-      <div onclick="nowSelectDept(${d.lDepartmentKey})"
-        style="padding:10px 12px;border:1.5px solid #DDE3EE;border-radius:6px;cursor:pointer;
-               transition:all .1s;background:#fff"
-        onmouseover="this.style.background='#EFF6FF';this.style.borderColor='#93C5FD'"
-        onmouseout="this.style.background='#fff';this.style.borderColor='#DDE3EE'">
-        <div style="font-size:11.5px;font-weight:700;color:var(--navy)">${_esc(d.psDepartmentName)}</div>
+      <div class="picker-card" onclick="nowSelectDept(${d.lDepartmentKey})">
+        <div class="picker-card-name">${_esc(d.psDepartmentName)}</div>
       </div>
     `).join('');
   };
