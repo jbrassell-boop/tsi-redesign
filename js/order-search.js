@@ -181,7 +181,7 @@
       '.os-modal{background:#fff;border-radius:12px;width:1050px;max-width:98vw;box-shadow:0 24px 72px rgba(var(--primary-rgb),.25);overflow:hidden;transform:translateY(15px);transition:transform .2s;display:flex;flex-direction:column;max-height:90vh}' +
       '.os-overlay.open .os-modal{transform:translateY(0)}' +
       '.os-head{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);border-radius:12px 12px 0 0;flex-shrink:0}' +
-      '.os-head h2{font-size:15px;color:#fff;font-weight:800;display:flex;align-items:center;gap:8px;margin:0}' +
+      '.os-head h2{font-size:14px;color:#fff;font-weight:600;display:flex;align-items:center;gap:8px;margin:0;letter-spacing:.3px}' +
       '.os-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;transition:all .1s}' +
       '.os-close:hover{background:rgba(255,255,255,.15);color:#fff}' +
       '.os-close svg{width:18px;height:18px}' +

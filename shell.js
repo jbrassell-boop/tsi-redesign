@@ -88,7 +88,7 @@
     html += '<div style="position:relative;margin-right:12px" id="newOrderWrap">';
     html += '<button class="btn-orders" onclick="document.getElementById(\'newOrderMenu\').classList.toggle(\'open\')">';
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-    html += 'Orders ';
+    html += 'Work Orders ';
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>';
     html += '</button>';
     html += '<div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">';
