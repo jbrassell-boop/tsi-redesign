@@ -329,9 +329,33 @@
     <div class="section-card">
       <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">Addresses <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="osToggleShipSame()"/> Same as Bill To</label></div>
       <div class="section-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field"><label>Bill To</label><textarea id="fBillTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"></textarea></div>
-          <div class="field"><label>Ship To</label><textarea id="fShipTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Bill To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fBillName1" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fBillAddr1" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"/></div>
+              <div class="field"><label>City</label><input id="fBillCity" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fBillState" maxlength="2" style="text-transform:uppercase" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"/></div>
+                <div class="field"><label>Zip</label><input id="fBillZip" oninput="markDirty();if(document.getElementById('fShipSameBill').checked)osToggleShipSame()"/></div>
+              </div>
+            </div>
+          </div>
+          <!-- Ship To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fShipName1" oninput="markDirty()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fShipAddr1" oninput="markDirty()"/></div>
+              <div class="field"><label>City</label><input id="fShipCity" oninput="markDirty()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fShipState" maxlength="2" style="text-transform:uppercase" oninput="markDirty()"/></div>
+                <div class="field"><label>Zip</label><input id="fShipZip" oninput="markDirty()"/></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -888,13 +912,23 @@ function openDrawer(key) {
   repDD.value = visit.salesRep || '';
   document.getElementById('fPaymentTerms').value = visit.paymentTerms || '';
 
-  // Addresses
-  document.getElementById('fBillTo').value = visit.billTo || visit.clientName + '\n' + (visit.deptName || '');
-  document.getElementById('fShipTo').value = visit.shipTo || visit.clientName + '\n' + (visit.deptName || '');
-  var sameBill = (document.getElementById('fBillTo').value === document.getElementById('fShipTo').value);
+  // Addresses — structured fields
+  var billParts = osParseAddress(visit.billTo || visit.clientName);
+  document.getElementById('fBillName1').value = billParts.name;
+  document.getElementById('fBillAddr1').value = billParts.addr;
+  document.getElementById('fBillCity').value = billParts.city;
+  document.getElementById('fBillState').value = billParts.state;
+  document.getElementById('fBillZip').value = billParts.zip;
+  var shipParts = osParseAddress(visit.shipTo || visit.clientName);
+  document.getElementById('fShipName1').value = shipParts.name;
+  document.getElementById('fShipAddr1').value = shipParts.addr;
+  document.getElementById('fShipCity').value = shipParts.city;
+  document.getElementById('fShipState').value = shipParts.state;
+  document.getElementById('fShipZip').value = shipParts.zip;
+  var sameBill = (billParts.name === shipParts.name && billParts.addr === shipParts.addr && billParts.city === shipParts.city && billParts.state === shipParts.state && billParts.zip === shipParts.zip);
   document.getElementById('fShipSameBill').checked = sameBill;
-  if (sameBill) { document.getElementById('fShipTo').readOnly = true; document.getElementById('fShipTo').style.background = '#F8FAFF'; }
-  else { document.getElementById('fShipTo').readOnly = false; document.getElementById('fShipTo').style.background = '#fff'; }
+  if (sameBill) { osSetShipReadOnly(true); }
+  else { osSetShipReadOnly(false); }
 
   document.getElementById('fNotes').value = visit.notes || '';
 
@@ -1007,15 +1041,39 @@ function markDirty() {
   _saveTimer = setTimeout(autoSave, 1500);
 }
 
+function osParseAddress(raw) {
+  if (!raw) return {name:'',addr:'',city:'',state:'',zip:''};
+  var lines = raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var name = lines[0] || '';
+  var addr = lines[1] || '';
+  var city = '', state = '', zip = '';
+  if (lines[2]) {
+    var m = lines[2].match(/^(.+?),\s*([A-Za-z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+    if (m) { city = m[1]; state = m[2].toUpperCase(); zip = m[3]; }
+    else { city = lines[2]; }
+  }
+  return {name:name,addr:addr,city:city,state:state,zip:zip};
+}
+
+function osSetShipReadOnly(ro) {
+  var bg = ro ? '#F8FAFF' : '#fff';
+  ['fShipName1','fShipAddr1','fShipCity','fShipState','fShipZip'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.readOnly = ro;
+    el.style.background = bg;
+  });
+}
+
 function osToggleShipSame() {
-  var shipTo = document.getElementById('fShipTo');
   if (document.getElementById('fShipSameBill').checked) {
-    shipTo.value = document.getElementById('fBillTo').value;
-    shipTo.readOnly = true;
-    shipTo.style.background = '#F8FAFF';
+    document.getElementById('fShipName1').value = document.getElementById('fBillName1').value;
+    document.getElementById('fShipAddr1').value = document.getElementById('fBillAddr1').value;
+    document.getElementById('fShipCity').value = document.getElementById('fBillCity').value;
+    document.getElementById('fShipState').value = document.getElementById('fBillState').value;
+    document.getElementById('fShipZip').value = document.getElementById('fBillZip').value;
+    osSetShipReadOnly(true);
   } else {
-    shipTo.readOnly = false;
-    shipTo.style.background = '#fff';
+    osSetShipReadOnly(false);
   }
   markDirty();
 }

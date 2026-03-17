@@ -362,21 +362,34 @@
     </div>
 
     <div class="section-card">
-      <div class="section-head">Addresses</div>
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">Addresses <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fShipSame" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To</label></div>
       <div class="section-body">
-        <div class="g2" style="align-items:flex-start">
-          <div class="field">
-            <label>Bill To</label>
-            <textarea id="fBillTo" rows="4" style="height:80px" oninput="markDirty()" placeholder="Billing address..."></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Bill To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fBillName1" oninput="markDirty();if(document.getElementById('fShipSame').checked)toggleShipSame()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fBillAddr1" oninput="markDirty();if(document.getElementById('fShipSame').checked)toggleShipSame()"/></div>
+              <div class="field"><label>City</label><input id="fBillCity" oninput="markDirty();if(document.getElementById('fShipSame').checked)toggleShipSame()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fBillState" maxlength="2" style="text-transform:uppercase" oninput="markDirty();if(document.getElementById('fShipSame').checked)toggleShipSame()"/></div>
+                <div class="field"><label>Zip</label><input id="fBillZip" oninput="markDirty();if(document.getElementById('fShipSame').checked)toggleShipSame()"/></div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label style="display:flex;align-items:center;justify-content:space-between;width:100%">
-              <span>Ship To</span>
-              <label style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;display:flex;align-items:center;gap:4px;cursor:pointer">
-                <input type="checkbox" id="fShipSame" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To
-              </label>
-            </label>
-            <textarea id="fShipTo" rows="4" style="height:80px" oninput="markDirty()" placeholder="Shipping address..."></textarea>
+          <!-- Ship To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fShipName1" oninput="markDirty()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fShipAddr1" oninput="markDirty()"/></div>
+              <div class="field"><label>City</label><input id="fShipCity" oninput="markDirty()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fShipState" maxlength="2" style="text-transform:uppercase" oninput="markDirty()"/></div>
+                <div class="field"><label>Zip</label><input id="fShipZip" oninput="markDirty()"/></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -988,11 +1001,27 @@ function populateDrawer(s) {
   document.getElementById('fShipMethod').value = s.shipMethod || 'Ground';
   document.getElementById('fLocation').value = s.location;
 
-  document.getElementById('fBillTo').value = s.billToAddr || '';
+  // Parse bill-to address
+  var billParts = (s.billToAddr || '').split('\n');
+  document.getElementById('fBillName1').value = billParts[0] || '';
+  document.getElementById('fBillAddr1').value = billParts[1] || '';
+  var billCityLine = (billParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  document.getElementById('fBillCity').value = billCityLine[1] || billParts[2] || '';
+  document.getElementById('fBillState').value = billCityLine[2] || '';
+  document.getElementById('fBillZip').value = billCityLine[3] || '';
+
+  // Parse ship-to address
+  var shipParts = (s.shipToAddr || '').split('\n');
   var shipSame = !s.shipToAddr || s.shipToAddr === s.billToAddr;
   document.getElementById('fShipSame').checked = shipSame;
-  document.getElementById('fShipTo').value = s.shipToAddr || '';
-  document.getElementById('fShipTo').disabled = shipSame;
+  document.getElementById('fShipName1').value = shipParts[0] || '';
+  document.getElementById('fShipAddr1').value = shipParts[1] || '';
+  var shipCityLine = (shipParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  document.getElementById('fShipCity').value = shipCityLine[1] || shipParts[2] || '';
+  document.getElementById('fShipState').value = shipCityLine[2] || '';
+  document.getElementById('fShipZip').value = shipCityLine[3] || '';
+  var shipFields = ['fShipName1','fShipAddr1','fShipCity','fShipState','fShipZip'];
+  shipFields.forEach(function(id){ document.getElementById(id).disabled = shipSame; });
 
   // Populate sales rep select
   var repSel = document.getElementById('fSalesRep');
@@ -1072,8 +1101,20 @@ function saveDrawer() {
   sale.priceList = document.getElementById('fPriceList').value;
   sale.paymentTerms = document.getElementById('fPayTerms').value;
   sale.shipMethod = document.getElementById('fShipMethod').value;
-  sale.billToAddr = document.getElementById('fBillTo').value;
-  sale.shipToAddr = document.getElementById('fShipSame').checked ? '' : document.getElementById('fShipTo').value;
+  var billCity = document.getElementById('fBillCity').value.trim();
+  var billState = document.getElementById('fBillState').value.trim().toUpperCase();
+  var billZip = document.getElementById('fBillZip').value.trim();
+  var billLine3 = billCity + (billState ? ', ' + billState : '') + (billZip ? ' ' + billZip : '');
+  sale.billToAddr = [document.getElementById('fBillName1').value.trim(), document.getElementById('fBillAddr1').value.trim(), billLine3].filter(Boolean).join('\n');
+  if (document.getElementById('fShipSame').checked) {
+    sale.shipToAddr = '';
+  } else {
+    var shipCity = document.getElementById('fShipCity').value.trim();
+    var shipState = document.getElementById('fShipState').value.trim().toUpperCase();
+    var shipZip = document.getElementById('fShipZip').value.trim();
+    var shipLine3 = shipCity + (shipState ? ', ' + shipState : '') + (shipZip ? ' ' + shipZip : '');
+    sale.shipToAddr = [document.getElementById('fShipName1').value.trim(), document.getElementById('fShipAddr1').value.trim(), shipLine3].filter(Boolean).join('\n');
+  }
   sale.notes = document.getElementById('fNotes').value;
   isDirty = false;
   var now = new Date();
@@ -1165,14 +1206,17 @@ function removeItem(idx) {
 /* ─── SHIP SAME TOGGLE ─── */
 function toggleShipSame() {
   var checked = document.getElementById('fShipSame').checked;
-  var shipTo = document.getElementById('fShipTo');
-  if (checked) {
-    shipTo.value = document.getElementById('fBillTo').value;
-    shipTo.disabled = true;
-  } else {
-    shipTo.disabled = false;
-    shipTo.focus();
-  }
+  var pairs = [['fBillName1','fShipName1'],['fBillAddr1','fShipAddr1'],['fBillCity','fShipCity'],['fBillState','fShipState'],['fBillZip','fShipZip']];
+  pairs.forEach(function(p) {
+    var shipEl = document.getElementById(p[1]);
+    if (checked) {
+      shipEl.value = document.getElementById(p[0]).value;
+      shipEl.disabled = true;
+    } else {
+      shipEl.disabled = false;
+    }
+  });
+  if (!checked) document.getElementById('fShipName1').focus();
   markDirty();
 }
 

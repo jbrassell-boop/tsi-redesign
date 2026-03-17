@@ -411,9 +411,33 @@
     <div class="section-card">
       <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">Addresses <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="fSameAsBill" onchange="syncShipToBill()"/> Same as Bill To</label></div>
       <div class="section-body" style="padding:8px 12px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field"><label>Bill To</label><textarea id="fBillTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"></textarea></div>
-          <div class="field"><label>Ship To</label><textarea id="fShipTo" rows="5" style="height:auto;font-size:11px;line-height:1.4;font-family:inherit;resize:none" oninput="markDirty()"></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Bill To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fBillName1" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fBillAddr1" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"/></div>
+              <div class="field"><label>City</label><input id="fBillCity" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fBillState" maxlength="2" style="text-transform:uppercase" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"/></div>
+                <div class="field"><label>Zip</label><input id="fBillZip" oninput="markDirty();if(document.getElementById('fSameAsBill').checked)syncShipToBill()"/></div>
+              </div>
+            </div>
+          </div>
+          <!-- Ship To -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="field" style="grid-column:span 2"><label>Name</label><input id="fShipName1" oninput="markDirty()"/></div>
+              <div class="field" style="grid-column:span 2"><label>Address</label><input id="fShipAddr1" oninput="markDirty()"/></div>
+              <div class="field"><label>City</label><input id="fShipCity" oninput="markDirty()"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div class="field"><label>State</label><input id="fShipState" maxlength="2" style="text-transform:uppercase" oninput="markDirty()"/></div>
+                <div class="field"><label>Zip</label><input id="fShipZip" oninput="markDirty()"/></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -977,26 +1001,25 @@ function populateDrawer(q) {
   document.getElementById('fSubtotal').value = fmtMoney(subtotal);
   document.getElementById('fGrandTotal').value = fmtMoney(grandTotal);
 
-  // Addresses — structured text blocks for report/invoice pull
+  // Addresses — structured fields
   var ship = q.shipAddress || {};
   var bill = q.billAddress || {};
-  function addrBlock(a, fallbackName, fallbackDept) {
-    var lines = [];
-    lines.push(a.name1 || fallbackName || '');
-    if (a.attn) lines.push('Attn: ' + a.attn);
-    else if (a.name2 || fallbackDept) lines.push(a.name2 || fallbackDept);
-    if (a.addr1) lines.push(a.addr1);
-    if (a.addr2) lines.push(a.addr2);
-    var csz = [a.city, a.state].filter(Boolean).join(', ');
-    if (a.zip) csz += ' ' + a.zip;
-    if (csz.trim()) lines.push(csz.trim());
-    return lines.filter(Boolean).join('\n');
-  }
-  var billText = q.billText || addrBlock(bill, q.clientName, '');
-  var shipText = q.shipText || addrBlock(ship, q.clientName, q.deptName);
-  document.getElementById('fBillTo').value = billText;
-  document.getElementById('fShipTo').value = shipText;
-  document.getElementById('fSameAsBill').checked = (billText === shipText);
+  document.getElementById('fBillName1').value = bill.name1 || q.clientName || '';
+  document.getElementById('fBillAddr1').value = bill.addr1 || '';
+  document.getElementById('fBillCity').value = bill.city || '';
+  document.getElementById('fBillState').value = bill.state || '';
+  document.getElementById('fBillZip').value = bill.zip || '';
+  document.getElementById('fShipName1').value = ship.name1 || q.clientName || '';
+  document.getElementById('fShipAddr1').value = ship.addr1 || '';
+  document.getElementById('fShipCity').value = ship.city || '';
+  document.getElementById('fShipState').value = ship.state || '';
+  document.getElementById('fShipZip').value = ship.zip || '';
+  var sameAddr = (bill.name1 || q.clientName || '') === (ship.name1 || q.clientName || '')
+    && (bill.addr1 || '') === (ship.addr1 || '')
+    && (bill.city || '') === (ship.city || '')
+    && (bill.state || '') === (ship.state || '')
+    && (bill.zip || '') === (ship.zip || '');
+  document.getElementById('fSameAsBill').checked = sameAddr;
 
   // Notes
   document.getElementById('fNotes').value = q.notes || '';
@@ -1023,13 +1046,20 @@ function populateDrawer(q) {
 
 /* ─── ADDRESS SYNC ─── */
 function syncShipToBill() {
+  var fields = ['Name1','Addr1','City','State','Zip'];
   if (document.getElementById('fSameAsBill').checked) {
-    document.getElementById('fShipTo').value = document.getElementById('fBillTo').value;
-    document.getElementById('fShipTo').readOnly = true;
-    document.getElementById('fShipTo').style.background = '#F8FAFF';
+    fields.forEach(function(f) {
+      var el = document.getElementById('fShip' + f);
+      el.value = document.getElementById('fBill' + f).value;
+      el.readOnly = true;
+      el.style.background = '#F8FAFF';
+    });
   } else {
-    document.getElementById('fShipTo').readOnly = false;
-    document.getElementById('fShipTo').style.background = '#fff';
+    fields.forEach(function(f) {
+      var el = document.getElementById('fShip' + f);
+      el.readOnly = false;
+      el.style.background = '#fff';
+    });
   }
   markDirty();
 }
