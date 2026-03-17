@@ -1418,9 +1418,13 @@ MockDB.seed('repairDetails', [
 
   // ── NEW REPAIRS line items ──
 
-  // Repair 6620: Duodenoscope elevator — just received (2 items)
-  { lRepairItemTranKey: 5022, lRepairKey: 6620, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, dblRepairPrice: 75.00, sApproved: 'Y', bPrimary: true, mComment: 'Initial evaluation' },
-  { lRepairItemTranKey: 5023, lRepairKey: 6620, lRepairItemKey: 2, sItemDescription: 'Angulation Wire Repair', nRepairPrice: 0.00, dblRepairPrice: 0.00, sApproved: 'P', bPrimary: false, mComment: 'Pending evaluation' },
+  // Repair 6620: Duodenoscope elevator — just received (6 items)
+  { lRepairItemTranKey: 5022, lRepairKey: 6620, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, dblRepairPrice: 75.00, sApproved: 'Y', bPrimary: false, mComment: 'Initial evaluation' },
+  { lRepairItemTranKey: 5023, lRepairKey: 6620, lRepairItemKey: 2, sItemDescription: 'Elevator Wire Replacement', nRepairPrice: 1250.00, dblRepairPrice: 1250.00, sApproved: 'P', bPrimary: true, mComment: 'Stiff articulation — full cable replacement recommended' },
+  { lRepairItemTranKey: 5060, lRepairKey: 6620, lRepairItemKey: 1, sItemDescription: 'Distal Tip Inspection & Reseal', nRepairPrice: 285.00, dblRepairPrice: 285.00, sApproved: 'P', bPrimary: false, mComment: 'Minor wear on distal cap — reseal recommended' },
+  { lRepairItemTranKey: 5061, lRepairKey: 6620, lRepairItemKey: 11, sItemDescription: 'Fluid Seal Kit', nRepairPrice: 40.00, dblRepairPrice: 40.00, sApproved: 'P', bPrimary: false, mComment: 'Preventive — replace all seals during teardown' },
+  { lRepairItemTranKey: 5062, lRepairKey: 6620, lRepairItemKey: 5, sItemDescription: 'Light Guide Bundle — Inspection', nRepairPrice: 120.00, dblRepairPrice: 120.00, sApproved: 'P', bPrimary: false, mComment: 'Brightness check — appears adequate but verify' },
+  { lRepairItemTranKey: 5063, lRepairKey: 6620, lRepairItemKey: 8, sItemDescription: 'Biopsy Channel — Clean & Verify', nRepairPrice: 95.00, dblRepairPrice: 95.00, sApproved: 'P', bPrimary: false, mComment: 'Flush test pending' },
   // Repair 6618: Rhinolaryngoscope fiber damage — just received (2 items)
   { lRepairItemTranKey: 5024, lRepairKey: 6618, lRepairItemKey: 12, sItemDescription: 'Evaluation Fee', nRepairPrice: 75.00, dblRepairPrice: 75.00, sApproved: 'Y', bPrimary: true, mComment: '' },
   { lRepairItemTranKey: 5025, lRepairKey: 6618, lRepairItemKey: 5, sItemDescription: 'Light Guide Bundle', nRepairPrice: 0.00, dblRepairPrice: 0.00, sApproved: 'P', bPrimary: false, mComment: 'Suspected — pending eval' },
@@ -1481,6 +1485,96 @@ MockDB.seed('repairInventory', [
   { lRepairInventoryKey: 5, lRepairKey: 6601, lRepairItemTranKey: 1004, sRepairItemDesc: 'Epoxy Application — Standard', lInventoryKey: 8, sItemDescription: 'Epoxy Resin', sSizeName: 'Araldite 2014 50ml cartridge', sLotNumber: 'LOT-2026-0035', nQuantity: 1 },
   { lRepairInventoryKey: 6, lRepairKey: 6601, lRepairItemTranKey: 1002, sRepairItemDesc: 'Bending Section — Distal End Rebuild', lInventoryKey: 6, sItemDescription: 'Control Body O-Ring Kit', sSizeName: 'Olympus Standard', sLotNumber: 'LOT-2026-0091', nQuantity: 3 },
   { lRepairInventoryKey: 7, lRepairKey: 6601, lRepairItemTranKey: 1007, sRepairItemDesc: 'Angulation Calibration & Adjustment', lInventoryKey: 3, sItemDescription: 'Angulation Wire Assembly', sSizeName: 'GIF-H180/190 Up', sLotNumber: 'LOT-2025-0723', nQuantity: 1 },
+
+  // Repair 6620 — Duodenoscope elevator wire (parts staged for eval)
+  { lRepairInventoryKey: 8, lRepairKey: 6620, lRepairItemTranKey: 5023, sRepairItemDesc: 'Elevator Wire Replacement', lInventoryKey: 3, sItemDescription: 'Elevator Cable Assembly', sSizeName: 'ED-580XT', sLotNumber: 'LOT-2026-0145', nQuantity: 1 },
+  { lRepairInventoryKey: 9, lRepairKey: 6620, lRepairItemTranKey: 5061, sRepairItemDesc: 'Fluid Seal Kit', lInventoryKey: 6, sItemDescription: 'Control Body O-Ring Kit', sSizeName: 'Fujifilm Standard', sLotNumber: 'LOT-2026-0098', nQuantity: 1 },
+  { lRepairInventoryKey: 10, lRepairKey: 6620, lRepairItemTranKey: 5060, sRepairItemDesc: 'Distal Tip Inspection & Reseal', lInventoryKey: 7, sItemDescription: 'Distal Tip Cover', sSizeName: 'ED-580XT', sLotNumber: 'LOT-2026-0102', nQuantity: 1 },
+]);
+
+// ── Status History (statusTrans) — tracks repair status changes ──
+MockDB.seed('statusTrans', [
+  // Repair 6620 — just received (Duodenoscope elevator wire)
+  { lStatusTranKey: 1, lRepairKey: 6620, sDescription: 'Received', dtDateTime: '2026-03-15T08:45:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: 'Scope received via FedEx — elevator wire stiff, limited articulation' },
+  { lStatusTranKey: 2, lRepairKey: 6620, sDescription: 'Evaluation', dtDateTime: '2026-03-15T10:30:00', sUserName: 'Joseph Brassell', sVoided: '', sComments: 'Assigned to bench for initial eval' },
+
+  // Repair 6601 — Fluid invasion (In Repair)
+  { lStatusTranKey: 3, lRepairKey: 6601, sDescription: 'Received', dtDateTime: '2026-03-05T08:30:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: 'Scope received via FedEx Priority' },
+  { lStatusTranKey: 4, lRepairKey: 6601, sDescription: 'Evaluation', dtDateTime: '2026-03-05T10:15:00', sUserName: 'Rob Martinez', sVoided: '', sComments: 'Leak test positive — fluid invasion confirmed' },
+  { lStatusTranKey: 5, lRepairKey: 6601, sDescription: 'D&I Inspection', dtDateTime: '2026-03-05T14:00:00', sUserName: 'Tim Johnson', sVoided: '', sComments: 'Disassembly & inspection complete' },
+  { lStatusTranKey: 6, lRepairKey: 6601, sDescription: 'Waiting for Approval', dtDateTime: '2026-03-05T16:30:00', sUserName: 'System', sVoided: '', sComments: 'Repair estimate sent — $400.00' },
+  { lStatusTranKey: 7, lRepairKey: 6601, sDescription: 'In Repair', dtDateTime: '2026-03-07T09:00:00', sUserName: 'Rob Martinez', sVoided: '', sComments: 'Approval received — repair started' },
+
+  // Repair 6587 — Angulation cable (Waiting for Approval)
+  { lStatusTranKey: 8, lRepairKey: 6587, sDescription: 'Received', dtDateTime: '2026-03-01T09:00:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: 'Scope received' },
+  { lStatusTranKey: 9, lRepairKey: 6587, sDescription: 'Evaluation', dtDateTime: '2026-03-01T11:00:00', sUserName: 'Tim Johnson', sVoided: '', sComments: 'Both up/down cables stretched' },
+  { lStatusTranKey: 10, lRepairKey: 6587, sDescription: 'Waiting for Approval', dtDateTime: '2026-03-02T08:30:00', sUserName: 'System', sVoided: '', sComments: 'Quote sent to client — $1,075.00' },
+
+  // Repair 6574 — Insertion tube (In Repair)
+  { lStatusTranKey: 11, lRepairKey: 6574, sDescription: 'Received', dtDateTime: '2026-02-25T08:00:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: '' },
+  { lStatusTranKey: 12, lRepairKey: 6574, sDescription: 'Evaluation', dtDateTime: '2026-02-25T10:30:00', sUserName: 'Rob Martinez', sVoided: '', sComments: 'Kink at 60cm mark confirmed' },
+  { lStatusTranKey: 13, lRepairKey: 6574, sDescription: 'In Repair', dtDateTime: '2026-02-27T09:00:00', sUserName: 'Rob Martinez', sVoided: '', sComments: 'Tube replacement in progress' },
+
+  // Repair 6398 — Shipped
+  { lStatusTranKey: 14, lRepairKey: 6398, sDescription: 'Received', dtDateTime: '2026-01-20T08:00:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: '' },
+  { lStatusTranKey: 15, lRepairKey: 6398, sDescription: 'Evaluation', dtDateTime: '2026-01-20T11:00:00', sUserName: 'Tim Johnson', sVoided: '', sComments: '' },
+  { lStatusTranKey: 16, lRepairKey: 6398, sDescription: 'In Repair', dtDateTime: '2026-01-22T09:00:00', sUserName: 'Tim Johnson', sVoided: '', sComments: 'Angulation + insertion tube repair' },
+  { lStatusTranKey: 17, lRepairKey: 6398, sDescription: 'Quality Check', dtDateTime: '2026-01-28T14:00:00', sUserName: 'Marcus Powell', sVoided: '', sComments: 'Final QC passed' },
+  { lStatusTranKey: 18, lRepairKey: 6398, sDescription: 'Completed', dtDateTime: '2026-01-29T10:00:00', sUserName: 'System', sVoided: '', sComments: 'Invoice #INV-26-0398 generated' },
+  { lStatusTranKey: 19, lRepairKey: 6398, sDescription: 'Shipped', dtDateTime: '2026-01-30T08:30:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: 'FedEx Priority — 1Z888DD40222333444' },
+
+  // Repair 6480 — QC
+  { lStatusTranKey: 20, lRepairKey: 6480, sDescription: 'Received', dtDateTime: '2026-02-10T08:00:00', sUserName: 'Kevin Brooks', sVoided: '', sComments: '' },
+  { lStatusTranKey: 21, lRepairKey: 6480, sDescription: 'In Repair', dtDateTime: '2026-02-12T09:00:00', sUserName: 'Marcus Powell', sVoided: '', sComments: '' },
+  { lStatusTranKey: 22, lRepairKey: 6480, sDescription: 'Quality Check', dtDateTime: '2026-02-18T14:00:00', sUserName: 'Marcus Powell', sVoided: '', sComments: 'Awaiting final leak test' },
+]);
+
+// ── Documents (per-repair attachments) ──────────────────
+MockDB.seed('documents', [
+  // Repair 6620 — just received
+  { lDocumentKey: 1, lOwnerKey: 6620, sDocumentName: 'Intake_Photo_Elevator.jpg', dtDateUploaded: '2026-03-15T08:50:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 2, lOwnerKey: 6620, sDocumentName: 'FedEx_BOL_6620.pdf', dtDateUploaded: '2026-03-15T08:52:00', sDocumentType: 'Shipping' },
+
+  // Repair 6601 — fluid invasion
+  { lDocumentKey: 3, lOwnerKey: 6601, sDocumentName: 'Intake_Photo_Front.jpg', dtDateUploaded: '2026-03-05T08:45:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 4, lOwnerKey: 6601, sDocumentName: 'Intake_Photo_DistalEnd.jpg', dtDateUploaded: '2026-03-05T08:46:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 5, lOwnerKey: 6601, sDocumentName: 'Leak_Test_Report.pdf', dtDateUploaded: '2026-03-05T10:30:00', sDocumentType: 'Report' },
+  { lDocumentKey: 6, lOwnerKey: 6601, sDocumentName: 'DI_Inspection_Worksheet.pdf', dtDateUploaded: '2026-03-05T14:15:00', sDocumentType: 'Form' },
+  { lDocumentKey: 7, lOwnerKey: 6601, sDocumentName: 'Repair_Estimate_6601.pdf', dtDateUploaded: '2026-03-05T16:30:00', sDocumentType: 'Estimate' },
+
+  // Repair 6574 — insertion tube
+  { lDocumentKey: 8, lOwnerKey: 6574, sDocumentName: 'Kink_Photo_60cm.jpg', dtDateUploaded: '2026-02-25T10:45:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 9, lOwnerKey: 6574, sDocumentName: 'Repair_Estimate_6574.pdf', dtDateUploaded: '2026-02-26T09:00:00', sDocumentType: 'Estimate' },
+
+  // Repair 6398 — shipped (full set)
+  { lDocumentKey: 10, lOwnerKey: 6398, sDocumentName: 'Intake_Photo.jpg', dtDateUploaded: '2026-01-20T08:30:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 11, lOwnerKey: 6398, sDocumentName: 'Repair_Estimate_6398.pdf', dtDateUploaded: '2026-01-21T09:00:00', sDocumentType: 'Estimate' },
+  { lDocumentKey: 12, lOwnerKey: 6398, sDocumentName: 'Final_QC_Report.pdf', dtDateUploaded: '2026-01-28T14:30:00', sDocumentType: 'Report' },
+  { lDocumentKey: 13, lOwnerKey: 6398, sDocumentName: 'Invoice_INV-26-0398.pdf', dtDateUploaded: '2026-01-29T10:15:00', sDocumentType: 'Invoice' },
+  { lDocumentKey: 14, lOwnerKey: 6398, sDocumentName: 'Packing_Slip_6398.pdf', dtDateUploaded: '2026-01-30T08:00:00', sDocumentType: 'Shipping' },
+
+  // Repair 6480 — QC
+  { lDocumentKey: 15, lOwnerKey: 6480, sDocumentName: 'DistalTip_Before.jpg', dtDateUploaded: '2026-02-10T09:00:00', sDocumentType: 'Photo' },
+  { lDocumentKey: 16, lOwnerKey: 6480, sDocumentName: 'DistalTip_After.jpg', dtDateUploaded: '2026-02-18T13:00:00', sDocumentType: 'Photo' },
+]);
+
+// ── Flags (repair-level alerts/notes) ───────────────────
+MockDB.seed('flags', [
+  // Repair 6620 — just received
+  { lFlagKey: 1, lOwnerKey: 6620, lClientKey: 0, sFlag: 'Elevator wire stiff — evaluate for cable replacement vs. adjustment', sFlagType: 'Repair' },
+  { lFlagKey: 2, lOwnerKey: 6620, lClientKey: 0, sFlag: 'Client requests 5-day turnaround — rush evaluation', sFlagType: 'Repair' },
+  { lFlagKey: 3, lOwnerKey: 6620, lClientKey: 0, sFlag: 'Fujifilm ED-580XT — check parts availability before quoting', sFlagType: 'Repair' },
+
+  // Repair 6601 — fluid invasion
+  { lFlagKey: 4, lOwnerKey: 6601, lClientKey: 0, sFlag: 'Fluid invasion confirmed — full distal end rebuild required', sFlagType: 'Repair' },
+  { lFlagKey: 5, lOwnerKey: 6601, lClientKey: 0, sFlag: 'Rush repair — 5 day turnaround per contract terms', sFlagType: 'Repair' },
+
+  // Repair 6541 — on hold
+  { lFlagKey: 6, lOwnerKey: 6541, lClientKey: 0, sFlag: 'CCD chip backordered — no ETA from Olympus', sFlagType: 'Repair' },
+  { lFlagKey: 7, lOwnerKey: 6541, lClientKey: 0, sFlag: 'Client aware of delay — last contacted 3/10', sFlagType: 'Repair' },
+
+  // Repair 6587 — waiting approval
+  { lFlagKey: 8, lOwnerKey: 6587, lClientKey: 0, sFlag: 'Quote pending client approval since 3/2 — follow up needed', sFlagType: 'Repair' },
 ]);
 
 // ── Contracts (12 — matching contracts.html demo) ───────
