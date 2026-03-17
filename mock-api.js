@@ -324,14 +324,14 @@ const MockAPI = (() => {
   route('POST', '/Supplier/AddSupplier', (p, body) => MockDB.insert('suppliers', body));
   route('POST', '/Supplier/UpdateSupplier', (p, body) => { MockDB.update('suppliers', body.lSupplierKey, body); return body; });
   route('DELETE', '/Supplier/DeleteSupplier', (p) => MockDB.remove('suppliers', int(p.plSupplierKey)));
-  route('POST', '/Supplier/GetSupplierRecentPOsList', () => []);
-  route('POST', '/Supplier/GetSuppliedItemAndSize', () => []);
-  route('POST', '/Supplier/GetAvailableSuppliedItemAndSize', () => []);
+  route('POST', '/Supplier/GetSupplierRecentPOsList', (p, body) => MockDB.getFiltered('supplierPOs', po => po.lSupplierKey === (body?.plSupplierKey || 0)));
+  route('POST', '/Supplier/GetSuppliedItemAndSize', (p, body) => MockDB.getAll('inventorySizes'));
+  route('POST', '/Supplier/GetAvailableSuppliedItemAndSize', () => MockDB.getAll('inventorySizes'));
 
   // ── Acquisitions (3) ──────────────────────────────────
-  route('POST', '/Acquisitions/GetAcquisitionsSoldList', () => []);
-  route('POST', '/Acquisitions/GetAcquisitionsInHouseList', () => []);
-  route('POST', '/Acquisitions/GetAcquisitionsConsignedList', () => []);
+  route('POST', '/Acquisitions/GetAcquisitionsSoldList', (p, body) => MockDB.paginate(MockDB.getFiltered('acquisitions', a => a.sCategory === 'Sold'), body?.Pagination));
+  route('POST', '/Acquisitions/GetAcquisitionsInHouseList', (p, body) => MockDB.paginate(MockDB.getFiltered('acquisitions', a => a.sCategory === 'InHouse'), body?.Pagination));
+  route('POST', '/Acquisitions/GetAcquisitionsConsignedList', (p, body) => MockDB.paginate(MockDB.getFiltered('acquisitions', a => a.sCategory === 'Consigned'), body?.Pagination));
 
   // ── Contract (16) ───────────────────────────────────
   route('POST', '/Contract/GetAllContractsList', (p, body) => MockDB.paginate(MockDB.getAll('contracts'), body?.Pagination));
@@ -348,7 +348,7 @@ const MockAPI = (() => {
     const found = MockDB.getFiltered('scopes', s => s.sSerialNumber === p.psSerialNumber);
     return found.length > 0;
   });
-  route('GET', '/Contract/GetContractRepairsList', () => []);
+  route('GET', '/Contract/GetContractRepairsList', (p) => MockDB.getFiltered('repairs', r => r.lContractKey === int(p.plContractKey)));
   route('GET', '/Contract/GetContractAmendmentsList', () => []);
   route('GET', '/Contract/GetAllContractCoverageCounts', () => ({ nCountFlexible: 10, nCountRigid: 5, nCountInstrument: 3, nCountCamera: 2, nCountAll: 20 }));
   route('GET', '/Contract/GetContractReportCardDetails', () => ({}));
@@ -460,6 +460,22 @@ const MockAPI = (() => {
 
   // ── UserManagement (1) ──────────────────────────────
   route('POST', '/UserManagement/UpdateUser', (p, body) => body);
+
+  // ── Product Sales (3) ────────────────────────────────
+  route('POST', '/ProductSale/GetAllProductSalesList', (p, body) => MockDB.paginate(MockDB.getAll('productSales'), body?.Pagination));
+  route('GET', '/ProductSale/GetProductSaleById', (p) => MockDB.getByKey('productSales', int(p.plProductSaleKey)));
+  route('GET', '/ProductSale/GetProductSaleItems', (p) => MockDB.getFiltered('productSaleItems', i => i.lProductSaleKey === int(p.plProductSaleKey)));
+
+  // ── Quality (3) ─────────────────────────────────────
+  route('GET', '/Quality/GetAllInspections', () => MockDB.tables.inspections || []);
+  route('GET', '/Quality/GetAllNCRs', () => MockDB.tables.ncrs || []);
+  route('GET', '/Quality/GetAllCAPAs', () => MockDB.tables.capas || []);
+
+  // ── Dashboard Queues (3) ────────────────────────────
+  route('GET', '/Dashboard/GetEmailQueue', () => MockDB.tables.emailQueue || []);
+  route('GET', '/Dashboard/GetShippingQueue', () => MockDB.tables.shippingQueue || []);
+  route('GET', '/Financials/GetAtRiskAccounts', () => MockDB.tables.atRiskAccounts || []);
+  route('GET', '/Financials/GetRevenueTrending', () => MockDB.tables.revenueTrending || []);
 
   // ── DevelopmentList (6) ───────────────────────────────
   route('POST', '/DevelopmentList/GetDevelopmentTodoList', () => MockDB.getAll('devTodoList'));

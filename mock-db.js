@@ -182,6 +182,19 @@ const MockDB = (() => {
     // Acquisitions
     acquisitions:       [],
 
+    // Quality
+    inspections:        [],
+    ncrs:               [],
+    capas:              [],
+
+    // Dashboard Queues
+    emailQueue:         [],
+    shippingQueue:      [],
+
+    // Financial Trending
+    atRiskAccounts:     [],
+    revenueTrending:    [],
+
     // Dev Todo
     devTodoList:        [],
     devTodoStatuses:    [],
@@ -3567,3 +3580,471 @@ MockDB.seed('clientsOnHold', [
 ]);
 
 console.log('[MockDB] WP-4 financials seeded: 18 GL accounts, 23 invoices, 6 drafts, 15 payments, 3 holds');
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 10: Programmatic Data Generators
+//  Compact code that reads existing MockDB data and
+//  creates additional records at runtime.
+//  Uses a seeded PRNG for deterministic output.
+// ═══════════════════════════════════════════════════════
+
+// ── Seeded PRNG (mulberry32) — deterministic across reloads ──
+const _gen = (() => {
+  let s = 0x48616E64;
+  function rand() {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+  const pick    = arr => arr[Math.floor(rand() * arr.length)];
+  const randInt = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
+  const randDec = (lo, hi, dp) => +(lo + rand() * (hi - lo)).toFixed(dp);
+  const BASE    = new Date('2026-03-17T12:00:00');
+  const daysAgo = n => new Date(BASE.getTime() - n * 864e5).toISOString().slice(0, 19);
+  const isoDate = n => daysAgo(n);
+  return { rand, pick, randInt, randDec, daysAgo, isoDate };
+})();
+
+// ═══════════════════════════════════════════════════════
+//  Generator 1: Repairs + All Child Records (WP-2)
+// ═══════════════════════════════════════════════════════
+(function generateRepairs() {
+  const depts   = MockDB.getAll('departments').filter(d => d.bActive);
+  const scopes  = MockDB.getAll('scopes').filter(s => s.sScopeIsDead !== 'Y' && !s.bOnSiteLoaner);
+  const techs   = MockDB.getAll('employees').filter(e => e.bIsTechnician);
+  const items   = MockDB.getAll('repairItems');
+  const reasons = MockDB.getAll('repairReasons');
+  const clients = MockDB.getAll('clients').filter(c => c.bActive);
+  const { pick, randInt, randDec, isoDate, rand } = _gen;
+
+  const COMPLAINTS = [
+    'Fluid invasion detected at distal end \u2014 leak test positive.',
+    'Angulation cables stretched \u2014 limited up/down deflection.',
+    'Insertion tube buckled at 45cm mark \u2014 outer sheath compromised.',
+    'CCD chip failure \u2014 no image output on processor.',
+    'Light guide bundle degraded \u2014 below 60% brightness threshold.',
+    'Universal cord intermittent disconnect under torque.',
+    'Suction cylinder valve not seating \u2014 vacuum loss.',
+    'Biopsy channel blockage \u2014 forceps cannot pass beyond 30cm.',
+    'Control body knob stiff \u2014 angulation gear mechanism worn.',
+    'Outer sheath abrasion at bending section \u2014 patient safety concern.',
+    'Elevator wire binding \u2014 limited articulation range.',
+    'Image haze and peripheral dark spots \u2014 possible lens contamination.',
+    'Preventive maintenance \u2014 annual service per contract.',
+    'Water resistance cap cracked at base \u2014 requires replacement.',
+    'Air/water nozzle clogged \u2014 intermittent spray pattern.',
+  ];
+  const RACK = 'ABCDE'.split('').flatMap(r =>
+    Array.from({length: 12}, (_, i) => r + '-' + String(i + 1).padStart(2, '0'))
+  );
+  const DOC_NAMES = {
+    Photo:    ['Intake_Photo.jpg','Distal_End_Photo.jpg','Damage_Detail.jpg','Bending_Section.jpg'],
+    Shipping: ['FedEx_BOL.pdf','Packing_Slip.pdf','Return_Label.pdf'],
+    Report:   ['Leak_Test_Report.pdf','Final_QC_Report.pdf','D_and_I_Report.pdf'],
+    Form:     ['DI_Inspection_Worksheet.pdf','Repair_Authorization.pdf','Approval_Form.pdf'],
+    Estimate: ['Repair_Estimate.pdf','Revised_Estimate.pdf'],
+    Invoice:  ['Final_Invoice.pdf'],
+  };
+  const FLAG_TEXT = [
+    'Rush repair \u2014 5-day turnaround requested by client.',
+    'Parts backordered \u2014 contact vendor for ETA.',
+    'Client escalated to VP level \u2014 priority handling required.',
+    'On hold pending purchase order \u2014 follow up by EOW.',
+    'Patient safety alert \u2014 expedite through QC.',
+    'Contract pricing applies \u2014 verify rate before quoting.',
+    'Loaner deployed \u2014 track expected return date.',
+    'Cancelled per client request \u2014 return scope unrepaired.',
+  ];
+  const STATUS = {
+    1:'Received', 2:'Evaluation', 3:'Waiting for Approval',
+    4:'In Repair', 5:'On Hold', 6:'Quality Check',
+    7:'Ready to Ship', 8:'Shipped', 9:'Closed', 10:'Cancelled'
+  };
+
+  // 35 repairs: status distribution
+  const DIST = [
+    ...Array(5).fill(1), ...Array(4).fill(2), ...Array(5).fill(3),
+    ...Array(6).fill(4), ...Array(3).fill(5), ...Array(3).fill(6),
+    ...Array(3).fill(7), ...Array(4).fill(8), ...Array(1).fill(9),
+    ...Array(1).fill(10)
+  ];
+
+  let woSeq = 7001;
+  DIST.forEach((sid, i) => {
+    const dept   = pick(depts);
+    const client = MockDB.getByKey('clients', dept.lClientKey) || pick(clients);
+    const deptScopes = scopes.filter(s => s.lDepartmentKey === dept.lDepartmentKey);
+    const scope  = deptScopes.length ? pick(deptScopes) : pick(scopes);
+    const svcLoc = dept.lServiceLocationKey || 1;
+    const prefix = svcLoc === 1 ? 'NR' : 'SR';
+    const woNum  = prefix + '26' + String(woSeq++).padStart(6, '0');
+    const tech   = sid >= 4 ? pick(techs) : null;
+    const daysIn = sid <= 2 ? randInt(1, 4) : sid <= 4 ? randInt(5, 16) : sid <= 7 ? randInt(12, 32) : randInt(20, 50);
+    const reason = pick(reasons);
+    const amt    = sid >= 3 ? randDec(280, 4200, 2) : 0;
+    const apAmt  = (sid >= 4 && sid !== 5 && sid !== 10) ? amt : 0;
+
+    const rk = MockDB.nextKey('repairs');
+    const repair = {
+      lRepairKey: rk, lScopeKey: scope.lScopeKey, lDepartmentKey: dept.lDepartmentKey,
+      lServiceLocationKey: svcLoc, sWorkOrderNumber: woNum,
+      sSerialNumber: scope.sSerialNumber || String(randInt(2000000, 9999999)),
+      sScopeTypeDesc: scope.sScopeTypeDesc || 'Olympus GIF-H190',
+      sRigidOrFlexible: scope.sRigidOrFlexible || 'F',
+      Diameter: pick(['5.2','6.0','6.9','9.2','9.9','11.3','13.2']),
+      sClientName1: client.sClientName1, sDepartmentName: dept.sDepartmentName,
+      sManufacturer: (scope.sScopeTypeDesc || 'Olympus').split(' ')[0],
+      sScopeCategory: pick(['Gastroscope','Colonoscope','Bronchoscope','Duodenoscope','Cystoscope']),
+      sComplaintDesc: pick(COMPLAINTS), Note: '',
+      sContactName: client.sClientName1.slice(0, 15) + ' Contact',
+      sContactPhone: '(555) ' + randInt(200, 899) + '-' + randInt(1000, 9999),
+      sContactEmail: 'contact@' + client.sClientName1.split(' ')[0].toLowerCase() + '.com',
+      sShipName1: client.sClientName1, sShipName2: dept.sDepartmentName,
+      sShipAddress: client.sMailAddr1 || '100 Hospital Dr',
+      sShipCity: dept.sShipCity || client.sMailCity || 'Nashville',
+      sShipState: dept.sShipState || client.sMailState || 'TN',
+      sShipZip: client.sMailZip || '37201',
+      sBillName1: client.sClientName1,
+      sBillAddress: client.sMailAddr1 || '100 Hospital Dr',
+      sBillCity: client.sMailCity || 'Nashville',
+      sBillState: client.sMailState || 'TN', sBillZip: client.sMailZip || '37201',
+      dtDateIn: isoDate(daysIn),
+      dtDateOut: sid >= 8 ? isoDate(randInt(0, Math.max(daysIn - 5, 1))) : null,
+      dtAprRecvd: sid >= 3 ? isoDate(daysIn - randInt(2, 4)) : null,
+      dtReqSent: sid >= 2 ? isoDate(daysIn - randInt(0, 2)) : null,
+      EstDelDate: (sid >= 3 && sid < 8) ? isoDate(-randInt(1, 10)) : null,
+      DaysLastIn: daysIn,
+      lRepairStatusID: sid, sRepairStatus: STATUS[sid], ProgBarStatus: STATUS[sid],
+      Approved: apAmt, dblAmtRepair: amt,
+      sInvoiceNumber: sid >= 8 ? 'INV-26-' + randInt(500, 999) : '',
+      ResponsibleTech: tech ? tech.sEmployeeFirst : '', lTechnicianKey: tech ? tech.lTechnicianKey : 0,
+      bHotList: rand() < 0.12, IsCogentix: 0, VendorKey: 0,
+      lRepairReasonKey: reason.lRepairReasonKey, lRepairLevelKey: randInt(1, 4),
+      lDeliveryMethodKey: randInt(1, 5),
+      lContractKey: rand() < 0.25 ? pick(MockDB.getAll('contracts')).lContractKey : 0,
+      sPurchaseOrder: sid >= 3 ? 'PO-2026-' + randInt(500, 9999) : '',
+      sAngInUp: String(randInt(180, 212)), sAngInDown: String(randInt(88, 102)),
+      sAngInRight: String(randInt(98, 155)), sAngInLeft: String(randInt(98, 155)),
+      sAngOutUp: sid >= 6 ? String(randInt(200, 215)) : null,
+      sAngOutDown: sid >= 6 ? String(randInt(96, 102)) : null,
+      sAngOutRight: sid >= 6 ? String(randInt(125, 150)) : null,
+      sAngOutLeft: sid >= 6 ? String(randInt(125, 150)) : null,
+      nIncomingEpoxySize: randDec(1.0, 3.8, 1), sMaxEpoxy: pick(['2.0','2.5','3.0','3.5']),
+      nOutgoingEpoxySize: sid >= 6 ? randDec(1.0, 2.2, 1) : null,
+      sBrokenFibersIn: String(randInt(0, 18)),
+      sBrokenFibersOut: sid >= 6 ? '0' : null,
+      sLeakTesterSN: sid >= 6 ? 'LT-2024-' + randInt(19, 25) : null,
+      sLeakTesterVersion: sid >= 6 ? '4.2.1' : null,
+      sLeakRunID: sid >= 6 ? 'LR-26-' + String(randInt(900, 999)).padStart(5, '0') : null,
+      sLeakDuration: sid >= 6 ? '120' : null,
+      sLeakResult: sid >= 6 ? 'Pass' : null, sFluidResult: sid >= 6 ? 'Pass' : null,
+      dtLeakTestDate: sid >= 6 ? isoDate(randInt(0, 5)) : null,
+      sLoanerSN: rand() < 0.15 ? 'LOAN-' + String(randInt(1, 7)).padStart(3, '0') : '',
+      sLoanerModel: '', bLoanerOut: false,
+      sRackPosition: sid < 8 ? pick(RACK) : null,
+      sCarrierTracking: '1Z' + randInt(100000000, 999999999) + randInt(10, 99),
+      sCarrierTrackingOut: sid >= 8 ? '1Z' + randInt(100000000, 999999999) + randInt(10, 99) : '',
+      lPatientSafetyLevelKey: randInt(1, 3), lSalesRepNameKey: randInt(1, 9),
+      lPricingCategoryKey: client.lPricingCategoryKey || 1,
+    };
+    if (repair.sLoanerSN) { repair.sLoanerModel = scope.sScopeTypeDesc; repair.bLoanerOut = true; }
+    MockDB.tables.repairs.push(repair);
+
+    // ── statusTrans ──
+    const path = sid === 10 ? [1, 10] : Array.from({length: Math.min(sid, 8)}, (_, j) => j + 1);
+    if (sid === 5 && !path.includes(5)) path.push(5);
+    path.forEach((st, j) => {
+      MockDB.tables.statusTrans.push({
+        lStatusTranKey: MockDB.nextKey('statusTrans'), lRepairKey: rk,
+        sDescription: STATUS[st], dtDateTime: _gen.daysAgo(daysIn - j),
+        sUserName: j === 0 ? 'Kevin Brooks' : (tech ? tech.sTechName : 'System'),
+        sVoided: '', sComments: j === 0 ? 'Scope received via carrier' : ''
+      });
+    });
+
+    // ── repairDetails ──
+    if (sid >= 2 || rand() < 0.3) {
+      const nItems = sid <= 2 ? randInt(1, 3) : randInt(2, 5);
+      const used = new Set();
+      used.add(12);
+      MockDB.tables.repairDetails.push({
+        lRepairItemTranKey: MockDB.nextKey('repairDetails'), lRepairKey: rk,
+        lRepairItemKey: 12, sItemDescription: 'Evaluation Fee',
+        nRepairPrice: 75, dblRepairPrice: 75, sApproved: 'Y', bPrimary: false, mComment: ''
+      });
+      for (let k = 1; k < nItems; k++) {
+        let item; do { item = pick(items); } while (used.has(item.lRepairItemKey));
+        used.add(item.lRepairItemKey);
+        const price = randDec(item.nUnitCost * 0.8, item.nUnitCost * 2.5, 2);
+        MockDB.tables.repairDetails.push({
+          lRepairItemTranKey: MockDB.nextKey('repairDetails'), lRepairKey: rk,
+          lRepairItemKey: item.lRepairItemKey, sItemDescription: item.sItemDescription,
+          nRepairPrice: price, dblRepairPrice: price,
+          sApproved: (sid >= 4 && sid !== 10) ? 'Y' : 'P',
+          bPrimary: k === 1, mComment: k === 1 ? pick(COMPLAINTS).slice(0, 50) : ''
+        });
+      }
+    }
+
+    // ── documents ──
+    const dtypes = sid === 10 ? ['Photo'] : sid <= 1 ? ['Photo','Shipping']
+      : sid <= 3 ? ['Photo','Shipping','Estimate'] : sid <= 5 ? ['Photo','Shipping','Estimate','Form']
+      : sid <= 7 ? ['Photo','Shipping','Estimate','Form','Report']
+      : ['Photo','Shipping','Estimate','Form','Report','Invoice'];
+    dtypes.forEach((dt, j) => {
+      MockDB.tables.documents.push({
+        lDocumentKey: MockDB.nextKey('documents'), lOwnerKey: rk,
+        sDocumentName: pick(DOC_NAMES[dt]).replace('.', '_' + woNum + '.'),
+        dtDateUploaded: _gen.daysAgo(daysIn - j), sDocumentType: dt
+      });
+    });
+
+    // ── flags ──
+    if (sid === 5 || repair.bHotList || sid === 10 || rand() < 0.15) {
+      const nf = sid === 5 ? 2 : 1;
+      for (let f = 0; f < nf; f++) {
+        MockDB.tables.flags.push({
+          lFlagKey: MockDB.nextKey('flags'), lOwnerKey: rk,
+          lClientKey: 0, sFlag: pick(FLAG_TEXT), sFlagType: 'Repair'
+        });
+      }
+    }
+
+    // ── repairInventory (shipped/closed/QC) ──
+    if (sid >= 6) {
+      const ni = randInt(1, 3);
+      for (let v = 0; v < ni; v++) {
+        const item = pick(items);
+        MockDB.tables.repairInventory.push({
+          lRepairInventoryKey: MockDB.nextKey('repairInventory'), lRepairKey: rk,
+          lRepairItemTranKey: 0, sRepairItemDesc: item.sItemDescription,
+          lInventoryKey: randInt(1, 22), sItemDescription: item.sItemDescription,
+          sSizeName: 'Standard', sLotNumber: 'LOT-2026-' + randInt(100, 999), nQuantity: randInt(1, 2)
+        });
+      }
+    }
+  });
+
+  console.log('[MockDB] Gen1: +35 repairs -> ' + MockDB.getAll('repairs').length + ' total, ' +
+    MockDB.getAll('repairDetails').length + ' details, ' +
+    MockDB.getAll('statusTrans').length + ' transitions, ' +
+    MockDB.getAll('documents').length + ' documents, ' +
+    MockDB.getAll('flags').length + ' flags');
+})();
+
+// ═══════════════════════════════════════════════════════
+//  Generator 2: Product Sales (WP-7)
+// ═══════════════════════════════════════════════════════
+(function generateProductSales() {
+  const clients = MockDB.getAll('clients').filter(c => c.bActive);
+  const { pick, randInt, randDec, isoDate } = _gen;
+
+  const PRODUCTS = [
+    { desc: 'Olympus GIF-H190 Gastroscope',       unit: 18500 },
+    { desc: 'Fujifilm EC-760R Colonoscope',        unit: 22000 },
+    { desc: 'Olympus BF-1TH190 Bronchoscope',     unit: 15800 },
+    { desc: 'Karl Storz 11101VP Rhinolaryngoscope', unit: 9200 },
+    { desc: 'Stryker 5mm 30deg Arthroscope',       unit: 6800 },
+    { desc: 'Olympus OTV-SP1 Camera Head',         unit: 12500 },
+    { desc: 'Olympus CLV-S200 Light Source',       unit: 8900 },
+    { desc: 'Pentax EPK-i7010 Video Processor',   unit: 34000 },
+    { desc: 'EndoCart Standard Configuration',     unit: 28500 },
+    { desc: 'Scope Transport Case (Hard Shell)',   unit: 450 },
+    { desc: 'Olympus MAJ-1720 Keyboard',          unit: 380 },
+    { desc: 'Stryker 1588 Camera Head',            unit: 14200 },
+  ];
+
+  for (let i = 0; i < 15; i++) {
+    const client = pick(clients);
+    const svcLoc = client.lServiceLocationKey || 1;
+    const prefix = svcLoc === 1 ? 'NI' : 'SI';
+    const pk = MockDB.nextKey('productSales');
+    const daysBack = randInt(2, 90);
+    const nItems = randInt(2, 4);
+    let total = 0;
+
+    const saleItems = [];
+    for (let j = 0; j < nItems; j++) {
+      const prod = pick(PRODUCTS);
+      const qty = j === 0 ? 1 : randInt(1, 3);
+      const price = prod.unit * qty;
+      total += price;
+      saleItems.push({
+        lProductSaleInventoryKey: MockDB.nextKey('productSaleItems'),
+        lProductSaleKey: pk, sDescription: prod.desc,
+        nQuantity: qty, dblUnitPrice: prod.unit, dblExtendedPrice: price,
+        sSerialNumber: j === 0 ? 'SN-' + randInt(100000, 999999) : ''
+      });
+    }
+
+    MockDB.tables.productSales.push({
+      lProductSaleKey: pk,
+      sWorkOrderNumber: prefix + '26' + String(8000 + i).padStart(6, '0'),
+      lClientKey: client.lClientKey, sClientName1: client.sClientName1,
+      sDepartmentName: '', lDepartmentKey: 0, lServiceLocationKey: svcLoc,
+      dtOrderDate: isoDate(daysBack),
+      dtShipDate: daysBack > 7 ? isoDate(daysBack - randInt(3, 7)) : null,
+      dblTotal: total,
+      sStatus: daysBack > 14 ? 'Shipped' : (daysBack > 5 ? 'Processing' : 'New'),
+      sSalesRepName: client.sSalesRepName || 'Joseph Brassell',
+      lSalesRepKey: client.lSalesRepKey || 1,
+      sPurchaseOrder: 'PO-2026-' + randInt(1000, 9999), sNotes: ''
+    });
+    saleItems.forEach(si => MockDB.tables.productSaleItems.push(si));
+  }
+
+  console.log('[MockDB] Gen2: +15 product sales, +' + MockDB.getAll('productSaleItems').length + ' items');
+})();
+
+// ═══════════════════════════════════════════════════════
+//  Generator 3: Quality Data (WP-8)
+// ═══════════════════════════════════════════════════════
+(function generateQualityData() {
+  const repairs = MockDB.getAll('repairs');
+  const techs   = MockDB.getAll('employees').filter(e => e.bIsTechnician);
+  const { pick, randInt, isoDate } = _gen;
+
+  // Inspections - 20 records
+  for (let i = 0; i < 20; i++) {
+    const r = pick(repairs.filter(r => r.lRepairStatusID >= 6)) || pick(repairs);
+    MockDB.tables.inspections.push({
+      lInspectionKey: i + 1, lRepairKey: r.lRepairKey,
+      sWorkOrderNumber: r.sWorkOrderNumber, sSerialNumber: r.sSerialNumber,
+      sClientName1: r.sClientName1, sScopeTypeDesc: r.sScopeTypeDesc,
+      sInspectorName: pick(techs).sTechName,
+      dtInspectionDate: isoDate(randInt(0, 60)),
+      sResult: i < 14 ? 'Pass' : (i < 17 ? 'Conditional' : 'Fail'),
+      sType: pick(['Final QC', 'In-Process', 'Receiving', 'Post-Repair']),
+      nScore: i < 14 ? randInt(92, 100) : randInt(65, 88),
+      sNotes: i >= 14 ? 'Requires re-inspection after rework' : ''
+    });
+  }
+
+  // NCRs - 12 records
+  const NCR_TYPES = ['Process Deviation','Part Defect','Contamination','Documentation Error','Equipment Malfunction'];
+  for (let i = 0; i < 12; i++) {
+    const r = pick(repairs);
+    MockDB.tables.ncrs.push({
+      lNCRKey: i + 1, sNCRNumber: 'NCR-2026-' + String(i + 1).padStart(3, '0'),
+      lRepairKey: r.lRepairKey, sWorkOrderNumber: r.sWorkOrderNumber,
+      sType: pick(NCR_TYPES), sSeverity: pick(['Minor','Minor','Major','Critical']),
+      sStatus: i < 4 ? 'Open' : (i < 8 ? 'Under Review' : 'Closed'),
+      dtDateOpened: isoDate(randInt(2, 90)),
+      dtDateClosed: i >= 8 ? isoDate(randInt(0, 10)) : null,
+      sDescription: pick(NCR_TYPES) + ' detected during ' + pick(['final QC','in-process check','receiving inspection']),
+      sAssignedTo: pick(techs).sTechName,
+      sRootCause: i >= 8 ? pick(['Training gap','Equipment calibration','Process not followed']) : ''
+    });
+  }
+
+  // CAPAs - 8 records
+  for (let i = 0; i < 8; i++) {
+    MockDB.tables.capas.push({
+      lCAPAKey: i + 1, sCAPANumber: 'CAPA-2026-' + String(i + 1).padStart(3, '0'),
+      sNCRRef: i < 4 ? 'NCR-2026-' + String(i + 1).padStart(3, '0') : '',
+      sType: i < 5 ? 'Corrective' : 'Preventive',
+      sStatus: i < 3 ? 'Open' : (i < 6 ? 'In Progress' : 'Closed'),
+      dtDateOpened: isoDate(randInt(10, 90)),
+      dtDueDate: isoDate(-randInt(5, 30)),
+      sRootCause: pick(['Training gap','Equipment calibration drift','SOP not followed','Vendor part defect','Process variation']),
+      sAction: pick(['Retrain technicians on procedure','Calibrate equipment per schedule','Update SOP rev. 3','Replace vendor','Add verification step']),
+      sAssignedTo: pick(techs).sTechName, sVerification: i >= 6 ? 'Verified effective' : ''
+    });
+  }
+
+  console.log('[MockDB] Gen3: +20 inspections, +12 NCRs, +8 CAPAs');
+})();
+
+// ═══════════════════════════════════════════════════════
+//  Generator 4: Dashboard Queue Data (WP-8)
+// ═══════════════════════════════════════════════════════
+(function generateDashboardData() {
+  const clients = MockDB.getAll('clients').filter(c => c.bActive);
+  const repairs = MockDB.getAll('repairs');
+  const { pick, randInt, daysAgo, isoDate } = _gen;
+
+  // Email queue - 15 items
+  const SUBJ = ['Repair Estimate','Quote Follow-Up','Loaner Return Request','Invoice Reminder',
+                'Approval Request','Ship Notification','Contract Renewal','PO Confirmation'];
+  for (let i = 0; i < 15; i++) {
+    const c = pick(clients);
+    MockDB.tables.emailQueue.push({
+      lEmailKey: i + 1,
+      sSubject: pick(SUBJ) + ' \u2014 ' + c.sClientName1,
+      sTo: 'contact@' + c.sClientName1.split(' ')[0].toLowerCase() + '.com',
+      sFrom: 'service@totalscope.com',
+      dtQueued: daysAgo(randInt(0, 5)),
+      sStatus: i < 10 ? 'Sent' : (i < 13 ? 'Pending' : 'Failed'),
+      sType: pick(['Estimate','Invoice','Notification','Follow-Up','Reminder'])
+    });
+  }
+
+  // Shipping queue - from Ready to Ship repairs + recent shipments
+  const readyRepairs = repairs.filter(r => r.lRepairStatusID === 7);
+  readyRepairs.forEach((r, i) => {
+    MockDB.tables.shippingQueue.push({
+      lShipQueueKey: i + 1, lRepairKey: r.lRepairKey,
+      sWorkOrderNumber: r.sWorkOrderNumber, sClientName1: r.sClientName1,
+      sDepartmentName: r.sDepartmentName,
+      sDeliveryMethod: pick(['FedEx Priority Overnight','FedEx Standard','UPS Ground','TSI Courier','Client Pickup']),
+      dtScheduledShip: isoDate(-randInt(0, 3)),
+      sPriority: r.bHotList ? 'Rush' : 'Standard',
+      sShipCity: r.sShipCity, sShipState: r.sShipState
+    });
+  });
+  // Add recently shipped for history
+  repairs.filter(r => r.lRepairStatusID === 8).slice(0, 4).forEach((r, i) => {
+    MockDB.tables.shippingQueue.push({
+      lShipQueueKey: readyRepairs.length + i + 1, lRepairKey: r.lRepairKey,
+      sWorkOrderNumber: r.sWorkOrderNumber, sClientName1: r.sClientName1,
+      sDepartmentName: r.sDepartmentName,
+      sDeliveryMethod: 'FedEx Priority Overnight',
+      dtScheduledShip: isoDate(randInt(1, 5)), dtShipped: isoDate(randInt(0, 3)),
+      sTracking: r.sCarrierTrackingOut || '1Z' + randInt(100000000, 999999999),
+      sPriority: 'Standard', sShipCity: r.sShipCity, sShipState: r.sShipState
+    });
+  });
+
+  console.log('[MockDB] Gen4: +15 emails, +' + MockDB.tables.shippingQueue.length + ' shipping queue');
+})();
+
+// ═══════════════════════════════════════════════════════
+//  Generator 5: Financial At-Risk & Revenue Trending (WP-9)
+// ═══════════════════════════════════════════════════════
+(function generateFinancialTrending() {
+  const clients = MockDB.getAll('clients').filter(c => c.bActive);
+  const { pick, randInt, isoDate } = _gen;
+
+  // At-risk accounts - 8 records
+  const riskClients = clients.slice(0, 8);
+  riskClients.forEach((c, i) => {
+    MockDB.tables.atRiskAccounts.push({
+      lAtRiskKey: i + 1, lClientKey: c.lClientKey, sClientName1: c.sClientName1,
+      dblBalance: randInt(1800, 18000), nDaysPastDue: randInt(15, 120),
+      sRiskLevel: i < 2 ? 'High' : (i < 5 ? 'Medium' : 'Low'),
+      sLastContact: isoDate(randInt(1, 30)),
+      sNotes: i < 2 ? 'Escalated to collections \u2014 no response' : (i < 5 ? 'Payment plan discussed' : '')
+    });
+  });
+
+  // Revenue trending - 12 months (Apr 2025 - Mar 2026)
+  var MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  MONTHS.forEach(function(m, i) {
+    var yr = i < 9 ? 2025 : 2026;
+    var repRev = randInt(48000, 92000);
+    var prodRev = randInt(18000, 65000);
+    var conRev = randInt(14000, 38000);
+    MockDB.tables.revenueTrending.push({
+      sMonth: m, nYear: yr, sLabel: m + ' ' + yr,
+      dblRepairRevenue: repRev, dblProductSales: prodRev,
+      dblContractRevenue: conRev, dblTotal: repRev + prodRev + conRev
+    });
+  });
+
+  console.log('[MockDB] Gen5: +8 at-risk accounts, +12 months revenue trending');
+})();
+
+console.log('[MockDB] All generators complete. Total repairs: ' + MockDB.getAll('repairs').length +
+  ', Total records across all tables: ~' +
+  Object.keys(MockDB.tables).reduce(function(sum, t) { return sum + (MockDB.tables[t] && MockDB.tables[t].length || 0); }, 0));
