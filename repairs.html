@@ -4521,19 +4521,25 @@ async function initPage() {
       await loadRepair(parseInt(requestedKey));
     } else {
       const action = params.get('action');
-      const clientName = params.get('client');
-      const deptName = params.get('dept');
+      const clientParam = params.get('client');
+      const deptParam = params.get('dept');
 
-      if (action === 'new' || clientName || deptName) {
+      if (action === 'new' || clientParam || deptParam) {
         newRepair();
-        if (clientName) {
-          const c = _clients.find(x => (x.sClientName1 || x.sClientName || '').toLowerCase() === clientName.toLowerCase());
+        if (clientParam) {
+          // Accept both numeric key (from shared wizard) and name (legacy)
+          const ck = parseInt(clientParam);
+          const c = !isNaN(ck)
+            ? _clients.find(x => x.lClientKey == ck)
+            : _clients.find(x => (x.sClientName1 || x.sClientName || '').toLowerCase() === clientParam.toLowerCase());
           if (c) {
             wizPickClient(c.lClientKey);
-            if (deptName) {
-              // Wait for depts to be available (rendered by wizPickClient via wizNext)
+            if (deptParam) {
               setTimeout(() => {
-                const d = _departments.find(x => (x.sDepartmentName || '').toLowerCase() === deptName.toLowerCase() && x.lClientKey === c.lClientKey);
+                const dk = parseInt(deptParam);
+                const d = !isNaN(dk)
+                  ? _departments.find(x => x.lDepartmentKey == dk && x.lClientKey == c.lClientKey)
+                  : _departments.find(x => (x.sDepartmentName || '').toLowerCase() === deptParam.toLowerCase() && x.lClientKey === c.lClientKey);
                 if (d) wizPickDept(d.lDepartmentKey);
               }, 300);
             }
@@ -4866,5 +4872,6 @@ initItemContextMenu();
 </div>
 
 <script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>

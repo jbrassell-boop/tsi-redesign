@@ -93,15 +93,15 @@
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>';
     html += '</button>';
     html += '<div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">';
-    html += menuItem("window.location='repairs.html'",
+    html += menuItem("openOrderSearch()",
       '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-      'Find / Open Repair', 'Search open work orders', '2px solid var(--border)');
-    html += menuItem("window.location='repairs.html?action=new'",
+      'Find / Open Order', 'Search by WO#, SN#, PO#', '2px solid var(--border)');
+    html += menuItem("openNewOrderWizard('repairs','New Repair Order','repair')",
       '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
       'Repair Order', 'New scope repair work order', '1px solid #f0f2f5');
-    html += menuItem("location='instruments.html?action=new'",
+    html += menuItem("openNewOrderWizard('instruments','New Instrument Repair','repair')",
       '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
-      'Instrument Repair', 'New rigid/surgical instrument order', '1px solid #f0f2f5');
+      'Instrument Repair', 'New surgical instrument repair order', '1px solid #f0f2f5');
     html += menuItem("openNewOrderWizard('product-sale','New Product Sale','sale')",
       '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
       'Product Sale', 'New product sale order', '1px solid #f0f2f5');

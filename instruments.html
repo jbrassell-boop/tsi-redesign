@@ -838,17 +838,34 @@ document.addEventListener('click', function(e) {
 _tabInited['repairs'] = true;
 ir_initPage();
 
-// Handle ?action=new from other pages
+// Handle ?action=new (with optional client/dept keys from shared wizard)
 (function() {
   const p = new URLSearchParams(window.location.search);
-  if (p.get('action') === 'new') {
-    // Small delay so ir_initPage() finishes rendering first
-    setTimeout(function() { if (typeof ir_newRepair === 'function') ir_newRepair(); }, 200);
-  }
+  if (p.get('action') !== 'new') return;
+
+  setTimeout(function() {
+    if (typeof ir_newRepair !== 'function') return;
+    ir_newRepair();
+
+    var clientKey = parseInt(p.get('client'));
+    if (!isNaN(clientKey) && typeof ir_wizPickClient === 'function') {
+      ir_wizPickClient(clientKey);
+      ir_wizNext();
+
+      var deptKey = parseInt(p.get('dept'));
+      if (!isNaN(deptKey) && typeof ir_wizPickDept === 'function') {
+        setTimeout(function() {
+          ir_wizPickDept(deptKey);
+          ir_wizNext();
+        }, 100);
+      }
+    }
+  }, 200);
 })();
 </script>
 <script src="js/instrument-catalog-data.js"></script>
 <script src="js/instrument-catalog-tab.js"></script>
 <script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>
