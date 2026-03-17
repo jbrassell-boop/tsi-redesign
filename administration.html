@@ -132,6 +132,12 @@
     /* Tab separator */
     .tab-sep{width:1px;height:20px;background:var(--border-dk);flex-shrink:0;margin:0 4px;align-self:center}
 
+    /* Category pill bar */
+    .cat-bar{display:flex;align-items:center;gap:6px;padding:8px 14px;background:#F0F4FA;border-bottom:1px solid var(--border)}
+    .cat-pill{padding:5px 14px;font-size:11px;font-weight:600;color:var(--muted);background:#fff;border:1.5px solid var(--border-dk);border-radius:16px;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap}
+    .cat-pill:hover{color:var(--navy);border-color:var(--navy)}
+    .cat-pill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
     /* Yes/No default badges */
     .b-yes{background:#E8F5E9;color:#2E7D32;border-color:#81C784}
     .b-no{background:#F3F4F6;color:#6B7280;border-color:#D1D5DB}
@@ -186,31 +192,37 @@
         </div>
       </div>
 
+      <!-- CATEGORY PILL BAR -->
+      <div class="cat-bar">
+        <div class="cat-pill active" data-cat="core" onclick="switchCat('core',this)">Users &amp; Security</div>
+        <div class="cat-pill" data-cat="business" onclick="switchCat('business',this)">Business Config</div>
+        <div class="cat-pill" data-cat="product" onclick="switchCat('product',this)">Product &amp; Repair</div>
+        <div class="cat-pill" data-cat="hr" onclick="switchCat('hr',this)">HR &amp; Finance</div>
+      </div>
+
       <!-- TAB BAR -->
       <div class="tab-bar">
-        <div class="tab active" onclick="switchTab('users',this)">Staff &amp; Users</div>
-        <div class="tab" onclick="switchTab('security',this)">Security Groups</div>
-        <div class="tab" onclick="switchTab('pricing',this)">Pricing Lists</div>
-        <div class="tab" onclick="switchTab('settings',this)">System Settings</div>
-        <div class="tab" onclick="switchTab('audit',this)">Audit Log</div>
-        <div class="tab-sep"></div>
-        <div class="tab" onclick="switchTab('delivery',this)">Delivery Methods</div>
-        <div class="tab" onclick="switchTab('payterms',this)">Payment Terms</div>
-        <div class="tab" onclick="switchTab('scopecat',this)">Scope Categories</div>
-        <div class="tab" onclick="switchTab('distrib',this)">Distributors</div>
-        <div class="tab" onclick="switchTab('companies',this)">Companies</div>
-        <div class="tab" onclick="switchTab('creditlimits',this)">Credit Limits</div>
-        <div class="tab" onclick="switchTab('repairreasons',this)">Repair Reasons</div>
-        <div class="tab" onclick="switchTab('repairstatuses',this)">Repair Statuses</div>
-        <div class="tab" onclick="switchTab('reportgroups',this)">Reporting Groups</div>
-        <div class="tab" onclick="switchTab('stddepts',this)">Standard Depts</div>
-        <div class="tab" onclick="switchTab('cleaningsys',this)">Cleaning Systems</div>
-        <div class="tab" onclick="switchTab('countries',this)">Countries</div>
-        <div class="tab-sep"></div>
-        <div class="tab" onclick="switchTab('salesreassign',this)">Sales Rep Reassignment</div>
-        <div class="tab" onclick="switchTab('holidays',this)">Holidays</div>
-        <div class="tab" onclick="switchTab('bonuspools',this)">Bonus Pools</div>
-        <div class="tab" onclick="switchTab('salestax',this)">Sales Tax Config</div>
+        <div class="tab active" data-cat="core" onclick="switchTab('users',this)">Staff &amp; Users</div>
+        <div class="tab" data-cat="core" onclick="switchTab('security',this)">Security Groups</div>
+        <div class="tab" data-cat="core" onclick="switchTab('pricing',this)">Pricing Lists</div>
+        <div class="tab" data-cat="core" onclick="switchTab('settings',this)">System Settings</div>
+        <div class="tab" data-cat="core" onclick="switchTab('audit',this)">Audit Log</div>
+        <div class="tab" data-cat="business" onclick="switchTab('delivery',this)" style="display:none">Delivery Methods</div>
+        <div class="tab" data-cat="business" onclick="switchTab('payterms',this)" style="display:none">Payment Terms</div>
+        <div class="tab" data-cat="business" onclick="switchTab('distrib',this)" style="display:none">Distributors</div>
+        <div class="tab" data-cat="business" onclick="switchTab('companies',this)" style="display:none">Companies</div>
+        <div class="tab" data-cat="business" onclick="switchTab('creditlimits',this)" style="display:none">Credit Limits</div>
+        <div class="tab" data-cat="business" onclick="switchTab('countries',this)" style="display:none">Countries</div>
+        <div class="tab" data-cat="product" onclick="switchTab('scopecat',this)" style="display:none">Scope Categories</div>
+        <div class="tab" data-cat="product" onclick="switchTab('repairreasons',this)" style="display:none">Repair Reasons</div>
+        <div class="tab" data-cat="product" onclick="switchTab('repairstatuses',this)" style="display:none">Repair Statuses</div>
+        <div class="tab" data-cat="product" onclick="switchTab('reportgroups',this)" style="display:none">Reporting Groups</div>
+        <div class="tab" data-cat="product" onclick="switchTab('stddepts',this)" style="display:none">Standard Depts</div>
+        <div class="tab" data-cat="product" onclick="switchTab('cleaningsys',this)" style="display:none">Cleaning Systems</div>
+        <div class="tab" data-cat="hr" onclick="switchTab('salesreassign',this)" style="display:none">Sales Rep Reassignment</div>
+        <div class="tab" data-cat="hr" onclick="switchTab('holidays',this)" style="display:none">Holidays</div>
+        <div class="tab" data-cat="hr" onclick="switchTab('bonuspools',this)" style="display:none">Bonus Pools</div>
+        <div class="tab" data-cat="hr" onclick="switchTab('salestax',this)" style="display:none">Sales Tax Config</div>
       </div>
 
       <!-- TAB: STAFF & USERS -->
@@ -1207,6 +1219,27 @@
     var target = document.getElementById('tab-'+name);
     if(target) target.classList.add('show');
     if(el) el.classList.add('active');
+  };
+
+  /* Category pill switching */
+  var TAB_CATS = {
+    core:     ['users','security','pricing','settings','audit'],
+    business: ['delivery','payterms','distrib','companies','creditlimits','countries'],
+    product:  ['scopecat','repairreasons','repairstatuses','reportgroups','stddepts','cleaningsys'],
+    hr:       ['salesreassign','holidays','bonuspools','salestax']
+  };
+
+  window.switchCat = function(cat, el){
+    document.querySelectorAll('.cat-pill').forEach(function(p){ p.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    document.querySelectorAll('.tab-bar .tab').forEach(function(t){
+      t.style.display = (t.getAttribute('data-cat') === cat) ? '' : 'none';
+    });
+    var first = TAB_CATS[cat] && TAB_CATS[cat][0];
+    if(first){
+      var firstEl = document.querySelector('.tab-bar .tab[data-cat="'+cat+'"]');
+      switchTab(first, firstEl);
+    }
   };
 
   /* ==============================
