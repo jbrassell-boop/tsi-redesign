@@ -292,13 +292,19 @@
         <input type="text" id="loanerRack" placeholder="e.g. A-1" readonly style="background:#F7F8FC"/>
       </div>
     </div>
-    <div class="field" id="fStatus">
-      <label>Status</label>
-      <select id="loanerStatus">
-        <option value="Out">Out</option>
-        <option value="Returned">Returned</option>
-        <option value="Reserved">Reserved</option>
-      </select>
+    <div class="field-row">
+      <div class="field" id="fStatus">
+        <label>Status</label>
+        <select id="loanerStatus">
+          <option value="Out">Out</option>
+          <option value="Returned">Returned</option>
+          <option value="Reserved">Reserved</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tracking #</label>
+        <input type="text" id="loanerTracking" placeholder="UPS/FedEx tracking…"/>
+      </div>
     </div>
     <div style="font-size:10px;color:var(--muted);margin-top:-8px">
       If the model you need is not listed, it may not be flagged as a loaner scope. Contact your administrator.
@@ -579,7 +585,7 @@ function getFilteredTaskRows() {
       else if (r._status !== sf) return false;
     }
     if (q) {
-      const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
+      const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition, r.sLoanerTrackingNumber, r.psTrackingNumber, r.sLocation, r.sLoanerSalesRepName, r.sSalesRepName]
         .map(v => (v || '').toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
@@ -614,7 +620,10 @@ function renderTaskLoaners() {
     <th style="width:90px">Serial #</th>
     <th style="width:45px;text-align:center">Qty</th>
     <th>Client</th>
+    <th>Department</th>
     <th style="width:70px;text-align:center">Rack</th>
+    <th style="width:70px;text-align:center">Location</th>
+    <th style="width:100px">Tracking #</th>
     <th style="width:70px;text-align:center">Status</th>
     <th style="width:65px;text-align:center">Days Out</th>
     <th style="width:90px;text-align:center">Actions</th>
@@ -624,20 +633,24 @@ function renderTaskLoaners() {
   const tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="12" class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
       <div>No task loaners found</div>
     </td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(r => {
       const key = r.lTaskLoanerKey || r.plTaskScopeTypeKey || 0;
+      const loc = r.sLocation || r.psLocationCode || '';
       return `<tr onclick="showTaskDetail(${key})">
         <td style="font-weight:600;color:var(--blue)">${esc(r.sTaskNumber || 'Task #' + r.plTaskKey)}</td>
         <td style="font-weight:500">${esc(r.sScopeTypeDesc || '—')}</td>
         <td style="font-family:monospace;font-size:11px">${esc(r.sSerialNumber || '—')}</td>
         <td style="text-align:center;font-weight:700">${r.plQuantity || r.lQuantity || 1}</td>
         <td>${esc(r.sClientName || '—')}</td>
+        <td style="color:var(--muted)">${esc(r.sDepartmentName || '—')}</td>
         <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center"><span style="font-size:10px;color:var(--muted)">${esc(loc || '—')}</span></td>
+        <td style="font-family:monospace;font-size:10px">${esc(r.sLoanerTrackingNumber || r.psTrackingNumber || '—')}</td>
         <td style="text-align:center">${statusBadge(r._status)}</td>
         <td style="text-align:center">${daysChip(r)}</td>
         <td style="text-align:center" onclick="event.stopPropagation()">
@@ -665,6 +678,7 @@ function renderActiveLoaners() {
     <th>Serial #</th>
     <th>Scope Type / Model</th>
     <th style="width:80px;text-align:center">Rack</th>
+    <th style="width:70px;text-align:center">Location</th>
     <th>Assigned To — Client</th>
     <th>Assigned To — Dept</th>
     <th style="width:70px;text-align:center">Status</th>
@@ -674,7 +688,7 @@ function renderActiveLoaners() {
   const tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 5V3.5a4 4 0 0 1 8 0V5"/></svg>
       <div>No loaner scopes found</div>
     </td></tr>`;
@@ -683,10 +697,12 @@ function renderActiveLoaners() {
       const key = r.lScopeKey || 0;
       const assigned = !!(r.sClientName || r.sClientName1 || r.sDepartmentName);
       const client = r.sClientName || r.sClientName1 || '';
+      const loc = r.sLocation || r.psLocationCode || '';
       return `<tr onclick="showActiveDetail(${key})">
         <td style="font-family:monospace;font-size:11px;font-weight:600">${esc(r.sSerialNumber || '—')}</td>
         <td style="font-weight:500">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}&nbsp;${loanerBadge()}</td>
         <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center"><span style="font-size:10px;color:var(--muted)">${esc(loc || '—')}</span></td>
         <td>${esc(client || (assigned ? '' : '—'))}</td>
         <td style="color:var(--muted)">${esc(r.sDepartmentName || (assigned ? '' : '—'))}</td>
         <td style="text-align:center">${assigned ? statusBadge('Out') : statusBadge('Available')}</td>
@@ -805,6 +821,8 @@ function showTaskDetail(key) {
       <div class="detail-row"><span class="detail-lbl">Work Order</span><span class="detail-val" style="color:var(--blue);font-weight:700">${esc(r.sTaskNumber || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Client</span><span class="detail-val">${esc(r.sClientName || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Department</span><span class="detail-val">${esc(r.sDepartmentName || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Sales Rep</span><span class="detail-val">${esc(r.sLoanerSalesRepName || r.sSalesRepName || '—')}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Location</span><span class="detail-val">${esc(r.sLocation || r.psLocationCode || '—')}</span></div>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">Loaner Scope</div>
@@ -820,6 +838,7 @@ function showTaskDetail(key) {
       <div class="detail-row"><span class="detail-lbl">Expected Return</span><span class="detail-val">${fmtDate(r.dtExpectedReturn)}</span></div>
       <div class="detail-row"><span class="detail-lbl">Actual Return</span><span class="detail-val">${fmtDate(r.dtActualReturn)}</span></div>
       <div class="detail-row"><span class="detail-lbl">Days Out</span><span class="detail-val">${daysChip(r)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Tracking #</span><span class="detail-val" style="font-family:monospace;font-size:11px">${esc(r.sLoanerTrackingNumber || r.psTrackingNumber || '—')}</span></div>
     </div>`;
 
   openDetailDrawer();
@@ -844,6 +863,7 @@ function showActiveDetail(key) {
       <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
       <div class="detail-row"><span class="detail-lbl">Loaner Flag</span><span class="detail-val">${loanerBadge()}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Location</span><span class="detail-val">${esc(r.sLocation || r.psLocationCode || '—')}</span></div>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">Current Assignment</div>
@@ -868,6 +888,7 @@ function openAddDrawer() {
   document.getElementById('loanerSerial').value = '';
   document.getElementById('loanerRack').value = '';
   document.getElementById('loanerStatus').value = 'Out';
+  document.getElementById('loanerTracking').value = '';
   clearValidation();
   openDrawer('loanerDrawer');
 }
@@ -884,6 +905,7 @@ function openEditDrawer(key) {
   document.getElementById('loanerSerial').value = r.sSerialNumber || '';
   document.getElementById('loanerRack').value = r.psLoanerRackPosition || '';
   document.getElementById('loanerStatus').value = r.sStatus || 'Out';
+  document.getElementById('loanerTracking').value = r.sLoanerTrackingNumber || r.psTrackingNumber || '';
   clearValidation();
   openDrawer('loanerDrawer');
 }
@@ -908,6 +930,7 @@ async function saveLoaner() {
   const qty        = parseInt(document.getElementById('loanerQty').value, 10);
   const scopeType  = parseInt(document.getElementById('loanerScopeType').value, 10);
   const status     = document.getElementById('loanerStatus').value;
+  const tracking   = document.getElementById('loanerTracking').value.trim();
 
   if (!taskNumber) { document.getElementById('fTaskNumber').classList.add('invalid'); valid = false; }
   else document.getElementById('fTaskNumber').classList.remove('invalid');
@@ -927,9 +950,9 @@ async function saveLoaner() {
 
   try {
     if (editKey) {
-      await API.updateTaskLoaner({ lTaskLoanerKey: parseInt(editKey, 10), lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status });
+      await API.updateTaskLoaner({ lTaskLoanerKey: parseInt(editKey, 10), lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status, sLoanerTrackingNumber: tracking });
     } else {
-      await API.addTaskLoaner({ sTaskNumber: taskNumber, lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status });
+      await API.addTaskLoaner({ sTaskNumber: taskNumber, lScopeTypeKey: scopeType, lQuantity: qty, sStatus: status, sLoanerTrackingNumber: tracking });
     }
     closeDrawer();
     await loadTaskLoaners();
