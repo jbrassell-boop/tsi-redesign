@@ -74,6 +74,26 @@
     .qc-pf label{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--steel);cursor:pointer}
     .qc-pf input[type="radio"]{margin:0;accent-color:var(--navy)}
 
+    /* P/F INSPECTION GRID */
+    .insp-details{margin:6px 0;border:1px solid var(--border);border-radius:6px;background:#fff;overflow:hidden}
+    .insp-details summary{font-size:10.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;padding:7px 14px;background:linear-gradient(135deg,#E3EAF6 0%,#EDF1F9 100%);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+    .insp-details summary::before{content:'▸';font-size:10px;transition:transform .15s}
+    .insp-details[open] summary::before{transform:rotate(90deg)}
+    .insp-details .insp-body{padding:10px 14px}
+    .pf-cat{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 4px;padding-bottom:2px;border-bottom:1px solid var(--border)}
+    .pf-cat:first-child{margin-top:0}
+    .pf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 8px}
+    .pf-item{display:flex;align-items:center;gap:4px;padding:2px 0}
+    .pf-label{font-size:10px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pf-btn{width:22px;height:18px;border:1px solid var(--border-dk);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);padding:0;line-height:1;font-family:inherit;transition:all .12s}
+    .pf-btn:hover{border-color:var(--navy)}
+    .pf-btn.pf-pass{background:#DCFCE7;color:#166534;border-color:#86EFAC}
+    .pf-btn.pf-fail{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+    .insp-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 12px;margin-top:8px}
+    .insp-row .field{margin:0}
+    .insp-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;margin-top:8px}
+    .insp-checks label{font-size:10px;display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:500}
+
     /* TABS */
     .tabs{display:flex;background:linear-gradient(to bottom,#A8C8E0,#C0D8ED);border-bottom:2px solid #98BBDA;flex-shrink:0;padding:0 10px}
     .tab{padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .12s;white-space:nowrap}
@@ -143,6 +163,8 @@
     .expense-col .exp-val{font-size:12px;font-weight:700;color:var(--navy)}
 
     .empty-state{text-align:center;padding:30px 20px;color:var(--muted);font-size:12px}
+    details[open] > summary svg{transform:rotate(180deg)}
+    details > summary::-webkit-details-marker{display:none}
 
     /* SEGMENTED CONTROL — Internal/External, Ops/Tech toggles */
     .seg-bar{display:inline-flex;border:1px solid var(--border-dk);border-radius:4px;overflow:hidden;margin-bottom:6px}
@@ -518,15 +540,77 @@
                       <th style="width:75px">Tech 1</th>
                       <th style="width:75px">Tech 2</th>
                       <th style="width:42px;text-align:center">Pri</th>
+                      <th style="width:65px">Repaired By</th>
                       <th>Comments</th>
                     </tr>
                   </thead>
                   <tbody id="repairItemsBody">
-                    <tr><td colspan="10" class="empty-state">No repair items</td></tr>
+                    <tr><td colspan="11" class="empty-state">No repair items</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
+
+            <!-- SCOPE-TYPE DETAILS (WP-R3) -->
+            <details class="section-card" style="margin-top:6px" id="scopeTypeDetails">
+              <summary class="section-head" style="cursor:pointer;list-style:none;user-select:none">
+                Scope-Type Details
+                <svg style="width:14px;height:14px;margin-left:auto;transition:transform .15s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </summary>
+              <div class="section-body" style="padding:10px 14px">
+
+                <!-- Flexible Scopes -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Flexible Scopes</div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
+                  <div class="field">
+                    <label>Bending Rubber P/F</label>
+                    <div class="qc-pf" style="margin-top:2px">
+                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="P" onchange="markDirty()" style="accent-color:var(--navy)"/> P</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="F" onchange="markDirty()" style="accent-color:var(--navy)"/> F</label>
+                    </div>
+                  </div>
+                  <div class="field"><label>Incoming Epoxy Size</label><input type="number" id="fFlexIncomingEpoxy" step="0.01" onchange="markDirty()"/></div>
+                  <div class="field"><label>Max Epoxy Size</label><input type="number" id="fFlexMaxEpoxy" step="0.01" onchange="markDirty()"/></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRAgeing" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Aging</span></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRMold" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Mold</span></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRCut" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Cut</span></div>
+                </div>
+
+                <!-- Rigid Scopes -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Rigid Scopes</div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
+                  <div class="field"><label>Eyepiece Type</label><input id="fRgdEyeCup" onchange="markDirty()"/></div>
+                  <div class="field"><label>Fiber Type</label><input id="fRgdFiber" onchange="markDirty()"/></div>
+                  <div class="field"><label>Tube Type</label><input id="fRgdTube" onchange="markDirty()"/></div>
+                  <div class="field"><label>Vision Type</label><input id="fRgdVision" onchange="markDirty()"/></div>
+                </div>
+
+                <!-- Camera/Video -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Camera / Video</div>
+                <div class="qc-check-grid" style="margin-bottom:12px">
+                  <div class="qc-row"><span class="qc-label">Camera Cable</span><div class="qc-pf"><label><input type="radio" name="fCamCable" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCable" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Cable Connector</span><div class="qc-pf"><label><input type="radio" name="fCamCableConn" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCableConn" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCamLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Control Buttons</span><div class="qc-pf"><label><input type="radio" name="fCamControlBtns" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamControlBtns" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Focus</span><div class="qc-pf"><label><input type="radio" name="fCamFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocus" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Video Appearance</span><div class="qc-pf"><label><input type="radio" name="fCamVideoAppear" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamVideoAppear" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera White Balance</span><div class="qc-pf"><label><input type="radio" name="fCamWhiteBal" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamWhiteBal" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCamFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Soak Cap Assembly</span><div class="qc-pf"><label><input type="radio" name="fCamSoakCap" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamSoakCap" value="F" onchange="markDirty()"/> F</label></div></div>
+                </div>
+
+                <!-- Coupler -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Coupler</div>
+                <div class="qc-check-grid">
+                  <div class="qc-row"><span class="qc-label">Coupler Focus</span><div class="qc-pf"><label><input type="radio" name="fCplFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocus" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCplFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Fog</span><div class="qc-pf"><label><input type="radio" name="fCplFog" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFog" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Leak</span><div class="qc-pf"><label><input type="radio" name="fCplLeak" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLeak" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCplLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
+                </div>
+
+              </div>
+            </details>
 
             <!-- NOTES -->
             <div style="margin-top:6px;margin-bottom:4px">
@@ -715,6 +799,23 @@
                       <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclBiopsy" onchange="markDirty()"/><span class="toggle-slider"></span></label>Biopsy</label>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scope Includes Checklist (WP-R10) -->
+            <div class="section-card" style="margin-top:8px">
+              <div class="section-head">Scope Includes</div>
+              <div class="section-body" style="padding:8px 12px">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 14px">
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclETOCap" style="accent-color:var(--navy)" onchange="markDirty()"/> ETO Cap</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclAirWater" style="accent-color:var(--navy)" onchange="markDirty()"/> Air/Water Valve</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclWaterProof" style="accent-color:var(--navy)" onchange="markDirty()"/> Water Proof Cap</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclCaseOut" style="accent-color:var(--navy)" onchange="markDirty()"/> Case</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclRimCap" style="accent-color:var(--navy)" onchange="markDirty()"/> Rim Cap</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclSuction" style="accent-color:var(--navy)" onchange="markDirty()"/> Suction Valve</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclLightPost" style="accent-color:var(--navy)" onchange="markDirty()"/> Light Post Adapter</label>
+                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclBox" style="accent-color:var(--navy)" onchange="markDirty()"/> Box</label>
                 </div>
               </div>
             </div>
@@ -926,6 +1027,24 @@
             <div class="drop-zone" style="margin-top:8px" id="docDropZone">
               Drop files here or click to upload
               <input type="file" id="docFileInput" style="display:none" multiple/>
+            </div>
+
+            <!-- Repair Inventory Pick List (WP-R8) -->
+            <div class="section-card" style="margin-top:8px">
+              <div class="section-head">Repair Inventory Pick List</div>
+              <div style="overflow-y:auto;max-height:200px">
+                <table class="audit" id="pickListTable">
+                  <thead style="position:sticky;top:0;z-index:1"><tr>
+                    <th>Item Name</th>
+                    <th style="width:120px">Size / Variant</th>
+                    <th style="width:90px">Lot #</th>
+                    <th style="width:60px;text-align:center">Qty</th>
+                  </tr></thead>
+                  <tbody id="pickListBody">
+                    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No pick list items</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div><!-- /pane-documents -->
 
@@ -1193,8 +1312,11 @@
     <div id="amendStartPanel">
       <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Start New Amendment</div>
       <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
-        <div class="field"><label>Reason</label><select id="amendReason"><option value="">— Select —</option><option>Failure found during repair</option><option>Failure missed during D &amp; I</option><option>Failure missed during update</option><option>Misquote by operations</option><option>Result of another repair being performed</option></select></div>
-        <div class="field"><label>Comment</label><input type="text" id="amendComment" placeholder="Optional note"/></div>
+        <div class="field"><label>Amendment Type</label><select id="amendType" onchange="markDirty()"><option value="">— Select —</option><option>Additional Findings</option><option>Not Repairable</option><option>Rework</option></select></div>
+        <div class="field"><label>Amendment Date</label><input type="date" id="amendDate" onchange="markDirty()"/></div>
+        <div class="field"><label>Reason</label><select id="amendReason"><option value="">— Select —</option><option>Failure found during repair</option><option>Failure missed during D &amp; I</option><option>Failure missed during update</option><option>Misquote by operations</option><option>Result of another repair being performed</option><option>Part failure during repair</option><option>Failure found during final QC</option></select></div>
+        <div class="field"><label>Tech Initials</label><input type="text" id="amendTechInits" placeholder="XX" maxlength="4" style="text-align:center" onchange="markDirty()"/></div>
+        <div class="field span2"><label>Comment</label><input type="text" id="amendComment" placeholder="Optional note"/></div>
       </div>
       <button class="btn btn-navy" onclick="openAmendment()">Open Amendment</button>
     </div>
@@ -1246,7 +1368,9 @@
     <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
       <div class="field"><label>Date</label><input type="date" id="defectDate" onchange="markDirty()"/></div>
       <div class="field"><label>Time</label><input type="time" id="defectTime" onchange="markDirty()"/></div>
-      <div class="field"><label>Reason</label><select id="defectReason" onchange="markDirty()"><option value="">— Select —</option><option>Leak Test Failure</option><option>Image Quality</option><option>Angulation Out of Spec</option><option>Unrelated to previous repairs</option><option>Physical Damage Found</option><option>Other</option></select></div>
+      <div class="field"><label>Reason</label><select id="defectReason" onchange="markDirty()"><option value="">— Select —</option><option>Rework</option><option>Unrelated to Previous Repairs</option></select></div>
+      <div class="field"><label>Recording Tech</label><input type="text" id="defectRecordingTech" placeholder="Initials" maxlength="4" style="text-align:center" onchange="markDirty()"/></div>
+      <div class="field"><label>QC Tech</label><input type="text" id="defectQCTech" placeholder="Initials" maxlength="4" style="text-align:center" onchange="markDirty()"/></div>
       <div class="field"><label>Technician</label><select id="defectTech" onchange="markDirty()"></select></div>
     </div>
     <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Failed Tests</div>
@@ -2343,6 +2467,32 @@ function populateDetail(d) {
   setSelectVal('fPSLevelIn', d.lPatientSafetyLevelKey);
   document.getElementById('fScopeNotes').value = d.sNotes || '';
 
+  // ── SCOPE-TYPE DETAILS (WP-R3) ──
+  setRadioVal('fBendingRubberPF', d.sBendingRubberPF);
+  document.getElementById('fFlexIncomingEpoxy').value = d.nIncomingEpoxySize || '';
+  document.getElementById('fFlexMaxEpoxy').value = d.sMaxEpoxy || '';
+  document.getElementById('fBRAgeing').checked = !!d.bBRAgeing;
+  document.getElementById('fBRMold').checked = !!d.bBRMold;
+  document.getElementById('fBRCut').checked = !!d.bBRCut;
+  document.getElementById('fRgdEyeCup').value = d.sRgdInsEyeCup || '';
+  document.getElementById('fRgdFiber').value = d.sRgdInsFiber || '';
+  document.getElementById('fRgdTube').value = d.sRgdInsTube || '';
+  document.getElementById('fRgdVision').value = d.sRgdInsVision || '';
+  setRadioVal('fCamCable', d.sCamCablePF);
+  setRadioVal('fCamCableConn', d.sCamCableConnPF);
+  setRadioVal('fCamLensCleaned', d.sCamLensCleanedPF);
+  setRadioVal('fCamControlBtns', d.sCamControlBtnsPF);
+  setRadioVal('fCamFocus', d.sCamFocusPF);
+  setRadioVal('fCamVideoAppear', d.sCamVideoAppearPF);
+  setRadioVal('fCamWhiteBal', d.sCamWhiteBalPF);
+  setRadioVal('fCamFocusMech', d.sCamFocusMechPF);
+  setRadioVal('fCamSoakCap', d.sCamSoakCapPF);
+  setRadioVal('fCplFocus', d.sCplFocusPF);
+  setRadioVal('fCplFocusMech', d.sCplFocusMechPF);
+  setRadioVal('fCplFog', d.sCplFogPF);
+  setRadioVal('fCplLeak', d.sCplLeakPF);
+  setRadioVal('fCplLensCleaned', d.sCplLensCleanedPF);
+
   // Outsource
   document.getElementById('fOutVendor').value = '';
   document.getElementById('fOutTracking').value = d.sShipTrackingNumberVendor || '';
@@ -2407,6 +2557,19 @@ function populateDetail(d) {
   document.getElementById('fInclVideoPlug').checked = d.sIncludesVideoPlugYN === 'Y';
   document.getElementById('fInclMouthpiece').checked = d.sIncludesMouthpieceYN === 'Y';
   document.getElementById('fInclAngleKnob').checked = d.sIncludesAngleKnobYN === 'Y';
+
+  // ── SCOPE INCLUDES (WP-R10) ──
+  document.getElementById('fInclETOCap').checked = d.fInclETOCap === 'Y' || !!d.fInclETOCap;
+  document.getElementById('fInclAirWater').checked = d.fInclAirWater === 'Y' || !!d.fInclAirWater;
+  document.getElementById('fInclWaterProof').checked = d.fInclWaterProof === 'Y' || !!d.fInclWaterProof;
+  document.getElementById('fInclCaseOut').checked = d.fInclCase === 'Y' || !!d.fInclCase;
+  document.getElementById('fInclRimCap').checked = d.fInclRimCap === 'Y' || !!d.fInclRimCap;
+  document.getElementById('fInclSuction').checked = d.fInclSuction === 'Y' || !!d.fInclSuction;
+  document.getElementById('fInclLightPost').checked = d.fInclLightPost === 'Y' || !!d.fInclLightPost;
+  document.getElementById('fInclBox').checked = d.fInclBox === 'Y' || !!d.fInclBox;
+
+  // ── PICK LIST (WP-R8) ──
+  populatePickList(d);
 
   // ── QC INSPECTION DRAWER ──
   setRadioVal('qcAngulation', d.sInsAngulationPF);
@@ -2508,7 +2671,7 @@ function renderRepairItems(ds) {
   _repairItems = ds || [];
   const tbody = document.getElementById('repairItemsBody');
   if (!_repairItems.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No repair items for this work order</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">No repair items for this work order</td></tr>';
     updateItemTotals();
     return;
   }
@@ -2527,8 +2690,12 @@ function renderRepairItems(ds) {
       '<td>' + (item.sTechInits||item.sTech1||'') + '</td>' +
       '<td>' + (item.sTechInits2||item.sTech2Inits||item.sTech2||'') + '</td>' +
       '<td style="text-align:center;' + (pri==='Y'?'font-weight:700;color:var(--navy)':'') + '">' + pri + '</td>' +
+      '<td><input type="text" value="' + (item.sRepairedBy||'') + '" style="width:55px;height:22px;font-size:10px;text-align:center;border:1px solid var(--border);border-radius:3px;font-family:inherit;outline:none;padding:0 4px" onchange="setRepairedBy(' + i + ',this.value)" onclick="event.stopPropagation()"/></td>' +
       '<td style="font-size:10px;color:var(--red);font-weight:500">' + (item.sComments||'') + '</td></tr>';
   }).join('');
+  // Approved count summary
+  const approvedCount = _repairItems.filter(x => x.sApproved === 'Y').length;
+  tbody.insertAdjacentHTML('beforeend', '<tr style="background:#F0F4FA;border-top:2px solid var(--border-dk)"><td colspan="4" style="text-align:right;font-size:10px;font-weight:700;color:var(--navy);padding:5px 14px">Approved: ' + approvedCount + ' / ' + _repairItems.length + '</td><td colspan="7"></td></tr>');
   updateItemTotals();
 }
 
@@ -2684,6 +2851,9 @@ function unapproveAllItems() {
 // ── Click-to-cycle for UA/NWT and W/N/C/A ──
 const _uanwtCycle = ['UA','NWT',''];
 const _uanwtLabels = {UA:'User Abuse',NWT:'Normal Wear & Tear','':'—'};
+function setRepairedBy(idx, val) {
+  if (_repairItems[idx]) { _repairItems[idx].sRepairedBy = val; markDirty(); }
+}
 function cycleUANWT(idx) {
   const item = _repairItems[idx];
   if (!item) return;
@@ -4166,6 +4336,7 @@ function wizSubmit() {
   populateInventory([]);
   populateStatus([]);
   populateDocuments([]);
+  populatePickList(null);
   renderFlags([]);
 
   // Populate scope info in header
@@ -4443,6 +4614,22 @@ function populateDocuments(docs) {
     '<td>' + (r.dtDateUploaded ? fmtDate(r.dtDateUploaded) : '') + '</td>' +
     '<td style="text-align:center"><button class="btn btn-outline" style="height:18px;font-size:8px;padding:0 6px">View</button></td>' +
     '<td style="text-align:center"><button class="btn btn-danger" style="height:18px;font-size:8px;padding:0 6px">×</button></td></tr>'
+  ).join('');
+}
+
+// ── Repair Inventory Pick List (WP-R8) ──
+function populatePickList(repair) {
+  const tbody = document.getElementById('pickListBody');
+  const items = repair?.repairInventory || [];
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No pick list items</td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(r =>
+    '<tr><td>' + (r.sItemName||r.sDescription||'') + '</td>' +
+    '<td>' + (r.sSize||r.sVariant||'') + '</td>' +
+    '<td>' + (r.sLotNumber||'') + '</td>' +
+    '<td style="text-align:center">' + (r.nQuantity||r.nQty||1) + '</td></tr>'
   ).join('');
 }
 
