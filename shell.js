@@ -145,11 +145,15 @@
     { id: 'emails',       label: 'Emails',            href: 'dashboard_emails.html' },
     { id: 'shipping',     label: 'Shipping Status',   href: 'dashboard_shipping.html' },
     { id: 'inventory',    label: 'Inventory',          href: 'dashboard_inventory.html' },
+    { id: 'openinv',     label: 'Open Inventory',     href: 'dashboard_openinventory.html' },
     { id: 'acquisitions', label: 'Acquisitions',       href: 'dashboard_acquisitions.html' },
-    { id: 'searches',     label: 'Searches',           href: 'dashboard_searches.html' },
+    { id: 'invoices',    label: 'Invoices',            href: 'dashboard_invoices.html' },
+    { id: 'searches',     label: 'Quick Searches',     href: 'dashboard_searches.html' },
     { id: 'metrics',      label: 'Repair Metrics',     href: 'dashboard_metrics.html' },
     { id: 'tat',          label: 'Turn Around Times',  href: 'dashboard_tat.html' },
-    { id: 'flags',        label: 'Flags',              href: 'dashboard_flags.html',        badge: '8' }
+    { id: 'flags',        label: 'Flags',              href: 'dashboard_flags.html',        badge: '8' },
+    { id: 'profitability', label: 'Profitability',     href: 'dashboard_profitability.html' },
+    { id: 'revenue',     label: 'Revenue/Expense',     href: 'dashboard_revenue.html' }
   ];
 
   /** Map filename → tab id for auto-detection */

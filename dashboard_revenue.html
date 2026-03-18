@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dashboard — Revenue &amp; Expense | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* Additional page-local vars */
+    :root{--hover:#CFFAFE}
+
+    /* PAGE BODY — override for flex column layout */
+    .page-body{display:flex;flex-direction:column;overflow:hidden}
+
+    /* STAT STRIP — overrides only (base in styles.css) */
+    .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
+    .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.alert{background:#FEF9F9}
+    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
+    .stat-chip .s-val{font-size:16px}
+    .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.4px}
+
+    /* SUBNAV */
+    .subnav{display:flex;align-items:center;gap:0;background:linear-gradient(to bottom,#A8C8E0,#C0D8ED);border-bottom:2px solid #98BBDA;padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;overflow-y:auto;background:var(--bg)}
+
+    /* METRIC CARDS */
+    .metric-cards{display:flex;gap:12px;padding:16px}
+    .metric-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+    .metric-card .mc-val{font-size:24px;font-weight:800;color:var(--navy)}
+    .metric-card .mc-val.mc-green{color:#2E7D32}
+    .metric-card .mc-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+    .metric-card .mc-sub{font-size:10px;margin-top:6px;color:var(--label)}
+
+    /* DATA TABLE */
+    .table-wrap{flex:1;overflow:auto;position:relative;padding:0 16px 16px}
+    .section-header{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 8px}
+    table{width:100%;border-collapse:collapse;min-width:800px}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
+    th:last-child{border-right:none}
+    th.sorted-asc::after{content:" \u25B2";font-size:9px}
+    th.sorted-desc::after{content:" \u25BC";font-size:9px}
+    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:var(--hover)}
+    .num-cell{text-align:right;font-variant-numeric:tabular-nums}
+
+    /* MARGIN BADGES */
+    .margin-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .margin-green{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .margin-amber{background:#FFF8E1;color:#F57F17;border:1px solid #FFD54F}
+    .margin-red{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+
+    /* FOOTER */
+    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .record-info{font-size:11px;color:var(--muted)}
+    .record-info strong{color:var(--text)}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <!-- Injected by shell.js -->
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <!-- Injected by shell.js -->
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- STAT STRIP -->
+      <div class="stat-strip" id="kpiStrip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">&#x1F4B0;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kRevenue">--</div><div class="s-lbl">Total Revenue</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+          <div class="s-data"><div class="s-val s-green" id="kProfit">--</div><div class="s-lbl">Total Profit</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#F3E8FD">&#x1F3C6;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kTopState">--</div><div class="s-lbl">Top State</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FFFBEB">&#x2B50;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kTopRep">--</div><div class="s-lbl">Top Sales Rep</div></div>
+        </div>
+      </div>
+
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <span class="filter-label">View</span>
+          <div class="seg-group" id="viewFilter">
+            <button class="seg-btn active" data-val="state">By State</button>
+            <button class="seg-btn" data-val="rep">By Sales Rep</button>
+          </div>
+        </div>
+        <div class="toolbar-search">
+          <input class="search-input" id="revSearch" type="text" placeholder="Search..."/>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="content-area">
+        <!-- METRIC CARDS -->
+        <div class="metric-cards">
+          <div class="metric-card">
+            <div class="mc-val" id="mcRevenue">--</div>
+            <div class="mc-lbl">Total Revenue</div>
+            <div class="mc-sub" id="mcRevenueSub">&nbsp;</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-val mc-green" id="mcProfit">--</div>
+            <div class="mc-lbl">Total Profit</div>
+            <div class="mc-sub" id="mcProfitSub">&nbsp;</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-val" id="mcTopEntity">--</div>
+            <div class="mc-lbl" id="mcTopEntityLbl">Top State</div>
+            <div class="mc-sub" id="mcTopEntitySub">&nbsp;</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-val" id="mcAvgMargin">--</div>
+            <div class="mc-lbl">Avg Margin %</div>
+            <div class="mc-sub" id="mcAvgMarginSub">&nbsp;</div>
+          </div>
+        </div>
+
+        <!-- AGGREGATED TABLE -->
+        <div class="table-wrap">
+          <div class="section-header" id="tableHeader">Revenue by State</div>
+          <table>
+            <thead id="revThead">
+              <tr>
+                <th data-col="name">State</th>
+                <th data-col="revenue" style="text-align:right">Revenue</th>
+                <th data-col="expenses" style="text-align:right">Expenses</th>
+                <th data-col="profit" style="text-align:right">Profit</th>
+                <th data-col="margin" style="text-align:right;width:100px">Margin %</th>
+                <th data-col="count" style="text-align:right;width:100px">Repair Count</th>
+              </tr>
+            </thead>
+            <tbody id="revTbody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="table-footer">
+        <div class="record-info" id="revRecordInfo">Loading...</div>
+        <div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ===============================================================
+//  REVENUE & EXPENSE DISTRIBUTION — By State / By Sales Rep
+// ===============================================================
+let ALL_DATA = [];
+let SALES_REP_MAP = {};
+let currentView = 'state';
+let searchTerm = '';
+let sortCol = 'revenue';
+let sortDir = 'desc';
+
+// ── Helpers ──
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtCurrency(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '0.0%';
+  return Number(n).toFixed(1) + '%';
+}
+
+function calcExpenses(r) {
+  return (Number(r.OutsourceAmount) || 0) +
+         (Number(r.ShippingAmount) || 0) +
+         (Number(r.LaborAmount) || 0) +
+         (Number(r.GPOAmount) || 0) +
+         (Number(r.CommissionAmount) || 0);
+}
+
+function marginClass(pct) {
+  if (pct > 30) return 'margin-green';
+  if (pct >= 10) return 'margin-amber';
+  return 'margin-red';
+}
+
+// ── Build sales rep lookup ──
+function buildRepMap() {
+  const reps = MockDB.getAll('salesReps') || [];
+  reps.forEach(r => {
+    const name = ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim();
+    SALES_REP_MAP[r.lSalesRepKey] = name || ('Rep #' + r.lSalesRepKey);
+  });
+}
+
+// ── Load data ──
+function loadData() {
+  try {
+    buildRepMap();
+    const standard = MockDB.getAll('profitability') || [];
+    const contract = MockDB.getAll('contractProfitability') || [];
+    ALL_DATA = [...standard, ...contract];
+    console.log('[TSI Revenue] Loaded', ALL_DATA.length, 'records');
+    API.UI.updateDemoBadge('live');
+  } catch (e) {
+    console.error('Failed to load revenue data:', e);
+    ALL_DATA = [];
+    API.UI.updateDemoBadge('demo');
+  }
+  renderAll();
+}
+
+// ── Aggregate by grouping key ──
+function aggregate(keyFn, labelFn) {
+  const map = {};
+  ALL_DATA.forEach(r => {
+    const key = keyFn(r);
+    if (!key) return;
+    if (!map[key]) map[key] = { name: labelFn(r), revenue: 0, expenses: 0, count: 0 };
+    map[key].revenue += (Number(r.RevenueAmount) || 0);
+    map[key].expenses += calcExpenses(r);
+    map[key].count++;
+  });
+
+  return Object.values(map).map(g => {
+    g.profit = g.revenue - g.expenses;
+    g.margin = g.revenue > 0 ? (g.profit / g.revenue) * 100 : 0;
+    return g;
+  });
+}
+
+function getAggregated() {
+  let rows;
+  if (currentView === 'state') {
+    rows = aggregate(
+      r => (r.sShipState || '').trim().toUpperCase() || null,
+      r => (r.sShipState || '').trim().toUpperCase() || 'Unknown'
+    );
+  } else {
+    rows = aggregate(
+      r => r.lSalesRepKey || null,
+      r => SALES_REP_MAP[r.lSalesRepKey] || ('Rep #' + r.lSalesRepKey)
+    );
+  }
+
+  // Search filter
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    rows = rows.filter(r => r.name.toLowerCase().includes(q));
+  }
+
+  // Sort
+  rows.sort((a, b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb || '').toLowerCase(); }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  return rows;
+}
+
+// ── Render everything ──
+function renderAll() {
+  renderCards();
+  renderTable();
+}
+
+function renderCards() {
+  const rows = getAggregated();
+  const totalRev = rows.reduce((s, r) => s + r.revenue, 0);
+  const totalProfit = rows.reduce((s, r) => s + r.profit, 0);
+  const avgMargin = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0;
+  const totalCount = rows.reduce((s, r) => s + r.count, 0);
+
+  // Find top entity
+  const topRow = rows.length ? rows.reduce((best, r) => r.revenue > best.revenue ? r : best, rows[0]) : null;
+  const topName = topRow ? topRow.name : '--';
+  const topRev = topRow ? fmtCurrency(topRow.revenue) : '--';
+
+  // KPI strip
+  document.getElementById('kRevenue').textContent = fmtCurrency(totalRev);
+  document.getElementById('kProfit').textContent = fmtCurrency(totalProfit);
+  document.getElementById('kTopState').textContent = currentView === 'state' ? topName : '--';
+  document.getElementById('kTopRep').textContent = currentView === 'rep' ? topName : '--';
+
+  // Metric cards
+  document.getElementById('mcRevenue').textContent = fmtCurrency(totalRev);
+  document.getElementById('mcRevenueSub').textContent = totalCount + ' repairs total';
+  document.getElementById('mcProfit').textContent = fmtCurrency(totalProfit);
+  document.getElementById('mcProfitSub').textContent = totalProfit >= 0 ? 'net positive' : 'net loss';
+  document.getElementById('mcTopEntity').textContent = topName;
+  document.getElementById('mcTopEntityLbl').textContent = currentView === 'state' ? 'Top State' : 'Top Sales Rep';
+  document.getElementById('mcTopEntitySub').textContent = topRev + ' revenue';
+  document.getElementById('mcAvgMargin').textContent = fmtPct(avgMargin);
+  document.getElementById('mcAvgMarginSub').textContent = 'weighted average';
+}
+
+function renderTable() {
+  const rows = getAggregated();
+  const tbody = document.getElementById('revTbody');
+  const entityLabel = currentView === 'state' ? 'State' : 'Sales Rep';
+
+  // Update header
+  document.getElementById('tableHeader').textContent = 'Revenue by ' + entityLabel;
+
+  // Update first th label
+  const firstTh = document.querySelector('#revThead th[data-col="name"]');
+  if (firstTh) firstTh.textContent = entityLabel;
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No data found</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td style="font-weight:600;color:var(--navy)">${escHtml(r.name)}</td>
+      <td class="num-cell">${fmtCurrency(r.revenue)}</td>
+      <td class="num-cell">${fmtCurrency(r.expenses)}</td>
+      <td class="num-cell" style="font-weight:600;color:${r.profit >= 0 ? '#2E7D32' : '#C62828'}">${fmtCurrency(r.profit)}</td>
+      <td class="num-cell"><span class="margin-badge ${marginClass(r.margin)}">${fmtPct(r.margin)}</span></td>
+      <td class="num-cell">${r.count}</td>
+    </tr>`).join('');
+  }
+
+  // Update sort indicators
+  document.querySelectorAll('#revThead th[data-col]').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    if (th.dataset.col === sortCol) th.classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+  });
+
+  document.getElementById('revRecordInfo').innerHTML =
+    '<strong>' + rows.length + '</strong> ' + entityLabel.toLowerCase() + (rows.length !== 1 ? 's' : '') +
+    ' &middot; By ' + entityLabel;
+}
+
+// ── View toggle wiring ──
+document.getElementById('viewFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('viewFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.val;
+    sortCol = 'revenue';
+    sortDir = 'desc';
+    renderAll();
+  });
+});
+
+// ── Search wiring ──
+document.getElementById('revSearch').addEventListener('input', function() {
+  searchTerm = this.value.trim();
+  renderAll();
+});
+
+// ── Column sort wiring ──
+document.querySelectorAll('#revThead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'desc'; }
+    renderTable();
+  });
+});
+
+// ── Init ──
+(function init() {
+  API.UI.init();
+  loadData();
+})();
+</script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
+</body>
+</html>
