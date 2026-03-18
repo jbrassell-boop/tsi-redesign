@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Dashboard — Inventory | TSI Redesign</title>
+  <title>Dashboard — Inventory Levels | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* Additional page-local vars */
     :root{--hover:#CFFAFE}
 
-    /* PAGE BODY — override for flex column layout */
     .page-body{display:flex;flex-direction:column;overflow:hidden}
 
-    /* STAT STRIP — overrides only (base in styles.css) */
+    /* STAT STRIP */
     .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
     .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
     .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active{background:#E3F2FD;box-shadow:inset 0 -2px 0 var(--navy)}
     .stat-chip.alert{background:#FEF9F9}
     .stat-chip.warn{background:#FFFDF7}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
@@ -29,19 +28,23 @@
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
     .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
 
-    /* CONTENT AREA */
-    .content-scroll{flex:1;overflow:auto}
-
-    /* SECTION HEADER */
-    .section-hdr{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)}
-    .section-hdr.red{color:var(--red);background:#FEF2F2}
-    .section-hdr.green{color:#15803D;background:#F0FDF4}
-    .section-hdr svg{width:14px;height:14px;flex-shrink:0}
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    .seg-group{display:flex;border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;background:var(--card);border:none;border-right:1px solid var(--border-dk);cursor:pointer;font-family:inherit;color:var(--label);white-space:nowrap}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn.active{background:var(--navy);color:#fff}
+    .seg-btn:hover:not(.active){background:var(--bg)}
+    .tb-label{font-size:11px;font-weight:600;color:var(--label)}
 
     /* DATA TABLE */
-    table{width:100%;border-collapse:collapse}
+    .table-wrap{flex:1;overflow:auto;position:relative}
+    table{width:100%;border-collapse:collapse;min-width:700px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
     td{padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
@@ -49,9 +52,9 @@
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-hold{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
-    .b-waiting{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
-    .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-critical{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+    .b-low{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .b-ok{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -63,180 +66,87 @@
 <div class="shell">
 
   <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <!-- Injected by shell.js -->
-  </nav>
+  <nav class="sidebar"></nav>
 
   <!-- MAIN -->
   <div class="main">
-    <header class="topbar">
-      <!-- Injected by shell.js -->
-    </header>
+    <header class="topbar"></header>
 
-    <!-- PAGE BODY -->
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+      <div class="stat-strip" id="invStatStrip">
+        <div class="stat-chip" data-filter="all">
+          <div class="s-icon" style="background:#E3F2FD">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" style="width:16px;height:16px"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">--</div><div class="s-lbl">TOTAL ITEMS</div></div>
         </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+        <div class="stat-chip alert" data-filter="critical">
+          <div class="s-icon" style="background:#FEF2F2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2" style="width:16px;height:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-red" id="kpiCritical">--</div><div class="s-lbl">CRITICAL</div></div>
         </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
+        <div class="stat-chip warn" data-filter="low">
+          <div class="s-icon" style="background:#FFFBEB">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#E65100" stroke-width="2" style="width:16px;height:16px"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiLow">--</div><div class="s-lbl">LOW</div></div>
         </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+        <div class="stat-chip" data-filter="ok">
+          <div class="s-icon" style="background:#E8F5E9">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-green" id="kpiOK">--</div><div class="s-lbl">OK</div></div>
         </div>
       </div>
 
       <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab active" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
+      <div class="subnav" id="dashSubnav"></div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <span class="tb-label">Status:</span>
+        <div class="seg-group" id="statusFilter">
+          <button class="seg-btn active">All</button>
+          <button class="seg-btn">Critical</button>
+          <button class="seg-btn">Low</button>
+          <button class="seg-btn">OK</button>
+        </div>
+        <span class="tb-label">Type:</span>
+        <div class="seg-group" id="typeFilter">
+          <button class="seg-btn active">All</button>
+          <button class="seg-btn">Flexible</button>
+          <button class="seg-btn">Rigid</button>
+        </div>
+        <div class="toolbar-search">
+          <input class="search-input" id="invSearch" type="text" placeholder="Search inventory..." oninput="applyFilters()"/>
+        </div>
       </div>
 
-      <!-- CONTENT -->
-      <div class="content-scroll">
-
-        <!-- SECTION A: Low Stock Alerts -->
-        <div class="section-hdr red">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Low Stock Alerts
-        </div>
+      <!-- DATA TABLE -->
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th style="width:90px">Part#</th>
-              <th>Description</th>
-              <th style="width:90px;text-align:center">On Hand</th>
-              <th style="width:120px;text-align:center">Reorder Point</th>
-              <th style="width:100px;text-align:center">Status</th>
+              <th style="width:90px" data-col="key">Item#</th>
+              <th data-col="desc">Description</th>
+              <th style="width:90px;text-align:center" data-col="type">Rigid/Flex</th>
+              <th style="width:90px;text-align:center" data-col="current">Current</th>
+              <th style="width:90px;text-align:center" data-col="min">Min Level</th>
+              <th style="width:90px;text-align:center" data-col="max">Max Level</th>
+              <th style="width:80px;text-align:center" data-col="sizes">Sizes</th>
+              <th style="width:100px;text-align:center" data-col="status">Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">P-1042</td>
-              <td>O-Ring Kit — Olympus 160/180</td>
-              <td style="text-align:center;font-weight:600;color:var(--red)">3</td>
-              <td style="text-align:center;color:var(--muted)">10</td>
-              <td style="text-align:center"><span class="badge b-hold">Critical</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">P-1108</td>
-              <td>Light Guide Bundle — Pentax</td>
-              <td style="text-align:center;font-weight:600;color:#E65100">5</td>
-              <td style="text-align:center;color:var(--muted)">8</td>
-              <td style="text-align:center"><span class="badge b-waiting">Low</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">P-2201</td>
-              <td>Bending Rubber — GIF-H190</td>
-              <td style="text-align:center;font-weight:600;color:var(--red)">2</td>
-              <td style="text-align:center;color:var(--muted)">6</td>
-              <td style="text-align:center"><span class="badge b-hold">Critical</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">P-1567</td>
-              <td>Insertion Tube — CF-HQ190L</td>
-              <td style="text-align:center;font-weight:600;color:#E65100">4</td>
-              <td style="text-align:center;color:var(--muted)">8</td>
-              <td style="text-align:center"><span class="badge b-waiting">Low</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">P-3012</td>
-              <td>CCD Chip — Fuji EG-760R</td>
-              <td style="text-align:center;font-weight:600;color:var(--red)">1</td>
-              <td style="text-align:center;color:var(--muted)">3</td>
-              <td style="text-align:center"><span class="badge b-hold">Critical</span></td>
-            </tr>
-          </tbody>
+          <tbody id="invTbody"></tbody>
         </table>
-
-        <!-- SECTION B: Recent Receives -->
-        <div class="section-hdr green" style="margin-top:0;border-top:1px solid var(--border)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          Recent Receives
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:100px">Date</th>
-              <th style="width:90px">PO#</th>
-              <th>Supplier</th>
-              <th>Item</th>
-              <th style="width:60px;text-align:center">Qty</th>
-              <th style="width:110px;text-align:center">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="white-space:nowrap">03/14/2026</td>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">PO-8841</td>
-              <td>Machida Endoscope</td>
-              <td>Light Guide Bundle</td>
-              <td style="text-align:center;font-weight:600">12</td>
-              <td style="text-align:center"><span class="badge b-approved">Received</span></td>
-            </tr>
-            <tr>
-              <td style="white-space:nowrap">03/13/2026</td>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">PO-8839</td>
-              <td>Olympus America</td>
-              <td>O-Ring Kit (bulk)</td>
-              <td style="text-align:center;font-weight:600">50</td>
-              <td style="text-align:center"><span class="badge b-approved">Received</span></td>
-            </tr>
-            <tr>
-              <td style="white-space:nowrap">03/12/2026</td>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">PO-8837</td>
-              <td>Medical Optics Inc</td>
-              <td>CCD Assembly</td>
-              <td style="text-align:center;font-weight:600">4</td>
-              <td style="text-align:center"><span class="badge b-waiting">QC Pending</span></td>
-            </tr>
-            <tr>
-              <td style="white-space:nowrap">03/11/2026</td>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">PO-8835</td>
-              <td>Pentax Medical</td>
-              <td>Bending Section</td>
-              <td style="text-align:center;font-weight:600">6</td>
-              <td style="text-align:center"><span class="badge b-approved">Received</span></td>
-            </tr>
-          </tbody>
-        </table>
-
-      </div><!-- end content-scroll -->
+      </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info">5 low stock alerts &middot; 4 recent receives</div>
+        <div class="record-info" id="invRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -252,38 +162,201 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// Close Orders dropdown on outside click
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
-  if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
-});
-
-// Sync KPI stats from main dashboard
 (function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
+'use strict';
 
-// Show data badge
-window.addEventListener('DOMContentLoaded', function() {
-  if (typeof API !== 'undefined' && API.UI && API.UI.updateDemoBadge) {
+let ALL_ITEMS = [];
+let filterStatus = 'All';
+let filterType = 'All';
+let searchTerm = '';
+let sortCol = 'status';
+let sortDir = 'asc';
+
+// ── Compute status for an inventory item ──
+function computeStatus(item) {
+  const cur = item.nLevelCurrent || 0;
+  const min = item.nLevelMinimum || 0;
+  if (min > 0 && cur < min) return 'Critical';
+  if (min > 0 && cur < min * 1.2) return 'Low';
+  return 'OK';
+}
+
+// ── Load data from MockDB via MockAPI ──
+async function loadData() {
+  try {
+    const data = await API.getInventoryList({
+      pbIncludeInactive: false,
+      Pagination: { PageNumber: 1, PageSize: 9999 }
+    });
+    const raw = Array.isArray(data) ? data : (data?.dataSource || []);
+    ALL_ITEMS = raw.map(item => ({
+      ...item,
+      _status: computeStatus(item)
+    }));
+    console.log('[Inventory Levels] Loaded', ALL_ITEMS.length, 'items');
+    API.UI.updateDemoBadge(ALL_ITEMS.length > 0 ? 'live' : 'demo');
+  } catch (e) {
+    console.warn('[Inventory Levels] Load failed:', e.message);
+    ALL_ITEMS = [];
     API.UI.updateDemoBadge('demo');
   }
+  updateKPIs();
+  applyFilters();
+}
+
+// ── Update KPI stat strip ──
+function updateKPIs() {
+  const total = ALL_ITEMS.length;
+  const critical = ALL_ITEMS.filter(i => i._status === 'Critical').length;
+  const low = ALL_ITEMS.filter(i => i._status === 'Low').length;
+  const ok = ALL_ITEMS.filter(i => i._status === 'OK').length;
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiCritical').textContent = critical;
+  document.getElementById('kpiLow').textContent = low;
+  document.getElementById('kpiOK').textContent = ok;
+}
+
+// ── Filter + render ──
+window.applyFilters = function() {
+  searchTerm = document.getElementById('invSearch').value.trim().toLowerCase();
+  let items = ALL_ITEMS;
+
+  // Status filter
+  if (filterStatus !== 'All') {
+    items = items.filter(i => i._status === filterStatus);
+  }
+
+  // Type filter
+  if (filterType === 'Flexible') {
+    items = items.filter(i => i.sRigidOrFlexible === 'F');
+  } else if (filterType === 'Rigid') {
+    items = items.filter(i => i.sRigidOrFlexible === 'R');
+  }
+
+  // Search
+  if (searchTerm) {
+    items = items.filter(i => {
+      const desc = (i.sItemDescription || '').toLowerCase();
+      const key = String(i.lInventoryKey || '');
+      return desc.includes(searchTerm) || key.includes(searchTerm);
+    });
+  }
+
+  // Sort
+  items.sort((a, b) => {
+    let va, vb;
+    switch (sortCol) {
+      case 'key': va = a.lInventoryKey; vb = b.lInventoryKey; break;
+      case 'desc': va = (a.sItemDescription||'').toLowerCase(); vb = (b.sItemDescription||'').toLowerCase(); break;
+      case 'type': va = a.sRigidOrFlexible||''; vb = b.sRigidOrFlexible||''; break;
+      case 'current': va = a.nLevelCurrent||0; vb = b.nLevelCurrent||0; break;
+      case 'min': va = a.nLevelMinimum||0; vb = b.nLevelMinimum||0; break;
+      case 'max': va = a.nLevelMaximum||0; vb = b.nLevelMaximum||0; break;
+      case 'sizes': va = a.nSizeCount||0; vb = b.nSizeCount||0; break;
+      case 'status':
+        const order = {Critical:0,Low:1,OK:2};
+        va = order[a._status]??2; vb = order[b._status]??2; break;
+      default: va = 0; vb = 0;
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  renderTable(items);
+};
+
+// ── Render table rows ──
+function renderTable(items) {
+  const tbody = document.getElementById('invTbody');
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No inventory items match your filters</td></tr>';
+    document.getElementById('invRecordInfo').innerHTML = 'No items found';
+    return;
+  }
+
+  const typeName = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
+  const badgeClass = {Critical:'b-critical',Low:'b-low',OK:'b-ok'};
+
+  tbody.innerHTML = items.map(item => {
+    const cur = item.nLevelCurrent || 0;
+    const min = item.nLevelMinimum || 0;
+    const max = item.nLevelMaximum || 0;
+    const status = item._status;
+    const curStyle = status === 'Critical' ? 'font-weight:600;color:var(--red)' :
+                     status === 'Low' ? 'font-weight:600;color:#E65100' : '';
+    return '<tr>' +
+      '<td style="font-weight:600;font-family:monospace;font-size:11px">' + item.lInventoryKey + '</td>' +
+      '<td>' + esc(item.sItemDescription || '') + '</td>' +
+      '<td style="text-align:center">' + (typeName[item.sRigidOrFlexible] || item.sRigidOrFlexible || '') + '</td>' +
+      '<td style="text-align:center;' + curStyle + '">' + cur + '</td>' +
+      '<td style="text-align:center;color:var(--muted)">' + min + '</td>' +
+      '<td style="text-align:center;color:var(--muted)">' + max + '</td>' +
+      '<td style="text-align:center">' + (item.nSizeCount || 0) + '</td>' +
+      '<td style="text-align:center"><span class="badge ' + (badgeClass[status]||'') + '">' + status + '</span></td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('invRecordInfo').innerHTML =
+    'Showing <strong>' + items.length + '</strong> of <strong>' + ALL_ITEMS.length + '</strong> items';
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Filter button wiring ──
+document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterStatus = btn.textContent.trim();
+    applyFilters();
+  });
 });
+
+document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterType = btn.textContent.trim();
+    applyFilters();
+  });
+});
+
+// ── Stat chip click → filter ──
+document.querySelectorAll('#invStatStrip .stat-chip[data-filter]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const f = chip.dataset.filter;
+    const map = {all:'All',critical:'Critical',low:'Low',ok:'OK'};
+    filterStatus = map[f] || 'All';
+    // Sync toolbar buttons
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim() === filterStatus);
+    });
+    applyFilters();
+  });
+});
+
+// ── Column sort ──
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortCol = col; sortDir = 'asc'; }
+    applyFilters();
+  });
+});
+
+// ── Init ──
+API.UI.init();
+loadData();
+
+})();
 </script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>

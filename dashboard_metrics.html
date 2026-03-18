@@ -29,20 +29,30 @@
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
     .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
 
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+
     /* CONTENT AREA */
     .content-area{flex:1;overflow-y:auto;background:var(--bg)}
 
     /* METRIC CARDS */
+    .metric-cards{display:flex;gap:12px;padding:16px}
     .metric-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
     .metric-card .mc-val{font-size:24px;font-weight:800;color:var(--navy)}
     .metric-card .mc-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
-    .metric-card .mc-trend{font-size:10px;margin-top:6px;font-weight:600}
-    .trend-green{color:#16A34A}
-    .trend-red{color:#DC2626}
-    .trend-amber{color:#D97706}
+    .metric-card .mc-sub{font-size:10px;margin-top:6px;color:var(--label)}
 
     /* DATA TABLE */
-    .table-wrap{padding:0 16px 16px}
+    .table-wrap{flex:1;overflow:auto;position:relative;padding:0 16px 16px}
     .section-header{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 8px}
     table{width:100%;border-collapse:collapse}
     thead{position:sticky;top:0;z-index:2}
@@ -79,167 +89,91 @@
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
+      <div class="stat-strip" id="kpiStrip">
         <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+          <div class="s-icon" style="background:#FEF2F2">&#x1F527;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kInHouse">--</div><div class="s-lbl">In-House</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+          <div class="s-icon" style="background:#E3F2FD">&#x23F1;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kAvgTat">--</div><div class="s-lbl">Avg TAT (days)</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
+          <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+          <div class="s-data"><div class="s-val s-green" id="kOnTime">--</div><div class="s-lbl">On-Time Ship %</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#F3E8FD">&#x1F4E6;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kThruput">--</div><div class="s-lbl">Throughput</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab active" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <span class="filter-label">Period</span>
+          <div class="seg-group" id="periodFilter">
+            <button class="seg-btn active" data-val="MTD">MTD</button>
+            <button class="seg-btn" data-val="QTD">QTD</button>
+            <button class="seg-btn" data-val="YTD">YTD</button>
+          </div>
+        </div>
+        <div class="toolbar-search">
+          <input class="search-input" id="metricSearch" type="text" placeholder="Search scope type..."/>
+        </div>
       </div>
 
       <!-- CONTENT -->
       <div class="content-area">
-
-        <!-- SECTION A: METRIC CARDS -->
-        <div style="display:flex;gap:12px;padding:16px">
+        <!-- METRIC CARDS -->
+        <div class="metric-cards">
           <div class="metric-card">
-            <div class="mc-val">7.2d</div>
+            <div class="mc-val" id="mcAvgTat">--</div>
             <div class="mc-lbl">Avg TAT</div>
-            <div class="mc-trend trend-green">&#8595; 0.8d vs last month</div>
+            <div class="mc-sub" id="mcAvgTatSub">&nbsp;</div>
           </div>
           <div class="metric-card">
-            <div class="mc-val">142/mo</div>
+            <div class="mc-val" id="mcThruput">--</div>
             <div class="mc-lbl">Throughput</div>
-            <div class="mc-trend trend-green">&#8593; 12% vs last month</div>
+            <div class="mc-sub" id="mcThruputSub">&nbsp;</div>
           </div>
           <div class="metric-card">
-            <div class="mc-val">91%</div>
-            <div class="mc-lbl">First-Pass Yield</div>
-            <div class="mc-trend trend-green">&#8593; 2% vs last month</div>
+            <div class="mc-val" id="mcOnTime">--</div>
+            <div class="mc-lbl">On-Time Ship %</div>
+            <div class="mc-sub" id="mcOnTimeSub">&nbsp;</div>
           </div>
           <div class="metric-card">
-            <div class="mc-val">$1,847</div>
-            <div class="mc-lbl">Avg Repair Cost</div>
-            <div class="mc-trend trend-green">&#8595; $126 vs last month</div>
+            <div class="mc-val" id="mcInHouse">--</div>
+            <div class="mc-lbl">Total In-House</div>
+            <div class="mc-sub" id="mcInHouseSub">&nbsp;</div>
           </div>
         </div>
 
-        <!-- SECTION B: TOP MODELS TABLE -->
+        <!-- TOP SCOPE TYPES TABLE -->
         <div class="table-wrap">
-          <div class="section-header">Top Models by Volume</div>
+          <div class="section-header">Top Scope Types by Volume</div>
           <table>
             <thead>
               <tr>
                 <th style="width:48px;text-align:center">Rank</th>
-                <th>Model</th>
-                <th>Manufacturer</th>
-                <th style="text-align:right">Repairs MTD</th>
-                <th style="text-align:right">Avg TAT</th>
-                <th style="text-align:right">Avg Cost</th>
+                <th>Scope Type</th>
+                <th style="text-align:right">Repair Count</th>
+                <th style="text-align:right">Avg TAT (days)</th>
+                <th style="text-align:right">In Progress</th>
+                <th style="text-align:right">Completed</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="rank-cell">1</td>
-                <td class="model-cell">GIF-H190</td>
-                <td>Olympus</td>
-                <td class="num-cell">18</td>
-                <td class="num-cell">6.1d</td>
-                <td class="num-cell">$1,620</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">2</td>
-                <td class="model-cell">CF-HQ190L</td>
-                <td>Olympus</td>
-                <td class="num-cell">14</td>
-                <td class="num-cell">8.2d</td>
-                <td class="num-cell">$2,240</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">3</td>
-                <td class="model-cell">EG-2990i</td>
-                <td>Pentax</td>
-                <td class="num-cell">12</td>
-                <td class="num-cell">7.5d</td>
-                <td class="num-cell">$1,890</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">4</td>
-                <td class="model-cell">EG-760R</td>
-                <td>Fujifilm</td>
-                <td class="num-cell">11</td>
-                <td class="num-cell">6.8d</td>
-                <td class="num-cell">$1,540</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">5</td>
-                <td class="model-cell">TJF-Q180V</td>
-                <td>Olympus</td>
-                <td class="num-cell">9</td>
-                <td class="num-cell">9.1d</td>
-                <td class="num-cell">$2,680</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">6</td>
-                <td class="model-cell">EC-3890Li</td>
-                <td>Pentax</td>
-                <td class="num-cell">8</td>
-                <td class="num-cell">7.0d</td>
-                <td class="num-cell">$1,720</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">7</td>
-                <td class="model-cell">BF-H190</td>
-                <td>Olympus</td>
-                <td class="num-cell">7</td>
-                <td class="num-cell">5.4d</td>
-                <td class="num-cell">$1,180</td>
-              </tr>
-              <tr>
-                <td class="rank-cell">8</td>
-                <td class="model-cell">13821NKS</td>
-                <td>Karl Storz</td>
-                <td class="num-cell">6</td>
-                <td class="num-cell">8.8d</td>
-                <td class="num-cell">$2,100</td>
-              </tr>
-            </tbody>
+            <tbody id="metricsTbody"></tbody>
           </table>
         </div>
-
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info">8 scope models &middot; March 2026 MTD</div>
+        <div class="record-info" id="metricsRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -255,29 +189,107 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// Sync KPI stats from main dashboard
-(function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let currentPeriod = 'MTD';
+let searchTerm = '';
+let metricsData = null;
 
-// ── Init ──
+// ═══════════════════════════════════════════════════════
+//  DATA LOAD
+// ═══════════════════════════════════════════════════════
+async function loadMetrics() {
+  try {
+    metricsData = await MockAPI.handleRequest('GET', '/Dashboard/GetRepairMetrics?period=' + currentPeriod);
+    renderCards();
+    renderTable();
+    API.UI.updateDemoBadge('live');
+  } catch (e) {
+    console.error('Failed to load metrics:', e);
+    API.UI.updateDemoBadge('demo');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER CARDS
+// ═══════════════════════════════════════════════════════
+function renderCards() {
+  if (!metricsData) return;
+  const d = metricsData;
+
+  // KPI strip
+  document.getElementById('kInHouse').textContent = d.inHouse;
+  document.getElementById('kAvgTat').textContent = d.avgTat + 'd';
+  document.getElementById('kOnTime').textContent = d.onTimePct + '%';
+  document.getElementById('kThruput').textContent = d.throughput;
+
+  // Metric cards
+  document.getElementById('mcAvgTat').textContent = d.avgTat + 'd';
+  document.getElementById('mcAvgTatSub').textContent = d.totalInPeriod + ' repairs in period';
+  document.getElementById('mcThruput').textContent = d.throughput;
+  document.getElementById('mcThruputSub').textContent = currentPeriod + ' shipped';
+  document.getElementById('mcOnTime').textContent = d.onTimePct + '%';
+  document.getElementById('mcOnTimeSub').textContent = 'within 10-day SLA';
+  document.getElementById('mcInHouse').textContent = d.inHouse;
+  document.getElementById('mcInHouseSub').textContent = 'awaiting completion';
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER TABLE
+// ═══════════════════════════════════════════════════════
+function renderTable() {
+  if (!metricsData) return;
+  let rows = metricsData.scopeTypes || [];
+
+  // Search filter
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    rows = rows.filter(r => r.type.toLowerCase().includes(q));
+  }
+
+  const tbody = document.getElementById('metricsTbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No scope types found</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map((r, i) => `<tr>
+      <td class="rank-cell">${i + 1}</td>
+      <td class="model-cell">${r.type}</td>
+      <td class="num-cell">${r.count}</td>
+      <td class="num-cell">${r.avgTat !== null ? r.avgTat + 'd' : '&#8212;'}</td>
+      <td class="num-cell">${r.inProgress}</td>
+      <td class="num-cell">${r.completed}</td>
+    </tr>`).join('');
+  }
+
+  const periodLabel = currentPeriod === 'MTD' ? 'Month to Date' : currentPeriod === 'QTD' ? 'Quarter to Date' : 'Year to Date';
+  document.getElementById('metricsRecordInfo').innerHTML =
+    `<strong>${rows.length}</strong> scope types &middot; ${periodLabel}`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  FILTER WIRING
+// ═══════════════════════════════════════════════════════
+document.getElementById('periodFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('periodFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.val;
+    loadMetrics();
+  });
+});
+
+document.getElementById('metricSearch').addEventListener('input', function() {
+  searchTerm = this.value.trim();
+  renderTable();
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
 (function init() {
   API.UI.init();
-  API.UI.updateDemoBadge('demo');
+  loadMetrics();
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>

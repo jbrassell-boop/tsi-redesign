@@ -47,10 +47,15 @@
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:900px}
+    table{width:100%;border-collapse:collapse;min-width:1050px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
+    th:hover{background:linear-gradient(to bottom,#B0CCE4,#D0E0F0)}
+    th .sort{margin-left:3px;opacity:.4;font-size:9px;transition:opacity .1s}
+    th.sorted .sort{opacity:1}
+    th.sorted.asc .sort::after{content:'\\25B2'}
+    th.sorted.desc .sort::after{content:'\\25BC'}
     td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
     tbody tr:hover{background:var(--hover)}
@@ -68,6 +73,7 @@
     .ts-declined{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
     .ts-sent{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
     .ts-unable{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .portal-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:9.5px;font-weight:600;background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
 
     /* ACTION BUTTONS */
     .task-action{width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all .1s}
@@ -81,7 +87,7 @@
     .record-info strong{color:var(--text)}
 
     /* DRAWER PANEL */
-    .drawer{position:fixed;top:0;right:0;width:420px;height:100vh;background:var(--card);z-index:51;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+    .drawer{position:fixed;top:0;right:0;width:440px;height:100vh;background:var(--card);z-index:51;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
     .drawer.open{transform:translateX(0)}
     .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);flex-shrink:0}
     .drawer-header h3{font-size:14px;font-weight:700;color:#fff;margin:0}
@@ -112,6 +118,16 @@
     .loaner-line .remove-line:hover{color:var(--red);background:#FEF2F2}
     .add-line-btn{font-size:11px;color:var(--blue);cursor:pointer;font-weight:500;background:none;border:none;font-family:inherit;padding:4px 0;text-align:left}
     .add-line-btn:hover{color:var(--navy);text-decoration:underline}
+
+    /* STATUS HISTORY TIMELINE */
+    .status-timeline{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--border-dk);margin-left:8px;padding-left:14px}
+    .timeline-entry{position:relative;padding:6px 0}
+    .timeline-entry::before{content:'';position:absolute;left:-19px;top:10px;width:8px;height:8px;border-radius:50%;background:var(--navy);border:2px solid var(--card)}
+    .timeline-entry:last-child::before{background:var(--green)}
+    .timeline-date{font-size:9.5px;color:var(--muted);font-weight:500}
+    .timeline-status{font-size:11px;font-weight:600;color:var(--text)}
+    .timeline-user{font-size:10px;color:var(--label)}
+    .no-history{font-size:11px;color:var(--muted);font-style:italic;padding:4px 0}
   </style>
 </head>
 <body>
@@ -131,52 +147,28 @@
     <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+      <!-- STAT STRIP — Task KPIs -->
+      <div class="stat-strip" id="taskStatStrip">
+        <div class="stat-chip" data-filter="open">
+          <div class="s-icon" style="background:#FFF8E1">&#9888;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiOpen">0</div><div class="s-lbl">Open</div></div>
         </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+        <div class="stat-chip" data-filter="fulfilled">
+          <div class="s-icon" style="background:#E8F5E9">&#10003;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiFulfilled">0</div><div class="s-lbl">Fulfilled</div></div>
         </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+        <div class="stat-chip" data-filter="portal">
+          <div class="s-icon" style="background:#E3F2FD">&#127760;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiPortal">0</div><div class="s-lbl">From Portal</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#F3E8FD">&#128202;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTopType">0</div><div class="s-lbl" id="kpiTopTypeLabel">Top Type</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab active" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
@@ -199,8 +191,15 @@
             <button class="seg-btn">Closed</button>
           </div>
         </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <span class="filter-label">Type</span>
+          <div class="seg-group" id="taskTypeFilter">
+            <button class="seg-btn active">All</button>
+          </div>
+        </div>
         <div class="toolbar-search">
-          <input class="search-input" id="taskSearch" type="text" placeholder="Search tasks…"/>
+          <input class="search-input" id="taskSearch" type="text" placeholder="Search tasks..."/>
         </div>
         <div class="toolbar-actions">
           <button class="tb-btn" onclick="openAddTask()">+ Add Task</button>
@@ -212,14 +211,15 @@
         <table>
           <thead>
             <tr>
-              <th style="width:85px">Date</th>
-              <th>Client</th>
-              <th>Department</th>
-              <th>Type</th>
-              <th style="width:60px;text-align:center">Priority</th>
-              <th>Status</th>
-              <th>Requested Models</th>
-              <th>Notes</th>
+              <th data-col="date" style="width:85px">Date<span class="sort"></span></th>
+              <th data-col="title">Title<span class="sort"></span></th>
+              <th data-col="client">Client<span class="sort"></span></th>
+              <th data-col="dept">Dept<span class="sort"></span></th>
+              <th data-col="type">Type<span class="sort"></span></th>
+              <th data-col="priority" style="width:60px;text-align:center">Priority<span class="sort"></span></th>
+              <th data-col="status">Status<span class="sort"></span></th>
+              <th data-col="assignedTo">Assigned<span class="sort"></span></th>
+              <th data-col="fromPortal" style="width:50px;text-align:center">Portal<span class="sort"></span></th>
               <th style="width:60px;text-align:center">Actions</th>
             </tr>
           </thead>
@@ -229,7 +229,7 @@
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="taskRecordInfo">Loading…</div>
+        <div class="record-info" id="taskRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -248,30 +248,34 @@
   </div>
   <div class="drawer-body">
     <input type="hidden" id="taskId" value=""/>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="taskTitle" placeholder="Task title..."/>
+    </div>
     <div class="field-row">
       <div class="field" id="fClient">
         <label>Client</label>
-        <input type="text" id="taskClient" placeholder="Client name…"/>
+        <input type="text" id="taskClient" placeholder="Client name..."/>
         <span class="field-error">Client is required</span>
       </div>
       <div class="field">
         <label>Department</label>
-        <input type="text" id="taskDept" placeholder="Department…"/>
+        <input type="text" id="taskDept" placeholder="Department..."/>
       </div>
     </div>
     <div class="field-row">
       <div class="field" id="fType">
         <label>Type</label>
         <select id="taskType">
-          <option value="">Select type…</option>
+          <option value="">Select type...</option>
           <option>Loaner Request</option>
-          <option>Loaner Wait List</option>
+          <option>Starter Kit Request</option>
+          <option>Requisition</option>
           <option>Miscellaneous</option>
+          <option>Repair Approved</option>
+          <option>Loaner Wait List</option>
           <option>No Loaner - expedite</option>
           <option>Pick Up Request</option>
-          <option>Repair Approved</option>
-          <option>Requisition</option>
-          <option>Starter Kit Request</option>
         </select>
         <span class="field-error">Type is required</span>
       </div>
@@ -296,8 +300,17 @@
           <option>Closed Duplicate</option>
           <option>Unable to Fulfill</option>
           <option>Request Declined</option>
-          <option>Not Completed</option>
         </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Assigned To</label>
+        <input type="text" id="taskAssignedTo" placeholder="Assignee name..."/>
+      </div>
+      <div class="field">
+        <label>Work Order #</label>
+        <input type="text" id="taskWorkOrder" placeholder="WO number..."/>
       </div>
     </div>
     <div class="field" id="fModels">
@@ -314,11 +327,16 @@
     </div>
     <div class="field">
       <label>Customer Message</label>
-      <textarea id="taskCustomerMsg" placeholder="Message from the client…"></textarea>
+      <textarea id="taskCustomerMsg" placeholder="Message from the client..."></textarea>
     </div>
     <div class="field">
       <label>Task Notes</label>
-      <textarea id="taskNotes" placeholder="Internal notes…"></textarea>
+      <textarea id="taskNotes" placeholder="Internal notes..."></textarea>
+    </div>
+    <!-- Status History Timeline (read-only, shown on edit) -->
+    <div class="field" id="statusHistorySection" style="display:none">
+      <label>Status History</label>
+      <div class="status-timeline" id="statusTimeline"></div>
     </div>
   </div>
   <div class="drawer-footer">
@@ -335,87 +353,129 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// ═══════════════════════════════════════════════════════
-//  TASKS DATA
-// ═══════════════════════════════════════════════════════
+// ===============================================================
+//  TASKS DATA — Real Nashville model
+// ===============================================================
 let TASKS = [];
+let _statusHistory = [];  // taskStatusHistory records
 let _taskTypes = [];
 let _taskPriorities = [];
 let _taskStatuses = [];
 let _isDemo = false;
 
-const DEMO_TASKS = [
-  {id:1,date:'03/07/2026',client:'Tift Regional Medical Center',dept:'Endoscopy',type:'Loaner Request',priority:'Urgent',status:'Not Started',models:'GIF-H190, CF-H185L',notes:'Need loaner ASAP — both scopes in repair. Patient backlog building.'},
-  {id:2,date:'03/06/2026',client:'Nashville General Hospital',dept:'GI Lab',type:'Repair Approved',priority:'High',status:'In Process',models:'',notes:'PO received. Begin repair on CF-H185L immediately.'},
-  {id:3,date:'03/05/2026',client:'Metro Health Hospital',dept:'Sterile Processing',type:'Loaner Request',priority:'High',status:'Not Started',models:'BF-UC180F',notes:'CCD repair on hold — client needs loaner while waiting for parts.'},
-  {id:4,date:'03/04/2026',client:'88th Medical Group',dept:'Biomedical Engineering',type:'Pick Up Request',priority:'Normal',status:'In Process',models:'',notes:'FedEx pickup scheduled for 03/09. Label printed.'},
-  {id:5,date:'03/03/2026',client:'West Side GI Center',dept:'Endoscopy',type:'Loaner Request',priority:'Normal',status:'Request Fulfilled',models:'EC-3890LK',notes:'Loaner shipped 03/04. Tracking: 7892-5510-0088.'},
-  {id:6,date:'03/02/2026',client:'Acadiana Endoscopy Center',dept:'Ambulatory Surgery',type:'Loaner Wait List',priority:'Normal',status:'Not Started',models:'GIF-H185',notes:'No loaners available. Added to wait list — next available.'},
-  {id:7,date:'03/01/2026',client:'Tampa Minimally Invasive',dept:'Endoscopy',type:'Requisition',priority:'High',status:'In Process',models:'',notes:'Parts requisition for GIF-Q165 major rebuild. Ordered from Olympus.'},
-  {id:8,date:'02/28/2026',client:'Mountain View Regional',dept:'Operating Room',type:'No Loaner - expedite',priority:'Urgent',status:'Not Started',models:'GIF-H190',notes:'Client declined loaner — wants expedited repair instead. HOT list item.'},
-  {id:9,date:'02/26/2026',client:'Bhatti GI Consultants, PA',dept:'Office',type:'Miscellaneous',priority:'Low',status:'Closed Duplicate',models:'',notes:'Duplicate of earlier follow-up task. Closed.'},
-  {id:10,date:'02/24/2026',client:'A.I.duPont Children Hospital',dept:'Endoscopy',type:'Loaner Request',priority:'High',status:'Request Fulfilled',models:'GIF-XP190N',notes:'Loaner delivered 02/25. Return expected when repair complete.'},
-  {id:11,date:'02/20/2026',client:'Phoebe Putney Memorial',dept:'Surgery',type:'Loaner Wait List',priority:'Low',status:'Not Completed',models:'GIF-Q165',notes:'Client cancelled loaner request — purchased backup scope.'},
-  {id:12,date:'02/15/2026',client:'CaroMont Regional Medical',dept:'Operating Room',type:'Loaner Wait List',priority:'Normal',status:'Not Completed',models:'GIF-H190',notes:'Quote dispute unresolved. Task on hold pending Joseph review.'},
-];
+// ── Nashville field mapping ──
+// Seed fields: lTaskKey, dtTaskDate, sClientName, sDepartmentName,
+//   sTaskTypeDesc, sTaskPriorityDesc, sTaskTitle, lTaskPriorityKey,
+//   lTaskTypeKey, lDepartmentKey
+// Enriched from taskStatusHistory: TaskStatus, sAssignedTo
+// Additional: bFromPortal, sCustomerMessage, sTaskNotes, sWorkOrderNumber
 
+const OPEN_STATUSES = ['Not Started','In Process','Customer Scope Sent'];
+const CLOSED_STATUSES = ['Request Fulfilled','Closed Duplicate','Unable to Fulfill','Request Declined'];
 
-// ── Map API task record → local flat object ──
-function mapApiTask(r) {
-  // API uses Hungarian notation: s=string, l=int, b=bool, dt=date
-  const dt = r.dtCreatedDate || r.dtTaskDate || r.dtDateCreated || '';
+// Map a raw task record (from API or mock-db) → flat UI object
+function mapTask(r, historyMap) {
+  // Date formatting
+  const dt = r.dtTaskDate || r.dtCreatedDate || r.dtDateCreated || '';
   let dateStr = '';
   if (dt) {
     const d = new Date(dt);
     if (!isNaN(d)) dateStr = String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0') + '/' + d.getFullYear();
   }
+
+  // Derive status from taskStatusHistory (latest entry) or enriched field
+  let status = r.TaskStatus || '';
+  let assignedTo = r.sAssignedTo || '';
+  if (!status && historyMap) {
+    const history = historyMap[r.lTaskKey] || [];
+    if (history.length > 0) {
+      // Sort by date descending, take latest
+      history.sort((a, b) => new Date(b.dtTaskStatusDate) - new Date(a.dtTaskStatusDate));
+      status = history[0].sTaskStatusDesc || '';
+      assignedTo = assignedTo || history[0].sUserName || '';
+    }
+  }
+  if (!status) status = 'Not Started';
+  if (!assignedTo) assignedTo = 'Unassigned';
+
   return {
-    id: r.lTaskKey || r.lTaskId || 0,
-    date: dateStr,
-    client: r.sClientName || r.sClientName1 || '',
-    dept: r.sDepartmentName || r.sDeptName || '',
-    type: r.sTaskTypeName || r.sTaskType || '',
-    priority: r.sPriorityName || r.sTaskPriority || r.sPriority || '',
-    status: r.sStatusName || r.sTaskStatus || r.sStatus || '',
-    models: r.sModels || r.sRequestedModels || r.sLoanerModels || '',
-    notes: r.sNotes || r.sTaskNotes || r.mNotes || '',
+    id:          r.lTaskKey || r.lTaskId || 0,
+    date:        dateStr,
+    title:       r.sTaskTitle || r.sTaskTypeDesc || '',
+    client:      (r.sClientName || r.sClientName1 || '').trim(),
+    dept:        (r.sDepartmentName || r.sDeptName || '').trim(),
+    type:        r.sTaskTypeDesc || r.sTaskTypeName || r.sTaskType || '',
+    priority:    r.sTaskPriorityDesc || r.sPriorityName || r.sTaskPriority || r.sPriority || '',
+    status:      status,
+    assignedTo:  assignedTo,
     customerMsg: r.sCustomerMessage || r.mCustomerMessage || '',
+    notes:       r.sTaskNotes || r.sNotes || r.mNotes || '',
+    fromPortal:  !!r.bFromPortal,
+    workOrder:   r.sWorkOrderNumber || '',
+    models:      r.sModels || r.sRequestedModels || r.sLoanerModels || '',
     // Preserve raw keys for save operations
-    _lTaskKey: r.lTaskKey || 0,
-    _lClientKey: r.lClientKey || 0,
-    _lDepartmentKey: r.lDepartmentKey || 0,
-    _lTaskTypeKey: r.lTaskTypeKey || 0,
+    _lTaskKey:         r.lTaskKey || 0,
+    _lClientKey:       r.lClientKey || 0,
+    _lDepartmentKey:   r.lDepartmentKey || 0,
+    _lTaskTypeKey:     r.lTaskTypeKey || 0,
     _lTaskPriorityKey: r.lTaskPriorityKey || 0,
-    _lTaskStatusKey: r.lTaskStatusKey || 0,
+    _lTaskStatusKey:   r.lTaskStatusKey || 0,
   };
 }
 
-// ── Load tasks from API ──
+// Build a map of lTaskKey → sorted history entries
+function buildHistoryMap(historyRecords) {
+  const map = {};
+  historyRecords.forEach(h => {
+    const key = h.lTaskKey;
+    if (!map[key]) map[key] = [];
+    map[key].push(h);
+  });
+  // Sort each by date descending
+  Object.values(map).forEach(arr => {
+    arr.sort((a, b) => new Date(b.dtTaskStatusDate) - new Date(a.dtTaskStatusDate));
+  });
+  return map;
+}
+
+// ── Load tasks from mock-db (via mock-api) ──
 async function loadTasks() {
   try {
+    // Try API first (real BrightLogix), then fall back to mock
     const data = await API.getTasks({
       Pagination: { PageNumber: 1, PageSize: 500 },
       Filters: {}
     });
     const raw = Array.isArray(data) ? data : [];
+
+    // Also load status history
+    let history = [];
+    try {
+      history = MockDB.getAll('taskStatusHistory');
+    } catch(e) { /* no history available */ }
+    _statusHistory = history;
+    const historyMap = buildHistoryMap(history);
+
     if (raw.length > 0) {
-      TASKS = raw.map(mapApiTask);
+      TASKS = raw.map(r => mapTask(r, historyMap));
       _isDemo = false;
-      console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from API');
-      API.UI.updateDemoBadge('api');
+      console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from mock-db');
+      API.UI.updateDemoBadge(raw[0]._lTaskKey ? 'api' : 'live');
     } else {
-      throw new Error('Empty task list — using demo');
+      throw new Error('Empty task list');
     }
   } catch (e) {
-    console.warn('[TSI Tasks] API unavailable, using demo data:', e.message);
-    TASKS = [...DEMO_TASKS];
+    console.warn('[TSI Tasks] API/mock unavailable:', e.message);
+    TASKS = [];
     _isDemo = true;
     API.UI.updateDemoBadge('demo');
   }
+  updateKPIs();
+  buildTypeFilterButtons();
   renderTasks();
 }
 
-// ── Load dropdown lookups from API ──
+// ── Load dropdown lookups ──
 async function loadTaskTypes() {
   try {
     const data = await API.getTaskTypes();
@@ -425,12 +485,11 @@ async function loadTaskTypes() {
     sel.innerHTML = '<option value="">Select type\u2026</option>';
     _taskTypes.forEach(t => {
       const key = t.lTaskTypeKey || t.lTaskTypesKey || t.lKey || 0;
-      const name = t.sTaskTypeName || t.sName || t.sDescription || '';
+      const name = t.sTaskType || t.sTaskTypeName || t.sName || t.sDescription || '';
       if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
     });
   } catch (e) {
     console.warn('[TSI Tasks] Could not load task types:', e.message);
-    // Keep hardcoded options as fallback — they're already in the HTML
   }
 }
 
@@ -443,10 +502,9 @@ async function loadTaskPriorities() {
     sel.innerHTML = '';
     _taskPriorities.forEach(p => {
       const key = p.lTaskPriorityKey || p.lPriorityKey || p.lKey || 0;
-      const name = p.sPriorityName || p.sName || p.sDescription || '';
+      const name = p.sTaskPriority || p.sPriorityName || p.sName || p.sDescription || '';
       if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
     });
-    // Default to Normal if available
     const normalOpt = [...sel.options].find(o => /normal/i.test(o.text));
     if (normalOpt) normalOpt.selected = true;
   } catch (e) {
@@ -456,17 +514,16 @@ async function loadTaskPriorities() {
 
 async function loadTaskStatuses() {
   try {
-    const data = await API.getTaskStatuses(true, true);
+    const data = await API.getTaskStatuses(true, false);
     _taskStatuses = Array.isArray(data) ? data : [];
     console.log('[TSI Tasks] Loaded', _taskStatuses.length, 'statuses');
     const sel = document.getElementById('taskStatus');
     sel.innerHTML = '';
     _taskStatuses.forEach(s => {
       const key = s.lTaskStatusKey || s.lStatusKey || s.lKey || 0;
-      const name = s.sStatusName || s.sName || s.sDescription || '';
+      const name = s.sTaskStatus || s.sStatusName || s.sName || s.sDescription || '';
       if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
     });
-    // Default to Not Started if available
     const nsOpt = [...sel.options].find(o => /not started/i.test(o.text));
     if (nsOpt) nsOpt.selected = true;
   } catch (e) {
@@ -474,15 +531,42 @@ async function loadTaskStatuses() {
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// ===============================================================
+//  KPI STAT STRIP
+// ===============================================================
+function updateKPIs() {
+  const openCount = TASKS.filter(t => OPEN_STATUSES.includes(t.status)).length;
+  const fulfilledCount = TASKS.filter(t => t.status === 'Request Fulfilled').length;
+  const portalCount = TASKS.filter(t => t.fromPortal).length;
+
+  document.getElementById('kpiOpen').textContent = openCount;
+  document.getElementById('kpiFulfilled').textContent = fulfilledCount;
+  document.getElementById('kpiPortal').textContent = portalCount;
+
+  // Top type by count
+  const typeCounts = {};
+  TASKS.forEach(t => { typeCounts[t.type] = (typeCounts[t.type] || 0) + 1; });
+  let topType = '', topCount = 0;
+  Object.entries(typeCounts).forEach(([type, count]) => {
+    if (count > topCount) { topType = type; topCount = count; }
+  });
+  document.getElementById('kpiTopType').textContent = topCount;
+  document.getElementById('kpiTopTypeLabel').textContent = topType || 'Top Type';
+
+  // Update tab badge with open count
+  const badge = document.getElementById('taskTabBadge');
+  if (badge) badge.textContent = openCount;
+}
+
+// ===============================================================
 //  STATE & HELPERS
-// ═══════════════════════════════════════════════════════
+// ===============================================================
 let taskFilterPriority = 'All';
 let taskFilterStatus = 'All';
+let taskFilterType = 'All';
 let taskSearchTerm = '';
-
-const OPEN_STATUSES = ['Not Started','In Process','Customer Scope Sent'];
-const CLOSED_STATUSES = ['Request Fulfilled','Closed Duplicate','Unable to Fulfill','Request Declined','Not Completed'];
+let sortCol = 'date';
+let sortDir = 'desc';
 
 function taskPriorityClass(p) {
   if (/urgent/i.test(p)) return 'p-urgent';
@@ -495,28 +579,81 @@ function taskStatusClass(s) {
   if (/not started/i.test(s)) return 'ts-notstarted';
   if (/in process/i.test(s)) return 'ts-inprocess';
   if (/fulfilled/i.test(s)) return 'ts-fulfilled';
-  if (/closed|not completed/i.test(s)) return 'ts-closed';
+  if (/closed/i.test(s)) return 'ts-closed';
   if (/declined|unable/i.test(s)) return 'ts-declined';
   if (/sent/i.test(s)) return 'ts-sent';
   return 'ts-notstarted';
 }
 
-// ═══════════════════════════════════════════════════════
-//  FILTERING & RENDER
-// ═══════════════════════════════════════════════════════
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Build type filter buttons dynamically from loaded data
+function buildTypeFilterButtons() {
+  const types = [...new Set(TASKS.map(t => t.type).filter(Boolean))].sort();
+  const container = document.getElementById('taskTypeFilter');
+  container.innerHTML = '<button class="seg-btn active">All</button>';
+  types.forEach(type => {
+    const btn = document.createElement('button');
+    btn.className = 'seg-btn';
+    btn.textContent = type;
+    container.appendChild(btn);
+  });
+  // Wire up click handlers
+  container.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      taskFilterType = btn.textContent.trim();
+      renderTasks();
+    });
+  });
+}
+
+// ===============================================================
+//  FILTERING, SORTING & RENDER
+// ===============================================================
 function getFilteredTasks() {
   let list = [...TASKS];
+
+  // Priority filter
   if (taskFilterPriority !== 'All') list = list.filter(t => t.priority === taskFilterPriority);
+
+  // Status filter
   if (taskFilterStatus === 'Open') list = list.filter(t => OPEN_STATUSES.includes(t.status));
   else if (taskFilterStatus === 'Closed') list = list.filter(t => CLOSED_STATUSES.includes(t.status));
+
+  // Type filter
+  if (taskFilterType !== 'All') list = list.filter(t => t.type === taskFilterType);
+
+  // Search
   if (taskSearchTerm) {
     const q = taskSearchTerm.toLowerCase();
     list = list.filter(t =>
       t.client.toLowerCase().includes(q) || t.dept.toLowerCase().includes(q) ||
       t.type.toLowerCase().includes(q) || t.notes.toLowerCase().includes(q) ||
-      t.models.toLowerCase().includes(q) || t.status.toLowerCase().includes(q)
+      t.title.toLowerCase().includes(q) || t.status.toLowerCase().includes(q) ||
+      t.assignedTo.toLowerCase().includes(q) || t.workOrder.toLowerCase().includes(q)
     );
   }
+
+  // Sort
+  list.sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (sortCol === 'date') {
+      va = va ? new Date(va).getTime() : 0;
+      vb = vb ? new Date(vb).getTime() : 0;
+    } else if (sortCol === 'fromPortal') {
+      va = a.fromPortal ? 1 : 0;
+      vb = b.fromPortal ? 1 : 0;
+    } else {
+      va = String(va).toLowerCase();
+      vb = String(vb).toLowerCase();
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   return list;
 }
 
@@ -524,17 +661,18 @@ function renderTasks() {
   const filtered = getFilteredTasks();
   const tbody = document.getElementById('tasksTbody');
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No tasks found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No tasks found</td></tr>';
   } else {
     tbody.innerHTML = filtered.map(t => `<tr>
-      <td style="white-space:nowrap">${t.date}</td>
-      <td style="font-weight:500">${t.client}</td>
-      <td style="color:var(--muted)">${t.dept}</td>
-      <td>${t.type}</td>
-      <td style="text-align:center"><span class="badge ${taskPriorityClass(t.priority)}">${t.priority}</span></td>
-      <td><span class="badge ${taskStatusClass(t.status)}">${t.status}</span></td>
-      <td style="font-size:10.5px;color:var(--label)">${t.models || '<span style="color:var(--muted)">—</span>'}</td>
-      <td style="font-size:10.5px;color:var(--label);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.notes.replace(/"/g,'&quot;')}">${t.notes}</td>
+      <td style="white-space:nowrap">${escHtml(t.date)}</td>
+      <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(t.title)}">${escHtml(t.title)}</td>
+      <td style="font-weight:500">${escHtml(t.client)}</td>
+      <td style="color:var(--muted)">${escHtml(t.dept)}</td>
+      <td style="font-size:10.5px">${escHtml(t.type)}</td>
+      <td style="text-align:center"><span class="badge ${taskPriorityClass(t.priority)}">${escHtml(t.priority)}</span></td>
+      <td><span class="badge ${taskStatusClass(t.status)}">${escHtml(t.status)}</span></td>
+      <td style="font-size:10.5px;color:var(--label)">${escHtml(t.assignedTo)}</td>
+      <td style="text-align:center">${t.fromPortal ? '<span class="portal-badge">Portal</span>' : '<span style="color:var(--muted)">&#8212;</span>'}</td>
       <td style="text-align:center">
         <button class="task-action" title="Edit" onclick="openEditTask(${t.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="task-action danger" title="Delete" onclick="deleteTask(${t.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
@@ -542,19 +680,26 @@ function renderTasks() {
     </tr>`).join('');
   }
   const openCount = filtered.filter(t => OPEN_STATUSES.includes(t.status)).length;
-  document.getElementById('taskRecordInfo').innerHTML = `<strong>${filtered.length}</strong> task${filtered.length!==1?'s':''} · <strong>${openCount}</strong> open`;
+  document.getElementById('taskRecordInfo').innerHTML = `<strong>${filtered.length}</strong> task${filtered.length!==1?'s':''} &middot; <strong>${openCount}</strong> open`;
+
+  // Update sort indicators
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.classList.remove('sorted','asc','desc');
+    if (th.dataset.col === sortCol) {
+      th.classList.add('sorted', sortDir);
+    }
+  });
 }
 
-// ═══════════════════════════════════════════════════════
+// ===============================================================
 //  DRAWER — Add / Edit Task
-// ═══════════════════════════════════════════════════════
+// ===============================================================
 const drawer = document.getElementById('taskDrawer');
 const overlay = document.getElementById('drawerOverlay');
 
 function openDrawer() {
   drawer.classList.add('open');
   overlay.classList.add('open');
-  // Clear validation
   document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
 }
 
@@ -567,10 +712,13 @@ overlay.addEventListener('click', closeDrawer);
 
 function resetDrawerForm() {
   document.getElementById('taskId').value = '';
+  document.getElementById('taskTitle').value = '';
   document.getElementById('taskClient').value = '';
   document.getElementById('taskDept').value = '';
   document.getElementById('taskType').value = '';
-  // Default priority to Normal, status to Not Started (by text match since values may be keys)
+  document.getElementById('taskAssignedTo').value = '';
+  document.getElementById('taskWorkOrder').value = '';
+  // Default priority to Normal, status to Not Started
   const priSel = document.getElementById('taskPriority');
   const normalOpt = [...priSel.options].find(o => /normal/i.test(o.text));
   if (normalOpt) priSel.value = normalOpt.value; else priSel.selectedIndex = 0;
@@ -579,19 +727,22 @@ function resetDrawerForm() {
   if (nsOpt) stsSel.value = nsOpt.value; else stsSel.selectedIndex = 0;
   document.getElementById('taskCustomerMsg').value = '';
   document.getElementById('taskNotes').value = '';
-  // Reset loaner lines to one empty row
+  // Reset loaner lines
   document.getElementById('loanerLines').innerHTML = `<div class="loaner-line">
     <input type="text" placeholder="Model (e.g. GIF-H190)"/>
     <input type="number" value="1" min="1" placeholder="Qty"/>
     <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>
   </div>`;
+  // Hide status history
+  document.getElementById('statusHistorySection').style.display = 'none';
+  document.getElementById('statusTimeline').innerHTML = '';
 }
 
 function openAddTask() {
   resetDrawerForm();
   document.getElementById('drawerTitle').textContent = 'Add Task';
   openDrawer();
-  document.getElementById('taskClient').focus();
+  document.getElementById('taskTitle').focus();
 }
 
 function openEditTask(id) {
@@ -600,18 +751,23 @@ function openEditTask(id) {
   resetDrawerForm();
   document.getElementById('drawerTitle').textContent = 'Edit Task';
   document.getElementById('taskId').value = task.id;
+  document.getElementById('taskTitle').value = task.title;
   document.getElementById('taskClient').value = task.client;
   document.getElementById('taskDept').value = task.dept;
-  // For API mode, set by key; for demo, set by text
+  document.getElementById('taskAssignedTo').value = task.assignedTo !== 'Unassigned' ? task.assignedTo : '';
+  document.getElementById('taskWorkOrder').value = task.workOrder;
+
+  // Set type dropdown
   const typeSel = document.getElementById('taskType');
   if (task._lTaskTypeKey) {
     typeSel.value = String(task._lTaskTypeKey);
   } else {
-    // Demo mode — match by text
     const opt = [...typeSel.options].find(o => o.text === task.type);
     if (opt) typeSel.value = opt.value;
     else typeSel.value = task.type;
   }
+
+  // Set priority dropdown
   const priSel = document.getElementById('taskPriority');
   if (task._lTaskPriorityKey) {
     priSel.value = String(task._lTaskPriorityKey);
@@ -620,6 +776,8 @@ function openEditTask(id) {
     if (opt) priSel.value = opt.value;
     else priSel.value = task.priority;
   }
+
+  // Set status dropdown
   const stsSel = document.getElementById('taskStatus');
   if (task._lTaskStatusKey) {
     stsSel.value = String(task._lTaskStatusKey);
@@ -628,19 +786,59 @@ function openEditTask(id) {
     if (opt) stsSel.value = opt.value;
     else stsSel.value = task.status;
   }
+
   document.getElementById('taskNotes').value = task.notes || '';
   document.getElementById('taskCustomerMsg').value = task.customerMsg || '';
+
   // Populate loaner lines from models string
   const linesContainer = document.getElementById('loanerLines');
   if (task.models) {
     const models = task.models.split(',').map(m => m.trim()).filter(Boolean);
     linesContainer.innerHTML = models.map(m => `<div class="loaner-line">
-      <input type="text" value="${m.replace(/"/g,'&quot;')}" placeholder="Model (e.g. GIF-H190)"/>
+      <input type="text" value="${escHtml(m)}" placeholder="Model (e.g. GIF-H190)"/>
       <input type="number" value="1" min="1" placeholder="Qty"/>
       <button class="remove-line" onclick="removeLoanerLine(this)" title="Remove">&times;</button>
     </div>`).join('');
   }
+
+  // Show status history timeline
+  renderStatusHistory(task.id);
+
   openDrawer();
+}
+
+function renderStatusHistory(taskKey) {
+  const section = document.getElementById('statusHistorySection');
+  const timeline = document.getElementById('statusTimeline');
+
+  // Get history for this task from the loaded statusHistory
+  let history = [];
+  try {
+    const allHistory = MockDB.getAll('taskStatusHistory');
+    history = allHistory.filter(h => h.lTaskKey === taskKey);
+  } catch(e) { /* fallback */ }
+
+  if (history.length === 0) {
+    section.style.display = 'block';
+    timeline.innerHTML = '<div class="no-history">No status changes recorded</div>';
+    return;
+  }
+
+  // Sort by date ascending (oldest first for timeline display)
+  history.sort((a, b) => new Date(a.dtTaskStatusDate) - new Date(b.dtTaskStatusDate));
+
+  section.style.display = 'block';
+  timeline.innerHTML = history.map(h => {
+    const dt = h.dtTaskStatusDate ? new Date(h.dtTaskStatusDate) : null;
+    const dateStr = dt ? (String(dt.getMonth()+1).padStart(2,'0') + '/' + String(dt.getDate()).padStart(2,'0') + '/' + dt.getFullYear() + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0')) : '';
+    const statusDesc = h.sTaskStatusDesc || 'Unknown';
+    const userName = h.sUserName || 'System';
+    return `<div class="timeline-entry">
+      <div class="timeline-date">${escHtml(dateStr)}</div>
+      <div class="timeline-status">${escHtml(statusDesc)}</div>
+      <div class="timeline-user">by ${escHtml(userName)}</div>
+    </div>`;
+  }).join('');
 }
 
 function addLoanerLine() {
@@ -659,7 +857,6 @@ function removeLoanerLine(btn) {
   if (container.children.length > 1) {
     btn.closest('.loaner-line').remove();
   } else {
-    // Last line — just clear it
     const inputs = btn.closest('.loaner-line').querySelectorAll('input');
     inputs[0].value = '';
     inputs[1].value = '1';
@@ -713,6 +910,9 @@ async function saveTask() {
         psModels: models.join(', '),
         psCustomerMessage: document.getElementById('taskCustomerMsg').value.trim(),
         psNotes: document.getElementById('taskNotes').value.trim(),
+        psTaskTitle: document.getElementById('taskTitle').value.trim(),
+        psAssignedTo: document.getElementById('taskAssignedTo').value.trim(),
+        psWorkOrderNumber: document.getElementById('taskWorkOrder').value.trim(),
       };
 
       if (editId) {
@@ -726,21 +926,23 @@ async function saveTask() {
       }
 
       closeDrawer();
-      await loadTasks(); // Reload from API
+      await loadTasks();
       return;
     } catch (e) {
       console.warn('[TSI Tasks] API save failed, applying locally:', e.message);
-      // Fall through to local update
     }
   }
 
   // Local/demo mode save
   const taskData = {
+    title: document.getElementById('taskTitle').value.trim(),
     client,
     dept: document.getElementById('taskDept').value.trim(),
     type: typeText,
     priority: priText,
     status: stsText,
+    assignedTo: document.getElementById('taskAssignedTo').value.trim() || 'Unassigned',
+    workOrder: document.getElementById('taskWorkOrder').value.trim(),
     models: models.join(', '),
     customerMsg: document.getElementById('taskCustomerMsg').value.trim(),
     notes: document.getElementById('taskNotes').value.trim(),
@@ -753,33 +955,32 @@ async function saveTask() {
     const maxId = TASKS.reduce((max, t) => Math.max(max, t.id), 0);
     const today = new Date();
     const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' + String(today.getDate()).padStart(2,'0') + '/' + today.getFullYear();
-    TASKS.unshift({ id: maxId + 1, date: dateStr, ...taskData });
+    TASKS.unshift({ id: maxId + 1, date: dateStr, fromPortal: false, ...taskData });
   }
 
   closeDrawer();
+  updateKPIs();
   renderTasks();
 }
 
 async function deleteTask(id) {
   if (!confirm('Delete this task?')) return;
 
-  // Try API delete
   if (!_isDemo) {
     try {
       const task = TASKS.find(t => t.id === id);
       const taskKey = task?._lTaskKey || id;
       await API.deleteTask(taskKey);
       console.log('[TSI Tasks] Deleted task', taskKey);
-      await loadTasks(); // Reload from API
+      await loadTasks();
       return;
     } catch (e) {
       console.warn('[TSI Tasks] API delete failed, removing locally:', e.message);
     }
   }
 
-  // Local/demo fallback
   const idx = TASKS.findIndex(t => t.id === id);
-  if (idx >= 0) { TASKS.splice(idx, 1); renderTasks(); }
+  if (idx >= 0) { TASKS.splice(idx, 1); updateKPIs(); renderTasks(); }
 }
 
 // Keyboard: Escape closes drawer
@@ -787,9 +988,25 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
 });
 
-// ═══════════════════════════════════════════════════════
+// ===============================================================
+//  SORT WIRING
+// ===============================================================
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'asc';
+    }
+    renderTasks();
+  });
+});
+
+// ===============================================================
 //  FILTER WIRING
-// ═══════════════════════════════════════════════════════
+// ===============================================================
 document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
@@ -811,28 +1028,40 @@ document.getElementById('taskSearch').addEventListener('input', function() {
   renderTasks();
 });
 
-// ═══════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════
-// Sync KPI stats from main dashboard
-(function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
+// Stat strip chip click filters
+document.querySelectorAll('#taskStatStrip .stat-chip[data-filter]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const filter = chip.dataset.filter;
+    // Toggle the appropriate toolbar filter
+    const statusBtns = document.getElementById('taskStatusFilter').querySelectorAll('.seg-btn');
+    if (filter === 'open') {
+      statusBtns.forEach(b => b.classList.remove('active'));
+      const openBtn = [...statusBtns].find(b => b.textContent.trim() === 'Open');
+      if (openBtn) { openBtn.classList.add('active'); taskFilterStatus = 'Open'; }
+    } else if (filter === 'fulfilled') {
+      // Set status to closed (fulfilled is a closed status)
+      statusBtns.forEach(b => b.classList.remove('active'));
+      statusBtns[0].classList.add('active'); // All
+      taskFilterStatus = 'All';
+      taskSearchTerm = 'Request Fulfilled';
+      document.getElementById('taskSearch').value = taskSearchTerm;
+    } else if (filter === 'portal') {
+      // Clear other filters, search for portal
+      statusBtns.forEach(b => b.classList.remove('active'));
+      statusBtns[0].classList.add('active');
+      taskFilterStatus = 'All';
+      taskSearchTerm = '';
+      document.getElementById('taskSearch').value = '';
+      // Custom filter — re-render with portal filter
+      // We'll use a temporary override
     }
-  } catch(e) {}
-})();
+    renderTasks();
+  });
+});
 
+// ===============================================================
+//  INIT
+// ===============================================================
 (async function init() {
   API.UI.init();
   // Load dropdown lookups and task data in parallel

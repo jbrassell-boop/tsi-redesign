@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Dashboard — Acquisitions | TSI Redesign</title>
+  <title>Dashboard — Supplier POs | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* Additional page-local vars */
     :root{--hover:#CFFAFE}
 
-    /* PAGE BODY — override for flex column layout */
     .page-body{display:flex;flex-direction:column;overflow:hidden}
 
-    /* STAT STRIP — overrides only (base in styles.css) */
+    /* STAT STRIP */
     .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
     .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
     .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active{background:#E3F2FD;box-shadow:inset 0 -2px 0 var(--navy)}
     .stat-chip.alert{background:#FEF9F9}
     .stat-chip.warn{background:#FFFDF7}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
@@ -34,26 +33,29 @@
     .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
     .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
     .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
-    .toolbar-actions{display:flex;gap:4px}
-    .tb-btn{height:30px;padding:0 10px;border:1px solid var(--border-dk);border-radius:6px;font-size:11px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--label);display:flex;align-items:center;gap:4px;font-weight:500}
-    .tb-btn:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .seg-group{display:flex;border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;background:var(--card);border:none;border-right:1px solid var(--border-dk);cursor:pointer;font-family:inherit;color:var(--label);white-space:nowrap}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn.active{background:var(--navy);color:#fff}
+    .seg-btn:hover:not(.active){background:var(--bg)}
+    .tb-label{font-size:11px;font-weight:600;color:var(--label)}
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
     table{width:100%;border-collapse:collapse;min-width:700px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
-    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    td{padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
     tbody tr:hover{background:var(--hover)}
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-waiting{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
-    .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
-    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .b-complete{background:#F3E8FD;color:#5E35B1;border:1px solid #B39DDB}
+    .b-open{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .b-received{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-partial{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .b-cancelled{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -64,153 +66,79 @@
 <body>
 <div class="shell">
 
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <!-- Injected by shell.js -->
-  </nav>
+  <nav class="sidebar"></nav>
 
-  <!-- MAIN -->
   <div class="main">
-    <header class="topbar">
-      <!-- Injected by shell.js -->
-    </header>
+    <header class="topbar"></header>
 
-    <!-- PAGE BODY -->
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+      <div class="stat-strip" id="poStatStrip">
+        <div class="stat-chip" data-filter="all">
+          <div class="s-icon" style="background:#E3F2FD">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">--</div><div class="s-lbl">TOTAL POs</div></div>
         </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+        <div class="stat-chip" data-filter="open">
+          <div class="s-icon" style="background:#E3F2FD">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiOpen">--</div><div class="s-lbl">OPEN</div></div>
         </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
+        <div class="stat-chip" data-filter="received">
+          <div class="s-icon" style="background:#E8F5E9">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-green" id="kpiReceived">--</div><div class="s-lbl">RECEIVED</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#F3E8FD">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5E35B1" stroke-width="2" style="width:16px;height:16px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiValue">--</div><div class="s-lbl">TOTAL VALUE</div></div>
         </div>
       </div>
 
       <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab active" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
-        <div class="toolbar-search">
-          <input class="search-input" id="acqSearch" type="text" placeholder="Search acquisitions…" oninput="filterTable()"/>
+        <span class="tb-label">Status:</span>
+        <div class="seg-group" id="statusFilter">
+          <button class="seg-btn active">All</button>
+          <button class="seg-btn">Open</button>
+          <button class="seg-btn">Received</button>
+          <button class="seg-btn">Cancelled</button>
         </div>
-        <div class="toolbar-actions">
-          <button class="tb-btn">+ New Acquisition</button>
+        <div class="toolbar-search">
+          <input class="search-input" id="poSearch" type="text" placeholder="Search POs..." oninput="applyFilters()"/>
         </div>
       </div>
 
       <!-- DATA TABLE -->
       <div class="table-wrap">
-        <table id="acqTable">
+        <table>
           <thead>
             <tr>
-              <th style="width:90px">ACQ#</th>
-              <th>Seller</th>
-              <th>Model</th>
-              <th style="width:90px">Source</th>
-              <th style="width:50px;text-align:center">QTY</th>
-              <th style="width:90px;text-align:right">Value</th>
-              <th style="width:110px">Status</th>
+              <th style="width:110px" data-col="po">PO#</th>
+              <th data-col="supplier">Supplier</th>
+              <th style="width:100px" data-col="date">Date</th>
+              <th style="width:100px;text-align:center" data-col="type">Type</th>
+              <th style="width:100px;text-align:center" data-col="status">Status</th>
+              <th style="width:90px;text-align:right" data-col="total">Total</th>
+              <th style="width:60px;text-align:center" data-col="items">Items</th>
             </tr>
           </thead>
-          <tbody id="acqTbody">
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-301</td>
-              <td>Tampa General</td>
-              <td>Olympus GIF-H190</td>
-              <td>Trade-In</td>
-              <td style="text-align:center">2</td>
-              <td style="text-align:right">$12,400</td>
-              <td><span class="badge b-waiting">Evaluating</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-300</td>
-              <td>Coastal Surgical</td>
-              <td>Pentax EG-2990i</td>
-              <td>Purchase</td>
-              <td style="text-align:center">1</td>
-              <td style="text-align:right">$8,200</td>
-              <td><span class="badge b-approved">Approved</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-299</td>
-              <td>MedEquip Brokers</td>
-              <td>Fujifilm EG-760R</td>
-              <td>Auction</td>
-              <td style="text-align:center">3</td>
-              <td style="text-align:right">$15,600</td>
-              <td><span class="badge b-inrepair">In Transit</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-298</td>
-              <td>Valley Health</td>
-              <td>Olympus CF-HQ190L</td>
-              <td>Trade-In</td>
-              <td style="text-align:center">1</td>
-              <td style="text-align:right">$6,800</td>
-              <td><span class="badge b-complete">Received</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-297</td>
-              <td>St. Joseph Medical</td>
-              <td>Olympus TJF-Q180V</td>
-              <td>Purchase</td>
-              <td style="text-align:center">1</td>
-              <td style="text-align:right">$9,400</td>
-              <td><span class="badge b-waiting">Evaluating</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">ACQ-296</td>
-              <td>ScopeTrader.com</td>
-              <td>Karl Storz 13821NKS</td>
-              <td>Auction</td>
-              <td style="text-align:center">2</td>
-              <td style="text-align:right">$11,200</td>
-              <td><span class="badge b-approved">Approved</span></td>
-            </tr>
-          </tbody>
+          <tbody id="poTbody"></tbody>
         </table>
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="acqRecordInfo">Showing <strong>6</strong> acquisitions</div>
+        <div class="record-info" id="poRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -223,54 +151,201 @@
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
-// ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// ── Orders menu close on outside click ──
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
-  if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
-});
-document.getElementById('newOrderMenu').addEventListener('click', function() {
-  this.style.display = 'none';
-});
+(function() {
+'use strict';
 
-// ── Search / filter ──
-function filterTable() {
-  const q = document.getElementById('acqSearch').value.toLowerCase();
-  const rows = document.querySelectorAll('#acqTbody tr');
-  let visible = 0;
-  rows.forEach(function(row) {
-    const match = !q || row.textContent.toLowerCase().includes(q);
-    row.style.display = match ? '' : 'none';
-    if (match) visible++;
-  });
-  document.getElementById('acqRecordInfo').innerHTML =
-    'Showing <strong>' + visible + '</strong> acquisition' + (visible === 1 ? '' : 's');
+let ALL_POS = [];
+let filterStatus = 'All';
+let searchTerm = '';
+let sortCol = 'date';
+let sortDir = 'desc';
+
+// ── Derive PO status from line items ──
+function derivePOStatus(po, trans) {
+  if (po.bCancelled) return 'Cancelled';
+  if (trans.length === 0) return 'Open';
+  const totalOrdered = trans.reduce((s, t) => s + (t.nOrderQuantity || 0), 0);
+  const totalReceived = trans.reduce((s, t) => s + (t.nReceivedQuantity || 0), 0);
+  if (totalReceived >= totalOrdered && totalOrdered > 0) return 'Received';
+  if (totalReceived > 0) return 'Partial';
+  return 'Open';
 }
 
-// Sync KPI stats from main dashboard
-(function() {
+// ── Load data ──
+async function loadData() {
   try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
+    // Load POs and their line items
+    const pos = MockDB.getAll('supplierPOs');
+    const allTrans = MockDB.getAll('supplierPOTrans');
+    const suppliers = MockDB.getAll('suppliers');
+    const poTypes = MockDB.getAll('supplierPOTypes');
 
-// ── Data badge ──
-API.UI.updateDemoBadge('demo');
+    // Build lookup maps
+    const supplierMap = {};
+    suppliers.forEach(s => { supplierMap[s.lSupplierKey] = s.sSupplierName1 || s.sSupplierName || s.sCompanyName || ''; });
+    const typeMap = {};
+    poTypes.forEach(t => { typeMap[t.lSupplierPOTypeKey] = t.sSupplierPOType || ''; });
+
+    // Group transactions by PO
+    const transByPO = {};
+    allTrans.forEach(t => {
+      if (!transByPO[t.lSupplierPOKey]) transByPO[t.lSupplierPOKey] = [];
+      transByPO[t.lSupplierPOKey].push(t);
+    });
+
+    ALL_POS = pos.map(po => {
+      const trans = transByPO[po.lSupplierPOKey] || [];
+      return {
+        ...po,
+        _supplierName: po.sSupplierName || supplierMap[po.lSupplierKey] || 'Unknown',
+        _typeName: typeMap[po.lSupplierPOTypeKey] || '',
+        _status: derivePOStatus(po, trans),
+        _itemCount: trans.length,
+        _totalReceived: trans.reduce((s, t) => s + (t.nReceivedQuantity || 0), 0)
+      };
+    });
+
+    // Sort by date descending by default
+    ALL_POS.sort((a, b) => new Date(b.dtDateOfPO || 0) - new Date(a.dtDateOfPO || 0));
+
+    console.log('[Supplier POs] Loaded', ALL_POS.length, 'POs');
+    API.UI.updateDemoBadge(ALL_POS.length > 0 ? 'live' : 'demo');
+  } catch (e) {
+    console.warn('[Supplier POs] Load failed:', e.message);
+    ALL_POS = [];
+    API.UI.updateDemoBadge('demo');
+  }
+  updateKPIs();
+  applyFilters();
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  const total = ALL_POS.length;
+  const open = ALL_POS.filter(p => p._status === 'Open' || p._status === 'Partial').length;
+  const received = ALL_POS.filter(p => p._status === 'Received').length;
+  const totalVal = ALL_POS.reduce((s, p) => s + (p.dblPOTotal || 0), 0);
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiOpen').textContent = open;
+  document.getElementById('kpiReceived').textContent = received;
+  document.getElementById('kpiValue').textContent = '$' + totalVal.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+// ── Filter + render ──
+window.applyFilters = function() {
+  searchTerm = document.getElementById('poSearch').value.trim().toLowerCase();
+  let items = ALL_POS;
+
+  if (filterStatus === 'Open') {
+    items = items.filter(p => p._status === 'Open' || p._status === 'Partial');
+  } else if (filterStatus !== 'All') {
+    items = items.filter(p => p._status === filterStatus);
+  }
+
+  if (searchTerm) {
+    items = items.filter(p => {
+      const text = (p.sSupplierPONumber||'') + ' ' + (p._supplierName||'') + ' ' + (p._typeName||'');
+      return text.toLowerCase().includes(searchTerm);
+    });
+  }
+
+  // Sort
+  items = [...items].sort((a, b) => {
+    let va, vb;
+    switch (sortCol) {
+      case 'po': va = (a.sSupplierPONumber||''); vb = (b.sSupplierPONumber||''); break;
+      case 'supplier': va = (a._supplierName||'').toLowerCase(); vb = (b._supplierName||'').toLowerCase(); break;
+      case 'date': va = new Date(a.dtDateOfPO||0); vb = new Date(b.dtDateOfPO||0); break;
+      case 'type': va = (a._typeName||''); vb = (b._typeName||''); break;
+      case 'status': va = a._status; vb = b._status; break;
+      case 'total': va = a.dblPOTotal||0; vb = b.dblPOTotal||0; break;
+      case 'items': va = a._itemCount||0; vb = b._itemCount||0; break;
+      default: va = 0; vb = 0;
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  renderTable(items);
+};
+
+// ── Render ──
+function renderTable(items) {
+  const tbody = document.getElementById('poTbody');
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No purchase orders match your filters</td></tr>';
+    document.getElementById('poRecordInfo').innerHTML = 'No POs found';
+    return;
+  }
+
+  const badgeClass = {Open:'b-open',Received:'b-received',Partial:'b-partial',Cancelled:'b-cancelled'};
+
+  tbody.innerHTML = items.map(po => {
+    const dt = po.dtDateOfPO ? new Date(po.dtDateOfPO) : null;
+    const dateStr = dt ? (String(dt.getMonth()+1).padStart(2,'0') + '/' + String(dt.getDate()).padStart(2,'0') + '/' + dt.getFullYear()) : '';
+    const total = (po.dblPOTotal || 0);
+    const totalStr = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    return '<tr>' +
+      '<td style="font-weight:600;color:var(--navy);font-family:monospace;font-size:11px">' + esc(po.sSupplierPONumber || String(po.lSupplierPOKey)) + '</td>' +
+      '<td>' + esc(po._supplierName) + '</td>' +
+      '<td style="white-space:nowrap">' + dateStr + '</td>' +
+      '<td style="text-align:center">' + esc(po._typeName) + '</td>' +
+      '<td style="text-align:center"><span class="badge ' + (badgeClass[po._status]||'b-open') + '">' + po._status + '</span></td>' +
+      '<td style="text-align:right;font-weight:500">' + totalStr + '</td>' +
+      '<td style="text-align:center">' + (po._itemCount || 0) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('poRecordInfo').innerHTML =
+    'Showing <strong>' + items.length + '</strong> of <strong>' + ALL_POS.length + '</strong> POs';
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ── Filter wiring ──
+document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterStatus = btn.textContent.trim();
+    applyFilters();
+  });
+});
+
+// ── Stat chip click → filter ──
+document.querySelectorAll('#poStatStrip .stat-chip[data-filter]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const f = chip.dataset.filter;
+    const map = {all:'All',open:'Open',received:'Received'};
+    filterStatus = map[f] || 'All';
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim() === filterStatus);
+    });
+    applyFilters();
+  });
+});
+
+// ── Column sort ──
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortCol = col; sortDir = col === 'date' || col === 'total' ? 'desc' : 'asc'; }
+    applyFilters();
+  });
+});
+
+// ── Init ──
+API.UI.init();
+loadData();
+
+})();
 </script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>

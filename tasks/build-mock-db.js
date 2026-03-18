@@ -13,6 +13,13 @@ const MOCKDB_PATH = path.join(__dirname, '..', 'mock-db.js');
 console.log('Reading real-data-seed.json...');
 const seed = JSON.parse(fs.readFileSync(SEED_PATH, 'utf8'));
 
+const DASH_SEED_PATH = path.join('C:', 'tmp', 'dashboard-seed.json');
+let dashSeed = {};
+if (fs.existsSync(DASH_SEED_PATH)) {
+  console.log('Reading dashboard-seed.json...');
+  dashSeed = JSON.parse(fs.readFileSync(DASH_SEED_PATH, 'utf8'));
+}
+
 console.log('Reading backup...');
 const lines = fs.readFileSync(BACKUP_PATH, 'utf8').split('\n');
 
@@ -371,6 +378,14 @@ const SEED_ORDER = [
 ];
 const TABLE_REMAP = { 'maxCharges': 'modelMaxCharges' };
 
+const DASH_SEED_ORDER = [
+  'taskTypes', 'taskStatuses', 'taskPriorities',
+  'tasks', 'taskLoaners', 'taskStatusHistory',
+  'loanerTrans', 'emails', 'emailAttachments', 'emailTypes',
+  'shippingCharges', 'flagTypes', 'flagLocations', 'flagLocationsUsed', 'flagInstrumentTypes',
+  'profitability', 'contractProfitability',
+];
+
 // ============================================================
 // Write new mock-db.js
 // ============================================================
@@ -410,13 +425,48 @@ w('');
 w(`console.log('[MockDB] Real data seeded: ${totalSeeded.toLocaleString()} records');`);
 w('');
 
+// Dashboard-specific seed data (from Nashville)
+if (Object.keys(dashSeed).length > 0) {
+  w('');
+  w('// ═══════════════════════════════════════════════════════');
+  w('//  DASHBOARD SEED — Nashville extract');
+  w('// ═══════════════════════════════════════════════════════');
+
+  // Register dashboard tables
+  ['taskStatusHistory', 'loanerTrans', 'emails', 'emailAttachments', 'emailTypes',
+   'shippingCharges', 'flagTypes', 'flagLocations', 'flagLocationsUsed', 'flagInstrumentTypes',
+   'profitability', 'contractProfitability'].forEach(t => {
+    w(`if (!MockDB.tables['${t}']) MockDB.tables['${t}'] = [];`);
+  });
+  w('');
+
+  let dashSeeded = 0;
+  for (const key of DASH_SEED_ORDER) {
+    const data = dashSeed[key];
+    if (!data || data.length === 0) continue;
+    w(`// ${key}: ${data.length} records`);
+    fs.writeSync(fd, `MockDB.seed('${key}', ${JSON.stringify(data)});\n`);
+    dashSeeded += data.length;
+  }
+  w('');
+  w(`console.log('[MockDB] Dashboard data seeded: ${dashSeeded.toLocaleString()} records');`);
+  totalSeeded += dashSeeded;
+}
+
 // 4. Static lookups
 w("MockDB.seed('states', " + JSON.stringify(getStates()) + ");");
 w("MockDB.seed('countries', [{ lCountryKey: 1, sCountryName: 'United States' }]);");
-w("MockDB.seed('users', [");
-w("  { lUserKey: 1, sFirstName: 'Joseph', sLastName: 'Brassell', sUserName: 'JBrassell', sEmailAddress: 'jbrassell@totalscope.com', bActive: true, bIsAdmin: true },");
-w("  { lUserKey: 2, sFirstName: 'Admin', sLastName: 'System', sUserName: 'admin', sEmailAddress: 'admin@totalscope.com', bActive: true, bIsAdmin: true }");
-w("]);");
+
+// Users from Nashville (real data) or fallback
+if (dashSeed.users && dashSeed.users.length > 0) {
+  w(`MockDB.seed('users', ${JSON.stringify(dashSeed.users)});`);
+} else {
+  // existing static fallback
+  w("MockDB.seed('users', [");
+  w("  { lUserKey: 1, sFirstName: 'Joseph', sLastName: 'Brassell', sUserName: 'JBrassell', sEmailAddress: 'jbrassell@totalscope.com', bActive: true, bIsAdmin: true },");
+  w("  { lUserKey: 2, sFirstName: 'Admin', sLastName: 'System', sUserName: 'admin', sEmailAddress: 'admin@totalscope.com', bActive: true, bIsAdmin: true }");
+  w("]);");
+}
 w('');
 
 // 5. PRNG + Gen3-5

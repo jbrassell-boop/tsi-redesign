@@ -524,11 +524,25 @@ const MockAPI = (() => {
   route('GET', '/Quality/GetAllNCRs', () => MockDB.tables.ncrs || []);
   route('GET', '/Quality/GetAllCAPAs', () => MockDB.tables.capas || []);
 
-  // ── Dashboard Queues (3) ────────────────────────────
+  // ── Dashboard Queues (3+) ───────────────────────────
   route('GET', '/Dashboard/GetEmailQueue', () => MockDB.tables.emailQueue || []);
   route('GET', '/Dashboard/GetShippingQueue', () => MockDB.tables.shippingQueue || []);
   route('GET', '/Financials/GetAtRiskAccounts', () => MockDB.tables.atRiskAccounts || []);
   route('GET', '/Financials/GetRevenueTrending', () => MockDB.tables.revenueTrending || []);
+
+  // ── LoanerTrans (2) ──────────────────────────────────
+  route('GET', '/LoanerTrans/GetAllLoanerTransList', () => MockDB.getAll('loanerTrans'));
+  route('POST', '/LoanerTrans/GetAllLoanerTransList', (p, body) => MockDB.paginate(MockDB.getAll('loanerTrans'), body?.Pagination));
+
+  // ── Emails (4) ────────────────────────────────────────
+  route('GET', '/Email/GetAllEmailList', () => MockDB.getAll('emails'));
+  route('POST', '/Email/GetAllEmailList', (p, body) => MockDB.paginate(MockDB.getAll('emails'), body?.Pagination));
+  route('GET', '/Email/GetAllEmailTypes', () => MockDB.getAll('emailTypes'));
+  route('GET', '/Email/GetEmailAttachments', (p) => MockDB.getFiltered('emailAttachments', a => a.lEmailKey === int(p.plEmailKey)));
+
+  // ── ShippingCharges (2) ───────────────────────────────
+  route('GET', '/ShippingCharge/GetAllShippingChargeList', () => MockDB.getAll('shippingCharges'));
+  route('POST', '/ShippingCharge/GetAllShippingChargeList', (p, body) => MockDB.paginate(MockDB.getAll('shippingCharges'), body?.Pagination));
 
   // ── DevelopmentList (6) ───────────────────────────────
   route('POST', '/DevelopmentList/GetDevelopmentTodoList', () => MockDB.getAll('devTodoList'));
@@ -537,6 +551,185 @@ const MockAPI = (() => {
   route('GET', '/DevelopmentList/GetAllTodoDetails', (p) => MockDB.getFiltered('devTodoList', t => t.plToDoID === int(p.plToDoID)));
   route('GET', '/DevelopmentList/GetAllTodoStatuses', () => MockDB.getAll('devTodoStatuses'));
   route('GET', '/DevelopmentList/GetAllTodoPriorities', () => MockDB.getAll('devTodoPriorities'));
+
+  // ── Dashboard Metrics (computed) ─────────────────────
+  route('GET', '/Dashboard/GetRepairMetrics', (p) => {
+    const repairs = MockDB.getAll('repairs');
+    const now = new Date();
+    const mStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const qMonth = Math.floor(now.getMonth() / 3) * 3;
+    const qStart = new Date(now.getFullYear(), qMonth, 1);
+    const yStart = new Date(now.getFullYear(), 0, 1);
+
+    function periodStart(period) {
+      if (period === 'QTD') return qStart;
+      if (period === 'YTD') return yStart;
+      return mStart;
+    }
+
+    const period = p.period || 'MTD';
+    const pStart = periodStart(period);
+
+    // Filter to period
+    const inPeriod = repairs.filter(r => {
+      const d = r.dtDateIn ? new Date(r.dtDateIn) : null;
+      return d && d >= pStart && d <= now;
+    });
+
+    // TAT: days between dtDateIn and dtDateOut where both exist
+    const withTat = inPeriod.filter(r => r.dtDateIn && r.dtDateOut);
+    const tats = withTat.map(r => {
+      const d1 = new Date(r.dtDateIn), d2 = new Date(r.dtDateOut);
+      return Math.max(0, Math.round((d2 - d1) / 86400000));
+    });
+    const avgTat = tats.length ? (tats.reduce((a, b) => a + b, 0) / tats.length) : 0;
+
+    // Throughput: shipped in period
+    const shipped = repairs.filter(r => {
+      const d = r.dtShipDate ? new Date(r.dtShipDate) : null;
+      return d && d >= pStart && d <= now;
+    });
+
+    // On-time ship %: shipped within 10 business days of dtDateIn
+    const SLA_DAYS = 10;
+    const onTime = shipped.filter(r => {
+      if (!r.dtDateIn || !r.dtShipDate) return false;
+      const days = Math.round((new Date(r.dtShipDate) - new Date(r.dtDateIn)) / 86400000);
+      return days <= SLA_DAYS;
+    });
+    const onTimePct = shipped.length ? Math.round((onTime.length / shipped.length) * 100) : 0;
+
+    // In-house: has dtDateIn but no dtDateOut
+    const inHouse = repairs.filter(r => r.dtDateIn && !r.dtDateOut).length;
+
+    // Top scope types by volume
+    const byType = {};
+    inPeriod.forEach(r => {
+      const st = r.sScopeTypeDesc || 'Unknown';
+      if (!byType[st]) byType[st] = { type: st, count: 0, tats: [], inProgress: 0, completed: 0 };
+      byType[st].count++;
+      if (r.dtDateIn && r.dtDateOut) {
+        const days = Math.max(0, Math.round((new Date(r.dtDateOut) - new Date(r.dtDateIn)) / 86400000));
+        byType[st].tats.push(days);
+        byType[st].completed++;
+      } else if (r.dtDateIn && !r.dtDateOut) {
+        byType[st].inProgress++;
+      }
+    });
+    const scopeTypes = Object.values(byType)
+      .map(s => ({
+        type: s.type,
+        count: s.count,
+        avgTat: s.tats.length ? +(s.tats.reduce((a, b) => a + b, 0) / s.tats.length).toFixed(1) : null,
+        inProgress: s.inProgress,
+        completed: s.completed
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      avgTat: +avgTat.toFixed(1),
+      throughput: shipped.length,
+      onTimePct,
+      inHouse,
+      totalInPeriod: inPeriod.length,
+      scopeTypes
+    };
+  });
+
+  // ── Dashboard TAT Matrix (computed) ─────────────────
+  route('GET', '/Dashboard/GetTATMatrix', (p) => {
+    const repairs = MockDB.getAll('repairs');
+    const levels = MockDB.getAll('repairLevels');
+    const now = new Date();
+    const outsourcedOnly = p.outsourced === 'true';
+    const inHouseOnly = p.inhouse === 'true';
+
+    // Time windows
+    const windows = [
+      { label: 'Current Month', start: new Date(now.getFullYear(), now.getMonth(), 1) },
+      { label: 'Last 30 Days', start: new Date(now.getTime() - 30 * 86400000) },
+      { label: 'Last 3 Months', start: new Date(now.getTime() - 90 * 86400000) },
+      { label: 'Last 6 Months', start: new Date(now.getTime() - 180 * 86400000) }
+    ];
+
+    // Map repair status to repair level
+    function repairLevel(r) {
+      const s = (r.sRepairStatus || '').toLowerCase();
+      if (s.includes('minor')) return 'Minor';
+      if (s.includes('mid')) return 'Mid-Level';
+      if (s.includes('major')) return 'Major';
+      if (s.includes('vsi') || s.includes('rigid')) return 'VSI';
+      return 'Other';
+    }
+
+    // Filter outsourced
+    let filtered = repairs;
+    if (outsourcedOnly) filtered = filtered.filter(r => r.bOutsourced === true);
+    if (inHouseOnly) filtered = filtered.filter(r => r.bOutsourced !== true);
+
+    // Only repairs with TAT
+    const withTat = filtered.filter(r => r.dtDateIn && r.dtDateOut);
+
+    // Build level x window matrix
+    const levelNames = ['Minor', 'Mid-Level', 'Major', 'VSI'];
+    const matrix = levelNames.map(level => {
+      const row = { level };
+      windows.forEach(w => {
+        const inWindow = withTat.filter(r => {
+          const d = new Date(r.dtDateOut);
+          return d >= w.start && d <= now && repairLevel(r) === level;
+        });
+        const tats = inWindow.map(r => Math.max(0, Math.round((new Date(r.dtDateOut) - new Date(r.dtDateIn)) / 86400000)));
+        row[w.label] = {
+          avgTat: tats.length ? +(tats.reduce((a, b) => a + b, 0) / tats.length).toFixed(1) : null,
+          count: inWindow.length
+        };
+      });
+      return row;
+    });
+
+    // TAT by scope type (top 15)
+    const byType = {};
+    withTat.forEach(r => {
+      const st = r.sScopeTypeDesc || 'Unknown';
+      if (!byType[st]) byType[st] = { type: st, tats: [], counts: {} };
+      const tat = Math.max(0, Math.round((new Date(r.dtDateOut) - new Date(r.dtDateIn)) / 86400000));
+      byType[st].tats.push(tat);
+      windows.forEach(w => {
+        const d = new Date(r.dtDateOut);
+        if (d >= w.start && d <= now) {
+          if (!byType[st].counts[w.label]) byType[st].counts[w.label] = { tats: [], count: 0 };
+          byType[st].counts[w.label].tats.push(tat);
+          byType[st].counts[w.label].count++;
+        }
+      });
+    });
+    const scopeTypes = Object.values(byType)
+      .map(s => {
+        const row = { type: s.type, totalCount: s.tats.length, avgTat: +(s.tats.reduce((a, b) => a + b, 0) / s.tats.length).toFixed(1) };
+        windows.forEach(w => {
+          const c = s.counts[w.label];
+          row[w.label] = c ? { avgTat: +(c.tats.reduce((a, b) => a + b, 0) / c.tats.length).toFixed(1), count: c.count } : { avgTat: null, count: 0 };
+        });
+        return row;
+      })
+      .sort((a, b) => b.totalCount - a.totalCount)
+      .slice(0, 15);
+
+    return { matrix, scopeTypes, windows: windows.map(w => w.label) };
+  });
+
+  // ── Dashboard Flags (6) ─────────────────────────────
+  route('GET', '/Flag/GetAllFlags', () => MockDB.getAll('flags'));
+  route('GET', '/Flag/GetAllFlagTypes', () => MockDB.getAll('flagTypes'));
+  route('GET', '/Flag/GetAllFlagLocations', () => MockDB.getAll('flagLocations'));
+  route('GET', '/Flag/GetAllFlagLocationsUsed', () => MockDB.getAll('flagLocationsUsed'));
+  route('GET', '/Flag/GetAllFlagInstrumentTypes', () => MockDB.getAll('flagInstrumentTypes'));
+  route('GET', '/Flag/GetFlagsByType', (p) => {
+    const typeKey = int(p.plFlagTypeKey);
+    if (!typeKey) return MockDB.getAll('flags');
+    return MockDB.getFiltered('flags', f => f.lFlagTypeKey === typeKey);
+  });
 
   console.log('[MockAPI] ' + _routes.length + ' routes registered');
 

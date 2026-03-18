@@ -2,25 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Dashboard — Searches | TSI Redesign</title>
+  <title>Dashboard — Quick Search | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* Additional page-local vars */
     :root{--hover:#CFFAFE}
 
-    /* PAGE BODY — override for flex column layout */
     .page-body{display:flex;flex-direction:column;overflow:hidden}
-
-    /* STAT STRIP — overrides only (base in styles.css) */
-    .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
-    .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
-    .stat-chip:hover{background:var(--bg)}
-    .stat-chip.alert{background:#FEF9F9}
-    .stat-chip.warn{background:#FFFDF7}
-    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
-    .stat-chip .s-val{font-size:16px}
-    .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.4px}
 
     /* SUBNAV */
     .subnav{display:flex;align-items:center;gap:0;background:linear-gradient(to bottom,#A8C8E0,#C0D8ED);border-bottom:2px solid #98BBDA;padding:0 14px;flex-shrink:0;overflow-x:auto}
@@ -29,11 +17,21 @@
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
     .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
 
-    /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
-    .toolbar-search{display:flex;align-items:center;gap:6px}
-    .search-input{height:30px;width:260px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
-    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    /* SEARCH FORM */
+    .search-panel{padding:20px 24px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0}
+    .search-panel h3{margin:0 0 14px 0;font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px}
+    .search-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+    .field-group{display:flex;flex-direction:column;gap:4px}
+    .field-group label{font-size:10.5px;font-weight:600;color:var(--label);text-transform:uppercase;letter-spacing:.3px}
+    .field-group input{height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card)}
+    .field-group input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+    .btn-search{height:34px;padding:0 20px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px}
+    .btn-search:hover{background:#1A3B5C}
+    .btn-search svg{width:14px;height:14px}
+    .btn-clear{height:34px;padding:0 14px;background:var(--card);color:var(--label);border:1px solid var(--border-dk);border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit}
+    .btn-clear:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+    .search-actions{display:flex;gap:6px;align-items:end}
+    .search-hint{margin-top:8px;font-size:10.5px;color:var(--muted);font-style:italic}
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
@@ -41,16 +39,25 @@
     thead{position:sticky;top:0;z-index:2}
     th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
     th:last-child{border-right:none}
-    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    td{padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
-    tbody tr:hover{background:var(--hover)}
+    tbody tr:hover{background:var(--hover);cursor:pointer}
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .b-waiting{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
-    .b-approved{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
-    .b-complete{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-repair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .b-scope{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
+    .b-client{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+
+    /* EMPTY STATE */
+    .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--muted)}
+    .empty-state svg{width:48px;height:48px;opacity:.3;margin-bottom:12px}
+    .empty-state h4{margin:0 0 6px 0;font-size:14px;font-weight:600;color:var(--label)}
+    .empty-state p{margin:0;font-size:12px}
+
+    /* LINK STYLE */
+    .link-cell{color:var(--navy);font-weight:500;cursor:pointer;text-decoration:none}
+    .link-cell:hover{text-decoration:underline}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -61,143 +68,69 @@
 <body>
 <div class="shell">
 
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <!-- Injected by shell.js -->
-  </nav>
+  <nav class="sidebar"></nav>
 
-  <!-- MAIN -->
   <div class="main">
-    <header class="topbar">
-      <!-- Injected by shell.js -->
-    </header>
+    <header class="topbar"></header>
 
-    <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
-        </div>
-      </div>
-
       <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab active" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <div class="subnav" id="dashSubnav"></div>
 
-      <!-- TOOLBAR -->
-      <div class="toolbar">
-        <div class="toolbar-search">
-          <input class="search-input" id="searchInput" type="text" placeholder="Search requests…"/>
+      <!-- SEARCH FORM -->
+      <div class="search-panel">
+        <h3>Quick Search</h3>
+        <div class="search-grid">
+          <div class="field-group">
+            <label>Work Order #</label>
+            <input type="text" id="searchWO" placeholder="e.g. NR260301..." onkeydown="if(event.key==='Enter')doSearch()"/>
+          </div>
+          <div class="field-group">
+            <label>Serial Number</label>
+            <input type="text" id="searchSN" placeholder="e.g. 2200456..." onkeydown="if(event.key==='Enter')doSearch()"/>
+          </div>
+          <div class="field-group">
+            <label>Client Name</label>
+            <input type="text" id="searchClient" placeholder="e.g. Bayhealth..." onkeydown="if(event.key==='Enter')doSearch()"/>
+          </div>
+          <div class="search-actions">
+            <button class="btn-search" onclick="doSearch()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Search
+            </button>
+            <button class="btn-clear" onclick="clearSearch()">Clear</button>
+          </div>
         </div>
+        <div class="search-hint">Enter one or more fields, then press Search. Results appear below.</div>
       </div>
 
-      <!-- DATA TABLE -->
-      <div class="table-wrap">
+      <!-- RESULTS: EMPTY STATE (shown initially) -->
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h4>Enter search criteria above</h4>
+        <p>Search by work order number, serial number, or client name</p>
+      </div>
+
+      <!-- RESULTS TABLE (hidden initially) -->
+      <div class="table-wrap" id="resultsWrap" style="display:none">
         <table>
           <thead>
             <tr>
-              <th style="width:90px">Search ID</th>
-              <th>Client</th>
-              <th>Model Requested</th>
-              <th style="width:90px">Date</th>
-              <th style="width:80px">Budget</th>
-              <th style="width:130px">Status</th>
+              <th style="width:80px">Type</th>
+              <th style="width:110px">ID</th>
+              <th>Name / Description</th>
+              <th>Details</th>
+              <th style="width:70px;text-align:center">Link</th>
             </tr>
           </thead>
-          <tbody id="searchesTbody">
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1042</td>
-              <td style="font-weight:500">Memorial Hermann</td>
-              <td>Olympus GIF-1TH190</td>
-              <td style="white-space:nowrap">03/12/2026</td>
-              <td>$18,000</td>
-              <td><span class="badge b-inrepair">Searching</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1041</td>
-              <td style="font-weight:500">Piedmont Healthcare</td>
-              <td>Pentax EC-3890Li</td>
-              <td style="white-space:nowrap">03/10/2026</td>
-              <td>$14,500</td>
-              <td><span class="badge b-waiting">Found — Pending</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1040</td>
-              <td style="font-weight:500">Orlando Health</td>
-              <td>Karl Storz 11301BN1</td>
-              <td style="white-space:nowrap">03/08/2026</td>
-              <td>$22,000</td>
-              <td><span class="badge b-inrepair">Searching</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1039</td>
-              <td style="font-weight:500">Baptist Health</td>
-              <td>Olympus BF-H190</td>
-              <td style="white-space:nowrap">03/05/2026</td>
-              <td>$11,000</td>
-              <td><span class="badge b-approved">Sourced</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1038</td>
-              <td style="font-weight:500">Northside Hospital</td>
-              <td>Fujifilm EB-710XP</td>
-              <td style="white-space:nowrap">03/03/2026</td>
-              <td>$16,500</td>
-              <td><span class="badge b-complete">Fulfilled</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;color:var(--navy)">SR-1037</td>
-              <td style="font-weight:500">HCA West Kendall</td>
-              <td>Olympus GIF-HQ190</td>
-              <td style="white-space:nowrap">02/28/2026</td>
-              <td>$19,000</td>
-              <td><span class="badge b-complete">Fulfilled</span></td>
-            </tr>
-          </tbody>
+          <tbody id="resultsTbody"></tbody>
         </table>
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="searchRecordInfo">Showing <strong>6</strong> search requests</div>
+        <div class="record-info" id="searchRecordInfo">Enter search criteria to begin</div>
         <div></div>
       </div>
 
@@ -210,46 +143,168 @@
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
-// ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// ── Live search filter ──
-document.getElementById('searchInput').addEventListener('input', function() {
-  const q = this.value.trim().toLowerCase();
-  const rows = document.querySelectorAll('#searchesTbody tr');
-  let visible = 0;
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    const show = !q || text.includes(q);
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  document.getElementById('searchRecordInfo').innerHTML =
-    'Showing <strong>' + visible + '</strong> search request' + (visible !== 1 ? 's' : '');
-});
-
-// Sync KPI stats from main dashboard
 (function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
+'use strict';
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+window.doSearch = function() {
+  const wo = document.getElementById('searchWO').value.trim().toLowerCase();
+  const sn = document.getElementById('searchSN').value.trim().toLowerCase();
+  const cl = document.getElementById('searchClient').value.trim().toLowerCase();
+
+  if (!wo && !sn && !cl) {
+    document.getElementById('emptyState').style.display = '';
+    document.getElementById('resultsWrap').style.display = 'none';
+    document.getElementById('searchRecordInfo').innerHTML = 'Enter search criteria to begin';
+    return;
+  }
+
+  const results = [];
+
+  // Search repairs by WO number
+  if (wo) {
+    try {
+      const repairs = MockDB.getAll('repairs');
+      const matches = repairs.filter(r => {
+        const woNum = (r.sWorkOrderNumber || '').toLowerCase();
+        return woNum.includes(wo);
+      }).slice(0, 50);
+      matches.forEach(r => {
+        const woDisplay = r.sWorkOrderNumber || String(r.lRepairKey);
+        results.push({
+          type: 'Repair',
+          badge: 'b-repair',
+          id: woDisplay,
+          name: r.sScopeTypeDesc || r.sScopeModelName || '',
+          details: (r.sClientName1 || '') + (r.sDepartmentName ? ' / ' + r.sDepartmentName : ''),
+          href: 'repairs.html?repairKey=' + r.lRepairKey
+        });
+      });
+    } catch(e) {}
+  }
+
+  // Search scopes by serial number
+  if (sn) {
+    try {
+      const scopes = MockDB.getAll('scopes');
+      const matches = scopes.filter(s => {
+        const serial = (s.sSerialNumber || '').toLowerCase();
+        return serial.includes(sn);
+      }).slice(0, 50);
+      matches.forEach(s => {
+        results.push({
+          type: 'Scope',
+          badge: 'b-scope',
+          id: s.sSerialNumber || String(s.lScopeKey),
+          name: s.sScopeTypeDesc || '',
+          details: (s.sRigidOrFlexible === 'F' ? 'Flexible' : s.sRigidOrFlexible === 'R' ? 'Rigid' : s.sRigidOrFlexible || '') + (s.sScopeIsDead === 'Y' ? ' (Dead)' : ''),
+          href: 'departments.html?scopeKey=' + s.lScopeKey
+        });
+      });
+    } catch(e) {}
+  }
+
+  // Search clients by name
+  if (cl) {
+    try {
+      const clients = MockDB.getAll('clients');
+      const matches = clients.filter(c => {
+        const name = (c.sClientName1 || '').toLowerCase();
+        return name.includes(cl);
+      }).slice(0, 50);
+      matches.forEach(c => {
+        const city = c.sMailCity || c.sPhysCity || '';
+        const state = c.sMailState || c.sPhysState || '';
+        results.push({
+          type: 'Client',
+          badge: 'b-client',
+          id: String(c.lClientKey),
+          name: c.sClientName1 || '',
+          details: city && state ? city + ', ' + state : city || state || '',
+          href: 'clients.html?clientKey=' + c.lClientKey
+        });
+      });
+    } catch(e) {}
+  }
+
+  // Also search repairs by serial number if sn provided
+  if (sn) {
+    try {
+      const repairs = MockDB.getAll('repairs');
+      const matches = repairs.filter(r => {
+        const serial = (r.sSerialNumber || '').toLowerCase();
+        return serial.includes(sn);
+      }).slice(0, 25);
+      matches.forEach(r => {
+        const woDisplay = r.sWorkOrderNumber || String(r.lRepairKey);
+        // Avoid duplicates
+        if (!results.find(x => x.type === 'Repair' && x.id === woDisplay)) {
+          results.push({
+            type: 'Repair',
+            badge: 'b-repair',
+            id: woDisplay,
+            name: r.sScopeTypeDesc || r.sScopeModelName || '',
+            details: 'SN: ' + (r.sSerialNumber || '') + ' | ' + (r.sClientName1 || ''),
+            href: 'repairs.html?repairKey=' + r.lRepairKey
+          });
+        }
+      });
+    } catch(e) {}
+  }
+
+  // Render results
+  const tbody = document.getElementById('resultsTbody');
+  const emptyState = document.getElementById('emptyState');
+  const resultsWrap = document.getElementById('resultsWrap');
+
+  if (results.length === 0) {
+    emptyState.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+      '<h4>No results found</h4><p>Try adjusting your search terms</p>';
+    emptyState.style.display = '';
+    resultsWrap.style.display = 'none';
+    document.getElementById('searchRecordInfo').innerHTML = 'No results found';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  resultsWrap.style.display = '';
+
+  tbody.innerHTML = results.map(r => {
+    return '<tr onclick="window.location=\'' + r.href + '\'">' +
+      '<td><span class="badge ' + r.badge + '">' + r.type + '</span></td>' +
+      '<td style="font-weight:600;font-family:monospace;font-size:11px;color:var(--navy)">' + esc(r.id) + '</td>' +
+      '<td style="font-weight:500">' + esc(r.name) + '</td>' +
+      '<td style="color:var(--muted)">' + esc(r.details) + '</td>' +
+      '<td style="text-align:center"><a class="link-cell" href="' + r.href + '">Open</a></td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('searchRecordInfo').innerHTML =
+    'Found <strong>' + results.length + '</strong> result' + (results.length !== 1 ? 's' : '');
+
+  API.UI.updateDemoBadge('live');
+};
+
+window.clearSearch = function() {
+  document.getElementById('searchWO').value = '';
+  document.getElementById('searchSN').value = '';
+  document.getElementById('searchClient').value = '';
+  document.getElementById('emptyState').innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+    '<h4>Enter search criteria above</h4><p>Search by work order number, serial number, or client name</p>';
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('resultsWrap').style.display = 'none';
+  document.getElementById('searchRecordInfo').innerHTML = 'Enter search criteria to begin';
+  document.getElementById('searchWO').focus();
+};
 
 // ── Init ──
-(function init() {
-  API.UI.init();
+API.UI.init();
+API.UI.updateDemoBadge('live');
+
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>

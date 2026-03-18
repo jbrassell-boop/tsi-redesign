@@ -135,6 +135,75 @@
     return html;
   }
 
+  /* ── DASHBOARD SUBNAV ──────────────────────────────────
+     Single source of truth for the dashboard tab strip.
+     Auto-renders when a #dashSubnav element is present.  */
+  var DASH_TABS = [
+    { id: 'scopes',       label: 'Scopes',            href: 'dashboard.html' },
+    { id: 'tasks',        label: 'Tasks',             href: 'dashboard_tasks.html',        badge: '5',  badgeId: 'taskTabBadge' },
+    { id: 'loaners',      label: 'Loaners',           href: 'dashboard_loaners.html',      badge: '2',  badgeStyle: 'background:var(--amber)' },
+    { id: 'emails',       label: 'Emails',            href: 'dashboard_emails.html' },
+    { id: 'shipping',     label: 'Shipping Status',   href: 'dashboard_shipping.html' },
+    { id: 'inventory',    label: 'Inventory',          href: 'dashboard_inventory.html' },
+    { id: 'acquisitions', label: 'Acquisitions',       href: 'dashboard_acquisitions.html' },
+    { id: 'searches',     label: 'Searches',           href: 'dashboard_searches.html' },
+    { id: 'metrics',      label: 'Repair Metrics',     href: 'dashboard_metrics.html' },
+    { id: 'tat',          label: 'Turn Around Times',  href: 'dashboard_tat.html' },
+    { id: 'flags',        label: 'Flags',              href: 'dashboard_flags.html',        badge: '8' }
+  ];
+
+  /** Map filename → tab id for auto-detection */
+  var DASH_FILE_MAP = {};
+  for (var t = 0; t < DASH_TABS.length; t++) DASH_FILE_MAP[DASH_TABS[t].href] = DASH_TABS[t].id;
+
+  /**
+   * renderDashboardSubnav(activeTab, badges)
+   *   activeTab — tab id string (e.g. 'scopes', 'tasks')
+   *   badges   — optional object of { tabId: { text, style, id } } overrides
+   *
+   * If no activeTab supplied, auto-detects from the current filename.
+   * Populates #dashSubnav (or first .subnav) with tab links.
+   */
+  function renderDashboardSubnav(activeTab, badges) {
+    var el = document.getElementById('dashSubnav') || document.querySelector('.subnav');
+    if (!el) return;
+
+    // Auto-detect active tab from URL if not supplied
+    if (!activeTab) {
+      var path = window.location.pathname;
+      var file = path.substring(path.lastIndexOf('/') + 1) || 'dashboard.html';
+      if (file.indexOf('.') === -1) file += '.html';
+      activeTab = DASH_FILE_MAP[file] || 'scopes';
+    }
+
+    badges = badges || {};
+    var html = '';
+    for (var i = 0; i < DASH_TABS.length; i++) {
+      var tab = DASH_TABS[i];
+      var isActive = (tab.id === activeTab);
+      var cls = 'subnav-tab' + (isActive ? ' active' : '');
+
+      // Badge: allow per-call overrides, fall back to defaults
+      var b = badges[tab.id] || {};
+      var bText  = b.text  !== undefined ? b.text  : (tab.badge || '');
+      var bStyle = b.style !== undefined ? b.style : (tab.badgeStyle || '');
+      var bId    = b.id    !== undefined ? b.id    : (tab.badgeId || '');
+
+      html += '<a class="' + cls + '" href="' + tab.href + '">' + tab.label;
+      if (bText) {
+        html += '<span class="tab-badge"';
+        if (bId)    html += ' id="' + bId + '"';
+        if (bStyle) html += ' style="' + bStyle + '"';
+        html += '>' + bText + '</span>';
+      }
+      html += '</a>';
+    }
+    el.innerHTML = html;
+  }
+
+  // Expose globally so pages can call it with overrides if needed
+  window.renderDashboardSubnav = renderDashboardSubnav;
+
   /* ── INJECT IMMEDIATELY ─────────────────────────────────
      Scripts are loaded at the bottom of <body>, so the sidebar
      and topbar DOM elements already exist. Injecting synchronously
@@ -143,6 +212,10 @@
   var topbar  = document.querySelector('.topbar');
   if (sidebar) sidebar.innerHTML = buildSidebar();
   if (topbar)  topbar.innerHTML  = buildTopbar();
+
+  // Auto-render dashboard subnav if placeholder exists
+  var dashSubnav = document.getElementById('dashSubnav');
+  if (dashSubnav) renderDashboardSubnav();
 
   // Close Orders menu on outside click
   document.addEventListener('click', function (e) {

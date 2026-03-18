@@ -35,11 +35,17 @@
     .search-input{height:30px;width:260px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
     .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
 
+    /* SEGMENTED BUTTONS */
+    .seg-group{display:flex;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:4px 12px;font-size:11px;font-weight:500;background:var(--card);border:none;border-right:1px solid var(--border-dk);cursor:pointer;color:var(--text);font-family:inherit}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn.active{background:var(--navy);color:#fff}
+
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:760px}
+    table{width:100%;border-collapse:collapse;min-width:860px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
     td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
@@ -47,9 +53,9 @@
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .b-hold{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
-    .b-complete{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-out{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .b-returned{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-overdue{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -76,56 +82,38 @@
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+      <div class="stat-strip" id="loanerStatStrip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">&#x1F4CB;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">0</div><div class="s-lbl">Total Loaners</div></div>
         </div>
         <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+          <div class="s-icon" style="background:#FFFBEB">&#x21BA;</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiOut">0</div><div class="s-lbl">Currently Out</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
+          <div class="s-icon" style="background:#E8F5E9">&#x2713;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiReturned">0</div><div class="s-lbl">Returned</div></div>
         </div>
         <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#FEF2F2">&#x26A0;</div>
+          <div class="s-data"><div class="s-val s-red" id="kpiOverdue">0</div><div class="s-lbl">Overdue (&gt;30d)</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab active" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
-        <div class="toolbar-search">
-          <input class="search-input" id="loanerSearch" type="text" placeholder="Search loaners…" oninput="filterLoaners(this.value)"/>
+        <div class="seg-group" id="statusFilter">
+          <button class="seg-btn active">All</button>
+          <button class="seg-btn">Out</button>
+          <button class="seg-btn">Returned</button>
+          <button class="seg-btn">Overdue</button>
+        </div>
+        <div class="toolbar-search" style="margin-left:auto">
+          <input class="search-input" id="loanerSearch" type="text" placeholder="Search loaners..." oninput="applyFilters()"/>
         </div>
       </div>
 
@@ -134,70 +122,25 @@
         <table id="loanerTable">
           <thead>
             <tr>
-              <th style="width:110px">Loaner ID</th>
-              <th>Client</th>
-              <th>Scope Model</th>
-              <th style="width:110px">Ship Date</th>
-              <th style="width:130px">Expected Return</th>
-              <th style="width:90px">Status</th>
+              <th style="width:110px" data-col="dateOut">Date Out</th>
+              <th data-col="scopeType">Scope Type</th>
+              <th data-col="serial">Serial#</th>
+              <th data-col="client">Client</th>
+              <th data-col="dept">Department</th>
+              <th style="width:110px" data-col="wo">WO#</th>
+              <th style="width:150px" data-col="tracking">Tracking#</th>
+              <th style="width:90px" data-col="status">Status</th>
             </tr>
           </thead>
           <tbody id="loanerTbody">
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006041</td>
-              <td style="font-weight:500">Memorial Hermann</td>
-              <td>Olympus GIF-H190</td>
-              <td>03/01/2026</td>
-              <td>03/15/2026</td>
-              <td><span class="badge b-inrepair">Out</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006040</td>
-              <td style="font-weight:500">Piedmont Healthcare</td>
-              <td>Pentax EG-2990i</td>
-              <td>02/25/2026</td>
-              <td>03/11/2026</td>
-              <td><span class="badge b-hold">Overdue</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006039</td>
-              <td style="font-weight:500">Orlando Health</td>
-              <td>Fujifilm EG-760R</td>
-              <td>02/28/2026</td>
-              <td>03/14/2026</td>
-              <td><span class="badge b-inrepair">Out</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006038</td>
-              <td style="font-weight:500">Baptist Health</td>
-              <td>Olympus CF-HQ190L</td>
-              <td>02/20/2026</td>
-              <td>03/06/2026</td>
-              <td><span class="badge b-complete">Returned</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006037</td>
-              <td style="font-weight:500">HCA West Kendall</td>
-              <td>Olympus TJF-Q180V</td>
-              <td>02/18/2026</td>
-              <td>03/04/2026</td>
-              <td><span class="badge b-complete">Returned</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight:600;font-family:monospace;font-size:11px">NL26006036</td>
-              <td style="font-weight:500">Tift Regional</td>
-              <td>Pentax EC-3890Li</td>
-              <td>02/15/2026</td>
-              <td>03/01/2026</td>
-              <td><span class="badge b-complete">Returned</span></td>
-            </tr>
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="loanerRecordInfo">Showing <strong>6</strong> loaners</div>
+        <div class="record-info" id="loanerRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -206,57 +149,201 @@
 </div>
 
 <script src="shell.js"></script>
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
+<script src="api.js"></script>
 <script>
-// Sync KPI stats from main dashboard
-(function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
 
-// Close Orders dropdown when clicking outside
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
-  if (wrap && !wrap.contains(e.target)) {
-    menu.style.display = 'none';
-    menu.classList.remove('open');
+// ===============================================================
+//  LOANER FLEET TRACKING — Real Nashville data
+// ===============================================================
+let LOANERS = [];
+let filterStatus = 'All';
+let searchTerm = '';
+let sortCol = 'dateOut';
+let sortDir = 'desc';
+
+// ── Parse sDateOut (YYYYMMDDHHMMSS) → Date ──
+function parseLoanerDate(s) {
+  if (!s) return null;
+  // Handle YYYYMMDDHHMMSS format
+  if (/^\d{14}$/.test(s)) {
+    const y = s.substring(0,4), m = s.substring(4,6), d = s.substring(6,8);
+    const hh = s.substring(8,10), mm = s.substring(10,12), ss = s.substring(12,14);
+    return new Date(+y, +m-1, +d, +hh, +mm, +ss);
   }
-});
-
-// Toggle menu display on open class
-const _menu = document.getElementById('newOrderMenu');
-const _menuObserver = new MutationObserver(function() {
-  _menu.style.display = _menu.classList.contains('open') ? 'block' : 'none';
-});
-_menuObserver.observe(_menu, {attributes: true, attributeFilter: ['class']});
-
-// Simple client-side filter
-function filterLoaners(term) {
-  const q = term.toLowerCase();
-  const rows = document.querySelectorAll('#loanerTbody tr');
-  let visible = 0;
-  rows.forEach(function(row) {
-    const text = row.textContent.toLowerCase();
-    const show = !q || text.includes(q);
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  document.getElementById('loanerRecordInfo').innerHTML =
-    'Showing <strong>' + visible + '</strong> loaner' + (visible !== 1 ? 's' : '');
+  // Handle ISO or other date formats
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
 }
+
+function fmtDate(d) {
+  if (!d) return '';
+  return String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0') + '/' + d.getFullYear();
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Derive loaner status ──
+function deriveStatus(r, dateOut) {
+  // If repair is closed → Returned
+  if (r.sRepairClosed || r.dtRepairClosed || r.bReturned) return 'Returned';
+  // If out and dateOut > 30 days ago → Overdue
+  if (dateOut) {
+    const now = new Date();
+    const diffDays = (now - dateOut) / (1000*60*60*24);
+    if (diffDays > 30) return 'Overdue';
+  }
+  // If dateOut exists → Out
+  if (dateOut) return 'Out';
+  return 'Out';
+}
+
+// ── Map raw record → UI object ──
+function mapLoaner(r) {
+  const dateOut = parseLoanerDate(r.sDateOut || r.dtDateOut);
+  const status = deriveStatus(r, dateOut);
+  return {
+    id:        r.lLoanerTranKey || 0,
+    dateOut:   dateOut,
+    dateStr:   fmtDate(dateOut),
+    scopeType: r.sScopeTypeDesc || '',
+    serial:    r.sSerialNumber || '',
+    client:    (r.sClientName || r.sClientName1 || '').trim(),
+    dept:      (r.sDepartmentName || '').trim(),
+    wo:        r.sRepairWO || '',
+    tracking:  r.sTrackingNumber || '',
+    status:    status,
+    _raw: r
+  };
+}
+
+// ── Load data ──
+async function loadLoaners() {
+  try {
+    const data = await MockAPI.handleRequest('GET', '/LoanerTrans/GetAllLoanerTransList');
+    const raw = Array.isArray(data) ? data : [];
+    if (raw.length > 0) {
+      LOANERS = raw.map(mapLoaner);
+      console.log('[TSI Loaners] Loaded', LOANERS.length, 'loaner transactions from mock-db');
+      API.UI.updateDemoBadge('live');
+    } else {
+      throw new Error('Empty loaner list');
+    }
+  } catch (e) {
+    console.warn('[TSI Loaners] Mock unavailable:', e.message);
+    LOANERS = [];
+    API.UI.updateDemoBadge('demo');
+  }
+  updateKPIs();
+  renderLoaners();
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  const total = LOANERS.length;
+  const out = LOANERS.filter(l => l.status === 'Out').length;
+  const returned = LOANERS.filter(l => l.status === 'Returned').length;
+  const overdue = LOANERS.filter(l => l.status === 'Overdue').length;
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiOut').textContent = out;
+  document.getElementById('kpiReturned').textContent = returned;
+  document.getElementById('kpiOverdue').textContent = overdue;
+}
+
+// ── Filtering & Sorting ──
+function getFiltered() {
+  let list = [...LOANERS];
+  if (filterStatus !== 'All') list = list.filter(l => l.status === filterStatus);
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    list = list.filter(l =>
+      l.client.toLowerCase().includes(q) || l.dept.toLowerCase().includes(q) ||
+      l.scopeType.toLowerCase().includes(q) || l.serial.toLowerCase().includes(q) ||
+      l.wo.toLowerCase().includes(q) || l.tracking.toLowerCase().includes(q) ||
+      l.status.toLowerCase().includes(q) || l.dateStr.includes(q)
+    );
+  }
+  list.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'dateOut') {
+      va = a.dateOut ? a.dateOut.getTime() : 0;
+      vb = b.dateOut ? b.dateOut.getTime() : 0;
+    } else {
+      va = String(a[sortCol] || '').toLowerCase();
+      vb = String(b[sortCol] || '').toLowerCase();
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function statusBadge(s) {
+  if (s === 'Out')      return '<span class="badge b-out">Out</span>';
+  if (s === 'Returned') return '<span class="badge b-returned">Returned</span>';
+  if (s === 'Overdue')  return '<span class="badge b-overdue">Overdue</span>';
+  return '<span class="badge b-out">' + escHtml(s) + '</span>';
+}
+
+function renderLoaners() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('loanerTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No loaners found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(l => `<tr>
+      <td style="white-space:nowrap">${escHtml(l.dateStr)}</td>
+      <td style="font-weight:500">${escHtml(l.scopeType)}</td>
+      <td style="font-family:monospace;font-size:11px">${escHtml(l.serial)}</td>
+      <td style="font-weight:500">${escHtml(l.client)}</td>
+      <td style="color:var(--muted)">${escHtml(l.dept)}</td>
+      <td>${l.wo ? '<a href="repairs.html?wo=' + escHtml(l.wo) + '" style="color:var(--navy);font-weight:600;text-decoration:none;font-size:11.5px">' + escHtml(l.wo) + '</a>' : '<span style="color:var(--muted)">&#8212;</span>'}</td>
+      <td style="font-family:monospace;font-size:10.5px">${escHtml(l.tracking) || '<span style="color:var(--muted)">&#8212;</span>'}</td>
+      <td>${statusBadge(l.status)}</td>
+    </tr>`).join('');
+  }
+  const outCount = filtered.filter(l => l.status === 'Out').length;
+  document.getElementById('loanerRecordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> loaner' + (filtered.length !== 1 ? 's' : '') +
+    ' &middot; <strong>' + outCount + '</strong> out';
+}
+
+function applyFilters() {
+  searchTerm = document.getElementById('loanerSearch').value.trim();
+  renderLoaners();
+}
+
+// ── Status filter wiring ──
+document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterStatus = btn.textContent.trim();
+    renderLoaners();
+  });
+});
+
+// ── Column sort wiring ──
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'asc'; }
+    renderLoaners();
+  });
+});
+
+// ── Init ──
+(async function init() {
+  API.UI.init();
+  await loadLoaners();
+})();
 </script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>

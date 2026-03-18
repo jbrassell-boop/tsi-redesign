@@ -35,11 +35,21 @@
     .search-input{height:30px;width:260px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
     .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
 
+    /* SEGMENTED BUTTONS */
+    .seg-group{display:flex;border:1.5px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:4px 12px;font-size:11px;font-weight:500;background:var(--card);border:none;border-right:1px solid var(--border-dk);cursor:pointer;color:var(--text);font-family:inherit}
+    .seg-btn:last-child{border-right:none}
+    .seg-btn.active{background:var(--navy);color:#fff}
+
+    /* TYPE DROPDOWN */
+    .filter-select{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;outline:none;color:var(--text);background:var(--card);cursor:pointer}
+    .filter-select:focus{border-color:var(--navy)}
+
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:800px}
+    table{width:100%;border-collapse:collapse;min-width:900px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
     td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
@@ -47,14 +57,9 @@
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
-    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .b-waiting{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
-    .b-hold{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
-
-    /* WO LINK */
-    .wo-link{color:var(--navy);font-weight:600;text-decoration:none;font-size:11.5px}
-    .wo-link:hover{text-decoration:underline}
+    .b-sent{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-pending{background:#FFF8E1;color:#B8860B;border:1px solid #F0D060}
+    .b-ignored{background:#F5F5F5;color:#757575;border:1px solid #BDBDBD}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -80,56 +85,41 @@
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
+      <div class="stat-strip" id="emailStatStrip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">&#x1F4E7;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">0</div><div class="s-lbl">Total Emails</div></div>
         </div>
         <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+          <div class="s-icon" style="background:#FFFBEB">&#x23F3;</div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiPending">0</div><div class="s-lbl">Pending</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+          <div class="s-icon" style="background:#E8F5E9">&#x2713;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiSent">0</div><div class="s-lbl">Sent</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#F3E8FD">&#x1F3F7;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTypes">0</div><div class="s-lbl">Email Types</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab active" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
-        <div class="toolbar-search">
-          <input class="search-input" id="emailSearch" type="text" placeholder="Search notifications…" oninput="filterEmails()"/>
+        <div class="seg-group" id="statusFilter">
+          <button class="seg-btn active">All</button>
+          <button class="seg-btn">Pending</button>
+          <button class="seg-btn">Sent</button>
+          <button class="seg-btn">Ignored</button>
+        </div>
+        <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+          <option value="">All Types</option>
+        </select>
+        <div class="toolbar-search" style="margin-left:auto">
+          <input class="search-input" id="emailSearch" type="text" placeholder="Search emails..." oninput="applyFilters()"/>
         </div>
       </div>
 
@@ -138,78 +128,23 @@
         <table id="emailsTable">
           <thead>
             <tr>
-              <th style="width:95px">Date</th>
-              <th>To</th>
-              <th>Subject</th>
-              <th style="width:80px">WO#</th>
-              <th style="width:90px">Type</th>
-              <th style="width:90px">Status</th>
+              <th style="width:100px" data-col="date">Date</th>
+              <th style="width:100px" data-col="type">Type</th>
+              <th data-col="from">From</th>
+              <th data-col="to">To</th>
+              <th data-col="subject">Subject</th>
+              <th style="width:80px" data-col="status">Sent?</th>
             </tr>
           </thead>
           <tbody id="emailsTbody">
-            <tr>
-              <td>03/14/2026</td>
-              <td>Memorial Hermann — SPD</td>
-              <td>Quote Ready: NR26006601 Olympus GIF-H190</td>
-              <td><a class="wo-link" href="repairs.html?wo=6601">NR26006601</a></td>
-              <td>Quote</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td>03/13/2026</td>
-              <td>Piedmont Healthcare — BioMed</td>
-              <td>Repair Complete: NR26006602 Pentax EG-2990i</td>
-              <td><a class="wo-link" href="repairs.html?wo=6602">NR26006602</a></td>
-              <td>Completion</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td>03/13/2026</td>
-              <td>Orlando Health — Endo</td>
-              <td>Approval Needed: NR26006603 Fujifilm EG-760R</td>
-              <td><a class="wo-link" href="repairs.html?wo=6603">NR26006603</a></td>
-              <td>Approval</td>
-              <td><span class="badge b-inrepair">Opened</span></td>
-            </tr>
-            <tr>
-              <td>03/12/2026</td>
-              <td>Baptist Health — BioMed</td>
-              <td>Scope Received: NR26006604 Olympus CF-HQ190L</td>
-              <td><a class="wo-link" href="repairs.html?wo=6604">NR26006604</a></td>
-              <td>Receiving</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td>03/12/2026</td>
-              <td>HCA West Kendall — SPD</td>
-              <td>Shipping Notification: NR26006605</td>
-              <td><a class="wo-link" href="repairs.html?wo=6605">NR26006605</a></td>
-              <td>Shipping</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td>03/11/2026</td>
-              <td>Tift Regional — Endo</td>
-              <td>Invoice #INV-4201: NR26006606</td>
-              <td><a class="wo-link" href="repairs.html?wo=6606">NR26006606</a></td>
-              <td>Invoice</td>
-              <td><span class="badge b-waiting">Pending</span></td>
-            </tr>
-            <tr>
-              <td>03/10/2026</td>
-              <td>HealthSpring — BioMed</td>
-              <td>30-Day Loaner Reminder: L-2024-040</td>
-              <td>—</td>
-              <td>Reminder</td>
-              <td><span class="badge b-hold">Bounced</span></td>
-            </tr>
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="emailRecordInfo">Showing <strong>7</strong> notifications</div>
+        <div class="record-info" id="emailRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -225,53 +160,191 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// ── Orders menu close on outside click ──
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
-  if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
-});
+// ===============================================================
+//  PENDING EMAIL QUEUE — Real Nashville data
+// ===============================================================
+let EMAILS = [];
+let _emailTypes = [];
+let filterStatus = 'All';
+let filterType = '';
+let searchTerm = '';
+let sortCol = 'date';
+let sortDir = 'desc';
 
-// ── Search filter ──
-function filterEmails() {
-  const q = document.getElementById('emailSearch').value.toLowerCase();
-  const rows = document.querySelectorAll('#emailsTbody tr');
-  let visible = 0;
-  rows.forEach(function(row) {
-    const text = row.textContent.toLowerCase();
-    const show = !q || text.includes(q);
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  const info = document.getElementById('emailRecordInfo');
-  if (info) {
-    info.innerHTML = 'Showing <strong>' + visible + '</strong> notification' + (visible !== 1 ? 's' : '');
-  }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtDate(dt) {
+  if (!dt) return '';
+  const d = new Date(dt);
+  if (isNaN(d)) return String(dt).substring(0,10);
+  return String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0') + '/' + d.getFullYear();
 }
 
-// Sync KPI stats from main dashboard
-(function() {
+// ── Derive email status ──
+function deriveEmailStatus(r) {
+  if (r.bIgnore) return 'Ignored';
+  if (r.dtSentDate) return 'Sent';
+  return 'Pending';
+}
+
+// ── Map raw record → UI object ──
+function mapEmail(r) {
+  const status = deriveEmailStatus(r);
+  return {
+    id:      r.lEmailKey || 0,
+    date:    r.dtCreateDate || r.dtCreatedDate || '',
+    dateStr: fmtDate(r.dtCreateDate || r.dtCreatedDate),
+    type:    r.sEmailTypeDesc || '',
+    typeKey: r.lEmailTypeKey || 0,
+    from:    (r.sFrom || '').trim(),
+    to:      (r.sTo || '').trim(),
+    cc:      (r.sCC || '').trim(),
+    subject: (r.sSubject || '').trim(),
+    body:    r.sBody || '',
+    status:  status,
+    sentDate: r.dtSentDate || null,
+    _raw: r
+  };
+}
+
+// ── Load data ──
+async function loadEmails() {
   try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
+    const [emailData, typeData] = await Promise.all([
+      MockAPI.handleRequest('GET', '/Email/GetAllEmailList'),
+      MockAPI.handleRequest('GET', '/Email/GetAllEmailTypes')
+    ]);
+
+    const rawEmails = Array.isArray(emailData) ? emailData : [];
+    _emailTypes = Array.isArray(typeData) ? typeData : [];
+
+    if (rawEmails.length > 0) {
+      EMAILS = rawEmails.map(mapEmail);
+      console.log('[TSI Emails] Loaded', EMAILS.length, 'emails from mock-db');
+      API.UI.updateDemoBadge('live');
+    } else {
+      throw new Error('Empty email list');
     }
-  } catch(e) {}
-})();
+  } catch (e) {
+    console.warn('[TSI Emails] Mock unavailable:', e.message);
+    EMAILS = [];
+    API.UI.updateDemoBadge('demo');
+  }
+
+  // Populate type dropdown — only types where bShowOnDash is true
+  const typeSel = document.getElementById('typeFilter');
+  typeSel.innerHTML = '<option value="">All Types</option>';
+  const dashTypes = _emailTypes.filter(t => t.bShowOnDash);
+  dashTypes.forEach(t => {
+    typeSel.innerHTML += '<option value="' + (t.lEmailTypeKey || '') + '">' + escHtml(t.sEmailType || t.sEmailTypeDesc || '') + '</option>';
+  });
+
+  updateKPIs();
+  renderEmails();
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  const total = EMAILS.length;
+  const pending = EMAILS.filter(e => e.status === 'Pending').length;
+  const sent = EMAILS.filter(e => e.status === 'Sent').length;
+  const types = new Set(EMAILS.map(e => e.type).filter(Boolean)).size;
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiPending').textContent = pending;
+  document.getElementById('kpiSent').textContent = sent;
+  document.getElementById('kpiTypes').textContent = types;
+}
+
+// ── Filtering & Sorting ──
+function getFiltered() {
+  let list = [...EMAILS];
+  if (filterStatus !== 'All') list = list.filter(e => e.status === filterStatus);
+  if (filterType) list = list.filter(e => String(e.typeKey) === filterType);
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    list = list.filter(e =>
+      e.from.toLowerCase().includes(q) || e.to.toLowerCase().includes(q) ||
+      e.subject.toLowerCase().includes(q) || e.type.toLowerCase().includes(q) ||
+      e.status.toLowerCase().includes(q) || e.dateStr.includes(q)
+    );
+  }
+  list.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'date') {
+      va = a.date ? new Date(a.date).getTime() : 0;
+      vb = b.date ? new Date(b.date).getTime() : 0;
+    } else {
+      va = String(a[sortCol] || '').toLowerCase();
+      vb = String(b[sortCol] || '').toLowerCase();
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function statusBadge(s) {
+  if (s === 'Sent')    return '<span class="badge b-sent">Sent</span>';
+  if (s === 'Pending') return '<span class="badge b-pending">Pending</span>';
+  if (s === 'Ignored') return '<span class="badge b-ignored">Ignored</span>';
+  return '<span class="badge b-pending">' + escHtml(s) + '</span>';
+}
+
+function renderEmails() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('emailsTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No emails found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(e => `<tr>
+      <td style="white-space:nowrap">${escHtml(e.dateStr)}</td>
+      <td style="font-size:10.5px">${escHtml(e.type)}</td>
+      <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(e.from)}">${escHtml(e.from)}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(e.to)}">${escHtml(e.to)}</td>
+      <td style="font-weight:500;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(e.subject)}">${escHtml(e.subject)}</td>
+      <td style="text-align:center">${statusBadge(e.status)}</td>
+    </tr>`).join('');
+  }
+  const pendingCount = filtered.filter(e => e.status === 'Pending').length;
+  document.getElementById('emailRecordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> email' + (filtered.length !== 1 ? 's' : '') +
+    ' &middot; <strong>' + pendingCount + '</strong> pending';
+}
+
+function applyFilters() {
+  searchTerm = document.getElementById('emailSearch').value.trim();
+  filterType = document.getElementById('typeFilter').value;
+  renderEmails();
+}
+
+// ── Status filter wiring ──
+document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterStatus = btn.textContent.trim();
+    renderEmails();
+  });
+});
+
+// ── Column sort wiring ──
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'asc'; }
+    renderEmails();
+  });
+});
 
 // ── Init ──
-(function init() {
-  showDataBadge('demo');
+(async function init() {
+  API.UI.init();
+  await loadEmails();
 })();
 </script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>

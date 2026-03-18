@@ -51,26 +51,24 @@
     tbody tr:nth-child(even){background:var(--row-alt)}
     tbody tr:hover{background:var(--hover)}
 
-    /* FLAG ICON CELL */
-    .flag-icon{font-size:16px;line-height:1;display:block;text-align:center}
-
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    /* b-hold = critical (red), b-waiting = warning (amber) — reuse existing style vars */
-    .b-hold{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
-    .b-waiting{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .b-client{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
+    .b-scopetype{background:#F3E5F5;color:#7B1FA2;border:1px solid #CE93D8}
+    .b-scope{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+    .b-repair{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+    .b-active{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+    .b-inactive{background:#ECEFF1;color:#78909C;border:1px solid #CFD8DC}
 
-    /* WO link style */
-    .wo-link{color:var(--navy);font-weight:600;text-decoration:none;cursor:pointer}
-    .wo-link:hover{text-decoration:underline}
+    /* Locations pill list */
+    .loc-pills{display:flex;flex-wrap:wrap;gap:3px}
+    .loc-pill{display:inline-block;padding:1px 6px;border-radius:8px;font-size:9.5px;font-weight:500;background:#EEF2F7;color:var(--label);white-space:nowrap}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .record-info{font-size:11px;color:var(--muted)}
     .record-info strong{color:var(--text)}
     .footer-summary{font-size:11px;color:var(--muted);display:flex;gap:12px}
-    .footer-summary .crit{color:#C62828;font-weight:600}
-    .footer-summary .warn{color:#E65100;font-weight:600}
   </style>
 </head>
 <body>
@@ -91,64 +89,50 @@
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+      <div class="stat-strip" id="kpiStrip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">&#x1F3F3;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kTotal">--</div><div class="s-lbl">Total Flags</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+          <div class="s-icon" style="background:#E3F2FD">&#x1F465;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kClient">--</div><div class="s-lbl">Client</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
+          <div class="s-icon" style="background:#F3E5F5">&#x1F50D;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kScopeType">--</div><div class="s-lbl">Scope Type</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#E8F5E9">&#x1F52C;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kScope">--</div><div class="s-lbl">Scope</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#FFF3E0">&#x1F527;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kRepair">--</div><div class="s-lbl">Repair</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+          <div class="s-data"><div class="s-val s-green" id="kActive">--</div><div class="s-lbl">Active</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab active" href="dashboard_flags.html">Flags<span class="tab-badge">8</span></a>
-      </div>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="filter-group">
-          <span class="filter-label">Severity</span>
-          <div class="seg-group" id="severityFilter">
-            <button class="seg-btn active">All</button>
-            <button class="seg-btn">Critical</button>
-            <button class="seg-btn">Warning</button>
+          <span class="filter-label">Flag Type</span>
+          <div class="seg-group" id="typeFilter">
+            <button class="seg-btn active" data-val="All">All</button>
+            <button class="seg-btn" data-val="Client">Client</button>
+            <button class="seg-btn" data-val="Scope Type">Scope Type</button>
+            <button class="seg-btn" data-val="Scope">Scope</button>
+            <button class="seg-btn" data-val="Repair">Repair</button>
           </div>
         </div>
         <div class="toolbar-search">
-          <input class="search-input" id="flagSearch" type="text" placeholder="Search flags…"/>
+          <input class="search-input" id="flagSearch" type="text" placeholder="Search flags..."/>
         </div>
       </div>
 
@@ -157,13 +141,13 @@
         <table>
           <thead>
             <tr>
-              <th style="width:40px;text-align:center">Flag</th>
-              <th style="width:90px">WO#</th>
-              <th>Client</th>
-              <th>Scope Type</th>
-              <th style="width:90px;text-align:center">Severity</th>
-              <th style="width:100px">Date Flagged</th>
-              <th>Reason</th>
+              <th>Flag Text</th>
+              <th style="width:100px;text-align:center">Flag Type</th>
+              <th style="width:100px">Owner Key</th>
+              <th>Locations</th>
+              <th style="width:100px;text-align:center">Instrument</th>
+              <th style="width:70px;text-align:center">Active</th>
+              <th style="width:90px">Created</th>
             </tr>
           </thead>
           <tbody id="flagsTbody"></tbody>
@@ -172,7 +156,7 @@
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="flagRecordInfo">Loading…</div>
+        <div class="record-info" id="flagRecordInfo">Loading...</div>
         <div class="footer-summary" id="flagSummary"></div>
       </div>
 
@@ -189,123 +173,201 @@
 if (!API.requireAuth()) throw new Error('redirect');
 
 // ═══════════════════════════════════════════════════════
-//  FLAGS DATA
-// ═══════════════════════════════════════════════════════
-const FLAGS = [
-  {icon:'⚠',wo:'NR26006603',client:'Orlando Health',       scope:'Fujifilm EG-760R',      severity:'Critical',dateFlagged:'03/14/2026',reason:'SLA breach — 12d, target 10d'},
-  {icon:'⚠',wo:'NR26006610',client:'Northside Hospital',   scope:'Olympus TJF-Q180V',     severity:'Critical',dateFlagged:'03/13/2026',reason:'Awaiting parts > 5 days'},
-  {icon:'⚠',wo:'NR26006611',client:'Valley Health',        scope:'Pentax EC-3890Li',       severity:'Critical',dateFlagged:'03/13/2026',reason:'Customer escalation received'},
-  {icon:'⚡',wo:'NR26006604',client:'Baptist Health',       scope:'Olympus CF-HQ190L',     severity:'Warning', dateFlagged:'03/12/2026',reason:'Approaching SLA — 8d / 10d'},
-  {icon:'⚡',wo:'NR26006612',client:'Tampa General',        scope:'Olympus GIF-H190',      severity:'Warning', dateFlagged:'03/12/2026',reason:'Quote pending > 3 days'},
-  {icon:'⚡',wo:'NR26006613',client:'Coastal Surgical',     scope:'Karl Storz 13821NKS',   severity:'Warning', dateFlagged:'03/11/2026',reason:'Repeat repair — 3rd visit in 90d'},
-  {icon:'🔴',wo:'NR26006614',client:'Memorial Hermann',     scope:'Olympus BF-H190',       severity:'Critical',dateFlagged:'03/10/2026',reason:'Hold — missing authorization'},
-  {icon:'⚡',wo:'NR26006615',client:'Piedmont Healthcare',  scope:'Fujifilm EB-710XP',     severity:'Warning', dateFlagged:'03/09/2026',reason:'Loaner not returned — 18 days'},
-];
-
-// ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
-let severityFilter = 'All';
+let typeFilter = 'All';
 let searchTerm = '';
+let allFlags = [];
+let flagTypes = [];
+let flagLocations = [];
+let flagLocationsUsed = [];
+let flagInstrumentTypes = [];
+
+// Build lookup maps
+let typeMap = {};      // lFlagTypeKey -> sFlagType
+let locationMap = {};  // lFlagLocationKey -> sFlagLocation
+let fluMap = {};       // lFlagKey -> [location names]
+let fitMap = {};       // lFlagKey -> [instrument type codes]
 
 // ═══════════════════════════════════════════════════════
-//  RENDER
+//  DATA LOAD
+// ═══════════════════════════════════════════════════════
+async function loadFlags() {
+  try {
+    const results = await Promise.all([
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlags'),
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlagTypes'),
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocations'),
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocationsUsed'),
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlagInstrumentTypes')
+    ]);
+    allFlags = results[0] || [];
+    flagTypes = results[1] || [];
+    flagLocations = results[2] || [];
+    flagLocationsUsed = results[3] || [];
+    flagInstrumentTypes = results[4] || [];
+
+    // Build lookups
+    typeMap = {};
+    flagTypes.forEach(t => typeMap[t.lFlagTypeKey] = t.sFlagType);
+
+    locationMap = {};
+    flagLocations.forEach(l => locationMap[l.lFlagLocationKey] = l.sFlagLocation);
+
+    fluMap = {};
+    flagLocationsUsed.forEach(flu => {
+      if (!fluMap[flu.lFlagKey]) fluMap[flu.lFlagKey] = [];
+      const name = locationMap[flu.lFlagLocationKey] || ('Loc #' + flu.lFlagLocationKey);
+      if (!fluMap[flu.lFlagKey].includes(name)) fluMap[flu.lFlagKey].push(name);
+    });
+
+    fitMap = {};
+    const instLabels = { F: 'Flexible', R: 'Rigid', C: 'Camera', I: 'Insufflator' };
+    flagInstrumentTypes.forEach(fit => {
+      if (!fitMap[fit.lFlagKey]) fitMap[fit.lFlagKey] = [];
+      const label = instLabels[fit.sRigidOrFlexible] || fit.sRigidOrFlexible;
+      if (!fitMap[fit.lFlagKey].includes(label)) fitMap[fit.lFlagKey].push(label);
+    });
+
+    renderKPIs();
+    renderTable();
+    API.UI.updateDemoBadge('live');
+  } catch (e) {
+    console.error('Failed to load flags:', e);
+    API.UI.updateDemoBadge('demo');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER KPI STRIP
+// ═══════════════════════════════════════════════════════
+function renderKPIs() {
+  const byType = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  let active = 0;
+  allFlags.forEach(f => {
+    byType[f.lFlagTypeKey] = (byType[f.lFlagTypeKey] || 0) + 1;
+    if (f.bActive) active++;
+  });
+
+  document.getElementById('kTotal').textContent = allFlags.length;
+  document.getElementById('kClient').textContent = byType[1] || 0;
+  document.getElementById('kScopeType').textContent = byType[2] || 0;
+  document.getElementById('kScope').textContent = byType[3] || 0;
+  document.getElementById('kRepair').textContent = byType[4] || 0;
+  document.getElementById('kActive').textContent = active;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER TABLE
 // ═══════════════════════════════════════════════════════
 function getFiltered() {
-  let list = [...FLAGS];
-  if (severityFilter !== 'All') list = list.filter(f => f.severity === severityFilter);
+  let list = [...allFlags];
+
+  // Type filter
+  if (typeFilter !== 'All') {
+    list = list.filter(f => typeMap[f.lFlagTypeKey] === typeFilter);
+  }
+
+  // Search filter
   if (searchTerm) {
     const q = searchTerm.toLowerCase();
     list = list.filter(f =>
-      f.wo.toLowerCase().includes(q) ||
-      f.client.toLowerCase().includes(q) ||
-      f.scope.toLowerCase().includes(q) ||
-      f.reason.toLowerCase().includes(q) ||
-      f.severity.toLowerCase().includes(q)
+      (f.sFlagText || '').toLowerCase().includes(q) ||
+      (typeMap[f.lFlagTypeKey] || '').toLowerCase().includes(q) ||
+      (fluMap[f.lFlagKey] || []).join(' ').toLowerCase().includes(q) ||
+      (fitMap[f.lFlagKey] || []).join(' ').toLowerCase().includes(q)
     );
   }
+
   return list;
 }
 
-function render() {
+function typeBadge(typeKey) {
+  const name = typeMap[typeKey] || 'Unknown';
+  const cls = { 1: 'b-client', 2: 'b-scopetype', 3: 'b-scope', 4: 'b-repair' }[typeKey] || 'b-client';
+  return `<span class="badge ${cls}">${name}</span>`;
+}
+
+function activeBadge(active) {
+  return active
+    ? '<span class="badge b-active">Active</span>'
+    : '<span class="badge b-inactive">Inactive</span>';
+}
+
+function locationPills(flagKey) {
+  const locs = fluMap[flagKey] || [];
+  if (!locs.length) return '<span style="color:var(--muted);font-size:10.5px">&#8212;</span>';
+  return '<div class="loc-pills">' + locs.map(l => `<span class="loc-pill">${l}</span>`).join('') + '</div>';
+}
+
+function instrumentTypes(flagKey) {
+  const types = fitMap[flagKey] || [];
+  if (!types.length) return '<span style="color:var(--muted)">&#8212;</span>';
+  return types.join(', ');
+}
+
+function formatDate(dt) {
+  if (!dt) return '&#8212;';
+  const d = new Date(dt);
+  return (d.getMonth() + 1).toString().padStart(2, '0') + '/' +
+    d.getDate().toString().padStart(2, '0') + '/' +
+    d.getFullYear();
+}
+
+function renderTable() {
   const filtered = getFiltered();
   const tbody = document.getElementById('flagsTbody');
 
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No flags found</td></tr>';
   } else {
-    tbody.innerHTML = filtered.map(f => {
-      const badgeCls = f.severity === 'Critical' ? 'b-hold' : 'b-waiting';
-      return `<tr>
-        <td style="text-align:center"><span class="flag-icon">${f.icon}</span></td>
-        <td><a class="wo-link" href="repairs.html?wo=${encodeURIComponent(f.wo)}">${f.wo}</a></td>
-        <td style="font-weight:500">${f.client}</td>
-        <td style="color:var(--label)">${f.scope}</td>
-        <td style="text-align:center"><span class="badge ${badgeCls}">${f.severity}</span></td>
-        <td style="white-space:nowrap;color:var(--muted)">${f.dateFlagged}</td>
-        <td style="font-size:11px;color:var(--label)">${f.reason}</td>
-      </tr>`;
-    }).join('');
+    tbody.innerHTML = filtered.map(f => `<tr>
+      <td style="font-weight:500">${f.sFlagText || '&#8212;'}</td>
+      <td style="text-align:center">${typeBadge(f.lFlagTypeKey)}</td>
+      <td style="font-size:10.5px;color:var(--label)">#${f.lOwnerKey}</td>
+      <td>${locationPills(f.lFlagKey)}</td>
+      <td style="text-align:center;font-size:10.5px">${instrumentTypes(f.lFlagKey)}</td>
+      <td style="text-align:center">${activeBadge(f.bActive)}</td>
+      <td style="white-space:nowrap;color:var(--muted);font-size:10.5px">${formatDate(f.dtCreateDate)}</td>
+    </tr>`).join('');
   }
 
-  const critical = filtered.filter(f => f.severity === 'Critical').length;
-  const warning  = filtered.filter(f => f.severity === 'Warning').length;
-  const total    = filtered.length;
+  // Footer
+  const active = filtered.filter(f => f.bActive).length;
+  const inactive = filtered.length - active;
 
   document.getElementById('flagRecordInfo').innerHTML =
-    `<strong>${total}</strong> flag${total !== 1 ? 's' : ''}`;
+    `<strong>${filtered.length}</strong> flag${filtered.length !== 1 ? 's' : ''}`;
 
   document.getElementById('flagSummary').innerHTML =
-    `<span class="crit">${critical} critical</span>` +
-    `<span style="color:var(--muted)">·</span>` +
-    `<span class="warn">${warning} warning${warning !== 1 ? 's' : ''}</span>` +
-    `<span style="color:var(--muted)">·</span>` +
-    `<span>${total} total flag${total !== 1 ? 's' : ''}</span>`;
+    `<span style="color:#2E7D32;font-weight:600">${active} active</span>` +
+    `<span style="color:var(--muted)">&middot;</span>` +
+    `<span style="color:#78909C">${inactive} inactive</span>`;
 }
 
 // ═══════════════════════════════════════════════════════
 //  FILTER WIRING
 // ═══════════════════════════════════════════════════════
-document.getElementById('severityFilter').querySelectorAll('.seg-btn').forEach(btn => {
+document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.getElementById('severityFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    severityFilter = btn.textContent.trim();
-    render();
+    typeFilter = btn.dataset.val;
+    renderTable();
   });
 });
 
 document.getElementById('flagSearch').addEventListener('input', function() {
   searchTerm = this.value.trim();
-  render();
+  renderTable();
 });
 
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
-// Sync KPI stats from main dashboard
-(function() {
-  try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
-    }
-  } catch(e) {}
-})();
-
 (function init() {
   API.UI.init();
-  API.UI.updateDemoBadge('demo');
-  render();
+  loadFlags();
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>

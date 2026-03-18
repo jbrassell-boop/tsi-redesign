@@ -31,25 +31,19 @@
 
     /* TOOLBAR */
     .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
-    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
-    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .toolbar-search{display:flex;align-items:center;gap:6px;margin-left:auto}
+    .search-input{height:30px;width:260px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
     .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:900px}
+    table{width:100%;border-collapse:collapse;min-width:600px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
     td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
     tbody tr:hover{background:var(--hover)}
-
-    /* BADGES */
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-inrepair{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9}
-    .b-waiting{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
-    .b-approved{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -75,144 +69,46 @@
     <div class="page-body">
 
       <!-- STAT STRIP -->
-      <div class="stat-strip">
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">🔧</div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">⏳</div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
+      <div class="stat-strip" id="shipStatStrip">
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E3F2FD">&#x1F4E6;</div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">0</div><div class="s-lbl">Total Shipments</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#E3F2FD">⚙</div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon" style="background:#FEF2F2">⚠</div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon" style="background:#FFFBEB">↺</div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-icon" style="background:#E8F5E9">&#x1F4B2;</div>
+          <div class="s-data"><div class="s-val s-green" id="kpiCharges">$0</div><div class="s-lbl">Total Charges</div></div>
         </div>
       </div>
 
-      <!-- SUB-NAV TABS -->
-      <div class="subnav">
-        <a class="subnav-tab" href="dashboard.html">Scopes</a>
-        <a class="subnav-tab" href="dashboard_tasks.html">Tasks<span class="tab-badge">5</span></a>
-        <a class="subnav-tab" href="dashboard_loaners.html">Loaners<span class="tab-badge" style="background:var(--amber)">2</span></a>
-        <a class="subnav-tab" href="dashboard_emails.html">Emails</a>
-        <a class="subnav-tab active" href="dashboard_shipping.html">Shipping Status</a>
-        <a class="subnav-tab" href="dashboard_inventory.html">Inventory</a>
-        <a class="subnav-tab" href="dashboard_acquisitions.html">Acquisitions</a>
-        <a class="subnav-tab" href="dashboard_searches.html">Searches</a>
-        <a class="subnav-tab" href="dashboard_metrics.html">Repair Metrics</a>
-        <a class="subnav-tab" href="dashboard_tat.html">Turn Around Times</a>
-        <a class="subnav-tab" href="dashboard_flags.html">Flags</a>
-      </div>
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
 
       <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="toolbar-search">
-          <input class="search-input" id="shipSearch" type="text" placeholder="Search shipments…" oninput="filterShipments()"/>
+          <input class="search-input" id="shipSearch" type="text" placeholder="Search by tracking#..." oninput="applyFilters()"/>
         </div>
       </div>
 
       <!-- DATA TABLE -->
       <div class="table-wrap">
-        <table>
+        <table id="shipTable">
           <thead>
             <tr>
-              <th style="width:90px">WO#</th>
-              <th>Client</th>
-              <th style="width:90px">Carrier</th>
-              <th>Tracking#</th>
-              <th style="width:100px">Ship Date</th>
-              <th style="width:110px">Delivery Est</th>
-              <th style="width:140px">Status</th>
+              <th data-col="tracking">Tracking#</th>
+              <th style="width:130px;text-align:right" data-col="charge">Shipping Charge</th>
+              <th style="width:130px" data-col="invoice">Invoice#</th>
             </tr>
           </thead>
           <tbody id="shipTbody">
-            <tr>
-              <td><a href="repairs.html?wo=NR26006601" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006601</a></td>
-              <td>Memorial Hermann</td>
-              <td>FedEx</td>
-              <td style="font-family:monospace;font-size:11px">7489-2341-8876</td>
-              <td>03/14/2026</td>
-              <td>03/16/2026</td>
-              <td><span class="badge b-inrepair">In Transit</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006605" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006605</a></td>
-              <td>HCA West Kendall</td>
-              <td>UPS</td>
-              <td style="font-family:monospace;font-size:11px">1Z999AA10123456784</td>
-              <td>03/13/2026</td>
-              <td>03/15/2026</td>
-              <td><span class="badge b-inrepair">In Transit</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006608" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006608</a></td>
-              <td>Northside Hospital</td>
-              <td>FedEx</td>
-              <td style="font-family:monospace;font-size:11px">7489-2341-8901</td>
-              <td>03/13/2026</td>
-              <td>03/15/2026</td>
-              <td><span class="badge b-waiting">Out for Delivery</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006602" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006602</a></td>
-              <td>Piedmont Healthcare</td>
-              <td>FedEx</td>
-              <td style="font-family:monospace;font-size:11px">7489-2341-8855</td>
-              <td>03/12/2026</td>
-              <td>03/14/2026</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006604" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006604</a></td>
-              <td>Baptist Health</td>
-              <td>UPS</td>
-              <td style="font-family:monospace;font-size:11px">1Z999AA10123456790</td>
-              <td>03/11/2026</td>
-              <td>03/13/2026</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006606" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006606</a></td>
-              <td>Tift Regional</td>
-              <td>FedEx</td>
-              <td style="font-family:monospace;font-size:11px">7489-2341-8812</td>
-              <td>03/10/2026</td>
-              <td>03/12/2026</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
-            <tr>
-              <td><a href="repairs.html?wo=NR26006607" style="color:var(--navy);font-weight:600;text-decoration:none">NR26006607</a></td>
-              <td>Orlando Health</td>
-              <td>UPS</td>
-              <td style="font-family:monospace;font-size:11px">1Z999AA10123456801</td>
-              <td>03/09/2026</td>
-              <td>03/11/2026</td>
-              <td><span class="badge b-approved">Delivered</span></td>
-            </tr>
+            <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- FOOTER -->
       <div class="table-footer">
-        <div class="record-info" id="shipRecordInfo">Showing <strong>7</strong> shipments</div>
+        <div class="record-info" id="shipRecordInfo">Loading...</div>
         <div></div>
       </div>
 
@@ -228,73 +124,131 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
-// ── Orders dropdown close on outside click ──
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('newOrderWrap');
-  const menu = document.getElementById('newOrderMenu');
-  if (wrap && !wrap.contains(e.target)) {
-    menu.classList.remove('open');
-    menu.style.display = '';
-  }
-});
+// ===============================================================
+//  SHIPPING STATUS — Real Nashville data
+// ===============================================================
+let SHIPMENTS = [];
+let searchTerm = '';
+let sortCol = 'tracking';
+let sortDir = 'asc';
 
-// Ensure menu display toggles correctly
-(function() {
-  const menu = document.getElementById('newOrderMenu');
-  const btn = document.querySelector('#newOrderWrap > button');
-  if (btn && menu) {
-    menu.style.display = 'none';
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const isOpen = menu.classList.contains('open');
-      menu.style.display = isOpen ? 'none' : 'block';
-      menu.classList.toggle('open', !isOpen);
-    });
-    document.addEventListener('click', function() {
-      menu.style.display = 'none';
-      menu.classList.remove('open');
-    });
-  }
-})();
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── Live search filter ──
-function filterShipments() {
-  const q = document.getElementById('shipSearch').value.toLowerCase();
-  const rows = document.querySelectorAll('#shipTbody tr');
-  let visible = 0;
-  rows.forEach(function(row) {
-    const text = row.textContent.toLowerCase();
-    const show = !q || text.includes(q);
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  const info = document.getElementById('shipRecordInfo');
-  if (info) {
-    info.innerHTML = 'Showing <strong>' + visible + '</strong> shipment' + (visible !== 1 ? 's' : '');
-  }
+function fmtCurrency(v) {
+  if (v == null || isNaN(v)) return '$0.00';
+  return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// Sync KPI stats from main dashboard
-(function() {
+// ── Map raw record → UI object ──
+function mapShipment(r) {
+  return {
+    id:       r.lShippingChargeKey || 0,
+    tracking: (r.sTrackingNumber || '').trim(),
+    charge:   r.nShippingCharge || 0,
+    invoice:  r.lShippingInvoiceKey || 0,
+    _raw: r
+  };
+}
+
+// ── Load data ──
+async function loadShipments() {
   try {
-    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
-    if (kpis) {
-      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
-      if (chips.length >= 7) {
-        chips[0].textContent = kpis.inHouse;
-        chips[1].textContent = kpis.waiting;
-        chips[2].textContent = kpis.inRepair;
-        chips[3].textContent = kpis.overdue;
-        chips[4].textContent = kpis.ready;
-        chips[5].textContent = kpis.loaners;
-        chips[6].textContent = kpis.shipped;
-      }
+    const data = await MockAPI.handleRequest('GET', '/ShippingCharge/GetAllShippingChargeList');
+    const raw = Array.isArray(data) ? data : [];
+    if (raw.length > 0) {
+      SHIPMENTS = raw.map(mapShipment);
+      console.log('[TSI Shipping] Loaded', SHIPMENTS.length, 'shipping charges from mock-db');
+      API.UI.updateDemoBadge('live');
+    } else {
+      throw new Error('Empty shipping list');
     }
-  } catch(e) {}
-})();
+  } catch (e) {
+    console.warn('[TSI Shipping] Mock unavailable:', e.message);
+    SHIPMENTS = [];
+    API.UI.updateDemoBadge('demo');
+  }
+  updateKPIs();
+  renderShipments();
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  const total = SHIPMENTS.length;
+  const totalCharge = SHIPMENTS.reduce((sum, s) => sum + (s.charge || 0), 0);
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiCharges').textContent = fmtCurrency(totalCharge);
+}
+
+// ── Filtering & Sorting ──
+function getFiltered() {
+  let list = [...SHIPMENTS];
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    list = list.filter(s =>
+      s.tracking.toLowerCase().includes(q) ||
+      String(s.invoice).includes(q) ||
+      fmtCurrency(s.charge).toLowerCase().includes(q)
+    );
+  }
+  list.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'charge') {
+      va = a.charge || 0;
+      vb = b.charge || 0;
+    } else if (sortCol === 'invoice') {
+      va = a.invoice || 0;
+      vb = b.invoice || 0;
+    } else {
+      va = String(a[sortCol] || '').toLowerCase();
+      vb = String(b[sortCol] || '').toLowerCase();
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function renderShipments() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('shipTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No shipments found</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(s => `<tr>
+      <td style="font-family:monospace;font-size:11px">${escHtml(s.tracking) || '<span style="color:var(--muted)">&#8212;</span>'}</td>
+      <td style="text-align:right;font-weight:500">${fmtCurrency(s.charge)}</td>
+      <td style="font-family:monospace;font-size:11px">${s.invoice ? escHtml(String(s.invoice)) : '<span style="color:var(--muted)">&#8212;</span>'}</td>
+    </tr>`).join('');
+  }
+  const totalCharge = filtered.reduce((sum, s) => sum + (s.charge || 0), 0);
+  document.getElementById('shipRecordInfo').innerHTML =
+    '<strong>' + filtered.length + '</strong> shipment' + (filtered.length !== 1 ? 's' : '') +
+    ' &middot; <strong>' + fmtCurrency(totalCharge) + '</strong> total';
+}
+
+function applyFilters() {
+  searchTerm = document.getElementById('shipSearch').value.trim();
+  renderShipments();
+}
+
+// ── Column sort wiring ──
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'asc'; }
+    renderShipments();
+  });
+});
 
 // ── Init ──
-API.UI.updateDemoBadge('demo');
+(async function init() {
+  API.UI.init();
+  await loadShipments();
+})();
 </script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
 </body>
 </html>
