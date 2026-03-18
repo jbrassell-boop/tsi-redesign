@@ -312,7 +312,11 @@
                       <div class="ff"><label>Sales Representative <span class="req">*</span></label>
                         <select class="inp" id="ctSalesRep"><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
                       </div>
+                      <div class="ff"><label>Contract #</label><input class="inp ro" id="ctContractNumber" value="" readonly style="font-family:monospace;background:#F7F8FC"/></div>
                       <div class="ff"><label>Purchase Order #</label><input class="inp" id="ctPO" value=""/></div>
+                      <div class="ff"><label>Contract Status</label>
+                        <select class="inp" id="ctContractStatus"><option>Active</option><option>Expired</option><option>Expiring</option><option>Pending</option><option>Cancelled</option></select>
+                      </div>
                       <div class="ff"><label>Invoice Frequency</label>
                         <select class="inp" id="ctFrequency"><option>None</option><option>18 Months</option><option>Annual</option><option>Monthly</option><option>Once</option><option>Quarterly</option></select>
                       </div>
@@ -338,14 +342,17 @@
                       <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" id="ctEndDate" type="date" value=""/></div>
                       <div class="ff"><label>Contract Total</label><input class="inp" id="ctTotal" value="" style="font-weight:700"/></div>
                       <div class="ff"><label>Annual Value</label><input class="inp" id="ctAnnualValue" value="" style="font-weight:700;color:var(--green)"/></div>
+                      <div class="ff"><label>Length (Months)</label><input class="inp ro" id="ctLengthMonths" value="" readonly style="background:#F7F8FC"/></div>
+                      <div class="ff"><label>Shared Risk %</label><input class="inp" id="ctSharedRiskPct" type="number" min="0" max="100" value="" placeholder="TSI share %"/></div>
                     </div>
                     <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
                       <div class="fg g2">
                         <div class="ff"><label>Sales Tax</label>
-                          <select class="inp"><option selected>None</option><option>CAL</option><option>Cal - LA County</option><option>IDAHO</option><option>NJ</option><option>PA</option><option>Tennessee</option></select>
+                          <select class="inp" id="ctSalesTax"><option selected>None</option><option>CAL</option><option>Cal - LA County</option><option>IDAHO</option><option>NJ</option><option>PA</option><option>Tennessee</option></select>
                         </div>
                         <div class="ff"><label>Currency</label><input class="inp ro" value="USD" readonly/></div>
                       </div>
+                      <div class="toggle-row" style="margin-top:6px"><label class="toggle"><input type="checkbox" id="ctTaxExempt"/><span class="toggle-slider"></span></label><span class="toggle-label">Tax Exempt</span></div>
                     </div>
                   </div>
                 </div>
@@ -356,6 +363,13 @@
                     <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctReminders"/><span class="toggle-slider"></span></label><span class="toggle-label">Send Renewal Reminders</span></div>
                     <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctPortal"/><span class="toggle-slider"></span></label><span class="toggle-label">Include on Client Portal</span></div>
                     <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctRequirePO"/><span class="toggle-slider"></span></label><span class="toggle-label">Require PO for Repairs</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctFuseContract"/><span class="toggle-slider"></span></label><span class="toggle-label">Fuse Contract</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctServicePlan"/><span class="toggle-slider"></span></label><span class="toggle-label">Service Plan</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctSharedRisk"/><span class="toggle-slider"></span></label><span class="toggle-label">Shared Risk</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctShowConsumption"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Consumption on Portal</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctShowShipOnInvoice"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Shipping on Invoice</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctManualSchedule"/><span class="toggle-slider"></span></label><span class="toggle-label">Manual Invoice Schedule</span></div>
+                    <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctUnlimitedProducts"/><span class="toggle-slider"></span></label><span class="toggle-label">Unlimited Scope Coverage</span></div>
                   </div>
                 </div>
               </div>
@@ -373,12 +387,18 @@
                     <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
                       <div class="ff" style="grid-column:span 2"><label>Name</label><input id="ctBillName1" class="inp" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Name 2 (Attn / Dept)</label><input id="ctBillName2" class="inp" placeholder="e.g. Accounts Payable" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
                       <div class="ff" style="grid-column:span 2"><label>Address</label><input id="ctBillAddr1" class="inp" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
                       <div class="ff"><label>City</label><input id="ctBillCity" class="inp" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
                         <div class="ff"><label>State</label><input id="ctBillState" class="inp" maxlength="2" style="text-transform:uppercase" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
                         <div class="ff"><label>Zip</label><input id="ctBillZip" class="inp" oninput="if(document.getElementById('ctShipSameBill').checked)ctToggleShipSame()"/></div>
                       </div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+                        <div class="ff"><label>Bill Email</label><input id="ctBillEmail" class="inp" type="email" placeholder="invoices@…"/></div>
+                        <div class="ff"><label>Email Contact Name</label><input id="ctBillEmailName" class="inp"/></div>
+                      </div>
+                      <div class="ff" style="margin-top:4px"><label>Bill Day of Month</label><input id="ctBillDay" class="inp" type="number" min="1" max="31" placeholder="e.g. 15" style="width:80px"/></div>
                     </div>
                   </div>
                   <!-- Ship To -->
@@ -386,6 +406,7 @@
                     <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
                       <div class="ff" style="grid-column:span 2"><label>Name</label><input id="ctShipName1" class="inp"/></div>
+                      <div class="ff" style="grid-column:span 2"><label>Name 2 (Attn / Dept)</label><input id="ctShipName2" class="inp" placeholder="e.g. Biomedical Dept"/></div>
                       <div class="ff" style="grid-column:span 2"><label>Address</label><input id="ctShipAddr1" class="inp"/></div>
                       <div class="ff"><label>City</label><input id="ctShipCity" class="inp"/></div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
@@ -432,10 +453,24 @@
                 </div>
               </div>
             </div>
+            <div class="panel" style="margin-top:12px">
+              <div class="panel-head">Department Configuration</div>
+              <div class="panel-body">
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctCostsPerDept"/><span class="toggle-slider"></span></label><span class="toggle-label">Track Costs Per Department</span></div>
+                <div class="toggle-row"><label class="toggle"><input type="checkbox" id="ctPOsPerDept"/><span class="toggle-slider"></span></label><span class="toggle-label">Require PO Per Department</span></div>
+              </div>
+            </div>
           </div>
 
           <!-- TAB: SCOPES -->
           <div class="tab-content" id="tab-scopes">
+            <div class="stat-strip" style="margin-bottom:8px">
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><div class="s-data"><div class="s-val" id="scopeCountAll">16</div><div class="s-lbl">Total</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5h16v14H4z"/></svg></div><div class="s-data"><div class="s-val" id="scopeCountFlexible">8</div><div class="s-lbl">Flexible</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="21"/></svg></div><div class="s-data"><div class="s-val" id="scopeCountRigid">4</div><div class="s-lbl">Rigid</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div><div class="s-data"><div class="s-val" id="scopeCountCamera">2</div><div class="s-lbl">Camera</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div class="s-data"><div class="s-val" id="scopeCountInstrument">2</div><div class="s-lbl">Instrument</div></div></div>
+            </div>
             <div class="panel">
               <div class="panel-head">
                 <span>Covered Scopes (16)</span>
@@ -582,6 +617,12 @@
 
           <!-- TAB: INVOICES (within contract detail) -->
           <div class="tab-content" id="tab-invoices-detail">
+            <div class="stat-strip" style="margin-bottom:8px">
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="s-data"><div class="s-val" id="invInstTotal">4</div><div class="s-lbl">Total Installments</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="s-data"><div class="s-val" id="invInstInvoiced">3</div><div class="s-lbl">Invoiced</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="s-data"><div class="s-val" id="invAmtInvoiced">$16,800</div><div class="s-lbl">Amount Invoiced</div></div></div>
+              <div class="stat-chip" style="cursor:default"><div class="s-icon s-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="s-data"><div class="s-val" id="invInstType">Quarterly</div><div class="s-lbl">Frequency</div></div></div>
+            </div>
             <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
               <select class="inp" style="width:200px"><option selected>All Departments</option><option>Biomedical Engineering</option><option>Endoscopy Center</option><option>Pulmonology</option></select>
             </div>
@@ -1260,7 +1301,9 @@ function populateSpecsTab(d) {
   setSelect('ctType', d.sContractType);
   setInput('ctClient', d.sClientName1 || d.sClientName || '');
   setSelect('ctSalesRep', d.sSalesRepName);
+  setInput('ctContractNumber', d.sContractNumber || ('CNT-' + (d.lContractKey || '')));
   setInput('ctPO', d.sPurchaseOrder || d.sPONumber || '');
+  setSelect('ctContractStatus', d.sContractStatus);
   setSelect('ctFrequency', d.sInvoiceFrequency);
   setSelect('ctPaymentTerms', d.sPaymentTerms);
 
@@ -1272,14 +1315,50 @@ function populateSpecsTab(d) {
   setInput('ctTotal', fmtCurrencyFull(total));
   setInput('ctAnnualValue', fmtCurrencyFull(annual));
 
+  // Contract length (calculated from dates)
+  const startD = new Date(d.dtStartDate || d.dtDateEffective);
+  const endD   = new Date(d.dtEndDate || d.dtDateTermination);
+  if (!isNaN(startD) && !isNaN(endD)) {
+    const months = (endD.getFullYear() - startD.getFullYear()) * 12 + (endD.getMonth() - startD.getMonth());
+    setInput('ctLengthMonths', months > 0 ? months : '');
+  }
+
+  // Shared Risk
+  setInput('ctSharedRiskPct', d.nSharedRiskPercentage ?? '');
+
   // Notes
   setInput('ctNotes', d.mContractNotes || d.mNotes || '');
 
-  // Toggle options
+  // Toggle options (original)
   const ar = document.getElementById('ctAutoRenew');     if (ar) ar.checked = !!d.bAutoRenew;
   const rm = document.getElementById('ctReminders');     if (rm) rm.checked = !!d.bSendRenewalReminder;
   const cp = document.getElementById('ctPortal');        if (cp) cp.checked = !!d.bClientPortal;
   const rp = document.getElementById('ctRequirePO');     if (rp) rp.checked = !!d.bRequirePO;
+
+  // Toggle options (new legacy fields)
+  const fc = document.getElementById('ctFuseContract');     if (fc) fc.checked = !!d.bFuseContract;
+  const sp = document.getElementById('ctServicePlan');      if (sp) sp.checked = !!d.bServicePlan;
+  const sr = document.getElementById('ctSharedRisk');       if (sr) sr.checked = !!d.bSharedRisk;
+  const sc2 = document.getElementById('ctShowConsumption'); if (sc2) sc2.checked = !!d.bShowConsumptionOnPortal;
+  const si = document.getElementById('ctShowShipOnInvoice');if (si) si.checked = !!d.bShowShippingAddressOnInvoice;
+  const ms = document.getElementById('ctManualSchedule');   if (ms) ms.checked = !!d.bManualSchedule;
+  const te = document.getElementById('ctTaxExempt');        if (te) te.checked = !!d.bTaxExempt;
+  const up = document.getElementById('ctUnlimitedProducts');if (up) up.checked = !!d.bUnlimitedProducts;
+  const cd = document.getElementById('ctCostsPerDept');     if (cd) cd.checked = !!d.bCostsPerDepartment;
+  const pd = document.getElementById('ctPOsPerDept');       if (pd) pd.checked = !!d.bPOsPerDepartment;
+
+  // Scope count stat chips
+  const scAll  = document.getElementById('scopeCountAll');       if (scAll) scAll.textContent = d.nCountAll ?? d.nCountFlexible + d.nCountRigid + d.nCountInstrument + d.nCountCamera || 16;
+  const scFlex = document.getElementById('scopeCountFlexible');  if (scFlex) scFlex.textContent = d.nCountFlexible ?? 8;
+  const scRig  = document.getElementById('scopeCountRigid');     if (scRig) scRig.textContent = d.nCountRigid ?? 4;
+  const scCam  = document.getElementById('scopeCountCamera');    if (scCam) scCam.textContent = d.nCountCamera ?? 2;
+  const scIns  = document.getElementById('scopeCountInstrument');if (scIns) scIns.textContent = d.nCountInstrument ?? 2;
+
+  // Invoice installment stat chips
+  const iiTotal = document.getElementById('invInstTotal');     if (iiTotal) iiTotal.textContent = d.nInstallmentsTotal ?? 4;
+  const iiDone  = document.getElementById('invInstInvoiced');  if (iiDone) iiDone.textContent = d.nInstallmentsInvoiced ?? 3;
+  const iiAmt   = document.getElementById('invAmtInvoiced');   if (iiAmt) iiAmt.textContent = fmtCurrency(d.dblAmtInvoiced ?? 16800);
+  const iiType  = document.getElementById('invInstType');      if (iiType) iiType.textContent = d.sInvoiceFrequency || 'Quarterly';
 }
 
 // ── Populate Address Tab ──────────────────────────────
@@ -1292,10 +1371,14 @@ function populateAddressTab(d) {
 
   const setVal = (id, v) => { const e = document.getElementById(id); if (e) e.value = v; };
   setVal('ctBillName1', bn);
+  setVal('ctBillName2', d.sContractBillName2 || d.sBillName2 || '');
   setVal('ctBillAddr1', ba1);
   setVal('ctBillCity', bc);
   setVal('ctBillState', bs);
   setVal('ctBillZip', bz);
+  setVal('ctBillEmail', d.sBillEmail || '');
+  setVal('ctBillEmailName', d.sBillEmailName || '');
+  setVal('ctBillDay', d.lBillDay ?? '');
 
   const sn = bn;
   const sa1 = d.sShipAddress1 || ba1;
@@ -1303,6 +1386,7 @@ function populateAddressTab(d) {
   const ss = d.sShipState || bs;
   const sz = d.sShipZip || bz;
   setVal('ctShipName1', sn);
+  setVal('ctShipName2', d.sContractShipName2 || d.sShipName2 || '');
   setVal('ctShipAddr1', sa1);
   setVal('ctShipCity', sc);
   setVal('ctShipState', ss);
@@ -1315,7 +1399,7 @@ function populateAddressTab(d) {
 }
 
 function ctSetShipReadOnly(ro) {
-  ['ctShipName1','ctShipAddr1','ctShipCity','ctShipState','ctShipZip'].forEach(id => {
+  ['ctShipName1','ctShipName2','ctShipAddr1','ctShipCity','ctShipState','ctShipZip'].forEach(id => {
     const e = document.getElementById(id);
     if (e) { e.readOnly = ro; e.style.background = ro ? '#F8FAFF' : '#fff'; }
   });
@@ -1895,10 +1979,25 @@ async function saveContract() {
     pdtStartDate: v('ctStartDate'),
     pdtEndDate: v('ctEndDate'),
     pmContractNotes: v('ctNotes'),
+    psContractStatus: v('ctContractStatus'),
+    pnSharedRiskPercentage: parseInt(v('ctSharedRiskPct')) || 0,
     pbAutoRenew: ch('ctAutoRenew'),
     pbSendRenewalReminder: ch('ctReminders'),
     pbClientPortal: ch('ctPortal'),
     pbRequirePO: ch('ctRequirePO'),
+    pbFuseContract: ch('ctFuseContract'),
+    pbServicePlan: ch('ctServicePlan'),
+    pbSharedRisk: ch('ctSharedRisk'),
+    pbShowConsumptionOnPortal: ch('ctShowConsumption'),
+    pbShowShippingAddressOnInvoice: ch('ctShowShipOnInvoice'),
+    pbManualSchedule: ch('ctManualSchedule'),
+    pbTaxExempt: ch('ctTaxExempt'),
+    pbUnlimitedProducts: ch('ctUnlimitedProducts'),
+    pbCostsPerDepartment: ch('ctCostsPerDept'),
+    pbPOsPerDepartment: ch('ctPOsPerDept'),
+    psBillEmail: v('ctBillEmail'),
+    psBillEmailName: v('ctBillEmailName'),
+    plBillDay: parseInt(v('ctBillDay')) || 0,
   };
 
   try {
