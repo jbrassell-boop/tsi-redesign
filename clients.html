@@ -123,6 +123,7 @@
       <!-- TABS -->
       <div class="tab-bar">
         <div class="tab active" onclick="showTab('main',this)">Main</div>
+        <div class="tab" onclick="showTab('addresses',this)">Addresses</div>
         <div class="tab" onclick="showTab('departments',this)">Departments</div>
         <div class="tab" onclick="showTab('flags',this)">Flags</div>
         <div class="tab" onclick="showTab('contacts',this)">Contacts</div>
@@ -204,6 +205,39 @@
                 </div>
               </div>
 
+            </div>
+          </div>
+
+          <!-- Additional Details -->
+          <div class="panel">
+            <div class="panel-head">Additional Details</div>
+            <div class="panel-body">
+              <div class="fg g2">
+                <div class="ff span2">
+                  <label>Secondary Name / AP Contact</label>
+                  <input id="ci-name2" class="inp" placeholder="e.g. Accounts Payable"/>
+                </div>
+                <div class="ff span2">
+                  <label>Client Terms</label>
+                  <input id="ci-terms-text" class="inp" placeholder="Client-specific terms"/>
+                </div>
+                <div class="ff">
+                  <label>Reference #1</label>
+                  <input id="ci-ref1" class="inp"/>
+                </div>
+                <div class="ff">
+                  <label>Reference #2</label>
+                  <input id="ci-ref2" class="inp"/>
+                </div>
+                <div class="ff">
+                  <label>Sales Tax</label>
+                  <select id="ci-sales-tax" class="inp"><option value="">— None —</option></select>
+                </div>
+                <div class="ff">
+                  <label>Reporting Group</label>
+                  <select id="ci-reporting-group" class="inp"><option value="">— None —</option></select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -296,6 +330,28 @@
                 <div class="toggle-label">National Account</div>
                 <label class="toggle"><input id="ci-national" type="checkbox"/><span class="toggle-slider"></span></label>
               </div>
+              <div class="toggle-row">
+                <div class="toggle-label">PO Required</div>
+                <label class="toggle"><input id="ci-po-required" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Never Hold</div>
+                <label class="toggle"><input id="ci-never-hold" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Skip Tracking</div>
+                <label class="toggle"><input id="ci-skip-tracking" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">Email New Repairs</div>
+                <label class="toggle"><input id="ci-email-repairs" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label" style="display:flex;align-items:center;gap:8px">Bad Debt Risk
+                  <span id="bad-debt-badge" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:var(--red);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">At Risk</span>
+                </div>
+                <label class="toggle"><input id="ci-bad-debt" type="checkbox"/><span class="toggle-slider"></span></label>
+              </div>
 
               <!-- Service Locations -->
               <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:6px">
@@ -308,6 +364,83 @@
             </div>
           </div>
 
+          <!-- Integration / ERP -->
+          <div class="panel">
+            <div class="panel-head">Integration</div>
+            <div class="panel-body">
+              <div class="fg" style="gap:6px">
+                <div class="ff">
+                  <label>Great Plains ID</label>
+                  <input id="ci-gpid" class="inp" placeholder="North region"/>
+                </div>
+                <div class="ff">
+                  <label>GP ID South</label>
+                  <input id="ci-gpid-south" class="inp" placeholder="South region"/>
+                </div>
+                <div class="ff">
+                  <label>Peachtree ID</label>
+                  <input id="ci-peachtree" class="inp"/>
+                </div>
+                <div class="fg g2" style="gap:6px">
+                  <div class="ff">
+                    <label>Adjustment %</label>
+                    <input id="ci-adj-pct" class="inp" placeholder="0.00"/>
+                  </div>
+                  <div class="ff" style="display:flex;align-items:flex-end">
+                    <div class="toggle-row" style="padding:0">
+                      <div class="toggle-label" style="font-size:11px">Use Adj %</div>
+                      <label class="toggle"><input id="ci-use-adj" type="checkbox"/><span class="toggle-slider"></span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══════════ ADDRESSES TAB ══════════ -->
+      <div id="tab-addresses" class="tab-content" style="display:none">
+        <div class="panel">
+          <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between">
+            Addresses
+            <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="clShipSameBill" style="width:auto;height:auto" onchange="clToggleShipSame()"/> Same as Bill To</label>
+          </div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <!-- Bill To -->
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Bill To</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                  <div class="ff" style="grid-column:span 2"><label>Name</label><input id="clBillName1" class="inp"/></div>
+                  <div class="ff" style="grid-column:span 2"><label>Address</label><input id="clBillAddr1" class="inp"/></div>
+                  <div class="ff" style="grid-column:span 2"><label>Address 2</label><input id="clBillAddr2" class="inp"/></div>
+                  <div class="ff"><label>City</label><input id="clBillCity" class="inp"/></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                    <div class="ff"><label>State</label><input id="clBillState" class="inp" maxlength="2" style="text-transform:uppercase"/></div>
+                    <div class="ff"><label>Zip</label><input id="clBillZip" class="inp"/></div>
+                  </div>
+                  <div class="ff" style="grid-column:span 2"><label>Country</label><input id="clBillCountry" class="inp"/></div>
+                </div>
+              </div>
+              <!-- Ship To -->
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Ship To</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                  <div class="ff" style="grid-column:span 2"><label>Name</label><input id="clShipName1" class="inp"/></div>
+                  <div class="ff" style="grid-column:span 2"><label>Address</label><input id="clShipAddr1" class="inp"/></div>
+                  <div class="ff" style="grid-column:span 2"><label>Address 2</label><input id="clShipAddr2" class="inp"/></div>
+                  <div class="ff"><label>City</label><input id="clShipCity" class="inp"/></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                    <div class="ff"><label>State</label><input id="clShipState" class="inp" maxlength="2" style="text-transform:uppercase"/></div>
+                    <div class="ff"><label>Zip</label><input id="clShipZip" class="inp"/></div>
+                  </div>
+                  <div class="ff" style="grid-column:span 2"><label>Country</label><input id="clShipCountry" class="inp"/></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1113,6 +1246,46 @@ function loadClient(c) {
   lbl.textContent = c.active ? 'Yes' : 'No';
   lbl.style.color = c.active ? 'var(--green)' : 'var(--red)';
   setChk('ci-skip', c.skip); setChk('ci-credit-memo', c.creditMemo); setChk('ci-national', c.national);
+
+  // Business rules
+  setChk('ci-po-required', c._raw?.sPORequired === 'Y' || c.poRequired);
+  setChk('ci-never-hold', c._raw?.bNeverHold || c.neverHold);
+  setChk('ci-skip-tracking', c._raw?.bSkipTracking || c.skipTracking);
+  setChk('ci-email-repairs', c._raw?.bEmailNewRepairs || c.emailRepairs);
+  setChk('ci-bad-debt', c._raw?.sBadDebtRisk === 'Y' || c.badDebt);
+  const bdBadge = document.getElementById('bad-debt-badge');
+  if (bdBadge) bdBadge.style.display = (c._raw?.sBadDebtRisk === 'Y' || c.badDebt) ? 'inline' : 'none';
+
+  // Additional details
+  setVal('ci-name2', c._raw?.sClientName2 || c.name2 || '');
+  setVal('ci-terms-text', c._raw?.sClntTerms || c.termsText || '');
+  setVal('ci-ref1', c._raw?.sReferenceNum || c.ref1 || '');
+  setVal('ci-ref2', c._raw?.sReferenceNum2 || c.ref2 || '');
+  setVal('ci-sales-tax', c._raw?.lSalesTaxKey || '');
+  setVal('ci-reporting-group', c._raw?.lReportingGroupKey || '');
+
+  // Integration / ERP
+  setVal('ci-gpid', c._raw?.sGPID || c.gpid || '');
+  setVal('ci-gpid-south', c._raw?.sGPIDSouth || c.gpidSouth || '');
+  setVal('ci-peachtree', c._raw?.sPeachTreeCustID || c.peachtree || '');
+  setVal('ci-adj-pct', c._raw?.dblAdjustmentPct || c.adjPct || '');
+  setChk('ci-use-adj', c._raw?.bUseAdjustmentPct || c.useAdj);
+
+  // Addresses tab
+  setVal('clBillAddr1', c._raw?.sBillAddr1 || '');
+  setVal('clBillAddr2', c._raw?.sBillAddr2 || '');
+  setVal('clBillCity', c._raw?.sBillCity || '');
+  setVal('clBillState', c._raw?.sBillState || '');
+  setVal('clBillZip', c._raw?.sBillZip || '');
+  setVal('clBillCountry', c._raw?.sBillCountry || '');
+  setVal('clBillName1', c._raw?.sClientName1 || c.name || '');
+  setVal('clShipAddr1', c._raw?.sShipAddr1 || '');
+  setVal('clShipAddr2', c._raw?.sShipAddr2 || '');
+  setVal('clShipCity', c._raw?.sShipCity || '');
+  setVal('clShipState', c._raw?.sShipState || '');
+  setVal('clShipZip', c._raw?.sShipZip || '');
+  setVal('clShipCountry', c._raw?.sShipCountry || '');
+  setVal('clShipName1', c._raw?.sShipName1 || '');
   if (_liveMode && c._raw) {
     const r = c._raw;
     // Set by key value (dropdowns now use API keys as option values)
@@ -1862,8 +2035,19 @@ async function doDeleteClient() {
   }
 }
 
+function clToggleShipSame() {
+  const same = document.getElementById('clShipSameBill').checked;
+  const fields = ['Name1','Addr1','Addr2','City','State','Zip','Country'];
+  fields.forEach(f => {
+    const billVal = document.getElementById('clBill'+f).value;
+    const shipEl = document.getElementById('clShip'+f);
+    if (same) { shipEl.value = billVal; shipEl.disabled = true; }
+    else { shipEl.disabled = false; }
+  });
+}
+
 function showTab(name, el) {
-  ['main','departments','flags','contacts','reportcard'].forEach(function(t) {
+  ['main','addresses','departments','flags','contacts','reportcard'].forEach(function(t) {
     document.getElementById('tab-'+t).style.display = 'none';
   });
   document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
