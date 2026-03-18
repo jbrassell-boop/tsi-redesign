@@ -120,9 +120,12 @@
               <tr>
                 <th>Serial #</th>
                 <th>Model / Type</th>
+                <th>Supplier</th>
+                <th>PO #</th>
                 <th>Department</th>
                 <th>Client</th>
                 <th>Date Acquired</th>
+                <th>PO Date</th>
                 <th>Condition</th>
                 <th style="text-align:right">Cost</th>
               </tr>
@@ -155,9 +158,12 @@
               <tr>
                 <th>Serial #</th>
                 <th>Model / Type</th>
+                <th>Supplier</th>
+                <th>PO #</th>
                 <th>Department</th>
                 <th>Client</th>
                 <th>Consign Date</th>
+                <th>PO Date</th>
                 <th>Condition</th>
                 <th style="text-align:right">Cost</th>
               </tr>
@@ -387,14 +393,17 @@
 
   function renderInhouse(rows) {
     const body = document.getElementById('inhouseBody');
-    if (!rows.length) { body.innerHTML = emptyRow(7, 'No in-house acquisitions found'); return; }
+    if (!rows.length) { body.innerHTML = emptyRow(10, 'No in-house acquisitions found'); return; }
     body.innerHTML = rows.map(function (r) {
       return '<tr>' +
         '<td style="font-weight:600;color:var(--navy)">' + esc(r.sSerialNumber || r.psSerialNumber || '—') + '</td>' +
         '<td>' + esc(r.sScopeTypeDesc || r.sModelDesc || r.sModel || '—') + '</td>' +
+        '<td>' + esc(r.sSupplierName || r.sSupplierName1 || '—') + '</td>' +
+        '<td style="font-family:monospace;font-size:11px">' + esc(r.sPONumber || r.sPurchaseOrderNumber || '—') + '</td>' +
         '<td>' + esc(r.sDepartmentName || '—') + '</td>' +
         '<td>' + esc(r.sClientName || r.sClientName1 || '—') + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtAcquiredDate || r.dtDateAcquired) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtPODate || r.dtPurchaseOrderDate) + '</td>' +
         '<td>' + conditionBadge(r.psCondition || r.sCondition) + '</td>' +
         '<td style="text-align:right;font-weight:600;color:var(--navy)">' + fmt$(r.pnCost || r.dblCost) + '</td>' +
         '</tr>';
@@ -403,14 +412,17 @@
 
   function renderConsigned(rows) {
     const body = document.getElementById('consignedBody');
-    if (!rows.length) { body.innerHTML = emptyRow(7, 'No consigned acquisitions found'); return; }
+    if (!rows.length) { body.innerHTML = emptyRow(10, 'No consigned acquisitions found'); return; }
     body.innerHTML = rows.map(function (r) {
       return '<tr>' +
         '<td style="font-weight:600;color:var(--navy)">' + esc(r.sSerialNumber || r.psSerialNumber || '—') + '</td>' +
         '<td>' + esc(r.sScopeTypeDesc || r.sModelDesc || r.sModel || '—') + '</td>' +
+        '<td>' + esc(r.sSupplierName || r.sSupplierName1 || '—') + '</td>' +
+        '<td style="font-family:monospace;font-size:11px">' + esc(r.sPONumber || r.sPurchaseOrderNumber || '—') + '</td>' +
         '<td>' + esc(r.sDepartmentName || '—') + '</td>' +
         '<td>' + esc(r.sClientName || r.sClientName1 || '—') + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtConsignDate || r.dtDateConsigned) + '</td>' +
+        '<td style="color:var(--muted)">' + fmtDate(r.dtPODate || r.dtPurchaseOrderDate) + '</td>' +
         '<td>' + conditionBadge(r.psCondition || r.sCondition) + '</td>' +
         '<td style="text-align:right;font-weight:600;color:var(--navy)">' + fmt$(r.pnCost || r.dblCost) + '</td>' +
         '</tr>';
