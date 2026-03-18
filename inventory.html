@@ -102,6 +102,7 @@
     .sd-body{padding:8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
     .sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px}
     .sd-grid .ff:first-child{grid-column:span 2}
+    .sd-grid .ff-bin{grid-column:span 2}
     .sd-grid .inp{height:24px;font-size:11px}
     .sd-levels{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
     .sd-level-box{display:flex;flex-direction:column;align-items:center;gap:1px}
@@ -332,9 +333,9 @@
                 <label>Type</label>
                 <select class="inp"><option>Flexible</option><option>Camera</option><option>Instrument</option><option>Rigid</option></select>
               </div>
-              <div class="ihb-field" style="flex:0.8">
+              <div class="ihb-field" style="flex:0.6">
                 <label>Diameter</label>
-                <select class="inp"><option>Small</option><option>Large</option></select>
+                <input class="inp" id="headerDiam" value="Small" readonly style="background:#f8f9fa;cursor:default"/>
               </div>
               <button class="btn btn-navy" style="height:28px;padding:0 10px;font-size:11px;gap:4px;align-self:flex-end;flex-shrink:0" title="Save Item (Ctrl+S)">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
@@ -343,6 +344,7 @@
             </div>
             <div class="ihb-toggles">
               <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Active</span></div>
+              <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Large Diameter</span></div>
               <div class="toggle-row"><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Not Used For Repair</span></div>
               <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">No Count Adjustment</span></div>
               <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Skip Pick List</span></div>
@@ -376,43 +378,43 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="size-row selected-size" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="A-12" data-cost="$0.10" data-cur="42" data-min="5" data-max="100" data-reorder="10">
+                    <tr class="size-row selected-size" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="A-12" data-cost="$0.10" data-cur="42" data-min="5" data-max="100" data-reorder="10" data-skip-pick="false">
                       <td>DUR-B</td>
                       <td></td>
                       <td>A-12</td>
                       <td><span class="badge b-active">Active</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="with stop pin" data-desc3="" data-bin="A-13" data-cost="$0.35" data-cur="18" data-min="3" data-max="50" data-reorder="8">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="with stop pin" data-desc3="" data-bin="A-13" data-cost="$0.35" data-cur="18" data-min="3" data-max="50" data-reorder="8" data-skip-pick="false">
                       <td>2.70 x 3.55 w/stop</td>
                       <td>with stop pin</td>
                       <td>A-13</td>
                       <td><span class="badge b-active">Active</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="B-04" data-cost="$0.22" data-cur="31" data-min="5" data-max="80" data-reorder="10">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="B-04" data-cost="$0.22" data-cur="31" data-min="5" data-max="80" data-reorder="10" data-skip-pick="false">
                       <td>3.0 x 4.0</td>
                       <td></td>
                       <td>B-04</td>
                       <td><span class="badge b-active">Active</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="standard" data-desc3="" data-bin="B-04" data-cost="$0.18" data-cur="55" data-min="10" data-max="120" data-reorder="15">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="standard" data-desc3="" data-bin="B-04" data-cost="$0.18" data-cur="55" data-min="10" data-max="120" data-reorder="15" data-skip-pick="false">
                       <td>3.5 x 5.0</td>
                       <td>standard</td>
                       <td>B-04</td>
                       <td><span class="badge b-active">Active</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="C-01" data-cost="$0.45" data-cur="0" data-min="2" data-max="30" data-reorder="5">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="C-01" data-cost="$0.45" data-cur="0" data-min="2" data-max="30" data-reorder="5" data-skip-pick="false">
                       <td>4.0 x 6.0</td>
                       <td></td>
                       <td>C-01</td>
                       <td><span class="badge b-inactive">Inactive</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="wide angle" data-desc3="OD 4.5mm" data-bin="C-02" data-cost="$1.20" data-cur="7" data-min="3" data-max="40" data-reorder="8">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="wide angle" data-desc3="OD 4.5mm" data-bin="C-02" data-cost="$1.20" data-cur="7" data-min="3" data-max="40" data-reorder="8" data-skip-pick="false">
                       <td>4.5 x 7.0</td>
                       <td>wide angle</td>
                       <td>C-02</td>
                       <td><span class="badge b-active">Active</span></td>
                     </tr>
-                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="" data-cost="$0.08" data-cur="14" data-min="5" data-max="60" data-reorder="10">
+                    <tr class="size-row" onclick="selectSizeRow(this)" data-desc2="" data-desc3="" data-bin="" data-cost="$0.08" data-cur="14" data-min="5" data-max="60" data-reorder="10" data-skip-pick="false">
                       <td>5.0 x 8.0</td>
                       <td></td>
                       <td></td>
@@ -456,9 +458,9 @@
                     <label for="sdDesc3">Description 3</label>
                     <input class="inp" id="sdDesc3" value=""/>
                   </div>
-                  <div class="ff">
-                    <label for="sdBin">Bin Number</label>
-                    <input class="inp" id="sdBin" value="A-12"/>
+                  <div class="ff ff-bin">
+                    <label for="sdBin">Bin Location</label>
+                    <input class="inp" id="sdBin" value="A-12" style="font-weight:600;font-size:13px;letter-spacing:.3px"/>
                   </div>
                   <div class="ff">
                     <label for="sdCost">Unit Cost</label>
@@ -486,6 +488,7 @@
                 <div class="sd-toggles">
                   <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Scan Required</span></div>
                   <div class="toggle-row"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Always Reorder</span></div>
+                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="sdSkipPickList"/><span class="toggle-slider"></span></label><span class="toggle-label">Skip Pick List</span></div>
                 </div>
               </div>
               <div class="sd-footer">
@@ -1678,9 +1681,12 @@ function selectItem(name) {
   // Update toggles
   const toggles = document.querySelectorAll('.ihb-toggles .toggle input');
   if (toggles[0]) toggles[0].checked = data.active;
-  if (toggles[1]) toggles[1].checked = data.notRepair;
-  if (toggles[2]) toggles[2].checked = data.noCount;
-  if (toggles[3]) toggles[3].checked = data.skipPick;
+  if (toggles[1]) toggles[1].checked = data.diameter === 'Large';
+  if (toggles[2]) toggles[2].checked = data.notRepair;
+  if (toggles[3]) toggles[3].checked = data.noCount;
+  if (toggles[4]) toggles[4].checked = data.skipPick;
+  const headerDiam = document.getElementById('headerDiam');
+  if (headerDiam) headerDiam.value = data.diameter || 'Small';
 
   // Rebuild sizes grid
   const tbody = document.querySelector('#sizeGrid tbody');
@@ -1692,7 +1698,7 @@ function selectItem(name) {
     return `<tr class="${cls}" onclick="selectSizeRow(this)"
       data-desc2="${s.desc2}" data-desc3="${s.desc3}" data-bin="${s.bin}"
       data-cost="${s.cost}" data-cur="${s.cur}" data-min="${s.min}"
-      data-max="${s.max}" data-reorder="${s.reorder}">
+      data-max="${s.max}" data-reorder="${s.reorder}" data-skip-pick="${!!data.skipPick}">
       <td>${s.name}</td>
       <td>${s.desc2}</td>
       <td>${s.bin}</td>
@@ -1736,6 +1742,8 @@ function selectSizeRow(row) {
   document.getElementById('sdDesc2').value = row.dataset.desc2 || '';
   document.getElementById('sdDesc3').value = row.dataset.desc3 || '';
   document.getElementById('sdBin').value = row.dataset.bin || '';
+  const sdSkip = document.getElementById('sdSkipPickList');
+  if (sdSkip) sdSkip.checked = row.dataset.skipPick === 'true';
   document.getElementById('sdCost').value = row.dataset.cost || '';
   document.getElementById('sdCur').textContent = row.dataset.cur || '0';
   document.getElementById('sdMin').value = row.dataset.min || '';
@@ -2040,22 +2048,23 @@ async function selectApiItem(key, name) {
 
     const toggles = document.querySelectorAll('.ihb-toggles .toggle input');
     if (toggles[0]) toggles[0].checked = item.bActive !== false;
-    if (toggles[1]) toggles[1].checked = !!item.bNotUsedByRepair;
-    if (toggles[2]) toggles[2].checked = !!item.bNoCountAdjustment;
-    if (toggles[3]) toggles[3].checked = !!item.bSkipPickList;
+    if (toggles[1]) { toggles[1].checked = !!item.bLargeDiameter; toggles[1].addEventListener('change', function() { if (headerDiam) headerDiam.value = this.checked ? 'Large' : 'Small'; }); }
+    if (toggles[2]) toggles[2].checked = !!item.bNotUsedByRepair;
+    if (toggles[3]) toggles[3].checked = !!item.bNoCountAdjustment;
+    if (toggles[4]) toggles[4].checked = !!item.bSkipPickList;
   }
 
   // Load sizes from API
   try {
     const sizesData = await API.getInventorySizes(key);
     const sizes = Array.isArray(sizesData) ? sizesData : (sizesData?.list || sizesData?.items || []);
-    renderApiSizes(sizes);
+    renderApiSizes(sizes, item);
   } catch (e) {
     console.warn('[TSI Inventory] Failed to load sizes:', e);
   }
 }
 
-function renderApiSizes(sizes) {
+function renderApiSizes(sizes, parentItem) {
   const tbody = document.querySelector('#sizeGrid tbody');
   if (!tbody) return;
 
@@ -2075,7 +2084,8 @@ function renderApiSizes(sizes) {
       data-key="${s.lInventorySizeKey || ''}"
       data-desc2="${desc2}" data-desc3="${s.sSizeDescription3 || ''}" data-bin="${bin}"
       data-cost="$${Number(cost).toFixed(2)}" data-cur="${s.nLevelCurrent || 0}"
-      data-min="${s.nLevelMinimum || 0}" data-max="${s.nLevelMaximum || 0}" data-reorder="${reorder}">
+      data-min="${s.nLevelMinimum || 0}" data-max="${s.nLevelMaximum || 0}" data-reorder="${reorder}"
+      data-skip-pick="${!!(parentItem && parentItem.bSkipPickList)}">
       <td>${desc}</td>
       <td>${desc2}</td>
       <td>${bin}</td>
