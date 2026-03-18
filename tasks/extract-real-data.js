@@ -1,6 +1,6 @@
 /**
  * extract-real-data.js
- * Pulls 30 days of real data from WinScopeNet via PowerShell Invoke-Sqlcmd
+ * Pulls 30 days of real data from WinScopeNet via sqlcmd
  *
  * Usage: node tasks/extract-real-data.js
  * Output: tasks/real-data-seed.json
@@ -9,67 +9,43 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER = 'localhost\\SQLEXPRESS';
+const SERVER = 'localhost';
 const DB = 'WinScopeNet';
 const DATE_FROM = '2026-02-13';
 const DATE_TO = '2026-03-14';
 const TMP_SQL = path.join(__dirname, '_tmp_query.sql');
+const SQLCMD = 'C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\SQLCMD.EXE';
 const SVC_LOC_NAMES = { 1: 'Upper Chichester', 2: 'Nashville' };
 
 // ============================================================
-// SQL helper via PowerShell Invoke-Sqlcmd
+// SQL helper via sqlcmd
 // ============================================================
 
 function sqlQuery(queryStr) {
-  // Write SQL to temp file
+  // Write SQL to temp file to avoid escaping issues
   fs.writeFileSync(TMP_SQL, queryStr, 'utf8');
 
-  // Write PowerShell script to temp file to avoid escaping hell
-  const TMP_PS = TMP_SQL + '.ps1';
-  const TMP_JSON = TMP_SQL + '.json';
-  const jsonPath = TMP_JSON.replace(/\\/g, '\\\\');
-  const sqlPath = TMP_SQL.replace(/\\/g, '\\\\');
-  // FOR JSON returns result in a column named JSON_F52E2B61-18A1-11d1-B105-00805F49916B
-  // For large results, output is split across multiple DataRows — must join them
-  const psScript = `
-$ErrorActionPreference = 'Stop'
-$sql = Get-Content '${sqlPath}' -Raw
-$result = Invoke-Sqlcmd -ServerInstance '${SERVER}' -Database '${DB}' -Query $sql -MaxCharLength 100000000 -QueryTimeout 300
-if ($result -eq $null) {
-  [IO.File]::WriteAllText('${jsonPath}', '[]', [Text.Encoding]::UTF8)
-} else {
-  $colName = 'JSON_F52E2B61-18A1-11d1-B105-00805F49916B'
-  $sb = New-Object System.Text.StringBuilder
-  if ($result -is [array]) {
-    foreach ($row in $result) { [void]$sb.Append($row.$colName) }
-  } else {
-    [void]$sb.Append($result.$colName)
-  }
-  [IO.File]::WriteAllText('${jsonPath}', $sb.ToString(), [Text.Encoding]::UTF8)
-}
-`;
-  fs.writeFileSync(TMP_PS, psScript, 'utf8');
-
   try {
-    execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${TMP_PS}"`, {
-      maxBuffer: 500 * 1024 * 1024,
-      encoding: 'utf8',
-      timeout: 300000
-    });
-    // Read JSON from temp file (bypasses PowerShell output wrapping)
-    if (fs.existsSync(TMP_JSON)) {
-      const raw = fs.readFileSync(TMP_JSON, 'utf8').trim();
-      if (!raw || raw === '[]') return [];
-      return JSON.parse(raw);
-    }
-    return [];
+    const buf = execSync(
+      `"${SQLCMD}" -S "${SERVER}" -d "${DB}" -C -i "${TMP_SQL}" -y0 -w 65535`,
+      { maxBuffer: 500 * 1024 * 1024, timeout: 300000 }
+    );
+
+    // sqlcmd outputs as system codepage; decode and strip all \r
+    const cleaned = buf.toString('utf8').replace(/\r/g, '');
+    const lines = cleaned.split('\n')
+      .map(l => l.trimEnd())
+      .filter(l => l && !/^\(\d+ rows? affected\)/.test(l));
+
+    const jsonStr = lines.join('').trim();
+    if (!jsonStr || jsonStr === 'NULL') return [];
+    return JSON.parse(jsonStr);
   } catch (e) {
-    console.error('  ERROR:', e.message.substring(0, 400));
+    const msg = e.stdout || e.stderr || e.message || '';
+    console.error('  ERROR:', String(msg).substring(0, 500));
     return [];
   } finally {
-    try { fs.unlinkSync(TMP_SQL); } catch(_) {}
-    try { fs.unlinkSync(TMP_PS); } catch(_) {}
-    try { fs.unlinkSync(TMP_JSON); } catch(_) {}
+    try { fs.unlinkSync(TMP_SQL); } catch (_) {}
   }
 }
 
@@ -100,12 +76,13 @@ function safeSelectCols(tableName, alias) {
     FOR JSON PATH
   `);
   if (!cols.length) return `${pfx}*`;
-  return cols.map(c => {
-    if (['ntext','text','image'].includes(c.typeName)) {
-      return `CAST(${pfx}[${c.name}] AS nvarchar(max)) AS [${c.name}]`;
-    }
-    return `${pfx}[${c.name}]`;
-  }).join(', ');
+  // Exclude binary/large-text types AND memo-style nvarchar columns (mXxx)
+  // that can contain unescaped quotes breaking sqlcmd JSON output
+  return cols
+    .filter(c => !['ntext','text','image'].includes(c.typeName))
+    .filter(c => !/^m[A-Z]/.test(c.name))
+    .map(c => `${pfx}[${c.name}]`)
+    .join(', ');
 }
 
 // ============================================================
@@ -214,7 +191,7 @@ function main() {
   seed.clients = sqlQuery(`SELECT DISTINCT ${clientCols} FROM tblClient c JOIN tblDepartment d ON c.lClientKey=d.lClientKey JOIN tblRepair r ON d.lDepartmentKey=r.lDepartmentKey WHERE r.${RW} FOR JSON PATH`);
   log('clients', seed);
 
-  seed.departments = sqlQuery(`SELECT DISTINCT ${deptCols} FROM tblDepartment d JOIN tblRepair r ON d.lDepartmentKey=r.lDepartmentKey WHERE r.${RW} FOR JSON PATH`);
+  seed.departments = sqlQuery(`SELECT ${deptCols} FROM tblDepartment d WHERE d.lDepartmentKey IN (${DK}) FOR JSON PATH`);
   seed.departments.forEach(d => { d.sServiceLocationName = SVC_LOC_NAMES[d.lServiceLocationKey] || ''; });
   log('departments', seed);
 

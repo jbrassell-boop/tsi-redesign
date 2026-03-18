@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const SERVER = 'localhost\\SQLEXPRESS';
+const SERVER = 'localhost';
 const DB = 'WinScopeNetNashville';
 const SQLCMD = 'C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\SQLCMD.EXE';
 const TMP_SQL = path.join(__dirname, '_dash_tmp.sql');
