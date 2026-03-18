@@ -237,13 +237,19 @@
     r.dblTranAmount  = r.dblTranAmount  || r.dblAmount || r.dblInvoiceAmount || r.balance || 0;
     r.dtTranDate     = r.dtTranDate     || r.dtIssuedDate  || r.dtInvoiceDate    || null;
     r.sStatus        = r.sStatus        || (r.aging > 0 ? 'Unpaid' : 'Unpaid');
+    r.dblTaxAmount   = r.dblTaxAmount   || r.dblTax || 0;
+    r.dblDiscount    = r.dblDiscount    || r.dblDiscountAmount || 0;
+    r.sPaymentTerms  = r.sPaymentTerms  || r.sTerms || '';
+    r.sGLAccountNumber = r.sGLAccountNumber || r.sGLAccount || '';
+    r.sDeliveryMethod  = r.sDeliveryMethod  || r.sInvoiceDeliveryMethod || '';
+    r.sGreatPlainsID   = r.sGreatPlainsID   || r.sGPID || '';
     return r;
   }
 
   // ── Tab headers ─────────────────────────────────────────
   const HEADERS = {
-    outstanding: '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Issued</th><th>Due Date</th><th style="text-align:right">Aging</th><th>Status</th><th style="width:80px"></th></tr>',
-    drafts:      '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Created</th><th>Status</th><th style="width:80px"></th></tr>',
+    outstanding: '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th style="text-align:right">Tax</th><th style="text-align:right">Discount</th><th>Terms</th><th>GL Acct</th><th>Issued</th><th>Due Date</th><th style="text-align:right">Aging</th><th>Status</th><th style="width:80px"></th></tr>',
+    drafts:      '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Created</th><th>Delivery</th><th>GP ID</th><th>Status</th><th style="width:80px"></th></tr>',
     hold:        '<tr><th>Client</th><th>Department</th><th>On Hold Since</th><th>Reason</th><th style="width:100px"></th></tr>',
     payments:    '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment Date</th><th>Method</th><th style="width:80px"></th></tr>',
     gl:          '<tr><th>Account #</th><th>Account Name</th><th>Type</th><th>Description</th><th style="width:80px"></th></tr>',
@@ -254,17 +260,17 @@
   // ── Demo data sets ──────────────────────────────────────
   const DEMO = {
     outstanding: [
-      { sTranNumber:'INV-2026-0284', sClientName1:'88th Medical Group', dblTranAmount:2840, dtTranDate:'2026-02-25', dtDueDate:'2026-03-25', sStatus:'Unpaid', lInvoiceKey:284 },
-      { sTranNumber:'INV-2026-0271', sClientName1:'Tift Regional Medical Center', dblTranAmount:5120, dtTranDate:'2026-02-18', dtDueDate:'2026-03-18', sStatus:'Unpaid', lInvoiceKey:271 },
-      { sTranNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblTranAmount:3650, dtTranDate:'2026-02-10', dtDueDate:'2026-03-10', sStatus:'Partial', lInvoiceKey:258 },
-      { sTranNumber:'INV-2026-0241', sClientName1:'West Side GI Center', dblTranAmount:9300, dtTranDate:'2026-01-31', dtDueDate:'2026-03-01', sStatus:'Overdue', lInvoiceKey:241 },
-      { sTranNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblTranAmount:4480, dtTranDate:'2026-01-22', dtDueDate:'2026-02-21', sStatus:'Paid', lInvoiceKey:229 },
-      { sTranNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblTranAmount:2100, dtTranDate:'2026-01-15', dtDueDate:'2026-02-14', sStatus:'Paid', lInvoiceKey:215 },
-      { sTranNumber:'INV-2026-0198', sClientName1:'Shreveport Endoscopy Center', dblTranAmount:1750, dtTranDate:'2026-01-08', dtDueDate:'2026-02-07', sStatus:'Overdue', lInvoiceKey:198 }
+      { sTranNumber:'INV-2026-0284', sClientName1:'88th Medical Group', dblTranAmount:2840, dblTaxAmount:212.14, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-25', dtDueDate:'2026-03-25', sStatus:'Unpaid', lInvoiceKey:284 },
+      { sTranNumber:'INV-2026-0271', sClientName1:'Tift Regional Medical Center', dblTranAmount:5120, dblTaxAmount:383.22, dblDiscount:256, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-18', dtDueDate:'2026-03-18', sStatus:'Unpaid', lInvoiceKey:271 },
+      { sTranNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblTranAmount:3650, dblTaxAmount:273.06, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-10', dtDueDate:'2026-03-10', sStatus:'Partial', lInvoiceKey:258 },
+      { sTranNumber:'INV-2026-0241', sClientName1:'West Side GI Center', dblTranAmount:9300, dblTaxAmount:695.82, dblDiscount:465, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-01-31', dtDueDate:'2026-03-01', sStatus:'Overdue', lInvoiceKey:241 },
+      { sTranNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblTranAmount:4480, dblTaxAmount:335.30, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-01-22', dtDueDate:'2026-02-21', sStatus:'Paid', lInvoiceKey:229 },
+      { sTranNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblTranAmount:2100, dblTaxAmount:157.08, dblDiscount:105, sPaymentTerms:'Net 30', sGLAccountNumber:'4100', dtTranDate:'2026-01-15', dtDueDate:'2026-02-14', sStatus:'Paid', lInvoiceKey:215 },
+      { sTranNumber:'INV-2026-0198', sClientName1:'Shreveport Endoscopy Center', dblTranAmount:1750, dblTaxAmount:130.90, dblDiscount:0, sPaymentTerms:'Net 45', sGLAccountNumber:'4000', dtTranDate:'2026-01-08', dtDueDate:'2026-02-07', sStatus:'Overdue', lInvoiceKey:198 }
     ],
     drafts: [
-      { sTranNumber:'DRF-2026-0050', sClientName1:'88th Medical Group', dblTranAmount:1200, dtCreatedDate:'2026-03-05', sStatus:'Draft', lInvoiceKey:50 },
-      { sTranNumber:'DRF-2026-0049', sClientName1:'Nashville General Hospital', dblTranAmount:3400, dtCreatedDate:'2026-03-02', sStatus:'Draft', lInvoiceKey:49 }
+      { sTranNumber:'DRF-2026-0050', sClientName1:'88th Medical Group', dblTranAmount:1200, dtCreatedDate:'2026-03-05', sDeliveryMethod:'Email', sGreatPlainsID:'GP-88MED-001', sStatus:'Draft', lInvoiceKey:50 },
+      { sTranNumber:'DRF-2026-0049', sClientName1:'Nashville General Hospital', dblTranAmount:3400, dtCreatedDate:'2026-03-02', sDeliveryMethod:'Print', sGreatPlainsID:'GP-NASH-014', sStatus:'Draft', lInvoiceKey:49 }
     ],
     hold: [
       { sClientName1:'West Side GI Center', sDepartmentName:'Endoscopy', dtOnHoldDate:'2026-02-15', sReason:'Past due > 60 days', lClientKey:41 },
@@ -323,7 +329,7 @@
     filterStatus.value = '';
     filterClient.value = '';
 
-    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
+    body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>';
 
     try {
       let raw;
@@ -429,7 +435,7 @@
   function renderRows() {
     const data = getFiltered();
     if (!data.length) {
-      body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+      body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
       return;
     }
 
@@ -449,10 +455,18 @@
       const days = agingDays(r.dtTranDate || r.dtInvoiceDate);
       const st = r.sStatus || 'Unpaid';
       const isOverdue = st.toLowerCase().includes('overdue');
+      const tax = Number(r.dblTaxAmount || r.dblTax || 0);
+      const disc = Number(r.dblDiscount || r.dblDiscountAmount || 0);
+      const terms = r.sPaymentTerms || r.sTerms || '—';
+      const glAcct = r.sGLAccountNumber || r.sGLAccount || '—';
       return '<tr' + (isOverdue ? ' style="background:#FEF9F9"' : '') + '>' +
         '<td style="color:var(--blue);font-weight:600">' + esc(r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
         '<td style="text-align:right;font-weight:700;color:' + amtColor(st) + '">' + fmt$(r.dblTranAmount || r.dblInvoiceAmount) + '</td>' +
+        '<td style="text-align:right;color:var(--muted)">' + (tax ? fmt$(tax) : '—') + '</td>' +
+        '<td style="text-align:right;color:var(--muted)">' + (disc ? fmt$(disc) : '—') + '</td>' +
+        '<td style="color:var(--muted)">' + esc(terms) + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + esc(glAcct) + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtTranDate || r.dtInvoiceDate) + '</td>' +
         '<td' + (isOverdue ? ' style="color:var(--red);font-weight:600"' : '') + '>' + fmtDate(r.dtDueDate) + '</td>' +
         '<td style="text-align:right;' + agingColor(days) + '">' + days + 'd</td>' +
@@ -464,11 +478,15 @@
 
   function renderDrafts(data) {
     body.innerHTML = data.map(r => {
+      const delivery = r.sDeliveryMethod || r.sInvoiceDeliveryMethod || '—';
+      const gpId = r.sGreatPlainsID || r.sGPID || '—';
       return '<tr>' +
         '<td style="color:var(--blue);font-weight:600">' + esc(r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
         '<td style="text-align:right;font-weight:700;color:var(--navy)">' + fmt$(r.dblTranAmount || r.dblInvoiceAmount) + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtCreatedDate || r.dtTranDate) + '</td>' +
+        '<td style="color:var(--muted)">' + esc(delivery) + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + esc(gpId) + '</td>' +
         '<td>' + statusBadge('Draft') + '</td>' +
         '<td style="text-align:right"><button class="edit-btn" onclick="viewInvoice(' + (r.lInvoiceKey || 0) + ')">Edit</button>' +
         ' <button class="edit-btn" style="background:#FEF2F2;color:var(--red)" onclick="deleteDraft(' + (r.lInvoiceKey || 0) + ')">Del</button></td>' +
