@@ -321,6 +321,28 @@
                   </div>
                 </div>
               </div>
+
+              <div class="field-section">
+                <div class="field-section-title">Alternate Contact</div>
+                <div class="fg" style="gap:5px">
+                  <div class="ff">
+                    <label>Alt Contact Name</label>
+                    <input class="inp" value="" id="fAltContact" placeholder="Alternate contact name"/>
+                  </div>
+                  <div class="ff">
+                    <label>Alt Phone</label>
+                    <input class="inp" type="tel" value="" id="fAltPhone" placeholder="+1 (xxx) xxx-xxxx"/>
+                  </div>
+                  <div class="ff">
+                    <label>Alt Email</label>
+                    <input class="inp" type="email" value="" id="fAltEmail" placeholder="alt@example.com"/>
+                  </div>
+                  <div class="ff">
+                    <label>Alt Email Name</label>
+                    <input class="inp" value="" id="fAltEmailName" placeholder="Alternate email contact name"/>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- RIGHT — Roles & Settings -->
@@ -371,8 +393,16 @@
                     <input class="inp" type="text" value="" id="fAdditionalPOCost" placeholder="$0.00" style="text-align:right"/>
                   </div>
                   <div class="ff">
+                    <label>PO Cost Per Order</label>
+                    <input class="inp" type="text" value="" id="fPOCostPerOrder" placeholder="$0.00" style="text-align:right"/>
+                  </div>
+                  <div class="ff">
                     <label>Include Part #</label>
                     <input class="inp" type="number" value="" id="fIncludePartNum" placeholder="0"/>
+                  </div>
+                  <div class="ff">
+                    <label>Supplier Link</label>
+                    <input class="inp" value="" id="fSupplierLink" placeholder="Linked supplier ID" readonly style="background:#F8FAFF;color:var(--muted)"/>
                   </div>
                 </div>
               </div>
@@ -403,6 +433,10 @@
                   <div class="toggle-row" style="gap:5px">
                     <label class="toggle"><input type="checkbox" id="fBlindPO"/><span class="toggle-slider"></span></label>
                     <span class="toggle-label" style="font-size:10.5px">Blind PO for GP</span>
+                  </div>
+                  <div class="toggle-row" style="gap:5px">
+                    <label class="toggle"><input type="checkbox" id="fAcquisitionSupplier"/><span class="toggle-slider"></span></label>
+                    <span class="toggle-label" style="font-size:10.5px">Acquisition Supplier</span>
                   </div>
                 </div>
               </div>
@@ -592,6 +626,11 @@
             </div>
             <div class="ff"><label>Email Name</label><input class="inp" placeholder="Contact name"/></div>
             <div class="ff"><label>Email Address <span class="req">*</span></label><input class="inp" type="email" placeholder="billing@example.com"/></div>
+            <div class="field-section-title" style="margin:8px 0 6px">Alternate Contact</div>
+            <div class="ff"><label>Alt Contact Name</label><input class="inp" placeholder="Alternate contact name"/></div>
+            <div class="ff"><label>Alt Phone</label><input class="inp" type="tel" placeholder="+1 (xxx) xxx-xxxx"/></div>
+            <div class="ff"><label>Alt Email</label><input class="inp" type="email" placeholder="alt@example.com"/></div>
+            <div class="ff"><label>Alt Email Name</label><input class="inp" placeholder="Alt email contact name"/></div>
           </div>
         </div>
         <!-- Right Column -->
@@ -610,6 +649,7 @@
             <div class="ff"><label>Supplier Level</label><select class="inp"><option>Non Critical</option><option>Critical</option></select></div>
             <div class="ff"><label>Default PO Type</label><select class="inp"><option>Parts</option><option>Instruments For Sale</option></select></div>
             <div class="ff"><label>Additional PO Cost</label><input class="inp" placeholder="$0.00" style="text-align:right"/></div>
+            <div class="ff"><label>PO Cost Per Order</label><input class="inp" placeholder="$0.00" style="text-align:right"/></div>
             <div class="ff"><label>Include Part #</label><input class="inp" type="number" placeholder="0"/></div>
           </div>
           <div class="field-section-title" style="margin:8px 0 6px">Options</div>
@@ -620,6 +660,7 @@
             <div class="toggle-row" style="gap:5px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:10.5px">Use Vendor SKU</span></div>
             <div class="toggle-row" style="gap:5px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:10.5px">Show Vendor SKU on PO</span></div>
             <div class="toggle-row" style="gap:5px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:10.5px">Blind PO for GP</span></div>
+            <div class="toggle-row" style="gap:5px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label" style="font-size:10.5px">Acquisition Supplier</span></div>
           </div>
           <div class="field-section-title" style="margin:8px 0 6px">Notes</div>
           <div class="fg" style="gap:5px">
@@ -851,7 +892,7 @@ function applyFilters() {
     }
     // Search filter
     if (search) {
-      const hay = (s.sSupplierName1 || '').toLowerCase() + ' ' + (s.sCity || '').toLowerCase() + ' ' + (s.sState || '').toLowerCase();
+      const hay = (s.sSupplierName1 || '').toLowerCase() + ' ' + (s.sCity || '').toLowerCase() + ' ' + (s.sState || '').toLowerCase() + ' ' + (s.sAltContact || '').toLowerCase() + ' ' + (s.sEMailAlt || '').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
@@ -997,6 +1038,20 @@ function populateDetail(s) {
   document.getElementById('fUseVendorSKU').checked = !!s.bUseVendorSKU;
   document.getElementById('fShowVendorSKU').checked = !!s.bShowVendorSKUOnPO;
   document.getElementById('fBlindPO').checked = !!s.bBlindPOForGP;
+
+  // Alternate Contact
+  document.getElementById('fAltContact').value = s.sAltContact || '';
+  document.getElementById('fAltPhone').value = s.sPhoneAlt || '';
+  document.getElementById('fAltEmail').value = s.sEMailAlt || '';
+  document.getElementById('fAltEmailName').value = s.sAltEMailName || '';
+
+  // PO Cost Per Order & Supplier Link
+  document.getElementById('fPOCostPerOrder').value = s.dblPOCostPerOrder ? formatCurrency(s.dblPOCostPerOrder) : '';
+  const linkKey = s.lSupplierKeyLink || s.lAltSupplierKey || '';
+  document.getElementById('fSupplierLink').value = linkKey ? ('Supplier #' + linkKey) : '';
+
+  // Acquisition Supplier
+  document.getElementById('fAcquisitionSupplier').checked = !!s.bAcquisitionSupplier;
 
   // Notes
   document.getElementById('fPODescription').value = s.sAdditionalPODescription || s.sPODescription || '';
@@ -1325,6 +1380,7 @@ async function executeDeleteSupplier() {
 function collectFormData() {
   const minOrder = (document.getElementById('fMinOrder').value || '').replace(/[$,]/g, '');
   const addPOCost = (document.getElementById('fAdditionalPOCost').value || '').replace(/[$,]/g, '');
+  const poCostPerOrder = (document.getElementById('fPOCostPerOrder').value || '').replace(/[$,]/g, '');
   return {
     psSupplierName1: document.getElementById('fSupplierName').value,
     psAddress1: document.getElementById('fAddress1').value,
@@ -1339,6 +1395,10 @@ function collectFormData() {
     pbBillEmail: document.getElementById('fBillEmail').checked,
     psEmailName: document.getElementById('fEmailName').value,
     psEmailAddress: document.getElementById('fEmailAddress').value,
+    psAltContact: document.getElementById('fAltContact').value,
+    psPhoneAlt: document.getElementById('fAltPhone').value,
+    psEMailAlt: document.getElementById('fAltEmail').value,
+    psAltEMailName: document.getElementById('fAltEmailName').value,
     pbPartsVendor: document.getElementById('fRoleParts').checked,
     pbRepairVendor: document.getElementById('fRoleRepair').checked,
     pbAcquisitionVendor: document.getElementById('fRoleAcquisition').checked,
@@ -1355,6 +1415,8 @@ function collectFormData() {
     pbUseVendorSKU: document.getElementById('fUseVendorSKU').checked,
     pbShowVendorSKUOnPO: document.getElementById('fShowVendorSKU').checked,
     pbBlindPOForGP: document.getElementById('fBlindPO').checked,
+    pbAcquisitionSupplier: document.getElementById('fAcquisitionSupplier').checked,
+    pdblPOCostPerOrder: parseFloat(poCostPerOrder) || 0,
     psPODescription: document.getElementById('fPODescription').value,
     psNotes: document.getElementById('fNotes').value,
     plServiceLocationKey: parseInt(document.getElementById('svcLocation').value) || 1
