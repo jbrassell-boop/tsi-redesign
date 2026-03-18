@@ -1814,7 +1814,7 @@ function populateFormDrawer(formId) {
     const form = WORKFLOW_FORMS.find(f => f.id === formId);
     body.innerHTML = tsiFormHeader('Blank Inspection', form.formNum) + headerHTML + `
       <div style="font-size:10.5px;margin-bottom:6px"><b style="font-size:9px;color:var(--steel)">COMPLAINT:</b> ${r.sComplaintDesc || '—'}</div>
-      <div style="font-size:10.5px;margin-bottom:8px;padding:4px 8px;background:#F0F4FA;border-radius:4px"><b>Customer Expected Delivery Date:</b> ${r.EstDelDate ? new Date(r.EstDelDate).toLocaleDateString() : 'N/A'}</div>
+      <div style="font-size:10.5px;margin-bottom:8px;padding:4px 8px;background:#F0F4FA;border-radius:4px"><b>Customer Expected Delivery Date:</b> ${r.dtExpDelDate ? new Date(r.dtExpDelDate).toLocaleDateString() : 'N/A'}</div>
       <div class="wf-section-label">ITEMS FOUND TO BE IN NEED OF REPAIR</div>
       <table class="wf-items-table">
         <thead><tr><th>Repair Item</th><th style="width:200px">Reason / Finding</th></tr></thead>
@@ -4418,11 +4418,11 @@ function populateStatus(history) {
     return;
   }
   tbody.innerHTML = rows.map(r =>
-    '<tr><td>' + (r.sDescription||r.sStatusDesc||'') + '</td>' +
-    '<td>' + (r.dtDateTime ? fmtDate(r.dtDateTime) + ' ' + new Date(r.dtDateTime).toLocaleTimeString() : '') + '</td>' +
-    '<td>' + (r.sUserName||r.sUser||'') + '</td>' +
-    '<td style="text-align:center">' + (r.sVoided||'') + '</td>' +
-    '<td style="font-size:10px;color:var(--muted)">' + (r.sComments||'') + '</td></tr>'
+    '<tr><td>' + (r.sStatusDesc||'') + '</td>' +
+    '<td>' + (r.dtCompleteDate ? fmtDate(r.dtCompleteDate) + ' ' + new Date(r.dtCompleteDate).toLocaleTimeString() : '') + '</td>' +
+    '<td>' + (r.sUserName||'') + '</td>' +
+    '<td style="text-align:center">' + (r.bIsVoid ? 'Yes' : '') + '</td>' +
+    '<td style="font-size:10px;color:var(--muted)">' + (r.mTranComments||'') + '</td></tr>'
   ).join('');
 }
 
@@ -4795,16 +4795,16 @@ async function initPage() {
 
     // Demo status history
     populateStatus([
-      { sDescription:'Received / Intake', dtDateTime:'2026-03-05T08:30:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'Scope received via FedEx Priority' },
-      { sDescription:'Evaluation', dtDateTime:'2026-03-05T10:15:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Leak test positive — fluid invasion confirmed' },
-      { sDescription:'D&I Inspection', dtDateTime:'2026-03-05T14:00:00', sUserName:'Tim Johnson', sVoided:'', sComments:'Disassembly & inspection complete' },
-      { sDescription:'Waiting for Approval', dtDateTime:'2026-03-05T16:30:00', sUserName:'System', sVoided:'', sComments:'Repair estimate sent to client — $2,875' },
-      { sDescription:'Approval Received', dtDateTime:'2026-03-06T14:22:00', sUserName:'System', sVoided:'', sComments:'Phone approval from Linda Harper' },
-      { sDescription:'Parts Ordered', dtDateTime:'2026-03-06T15:00:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'CCD module ordered from Olympus — ETA 3/8' },
-      { sDescription:'Parts Received', dtDateTime:'2026-03-08T09:45:00', sUserName:'Kevin Brooks', sVoided:'', sComments:'CCD module received, QC passed' },
-      { sDescription:'In Repair', dtDateTime:'2026-03-08T10:00:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Distal end rebuild started' },
-      { sDescription:'In Repair', dtDateTime:'2026-03-09T11:30:00', sUserName:'Rob Martinez', sVoided:'', sComments:'CCD installed, light guide inspected' },
-      { sDescription:'In Repair', dtDateTime:'2026-03-10T08:00:00', sUserName:'Rob Martinez', sVoided:'', sComments:'Reassembly — epoxy cure in progress' }
+      { sStatusDesc:'Received / Intake', dtCompleteDate:'2026-03-05T08:30:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'Scope received via FedEx Priority' },
+      { sStatusDesc:'Evaluation', dtCompleteDate:'2026-03-05T10:15:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Leak test positive — fluid invasion confirmed' },
+      { sStatusDesc:'D&I Inspection', dtCompleteDate:'2026-03-05T14:00:00', sUserName:'Tim Johnson', bIsVoid:false, mTranComments:'Disassembly & inspection complete' },
+      { sStatusDesc:'Waiting for Approval', dtCompleteDate:'2026-03-05T16:30:00', sUserName:'System', bIsVoid:false, mTranComments:'Repair estimate sent to client — $2,875' },
+      { sStatusDesc:'Approval Received', dtCompleteDate:'2026-03-06T14:22:00', sUserName:'System', bIsVoid:false, mTranComments:'Phone approval from Linda Harper' },
+      { sStatusDesc:'Parts Ordered', dtCompleteDate:'2026-03-06T15:00:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'CCD module ordered from Olympus — ETA 3/8' },
+      { sStatusDesc:'Parts Received', dtCompleteDate:'2026-03-08T09:45:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'CCD module received, QC passed' },
+      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-08T10:00:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Distal end rebuild started' },
+      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-09T11:30:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'CCD installed, light guide inspected' },
+      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-10T08:00:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Reassembly — epoxy cure in progress' }
     ]);
 
     // Demo documents

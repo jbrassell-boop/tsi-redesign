@@ -1223,7 +1223,7 @@ function openContactModal(mode){
       reps.forEach(r=>{
         const o = document.createElement('option');
         o.value = r.lSalesRepKey;
-        o.textContent = (r.sFirstName||'')+' '+(r.sLastName||'');
+        o.textContent = (r.sRepFirst||'')+' '+(r.sRepLast||'');
         sel.appendChild(o);
       });
       setSelectByValue(sel, selectedKey);
@@ -1588,8 +1588,8 @@ function openContactModal(mode){
         const tr = document.createElement('tr');
         tr.innerHTML =
           '<td style="font-weight:600">'+name+'</td>'+
-          '<td>'+(c.sContactPhoneNumber||c.sPhone||'')+'</td>'+
-          '<td>'+(c.sContactFaxNumber||c.sFax||'')+'</td>'+
+          '<td>'+(c.sContactPhoneVoice||c.sPhone||'')+'</td>'+
+          '<td>'+(c.sContactPhoneFAX||c.sFax||'')+'</td>'+
           '<td>'+(c.sContactEmail||c.sEmail||'')+'</td>'+
           '<td>'+(c.bBillingContact ? '<span class="badge b-active">Active</span>' : '')+'</td>'+
           '<td>'+(c.bActive!==false ? '<span class="badge b-active">Active</span>' : '<span class="badge" style="color:var(--muted)">Inactive</span>')+'</td>'+
@@ -1934,8 +1934,8 @@ function openContactModal(mode){
       editingContactKey = contactData.lContactKey;
       inputs[0].value = contactData.sContactFirst || '';
       inputs[1].value = contactData.sContactLast || '';
-      inputs[2].value = contactData.sContactPhoneNumber || contactData.sPhone || '';
-      inputs[3].value = contactData.sContactFaxNumber || contactData.sFax || '';
+      inputs[2].value = contactData.sContactPhoneVoice || contactData.sPhone || '';
+      inputs[3].value = contactData.sContactPhoneFAX || contactData.sFax || '';
       inputs[4].value = contactData.sContactEmail || contactData.sEmail || '';
       if(toggles[0]) toggles[0].checked = contactData.bActive !== false;
       if(toggles[1]) toggles[1].checked = !!contactData.bBillingContact;
@@ -1958,8 +1958,8 @@ function openContactModal(mode){
       plClientKey: parseInt($('selClient').value) || 0,
       psContactFirst: inputs[0].value || '',
       psContactLast: inputs[1].value || '',
-      psContactPhoneNumber: inputs[2].value || '',
-      psContactFaxNumber: inputs[3].value || '',
+      psContactPhoneVoice: inputs[2].value || '',
+      psContactPhoneFAX: inputs[3].value || '',
       psContactEmail: inputs[4].value || '',
       pbActive: toggles[0] ? toggles[0].checked : true,
       pbBillingContact: toggles[1] ? toggles[1].checked : false
@@ -1997,7 +1997,7 @@ function openContactModal(mode){
     $('deptBillState').value = bs;
     $('deptBillZip').value = bz;
     $('deptBillEmail').value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
-    $('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneNumber || '';
+    $('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneVoice || '';
 
     // Ship To
     const sn1 = d.sShippingName1 || d.sShipToName1 || d.sShipName1 || '';
@@ -2013,7 +2013,7 @@ function openContactModal(mode){
     $('deptShipState').value = ss;
     $('deptShipZip').value = sz;
     $('deptShipPhone').value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
-    $('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactFaxNumber || '';
+    $('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactPhoneFAX || '';
 
     // Same as Bill To check
     const sameBill = (bn1 === sn1 && ba1 === sa1 && bc === sc && bs === ss && bz === sz);

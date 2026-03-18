@@ -1494,10 +1494,10 @@ async function loadInvoicesTab(contractKey) {
       tbody.innerHTML = invoices.map(inv => {
         const statusColor = (inv.sInvoiceStatus || '').toLowerCase().includes('paid') ? 'var(--green)' : 'var(--amber)';
         return '<tr>' +
-          '<td style="font-weight:600;color:var(--blue)">' + (inv.sInvoiceNumber || 'INV-' + (inv.lInvoiceKey || '?')) + '</td>' +
+          '<td style="font-weight:600;color:var(--blue)">' + (inv.sTranNumber || inv.sInvoiceNumber || 'INV-' + (inv.lInvoiceKey || '?')) + '</td>' +
           '<td>' + fmtDate(inv.dtInvoiceDate) + '</td>' +
           '<td>' + (inv.sDepartmentName || '—') + '</td>' +
-          '<td>' + fmtCurrencyFull(inv.dblInvoiceAmount || inv.dblAmount) + '</td>' +
+          '<td>' + fmtCurrencyFull(inv.dblInvoiceAmount || inv.dblTranAmount || inv.dblAmount) + '</td>' +
           '<td><span style="color:' + statusColor + ';font-weight:600">' + (inv.sInvoiceStatus || '—') + '</span></td>' +
         '</tr>';
       }).join('') || '<tr><td colspan="5" class="empty-state">No invoices</td></tr>';

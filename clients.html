@@ -1422,8 +1422,8 @@ function renderContactsFromAPI(contacts) {
     return `<tr${bg} data-contact-key="${c.lContactKey}">
       <td style="font-weight:600">${name}</td>
       <td style="color:var(--muted)">${c.sContactTitle || c.sTitle || (c.bBillingContact ? 'Billing Contact' : '') || '—'}</td>
-      <td>${c.sContactPhoneNumber || '—'}</td>
-      <td>${c.sContactFaxNumber || '—'}</td>
+      <td>${c.sContactPhoneVoice || '—'}</td>
+      <td>${c.sContactPhoneFAX || '—'}</td>
       <td>${c.sContactEMail || '—'}</td>
       <td>${badge}</td>
       <td><button class="edit-btn" onclick="openEditContactAPI(${c.lContactKey})">&#9998; Edit</button></td>
@@ -1440,8 +1440,8 @@ function openEditContactAPI(contactKey) {
   document.getElementById('ct-firstname').value = contact.sContactFirst || '';
   document.getElementById('ct-lastname').value = contact.sContactLast || '';
   document.getElementById('ct-title').value = '';
-  document.getElementById('ct-phone').value = contact.sContactPhoneNumber || '';
-  document.getElementById('ct-fax').value = contact.sContactFaxNumber || '';
+  document.getElementById('ct-phone').value = contact.sContactPhoneVoice || '';
+  document.getElementById('ct-fax').value = contact.sContactPhoneFAX || '';
   document.getElementById('ct-email').value = contact.sContactEMail || '';
   document.getElementById('ct-active').checked = contact.bActive !== false;
   document.getElementById('contactModal').classList.add('open');
@@ -1743,8 +1743,8 @@ async function saveContact() {
     const payload = {
       psContactFirst: first,
       psContactLast: last,
-      psContactPhoneNumber: document.getElementById('ct-phone').value.trim(),
-      psContactFaxNumber: document.getElementById('ct-fax').value.trim(),
+      psContactPhoneVoice: document.getElementById('ct-phone').value.trim(),
+      psContactPhoneFAX: document.getElementById('ct-fax').value.trim(),
       psContactEmail: document.getElementById('ct-email').value.trim(),
       pbActive: document.getElementById('ct-active').checked,
       pbBillingContact: false,
@@ -1972,7 +1972,7 @@ function populateClientList(clients) {
       <td>#${key}</td>
       <td style="font-weight:600">${c.sZipCode || c.zip || ''}</td>
       <td>${c.sCity || c.city || ''}${c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : '')}</td>
-      <td>${c.sServiceLocationName || ''}</td>
+      <td>${c.sServiceLocation || ''}</td>
       <td><span class="badge ${c.bActive === false ? 'b-inactive' : 'b-active'}">${c.bActive === false ? 'Inactive' : 'Active'}</span></td>`;
     tbody.appendChild(tr);
   });
