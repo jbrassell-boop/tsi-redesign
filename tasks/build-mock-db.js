@@ -84,7 +84,22 @@ if (seed.scopeTypes) {
 
 // --- Enrich clients ---
 if (seed.clients) {
+  // Build a map: clientKey → service location key from their departments
+  const clientSvcMap = {};
+  if (seed.departments) {
+    seed.departments.forEach(d => {
+      if (d.lClientKey && d.lServiceLocationKey) {
+        clientSvcMap[d.lClientKey] = d.lServiceLocationKey;
+      }
+    });
+  }
   seed.clients.forEach(c => {
+    // Assign service location from departments if missing
+    if (!c.lServiceLocationKey && clientSvcMap[c.lClientKey]) {
+      c.lServiceLocationKey = clientSvcMap[c.lClientKey];
+    }
+    // Default to service location 1 if still missing
+    if (!c.lServiceLocationKey) c.lServiceLocationKey = 1;
     c.sSalesRepName = repName(c.lSalesRepKey);
     c.sServiceLocationName = lk(svcLocMap, c.lServiceLocationKey, 'sServiceLocationName') ||
                               lk(svcLocMap, c.lServiceLocationKey, 'sServiceLocation') || '';
@@ -92,7 +107,7 @@ if (seed.clients) {
     c.sPricingCategory = lk(pricingMap, c.lPricingCategoryKey, 'sPricingDescription') || '';
     c.sDistName1 = lk(distributorMap, c.lDistributorKey, 'sDistName1') || '';
   });
-  console.log('  clients: +sSalesRepName, +sServiceLocationName, +sPaymentTerms, +sPricingCategory, +sDistName1');
+  console.log('  clients: +lServiceLocationKey (from depts), +sSalesRepName, +sServiceLocationName, +sPaymentTerms, +sPricingCategory, +sDistName1');
 }
 
 // --- Enrich departments ---
@@ -172,6 +187,11 @@ if (seed.repairs) {
     // Approved flag
     r.Approved = r.dtAprRecvd ? 'Y' : 'N';
 
+    // Dashboard-compatible fields
+    r.ResponsibleTech = r.sTechName || '';
+    r.nApprovedAmount = r.dblAmtRepair || 0;
+    r.Diameter = '';  // not tracked per-repair, inferred from scope type
+
     // Turn around time (days between in and out)
     if (r.dtDateIn && r.dtDateOut) {
       const din = new Date(r.dtDateIn);
@@ -180,6 +200,8 @@ if (seed.repairs) {
     } else if (r.dtDateIn) {
       r.nTurnAroundTime = Math.max(0, Math.round((new Date('2026-03-14') - new Date(r.dtDateIn)) / 86400000));
     }
+    // Cap nDaysSinceLastIn to reasonable value (raw SQL data can have extreme values)
+    if (r.nDaysSinceLastIn > 365) r.nDaysSinceLastIn = r.nTurnAroundTime || 0;
 
     // Days past due (from expected delivery)
     if (r.dtExpDelDate && !r.dtDateOut) {
@@ -278,12 +300,52 @@ if (seed.productSales) {
 
 // --- Enrich supplier POs ---
 if (seed.supplierPOs) {
-  const supplierMap = buildMap(seed.suppliers, 'lSupplierKey');
+  const supplierMap2 = buildMap(seed.suppliers, 'lSupplierKey');
   seed.supplierPOs.forEach(po => {
-    const sup = supplierMap[po.lSupplierKey];
+    const sup = supplierMap2[po.lSupplierKey];
     po.sSupplierName = sup ? (sup.sSupplierName || sup.sName1 || '') : '';
   });
   console.log('  supplierPOs: +sSupplierName');
+}
+
+// --- Enrich suppliers with vendor type flags ---
+if (seed.suppliers) {
+  // Build set of suppliers that have POs (parts vendors)
+  const suppliersWithPOs = new Set();
+  if (seed.supplierPOs) seed.supplierPOs.forEach(po => suppliersWithPOs.add(po.lSupplierKey));
+
+  seed.suppliers.forEach(s => {
+    // Assign vendor type booleans from existing flags or derive from context
+    s.bPartsVendor = s.bPartsVendor ?? (suppliersWithPOs.has(s.lSupplierKey) ? true : false);
+    s.bRepairVendor = s.bRepairVendor ?? false;
+    s.bAcquisitionVendor = s.bAcquisitionVendor ?? s.bAcquisitionSupplier ?? false;
+    s.bCartsVendor = s.bCartsVendor ?? false;
+    // Ensure city/state fields exist for display
+    s.sCity = s.sCity || s.sMailCity || '';
+    s.sState = s.sState || s.sMailState || '';
+  });
+  console.log('  suppliers: +bPartsVendor, +bRepairVendor, +bAcquisitionVendor, +bCartsVendor, +sCity, +sState');
+}
+
+// --- Enrich status transitions with user name ---
+if (seed.statusTrans) {
+  const userMap = {};
+  if (seed.employees) seed.employees.forEach(e => { userMap[e.lEmployeeKey] = `${e.sEmployeeFirst || ''} ${e.sEmployeeLast || ''}`.trim(); });
+  seed.statusTrans.forEach(st => {
+    st.sUserName = userMap[st.lUserKey] || userMap[st.Created_UserKey] || '';
+    // Enrich status description
+    const status = repairStatusMap[st.lRepairStatusID];
+    st.sRepairStatus = status ? status.sRepairStatus : '';
+  });
+  console.log('  statusTrans: +sUserName, +sRepairStatus');
+}
+
+// --- Enrich documents with upload date ---
+if (seed.documents) {
+  seed.documents.forEach(doc => {
+    if (!doc.dtUploadDate) doc.dtUploadDate = doc.dtCreateDate || doc.Created_datetime || '';
+  });
+  console.log('  documents: +dtUploadDate');
 }
 
 console.log('Denormalization complete.\n');

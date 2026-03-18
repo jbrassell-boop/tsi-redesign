@@ -281,8 +281,8 @@
         <div class="filter-group">
           <span class="filter-label">Type</span>
           <div class="seg-group">
-            <button class="seg-btn">All</button>
-            <button class="seg-btn active">Flexible</button>
+            <button class="seg-btn active">All</button>
+            <button class="seg-btn">Flexible</button>
             <button class="seg-btn">Rigid</button>
             <button class="seg-btn">Instrument</button>
             <button class="seg-btn">Camera</button>
@@ -548,12 +548,12 @@ function mapApiRow(r) {
     wo: r.sWorkOrderNumber || '',
     type: r.sScopeTypeDesc || '',
     serial: r.sSerialNumber || '',
-    daysIn: parseInt(r.nDaysSinceLastIn) || 0,
+    daysIn: parseInt(r.nTurnAroundTime) || parseInt(r.nDaysSinceLastIn) || 0,
     status: r.sRepairStatus || r.ProgBarStatus || '',
     dateApproved: fmtDate(r.dtAprRecvd || r.DateApproved),
     estDel: fmtDate(r.dtExpDelDate) || '',
-    approved: parseFloat(r.Approved) || 0,
-    tech: r.ResponsibleTech || '',
+    approved: parseFloat(r.nApprovedAmount) || parseFloat(r.dblAmtRepair) || 0,
+    tech: r.ResponsibleTech || r.sTechName || '',
     notes: r.Note || '',
     quoted: 0,
     invoice: '',
@@ -633,7 +633,7 @@ let rowsPerPage = 15;
 let sortCol = 'dateIn';
 let sortDir = 'desc';        // 'asc' or 'desc'
 // Segmented filter state
-let filterType = 'Flexible';  // matches button text
+let filterType = 'All';  // matches button text — load all types initially
 let filterSize = 'All';
 let filterSource = 'In House';
 let groupBy = '';              // '' = no grouping, or a field name
@@ -701,6 +701,8 @@ function updateStats() {
     chips[5].textContent = stats.loaners;
     chips[6].textContent = stats.shipped;
   }
+  // Share KPI values with other dashboard tabs via sessionStorage
+  try { sessionStorage.setItem('tsi_dashboard_kpis', JSON.stringify(stats)); } catch(e) {}
 }
 
 function exportCSV() {
@@ -1399,14 +1401,14 @@ function submitNewWorkspace() {
 function changeServiceLocation() {
   const sel = document.getElementById('svcLocation');
   const locationKey = parseInt(sel.value) || 1;
-  loadDashboardData({ plServiceLocationKey: locationKey });
+  loadDashboardData({ plServiceLocationKey: locationKey, instrumentTypeValue: 'all' });
 }
 
 // ═══════════════════════════════════════════════════════
 //  INIT — load from API, then render
 // ═══════════════════════════════════════════════════════
 API.UI.init();
-loadDashboardData();
+loadDashboardData({ instrumentTypeValue: 'all' });
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

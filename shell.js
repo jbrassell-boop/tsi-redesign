@@ -122,9 +122,13 @@
     /* Data badge */
     html += '<span id="dataBadge" class="data-badge"></span>';
 
-    /* User info */
-    html += '<div class="topbar-avatar">JB</div>';
-    html += '<span class="topbar-welcome">Welcome back, <strong>Joseph</strong></span>';
+    /* User info — read from stored user, fallback to initials/name */
+    const _u = JSON.parse(localStorage.getItem('tsi_user') || 'null');
+    const _fn = _u?.sFirstName || 'User';
+    const _ln = _u?.sLastName || '';
+    const _ini = ((_fn[0]||'') + (_ln[0]||'')).toUpperCase() || 'U';
+    html += '<div class="topbar-avatar">' + _ini + '</div>';
+    html += '<span class="topbar-welcome">Welcome back, <strong>' + _fn + '</strong></span>';
     html += '<button onclick="API.logout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit">Sign Out</button>';
 
     html += '</div>'; // topbar-right

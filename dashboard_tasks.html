@@ -398,10 +398,14 @@ async function loadTasks() {
       Filters: {}
     });
     const raw = Array.isArray(data) ? data : [];
-    TASKS = raw.map(mapApiTask);
-    _isDemo = false;
-    console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from API');
-    API.UI.updateDemoBadge('api');
+    if (raw.length > 0) {
+      TASKS = raw.map(mapApiTask);
+      _isDemo = false;
+      console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from API');
+      API.UI.updateDemoBadge('api');
+    } else {
+      throw new Error('Empty task list — using demo');
+    }
   } catch (e) {
     console.warn('[TSI Tasks] API unavailable, using demo data:', e.message);
     TASKS = [...DEMO_TASKS];
@@ -810,6 +814,25 @@ document.getElementById('taskSearch').addEventListener('input', function() {
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
+// Sync KPI stats from main dashboard
+(function() {
+  try {
+    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
+    if (kpis) {
+      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
+      if (chips.length >= 7) {
+        chips[0].textContent = kpis.inHouse;
+        chips[1].textContent = kpis.waiting;
+        chips[2].textContent = kpis.inRepair;
+        chips[3].textContent = kpis.overdue;
+        chips[4].textContent = kpis.ready;
+        chips[5].textContent = kpis.loaners;
+        chips[6].textContent = kpis.shipped;
+      }
+    }
+  } catch(e) {}
+})();
+
 (async function init() {
   API.UI.init();
   // Load dropdown lookups and task data in parallel

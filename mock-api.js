@@ -94,7 +94,7 @@ const MockAPI = (() => {
       data: {
         isAuthenticated: true,
         token: 'mock-token-' + Date.now(),
-        user: MockDB.getByKey('users', 2)
+        user: MockDB.getByKey('users', 1)
       }
     };
   });
@@ -242,7 +242,52 @@ const MockAPI = (() => {
 
   // ── ScopeModel (4) ──────────────────────────────────
   route('POST', '/ScopeModel/GetAllManufacturersList', () => MockDB.getAll('manufacturers'));
-  route('POST', '/ScopeModel/GetAllScopeTypeList', (p, body) => MockDB.paginate(MockDB.getAll('scopeTypes'), body?.Pagination));
+  route('POST', '/ScopeModel/GetAllScopeTypeList', (p, body) => {
+    const types = MockDB.getAll('scopeTypes');
+    // Build scopeTypeKey→repair counts from scopes + repairs chain
+    const scopes = MockDB.getAll('scopes');
+    const repairs = MockDB.getAll('repairs');
+    const repairItems = MockDB.getAll('repairItems');
+    const inventorySizes = MockDB.getAll('inventorySizes');
+
+    // Map scopeKey → scopeTypeKey
+    const scopeToType = {};
+    scopes.forEach(s => { if (s.lScopeTypeKey) scopeToType[s.lScopeKey] = s.lScopeTypeKey; });
+
+    // Aggregate repair TATs by scopeTypeKey
+    const tatByScopeType = {};
+    repairs.forEach(r => {
+      const stk = scopeToType[r.lScopeKey];
+      if (!stk) return;
+      if (!tatByScopeType[stk]) tatByScopeType[stk] = [];
+      if (r.nTurnAroundTime > 0) tatByScopeType[stk].push(r.nTurnAroundTime);
+    });
+
+    // Count repair items by rigid/flexible match to scope type
+    const riByFlex = { F: 0, R: 0, C: 0 };
+    repairItems.forEach(ri => { if (ri.bActive !== false) riByFlex[ri.sRigidOrFlexible] = (riByFlex[ri.sRigidOrFlexible] || 0) + 1; });
+
+    // Count inventory sizes by rigid/flexible
+    const invByFlex = { F: 0, R: 0, C: 0 };
+    inventorySizes.forEach(is => { if (is.bActive !== false) invByFlex[is.sRigidOrFlexible] = (invByFlex[is.sRigidOrFlexible] || 0) + 1; });
+
+    // Attach computed counts to each scope type
+    const enriched = types.map(t => {
+      const flex = t.sRigidOrFlexible || 'F';
+      const tats = tatByScopeType[t.lScopeTypeKey] || [];
+      const avgTAT = tats.length ? Math.round((tats.reduce((a, b) => a + b, 0) / tats.length) * 10) / 10 : null;
+
+      // Deterministic per-model count using key as seed (varies per scope type)
+      const k = t.lScopeTypeKey || 0;
+      const baseRI = riByFlex[flex] || repairItems.length;
+      const baseInv = invByFlex[flex] || inventorySizes.length;
+      const repairItemCount = Math.max(3, Math.min(20, (k * 7 + 3) % (Math.min(baseRI, 18)) + 3));
+      const linkedParts = Math.max(2, Math.min(25, (k * 11 + 5) % (Math.min(baseInv, 22)) + 4));
+
+      return { ...t, lRepairItemCount: repairItemCount, lLinkedParts: linkedParts, dblAvgTAT: avgTAT };
+    });
+    return MockDB.paginate(enriched, body?.Pagination);
+  });
   route('GET', '/ScopeModel/GetScopeTypeDetailsById', (p) => MockDB.getByKey('scopeTypes', int(p.plScopeTypeKey)));
   route('POST', '/ScopeModel/AddUpdateScopeType', (p, body) => {
     if (body.lScopeTypeKey) { MockDB.update('scopeTypes', body.lScopeTypeKey, body); return body; }

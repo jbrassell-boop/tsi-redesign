@@ -1983,37 +1983,37 @@ function openContactModal(mode){
   function populateAddresses(d){
     if(!d) return;
 
-    // Bill To — structured fields with API field name fallbacks
-    const bn1 = d.sBillingName1 || d.sBillToName1 || d.sBillName1 || '';
-    const ba1 = d.sBillingAddress1 || d.sBillToAddress1 || d.sBillToAddr1 || d.sBillingAddr1 || d.sBillAddr1 || '';
-    const ba2 = d.sBillingAddress2 || d.sBillToAddress2 || d.sBillToAddr2 || d.sBillingAddr2 || d.sBillAddr2 || '';
-    const bc = d.sBillingCity || d.sBillToCity || d.sBillCity || '';
-    const bs = d.sBillingState || d.sBillToState || d.sBillState || '';
-    const bz = d.sBillingZip || d.sBillToZip || d.sBillToZipCode || d.sBillZip || '';
+    // Bill To — real DB fields first, then API-normalized fallbacks
+    const bn1 = d.sBillName1 || d.sBillingName1 || d.sBillToName1 || '';
+    const ba1 = d.sBillAddr1 || d.sBillingAddress1 || d.sBillToAddress1 || d.sBillToAddr1 || d.sBillingAddr1 || '';
+    const ba2 = d.sBillAddr2 || d.sBillingAddress2 || d.sBillToAddress2 || d.sBillToAddr2 || d.sBillingAddr2 || '';
+    const bc = d.sBillCity || d.sBillingCity || d.sBillToCity || '';
+    const bs = d.sBillState || d.sBillingState || d.sBillToState || '';
+    const bz = d.sBillZip || d.sBillingZip || d.sBillToZip || d.sBillToZipCode || '';
     $('deptBillName1').value = bn1;
     $('deptBillAddr1').value = ba1;
     $('deptBillAddr2').value = ba2;
     $('deptBillCity').value = bc;
     $('deptBillState').value = bs;
     $('deptBillZip').value = bz;
-    $('deptBillEmail').value = d.sBillingEmail || d.sBillToEmail || d.sBillEmail || '';
-    $('deptBillPhone').value = d.sBillingPhone || d.sBillToPhone || d.sBillPhone || d.sContactPhoneVoice || '';
+    $('deptBillEmail').value = d.sBillEmail || d.sBillingEmail || d.sBillToEmail || '';
+    $('deptBillPhone').value = d.sBillPhone || d.sBillingPhone || d.sBillToPhone || d.sContactPhoneVoice || '';
 
-    // Ship To
-    const sn1 = d.sShippingName1 || d.sShipToName1 || d.sShipName1 || '';
-    const sa1 = d.sShippingAddress1 || d.sShipToAddress1 || d.sShipToAddr1 || d.sShippingAddr1 || d.sShipAddr1 || '';
-    const sa2 = d.sShippingAddress2 || d.sShipToAddress2 || d.sShipToAddr2 || d.sShippingAddr2 || d.sShipAddr2 || '';
-    const sc = d.sShippingCity || d.sShipToCity || d.sShipCity || '';
-    const ss = d.sShippingState || d.sShipToState || d.sShipState || '';
-    const sz = d.sShippingZip || d.sShipToZip || d.sShipToZipCode || d.sShipZip || '';
+    // Ship To — real DB fields first, then API-normalized fallbacks
+    const sn1 = d.sShipName1 || d.sShippingName1 || d.sShipToName1 || '';
+    const sa1 = d.sShipAddr1 || d.sShippingAddress1 || d.sShipToAddress1 || d.sShipToAddr1 || d.sShippingAddr1 || '';
+    const sa2 = d.sShipAddr2 || d.sShippingAddress2 || d.sShipToAddress2 || d.sShipToAddr2 || d.sShippingAddr2 || '';
+    const sc = d.sShipCity || d.sShippingCity || d.sShipToCity || '';
+    const ss = d.sShipState || d.sShippingState || d.sShipToState || '';
+    const sz = d.sShipZip || d.sShippingZip || d.sShipToZip || d.sShipToZipCode || '';
     $('deptShipName1').value = sn1;
     $('deptShipAddr1').value = sa1;
     $('deptShipAddr2').value = sa2;
     $('deptShipCity').value = sc;
     $('deptShipState').value = ss;
     $('deptShipZip').value = sz;
-    $('deptShipPhone').value = d.sShippingPhone || d.sShipToPhone || d.sShipPhone || '';
-    $('deptFax').value = d.sBillingFax || d.sBillToFax || d.sBillFax || d.sContactPhoneFAX || '';
+    $('deptShipPhone').value = d.sShipPhone || d.sShippingPhone || d.sShipToPhone || '';
+    $('deptFax').value = d.sBillFax || d.sBillingFax || d.sBillToFax || d.sContactPhoneFAX || '';
 
     // Same as Bill To check
     const sameBill = (bn1 === sn1 && ba1 === sa1 && bc === sc && bs === ss && bz === sz);

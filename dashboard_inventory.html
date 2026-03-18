@@ -259,6 +259,25 @@ document.addEventListener('click', function(e) {
   if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
 });
 
+// Sync KPI stats from main dashboard
+(function() {
+  try {
+    const kpis = JSON.parse(sessionStorage.getItem('tsi_dashboard_kpis'));
+    if (kpis) {
+      const chips = document.querySelectorAll('.stat-strip .stat-chip .s-val');
+      if (chips.length >= 7) {
+        chips[0].textContent = kpis.inHouse;
+        chips[1].textContent = kpis.waiting;
+        chips[2].textContent = kpis.inRepair;
+        chips[3].textContent = kpis.overdue;
+        chips[4].textContent = kpis.ready;
+        chips[5].textContent = kpis.loaners;
+        chips[6].textContent = kpis.shipped;
+      }
+    }
+  } catch(e) {}
+})();
+
 // Show data badge
 window.addEventListener('DOMContentLoaded', function() {
   if (typeof API !== 'undefined' && API.UI && API.UI.updateDemoBadge) {

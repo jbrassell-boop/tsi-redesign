@@ -464,7 +464,9 @@
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
       const raw = await API.getAcquisitionsInHouse(body);
-      state.inhouse.rows = unwrap(raw).map(normalizeAcquisition);
+      const items = unwrap(raw);
+      if (items.length === 0) throw new Error('No data');
+      state.inhouse.rows = items.map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] In-House API unavailable, using demo data:', e.message);
@@ -482,7 +484,9 @@
     try {
       const body = { pagination: { PageNumber: 1, PageSize: 500 }, filters: {}, groupBy: null, sortField: null, sortOrder: 0 };
       const raw = await API.getAcquisitionsConsigned(body);
-      state.consigned.rows = unwrap(raw).map(normalizeAcquisition);
+      const items = unwrap(raw);
+      if (items.length === 0) throw new Error('No data');
+      state.consigned.rows = items.map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] Consigned API unavailable, using demo data:', e.message);
@@ -510,7 +514,9 @@
         pdtSaleDateTo:   toEl.value   || null,
       };
       const raw = await API.getAcquisitionsSold(body);
-      state.sold.rows = unwrap(raw).map(normalizeAcquisition);
+      const items = unwrap(raw);
+      if (items.length === 0) throw new Error('No data');
+      state.sold.rows = items.map(normalizeAcquisition);
       API.UI.updateDemoBadge('api');
     } catch (e) {
       console.warn('[TSI Acquisitions] Sold API unavailable, using demo data:', e.message);

@@ -423,8 +423,13 @@ function fmtDate(dt) {
 //  STAT STRIP — computed from data
 // ═══════════════════════════════════════════════════════
 function updateStats() {
-  const total    = taskRows.length;
-  const out      = taskRows.filter(r => r._status === 'Out').length;
+  // Combine task loaners + active loaner scopes for comprehensive stats
+  const taskTotal = taskRows.length;
+  const activeTotal = (typeof activeRows !== 'undefined') ? activeRows.length : 0;
+  const total    = taskTotal || activeTotal;  // prefer task rows, fall back to active loaners
+  const out      = taskTotal
+    ? taskRows.filter(r => r._status === 'Out').length
+    : activeRows.filter(r => /out|active/i.test(r.sLoanerStatus || r.sStatus || 'Out')).length;
   const overdue  = taskRows.filter(r => r._status === 'Overdue').length;
   const returned = taskRows.filter(r => r._status === 'Returned').length;
   const declined = taskRows.filter(r => r._status === 'Declined' || r._status === 'Unable').length;

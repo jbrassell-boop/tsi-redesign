@@ -60,7 +60,7 @@ const API = (() => {
   async function login(email, password) {
     // ── Mock mode: instant login ────────────────────────
     if (isMockMode()) {
-      const mockUser = MockDB.getByKey('users', 2);
+      const mockUser = MockDB.getByKey('users', 1);
       const tokenStr = 'mock-token-' + Date.now();
       setToken(tokenStr);
       if (mockUser) setUser(mockUser);

@@ -2163,7 +2163,7 @@ function updateUserInfo() {
   const name = (user.sFirstName || '') + ' ' + (user.sLastName || '');
   const initials = ((user.sFirstName||'')[0]||'') + ((user.sLastName||'')[0]||'');
   document.querySelector('.topbar-avatar').textContent = initials.toUpperCase();
-  document.querySelector('.topbar-welcome').innerHTML = 'Welcome, <strong>' + name.trim() + '</strong>';
+  document.querySelector('.topbar-welcome').innerHTML = 'Welcome back, <strong>' + name.trim() + '</strong>';
 }
 
 function fmtDate(v) { if (!v) return ''; const d = new Date(v); return isNaN(d) ? v : d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
@@ -4463,8 +4463,10 @@ async function initPage() {
   updateUserInfo();
 
   // Check URL for a specific repair key (e.g. repairs.html?key=12345)
+  // or work order number (e.g. repairs.html?wo=NR26072001)
   const params = new URLSearchParams(window.location.search);
   const requestedKey = params.get('key');
+  const requestedWO = params.get('wo');
 
   try {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
@@ -4519,6 +4521,22 @@ async function initPage() {
     // Handle URL parameters for direct actions
     if (requestedKey) {
       await loadRepair(parseInt(requestedKey));
+    } else if (requestedWO) {
+      // Look up repair by work order number (from dashboard links)
+      try {
+        const allRepairs = await API.getRepairList(svcKey);
+        const arr = Array.isArray(allRepairs) ? allRepairs : [];
+        const match = arr.find(r => (r.sWorkOrderNumber || '') === requestedWO);
+        if (match) {
+          await loadRepair(match.lRepairKey);
+        } else {
+          console.warn('[TSI Repairs] WO not found:', requestedWO, '— loading most recent');
+          arr.sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
+          if (arr.length) await loadRepair(arr[0].lRepairKey);
+        }
+      } catch (e) {
+        console.error('[TSI Repairs] Error looking up WO:', requestedWO, e);
+      }
     } else {
       const action = params.get('action');
       const clientParam = params.get('client');
