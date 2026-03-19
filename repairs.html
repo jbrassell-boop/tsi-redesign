@@ -385,7 +385,7 @@
 .wf-est-section+.wf-est-section{border-top:1px solid #D0D8E4}
 .wf-est-label{font-size:9px;font-weight:700;color:#5A6F8A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .wf-est-addr{font-size:11px;line-height:1.7;color:#1A202C}
-.wf-est-equip{border:1px solid #DDE3EE;border-radius:6px;padding:14px 16px;background:#FAFBFD}
+.wf-est-equip{border:1px solid #DDE3EE;border-radius:6px;padding:14px 16px;background:#FAFBFD;height:100%;display:flex;flex-direction:column;justify-content:center}
 .wf-est-equip-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
 .wf-est-equip-row b{color:#5A6F8A;font-size:9px;text-transform:uppercase;font-weight:600}
 .wf-est-complaint{background:#F7F9FC;border-left:3px solid #00257A;padding:12px 16px;border-radius:0 4px 4px 0;font-size:11px;line-height:1.6;color:#1A202C}
@@ -2943,9 +2943,9 @@ function populateFormDrawer(formId) {
 
       <!-- CUSTOMER & EQUIPMENT -->
       <div class="wf-est-section">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 28px">
-          <div>
-            <div class="wf-est-label">Bill To</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px;align-items:stretch">
+          <div class="wf-est-equip" style="justify-content:flex-start">
+            <div class="wf-est-label" style="margin-bottom:4px">Bill To</div>
             <div class="wf-est-addr">
               ${r.sBillName1 || r.sShipName1 || '—'}<br/>
               ${r.sBillName2 ? r.sBillName2 + '<br/>' : ''}
@@ -2954,8 +2954,8 @@ function populateFormDrawer(formId) {
               ${[r.sBillCity, r.sBillState].filter(Boolean).join(', ')} ${r.sBillZip || ''}
             </div>
           </div>
-          <div>
-            <div class="wf-est-label">Ship To</div>
+          <div class="wf-est-equip" style="justify-content:flex-start">
+            <div class="wf-est-label" style="margin-bottom:4px">Ship To</div>
             <div class="wf-est-addr">
               ${r.sShipName1 || '—'}<br/>
               ${r.sShipName2 ? r.sShipName2 + '<br/>' : ''}
@@ -2966,6 +2966,7 @@ function populateFormDrawer(formId) {
           </div>
           <div>
             <div class="wf-est-equip">
+              <div class="wf-est-equip-row"><b>Mfr</b><span>${r.sManufacturer || '—'}</span></div>
               <div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div>
               <div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div>
               <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div>
@@ -3235,10 +3236,9 @@ function populateFormDrawer(formId) {
 
       <!-- CUSTOMER & EQUIPMENT + COMPLAINT (merged) -->
       <div class="wf-est-section" style="padding:12px 24px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;font-size:10px">
-          <div><div class="wf-est-label">Client</div><div class="wf-est-addr" style="font-size:10px;line-height:1.5">${r.sBillName1 || r.sShipName1 || '—'}${r.sBillName2 ? '<br/>' + r.sBillName2 : ''}</div></div>
-          <div><div class="wf-est-label">Ship To</div><div class="wf-est-addr" style="font-size:10px;line-height:1.5">${r.sShipName1 || '—'}${r.sShipName2 ? ', ' + r.sShipName2 : ''}${r.sShipCity ? '<br/>' + r.sShipCity + ', ' + (r.sShipState||'') + ' ' + (r.sShipZip||'') : ''}</div></div>
-          <div><div class="wf-est-equip" style="padding:8px 10px"><div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div><div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div><div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:10px;align-items:stretch">
+          <div class="wf-est-equip" style="padding:10px 14px;justify-content:flex-start"><div class="wf-est-label" style="margin-bottom:4px">Ship To</div><div class="wf-est-addr" style="font-size:10px;line-height:1.5">${r.sShipName1 || '—'}${r.sShipName2 ? ', ' + r.sShipName2 : ''}${r.sShipAddr1 ? '<br/>' + r.sShipAddr1 : ''}${r.sShipCity ? '<br/>' + r.sShipCity + ', ' + (r.sShipState||'') + ' ' + (r.sShipZip||'') : ''}</div></div>
+          <div class="wf-est-equip" style="padding:10px 14px;justify-content:flex-start"><div class="wf-est-label" style="margin-bottom:4px">Equipment</div><div class="wf-est-equip-row"><b>Mfr</b><span>${r.sManufacturer || '—'}</span></div><div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div><div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div><div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div></div>
         </div>
         <div style="margin-top:8px;font-size:10px"><b style="color:#5A6F8A;font-size:8px;text-transform:uppercase">Complaint:</b> ${r.sComplaintDesc || '—'}</div>
       </div>
@@ -3307,7 +3307,7 @@ function populateFormDrawer(formId) {
       <!-- REPROCESSING + CERTIFICATION (compact) -->
       <div class="wf-est-section" style="padding:10px 24px;border-top:1px solid #D0D8E4">
         <div style="font-size:8px;color:#B91C1C;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#FEF8F8;border-left:2px solid #B91C1C;border-radius:0 3px 3px 0">
-          <b>Reprocessing Required:</b> This endoscope must be fully reprocessed per facility policies and manufacturer IFU before patient use. TSI does not perform HLD/sterilization. (AAMI ST91 §14.5)
+          <b>Reprocessing Required:</b> This endoscope must be fully reprocessed per facility policies and manufacturer IFU before patient use. TSI does not perform HLD/sterilization.
         </div>
         <div style="text-align:center;margin-bottom:10px">
           <div style="font-size:13px;font-weight:700;color:#00257A;letter-spacing:.3px">SCOPE HAS BEEN REPAIRED</div>
@@ -3321,7 +3321,7 @@ function populateFormDrawer(formId) {
         </div>
         <div style="text-align:center;font-size:8px;color:#8896AA">
           <b style="color:#5A6F8A">Total Scope, Inc.</b> &bull; 17 Creek Parkway, Upper Chichester, PA 19061 &bull; 800-471-2255 &bull; www.totalscopeinc.com<br/>
-          ISO 13485 Certified &bull; FDA Registered Medical Device Repair Facility &bull; Form #: ${form.formNum} (OM10-2)
+          ISO 13485 Certified &bull; Form #: ${form.formNum} (OM10-2)
         </div>
       </div>
     `;
