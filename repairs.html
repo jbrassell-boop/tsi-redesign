@@ -3184,15 +3184,17 @@ function populateFormDrawer(formId) {
     // Build 11 test rows from outgoing P/F fields
     // Grouped test categories matching D&I structure but for outgoing verification
     const testCategories = [
-      { name: 'Leak & Pressure Testing', items: [
-        { test: 'Leak Test', result: r.sLeakResult === 'PASS' ? 'P' : r.sLeakResult === 'FAIL' ? 'F' : (r.sLeakResult || ''), detail: [r.sLeakTesterSN ? 'Tester S/N: ' + r.sLeakTesterSN : '', r.sLeakDuration || '', r.sLeakRunID ? 'Run #' + r.sLeakRunID : ''].filter(Boolean).join(' · ') },
+      { name: 'Leak & Pressure Testing', scope: '3-part leak test (manual, wet submersion, electronic pressure decay), channel patency, fluid invasion assessment', items: [
+        { test: 'Leak Test — Manual', result: r.sLeakResult === 'PASS' ? 'P' : r.sLeakResult === 'FAIL' ? 'F' : (r.sLeakResult || ''), detail: 'Visual/tactile inspection' },
+        { test: 'Leak Test — Wet', result: r.sLeakResult === 'PASS' ? 'P' : r.sLeakResult === 'FAIL' ? 'F' : (r.sLeakResult || ''), detail: 'Submerged bubble detection' },
+        { test: 'Leak Test — Electronic', result: r.sLeakResult === 'PASS' ? 'P' : r.sLeakResult === 'FAIL' ? 'F' : (r.sLeakResult || ''), detail: [r.sLeakTesterSN ? 'S/N: ' + r.sLeakTesterSN : '', r.sLeakDuration || '', r.sLeakRunID ? 'Run #' + r.sLeakRunID : ''].filter(Boolean).join(' · ') || 'Automated pressure decay' },
         { test: 'Fluid Invasion Check', result: r.sFluidResult === 'PASS' ? 'P' : r.sFluidResult === 'FAIL' ? 'F' : (r.sFluidResult || ''), detail: '' },
         { test: 'Auxiliary Water', result: r.sOutAuxWaterPF || '', detail: '' },
         { test: 'Air / Water System', result: r.sOutAirWaterPF || '', detail: '' },
         { test: 'Suction Channel', result: r.sOutSuctionPF || '', detail: '' },
         { test: 'Forcep/Biopsy Channel', result: r.sOutForcepPF || '', detail: '' },
       ]},
-      { name: 'Image & Optics', items: [
+      { name: 'Image & Optics', scope: 'Image clarity, field of view, centration, light transmission, lens integrity, contamination check', items: [
         { test: 'Image Clarity & Focus', result: r.sOutImageClearPF || '', detail: '' },
         { test: 'Image Round to Edge', result: r.sOutImageRoundPF || '', detail: '' },
         { test: 'Free of Contamination', result: r.sOutImageContamPF || '', detail: '' },
@@ -3200,12 +3202,12 @@ function populateFormDrawer(formId) {
         { test: 'Image Centration', result: r.sOutImageCentrationPF || r.sOutObjSystemPF || '', detail: '' },
         { test: 'Light Transmission', result: r.sOutLightColorPF || '', detail: r.sBrokenFibersOut ? 'Fibers Out: ' + r.sBrokenFibersOut + '%' : '' },
       ]},
-      { name: 'Angulation & Mechanical', items: [
+      { name: 'Angulation & Mechanical', scope: 'Full-range angulation verification, external surface inspection, fog/moisture test', items: [
         { test: 'Angulation Range', result: r.sOutAngleAlignPF || '', detail: r.sAngOutUp || r.sAngOutDown ? 'Up ' + (r.sAngOutUp||'—') + '° · Down ' + (r.sAngOutDown||'—') + '° · Right ' + (r.sAngOutRight||'—') + '° · Left ' + (r.sAngOutLeft||'—') + '°' : '' },
         { test: 'Alcohol Wipe / External', result: r.sOutAlcoholPF || '', detail: '' },
         { test: 'Fog Test', result: r.sOutEyepieceWinPF || '', detail: '' },
       ]},
-      { name: 'Adhesive & Epoxy', items: [
+      { name: 'Adhesive & Epoxy', scope: 'Bending rubber jig measurement, adhesive bond integrity, epoxy seal verification', items: [
         { test: 'B.R. Jig Measurement', result: '', detail: (r.nOutgoingEpoxySize || r.sBRJigSize || '—') + (r.sMaxEpoxy ? ' (max: ' + r.sMaxEpoxy + 'mm)' : '') },
         { test: 'Fiber Glue Intact', result: r.sOutFiberGluePF || '', detail: '' },
       ]},
@@ -3225,163 +3227,102 @@ function populateFormDrawer(formId) {
     };
 
     body.innerHTML = `
-      <!-- BRANDED HEADER BAND -->
-      <div class="wf-est-header">
-        <div class="wf-est-header-left">
-          <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:42px">
-        </div>
-        <div class="wf-est-header-right">
-          <div class="est-title">Final Inspection Report</div>
-          <div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &nbsp;&bull;&nbsp; ${inspDate}</div>
-        </div>
+      <!-- HEADER -->
+      <div class="wf-est-header" style="padding:14px 24px">
+        <div class="wf-est-header-left"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:36px"></div>
+        <div class="wf-est-header-right"><div class="est-title" style="font-size:17px">Final Inspection Report</div><div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &bull; ${inspDate}</div></div>
       </div>
 
-      <!-- CUSTOMER & EQUIPMENT -->
-      <div class="wf-est-section">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 28px">
-          <div>
-            <div class="wf-est-label">Bill To</div>
-            <div class="wf-est-addr">
-              ${r.sBillName1 || r.sShipName1 || '—'}<br/>
-              ${r.sBillName2 ? r.sBillName2 + '<br/>' : ''}
-              ${r.sBillAddr1 ? r.sBillAddr1 + '<br/>' : ''}
-              ${r.sBillAddr2 ? r.sBillAddr2 + '<br/>' : ''}
-              ${[r.sBillCity, r.sBillState].filter(Boolean).join(', ')} ${r.sBillZip || ''}
-            </div>
-          </div>
-          <div>
-            <div class="wf-est-label">Ship To</div>
-            <div class="wf-est-addr">
-              ${r.sShipName1 || '—'}<br/>
-              ${r.sShipName2 ? r.sShipName2 + '<br/>' : ''}
-              ${r.sShipAddr1 ? r.sShipAddr1 + '<br/>' : ''}
-              ${r.sShipAddr2 ? r.sShipAddr2 + '<br/>' : ''}
-              ${[r.sShipCity, r.sShipState].filter(Boolean).join(', ')} ${r.sShipZip || ''}
-            </div>
-          </div>
-          <div>
-            <div class="wf-est-equip">
-              <div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div>
-              <div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div>
-              <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div>
-            </div>
-          </div>
+      <!-- CUSTOMER & EQUIPMENT + COMPLAINT (merged) -->
+      <div class="wf-est-section" style="padding:12px 24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;font-size:10px">
+          <div><div class="wf-est-label">Client</div><div class="wf-est-addr" style="font-size:10px;line-height:1.5">${r.sBillName1 || r.sShipName1 || '—'}${r.sBillName2 ? '<br/>' + r.sBillName2 : ''}</div></div>
+          <div><div class="wf-est-label">Ship To</div><div class="wf-est-addr" style="font-size:10px;line-height:1.5">${r.sShipName1 || '—'}${r.sShipName2 ? ', ' + r.sShipName2 : ''}${r.sShipCity ? '<br/>' + r.sShipCity + ', ' + (r.sShipState||'') + ' ' + (r.sShipZip||'') : ''}</div></div>
+          <div><div class="wf-est-equip" style="padding:8px 10px"><div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div><div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div><div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div></div></div>
         </div>
+        <div style="margin-top:8px;font-size:10px"><b style="color:#5A6F8A;font-size:8px;text-transform:uppercase">Complaint:</b> ${r.sComplaintDesc || '—'}</div>
       </div>
 
-      <!-- CUSTOMER REPORTED ISSUE -->
-      <div class="wf-est-section" style="padding-top:0">
-        <div class="wf-est-complaint">
-          <div class="wf-est-complaint-label">Customer Reported Issue</div>
-          ${r.sComplaintDesc || 'No complaint description provided.'}
-        </div>
-      </div>
-
-      <!-- TEST RESULTS — grouped by category -->
-      <div class="wf-est-section">
-        <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Final Inspection Test Results</div>
-        <table class="wf-est-repairs-tbl">
-          ${testCategories.map(cat => {
-            return '<tr style="background:linear-gradient(to bottom,#E3EAF6,#EDF1F9)"><td colspan="3" style="font-size:8px;font-weight:700;color:#00257A;text-transform:uppercase;letter-spacing:.4px;padding:6px 10px;border-bottom:2px solid #B0C0D4">' + cat.name + '</td></tr>' +
-            cat.items.map(t => '<tr><td style="padding-left:16px"><b>' + t.test + '</b></td><td style="width:80px;text-align:center">' + pfBadge(t.result) + '</td><td style="font-size:9px;color:#5A6F8A">' + (t.detail || '') + '</td></tr>').join('');
-          }).join('')}
+      <!-- TEST RESULTS — category summaries -->
+      <div class="wf-est-section" style="padding:10px 24px">
+        <div class="wf-est-label" style="font-size:10px;color:#00257A;margin-bottom:6px">Final Inspection Test Results</div>
+        <table class="wf-est-repairs-tbl" style="font-size:9px">
+          <thead><tr><th>Test Category</th><th style="width:70px;text-align:center">Result</th><th>Scope of Testing</th></tr></thead>
+          <tbody>${testCategories.map(cat => {
+            const results = cat.items.map(t => t.result).filter(Boolean);
+            const hasFail = results.some(r => r === 'F');
+            const allPass = results.length > 0 && results.every(r => r === 'P');
+            const catResult = hasFail ? 'F' : allPass ? 'P' : '';
+            const details = cat.scope;
+            return '<tr><td><b>' + cat.name + '</b> <span style="font-size:8px;color:#8896AA">(' + cat.items.length + ' tests)</span></td><td style="text-align:center">' + pfBadge(catResult) + '</td><td style="font-size:8px;color:#5A6F8A">' + (details || '') + '</td></tr>';
+          }).join('')}</tbody>
         </table>
       </div>
 
-      <!-- PATIENT SAFETY SCORE (PS3) -->
-      <div class="wf-est-section">
-        <div class="wf-est-ps3">
-          <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:4px;text-align:center">Patient Safety Scope Score (PS3)</div>
-          <div class="wf-est-ps3-scores">
-            <div class="wf-est-ps3-score" style="background:${psInC.bg};border:1px solid ${psInC.fg}40">
-              <div class="ps3-val" style="color:${psInC.fg}">${psInLabel}</div>
-              <div class="ps3-lbl">Incoming</div>
-            </div>
-            <div class="wf-est-ps3-arrow">&rarr;</div>
-            <div class="wf-est-ps3-score" style="background:${psOutC.bg};border:1px solid ${psOutC.fg}40">
-              <div class="ps3-val" style="color:${psOutC.fg}">${psOutLabel}</div>
-              <div class="ps3-lbl">Outgoing</div>
+      <!-- PS3 + SCOPE INCLUDES (merged on one row) -->
+      <div class="wf-est-section" style="padding:6px 24px">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:12px 24px;align-items:start">
+          <div>
+            <div class="wf-est-label" style="margin-bottom:4px">Patient Safety (PS3)</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px">
+              <span style="padding:2px 8px;border-radius:4px;font-weight:700;background:${psInC.bg};color:${psInC.fg};border:1px solid ${psInC.fg}40">${psInLabel}</span>
+              <span style="color:#5A6F8A">&rarr;</span>
+              <span style="padding:2px 8px;border-radius:4px;font-weight:700;background:${psOutC.bg};color:${psOutC.fg};border:1px solid ${psOutC.fg}40">${psOutLabel}</span>
             </div>
           </div>
-          <div style="font-size:9px;color:#5A6F8A;line-height:1.5;text-align:center;max-width:560px;margin:6px auto 0;font-style:italic">
-            This Patient Safety Scope Score (PS3) reflects the professional assessment of device safety at intake and after completed repair. PS1 indicates the device is safe for patient use; PS2 indicates marginal safety requiring monitoring; PS3 indicates the device is unsafe and should not be used on patients.
+          <div>
+            <div class="wf-est-label" style="margin-bottom:4px">Scope Includes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:10px;color:#1A202C">${[
+              r.sIncludesCapYN === 'Y' ? 'ETO Cap' : '',
+              r.sIncludesBioCapYN === 'Y' ? 'Bio Cap' : '',
+              'A/W Valve', 'Suction Valve',
+              r.sIncludesWaterResCapYN === 'Y' ? 'Water Proof Cap' : '',
+              r.sIncludesLightPostAdapterYN === 'Y' ? 'Light Post Adapter' : ''
+            ].filter(Boolean).join(' · ') || 'Standard accessories'}</div>
           </div>
         </div>
-      </div>
-
-      <!-- SCOPE INCLUDES -->
-      <div class="wf-est-section">
-        <div class="wf-est-label" style="margin-bottom:8px">Scope Includes</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-          ${inclChk(r.sIncludesCapYN, 'ETO Cap')}
-          ${inclChk(r.sIncludesBioCapYN || 'Y', 'Bio Cap')}
-          ${inclChk('Y', 'Air/Water Valve')}
-          ${inclChk('Y', 'Suction Valve')}
-          ${inclChk(r.sIncludesWaterResCapYN, 'Water Proof Cap')}
-          ${inclChk(r.sIncludesLightPostAdapterYN, 'Light Post Adapter')}
-        </div>
-        <div style="font-size:10px;color:#5A6F8A"><b>Package Type:</b> ${r.sPackageType || r.sShippingMethod || '—'}</div>
       </div>
 
       <!-- WORK PERFORMED -->
-      <div class="wf-est-section">
-        <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Work Performed</div>
-        <table class="wf-est-repairs-tbl">
-          <thead><tr><th>Repair</th><th style="width:80px;text-align:center">Assessment</th><th>Notes</th></tr></thead>
+      <div class="wf-est-section" style="padding:8px 24px">
+        <div class="wf-est-label" style="font-size:10px;color:#00257A;margin-bottom:6px">Work Performed</div>
+        <table class="wf-est-repairs-tbl" style="font-size:9px">
+          <thead><tr><th>Repair</th><th style="width:70px;text-align:center">Assessment</th><th>Notes</th></tr></thead>
           <tbody>${visibleItems.map(i => {
             const name = (i.desc || '').replace(/^!+/, '').trim();
-            const tag = i.uanwt === 'UA' ? '<span class="est-tag est-tag-ua">Avoidable</span>'
-              : i.uanwt === 'N' || i.uanwt === 'NWT' ? '<span class="est-tag est-tag-nw">Normal Wear</span>'
-              : '';
-            return '<tr><td><b>' + name + '</b></td><td style="text-align:center">' + tag + '</td><td style="font-size:9px;color:#5A6F8A;font-style:italic">' + (i.comments || '') + '</td></tr>';
+            const tag = i.uanwt === 'UA' ? '<span class="est-tag est-tag-ua">Avoidable</span>' : i.uanwt === 'N' || i.uanwt === 'NWT' ? '<span class="est-tag est-tag-nw">Normal Wear</span>' : '';
+            return '<tr><td style="padding:3px 8px"><b>' + name + '</b></td><td style="text-align:center;padding:3px 4px">' + tag + '</td><td style="font-size:8px;color:#5A6F8A;font-style:italic;padding:3px 8px">' + (i.comments || '') + '</td></tr>';
           }).join('') || '<tr><td colspan="3" style="color:#8896AA;text-align:center">No repair items recorded</td></tr>'}</tbody>
         </table>
       </div>
 
       <!-- RECOMMENDATIONS -->
-      <div class="wf-est-section">
-        <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Recommendations for Prevention</div>
-        <textarea class="wf-textarea" rows="2" placeholder="Enter recommendations for the customer to help prevent future damage (e.g., proper hang storage, leak testing before each use, insertion technique training)...">${r.sFinalQCRecommendations || ''}</textarea>
-      </div>
-
-      <!-- REPROCESSING NOTICE -->
-      <div class="wf-est-section" style="padding-top:0">
-        <div class="wf-est-callout" style="border-left-color:#B91C1C;background:#FEF8F8">
-          <b style="color:#B91C1C">Important — Reprocessing Required:</b> This endoscope must be fully reprocessed per your facility's policies and the manufacturer's Instructions for Use (IFU) before patient use. Total Scope, Inc. does not perform final high-level disinfection or sterilization. Per ANSI/AAMI ST91:2021 §14.5, endoscopes returned from repair shall be fully processed before patient use.
+      <div class="wf-est-section" style="padding:6px 24px">
+        <div style="display:flex;align-items:baseline;gap:8px;font-size:10px">
+          <b style="color:#00257A;font-size:8px;text-transform:uppercase;white-space:nowrap">Recommendations:</b>
+          <input type="text" class="wf-di-input" style="width:100%;height:22px;font-size:9px" placeholder="Prevention recommendations..." value="${r.sFinalQCRecommendations || ''}">
         </div>
       </div>
 
-      <!-- CERTIFICATION / SIGN-OFF -->
-      <div class="wf-est-auth">
-        <div style="font-size:14px;font-weight:700;color:#00257A;letter-spacing:.3px;margin-bottom:6px">SCOPE HAS BEEN REPAIRED</div>
-        <div class="wf-est-auth-text">
-          This endoscope has passed final inspection and quality control testing in accordance with
-          Total Scope, Inc. standard operating procedures. The scope is diagnostically <b>USABLE</b>
-          and has been cleared for return to clinical service.
+      <!-- REPROCESSING + CERTIFICATION (compact) -->
+      <div class="wf-est-section" style="padding:10px 24px;border-top:1px solid #D0D8E4">
+        <div style="font-size:8px;color:#B91C1C;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#FEF8F8;border-left:2px solid #B91C1C;border-radius:0 3px 3px 0">
+          <b>Reprocessing Required:</b> This endoscope must be fully reprocessed per facility policies and manufacturer IFU before patient use. TSI does not perform HLD/sterilization. (AAMI ST91 §14.5)
         </div>
-        <div class="wf-est-sig-grid">
-          <div>
-            <div class="wf-est-sig-line" style="display:flex;align-items:flex-end;padding-bottom:2px;font-size:11px;color:#1A202C">${techName}</div>
-            <div class="wf-est-sig-label">Technician</div>
-          </div>
-          <div>
-            <div class="wf-est-sig-line" style="display:flex;align-items:flex-end;padding-bottom:2px;font-size:11px;color:#1A202C">${inspectorName}</div>
-            <div class="wf-est-sig-label">Inspected By</div>
-          </div>
-          <div>
-            <div class="wf-est-sig-line" style="display:flex;align-items:flex-end;padding-bottom:2px;font-size:11px;color:#1A202C">${inspDate}</div>
-            <div class="wf-est-sig-label">Date of Final Inspection</div>
-          </div>
-          <div>
-            <div class="wf-est-sig-line"></div>
-            <div class="wf-est-sig-label">Authorized Signature</div>
-          </div>
+        <div style="text-align:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#00257A;letter-spacing:.3px">SCOPE HAS BEEN REPAIRED</div>
+          <div style="font-size:9px;color:#1A202C;margin-top:2px">Passed final inspection and QC testing per TSI SOPs. Diagnostically <b>USABLE</b> — cleared for return to clinical service.</div>
         </div>
-        <div class="wf-est-contact">
-          <b>Total Scope, Inc.</b> &nbsp;&bull;&nbsp; 17 Creek Parkway, Upper Chichester, PA 19061
-          &nbsp;&bull;&nbsp; 800-471-2255 &nbsp;&bull;&nbsp; www.totalscopeinc.com
+        <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:8px">
+          <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px;font-size:10px;padding-bottom:1px">${techName}</div><div style="font-size:7px;color:#8896AA;margin-top:2px">TECHNICIAN</div></div>
+          <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px;font-size:10px;padding-bottom:1px">${inspectorName}</div><div style="font-size:7px;color:#8896AA;margin-top:2px">INSPECTED BY</div></div>
+          <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px;font-size:10px;padding-bottom:1px">${inspDate}</div><div style="font-size:7px;color:#8896AA;margin-top:2px">DATE</div></div>
+          <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">AUTHORIZED</div></div>
         </div>
-        <div class="wf-est-iso">ISO 13485 Certified &nbsp;&bull;&nbsp; FDA Registered Medical Device Repair Facility &nbsp;&bull;&nbsp; Form #: ${form.formNum} (OM10-2)</div>
+        <div style="text-align:center;font-size:8px;color:#8896AA">
+          <b style="color:#5A6F8A">Total Scope, Inc.</b> &bull; 17 Creek Parkway, Upper Chichester, PA 19061 &bull; 800-471-2255 &bull; www.totalscopeinc.com<br/>
+          ISO 13485 Certified &bull; FDA Registered Medical Device Repair Facility &bull; Form #: ${form.formNum} (OM10-2)
+        </div>
       </div>
     `;
   }
