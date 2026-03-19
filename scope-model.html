@@ -554,10 +554,13 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth guard ──────────────────────────────────────────
 try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
@@ -919,6 +922,101 @@ function onCtx(e, key) {
   menu.style.top = Math.min(e.clientY, window.innerHeight - 280) + 'px';
 }
 
+/* ─── PDF EXPORT ─── */
+function generateSpecSheetPdf(model) {
+  var E = window.TSIExport;
+  var doc = E.createPDF();
+  var y = E.addTSIHeader(doc, 'Instrument Specification Sheet');
+
+  // Model identity
+  y = E.addKeyValueGrid(doc, [
+    ['Model', model.sScopeTypeDesc || '—'],
+    ['Manufacturer', model.sManufacturerName || '—'],
+    ['Description', model.sDescription || '—'],
+    ['Category', model.sCategory || '—'],
+    ['Instrument Type', typeLabel(model.sRigidOrFlexible)],
+    ['Status', model.bActive !== false ? 'Active' : 'Inactive']
+  ], y);
+
+  // Physical specifications
+  y = E.addSectionLabel(doc, 'Physical Specifications', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Insertion Length', model.insLength ? model.insLength + ' mm' : '—'],
+    ['Insertion Diameter', model.insDiam ? model.insDiam + ' mm' : '—'],
+    ['Channel Size', model.channel ? model.channel + ' mm' : '—'],
+    ['Field of View', model.fov ? model.fov + '°' : '—'],
+    ['Direction of View', model.dirView || '—'],
+    ['Depth of Field', model.depthField || '—']
+  ], y);
+
+  // Angulation
+  y = E.addSectionLabel(doc, 'Angulation Range', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Up', model.angUp ? model.angUp + '°' : '—'],
+    ['Down', model.angDown ? model.angDown + '°' : '—'],
+    ['Left', model.angLeft ? model.angLeft + '°' : '—'],
+    ['Right', model.angRight ? model.angRight + '°' : '—']
+  ], y);
+
+  // Imaging
+  y = E.addSectionLabel(doc, 'Imaging & Compatibility', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Video / Image', model.videoImage || '—'],
+    ['Image Sensor', model.imageSensor || '—'],
+    ['Processors', model.processors || '—'],
+    ['Light Sources', model.lightSources || '—']
+  ], y);
+
+  // Epoxy info
+  if (model.epoxyAvg || model.epoxyMax) {
+    y = E.addKeyValueGrid(doc, [
+      ['Epoxy Avg', model.epoxyAvg || '—'],
+      ['Epoxy Max', model.epoxyMax || '—']
+    ], y);
+  }
+
+  // Repair pricing
+  y = E.checkPageBreak(doc, y, 80);
+  y = E.addSectionLabel(doc, 'Repair Pricing & TAT', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Base Eval Fee', model.baseEvalFee ? '$' + model.baseEvalFee : '—'],
+    ['Est. TAT', model.estTAT ? model.estTAT + ' days' : '—'],
+    ['Avg TAT (actual)', model.avgTAT ? model.avgTAT.toFixed(1) + ' days' : '—'],
+    ['Contract Cost', model.contractCost ? '$' + Number(model.contractCost).toLocaleString() : '—']
+  ], y);
+
+  // Repair tiers table
+  var tierRows = [];
+  if (model.minorPrice) tierRows.push(['Minor', '$' + model.minorPrice, model.minorWarranty ? model.minorWarranty + ' mo' : '—']);
+  if (model.midPrice)   tierRows.push(['Mid',   '$' + model.midPrice,   model.midWarranty ? model.midWarranty + ' mo' : '—']);
+  if (model.majorPrice) tierRows.push(['Major', '$' + model.majorPrice, model.majorWarranty ? model.majorWarranty + ' mo' : '—']);
+  if (tierRows.length) {
+    y = E.addTable(doc, ['Tier', 'Price', 'Warranty'], tierRows, y, {
+      columnStyles: { 1: { halign: 'right' } }
+    });
+  }
+
+  // Stats
+  y = E.checkPageBreak(doc, y, 40);
+  y = E.addSectionLabel(doc, 'Catalog Stats', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Repair Items', String(model.repairItemCount || 0)],
+    ['Linked Parts', String(model.linkedParts || 0)],
+    ['Flags', String(model.flagCount || 0)],
+    ['Max Charge', model.maxCharge || '—']
+  ], y);
+
+  // Notes
+  if (model.notes) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Notes', y);
+    y = E.addParagraph(doc, model.notes, y);
+  }
+
+  var safeName = (model.sScopeTypeDesc || 'model').replace(/[^a-zA-Z0-9_-]/g, '_');
+  E.savePDF(doc, 'SpecSheet_' + safeName + '.pdf');
+}
+
 function ctxAction(action) {
   document.getElementById('ctxMenu').style.display = 'none';
   if (!ctxModelKey) return;
@@ -926,7 +1024,7 @@ function ctxAction(action) {
     case 'view': case 'edit': openDrawer(ctxModelKey); break;
     case 'repairItems': openDrawer(ctxModelKey); setTimeout(() => { const tab = document.querySelectorAll('.dtab')[1]; switchTab('repairItems', tab); }, 200); break;
     case 'clone': cloneModel(ctxModelKey); break;
-    case 'print': alert('Print spec sheet — coming soon'); break;
+    case 'print': { var m = allModels.find(function(x){ return x.lScopeTypeKey === ctxModelKey; }); if (m) generateSpecSheetPdf(m); break; }
     case 'toggleActive': toggleActive(ctxModelKey); break;
     case 'delete': confirmDeleteByKey(ctxModelKey); break;
   }

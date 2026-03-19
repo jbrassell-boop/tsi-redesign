@@ -1030,10 +1030,12 @@
   </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
@@ -2556,7 +2558,17 @@ function generateReportCard() {
 }
 
 function exportReportCard() {
-  if (typeof showToast === 'function') showToast('Exporting to Excel...', 'info');
+  var preview = document.getElementById('rc-preview');
+  var tbl = preview ? preview.querySelector('table') : null;
+  if (!tbl || !tbl.querySelector('tbody tr')) {
+    if (typeof showToast === 'function') showToast('Generate a report first, then export.', 'warning');
+    return;
+  }
+  var clientName = (_currentClientName || 'Client').replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+  var date = new Date().toISOString().slice(0, 10);
+  var filename = clientName + '_ReportCard_' + date + '.xlsx';
+  TSIExport.tableToExcel(tbl, 'Report Card', filename);
+  if (typeof showToast === 'function') showToast('Report card exported to Excel', 'success');
 }
 
 // ── Update flags count when flags change ─────────────

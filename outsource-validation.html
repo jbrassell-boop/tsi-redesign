@@ -443,10 +443,13 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 /* ─── STATE ─── */
 let allRecords = [], filteredRecords = [], displayRecords = [];
@@ -744,6 +747,69 @@ function onCtx(e, key) {
   menu.style.display = 'block';
 }
 
+/* ─── PDF EXPORT ─── */
+function generateOutsourcePdf(rec) {
+  var E = window.TSIExport;
+  var doc = E.createPDF();
+  var y = E.addTSIHeader(doc, 'Outsource Validation Report');
+
+  // Repair identity
+  y = E.addKeyValueGrid(doc, [
+    ['WO #', String(rec.lRepairKey || '—')],
+    ['Status', rec.status || '—'],
+    ['Serial Number', rec.sSerialNumber || '—'],
+    ['Instrument Type', rec.sInstrumentType || '—'],
+    ['Scope Type', rec.sScopeTypeDesc || '—'],
+    ['Service Level', rec.serviceLevel || 'Standard'],
+    ['Client', rec.sClientName || '—'],
+    ['Department', rec.sDepartmentName || '—'],
+    ['Location', rec.sLocation || '—'],
+    ['Vendor', rec.sVendorName || '—']
+  ], y);
+
+  // Shipping / dates
+  y = E.addSectionLabel(doc, 'Shipping & Timeline', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Date Sent', E.fmtDate(rec.dtSentDate)],
+    ['Date Returned', rec.dtReturnDate ? E.fmtDate(rec.dtReturnDate) : 'Still out'],
+    ['Days Out', String(rec.daysOut || 0) + ' days'],
+    ['Tracking Out', rec.sTrackingOut || '—'],
+    ['Tracking Return', rec.sTrackingReturn || '—'],
+    ['']
+  ], y);
+
+  // Cost comparison
+  y = E.checkPageBreak(doc, y, 80);
+  y = E.addSectionLabel(doc, 'Cost Analysis', y);
+  y = E.addTable(doc, ['Category', 'Vendor', 'In-House Estimate'], [
+    ['Parts',    E.fmtCurrency(rec.vendorParts),    E.fmtCurrency(rec.estParts)],
+    ['Labor',    E.fmtCurrency(rec.vendorLabor),     E.fmtCurrency(rec.estLabor)],
+    ['Shipping', E.fmtCurrency(rec.vendorShipping),  E.fmtCurrency(rec.estShipping)],
+    ['Markup',   E.fmtCurrency(rec.vendorMarkup),    E.fmtCurrency(0)]
+  ], y, {
+    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }
+  });
+
+  // Totals
+  y = E.addKeyValueGrid(doc, [
+    ['Vendor Total Cost', E.fmtCurrency(rec.dblOutSourceCost)],
+    ['In-House Estimate', E.fmtCurrency(rec.estInHouseCost)],
+    ['TSI Charge to Client', E.fmtCurrency(rec.dblAmtRepair)],
+    ['Margin $', E.fmtCurrency(rec.marginDollar)],
+    ['Margin %', (rec.marginPct != null ? rec.marginPct.toFixed(1) : '0.0') + '%'],
+    ['']
+  ], y);
+
+  // Notes
+  if (rec.notes) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Notes', y);
+    y = E.addParagraph(doc, rec.notes, y);
+  }
+
+  E.savePDF(doc, 'OutsourceValidation_WO' + (rec.lRepairKey || '') + '.pdf');
+}
+
 function ctxAction(action) {
   document.getElementById('ctxMenu').style.display = 'none';
   var rec = allRecords.find(function(r) { return r.lRepairKey === ctxKey; });
@@ -766,7 +832,7 @@ function ctxAction(action) {
       runPipeline();
       break;
     case 'exportPdf':
-      alert('PDF export for WO# '+rec.lRepairKey+' — not yet implemented.');
+      generateOutsourcePdf(rec);
       break;
   }
 }

@@ -958,10 +958,12 @@
   </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 /* ── Tab switching (preserved) ────────────────────────── */
 function showDeptTab(name,el){
@@ -1940,13 +1942,28 @@ function openContactModal(mode){
 
   /* ── Export actions ──────────────────────────────── */
   function exportDeptAudit(){
-    var msg = 'Generating Department Audit export...';
-    if(typeof showToast === 'function') showToast(msg, 'info'); else alert(msg);
+    var tbl = document.querySelector('#dtab-scopes table.readonly-tbl');
+    if (!tbl || !tbl.querySelector('tbody tr')) {
+      if(typeof showToast === 'function') showToast('No scope data to export.', 'warning'); return;
+    }
+    var date = new Date().toISOString().slice(0, 10);
+    var deptName = (_curDeptName || 'Department').replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+    TSIExport.tableToExcel(tbl, 'Department Audit', deptName + '_Audit_' + date + '.xlsx');
+    if(typeof showToast === 'function') showToast('Department audit exported to Excel', 'success');
   }
+  window.exportDeptAudit = exportDeptAudit;
+
   function exportDeptContacts(){
-    var msg = 'Generating Department Contacts export...';
-    if(typeof showToast === 'function') showToast(msg, 'info'); else alert(msg);
+    var tbl = document.querySelector('#dtab-contacts table');
+    if (!tbl || !tbl.querySelector('tbody tr')) {
+      if(typeof showToast === 'function') showToast('No contacts to export.', 'warning'); return;
+    }
+    var date = new Date().toISOString().slice(0, 10);
+    var deptName = (_curDeptName || 'Department').replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+    TSIExport.tableToExcel(tbl, 'Contacts', deptName + '_Contacts_' + date + '.xlsx');
+    if(typeof showToast === 'function') showToast('Contacts exported to Excel', 'success');
   }
+  window.exportDeptContacts = exportDeptContacts;
 
   /* ── Delete department ───────────────────────────── */
   function confirmDeactivateDept(){

@@ -309,9 +309,13 @@
 /* WORKFLOW TOAST */
 .wf-toast{position:fixed;top:72px;right:16px;z-index:900;background:var(--navy);color:#fff;padding:8px 14px;border-radius:6px;font-size:11px;font-weight:600;box-shadow:0 4px 16px rgba(0,20,60,.25);transform:translateX(120%);transition:transform .3s ease;max-width:340px}
 .wf-toast.show{transform:translateX(0)}
-/* FORM PREVIEW DRAWER (wider for inspection forms) */
-.wf-drawer{width:540px;right:0;transform:translateX(calc(100% + 4px));transition:transform .25s ease,visibility 0s .25s;visibility:hidden}
-.qc-drawer.open.wf-drawer{transform:translateX(0);transition:transform .25s ease,visibility 0s 0s;visibility:visible}
+/* WORKFLOW FORM OVERLAY (centered, full-viewport frame) — standalone, no .qc-drawer dependency */
+.wf-drawer{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;overflow:hidden;padding:16px;z-index:900;box-shadow:none}
+.wf-drawer.open{opacity:1;visibility:visible}
+.wf-drawer-panel{background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.2);width:100%;max-width:900px;height:calc(100vh - 32px);display:flex;flex-direction:column;position:relative}
+.wf-drawer .qc-drawer-head{border-radius:8px 8px 0 0;flex-shrink:0}
+.wf-drawer .qc-drawer-body{flex:1;overflow-y:auto}
+.wf-drawer .wf-footer-actions{border-radius:0 0 8px 8px;flex-shrink:0}
 .wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px}
 .wf-form-header .wf-fh-item{font-size:10.5px;color:var(--text)}
 .wf-form-header .wf-fh-item b{font-size:9px;color:var(--steel);text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-right:4px}
@@ -339,6 +343,96 @@
 .wf-placeholder svg{width:48px;height:48px;stroke:var(--border-dk);margin-bottom:10px}
 .wf-placeholder p{font-size:12px;font-weight:600;margin:0 0 4px}
 .wf-placeholder small{font-size:10px}
+/* ── Workflow Form — Style A Cards ── */
+.wf-card{background:#fff;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(var(--primary-rgb),.06)}
+.wf-card-head{background:linear-gradient(135deg,#E3EAF6 0%,#EDF1F9 100%);color:var(--navy);padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.wf-card-body{padding:10px 14px}
+.wf-ro{background:#F7F9FC;color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;min-height:24px;line-height:1.5}
+.wf-info-strip{display:flex;gap:16px;padding:6px 10px;background:#F0F4FA;border-radius:4px;font-size:10px;color:var(--text);margin-bottom:2px}
+.wf-info-strip b{color:var(--steel);font-weight:700}
+.wf-check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px}
+.wf-check-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text)}
+.wf-check-item input[type=checkbox]{accent-color:var(--navy);width:14px;height:14px}
+.wf-di-table{width:100%;border-collapse:collapse;font-size:10.5px}
+.wf-di-table th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;padding:5px 8px;text-align:left;letter-spacing:.3px;border-bottom:1px solid #B0C8DE}
+.wf-di-table td{padding:4px 8px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+.wf-di-table tr:hover td{background:#EFF6FF}
+.wf-di-cat{background:#F0F4FA;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}
+.wf-di-cat td{padding:6px 8px;border-bottom:1px solid var(--border)}
+.wf-di-extra{font-size:10px;color:var(--text)}
+.wf-di-extra input{width:40px;height:20px;border:1.5px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:10px;font-family:inherit;text-align:center}
+.wf-di-input{width:60px;height:20px;border:1px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:10px;font-family:inherit;display:inline-block;vertical-align:middle}
+.wf-di-input.wide{width:100px}
+.wf-di-input.xwide{width:140px}
+.wf-di-radios{white-space:nowrap;font-size:10px}
+.wf-di-radios label{margin-right:2px;cursor:pointer}
+.wf-di-radios input[type=radio]{accent-color:var(--navy);vertical-align:middle;margin:0 1px 0 0}
+.wf-di-defects{font-size:10px;color:var(--text)}
+.wf-di-defects label{margin-right:6px;white-space:nowrap;cursor:pointer}
+.wf-di-defects input[type=checkbox]{accent-color:var(--navy);vertical-align:middle;margin:0 2px 0 0;width:12px;height:12px}
+.wf-textarea{width:100%;min-height:100px;border:1.5px solid var(--border-dk);border-radius:4px;padding:8px 10px;font-size:11px;font-family:inherit;resize:vertical;box-sizing:border-box}
+.wf-form-footer{font-size:8px;color:var(--muted);text-align:right;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)}
+/* ── Premium Customer Estimate (.wf-est-*) ── */
+.wf-est-header{background:linear-gradient(135deg,#00257A 0%,#0E4D8A 100%);color:#fff;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;margin:-12px -16px 16px}
+.wf-est-header img{height:36px;margin-right:14px}
+.wf-est-header-left{display:flex;align-items:center}
+.wf-est-header-left .est-company{font-size:17px;font-weight:700;letter-spacing:.2px}
+.wf-est-header-left .est-tagline{font-size:9px;opacity:.7;margin-top:2px}
+.wf-est-header-right{text-align:right}
+.wf-est-header-right .est-title{font-size:20px;font-weight:300;letter-spacing:.5px}
+.wf-est-header-right .est-meta{font-size:10px;opacity:.7;margin-top:4px}
+.wf-est-section{padding:20px 28px}
+.wf-est-section+.wf-est-section{border-top:1px solid #D0D8E4}
+.wf-est-label{font-size:9px;font-weight:700;color:#5A6F8A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.wf-est-addr{font-size:11px;line-height:1.7;color:#1A202C}
+.wf-est-equip{border:1px solid #DDE3EE;border-radius:6px;padding:14px 16px;background:#FAFBFD}
+.wf-est-equip-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.wf-est-equip-row b{color:#5A6F8A;font-size:9px;text-transform:uppercase;font-weight:600}
+.wf-est-complaint{background:#F7F9FC;border-left:3px solid #00257A;padding:12px 16px;border-radius:0 4px 4px 0;font-size:11px;line-height:1.6;color:#1A202C}
+.wf-est-complaint-label{font-size:9px;font-weight:700;color:#00257A;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.wf-est-item{border:1px solid #C8D4E0;border-radius:6px;padding:14px 18px;margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:4px;transition:border-color .15s;background:#FAFBFD}
+.wf-est-item:hover{border-color:#8AACCC;background:#F4F8FC}
+.wf-est-item-desc{flex:1;min-width:200px}
+.wf-est-item-desc .est-name{font-size:12px;font-weight:600;color:#1A202C}
+.wf-est-item-desc .est-code{font-size:9px;color:#8896AA;margin-top:2px}
+.wf-est-item-desc .est-note{font-size:10px;color:#00257A;font-style:italic;margin-top:4px;padding-left:10px;border-left:2px solid #B0C8DE}
+.wf-est-item-price{font-size:14px;font-weight:700;color:#1A202C;text-align:right;min-width:80px}
+.wf-est-item-approve{width:100%;display:flex;justify-content:flex-end;gap:6px;margin-top:6px;padding-top:8px;border-top:1px solid #F0F2F5}
+.wf-est-item-approve label{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:4px 12px;border:1px solid #DDE3EE;border-radius:16px;cursor:pointer;transition:all .15s}
+.wf-est-item-approve label:has(input:checked){border-color:#00257A;background:#EDF4FF;color:#00257A}
+.wf-est-item-approve input[type=radio]{display:none}
+.wf-est-item.est-diagnostic{background:#FAFBFD;border-style:dashed;border-color:#DDE3EE}
+.wf-est-item.est-diagnostic .est-name{color:#5A6F8A;font-weight:500}
+.wf-est-totals{display:flex;justify-content:flex-end;padding:16px 28px}
+.wf-est-totals-grid{display:grid;grid-template-columns:auto auto;gap:4px 20px;text-align:right;font-size:12px}
+.wf-est-totals-grid .est-total-label{color:#5A6F8A;font-weight:500}
+.wf-est-totals-grid .est-total-val{font-weight:600;color:#1A202C}
+.wf-est-totals-grid .est-grand-label{color:#00257A;font-weight:700;font-size:14px;padding-top:8px;border-top:2px solid #00257A}
+.wf-est-totals-grid .est-grand-val{color:#00257A;font-weight:700;font-size:14px;padding-top:8px;border-top:2px solid #00257A}
+.wf-est-callout{font-size:10px;color:#5A6F8A;line-height:1.6;padding:12px 16px;background:#F7F9FC;border-left:3px solid #B0C8DE;border-radius:0 4px 4px 0;font-style:italic}
+.wf-est-repairs-tbl{width:100%;border-collapse:collapse;font-size:10px;border:1px solid #C8D4E0;border-radius:4px}
+.wf-est-repairs-tbl th{background:linear-gradient(to bottom,#E3EAF6,#EDF1F9);color:#00257A;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:6px 10px;text-align:left;border-bottom:2px solid #B0C0D4;border-right:1px solid #D0D8E4}
+.wf-est-repairs-tbl th:last-child{border-right:none}
+.wf-est-repairs-tbl td{padding:5px 10px;border-bottom:1px solid #DDE3EE;vertical-align:middle}
+.wf-est-repairs-tbl tr:last-child td{border-bottom:none}
+.wf-est-repairs-tbl tr:nth-child(even) td{background:#FAFBFD}
+.wf-est-repairs-tbl tr:hover td{background:#EFF4FA}
+.wf-est-repairs-tbl b{font-size:10px;font-weight:600;color:#1A202C}
+.est-tag{display:inline-block;font-size:7px;font-weight:700;padding:1px 5px;border-radius:8px}
+.est-tag-ua{background:#FEF2F2;color:#B91C1C}
+.est-tag-nw{background:#F0FDF4;color:#166534}
+.wf-est-tech{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:0;font-size:10px;border:1px solid #E8ECF2;border-radius:4px;overflow:hidden}
+.wf-est-tech div{padding:6px 10px;border-right:1px solid #E8ECF2}
+.wf-est-tech div:last-child{border-right:none}
+.wf-est-tech .est-th{background:#F0F4FA;font-weight:700;color:#5A6F8A;font-size:9px;text-transform:uppercase}
+.wf-est-auth{text-align:center;padding:24px 28px}
+.wf-est-auth-text{font-size:11px;color:#1A202C;line-height:1.6;max-width:600px;margin:0 auto 20px}
+.wf-est-sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 32px;max-width:600px;margin:0 auto}
+.wf-est-sig-line{border-bottom:1px solid #1A202C;height:32px;margin-bottom:4px}
+.wf-est-sig-label{font-size:9px;color:#5A6F8A;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.wf-est-contact{font-size:10px;color:#5A6F8A;margin-top:16px;padding-top:12px;border-top:1px solid #E8ECF2}
+.wf-est-contact b{color:#00257A}
+.wf-est-iso{font-size:8px;color:#8896AA;margin-top:6px}
   </style>
 </head>
 <body>
@@ -1794,7 +1888,8 @@
 <!-- ═══ WORKFLOW FORM PREVIEW DRAWERS ═══ -->
 
 <!-- D&I PREVIEW (OM05-1) -->
-<div class="qc-drawer wf-drawer" id="drawer-form-disassemble">
+<div class="wf-drawer" id="drawer-form-disassemble">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Disassemble & Inspection — OM05-1</span>
     <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfDITimestamp"></span>
@@ -1808,10 +1903,12 @@
     <button class="btn btn-outline">Email</button>
     <button class="btn btn-navy" onclick="generateForm('disassemble')">Generate PDF</button>
   </div>
+  </div>
 </div>
 
 <!-- REQUISITION PREVIEW (OM07-2) -->
-<div class="qc-drawer wf-drawer" id="drawer-form-requisition">
+<div class="wf-drawer" id="drawer-form-requisition">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Requisition for Approval — OM07-2</span>
     <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfReqTimestamp"></span>
@@ -1825,10 +1922,12 @@
     <button class="btn btn-outline">Email to Customer</button>
     <button class="btn btn-navy" onclick="generateForm('requisition')">Generate PDF</button>
   </div>
+  </div>
 </div>
 
 <!-- BLANK INSPECTION PREVIEW (OM07-3) -->
-<div class="qc-drawer wf-drawer" id="drawer-form-inspection">
+<div class="wf-drawer" id="drawer-form-inspection">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Blank Inspection — OM07-3</span>
     <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfInspTimestamp"></span>
@@ -1842,10 +1941,12 @@
     <button class="btn btn-outline">Email</button>
     <button class="btn btn-navy" onclick="generateForm('inspection')">Generate PDF</button>
   </div>
+  </div>
 </div>
 
 <!-- PICK LIST PREVIEW (OM07-6) -->
-<div class="qc-drawer wf-drawer" id="drawer-form-picklist">
+<div class="wf-drawer" id="drawer-form-picklist">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Repair Inventory Pick List — OM07-6</span>
     <span style="font-size:9px;opacity:.7;margin-left:8px;color:#fff" id="wfPickTimestamp"></span>
@@ -1858,12 +1959,14 @@
     <button class="btn btn-outline" onclick="printFormDocument('picklist')">Print</button>
     <button class="btn btn-navy" onclick="generateForm('picklist')">Generate PDF</button>
   </div>
+  </div>
 </div>
 
 <!-- Amendment (OM07-9) and Defect (OM07-8) pills open existing drawer-amend / drawer-defects above -->
 
 <!-- INVOICE -->
-<div class="qc-drawer wf-drawer" id="drawer-form-invoice">
+<div class="wf-drawer" id="drawer-form-invoice">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Final Invoice</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
@@ -1876,10 +1979,12 @@
     <button class="btn btn-outline">Email to AP</button>
     <button class="btn btn-navy" onclick="generateForm('invoice')">Generate</button>
   </div>
+  </div>
 </div>
 
 <!-- PACKING SLIP -->
-<div class="qc-drawer wf-drawer" id="drawer-form-packing">
+<div class="wf-drawer" id="drawer-form-packing">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Scope Return Verification (Packing Slip)</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
@@ -1891,10 +1996,12 @@
     <button class="btn btn-outline" onclick="printFormDocument('packing')">Print & Generate</button>
     <button class="btn btn-navy" onclick="generateForm('packing')">Generate</button>
   </div>
+  </div>
 </div>
 
 <!-- FINAL QC -->
-<div class="qc-drawer wf-drawer" id="drawer-form-finalqc">
+<div class="wf-drawer" id="drawer-form-finalqc">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Inspection Completed (Final QC)</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
@@ -1912,10 +2019,13 @@
 <!-- WORKFLOW TOAST -->
 <div class="wf-toast" id="wfToast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
@@ -2042,6 +2152,8 @@ async function generateForm(formId) {
     showWorkflowToast(form.name + ' generated');
     // Add generated form to Documents tab
     addGeneratedFormDoc(form, now);
+    // Generate the actual PDF
+    generateFormPDF(formId);
   }
 }
 
@@ -2059,6 +2171,488 @@ function addGeneratedFormDoc(form, dt) {
   tbody.insertBefore(tr, tbody.firstChild);
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// PDF Form Generation — uses TSIExport helpers from export-utils.js
+// ═══════════════════════════════════════════════════════════════════
+
+/** Collect common form data from _currentRepair + lookups */
+function collectFormData(r) {
+  if (!r) r = {};
+  const clientName = r.sShipName1 || r.sBillName1 || _clients.find(c => c.lClientKey == r.lClientKey)?.sClientName1 || '—';
+  const deptName = r.sShipName2 || _departments.find(d => d.lDepartmentKey == r.lDepartmentKey)?.sDepartmentName || '—';
+  const _rep = _salesReps.find(s => (s.lSalesRepNameKey || s.lSalesRepKey) == r.lSalesRepKey);
+  const repName = _rep ? (_rep.sSalesRepName || [_rep.sRepFirst, _rep.sRepLast].filter(Boolean).join(' ') || '—') : '—';
+
+  // Extract repair items from DOM table
+  const itemRows = document.querySelectorAll('#repairItemsBody tr');
+  const items = [];
+  itemRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 6) {
+      const descText = cells[1]?.textContent?.trim() || '';
+      items.push({
+        code: cells[0]?.textContent?.trim() || '',
+        desc: descText,
+        uanwt: cells[2]?.textContent?.trim() || '',
+        approved: cells[4]?.textContent?.trim() || '',
+        amount: cells[5]?.textContent?.trim() || '',
+        isBlind: descText.startsWith('!'),
+        isAmended: row.dataset.amended === 'true',
+        comments: cells[cells.length - 1]?.textContent?.trim() || ''
+      });
+    }
+  });
+
+  return {
+    r, clientName, deptName, repName, items,
+    wo: r.sWorkOrderNumber || 'WO',
+    serial: r.sSerialNumber || '—',
+    model: r.sScopeTypeDesc || '—',
+    dateIn: TSIExport.fmtDate(r.dtDateIn),
+    rack: r.sRackPosition || 'N/A',
+    type: r.sRigidOrFlexible || '—',
+    complaint: r.sComplaintDesc || '(none)',
+    visibleItems: items.filter(i => !i.isBlind),
+    allItems: items
+  };
+}
+
+/** Build PDF filename: FormNum_WO.pdf */
+function pdfFileName(formId) {
+  const form = WORKFLOW_FORMS.find(f => f.id === formId);
+  const wo = _currentRepair ? _currentRepair.sWorkOrderNumber : 'WO';
+  const prefix = (form && form.formNum && form.formNum !== '—') ? form.formNum + '_' : '';
+  return prefix + wo + '.pdf';
+}
+
+/** Dispatch to the correct form builder */
+function generateFormPDF(formId) {
+  if (!window.TSIExport) { console.warn('TSIExport not loaded'); return; }
+  const d = collectFormData(_currentRepair);
+  try {
+    switch (formId) {
+      case 'disassemble': buildDIPdf(d); break;
+      case 'requisition': buildRequisitionPdf(d); break;
+      case 'inspection':  buildInspectionPdf(d); break;
+      case 'picklist':    buildPickListPdf(d); break;
+      case 'invoice':     buildInvoicePdf(d); break;
+      case 'packing':     buildPackingPdf(d); break;
+      case 'finalqc':     buildFinalQCPdf(d); break;
+      default: console.warn('No PDF builder for form:', formId);
+    }
+  } catch (e) {
+    console.error('[TSI PDF] Error generating', formId, e);
+    showWorkflowToast('PDF generation failed — see console');
+  }
+}
+
+// ── D&I (Disassemble & Inspection) ──────────────────────────────
+function buildDIPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const form = WORKFLOW_FORMS.find(f => f.id === 'disassemble');
+  let y = E.addTSIHeader(doc, 'Disassemble & Inspection', form.formNum);
+
+  y = E.addKeyValueGrid(doc, [
+    ['Client', d.clientName], ['W.O. #', d.wo],
+    ['Department', d.deptName], ['Serial #', d.serial],
+    ['Model', d.model], ['Date In', d.dateIn],
+    ['Rack #', d.rack], ['Type', d.type]
+  ], y);
+
+  // Customer type / pricing
+  const r = d.r;
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.steel);
+  doc.text('Customer Type: ' + (r.lPricingCategoryKey === 4 ? 'CAP' : 'FFS') + '    Scope Type: ' + d.model + '    Rack #: ' + d.rack, E.PAGE.margin, y);
+  y += 14;
+
+  y = E.addSectionLabel(doc, 'Customer Perceived Problems', y);
+  y = E.addParagraph(doc, d.complaint, y);
+
+  y = E.addSectionLabel(doc, 'Accessories Received', y);
+  y = E.addCheckboxRows(doc, [
+    { label: 'ETO Cap', checked: r.sIncludesCapYN === 'Y' },
+    { label: 'A/W Button', checked: true },
+    { label: 'Suction Button', checked: true },
+    { label: 'Water Cap', checked: r.sIncludesWaterResCapYN === 'Y' },
+    { label: 'Biopsy Valve', checked: false },
+    { label: 'Light Post Adapter', checked: false }
+  ], y, 3);
+
+  y = E.addSectionLabel(doc, 'Items in Need of Repair', y);
+  const itemRows = d.allItems.map(i => [i.code, i.desc]);
+  if (itemRows.length) {
+    y = E.addTable(doc, ['Item', 'Description / Finding'], itemRows, y);
+  } else {
+    y = E.addParagraph(doc, 'No items', y, { color: E.COLORS.steel });
+  }
+
+  y = E.addSectionLabel(doc, 'Comments', y);
+  y = E.addParagraph(doc, r.mCommentsDisIns || '(none)', y);
+
+  E.savePDF(doc, pdfFileName('disassemble'));
+}
+
+// ── Requisition for Approval ────────────────────────────────────
+function buildRequisitionPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const form = WORKFLOW_FORMS.find(f => f.id === 'requisition');
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Requisition for Approval', form.formNum);
+
+  y = E.addKeyValueGrid(doc, [
+    ['To', d.clientName], ['W.O. #', d.wo],
+    ['Attn', r.sShipAttention || '—'], ['PO #', r.sPurchaseOrder || '—'],
+    ['Ship To', (r.sShipName1 || '') + ', ' + (r.sShipCity || '') + ' ' + (r.sShipState || '')],
+    ['Model', d.model]
+  ], y);
+
+  y = E.addSectionLabel(doc, 'Customer Complaint', y);
+  y = E.addParagraph(doc, d.complaint, y);
+
+  // Items table — exclude blind items
+  const reqItems = d.visibleItems;
+  const rows = reqItems.map(i => [i.desc, i.amount, i.approved === 'Y' ? 'Y' : 'N']);
+  y = E.addTable(doc, ['Problem / Description', 'Amount', 'Approved'], rows, y, {
+    columnStyles: { 1: { halign: 'right', cellWidth: 60 }, 2: { halign: 'center', cellWidth: 50 } }
+  });
+
+  // Totals
+  const totalAmount = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
+  const shipping = r.dblAmtShipping || 0;
+  y = E.checkPageBreak(doc, y, 30);
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(E.COLORS.black);
+  doc.text('Sub Total: ' + E.fmtCurrency(totalAmount), E.PAGE.w - E.PAGE.margin - 180, y);
+  doc.text('Shipping: ' + E.fmtCurrency(shipping), E.PAGE.w - E.PAGE.margin - 90, y);
+  y += 13;
+  doc.setFontSize(10); doc.setTextColor(E.COLORS.navy);
+  doc.text('Repair Total: ' + E.fmtCurrency(totalAmount + shipping), E.PAGE.w - E.PAGE.margin - 90, y, { align: 'right' });
+  y += 16;
+
+  // Disclaimer
+  y = E.addParagraph(doc, '* This estimate is based on our initial inspections. As the scope is disassembled further there may be additional repair items identified that may require an adjustment to this estimate.', y, { fontSize: 8, color: E.COLORS.steel });
+
+  // Non-contract cost
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
+  doc.text('Non-Contract Cost: ' + E.fmtCurrency(r.mMaxCharge || 0), E.PAGE.margin, y);
+  y += 18;
+
+  // Signature block
+  y = E.addSignatureBlock(doc, [
+    'Customer Approval',
+    'Date',
+    'Customer Printed Name',
+    'Reviewed By: ' + d.repName
+  ], y);
+
+  // ISO line
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.steel);
+  doc.text('An ISO Certified Company meeting the Medical Device Standards of ISO 13485', E.PAGE.w / 2, y + 8, { align: 'center' });
+
+  E.savePDF(doc, pdfFileName('requisition'));
+}
+
+// ── Blank Inspection ────────────────────────────────────────────
+function buildInspectionPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const form = WORKFLOW_FORMS.find(f => f.id === 'inspection');
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Blank Inspection', form.formNum);
+
+  y = E.addKeyValueGrid(doc, [
+    ['Client', d.clientName], ['W.O. #', d.wo],
+    ['Department', d.deptName], ['Serial #', d.serial],
+    ['Model', d.model], ['Date In', d.dateIn],
+    ['Rack #', d.rack], ['Type', d.type]
+  ], y);
+
+  y = E.addSectionLabel(doc, 'Complaint', y);
+  y = E.addParagraph(doc, d.complaint, y);
+
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
+  doc.text('Customer Expected Delivery Date: ' + E.fmtDate(r.dtExpDelDate), E.PAGE.margin, y);
+  y += 16;
+
+  y = E.addSectionLabel(doc, 'Items Found to Be in Need of Repair', y);
+  const foundRows = d.allItems.map(i => [i.desc, i.code]);
+  if (foundRows.length) {
+    y = E.addTable(doc, ['Repair Item', 'Reason / Finding'], foundRows, y);
+  } else {
+    y = E.addParagraph(doc, 'No items', y, { color: E.COLORS.steel });
+  }
+
+  y = E.addSectionLabel(doc, 'Items Approved and Repaired', y);
+  const approvedRows = d.allItems.filter(i => i.approved === 'Y').map(i => [i.desc, '________']);
+  if (approvedRows.length) {
+    y = E.addTable(doc, ['Repair Item', 'Repaired By'], approvedRows, y, {
+      columnStyles: { 1: { halign: 'center', cellWidth: 80 } }
+    });
+  } else {
+    y = E.addParagraph(doc, 'No approved items', y, { color: E.COLORS.steel });
+  }
+
+  E.savePDF(doc, pdfFileName('inspection'));
+}
+
+// ── Pick List ───────────────────────────────────────────────────
+function buildPickListPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const form = WORKFLOW_FORMS.find(f => f.id === 'picklist');
+  let y = E.addTSIHeader(doc, 'Repair Inventory Pick List', form.formNum);
+
+  y = E.addKeyValueGrid(doc, [
+    ['Client', d.clientName], ['W.O. #', d.wo],
+    ['Department', d.deptName], ['Serial #', d.serial],
+    ['Model', d.model], ['Date In', d.dateIn],
+    ['Rack #', d.rack], ['Type', d.type]
+  ], y);
+
+  // Pull inventory data from the pick list drawer DOM if populated
+  const pickBody = document.getElementById('wfPickBody');
+  const invRows = [];
+  if (pickBody) {
+    const trs = pickBody.querySelectorAll('table.wf-items-table tbody tr');
+    trs.forEach(tr => {
+      const cells = tr.querySelectorAll('td');
+      if (cells.length === 4) {
+        invRows.push([
+          cells[0]?.textContent?.trim() || '',
+          cells[1]?.textContent?.trim() || '',
+          cells[2]?.textContent?.trim() || '',
+          cells[3]?.textContent?.trim() || ''
+        ]);
+      } else if (cells.length === 1) {
+        // Group header row
+        invRows.push([{ content: cells[0].textContent.trim(), colSpan: 4, styles: { fontStyle: 'bold', fillColor: E.COLORS.bg } }]);
+      }
+    });
+  }
+
+  y = E.addSectionLabel(doc, 'Inventory Items', y);
+  if (invRows.length) {
+    y = E.addTable(doc, ['Item', 'Size', 'Lot Number', 'Qty'], invRows, y, {
+      columnStyles: { 3: { halign: 'center', cellWidth: 40 } }
+    });
+  } else {
+    y = E.addParagraph(doc, 'No inventory items', y, { color: E.COLORS.steel });
+  }
+
+  E.savePDF(doc, pdfFileName('picklist'));
+}
+
+// ── Invoice ─────────────────────────────────────────────────────
+function buildInvoicePdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Final Invoice', '');
+
+  y = E.addKeyValueGrid(doc, [
+    ['Invoice #', r.sInvoiceNumber || 'Pending'], ['Date', E.fmtDate(new Date())],
+    ['PO #', r.sPurchaseOrder || '—'], ['W.O. #', d.wo]
+  ], y);
+
+  y = E.addSectionLabel(doc, 'Line Items', y);
+  const visItems = d.visibleItems;
+  const rows = visItems.map(i => [i.desc, i.amount]);
+  if (rows.length) {
+    y = E.addTable(doc, ['Description', 'Amount'], rows, y, {
+      columnStyles: { 1: { halign: 'right', cellWidth: 70 } }
+    });
+  } else {
+    y = E.addParagraph(doc, 'No billable items', y, { color: E.COLORS.steel });
+  }
+
+  // Totals
+  const totalAmount = visItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
+  const shipping = r.dblAmtShipping || 0;
+  const tax = parseFloat(r.dblAmtTax) || 0;
+  y = E.checkPageBreak(doc, y, 50);
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(E.COLORS.black);
+  const totX = E.PAGE.w - E.PAGE.margin;
+  doc.text('Sub Total: ' + E.fmtCurrency(totalAmount), totX, y, { align: 'right' }); y += 13;
+  doc.text('Shipping: ' + E.fmtCurrency(shipping), totX, y, { align: 'right' }); y += 13;
+  doc.text('Tax: ' + E.fmtCurrency(tax), totX, y, { align: 'right' }); y += 13;
+  doc.setFontSize(11); doc.setTextColor(E.COLORS.navy);
+  doc.text('Total Due: ' + E.fmtCurrency(totalAmount + shipping + tax), totX, y, { align: 'right' }); y += 20;
+
+  // Payment Terms + Bill To
+  y = E.checkPageBreak(doc, y, 60);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
+  doc.text('Payment Terms: ' + (r.lPaymentTermsKey || 'Net 30'), E.PAGE.margin, y);
+  y += 16;
+
+  y = E.addAddressBlock(doc, 'Bill To', {
+    name: r.sBillName1 || '',
+    addr1: r.sBillAddr1 || '',
+    addr2: r.sBillAddr2 || '',
+    city: r.sBillCity || '',
+    state: r.sBillState || '',
+    zip: r.sBillZip || ''
+  }, E.PAGE.margin, y);
+
+  E.savePDF(doc, pdfFileName('invoice'));
+}
+
+// ── Packing Slip (Scope Return Verification) ────────────────────
+function buildPackingPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Scope Return Verification', '');
+
+  // Ship-to address
+  y = E.addAddressBlock(doc, 'Ship To', {
+    name: r.sShipName1 || '',
+    attn: r.sShipAttention || r.sShipName2 || '',
+    addr1: r.sShipAddr1 || '',
+    addr2: r.sShipAddr2 || '',
+    city: r.sShipCity || '',
+    state: r.sShipState || '',
+    zip: r.sShipZip || ''
+  }, E.PAGE.margin, y);
+
+  y = E.addSectionLabel(doc, 'Scope Details', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Model', d.model], ['Serial #', d.serial],
+    ['Type', d.type], ['Work Order', d.wo]
+  ], y);
+
+  y = E.addSectionLabel(doc, 'Accessories Included', y);
+  const acc = [];
+  if (r.sIncludesCaseYN === 'Y') acc.push({ label: 'Case', checked: true });
+  if (r.sIncludesCapYN === 'Y') acc.push({ label: 'Cap', checked: true });
+  if (r.sIncludesWaterResCapYN === 'Y') acc.push({ label: 'Water Res Cap', checked: true });
+  if (r.sIncludesVideoPlugYN === 'Y') acc.push({ label: 'Video Plug', checked: true });
+  if (r.sIncludesMouthpieceYN === 'Y') acc.push({ label: 'Mouthpiece', checked: true });
+  if (r.sIncludesAngleKnobYN === 'Y') acc.push({ label: 'Angle Knob', checked: true });
+  if (acc.length) {
+    y = E.addCheckboxRows(doc, acc, y, 3);
+  } else {
+    y = E.addParagraph(doc, 'No accessories listed', y, { color: E.COLORS.steel });
+  }
+
+  // Note
+  y = E.checkPageBreak(doc, y, 30);
+  y = E.addParagraph(doc, 'Note: This document does not include pricing information. For billing details refer to the Final Invoice.', y, { fontSize: 8, color: E.COLORS.steel });
+
+  E.savePDF(doc, pdfFileName('packing'));
+}
+
+// ── Final QC (Inspection Completed) ─────────────────────────────
+function buildFinalQCPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const form = WORKFLOW_FORMS.find(f => f.id === 'finalqc');
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Final Inspection', form.formNum);
+
+  y = E.addKeyValueGrid(doc, [
+    ['Client', d.clientName], ['W.O. #', d.wo],
+    ['Department', d.deptName], ['Serial #', d.serial],
+    ['Model', d.model], ['Date In', d.dateIn],
+    ['Rack #', d.rack], ['Type', d.type]
+  ], y);
+
+  // Pass/Fail inspection grid — 6 categories matching renderInspectionCategories
+  const categories = [
+    { name: 'IMAGE ACCEPTABLE', items: [
+      { label: 'Image is Clear and In focus' },
+      { label: 'Image is Round and clear to edge' },
+      { label: 'Image is free of contamination' },
+      { label: 'Image Lens system is secure' }
+    ]},
+    { name: 'EYEPIECE/OCULAR ACCEPTABLE', items: [
+      { label: 'Eyepiece Color' },
+      { label: 'Eyepiece condition' },
+      { label: 'Eyepiece window' },
+      { label: 'Eyepiece glue seal' },
+      { label: 'Ocular Lens (Intact and Clean)' }
+    ]},
+    { name: 'TUBING ACCEPTABLE', items: [
+      { label: 'Insertion Tube Connection to Body' },
+      { label: 'Tubing Finish' },
+      { label: 'Insertion Tube' },
+      { label: 'Insertion Tube Damage to Plating' },
+      { label: 'Insertion Tube Tip' }
+    ]},
+    { name: 'BODY/NOSECONE/LIGHT POST ACCEPTABLE', items: [
+      { label: 'ID Band in tact and proper color' },
+      { label: 'Body condition' },
+      { label: 'Nosecone condition' },
+      { label: 'Glue/Solder Seals Intact' },
+      { label: 'Light Post condition' },
+      { label: 'Model # Clear and Visible' },
+      { label: 'Light Post and Tip Angle in Alignment' }
+    ]},
+    { name: 'OBJECTIVE/DISTAL END ACCEPTABLE', items: [
+      { label: 'Window (Intact and Clear)' },
+      { label: 'Negative Lens (Intact and Clear)' },
+      { label: 'Objective System (Intact and secure)' },
+      { label: 'Free of Dust, Dirt and Fluid' }
+    ]},
+    { name: 'LIGHT FIBERS ACCEPTABLE', items: [
+      { label: 'Color of Light at tip and Post acceptable' },
+      { label: 'Fibers Intact and not loose' },
+      { label: 'Fiber Glue Intact and Sealed' }
+    ]}
+  ];
+  y = E.addPassFailGrid(doc, categories, y);
+
+  // Outgoing angulation
+  y = E.checkPageBreak(doc, y, 50);
+  y = E.addSectionLabel(doc, 'Outgoing Angulation', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Up', r.sAngOutUp || '—'], ['Down', r.sAngOutDown || '—'],
+    ['Right', r.sAngOutRight || '—'], ['Left', r.sAngOutLeft || '—']
+  ], y);
+
+  // Broken fibers / epoxy
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
+  doc.text('Broken Fibers Out: ' + (r.sBrokenFibersOut || '—') + '    Epoxy Size: ' + (r.nOutgoingEpoxySize || '—') + '    Max Epoxy: ' + (r.sMaxEpoxy || '—'), E.PAGE.margin, y);
+  y += 16;
+
+  // Leak tester data
+  y = E.addSectionLabel(doc, 'Leak Tester Data', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Tester S/N', r.sLeakTesterSN || '—'], ['Version', r.sLeakTesterVersion || '—'],
+    ['Date/Time', E.fmtDate(r.dtLeakTestDate)], ['Serial Number', d.serial],
+    ['Run ID', r.sLeakRunID || '—'], ['Test Duration', r.sLeakDuration || '—'],
+    ['Leak Result', r.sLeakResult || '—'], ['Fluid Result', r.sFluidResult || '—']
+  ], y);
+
+  // Scope includes
+  y = E.addSectionLabel(doc, 'Scope Includes', y);
+  y = E.addCheckboxRows(doc, [
+    { label: 'ETO Cap', checked: r.sIncludesCapYN === 'Y' },
+    { label: 'Air/Water Valve', checked: true },
+    { label: 'Water Proof Cap', checked: r.sIncludesWaterResCapYN === 'Y' },
+    { label: 'Case', checked: r.sIncludesCaseYN === 'Y' },
+    { label: 'Rim Cap', checked: false },
+    { label: 'Suction Valve', checked: true },
+    { label: 'Light Post Adapter', checked: false },
+    { label: 'Box', checked: false }
+  ], y, 3);
+
+  // QC Sign-off
+  y = E.addSectionLabel(doc, 'Commercial Q.C. Sign-Off', y);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
+  doc.text('Date of Commercial Q.C.: ' + E.fmtDate(new Date()), E.PAGE.margin, y); y += 13;
+  doc.text('Scope has passed Final Inspection.', E.PAGE.margin, y); y += 16;
+
+  y = E.addSignatureBlock(doc, [
+    'QC Technician Initials',
+    'Reviewer',
+    'Inspected By',
+    'Date'
+  ], y);
+
+  E.savePDF(doc, pdfFileName('finalqc'));
+}
+
 function setSelectVal_safe(id, val) {
   const el = document.getElementById(id);
   if (el) el.value = val;
@@ -2074,15 +2668,84 @@ function printFormDocument(formId) {
   const form = WORKFLOW_FORMS.find(f => f.id === formId);
   const w = window.open('', '_blank', 'width=800,height=900');
   w.document.write('<html><head><title>' + (form ? form.name : formId) + ' — ' + (r.sWorkOrderNumber || '') + '</title>');
-  w.document.write('<style>@page{size:letter;margin:0.5in}body{font-family:Calibri,sans-serif;font-size:11px;padding:0;max-width:100%;margin:0}table{border-collapse:collapse;width:100%;margin:6px 0}td,th{border:1px solid #ccc;padding:4px 6px;text-align:left;font-size:10px}th{background:#f0f4fa;font-size:9px;text-transform:uppercase;font-weight:700;color:#333}.wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;font-size:10px;padding:6px 8px;background:#f0f4fa;border-radius:4px}.wf-fh-item b{color:#00257A}.wf-section-label{font-size:9px;font-weight:700;color:#00257A;text-transform:uppercase;letter-spacing:.4px;margin:10px 0 4px;padding:3px 0;border-bottom:1px solid #00257A}.wf-pf-grid{margin-bottom:6px}.wf-pf-row{display:flex;align-items:center;padding:2px 4px;border-bottom:1px solid #eee;font-size:10px}.wf-pf-row:nth-child(odd){background:#fafbfd}.wf-pf-label{flex:1}.wf-pf-result{display:flex;gap:8px;font-size:9px}.wf-pf-result label{display:inline-flex;align-items:center;gap:2px}.sig-line{border-bottom:1px solid #000;height:30px;margin-bottom:2px}.sig-label{font-size:8px;color:#666}@media print{body{padding:0}}</style>');
+  // Build print CSS — includes both internal form styles and premium estimate styles
+  const printCSS = `@page{size:letter;margin:0.4in}
+body{font-family:Calibri,Helvetica,sans-serif;font-size:11px;padding:0;max-width:100%;margin:0;color:#1A202C}
+table{border-collapse:collapse;width:100%;margin:6px 0}
+td,th{border:1px solid #ccc;padding:4px 6px;text-align:left;font-size:10px}
+th{background:#f0f4fa;font-size:9px;text-transform:uppercase;font-weight:700;color:#333}
+/* Internal form styles */
+.wf-card{border:1px solid #ccc;border-radius:4px;margin-bottom:6px;page-break-inside:avoid}
+.wf-card-head{background:#E3EAF6;color:#00257A;padding:5px 10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ccc}
+.wf-card-body{padding:8px 10px}
+.wf-ro{background:#F7F9FC;border:1px solid #ddd;border-radius:3px;padding:3px 8px;font-size:10px}
+.wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;font-size:10px;padding:6px 8px;background:#f0f4fa;border-radius:4px}
+.wf-fh-item b{color:#00257A;font-size:8px;text-transform:uppercase}
+.wf-check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 10px;font-size:10px}
+.wf-di-table{width:100%;border-collapse:collapse;font-size:10px}
+.wf-di-table td{padding:3px 6px;border-bottom:1px solid #eee}
+.wf-di-cat{background:#f0f4fa;font-weight:700;color:#00257A;font-size:9px;text-transform:uppercase}
+.wf-di-cat td{padding:5px 6px;border-bottom:1px solid #ccc}
+.wf-di-input{width:50px;border:1px solid #bbb;border-radius:2px;padding:1px 3px;font-size:9px}
+.wf-di-input.wide{width:80px}
+.wf-textarea{width:100%;min-height:60px;border:1px solid #bbb;border-radius:3px;padding:4px 6px;font-size:10px;font-family:inherit;box-sizing:border-box}
+.sig-line{border-bottom:1px solid #000;height:30px;margin-bottom:2px}
+.sig-label{font-size:8px;color:#666}
+/* Premium estimate styles */
+.wf-est-header{background:#00257A;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.wf-est-header img{height:32px;margin-right:12px}
+.wf-est-header-left{display:flex;align-items:center}
+.est-company{font-size:15px;font-weight:700}
+.est-tagline{font-size:8px;opacity:.7;margin-top:1px}
+.wf-est-header-right{text-align:right}
+.est-title{font-size:18px;font-weight:300;letter-spacing:.3px}
+.est-meta{font-size:9px;opacity:.7;margin-top:3px}
+.wf-est-section{padding:14px 24px}
+.wf-est-section+.wf-est-section{border-top:1px solid #C8D4E0}
+.wf-est-label{font-size:8px;font-weight:700;color:#5A6F8A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.wf-est-addr{font-size:10px;line-height:1.6}
+.wf-est-equip{border:1px solid #ccc;border-radius:4px;padding:10px 12px;background:#FAFBFD}
+.wf-est-equip-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0}
+.wf-est-equip-row b{color:#5A6F8A;font-size:8px;text-transform:uppercase}
+.wf-est-complaint{background:#F7F9FC;border-left:3px solid #00257A;padding:10px 14px;font-size:10px;line-height:1.5}
+.wf-est-complaint-label{font-size:8px;font-weight:700;color:#00257A;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.wf-est-repairs-tbl{width:100%;border-collapse:collapse;font-size:9px;border:1.5px solid #8898AA}
+.wf-est-repairs-tbl th{background:#E3EAF6;color:#00257A;font-size:7px;font-weight:700;text-transform:uppercase;padding:5px 8px;text-align:left;border-bottom:2px solid #8898AA;border-right:1px solid #B0C0D4}
+.wf-est-repairs-tbl th:last-child{border-right:none}
+.wf-est-repairs-tbl td{padding:4px 8px;border-bottom:1px solid #C0C8D4;border-right:1px solid #E0E4EA}
+.wf-est-repairs-tbl td:last-child{border-right:none}
+.wf-est-repairs-tbl tr:nth-child(even) td{background:#F5F7FA}
+.wf-est-repairs-tbl b{font-size:9px;font-weight:600}
+.est-tag{display:inline-block;font-size:6px;font-weight:700;padding:1px 4px;border-radius:6px}
+.est-tag-ua{background:#FEF2F2;color:#B91C1C}
+.est-tag-nw{background:#F0FDF4;color:#166534}
+.wf-est-totals{display:flex;justify-content:flex-end;padding:12px 24px}
+.wf-est-totals-grid{display:grid;grid-template-columns:auto auto;gap:3px 16px;text-align:right;font-size:11px}
+.est-total-label{color:#5A6F8A}
+.est-total-val{font-weight:600}
+.est-grand-label{color:#00257A;font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid #00257A}
+.est-grand-val{color:#00257A;font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid #00257A}
+.wf-est-callout{font-size:9px;color:#5A6F8A;line-height:1.5;padding:10px 14px;background:#F7F9FC;border-left:3px solid #B0C8DE;font-style:italic}
+.wf-est-tech{display:grid;grid-template-columns:repeat(4,1fr) auto;font-size:10px;border:1px solid #ccc;border-radius:3px;overflow:hidden}
+.wf-est-tech div{padding:4px 8px;border-right:1px solid #ccc}
+.wf-est-tech div:last-child{border-right:none}
+.est-th{background:#f0f4fa;font-weight:700;color:#5A6F8A;font-size:8px;text-transform:uppercase}
+.wf-est-auth{text-align:center;padding:16px 0}
+.wf-est-auth-text{font-size:10px;line-height:1.5;max-width:500px;margin:0 auto 16px}
+.wf-est-sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;max-width:500px;margin:0 auto}
+.wf-est-sig-line{border-bottom:1px solid #1A202C;height:28px;margin-bottom:3px}
+.wf-est-sig-label{font-size:8px;color:#5A6F8A;font-weight:600;text-transform:uppercase}
+.wf-est-contact{font-size:9px;color:#5A6F8A;margin-top:12px;padding-top:10px;border-top:1px solid #E8ECF2}
+.wf-est-contact b{color:#00257A}
+.wf-est-iso{font-size:7px;color:#8896AA;margin-top:4px}
+.wf-form-footer{font-size:7px;color:#999;text-align:right;margin-top:6px;padding-top:4px;border-top:1px solid #eee}
+@media print{body{padding:0}.wf-est-item-approve{display:none}}`;
+  w.document.write('<style>' + printCSS + '</style>');
   w.document.write('</head><body>');
   w.document.write(body.innerHTML);
   w.document.write('</body></html>');
   w.document.close();
   setTimeout(() => w.print(), 300);
-
-  // Mark as generated + advance status
-  generateForm(formId);
 }
 
 function openFormPreview(formId) {
@@ -2100,15 +2763,21 @@ function openFormPreview(formId) {
   const drawer = document.getElementById('drawer-form-' + formId);
   if (drawer) {
     drawer.classList.add('open');
-    document.getElementById('drawerBackdrop').classList.add('open');
+    drawer.scrollTop = 0; // always show top/close button
+    // wf-drawer overlays are self-contained; only non-wf drawers need the shared backdrop
+    if (!drawer.classList.contains('wf-drawer'))
+      document.getElementById('drawerBackdrop').classList.add('open');
   }
 }
 
 function tsiFormHeader(formName, formNum) {
-  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #00257A;padding-bottom:8px">
-    <div>
-      <div style="font-size:16px;font-weight:700;color:#00257A">Total Scope, Inc.</div>
-      <div style="font-size:9px;color:#666;line-height:1.5">The Leader in Medical Device Repair &amp; Services<br/>17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #00257A;padding-bottom:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="assets/logo-white.png" alt="TSI" style="height:40px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#00257A">Total Scope, Inc.</div>
+        <div style="font-size:9px;color:#666;line-height:1.5">The Leader in Medical Device Repair &amp; Services<br/>17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
+      </div>
     </div>
     <div style="text-align:right">
       <div style="font-size:13px;font-weight:700;color:#00257A">${formName}</div>
@@ -2121,22 +2790,26 @@ function tsiFormHeader(formName, formNum) {
 function populateFormDrawer(formId) {
   const r = _currentRepair;
   if (!r) return;
-  const clientName = _clients.find(c => c.lClientKey === r.lClientKey)?.sClientName1 || 'Unknown Client';
-  const deptName = _departments.find(d => d.lDepartmentKey === r.lDepartmentKey)?.sDepartmentName || 'Unknown Dept';
-  const repName = _salesReps.find(s => s.lSalesRepNameKey === r.lSalesRepKey)?.sSalesRepName || '—';
+  const clientName = r.sShipName1 || r.sBillName1 || _clients.find(c => c.lClientKey == r.lClientKey)?.sClientName1 || '—';
+  const deptName = r.sShipName2 || _departments.find(d => d.lDepartmentKey == r.lDepartmentKey)?.sDepartmentName || '—';
+  const _rep = _salesReps.find(s => (s.lSalesRepNameKey || s.lSalesRepKey) == r.lSalesRepKey);
+  const repName = _rep ? (_rep.sSalesRepName || [_rep.sRepFirst, _rep.sRepLast].filter(Boolean).join(' ') || '—') : '—';
 
   const itemRows = document.querySelectorAll('#repairItemsBody tr');
   const items = [];
   itemRows.forEach(row => {
     const cells = row.querySelectorAll('td');
     if (cells.length >= 6) {
+      const descText = cells[1]?.textContent?.trim() || '';
       items.push({
         code: cells[0]?.textContent?.trim() || '',
-        desc: cells[1]?.textContent?.trim() || '',
+        desc: descText,
+        uanwt: cells[2]?.textContent?.trim() || '',
         approved: cells[4]?.textContent?.trim() || '',
         amount: cells[5]?.textContent?.trim() || '',
-        isBlind: row.dataset.blind === 'true',
-        isAmended: row.dataset.amended === 'true'
+        isBlind: descText.startsWith('!'),
+        isAmended: row.dataset.amended === 'true',
+        comments: cells[cells.length - 1]?.textContent?.trim() || ''
       });
     }
   });
@@ -2157,70 +2830,201 @@ function populateFormDrawer(formId) {
     const body = document.getElementById('wfDIBody');
     if (!body) return;
     const form = WORKFLOW_FORMS.find(f => f.id === formId);
-    body.innerHTML = tsiFormHeader(form.name, form.formNum) + headerHTML + `
-      <div style="font-size:10.5px;margin-bottom:6px"><b style="font-size:9px;color:var(--steel)">CUSTOMER PERCEIVED PROBLEMS:</b> ${r.sComplaintDesc || '—'}</div>
-      <div style="display:flex;gap:12px;margin-bottom:8px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:10px">
-        <span><b>Customer Type:</b> ${r.lPricingCategoryKey === 4 ? 'CAP' : 'FFS'}</span>
-        <span><b>Scope Type:</b> ${r.sScopeTypeDesc || '—'}</span>
-        <span><b>Rack #:</b> ${r.sRackPosition || '—'}</span>
+    const techName = _techs.find(t => t.lTechnicianKey === r.lTechnicianKey)?.sTechnicianName || '';
+    body.innerHTML = tsiFormHeader('Flexible Endoscope Diagnostic Report', form.formNum) + `
+      <!-- SECTION 1: GENERAL INFORMATION -->
+      <div class="wf-card">
+        <div class="wf-card-head">1. General Information</div>
+        <div class="wf-card-body">
+          <div class="wf-form-header" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="wf-fh-item"><b>Customer</b> ${clientName}</div>
+            <div class="wf-fh-item"><b>Work Order #</b> ${r.sWorkOrderNumber || '—'}</div>
+            <div class="wf-fh-item"><b>Inspected By</b> <input class="wf-di-input wide" value="${techName}"></div>
+            <div class="wf-fh-item"><b>Date</b> ${r.dtDateIn ? new Date(r.dtDateIn).toLocaleDateString() : '—'}</div>
+            <div class="wf-fh-item"><b>Scope Model</b> ${r.sScopeTypeDesc || '—'}</div>
+            <div class="wf-fh-item"><b>Rack #</b> ${r.sRackPosition || 'N/A'}</div>
+            <div class="wf-fh-item"><b>Customer Type</b> ${r.lPricingCategoryKey === 4 ? 'CAP' : 'FFS'}</div>
+            <div class="wf-fh-item"><b>Serial #</b> ${r.sSerialNumber || '—'}</div>
+            <div class="wf-fh-item"><b>Package Type</b> ${r.sRigidOrFlexible || '—'}</div>
+          </div>
+          <div style="margin-top:8px;font-size:10.5px"><b style="font-size:9px;color:var(--steel)">ACCESSORIES RECEIVED:</b></div>
+          <div class="wf-di-defects" style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px">
+            <label><input type="checkbox"> None</label>
+            <label><input type="checkbox" ${r.sIncludesCapYN==='Y'?'checked':''}> ETO Cap</label>
+            <label><input type="checkbox" checked> A/W Button</label>
+            <label><input type="checkbox" checked> Suction Button</label>
+            <label><input type="checkbox" ${r.sIncludesWaterResCapYN==='Y'?'checked':''}> Water Cap</label>
+            <label><input type="checkbox"> Biopsy Valve</label>
+            <label><input type="checkbox"> Light Post Adapter</label>
+          </div>
+        </div>
       </div>
-      <div class="wf-section-label">ACCESSORIES RECEIVED</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:10px">
-        <label><input type="checkbox" ${r.sIncludesCapYN==='Y'?'checked':''}/> ETO Cap</label>
-        <label><input type="checkbox" checked/> A/W Button</label>
-        <label><input type="checkbox" checked/> Suction Button</label>
-        <label><input type="checkbox" ${r.sIncludesWaterResCapYN==='Y'?'checked':''}/> Water Cap</label>
-        <label><input type="checkbox"/> Biopsy Valve</label>
-        <label><input type="checkbox"/> Light Post Adapter</label>
+
+      <!-- SECTION 2: ITEM CONDITION UPON RECEIPT -->
+      <div class="wf-card">
+        <div class="wf-card-head">2. Item Condition Upon Receipt</div>
+        <div class="wf-card-body">
+          <div style="font-size:10.5px;margin-bottom:6px">
+            <b>External Condition:</b>
+            <label style="margin:0 6px"><input type="radio" name="extCond" style="accent-color:var(--navy)"> Clean</label>
+            <label><input type="radio" name="extCond" style="accent-color:var(--navy)"> Unclean</label>
+            <span style="font-size:9.5px;color:var(--steel);margin-left:6px">(if unclean, follow OM-22 SOP)</span>
+            — Cleaned By: <input class="wf-di-input wide">
+          </div>
+          <div style="font-size:10.5px;margin-bottom:6px">
+            <b>Model &amp; SN# Confirmed:</b>
+            <label style="margin-left:6px"><input type="checkbox" style="accent-color:var(--navy)"> Yes</label>
+          </div>
+          <div style="font-size:10.5px">
+            <b>Customer Perceived Problem:</b>
+            <div class="wf-ro" style="margin-top:4px">${r.sComplaintDesc || '—'}</div>
+          </div>
+        </div>
       </div>
+
+      <!-- SECTIONS 3-4-5: rendered by function -->
       ${renderFlexDIChecklist()}
-      <div class="wf-section-label">ITEMS IN NEED OF REPAIR</div>
-      <table class="wf-items-table">
-        <thead><tr><th>Item</th><th>Description / Finding</th></tr></thead>
-        <tbody>${items.map(i => '<tr><td>' + i.code + '</td><td>' + i.desc + '</td></tr>').join('') || '<tr><td colspan="2" style="color:var(--muted);text-align:center">No items</td></tr>'}</tbody>
-      </table>
-      <div class="wf-section-label">COMMENTS</div>
-      <textarea rows="3" style="width:100%;font-size:10.5px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-family:inherit;resize:vertical">${r.mCommentsDisIns || ''}</textarea>
-      <div style="font-size:8px;color:var(--muted);margin-top:8px;text-align:right">Form #: ${form.formNum} (01/2026)</div>
+
+      <div class="wf-form-footer">Form #: ${form.formNum} — Revision Pending (01/2026)</div>
     `;
   } else if (formId === 'requisition') {
-    const body = document.getElementById('wfReqBody');
-    if (!body) return;
+    const reqBody = document.getElementById('wfReqBody');
+    if (!reqBody) return;
     const form = WORKFLOW_FORMS.find(f => f.id === formId);
-    // Exclude blind items from customer-facing requisition
-    const reqItems = items.filter(i => !i.isBlind);
-    const totalAmount = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g,'')) || 0), 0);
-    body.innerHTML = tsiFormHeader(form.name, form.formNum) + `
-      <div class="wf-form-header">
-        <div class="wf-fh-item"><b>To</b> ${clientName}</div>
-        <div class="wf-fh-item"><b>W.O. #</b> ${r.sWorkOrderNumber || '—'}</div>
-        <div class="wf-fh-item"><b>Attn</b> ${r.sShipAttention || '—'}</div>
-        <div class="wf-fh-item"><b>PO #</b> ${r.sPurchaseOrder || '—'}</div>
-        <div class="wf-fh-item"><b>Ship To</b> ${r.sShipName1 || ''}, ${r.sShipCity || ''} ${r.sShipState || ''}</div>
-        <div class="wf-fh-item"><b>Model</b> ${r.sScopeTypeDesc || '—'}</div>
-      </div>
-      <div style="font-size:10.5px;margin-bottom:8px"><b style="font-size:9px;color:var(--steel)">CUSTOMER COMPLAINT</b><br/>${r.sComplaintDesc || '—'}</div>
-      <table class="wf-items-table">
-        <thead><tr><th>Problem / Description</th><th style="width:70px;text-align:right">Amount</th><th style="width:60px;text-align:center">Approved</th></tr></thead>
-        <tbody>${reqItems.map(i => '<tr><td>' + i.desc + '</td><td style="text-align:right">' + i.amount + '</td><td style="text-align:center">' + (i.approved === 'Y' ? '<span style="color:var(--green);font-weight:700">Y</span>' : '<span style="color:var(--red);font-weight:700">N</span>') + '</td></tr>').join('')}</tbody>
-      </table>
-      <div style="display:flex;justify-content:flex-end;gap:16px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:8px">
-        <span>Sub Total: $${totalAmount.toFixed(2)}</span>
-        <span>Shipping: $${(r.dblAmtShipping || 0).toFixed(2)}</span>
-        <span style="color:var(--navy);font-size:12px">Repair Total: $${(totalAmount + (r.dblAmtShipping || 0)).toFixed(2)}</span>
-      </div>
-      <div style="font-size:9.5px;color:var(--muted);font-style:italic;margin-bottom:10px;padding:6px 8px;background:#FFFBEB;border:1px solid #F0C040;border-radius:4px">* This estimate is based on our initial inspections. As the scope is disassembled further there may be additional repair items identified that may require an adjustment to this estimate.</div>
-      <div class="wf-section-label">SUMMARY COMMENTS</div>
-      <div style="font-size:10.5px;padding:4px 0;margin-bottom:6px">Non-Contract Cost: <b>$${r.mMaxCharge ? r.mMaxCharge.toFixed(2) : '0.00'}</b></div>
-      <div class="wf-signature-block">
-        <div style="font-size:9.5px;color:var(--text);line-height:1.5;margin-bottom:10px">I have reviewed this appraisal, circled Y or N for the item(s) approved for repair and confirm that the scope indicated above will ship to the correct address.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><div class="sig-line"></div><div class="sig-label">Customer Approval</div></div>
-          <div><div class="sig-line"></div><div class="sig-label">Date</div></div>
-          <div><div class="sig-line"></div><div class="sig-label">Customer Printed Name</div></div>
-          <div><div class="sig-line"></div><div class="sig-label">Reviewed By: ${repName}</div></div>
+    const reqItems = items;
+    const shipping = parseFloat(r.dblAmtShipping) || 0;
+    const tax = parseFloat(r.dblAmtTax) || 0;
+    // Use dblAmtRepair if available (finalized), otherwise sum all items (estimate stage)
+    const itemSum = items.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g,'')) || 0), 0);
+    const subTotal = parseFloat(r.dblAmtRepair) || itemSum;
+    const repairTotal = subTotal + shipping + tax;
+    const reqDate = r.dtReqSent ? new Date(r.dtReqSent).toLocaleDateString() : new Date().toLocaleDateString();
+    const fmt$ = v => '$' + v.toFixed(2);
+    // Payment terms lookup
+    const pt = _paymentTerms.find(x => x.lPaymentTermsKey == r.lPaymentTermsKey);
+    const payTerms = pt ? (pt.sPaymentTerms || pt.sTermsDesc) : 'Net 30';
+
+    // Filter: hide blind/internal items and discount adjustments — but keep Diagnostic Inspection
+    // Diagnostic Inspection always first, rest sorted alphabetically
+    const filteredItems = reqItems
+      .filter(i => (!i.isBlind || (i.desc || '').toLowerCase().includes('diagnostic inspection')) && !(i.code || '').startsWith('ZZ') && !(i.desc || '').includes('Discount Adjustment'));
+    const diItems = filteredItems.filter(i => (i.desc || '').toLowerCase().includes('diagnostic inspection'));
+    const otherItems = filteredItems.filter(i => !(i.desc || '').toLowerCase().includes('diagnostic inspection')).sort((a, b) => (a.desc || '').localeCompare(b.desc || ''));
+    const visibleItems = [...diItems, ...otherItems];
+
+    reqBody.innerHTML = `
+      <!-- BRANDED HEADER BAND -->
+      <div class="wf-est-header">
+        <div class="wf-est-header-left">
+          <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:42px">
         </div>
-        <div style="font-size:8px;color:var(--muted);margin-top:8px;text-align:center">An ISO Certified Company meeting the Medical Device Standards of ISO 13485</div>
+        <div class="wf-est-header-right">
+          <div class="est-title">Service Estimate</div>
+          <div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &nbsp;&bull;&nbsp; ${reqDate}</div>
+        </div>
+      </div>
+
+      <!-- CUSTOMER & EQUIPMENT -->
+      <div class="wf-est-section">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 28px">
+          <div>
+            <div class="wf-est-label">Bill To</div>
+            <div class="wf-est-addr">
+              ${r.sBillName1 || r.sShipName1 || '—'}<br/>
+              ${r.sBillName2 ? r.sBillName2 + '<br/>' : ''}
+              ${r.sBillAddr1 ? r.sBillAddr1 + '<br/>' : ''}
+              ${r.sBillAddr2 ? r.sBillAddr2 + '<br/>' : ''}
+              ${[r.sBillCity, r.sBillState].filter(Boolean).join(', ')} ${r.sBillZip || ''}
+            </div>
+          </div>
+          <div>
+            <div class="wf-est-label">Ship To</div>
+            <div class="wf-est-addr">
+              ${r.sShipName1 || '—'}<br/>
+              ${r.sShipName2 ? r.sShipName2 + '<br/>' : ''}
+              ${r.sShipAddr1 ? r.sShipAddr1 + '<br/>' : ''}
+              ${r.sShipAddr2 ? r.sShipAddr2 + '<br/>' : ''}
+              ${[r.sShipCity, r.sShipState].filter(Boolean).join(', ')} ${r.sShipZip || ''}
+            </div>
+          </div>
+          <div>
+            <div class="wf-est-equip">
+              <div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>Terms</b><span>${payTerms}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMER REPORTED ISSUE + DIAGNOSIS -->
+      <div class="wf-est-section" style="padding-top:0">
+        <div class="wf-est-complaint">
+          <div class="wf-est-complaint-label">Customer Reported Issue</div>
+          ${r.sComplaintDesc || 'No complaint description provided.'}
+        </div>
+        ${(() => {
+          const reason = _repairReasons.find(x => x.lRepairReasonKey == r.lRepairReasonKey);
+          const level = _levels.find(x => x.lRepairLevelKey == r.lRepairLevelKey);
+          const hasUA = items.some(i => i.uanwt === 'UA');
+          const hasNWT = items.some(i => i.uanwt === 'N' || i.uanwt === 'NWT');
+          const damageClass = hasUA ? 'Avoidable Damage' : hasNWT ? 'Normal Wear & Tear' : '';
+          if (!reason && !level && !damageClass) return '';
+          return '<div style="display:flex;gap:20px;margin-top:10px;font-size:11px">' +
+            (reason ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Primary Failure</span><span style="font-weight:600;color:#1A202C">' + reason.sRepairReason + '</span></div>' : '') +
+            (level ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Repair Classification</span><span style="font-weight:600;color:#1A202C">' + level.sRepairLevel + '</span></div>' : '') +
+            (damageClass ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Damage Assessment</span><span style="font-weight:600;color:' + (hasUA ? '#B91C1C' : '#166534') + '">' + damageClass + '</span></div>' : '') +
+          '</div>';
+        })()}
+      </div>
+
+      <!-- SCOPE OF REPAIR -->
+      <div class="wf-est-section">
+        <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Scope of Repair</div>
+        <div style="font-size:10px;color:#5A6F8A;margin-bottom:10px">Based on our diagnostic inspection, we recommend the following repairs:</div>
+        <table class="wf-est-repairs-tbl">
+          <thead><tr><th>Repair</th><th style="width:80px;text-align:center">Assessment</th><th>Notes</th></tr></thead>
+          <tbody>${visibleItems.map(i => {
+            const name = (i.desc || '').replace(/^!+/, '').trim();
+            const tag = i.uanwt === 'UA' ? '<span class="est-tag est-tag-ua">Avoidable</span>'
+              : i.uanwt === 'N' || i.uanwt === 'NWT' ? '<span class="est-tag est-tag-nw">Normal Wear</span>'
+              : '';
+            return '<tr><td><b>' + name + '</b></td><td style="text-align:center">' + tag + '</td><td style="font-size:9px;color:#5A6F8A;font-style:italic">' + (i.comments || '') + '</td></tr>';
+          }).join('') || '<tr><td colspan="3" style="color:#8896AA;text-align:center">No repair items identified</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <!-- ESTIMATE TOTAL -->
+      <div class="wf-est-section" style="border-top:1px solid #E8ECF2;padding-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div></div>
+          <div style="text-align:right">
+            <div class="wf-est-totals-grid" style="padding:0">
+              ${shipping > 0 ? '<span class="est-total-label">Repair</span><span class="est-total-val">' + fmt$(subTotal) + '</span>' : ''}
+              ${shipping > 0 ? '<span class="est-total-label">Shipping</span><span class="est-total-val">' + fmt$(shipping) + '</span>' : ''}
+              <span class="est-total-label">Sales Tax</span><span class="est-total-val">${fmt$(tax)}</span>
+              <span class="est-grand-label">Estimate Total</span><span class="est-grand-val">${fmt$(subTotal + shipping + tax)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TECHNICAL DETAILS (secondary) -->
+      <!-- IMPORTANT NOTICE -->
+      <div class="wf-est-section" style="padding-top:0">
+        <div class="wf-est-callout">This estimate is based on our initial inspection. As the scope is disassembled further, additional repair items may be identified that could require an adjustment to this estimate. We will contact you before proceeding with any work beyond the scope of this estimate.</div>
+      </div>
+
+      <!-- APPROVAL & FOOTER -->
+      <div class="wf-est-section" style="border-top:1px solid #D0D8E4;padding:14px 28px;text-align:center">
+        <div style="font-size:10px;color:#1A202C;line-height:1.5;margin-bottom:8px">To approve, log in to your <b style="color:#00257A">TSI Customer Portal</b> or contact us: <b style="color:#00257A">ops-tsi@totalscopeinc.com</b> &bull; <b style="color:#00257A">800-471-2255</b> &nbsp; | &nbsp; Prepared by: <b>${repName}</b></div>
+        <div style="display:flex;align-items:flex-end;gap:16px;margin-top:10px;border-top:1px dashed #D0D8E4;padding-top:8px">
+          <div style="flex:2"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">SIGNATURE (optional)</div></div>
+          <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">DATE</div></div>
+          <div style="flex:2"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">PRINTED NAME / TITLE</div></div>
+        </div>
+        <div style="font-size:7px;color:#8896AA;margin-top:8px">Total Scope, Inc. &bull; 17 Creek Parkway, Upper Chichester, PA 19061 &bull; ISO 13485:2016 Certified &nbsp;&nbsp; Form #: ${form.formNum}</div>
       </div>
     `;
   } else if (formId === 'inspection') {
@@ -2478,70 +3282,117 @@ function renderInspectionCategories(detailed) {
 
 function renderFlexDIChecklist() {
   const r = _currentRepair || {};
-  const items = [
-    { cat:'PRESSURE TEST', rows:[
-      {label:'Pressure Test: Water', pf:true, extra:'Verification: P/F &nbsp; N/A'},
-    ]},
-    { cat:'GENERAL INSPECTION', rows:[
-      {label:'Auxiliary Water', pf:true},
-      {label:'Control Body: Leaks / Loose / Cosmetic Defects', pf:true},
-      {label:'Light Bundle: Brightness', pf:true},
-      {label:'Video Image: No Image / Image Imperfection', pf:true},
-      {label:'Video Features: Date / MR / WB / Rail Focus / Camera Orientation / Users', pf:true},
-      {label:'Controls: Switches', pf:true},
-      {label:'A/W Flow', pf:true},
-    ]},
-    { cat:'ANGULATION', rows:[
-      {label:'Angulation Specs', pf:false, extra:'U: <input style="width:36px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.sAngInUp||'')+'"/> D: <input style="width:36px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.sAngInDown||'')+'"/> R: <input style="width:36px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.sAngInRight||'')+'"/> L: <input style="width:36px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.sAngInLeft||'')+'"/>'},
-      {label:'Factory Specifications', pf:false, extra:'U: <b>210</b> D: <b>90</b> R: <b>100</b> L: <b>100</b>'},
-      {label:'Angulation Tightness', pf:true},
-      {label:'Angulation Orientation', pf:true},
-      {label:'Angulation Knobs: U/D & R/L Moving Together / Leaking at Base / Between / Under Cap', pf:true},
-      {label:'Angulation Lock Rubber', pf:true},
-    ]},
-    { cat:'CHANNELS', rows:[
-      {label:'Forcep Channel: Blocked / Leak / Impeded', pf:true},
-      {label:'Suction Channel: Blocked / Leak / Impeded', pf:true},
-    ]},
-    { cat:'INSERTION TUBE / CORD', rows:[
-      {label:'Elevator Wire/Screw: Broken / Port Leaking / Channel Leaking / Needs Adjustment', pf:true},
-      {label:'Insertion Tube Telescoping: Rub/Distal Leaking / Not Functioning / Needs Adjustment', pf:true},
-      {label:'Insertion Tube: Dents / Buckled / Cut / Peeling / Cut Back Too Far', pf:true},
-      {label:'Universal Cord: Dents / Buckled / Cut / Peeling', pf:true},
-      {label:'Sheath Condition: Torn / Loose', pf:true},
-      {label:'Light Guide Connector: Loose / Alignment Pin Missing / Prong Loose / Lens Broken / Lens Dirty', pf:true},
-    ]},
-    { cat:'DISTAL END', rows:[
-      {label:'Electrical Connector: Dirty/Corrosion / Bent/Broken Data Pins / Leak / Fluid Invasion', pf:true},
-      {label:'Bending Rubber: Aging / Loose / Mold/Cut', pf:true, extra:'Epoxy Size: <input style="width:48px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.nIncomingEpoxySize||'')+'"/> Max Epoxy: <input style="width:48px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value=""/>'},
-      {label:'Distal Lenses: OB Lens Missing / Cracked / Chipped / Dirty / Glue Missing', pf:true},
-      {label:'Distal Tip: OB Lens / Light Lenses / Nozzle / RSV / C-Cover', pf:true},
-      {label:'Fluid Invasion', pf:true, extra:'Location: <input style="width:120px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value=""/>'},
-    ]},
-    { cat:'IMAGE / FIBERS', rows:[
-      {label:'Eyepiece: Cracked / Dirty / Field / Prong Ring / Stain / Lens Dirty', pf:true},
-      {label:'Image Bundle: Stains / Field / IGIA / Lens Separation / Centralism / Leaching', pf:true},
-      {label:'Broken Fibers #', pf:false, extra:'<input style="width:40px;border:1px solid #ccc;border-radius:3px;padding:1px 4px;font-size:10px" value="'+(r.sBrokenFibersIn||'')+'"/>'},
-      {label:'Pictures Taken', pf:true},
-    ]}
-  ];
+
+  // Helper: build a P/F/N/A radio cell + label + defects HTML row
+  function diRow(name, label, defectsHTML) {
+    return `<tr>
+      <td style="width:90px;white-space:nowrap" class="wf-di-radios">
+        <label><input type="radio" name="${name}" value="P"> P</label>
+        <label><input type="radio" name="${name}" value="F"> F</label>
+        <label><input type="radio" name="${name}" value="NA"> N/A</label>
+      </td>
+      <td><b>${label}</b>${defectsHTML ? ' ' + defectsHTML : ''}</td>
+    </tr>`;
+  }
+
+  // Helper: inline checkbox
+  function chk(label) { return `<label class="wf-di-defects" style="display:inline"><input type="checkbox"> ${label}</label> `; }
+
+  // Helper: inline input
+  function inp(label, w) { return `${label ? label + ' ' : ''}<input class="wf-di-input${w ? ' ' + w : ''}">`; }
 
   let html = '';
-  items.forEach(section => {
-    html += '<div class="wf-section-label">' + section.cat + '</div><div class="wf-pf-grid">';
-    section.rows.forEach((row, i) => {
-      const uid = section.cat.replace(/[^a-zA-Z]/g,'').substring(0,6) + i;
-      html += '<div class="wf-pf-row"><span class="wf-pf-label">' + row.label + '</span>';
-      if (row.pf) {
-        html += '<span class="wf-pf-result"><label><input type="radio" name="di' + uid + '" style="accent-color:var(--navy)"/> P</label> <label><input type="radio" name="di' + uid + '" style="accent-color:var(--navy)"/> F</label> <label><input type="radio" name="di' + uid + '" style="accent-color:var(--navy)"/> N/A</label></span>';
-      }
-      if (row.extra) {
-        html += '<span style="font-size:10px;margin-left:8px">' + row.extra + '</span>';
-      }
-      html += '</div>';
-    });
-    html += '</div>';
-  });
+
+  // ── SECTION 3: FUNCTIONAL CHECKS ──
+  html += `<div class="wf-card"><div class="wf-card-head">3. Functional Checks</div>
+    <div class="wf-card-body" style="padding:0"><table class="wf-di-table"><tbody>`;
+
+  // 3A. Leak Test & Fluid Invasion
+  html += `<tr class="wf-di-cat"><td colspan="2">3A. Leak Test &amp; Fluid Invasion</td></tr>`;
+  html += diRow('r3a1', 'Leak Test Performed', `&rarr; Result: <input class="wf-di-input"> Leak Location: <input class="wf-di-input wide">`);
+  html += diRow('r3a2', 'Fluid Invasion Detected', `&rarr; Location: <span class="wf-di-defects">${chk('BS')}${chk('CB')}${chk('SC')}${chk('LGC')}${chk('Lenses')}${chk('Other:')} <input class="wf-di-input"></span>`);
+
+  // 3B. Angulation System
+  html += `<tr class="wf-di-cat"><td colspan="2">3B. Angulation System</td></tr>`;
+  html += diRow('r3b1', 'Angulation Specs',
+    `U: <input class="wf-di-input" style="width:40px" value="${r.sAngInUp||''}"> D: <input class="wf-di-input" style="width:40px" value="${r.sAngInDown||''}"> R: <input class="wf-di-input" style="width:40px" value="${r.sAngInRight||''}"> L: <input class="wf-di-input" style="width:40px" value="${r.sAngInLeft||''}"> <span style="font-size:9px;color:var(--steel);margin-left:6px">(Factory: U180/D180/R160/L160)</span>`);
+  html += diRow('r3b2', 'Angulation System', `<span class="wf-di-defects">${chk('Play')}${chk('Stiff/Grinding')}${chk('Broken Cable')}${chk('Slip Stopper')}${chk('Orientation Off')}${chk('Broken Bracket')}</span>`);
+  html += diRow('r3b3', 'Angulation Knobs', `<span class="wf-di-defects">${chk('Moving Together')}${chk('Not Locking')}${chk('Leaking')}</span> — Location: <input class="wf-di-input wide">`);
+  html += diRow('r3b4', 'Angulation Lock', `<span class="wf-di-defects">${chk('Too Tight')}${chk('Too Loose')}${chk('Brake Not Functioning')}${chk('Missing')}</span>`);
+
+  // 3C. Image & Light Transmission
+  html += `<tr class="wf-di-cat"><td colspan="2">3C. Image &amp; Light Transmission</td></tr>`;
+  html += diRow('r3c1', 'Video Image', `<span class="wf-di-defects">${chk('No Image')}${chk('Static')}${chk('Lens Separation')}${chk('Imperfection')}${chk('Error Code')}</span> Notes: <input class="wf-di-input wide">`);
+  html += diRow('r3c2', 'Light Bundle', `<span class="wf-di-defects">${chk('Slip from Tip')}${chk('Broken Fibers')}</span> &rarr; % Broken: <input class="wf-di-input" style="width:40px" value="${r.sBrokenFibersIn||''}">`);
+  html += diRow('r3c3', 'Video Features', `<span class="wf-di-defects">${chk('Data')}${chk('WB')}${chk('NBI')}${chk('Dual Focus')}${chk('Orientation')}</span> Uses: <input class="wf-di-input" style="width:30px"> Time: <input class="wf-di-input" style="width:40px">`);
+  html += diRow('r3c4', 'Control Switches', `<span class="wf-di-defects">${chk('Misaligned')}${chk('Rubber Cut')}${chk('Inoperative')}</span> — Switch #: <input class="wf-di-input" style="width:40px">`);
+
+  // 3D. Channel Function
+  html += `<tr class="wf-di-cat"><td colspan="2">3D. Channel Function</td></tr>`;
+  html += diRow('r3d1', 'Suction Channel', `<span class="wf-di-defects">${chk('Blocked')}${chk('Leaking')}${chk('Impeded')}</span>`);
+  html += diRow('r3d2', 'Forcep/Biopsy Channel', `<span class="wf-di-defects">${chk('Blocked')}${chk('Leaking')}${chk('Port Seal Damaged')}${chk('Impeded')}</span> — Level: <input class="wf-di-input" style="width:40px">`);
+  html += diRow('r3d3', 'Auxiliary Water Channel', `<span class="wf-di-defects">${chk('Blocked')}${chk('Leaking')}${chk('Loose')}${chk('Weak')}</span>`);
+  html += diRow('r3d4', 'A/W System Channel', `<span class="wf-di-defects">${chk('Kinked')}${chk('Clogged')}${chk('Leaking')}${chk('Nozzle Clogged')}</span>`);
+
+  // 3E. Electrical & Connector Integrity
+  html += `<tr class="wf-di-cat"><td colspan="2">3E. Electrical &amp; Connector Integrity</td></tr>`;
+  html += diRow('r3e1', 'Light Guide Connector (LGC)', `<span class="wf-di-defects">${chk('Alignment Pin Missing/Leaking')}${chk('Prong Loose')}${chk('Lens (Dirty or Broken)')}${chk('ETO Valve')}${chk('Bottle Connector Loose')}${chk('Cracked')}${chk('Leaking')}</span>`);
+  html += diRow('r3e2', 'Electrical Pins/Contacts', `<span class="wf-di-defects">${chk('Dirty')}${chk('Corroded')}${chk('Bent Pins')}</span>`);
+
+  // 3F. Control Body
+  html += `<tr class="wf-di-cat"><td colspan="2">3F. Control Body</td></tr>`;
+  html += diRow('r3f1', 'Control Body Housing', `<span class="wf-di-defects">${chk('Leaking')}${chk('Cracked')}${chk('Loose Mount')}</span>`);
+  html += diRow('r3f2', 'Elevator Function', `<span class="wf-di-defects">${chk('Wire Broken')}${chk('Needs Adjustment')}${chk('Channel Leaking')}${chk('Port Leaking')}</span>`);
+
+  // 3G. Insertion Tube
+  html += `<tr class="wf-di-cat"><td colspan="2">3G. Insertion Tube</td></tr>`;
+  html += diRow('r3g1', 'Surface', `<span class="wf-di-defects">${chk('Dented')}${chk('Buckled')}${chk('Cut')}${chk('Peeling')}${chk('Cut Back Too Far')}${chk('Discolored')}</span> — Location: <input class="wf-di-input wide">`);
+  html += diRow('r3g2', 'Tensioner', `<span class="wf-di-defects">${chk('Leaking')}${chk('Nonfunctional')}${chk('Needs Adjustment')}${chk('Knob Damage')}</span>`);
+  html += diRow('r3g3', 'Flexibility', `<span class="wf-di-defects">${chk('Stiff')}${chk('Over-flexible')}${chk('Snaking')}</span>`);
+  html += diRow('r3g4', 'Boot (CB)', `<span class="wf-di-defects">${chk('Torn')}${chk('Loose')}${chk('Trim Ring')}</span>`);
+
+  // 3H. Distal Tip & Adhesive Surfaces
+  html += `<tr class="wf-di-cat"><td colspan="2">3H. Distal Tip &amp; Adhesive Surfaces</td></tr>`;
+  html += diRow('r3h1', 'C-Cover', `<span class="wf-di-defects">${chk('Cracked')}${chk('Loose')}${chk('RTV Missing')}${chk('Poor Condition')}</span>`);
+  html += diRow('r3h2', 'BR Adhesive', `<span class="wf-di-defects">${chk('Flaking')}${chk('Missing')}${chk('Aged')}${chk('Oversized')}</span> &rarr; Measured Size: <input class="wf-di-input" style="width:50px" value="${r.nIncomingEpoxySize||''}"> <span style="font-size:9px;color:var(--steel)">Max: 12.82mm</span>`);
+  html += diRow('r3h3', 'Bending Rubber', `<span class="wf-di-defects">${chk('Aging')}${chk('Loose')}${chk('Cut/Hole')}</span>`);
+  html += diRow('r3h4', 'Bending Section Mesh', `<span class="wf-di-defects">${chk('Poor Condition')}</span>: <input class="wf-di-input wide">`);
+  html += diRow('r3h5', 'Lenses', `<span class="wf-di-defects">${chk('Cracked')}${chk('Chipped')}${chk('Dirty')}${chk('Glue Missing')}${chk('Missing Lens')}</span> — Specify: <input class="wf-di-input wide">`);
+
+  // 3I. Universal Cord & Boots
+  html += `<tr class="wf-di-cat"><td colspan="2">3I. Universal Cord &amp; Boots</td></tr>`;
+  html += diRow('r3i1', 'Cord', `<span class="wf-di-defects">${chk('Dented')}${chk('Buckled')}${chk('Cut')}${chk('Peeling')}</span>`);
+  html += diRow('r3i2', 'Boot (CB)', `<span class="wf-di-defects">${chk('Torn')}${chk('Loose')}${chk('Cracked')}</span>`);
+  html += diRow('r3i3', 'Boot (LGC)', `<span class="wf-di-defects">${chk('Torn')}${chk('Loose')}${chk('Cracked')}</span>`);
+
+  html += `</tbody></table></div></div>`;
+
+  // ── SECTION 4: DETAILED INSPECTION ──
+  html += `<div class="wf-card"><div class="wf-card-head">4. Detailed Inspection</div>
+    <div class="wf-card-body" style="padding:0"><table class="wf-di-table"><tbody>`;
+  html += diRow('r4a1', 'Borescope Used', '');
+  html += diRow('r4a2', 'Internal Channels', `<span class="wf-di-defects">${chk('Good')}${chk('Freckling')}${chk('Debris')}${chk('Scratched/Deformed')}${chk('Other')}</span>`);
+  html += diRow('r4a3', 'Residue', `<span class="wf-di-defects">${chk('Biological')}${chk('Chemical')}${chk('Staining')}${chk('Other')}</span> &rarr; Location: <input class="wf-di-input wide">`);
+  html += diRow('r4a4', 'Photos Taken', `<span class="wf-di-defects">${chk('Yes')}${chk('No')}</span>`);
+  html += `</tbody></table>
+    <div style="padding:8px 14px;font-size:10.5px">
+      <b style="font-size:9px;color:var(--steel)">SCOPE CONDITION (select one):</b>
+      <div class="wf-di-defects" style="margin-top:4px;display:flex;gap:10px;flex-wrap:wrap">
+        <label><input type="radio" name="scopeCondition" style="accent-color:var(--navy)"> Not Patient Safe</label>
+        <label><input type="radio" name="scopeCondition" style="accent-color:var(--navy)"> Functional Issue</label>
+        <label><input type="radio" name="scopeCondition" style="accent-color:var(--navy)"> Cosmetic Only</label>
+        <label><input type="radio" name="scopeCondition" style="accent-color:var(--navy)"> No Issues Found</label>
+      </div>
+    </div>
+  </div></div>`;
+
+  // ── SECTION 5: REPAIR ASSESSMENT ──
+  html += `<div class="wf-card"><div class="wf-card-head">5. Repair Assessment</div>
+    <div class="wf-card-body">
+      <textarea class="wf-textarea" rows="5" placeholder="Tech notes...">${r.mCommentsDisIns || ''}</textarea>
+    </div>
+  </div>`;
+
   return html;
 }
 
@@ -4316,6 +5167,12 @@ function updateSaveStatus(state) {
 }
 
 document.addEventListener('keydown', function(e) { if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); if (_dirty) autoSave(); } });
+// ESC closes any open drawer / overlay
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
+// Click backdrop area of wf-drawer overlays to close
+document.querySelectorAll('.wf-drawer').forEach(function(el) {
+  el.addEventListener('click', function(e) { if (e.target === el) closeDrawer(); });
+});
 
 function reloadRepairs() { initPage(); }
 
@@ -4963,7 +5820,7 @@ function populateDrawerTechDropdowns() {
   });
 }
 function closeDrawer() {
-  document.querySelectorAll('.qc-drawer.open').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.qc-drawer.open, .wf-drawer.open').forEach(d => d.classList.remove('open'));
   document.getElementById('drawerBackdrop').classList.remove('open');
 }
 

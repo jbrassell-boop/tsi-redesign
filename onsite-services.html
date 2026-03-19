@@ -448,10 +448,13 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth guard ──────────────────────────────────────────
 try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
@@ -850,6 +853,91 @@ function onCtx(e, key) {
   menu.style.top = Math.min(e.clientY, window.innerHeight - 250) + 'px';
 }
 
+/* ─── PDF EXPORT ─── */
+function generateOnsitePdf(visit) {
+  var E = window.TSIExport;
+  var doc = E.createPDF();
+  var y = E.addTSIHeader(doc, 'Onsite Service Report');
+
+  // Visit details
+  y = E.addKeyValueGrid(doc, [
+    ['Invoice #', visit.invoiceNum || '—'],
+    ['Visit Date', E.fmtDate(visit.visitDate)],
+    ['Client', visit.clientName || '—'],
+    ['Department', visit.deptName || '—'],
+    ['Technician', visit.techName || '—'],
+    ['Status', visit.status || '—'],
+    ['Location', visit.location || '—'],
+    ['PO #', visit.po || '—'],
+    ['Start Time', visit.startTime || '—'],
+    ['End Time', visit.endTime || '—'],
+    ['Sales Rep', visit.salesRep || '—'],
+    ['Payment Terms', visit.paymentTerms || '—']
+  ], y);
+
+  // Addresses
+  if (visit.billTo || visit.shipTo) {
+    y = E.checkPageBreak(doc, y, 80);
+    var bp = osParseAddress(visit.billTo || visit.clientName);
+    var sp = osParseAddress(visit.shipTo || visit.clientName);
+    var addrY = y;
+    var lY = E.addAddressBlock(doc, 'BILL TO', bp, E.PAGE.margin, addrY);
+    var rY = E.addAddressBlock(doc, 'SHIP TO', sp, E.PAGE.margin + 270, addrY);
+    y = Math.max(lY, rY) + 4;
+  }
+
+  // Trays
+  if (visit.trays && visit.trays.length) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Tray Services', y);
+    visit.trays.forEach(function(tray) {
+      y = E.checkPageBreak(doc, y, 30);
+      y = E.addParagraph(doc, tray.name, y, { bold: true, color: E.COLORS.navy });
+      var rows = (tray.items || []).map(function(it) {
+        var lineTotal = (it.repaired || 0) * (it.unitPrice || 0);
+        return [it.type || '—', String(it.total || 0), String(it.repaired || 0), String(it.sentTSI || 0), String(it.ber || 0), E.fmtCurrency(it.unitPrice), E.fmtCurrency(lineTotal)];
+      });
+      y = E.addTable(doc, ['Type', 'Total', 'Repaired', 'Sent TSI', 'BER', 'Unit Price', 'Line Total'], rows, y, {
+        columnStyles: { 1:{halign:'center'}, 2:{halign:'center'}, 3:{halign:'center'}, 4:{halign:'center'}, 5:{halign:'right'}, 6:{halign:'right'} }
+      });
+    });
+  }
+
+  // Expenses
+  if (visit.expenses && visit.expenses.length) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Expenses', y);
+    var expRows = visit.expenses.map(function(e) {
+      return [e.desc || '—', e.category || '—', E.fmtCurrency(e.amount)];
+    });
+    y = E.addTable(doc, ['Description', 'Category', 'Amount'], expRows, y, {
+      columnStyles: { 2: { halign: 'right' } }
+    });
+  }
+
+  // Financial summary
+  var trayTotal = calcVisitTraysTotal(visit);
+  var expTotal = calcExpensesTotal(visit);
+  var grandTotal = trayTotal + expTotal;
+  y = E.checkPageBreak(doc, y, 50);
+  y = E.addSectionLabel(doc, 'Financial Summary', y);
+  y = E.addKeyValueGrid(doc, [
+    ['Tray Services', E.fmtCurrency(trayTotal)],
+    ['Expenses', E.fmtCurrency(expTotal)],
+    ['Tax', E.fmtCurrency(0)],
+    ['Grand Total', E.fmtCurrency(grandTotal)]
+  ], y);
+
+  // Notes
+  if (visit.notes) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Service Notes', y);
+    y = E.addParagraph(doc, visit.notes, y);
+  }
+
+  E.savePDF(doc, 'OnsiteService_' + (visit.invoiceNum || 'draft') + '.pdf');
+}
+
 function ctxAction(action) {
   document.getElementById('ctxMenu').style.display = 'none';
   if (!ctxVisitKey) return;
@@ -865,7 +953,7 @@ function ctxAction(action) {
         runPipeline();
       }
       break;
-    case 'print': alert('Print invoice: ' + visit.invoiceNum + '\n(Not available in demo mode)'); break;
+    case 'print': generateOnsitePdf(visit); break;
     case 'void':
       if (confirm('Void visit ' + visit.invoiceNum + '? This cannot be undone.')) {
         visit.status = 'Void'; runPipeline();

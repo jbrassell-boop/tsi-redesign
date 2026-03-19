@@ -522,10 +522,13 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 /* ─── STATE ─── */
 let allSales = [], filteredSales = [], displaySales = [];
@@ -926,6 +929,76 @@ function onCtx(e, key) {
   menu.style.display = 'block';
 }
 
+/* ─── PDF EXPORT ─── */
+function generateSalePdf(sale) {
+  var E = window.TSIExport;
+  var doc = E.createPDF();
+  var y = E.addTSIHeader(doc, 'Product Sale Invoice');
+
+  // Key-value header grid
+  y = E.addKeyValueGrid(doc, [
+    ['Invoice #', sale.invoiceNum || '—'],
+    ['Date', E.fmtDate(sale.orderDate)],
+    ['PO #', sale.poNumber || '—'],
+    ['Status', sale.status || '—'],
+    ['Client', sale.clientName || '—'],
+    ['Department', sale.deptName || '—'],
+    ['Sales Rep', sale.salesRep || '—'],
+    ['Location', sale.location || '—']
+  ], y);
+
+  // Bill-To / Ship-To addresses
+  y = E.checkPageBreak(doc, y, 80);
+  var billParts = (sale.billToAddr || '').split('\n');
+  var billCL = (billParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  var billAddr = { name: billParts[0] || sale.clientName || '', addr1: billParts[1] || '', city: billCL[1] || billParts[2] || '', state: billCL[2] || '', zip: billCL[3] || '' };
+  var shipParts = (sale.shipToAddr || sale.billToAddr || '').split('\n');
+  var shipCL = (shipParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  var shipAddr = { name: shipParts[0] || '', addr1: shipParts[1] || '', city: shipCL[1] || shipParts[2] || '', state: shipCL[2] || '', zip: shipCL[3] || '' };
+  var addrY = y;
+  var leftY = E.addAddressBlock(doc, 'BILL TO', billAddr, E.PAGE.margin, addrY);
+  var rightY = E.addAddressBlock(doc, 'SHIP TO', shipAddr, E.PAGE.margin + 270, addrY);
+  y = Math.max(leftY, rightY) + 4;
+
+  // Line items table
+  y = E.addSectionLabel(doc, 'Line Items', y);
+  var rows = (sale.items || []).map(function(item) {
+    var lineTotal = (item.qty || 0) * (item.unitPrice || 0);
+    return [item.name || '—', item.sku || '', String(item.qty || 0), E.fmtCurrency(item.unitPrice), E.fmtCurrency(lineTotal)];
+  });
+  y = E.addTable(doc, ['Description', 'SKU', 'Qty', 'Unit Price', 'Total'], rows, y, {
+    columnStyles: { 2: { halign: 'center' }, 3: { halign: 'right' }, 4: { halign: 'right' } }
+  });
+
+  // Totals
+  var subtotal = sale.total || (sale.items || []).reduce(function(s, i) { return s + (i.qty * i.unitPrice); }, 0);
+  y = E.checkPageBreak(doc, y, 60);
+  y = E.addKeyValueGrid(doc, [
+    ['Sub Total', E.fmtCurrency(subtotal)],
+    ['Tax', E.fmtCurrency(0)],
+    ['Shipping', E.fmtCurrency(0)],
+    ['Grand Total', E.fmtCurrency(subtotal)]
+  ], y);
+
+  // Payment / shipping info
+  y = E.checkPageBreak(doc, y, 40);
+  y = E.addKeyValueGrid(doc, [
+    ['Payment Terms', sale.paymentTerms || 'Net 30'],
+    ['Ship Method', sale.shipMethod || 'Ground'],
+    ['Price List', sale.priceList || 'Standard'],
+    ['']
+  ], y);
+
+  // Notes
+  if (sale.notes) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Notes', y);
+    y = E.addParagraph(doc, sale.notes, y);
+  }
+
+  E.savePDF(doc, 'Invoice_' + (sale.invoiceNum || 'draft') + '.pdf');
+}
+
 function ctxAction(action) {
   document.getElementById('ctxMenu').style.display = 'none';
   var sale = allSales.find(function(s) { return s.lSaleKey === ctxKey; });
@@ -938,10 +1011,8 @@ function ctxAction(action) {
       runPipeline();
       break;
     case 'printInvoice':
-      alert('Print invoice for ' + sale.invoiceNum + ' — not yet implemented.');
-      break;
     case 'exportPdf':
-      alert('PDF export for ' + sale.invoiceNum + ' — not yet implemented.');
+      generateSalePdf(sale);
       break;
     case 'cancel':
       sale.status = 'Cancelled';

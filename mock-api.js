@@ -308,7 +308,18 @@ const MockAPI = (() => {
     if (int(p.plDepartmentKey)) repairs = repairs.filter(r => r.lDepartmentKey === int(p.plDepartmentKey));
     return repairs;
   });
-  route('GET', '/Repair/GetAllrepairsBylRepairKey', (p) => MockDB.getByKey('repairs', int(p.plRepairKey)));
+  route('GET', '/Repair/GetAllrepairsBylRepairKey', (p) => {
+    const r = MockDB.getByKey('repairs', int(p.plRepairKey));
+    if (r && !r.sScopeCategory) {
+      // Enrich: repair → scope → scopeType → scopeTypeCategory
+      const scope = r.lScopeKey ? MockDB.getByKey('scopes', r.lScopeKey) : null;
+      const st = scope ? MockDB.getByKey('scopeTypes', scope.lScopeTypeKey) : null;
+      const catKey = st ? (st.lScopeTypeCatKey || st.lScopeTypeCategoryKey) : null;
+      const cat = catKey ? MockDB.getByKey('scopeTypeCategories', catKey) : null;
+      if (cat) r.sScopeCategory = cat.sScopeTypeCategory;
+    }
+    return r;
+  });
   route('GET', '/Repair/GetAllRepairReasons', () => MockDB.getAll('repairReasons'));
   route('GET', '/Repair/GetAllDeliveryMethods', () => MockDB.getAll('deliveryMethods'));
   route('GET', '/Repair/GetAllTechs', () => MockDB.getFiltered('employees', e => e.bIsTechnician));
