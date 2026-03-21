@@ -618,18 +618,6 @@
               <button class="btn btn-outline" style="height:26px;font-size:10px;padding:0 10px" onclick="openDrawer('defects')">Defects</button>
             </div>
 
-            <!-- ═══ INCOMING INSPECTION (D&I) ═══ -->
-            <details class="insp-details" id="incomingInspection">
-              <summary>Incoming Inspection (D&amp;I)</summary>
-              <div class="insp-body" id="incomingInspBody"></div>
-            </details>
-
-            <!-- ═══ POST-REPAIR VERIFICATION ═══ -->
-            <details class="insp-details" id="postRepairVerification">
-              <summary>Post-Repair Verification</summary>
-              <div class="insp-body" id="postRepairInspBody"></div>
-            </details>
-
             <!-- ★ REPAIR ITEMS TABLE — the main work area ★ -->
             <div class="section-card" style="margin-top:0;flex:1;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(var(--primary-rgb),.1);border-color:var(--border-dk)">
               <div class="section-head">
@@ -665,6 +653,18 @@
                 </table>
               </div>
             </div>
+
+            <!-- ═══ INCOMING INSPECTION (D&I) ═══ -->
+            <details class="insp-details" id="incomingInspection">
+              <summary>Incoming Inspection (D&amp;I)</summary>
+              <div class="insp-body" id="incomingInspBody"></div>
+            </details>
+
+            <!-- ═══ POST-REPAIR VERIFICATION ═══ -->
+            <details class="insp-details" id="postRepairVerification">
+              <summary>Post-Repair Verification</summary>
+              <div class="insp-body" id="postRepairInspBody"></div>
+            </details>
 
             <!-- SCOPE-TYPE DETAILS (WP-R3) -->
             <details class="section-card" style="margin-top:6px" id="scopeTypeDetails">
@@ -2684,11 +2684,8 @@ function openFormPreview(formId) {
 function tsiFormHeader(formName, formNum) {
   return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #00257A;padding-bottom:10px">
     <div style="display:flex;align-items:center;gap:12px">
-      <img src="assets/logo-white.png" alt="TSI" style="height:40px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
-      <div>
-        <div style="font-size:16px;font-weight:700;color:#00257A">Total Scope, Inc.</div>
-        <div style="font-size:9px;color:#666;line-height:1.5">The Leader in Medical Device Repair &amp; Services<br/>17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
-      </div>
+      <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
+      <div style="font-size:9px;color:#666;line-height:1.5">17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
     </div>
     <div style="text-align:right">
       <div style="font-size:13px;font-weight:700;color:#00257A">${formName}</div>
@@ -3007,25 +3004,81 @@ function populateFormDrawer(formId) {
     const visibleItems = items.filter(i => !i.isBlind);
     const totalAmount = visibleItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g,'')) || 0), 0);
     const tax = parseFloat(r.dblAmtTax) || 0;
-    body.innerHTML = tsiFormHeader(form.name, form.formNum) + headerHTML + `
-      <div style="display:flex;gap:16px;font-size:10.5px;margin-bottom:8px;padding:4px 8px;background:#F0F4FA;border-radius:4px">
-        <span><b>Invoice #:</b> ${r.sInvoiceNumber || 'Pending'}</span>
-        <span><b>PO #:</b> ${r.sPurchaseOrder || '—'}</span>
-        <span><b>Date:</b> ${new Date().toLocaleDateString()}</span>
+    const shipping = parseFloat(r.dblAmtShipping) || 0;
+    const invDate = r.dtDateOut ? new Date(r.dtDateOut).toLocaleDateString() : new Date().toLocaleDateString();
+    const pt = _paymentTerms.find(x => x.lPaymentTermsKey == r.lPaymentTermsKey);
+    const payTerms = pt ? (pt.sPaymentTerms || pt.sTermsDesc) : 'Net 30';
+    // Bill-to from department record
+    const billDept = _departments.find(d => d.lDepartmentKey == r.lDepartmentKey) || {};
+    const billName1 = billDept.sBillName1 || r.sShipName1 || clientName || '—';
+    const billName2 = billDept.sBillName2 || '';
+    const billAddr1 = billDept.sBillAddr1 || billDept.sMailAddr1 || '';
+    const billAddr2 = billDept.sBillAddr2 || '';
+    const billCity = billDept.sBillCity || billDept.sMailCity || '';
+    const billState = billDept.sBillState || billDept.sMailState || '';
+    const billZip = billDept.sBillZip || billDept.sMailZip || '';
+
+    body.innerHTML = `
+      <!-- BRANDED HEADER BAND -->
+      <div class="wf-est-header">
+        <div class="wf-est-header-left">
+          <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:42px">
+        </div>
+        <div class="wf-est-header-right">
+          <div class="est-title">Invoice</div>
+          <div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &nbsp;&bull;&nbsp; ${invDate}</div>
+        </div>
       </div>
+
+      <!-- BILL-TO / SHIP-TO / EQUIPMENT -->
+      <div class="wf-est-section">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px;align-items:stretch">
+          <div class="wf-est-equip" style="justify-content:flex-start">
+            <div class="wf-est-label" style="margin-bottom:4px">Bill To</div>
+            <div class="wf-est-addr">
+              ${billName1}<br/>
+              ${billName2 ? billName2 + '<br/>' : ''}
+              ${billAddr1 ? billAddr1 + '<br/>' : ''}
+              ${billAddr2 ? billAddr2 + '<br/>' : ''}
+              ${[billCity, billState].filter(Boolean).join(', ')} ${billZip}
+            </div>
+          </div>
+          <div class="wf-est-equip" style="justify-content:flex-start">
+            <div class="wf-est-label" style="margin-bottom:4px">Ship To</div>
+            <div class="wf-est-addr">
+              ${r.sShipName1 || '—'}<br/>
+              ${r.sShipName2 ? r.sShipName2 + '<br/>' : ''}
+              ${r.sShipAddr1 ? r.sShipAddr1 + '<br/>' : ''}
+              ${r.sShipAddr2 ? r.sShipAddr2 + '<br/>' : ''}
+              ${[r.sShipCity, r.sShipState].filter(Boolean).join(', ')} ${r.sShipZip || ''}
+            </div>
+          </div>
+          <div>
+            <div class="wf-est-equip">
+              <div class="wf-est-equip-row"><b>Invoice #</b><span>${r.sInvoiceNumber || 'Pending'}</span></div>
+              <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || r.sPONumber || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>Terms</b><span>${payTerms}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINE ITEMS -->
       <table class="wf-items-table">
         <thead><tr><th>Description</th><th style="width:70px;text-align:right">Amount</th></tr></thead>
         <tbody>${visibleItems.map(i => '<tr><td>' + i.desc + '</td><td style="text-align:right">' + i.amount + '</td></tr>').join('') || '<tr><td colspan="2" style="color:var(--muted);text-align:center">No billable items</td></tr>'}</tbody>
       </table>
+
+      <!-- TOTALS -->
       <div style="display:flex;justify-content:flex-end;gap:16px;padding:6px 8px;background:#F0F4FA;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:8px">
         <span>Sub Total: $${totalAmount.toFixed(2)}</span>
-        <span>Shipping: $${(r.dblAmtShipping || 0).toFixed(2)}</span>
+        <span>Shipping: $${shipping.toFixed(2)}</span>
         <span>Tax: $${tax.toFixed(2)}</span>
-        <span style="color:var(--navy);font-size:12px">Total Due: $${(totalAmount + (r.dblAmtShipping || 0) + tax).toFixed(2)}</span>
+        <span style="color:var(--navy);font-size:12px">Total Due: $${(totalAmount + shipping + tax).toFixed(2)}</span>
       </div>
-      <div style="font-size:10px;padding:8px;background:#FFFBEB;border:1px solid #F0C040;border-radius:4px;margin-bottom:8px">
-        <b>Payment Terms:</b> ${r.lPaymentTermsKey || 'Net 30'} &nbsp; <b>Bill To:</b> ${r.sBillName1 || ''}, ${r.sBillCity || ''} ${r.sBillState || ''}
-      </div>
+      <div style="font-size:8px;color:var(--muted);text-align:right">Form #: ${form.formNum}</div>
     `;
   } else if (formId === 'packing') {
     const body = document.getElementById('wfPackingBody');
