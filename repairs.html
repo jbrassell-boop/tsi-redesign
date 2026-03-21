@@ -3715,8 +3715,32 @@ function populateDetail(d) {
   document.getElementById('hModel').textContent = d.sScopeTypeDesc || '—';
   document.getElementById('hSerial').textContent = d.sSerialNumber || '—';
   document.getElementById('hCapFFS').textContent = d.lContractKey ? 'Contract' : 'FFS';
-  document.getElementById('hDaysLastIn').textContent = d.nDaysSinceLastIn || '—';
-  document.getElementById('hWithin40').textContent = '—';
+  // Compute days since last repair + 40-day warranty flag from repair history
+  var daysLastIn = d.nDaysSinceLastIn;
+  if (!daysLastIn && d.sSerialNumber && d.dtDateIn) {
+    try {
+      var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+      API.getRepairList(svcKey).then(function(list) {
+        var arr = Array.isArray(list) ? list : [];
+        var curInDate = d.dtDateIn.substring(0, 10);
+        var prevRepairs = arr.filter(function(r) {
+          return r.sSerialNumber === d.sSerialNumber && r.lRepairKey !== d.lRepairKey && r.dtDateOut && r.dtDateOut.substring(0, 10) <= curInDate;
+        }).sort(function(a, b) { return (b.dtDateOut || '').localeCompare(a.dtDateOut || ''); });
+        if (prevRepairs.length) {
+          var prevOut = new Date(prevRepairs[0].dtDateOut);
+          var curIn = new Date(d.dtDateIn);
+          var gap = Math.round((curIn - prevOut) / 86400000);
+          document.getElementById('hDaysLastIn').textContent = gap + 'd';
+          var el40 = document.getElementById('hWithin40');
+          if (gap <= 40) { el40.textContent = 'YES'; el40.style.color = '#DC2626'; el40.style.fontWeight = '700'; }
+          else { el40.textContent = 'No'; el40.style.color = ''; el40.style.fontWeight = ''; }
+        }
+      }).catch(function() {});
+    } catch(e) {}
+  } else {
+    document.getElementById('hDaysLastIn').textContent = daysLastIn || '—';
+  }
+  document.getElementById('hWithin40').textContent = daysLastIn && daysLastIn <= 40 ? 'YES' : '—';
 
   // Details tab — TAT / Dates (now spans, not inputs)
   if (d.dtDateIn) {

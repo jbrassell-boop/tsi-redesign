@@ -140,13 +140,13 @@
      Auto-renders when a #dashSubnav element is present.  */
   var DASH_TABS = [
     { id: 'scopes',         label: 'Scopes',           href: 'dashboard.html' },
-    { id: 'tasks',          label: 'Tasks',             href: 'dashboard_tasks.html',          badge: '5',  badgeId: 'taskTabBadge' },
+    { id: 'tasks',          label: 'Tasks',             href: 'dashboard_tasks.html',          badge: '0',  badgeId: 'taskTabBadge' },
     { id: 'emails',         label: 'Emails',            href: 'dashboard_emails.html' },
     { id: 'shipping',       label: 'Shipping Status',   href: 'dashboard_shipping.html' },
     { id: 'inventory',      label: 'Inventory',         href: 'dashboard_inventory.html' },
     { id: 'purchaseorders', label: 'Purchase Orders',   href: 'dashboard_purchaseorders.html' },
     { id: 'invoices',       label: 'Invoices',          href: 'dashboard_invoices.html' },
-    { id: 'flags',          label: 'Flags',             href: 'dashboard_flags.html',          badge: '8' },
+    { id: 'flags',          label: 'Flags',             href: 'dashboard_flags.html',          badge: '0',  badgeId: 'flagTabBadge' },
     { id: 'analytics',      label: 'Analytics',         href: 'dashboard_analytics.html' }
   ];
 
