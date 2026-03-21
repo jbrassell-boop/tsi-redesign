@@ -291,7 +291,9 @@ const API = (() => {
 
   // ── Scopes (14) — Device/instrument records ───────────
   async function getAllScopes(deptKey, isDead) { return get('/Scopes/GetAllScopes?plDepartmentKey=' + deptKey + (isDead ? '&psScopeIsDead=' + isDead : '')); }
+  async function getScopeByKey(scopeKey) { return get('/Scopes/GetScopeByScopeId?plScopeKey=' + scopeKey); }
   async function checkOpenRepairForScope(scopeKey) { return get('/Scopes/CheckOpenRepaireScope?plScopeKey=' + scopeKey); }
+  async function getAllScopeTypes() { return get('/Scopes/GetAllScopeType'); }
   async function addScope(data) { return post('/Scopes/AddScope', data); }
   async function deleteScope(scopeKey) { return del('/Scopes/DeleteScope?plScopeKey=' + scopeKey); }
 
@@ -502,8 +504,8 @@ const API = (() => {
     getContactsByClient, getContactsByDepartment, addContact, updateContact,
 
     // Scopes
-    getAllScopes, checkOpenRepairForScope,
-    addScope, deleteScope,
+    getAllScopes, getScopeByKey, checkOpenRepairForScope,
+    addScope, deleteScope, getAllScopeTypes,
 
     // Scope Types
     getScopeTypeNames, getDepartmentScopeTypes, getAvailableDepartmentScopeTypes,

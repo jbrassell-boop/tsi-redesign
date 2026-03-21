@@ -70,6 +70,7 @@
     .qc-row{display:flex;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border)}
     .qc-row:nth-child(odd){background:#F8FAFD}
     .qc-label{flex:1;font-size:11px;font-weight:600;color:var(--text)}
+    .qc-num{width:18px;font-size:10px;font-weight:700;color:var(--muted);text-align:right;margin-right:6px;flex-shrink:0}
     .qc-pf{display:flex;gap:12px}
     .qc-pf label{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--steel);cursor:pointer}
     .qc-pf input[type="radio"]{margin:0;accent-color:var(--navy)}
@@ -1854,34 +1855,69 @@
 </div>
 
 <!-- 40-DAY EVALUATION DRAWER -->
-<div class="qc-drawer" id="drawer-fortyDay">
+<div class="wf-drawer" id="drawer-fortyDay">
+  <div class="wf-drawer-panel">
   <div class="qc-drawer-head">
-    <span style="font-size:13px;font-weight:700;color:#fff">Recent Repair — Within 40 Days</span>
+    <span style="font-size:13px;font-weight:700;color:#fff">Recent Repair — Within 40 Days &nbsp;<span style="font-size:9px;opacity:.7">OM06-2</span></span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
   </div>
-  <div class="qc-drawer-body">
-    <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:10px">Is the customer complaint a result of improper care or handling by the customer?</div>
+  <div class="qc-drawer-body" id="fortyDayBody">
+    <!-- Header — auto-filled from repair data -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-bottom:14px;padding:10px 12px;background:#F6F8FB;border:1px solid var(--border);border-radius:5px;font-size:11px">
+      <div><span style="color:var(--muted);font-weight:600">Client:</span> <span id="fd-client">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Department:</span> <span id="fd-dept">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Model:</span> <span id="fd-model">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Serial #:</span> <span id="fd-serial">—</span></div>
+      <div style="grid-column:1/-1"><span style="color:var(--muted);font-weight:600">Complaint:</span> <span id="fd-complaint">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Current WO:</span> <span id="fd-currentWO" style="font-weight:700;color:var(--navy)">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Prior WO:</span> <span id="fd-priorWO" style="font-weight:700;color:var(--navy)">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Days Since Last In:</span> <span id="fd-daysSince" style="font-weight:700">—</span></div>
+      <div><span style="color:var(--muted);font-weight:600">Date:</span> <span id="fd-date">—</span></div>
+    </div>
+
+    <!-- Section 1: Technician Evaluation -->
+    <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Technician Evaluation</div>
+    <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px">Is the customer complaint a result of improper care or handling by the customer?</div>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;padding-left:8px">
       <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="yes" style="accent-color:var(--navy)" onchange="markDirty()"/> Yes</label>
       <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="no" style="accent-color:var(--navy)" onchange="markDirty()"/> No</label>
       <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="fortyDayCause" value="unknown" style="accent-color:var(--navy)" onchange="markDirty()"/> Cannot determine — further inspection needed</label>
     </div>
+    <div class="field" style="margin-bottom:14px"><label>Technician Notes</label><textarea id="fd-techNotes" rows="2" style="width:100%;font-size:11px;resize:vertical" onchange="markDirty()"></textarea></div>
 
-    <div style="font-size:11px;color:var(--text);margin-bottom:10px;line-height:1.4;padding:8px 10px;background:#FFF8F0;border:1px solid #F0D4A8;border-radius:4px">If the above is <b>NO</b> or cannot be determined, the Lab Manager should evaluate the scope for the failure codes below.</div>
+    <!-- Section 2: Lab Manager Evaluation -->
+    <div style="font-size:11px;color:var(--text);margin-bottom:10px;line-height:1.4;padding:8px 10px;background:#FFF8F0;border:1px solid #F0D4A8;border-radius:4px">If the above is <b>No</b> or <b>Cannot determine</b>, the Lab Manager should evaluate the scope for the failure codes below.</div>
 
-    <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Failure Codes</div>
-    <div class="qc-check-grid" style="margin-bottom:12px">
-      <div class="qc-row"><span class="qc-label">Result of improper care and handling</span><input type="checkbox" id="fc1" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Part failure unrelated to previous repairs</span><input type="checkbox" id="fc2" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Cosmetic issue unrelated to previous repairs</span><input type="checkbox" id="fc3" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Improper repair technique</span><input type="checkbox" id="fc4" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Failure during previous final inspection</span><input type="checkbox" id="fc5" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Failure related to previous repairs</span><input type="checkbox" id="fc6" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Unable to duplicate customer complaint</span><input type="checkbox" id="fc7" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">No repairs we performed previously</span><input type="checkbox" id="fc8" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
-      <div class="qc-row"><span class="qc-label">Other</span><input type="checkbox" id="fc9" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+    <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Lab Manager — Failure Code Determination</div>
+    <div class="qc-check-grid" style="margin-bottom:4px">
+      <div class="qc-row"><span class="qc-num">1.</span><span class="qc-label">Result of improper care and handling</span><input type="checkbox" id="fc1" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">2.</span><span class="qc-label">Part failure unrelated to previous repairs</span><input type="checkbox" id="fc2" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">3.</span><span class="qc-label">Cosmetic issue unrelated to previous repairs</span><input type="checkbox" id="fc3" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">4.</span><span class="qc-label" style="color:#DC2626;font-weight:600">Improper repair technique <span style="font-size:9px;font-weight:400;color:#DC2626">(triggers nonconformance)</span></span><input type="checkbox" id="fc4" style="accent-color:#DC2626" onchange="fortyDayNCCheck();markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">5.</span><span class="qc-label" style="color:#DC2626;font-weight:600">Failure during previous final inspection <span style="font-size:9px;font-weight:400;color:#DC2626">(triggers nonconformance)</span></span><input type="checkbox" id="fc5" style="accent-color:#DC2626" onchange="fortyDayNCCheck();markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">6.</span><span class="qc-label">Failure related to previous repairs</span><input type="checkbox" id="fc6" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">7.</span><span class="qc-label">Unable to duplicate customer complaint</span><input type="checkbox" id="fc7" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">8.</span><span class="qc-label">No repairs were performed previously</span><input type="checkbox" id="fc8" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
+      <div class="qc-row"><span class="qc-num">9.</span><span class="qc-label">Other</span><input type="checkbox" id="fc9" style="accent-color:var(--navy)" onchange="markDirty()"/></div>
     </div>
-    <button class="btn btn-outline" style="width:100%" onclick="closeDrawer()">Close</button>
+
+    <!-- Nonconformance alert (hidden by default) -->
+    <div id="fd-ncAlert" style="display:none;padding:8px 10px;background:#FEE2E2;border:1px solid #FECACA;border-radius:4px;margin-bottom:10px;font-size:11px;color:#991B1B;font-weight:600">
+      Nonconformance write-up required — failure code 4 or 5 selected.
+    </div>
+
+    <div class="field" style="margin-bottom:14px"><label>Lab Manager Notes</label><textarea id="fd-labNotes" rows="3" style="width:100%;font-size:11px;resize:vertical" onchange="markDirty()"></textarea></div>
+
+    <div style="display:flex;gap:8px;font-size:11px;margin-bottom:8px">
+      <div class="field" style="flex:1"><label>Lab Manager</label><select id="fd-labManager" style="width:100%;height:28px;font-size:11px"><option value="">— Select —</option></select></div>
+      <div class="field" style="flex:1"><label>Date Evaluated</label><input type="date" id="fd-evalDate" style="width:100%;height:28px;font-size:11px"/></div>
+    </div>
+  </div>
+  <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printFormDocument('fortyDay')">Print</button>
+    <button class="btn btn-outline">Email</button>
+    <button class="btn btn-navy" onclick="generateForm('fortyDay')">Generate PDF</button>
+  </div>
   </div>
 </div>
 
@@ -3550,6 +3586,8 @@ setTimeout(function() {
 // Lookups
 let _statuses = [], _levels = [], _deliveryMethods = [], _techs = [], _safetyLevels = [];
 let _repairReasons = [], _salesReps = [], _pricingCategories = [], _paymentTerms = [];
+let _scopeTypes = [];
+let _repairItemsCatalog = {}; // lRepairItemKey → catalog record (for sMajorRepair lookup)
 
 function showDataBadge(live) {
   const b = document.getElementById('dataBadge');
@@ -3710,8 +3748,15 @@ function populateDetail(d) {
 
   // Scope row (spans, not inputs)
   document.getElementById('hMfr').textContent = d.sManufacturer || '—';
-  var catLabel = d.sScopeCategory || (d.sRigidOrFlexible === 'F' ? 'Flexible' : d.sRigidOrFlexible === 'R' ? 'Rigid' : '') || '—';
-  document.getElementById('hScopeCat').textContent = catLabel;
+  // Category: look up from scope record via lScopeKey (scope has sScopeCategory directly)
+  document.getElementById('hScopeCat').textContent = '—';
+  if (d.lScopeKey) {
+    API.getScopeByKey(d.lScopeKey).then(function(scope) {
+      if (scope && scope.sScopeCategory) {
+        document.getElementById('hScopeCat').textContent = scope.sScopeCategory.trim();
+      }
+    }).catch(function() {});
+  }
   document.getElementById('hModel').textContent = d.sScopeTypeDesc || '—';
   document.getElementById('hSerial').textContent = d.sSerialNumber || '—';
   document.getElementById('hCapFFS').textContent = d.lContractKey ? 'Contract' : 'FFS';
@@ -4066,6 +4111,8 @@ async function loadRepairItems(repairKey) {
       ds = items?.dataSource || (Array.isArray(items) ? items : []);
     }
     renderRepairItems(ds);
+    // Auto-populate repair level from highest level on repair items
+    autoPopulateRepairLevel(ds);
   } catch (e) { console.warn('[TSI Repairs] Items load:', e.message); }
 }
 
@@ -4100,6 +4147,24 @@ function renderRepairItems(ds) {
   const approvedCount = _repairItems.filter(x => x.sApproved === 'Y').length;
   tbody.insertAdjacentHTML('beforeend', '<tr style="background:#F0F4FA;border-top:2px solid var(--border-dk)"><td colspan="4" style="text-align:right;font-size:10px;font-weight:700;color:var(--navy);padding:5px 14px">Approved: ' + approvedCount + ' / ' + _repairItems.length + '</td><td colspan="7"></td></tr>');
   updateItemTotals();
+}
+
+// Auto-populate repair level based on highest level among repair items
+function autoPopulateRepairLevel(items) {
+  if (!items || !items.length || !_currentRepair) return;
+  // Only auto-set if repair doesn't already have a level
+  if (_currentRepair.lRepairLevelKey) return;
+  var hasMajor = false;
+  items.forEach(function(item) {
+    var cat = _repairItemsCatalog[item.lRepairItemKey];
+    if (cat && cat.sMajorRepair === '1') hasMajor = true;
+  });
+  // Major=3, Minor=1
+  var autoLevel = hasMajor ? 3 : 1;
+  setSelectVal('hRepairLevel', autoLevel);
+  // Update toolbar chip
+  var lvl = _levels.find(function(x) { return x.lRepairLevelKey == autoLevel; });
+  if (lvl) document.getElementById('ssLevel').querySelector('.ss-val').textContent = lvl.sRepairLevel;
 }
 
 function updateItemTotals() {
@@ -5957,6 +6022,7 @@ function openDrawer(id) {
   if (id === 'slips') { loadSlips(); populateDrawerTechDropdowns(); }
   if (id === 'amend') { loadAmendments(); }
   if (id === 'defects') { loadDefects(); populateDrawerTechDropdowns(); }
+  if (id === 'fortyDay') { populateFortyDayForm(); }
   if (id === 'qc') { populateDrawerTechDropdowns(); }
   document.getElementById('drawer-' + id).classList.add('open');
   document.getElementById('drawerBackdrop').classList.add('open');
@@ -5975,6 +6041,52 @@ function populateDrawerTechDropdowns() {
     });
   });
 }
+// 40-Day Form (OM06-2) — populate header from repair data + prior repair lookup
+function populateFortyDayForm() {
+  var d = _currentRepair;
+  if (!d) return;
+  document.getElementById('fd-client').textContent = d.sClientName1 || d.sShipName1 || '—';
+  document.getElementById('fd-dept').textContent = d.sDepartmentName || d.sShipName2 || '—';
+  document.getElementById('fd-model').textContent = d.sScopeTypeDesc || '—';
+  document.getElementById('fd-serial').textContent = d.sSerialNumber || '—';
+  document.getElementById('fd-complaint').textContent = d.sComplaintDesc || '—';
+  document.getElementById('fd-currentWO').textContent = d.sWorkOrderNumber || '—';
+  document.getElementById('fd-date').textContent = d.dtDateIn ? fmtDate(d.dtDateIn) : new Date().toLocaleDateString();
+  // Populate lab manager dropdown with techs
+  var lmSel = document.getElementById('fd-labManager');
+  if (lmSel.options.length <= 1) {
+    _techs.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.lTechnicianKey;
+      opt.textContent = t.sTechName;
+      lmSel.appendChild(opt);
+    });
+  }
+  // Prior WO + days since — async lookup
+  if (d.sSerialNumber && d.dtDateIn) {
+    var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+    API.getRepairList(svcKey).then(function(list) {
+      var arr = Array.isArray(list) ? list : [];
+      var curInDate = d.dtDateIn.substring(0, 10);
+      var prevRepairs = arr.filter(function(r) {
+        return r.sSerialNumber === d.sSerialNumber && r.lRepairKey !== d.lRepairKey && r.dtDateOut && r.dtDateOut.substring(0, 10) <= curInDate;
+      }).sort(function(a, b) { return (b.dtDateOut || '').localeCompare(a.dtDateOut || ''); });
+      if (prevRepairs.length) {
+        document.getElementById('fd-priorWO').textContent = prevRepairs[0].sWorkOrderNumber || '—';
+        var gap = Math.round((new Date(d.dtDateIn) - new Date(prevRepairs[0].dtDateOut)) / 86400000);
+        var el = document.getElementById('fd-daysSince');
+        el.textContent = gap + 'd';
+        if (gap <= 40) { el.style.color = '#DC2626'; el.style.fontWeight = '700'; }
+      }
+    }).catch(function() {});
+  }
+}
+function fortyDayNCCheck() {
+  var fc4 = document.getElementById('fc4').checked;
+  var fc5 = document.getElementById('fc5').checked;
+  document.getElementById('fd-ncAlert').style.display = (fc4 || fc5) ? 'block' : 'none';
+}
+
 function closeDrawer() {
   document.querySelectorAll('.qc-drawer.open, .wf-drawer.open').forEach(d => d.classList.remove('open'));
   document.getElementById('drawerBackdrop').classList.remove('open');
@@ -6209,7 +6321,7 @@ async function initPage() {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
 
     // Load lookups + client/dept lists in parallel (no repair list — we load single repairs)
-    const [clients, departments, statuses, levels, deliveryMethods, techs, safetyLevels, repairReasons, salesReps, pricingCats, paymentTerms] = await Promise.all([
+    const [clients, departments, statuses, levels, deliveryMethods, techs, safetyLevels, repairReasons, salesReps, pricingCats, paymentTerms, scopeTypes, itemsCatalog] = await Promise.all([
       API.getAllClients(svcKey),
       API.getAllDepartments(svcKey),
       API.getRepairStatuses(),
@@ -6220,7 +6332,9 @@ async function initPage() {
       API.getRepairReasons().catch(() => []),
       API.getAllSalesReps().catch(() => []),
       API.getAllPricingCategories().catch(() => []),
-      API.getAllPaymentTerms().catch(() => [])
+      API.getAllPaymentTerms().catch(() => []),
+      API.getAllScopeTypes().catch(() => []),
+      API.getRepairItemsCatalog().catch(() => [])
     ]);
 
     _clients = Array.isArray(clients) ? clients : [];
@@ -6234,6 +6348,11 @@ async function initPage() {
     _salesReps = Array.isArray(salesReps) ? salesReps : [];
     _pricingCategories = Array.isArray(pricingCats) ? pricingCats : [];
     _paymentTerms = Array.isArray(paymentTerms) ? paymentTerms : [];
+    _scopeTypes = Array.isArray(scopeTypes) ? scopeTypes : [];
+    // Build repair items catalog map for sMajorRepair lookup
+    (Array.isArray(itemsCatalog) ? itemsCatalog : []).forEach(function(item) {
+      _repairItemsCatalog[item.lRepairItemKey] = item;
+    });
 
     // Populate form dropdowns
     populateSelect('hRepairStatus', _statuses, 'lRepairStatusID', 'sRepairStatus', true);

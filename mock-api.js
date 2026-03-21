@@ -322,7 +322,7 @@ const MockAPI = (() => {
   });
   route('GET', '/Repair/GetAllRepairReasons', () => MockDB.getAll('repairReasons'));
   route('GET', '/Repair/GetAllDeliveryMethods', () => MockDB.getAll('deliveryMethods'));
-  route('GET', '/Repair/GetAllTechs', () => MockDB.getFiltered('employees', e => e.bIsTechnician));
+  route('GET', '/Repair/GetAllTechs', () => MockDB.getAll('technicians'));
   route('GET', '/Repair/GetAllPatientSafetyLevels', () => MockDB.getAll('patientSafetyLevels'));
   route('POST', '/Repair/AddRepair', (p, body) => MockDB.insert('repairs', body));
   route('POST', '/Repair/UpdateRepair', (p, body) => { MockDB.update('repairs', body.lRepairKey, body); return body; });
