@@ -110,10 +110,6 @@
           <div class="s-icon" style="background:#FFF3E0">&#x1F527;</div>
           <div class="s-data"><div class="s-val s-navy" id="kRepair">--</div><div class="s-lbl">Repair</div></div>
         </div>
-        <div class="stat-chip">
-          <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
-          <div class="s-data"><div class="s-val s-green" id="kActive">--</div><div class="s-lbl">Active</div></div>
-        </div>
       </div>
 
       <!-- SUB-NAV TABS (rendered by shell.js) -->
@@ -143,11 +139,9 @@
             <tr>
               <th>Flag Text</th>
               <th style="width:100px;text-align:center">Flag Type</th>
-              <th style="width:100px">Owner Key</th>
+              <th style="width:180px">Owner</th>
               <th>Locations</th>
               <th style="width:100px;text-align:center">Instrument</th>
-              <th style="width:70px;text-align:center">Active</th>
-              <th style="width:90px">Created</th>
             </tr>
           </thead>
           <tbody id="flagsTbody"></tbody>
@@ -192,20 +186,32 @@ let fitMap = {};       // lFlagKey -> [instrument type codes]
 // ═══════════════════════════════════════════════════════
 //  DATA LOAD
 // ═══════════════════════════════════════════════════════
+let ownerNameMap = {};  // lOwnerKey -> resolved name
+
 async function loadFlags() {
   try {
+    const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
     const results = await Promise.all([
       MockAPI.handleRequest('GET', '/Flag/GetAllFlags'),
       MockAPI.handleRequest('GET', '/Flag/GetAllFlagTypes'),
       MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocations'),
       MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocationsUsed'),
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlagInstrumentTypes')
+      MockAPI.handleRequest('GET', '/Flag/GetAllFlagInstrumentTypes'),
+      API.getAllClients(svcKey).catch(() => []),
+      API.getAllScopeTypes ? API.getAllScopeTypes().catch(() => []) : Promise.resolve([])
     ]);
     allFlags = results[0] || [];
     flagTypes = results[1] || [];
     flagLocations = results[2] || [];
     flagLocationsUsed = results[3] || [];
     flagInstrumentTypes = results[4] || [];
+    const clients = Array.isArray(results[5]) ? results[5] : [];
+    const scopeTypes = Array.isArray(results[6]) ? results[6] : [];
+
+    // Build owner name lookup
+    ownerNameMap = {};
+    clients.forEach(c => { ownerNameMap['1_' + c.lClientKey] = c.sClientName1 || c.psClientName1 || ''; });
+    scopeTypes.forEach(s => { ownerNameMap['2_' + (s.lScopeTypeKey || s.lScopeModelKey)] = s.sScopeTypeDesc || s.sScopeModel || ''; });
 
     // Build lookups
     typeMap = {};
@@ -243,10 +249,8 @@ async function loadFlags() {
 // ═══════════════════════════════════════════════════════
 function renderKPIs() {
   const byType = { 1: 0, 2: 0, 3: 0, 4: 0 };
-  let active = 0;
   allFlags.forEach(f => {
     byType[f.lFlagTypeKey] = (byType[f.lFlagTypeKey] || 0) + 1;
-    if (f.bActive) active++;
   });
 
   document.getElementById('kTotal').textContent = allFlags.length;
@@ -254,7 +258,6 @@ function renderKPIs() {
   document.getElementById('kScopeType').textContent = byType[2] || 0;
   document.getElementById('kScope').textContent = byType[3] || 0;
   document.getElementById('kRepair').textContent = byType[4] || 0;
-  document.getElementById('kActive').textContent = active;
   // Update tab badge in shell
   var fb = document.getElementById('flagTabBadge');
   if (fb) fb.textContent = allFlags.length;
@@ -275,7 +278,7 @@ function getFiltered() {
   if (searchTerm) {
     const q = searchTerm.toLowerCase();
     list = list.filter(f =>
-      (f.sFlagText || '').toLowerCase().includes(q) ||
+      (f.sFlag || '').toLowerCase().includes(q) ||
       (typeMap[f.lFlagTypeKey] || '').toLowerCase().includes(q) ||
       (fluMap[f.lFlagKey] || []).join(' ').toLowerCase().includes(q) ||
       (fitMap[f.lFlagKey] || []).join(' ').toLowerCase().includes(q)
@@ -297,10 +300,20 @@ function activeBadge(active) {
     : '<span class="badge b-inactive">Inactive</span>';
 }
 
-function locationPills(flagKey) {
-  const locs = fluMap[flagKey] || [];
+function locationPills(flagKey, flag) {
+  let locs = fluMap[flagKey] || [];
+  // Fall back to bVisibleOn* fields when junction table is empty
+  if (!locs.length && flag) {
+    if (flag.bVisibleOnDI) locs.push('D&I');
+    if (flag.bVisibleOnBlank) locs.push('Req');
+  }
   if (!locs.length) return '<span style="color:var(--muted);font-size:10.5px">&#8212;</span>';
   return '<div class="loc-pills">' + locs.map(l => `<span class="loc-pill">${l}</span>`).join('') + '</div>';
+}
+
+function ownerName(flag) {
+  const resolved = ownerNameMap[flag.lFlagTypeKey + '_' + flag.lOwnerKey];
+  return resolved || '#' + flag.lOwnerKey;
 }
 
 function instrumentTypes(flagKey) {
@@ -322,30 +335,25 @@ function renderTable() {
   const tbody = document.getElementById('flagsTbody');
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No flags found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No flags found</td></tr>';
   } else {
     tbody.innerHTML = filtered.map(f => `<tr>
-      <td style="font-weight:500">${f.sFlagText || '&#8212;'}</td>
+      <td style="font-weight:500">${f.sFlag || '&#8212;'}</td>
       <td style="text-align:center">${typeBadge(f.lFlagTypeKey)}</td>
-      <td style="font-size:10.5px;color:var(--label)">#${f.lOwnerKey}</td>
-      <td>${locationPills(f.lFlagKey)}</td>
+      <td style="font-size:10.5px;font-weight:500">${ownerName(f)}</td>
+      <td>${locationPills(f.lFlagKey, f)}</td>
       <td style="text-align:center;font-size:10.5px">${instrumentTypes(f.lFlagKey)}</td>
-      <td style="text-align:center">${activeBadge(f.bActive)}</td>
-      <td style="white-space:nowrap;color:var(--muted);font-size:10.5px">${formatDate(f.dtCreateDate)}</td>
     </tr>`).join('');
   }
 
   // Footer
-  const active = filtered.filter(f => f.bActive).length;
-  const inactive = filtered.length - active;
-
   document.getElementById('flagRecordInfo').innerHTML =
     `<strong>${filtered.length}</strong> flag${filtered.length !== 1 ? 's' : ''}`;
 
+  const byTypeSummary = {};
+  filtered.forEach(f => { const t = typeMap[f.lFlagTypeKey] || 'Other'; byTypeSummary[t] = (byTypeSummary[t]||0) + 1; });
   document.getElementById('flagSummary').innerHTML =
-    `<span style="color:#2E7D32;font-weight:600">${active} active</span>` +
-    `<span style="color:var(--muted)">&middot;</span>` +
-    `<span style="color:#78909C">${inactive} inactive</span>`;
+    Object.entries(byTypeSummary).map(([t, n]) => `<span style="color:var(--label);font-weight:500">${n} ${t}</span>`).join('<span style="color:var(--muted)">&middot;</span>');
 }
 
 // ═══════════════════════════════════════════════════════
