@@ -413,34 +413,34 @@ const TABLE_REMAP = { 'maxCharges': 'modelMaxCharges' };
 // Full 2.3M-record dataset stays in real-data-seed.json for backend/testing.
 // Keeps tail (newest data) for each table.
 const TABLE_LIMITS = {
+  'contractScopes': 2000,         // 8K → 2K
+  'documents': 2000,              // 76K → 2K
+  'emails': 1000,                 // 9K → 1K
+  'gpInvoiceStaging': 1000,       // 7K → 1K
+  'hpgList': 500,
+  'instrumentModels': 2000,       // 3.3K → 2K
+  'inventorySizes': 2000,         // 18K → 2K
+  'inventoryTrans': 1000,         // 37K → 1K
+  'invoiceDetails': 2000,         // 87K → 2K
+  'invoicePayments': 2000,        // 4.5K → 2K
+  'invoices': 5000,               // 11K → 5K
+  'maxCharges': 2000,             // 28K → 2K
+  'pointsOps': 1000,              // 44K → 1K
+  'pointsTech': 1000,             // 36K → 1K
+  'premierList': 500,
+  'repairDetails': 3000,          // 92K → 3K
+  'repairInventory': 2000,        // 30K → 2K
+  'repairStatusLog': 2000,        // 43K → 2K
   'scopeTypes': 3000,             // 10.7K → 3K
   'scopes': 3000,                 // 60K → 3K
-  'shippingCharges': 500,         // 722K → 500
-  'shippingChargeRepairs': 500,   // 780K → 500
-  'statusTrans': 3000,            // 167K → 3K
-  'repairDetails': 3000,          // 92K → 3K
-  'invoiceDetails': 2000,         // 87K → 2K
-  'documents': 2000,              // 76K → 2K
-  'pointsOps': 1000,              // 44K → 1K
-  'repairStatusLog': 2000,        // 43K → 2K
-  'inventoryTrans': 1000,         // 37K → 1K
-  'pointsTech': 1000,             // 36K → 1K
-  'repairInventory': 2000,        // 30K → 2K
-  'maxCharges': 2000,             // 28K → 2K
-  'tasks': 2000,                  // 18K → 2K
-  'inventorySizes': 2000,         // 18K → 2K
-  'techHours': 1000,              // 16K → 1K
-  'invoices': 5000,               // 11K → 5K
-  'emails': 1000,                 // 9K → 1K
-  'contractScopes': 2000,         // 8K → 2K
-  'taskLoaners': 1000,            // 7.4K → 1K
   'sessions': 500,                // 6.7K → 500
-  'gpInvoiceStaging': 1000,       // 7K → 1K
-  'invoicePayments': 2000,        // 4.5K → 2K
+  'shippingChargeRepairs': 500,   // 780K → 500
+  'shippingCharges': 500,         // 722K → 500
+  'statusTrans': 3000,            // 167K → 3K
   'supplierPOTrans': 2000,        // 4.2K → 2K
-  'instrumentModels': 2000,       // 3.3K → 2K
-  'hpgList': 500,
-  'premierList': 500,
+  'taskLoaners': 1000,            // 7.4K → 1K
+  'tasks': 2000,                  // 18K → 2K
+  'techHours': 1000,              // 16K → 1K
   'vizientList': 500,
 };
 
@@ -498,42 +498,38 @@ function compact(arr) {
 // Strip fields from heavy tables that the UI doesn't need
 // Repairs are 5KB each — keep only the fields the app actually references
 const REPAIR_KEEP_FIELDS = new Set([
-  // Core keys
-  'lRepairKey', 'lDepartmentKey', 'lScopeKey', 'lServiceLocationKey', 'lContractKey',
-  'lRepairStatusID', 'lRepairReasonKey', 'lTechnicianKey', 'lSalesRepKey',
-  'lDeliveryMethodKey', 'lPaymentTermsKey', 'lPricingCategoryKey', 'lRepairLevelKey',
-  // WO number & tracking
-  'sWorkOrderNumber', 'sTransNumber', 'sPONumber', 'sTrackingNumberIn', 'sTrackingNumberOut',
-  // Key dates
-  'dtDateIn', 'dtDateOut', 'dtAprRecvd', 'dtExpDelDate', 'dtEvalCompDate', 'dtDateShipped',
-  'dtPromiseDate', 'dtRepairDate',
-  // Amounts
-  'dblAmtRepair', 'dblAmtShipping', 'dblAmtParts', 'dblAmtLabor', 'dblCostParts', 'dblCostLabor',
-  'dblEvalTotal', 'dblApprovedAmount', 'dblAmtSubcontract',
-  // Status fields
-  'bComplete', 'bApproved', 'bVoid', 'bWarranty', 'bLoaner', 'bSubcontract',
-  'bAcquisitionRepair', 'bAvoidableDamage', 'bReturned',
-  // Complaint
-  'sComplaint',
-  // Enrichment fields (added by build-mock-db.js)
-  'sSerialNumber', 'sScopeTypeDesc', 'sManufacturer', 'sScopeCategory', 'sRigidOrFlexible',
-  'sClientName1', 'sDepartmentName', 'sRepairStatus', 'sRepairReason', 'sTechName',
-  'sSalesRepName', 'sContractName1', 'sDeliveryMethodDesc', 'sPaymentTerms',
-  'sServiceLocationName', 'sPricingDescription', 'ProgBarStatus', 'Approved',
-  'ResponsibleTech', 'nApprovedAmount', 'nTurnAroundTime', 'nDaysPastDue', 'nLeadTime',
-  'sShipCity', 'sShipState',
-  // Tags
-  '_region', '_dbKey', '_woType', '_site',
+  '_dbKey', '_region', '_site', '_woType',
+  'Approved', 'nApprovedAmount', 'nDaysPastDue', 'nLeadTime', 'nTurnAroundTime',
+  'ProgBarStatus', 'ResponsibleTech',
+  'bAcquisitionRepair', 'bApproved', 'bAvoidableDamage', 'bComplete',
+  'bLoaner', 'bReturned', 'bSubcontract', 'bVoid', 'bWarranty',
+  'dblAmtLabor', 'dblAmtParts', 'dblAmtRepair', 'dblAmtShipping', 'dblAmtSubcontract',
+  'dblApprovedAmount', 'dblCostLabor', 'dblCostParts', 'dblEvalTotal',
+  'dtAprRecvd', 'dtDateIn', 'dtDateOut', 'dtDateShipped',
+  'dtEvalCompDate', 'dtExpDelDate', 'dtPromiseDate', 'dtRepairDate',
+  'lContractKey', 'lDeliveryMethodKey', 'lDepartmentKey',
+  'lPaymentTermsKey', 'lPricingCategoryKey', 'lRepairKey', 'lRepairLevelKey',
+  'lRepairReasonKey', 'lRepairStatusID', 'lSalesRepKey',
+  'lScopeKey', 'lServiceLocationKey', 'lTechnicianKey',
+  'sClientName1', 'sComplaint', 'sContractName1',
+  'sDeliveryMethodDesc', 'sDepartmentName', 'sManufacturer',
+  'sPaymentTerms', 'sPONumber', 'sPricingDescription',
+  'sRepairReason', 'sRepairStatus', 'sRigidOrFlexible',
+  'sSalesRepName', 'sScopeCategory', 'sScopeTypeDesc', 'sSerialNumber',
+  'sServiceLocationName', 'sShipCity', 'sShipState',
+  'sTechName', 'sTrackingNumberIn', 'sTrackingNumberOut',
+  'sTransNumber', 'sWorkOrderNumber',
 ]);
 
 const INVOICE_KEEP_FIELDS = new Set([
-  'lInvoiceKey', 'lRepairKey', 'lClientKey', 'lDepartmentKey', 'lContractKey',
-  'sInvoiceNumber', 'dtInvoiceDate', 'dtDueDate', 'dtTranDate',
-  'dblInvoiceTotal', 'dblAmtPaid', 'dblAmtDue', 'dblAmtParts', 'dblAmtLabor',
-  'dblAmtShipping', 'dblAmtSubcontract', 'dblAmtTax', 'dblEvalAmount',
-  'bPaid', 'bVoid', 'bCreditMemo',
-  'sClientName1', 'sWorkOrderNumber',
-  'lServiceLocationKey', 'lPaymentTermsKey', 'sSalesRepName',
+  'bCreditMemo', 'bPaid', 'bVoid',
+  'dblAmtDue', 'dblAmtLabor', 'dblAmtPaid', 'dblAmtParts',
+  'dblAmtShipping', 'dblAmtSubcontract', 'dblAmtTax',
+  'dblEvalAmount', 'dblInvoiceTotal',
+  'dtDueDate', 'dtInvoiceDate', 'dtTranDate',
+  'lClientKey', 'lContractKey', 'lDepartmentKey',
+  'lInvoiceKey', 'lPaymentTermsKey', 'lRepairKey', 'lServiceLocationKey',
+  'sClientName1', 'sInvoiceNumber', 'sSalesRepName', 'sWorkOrderNumber',
 ]);
 
 function stripFields(arr, keepSet) {
