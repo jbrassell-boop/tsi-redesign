@@ -3694,7 +3694,7 @@ function populateDetail(d) {
   document.getElementById('ssLevel').querySelector('.ss-val').textContent = lvl ? lvl.sRepairLevel : '';
   document.getElementById('ssCarrier').querySelector('.ss-val').textContent = '';
   // Look up names from loaded data
-  const rep = _salesReps.find(x => x.lSalesRepNameKey == d.lSalesRepKey);
+  const rep = _salesReps.find(x => (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey);
   if (rep) document.getElementById('ssRep').querySelector('.ss-val').textContent = rep.sSalesRepName;
   const tech = _techs.find(x => x.lTechnicianKey == d.lTechnicianKey);
   if (tech) document.getElementById('ssTech').querySelector('.ss-val').textContent = tech.sTechName;
@@ -3898,7 +3898,7 @@ function populateDetail(d) {
   document.getElementById('fShipFromDistributor').checked = !!d.bShipFromDistributor;
   document.getElementById('fTrackingReq').checked = !!d.bTrackingNumberRequired;
   // Sales & Quality displays
-  var repDisp2 = _salesReps.find(function(x){ return x.lSalesRepNameKey == d.lSalesRepKey; });
+  var repDisp2 = _salesReps.find(function(x){ return (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey; });
   document.getElementById('fSalesRepDisp').textContent = repDisp2 ? repDisp2.sSalesRepName : '\u2014';
   var pcDisp = _pricingCategories.find(function(x){ return x.lPricingCategoryKey == d.lPricingCategoryKey; });
   document.getElementById('fPricingDisp').textContent = pcDisp ? (pcDisp.sPricingDescription || pcDisp.sPricingCategory) : '\u2014';

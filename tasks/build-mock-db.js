@@ -80,6 +80,17 @@ function repName(key) {
   return (`${r.sRepFirst || ''} ${r.sRepLast || ''}`.trim()) || r.sSalesRepName || '';
 }
 
+// --- Enrich sales reps with display name + BrightLogix key alias ---
+if (seed.salesReps) {
+  seed.salesReps.forEach(r => {
+    // Add sSalesRepName (computed from sRepFirst/sRepLast — legacy DB doesn't store it)
+    r.sSalesRepName = (`${r.sRepFirst || ''} ${r.sRepLast || ''}`.trim()) || '';
+    // Add lSalesRepNameKey alias (BrightLogix API uses this name, SQL uses lSalesRepKey)
+    r.lSalesRepNameKey = r.lSalesRepKey;
+  });
+  console.log('  salesReps: +sSalesRepName, +lSalesRepNameKey');
+}
+
 // --- Enrich scope types with manufacturer name ---
 if (seed.scopeTypes) {
   seed.scopeTypes.forEach(st => {
@@ -282,12 +293,12 @@ if (seed.contracts) {
 
 // --- Enrich invoices ---
 if (seed.invoices) {
+  const repairMap = buildMap(seed.repairs || [], 'lRepairKey');
   seed.invoices.forEach(inv => {
     const client = clientMap[inv.lClientKey];
     inv.sClientName1 = client ? client.sClientName1 : '';
-    // Find the repair for WO number
-    const repair = seed.repairs ? seed.repairs.find(r => r.lRepairKey === inv.lRepairKey) : null;
-    inv.sWorkOrderNumber = repair ? repair.sWorkOrderNumber : '';
+    const repair = repairMap[inv.lRepairKey];
+    inv.sWorkOrderNumber = repair ? (repair.sWorkOrderNumber || repair.sTransNumber || '') : '';
   });
   console.log('  invoices: +sClientName1, +sWorkOrderNumber');
 }
@@ -361,30 +372,77 @@ console.log('Denormalization complete.\n');
 // SEED TABLE ORDER
 // ============================================================
 const SEED_ORDER = [
-  'serviceLocations', 'manufacturers', 'scopeCategories', 'scopeTypeCategories',
-  'repairStatuses', 'repairReasons', 'repairLevels', 'deliveryMethods',
-  'paymentTerms', 'pricingCategories', 'salesReps', 'technicians',
-  'employees', 'distributors', 'vendors', 'salesTax', 'packageTypes',
-  'companies', 'contractTypes', 'servicePlanTerms', 'shippingCarriers',
-  'supplierPOTypes', 'storageLocations',
-  'scopeTypes', 'clients', 'departments', 'contacts', 'contactTrans',
-  'scopes', 'contracts', 'contractDepartments', 'contractScopes', 'suppliers',
-  'repairs', 'repairDetails', 'repairItems', 'statusTrans', 'repairInventory',
-  'documents', 'flags', 'invoices', 'invoicePayments',
-  'productSales', 'productSaleItems',
-  'supplierPOs', 'supplierPOTrans',
-  'inventoryTrans', 'inventory', 'inventorySizes',
-  'departmentScopeTypes', 'maxCharges', 'subGroups',
+  // Phase 1: Reference & lookup tables (complete)
+  'amendRepairReasons', 'amendRepairTypes', 'companies', 'contractTypes',
+  'deliveryMethods', 'distributors', 'employees', 'flagLocations',
+  'flagTypes', 'holidays', 'instrumentManufacturers', 'instrumentModels',
+  'manufacturers', 'packageTypes', 'paymentTerms', 'pricingCategories',
+  'repairItems', 'repairLevels', 'repairReasons', 'repairStatuses',
+  'salesReps', 'salesTax', 'scopeCategories', 'scopeTypeCategories',
+  'servicePlanTerms', 'serviceLocations', 'shippingCarriers', 'staffTypes',
+  'status', 'storageLocations', 'subGroups', 'supplierPOTypes',
+  'taskPriorities', 'taskStatuses', 'taskTypes', 'technicians',
+  'users', 'vendors',
+
+  // Phase 2: Core entities (complete)
+  'clients', 'contactTrans', 'contacts', 'contractDepartments',
+  'contractScopes', 'contracts', 'departments', 'pendingContractDepartments',
+  'pendingContracts', 'scopeTypes', 'scopes', 'suppliers',
+
+  // Phase 3: Transactional data (2025+)
+  'amendments', 'departmentScopeTypes', 'documents', 'emails',
+  'flags', 'gpInvoiceStaging', 'inventory', 'inventorySizes',
+  'inventoryTrans', 'invoiceDetails', 'invoicePayments', 'invoices',
+  'loanerTrans', 'maxCharges', 'pointsOps', 'pointsTech',
+  'productSaleItems', 'productSales', 'repairDetails', 'repairInventory',
+  'repairStatusLog', 'repairs', 'sessions', 'shipPercentage',
+  'shippingChargeRepairs', 'shippingCharges', 'statusTrans',
+  'supplierPOs', 'supplierPOTrans', 'taskLoaners', 'tasks',
+  'techHours',
+
+  // Phase 3c: Site services
+  'departmentSiteServiceTrayNames', 'siteServices', 'siteServicesCalendar',
+  'siteServiceTrayDetails', 'siteServiceTrayInsert', 'siteServiceTrays',
+
+  // Phase 4: GPO
+  'hpgList', 'premierList', 'vizientList',
 ];
 const TABLE_REMAP = { 'maxCharges': 'modelMaxCharges' };
 
-const DASH_SEED_ORDER = [
-  'taskTypes', 'taskStatuses', 'taskPriorities',
-  'tasks', 'taskLoaners', 'taskStatusHistory',
-  'loanerTrans', 'emails', 'emailAttachments', 'emailTypes',
-  'shippingCharges', 'flagTypes', 'flagLocations', 'flagLocationsUsed', 'flagInstrumentTypes',
-  'profitability', 'contractProfitability',
-];
+// Large tables trimmed to keep mock-db.js ~40MB for browser loading.
+// Full 2.3M-record dataset stays in real-data-seed.json for backend/testing.
+// Keeps tail (newest data) for each table.
+const TABLE_LIMITS = {
+  'scopeTypes': 3000,             // 10.7K → 3K
+  'scopes': 3000,                 // 60K → 3K
+  'shippingCharges': 500,         // 722K → 500
+  'shippingChargeRepairs': 500,   // 780K → 500
+  'statusTrans': 3000,            // 167K → 3K
+  'repairDetails': 3000,          // 92K → 3K
+  'invoiceDetails': 2000,         // 87K → 2K
+  'documents': 2000,              // 76K → 2K
+  'pointsOps': 1000,              // 44K → 1K
+  'repairStatusLog': 2000,        // 43K → 2K
+  'inventoryTrans': 1000,         // 37K → 1K
+  'pointsTech': 1000,             // 36K → 1K
+  'repairInventory': 2000,        // 30K → 2K
+  'maxCharges': 2000,             // 28K → 2K
+  'tasks': 2000,                  // 18K → 2K
+  'inventorySizes': 2000,         // 18K → 2K
+  'techHours': 1000,              // 16K → 1K
+  'invoices': 5000,               // 11K → 5K
+  'emails': 1000,                 // 9K → 1K
+  'contractScopes': 2000,         // 8K → 2K
+  'taskLoaners': 1000,            // 7.4K → 1K
+  'sessions': 500,                // 6.7K → 500
+  'gpInvoiceStaging': 1000,       // 7K → 1K
+  'invoicePayments': 2000,        // 4.5K → 2K
+  'supplierPOTrans': 2000,        // 4.2K → 2K
+  'instrumentModels': 2000,       // 3.3K → 2K
+  'hpgList': 500,
+  'premierList': 500,
+  'vizientList': 500,
+};
 
 // ============================================================
 // Write new mock-db.js
@@ -398,26 +456,124 @@ fs.writeSync(fd, infrastructure + '\n\n');
 
 // 2. Header
 w('// ═══════════════════════════════════════════════════════');
-w('//  SEED DATA — Real WinScopeNet extract (Feb 13 – Mar 13, 2026)');
-w('//  Denormalized with display fields for UI compatibility');
+w('//  SEED DATA — Real WinScopeNet + Nashville extract (2025+)');
+w('//  91 tables, North + South, denormalized with display fields');
 w('// ═══════════════════════════════════════════════════════');
 w('');
 
-// Register new tables
-['contactTrans', 'vendors', 'salesTax', 'packageTypes', 'inventoryTrans',
- 'storageLocations', 'modelMaxCharges', 'departmentScopeTypes'].forEach(t => {
+// Register all new tables
+const allNewTables = [
+  'amendRepairReasons', 'amendRepairTypes', 'amendments', 'contactTrans',
+  'contractProfitability', 'departmentScopeTypes', 'departmentSiteServiceTrayNames',
+  'emailAttachments', 'emails', 'emailTypes', 'flagInstrumentTypes',
+  'flagLocationsUsed', 'gpInvoiceStaging', 'holidays', 'hpgList',
+  'instrumentManufacturers', 'instrumentModels', 'inventoryTrans',
+  'invoiceDetails', 'loanerTrans', 'modelMaxCharges', 'packageTypes',
+  'pendingContractDepartments', 'pendingContracts', 'pointsOps', 'pointsTech',
+  'premierList', 'profitability', 'repairStatusLog', 'salesTax', 'sessions',
+  'shipPercentage', 'shippingChargeRepairs', 'siteServices', 'siteServicesCalendar',
+  'siteServiceTrayDetails', 'siteServiceTrayInsert', 'siteServiceTrays',
+  'staffTypes', 'status', 'storageLocations', 'taskStatusHistory', 'techHours',
+  'vendors', 'vizientList',
+];
+allNewTables.forEach(t => {
   w(`if (!MockDB.tables['${t}']) MockDB.tables['${t}'] = [];`);
 });
 w('');
 
-// 3. Seed each table
+// Compact records: strip null, empty string, and zero amounts to reduce JSON size
+// Preserves boolean false values (important for bActive, bComplete, etc.)
+function compact(arr) {
+  return arr.map(row => {
+    const out = {};
+    for (const [k, v] of Object.entries(row)) {
+      if (v === null || v === undefined || v === '') continue;
+      if (v === 0 && !k.startsWith('l') && !k.startsWith('b')) continue; // strip zero amounts/counts but keep keys and booleans
+      out[k] = v;
+    }
+    return out;
+  });
+}
+
+// Strip fields from heavy tables that the UI doesn't need
+// Repairs are 5KB each — keep only the fields the app actually references
+const REPAIR_KEEP_FIELDS = new Set([
+  // Core keys
+  'lRepairKey', 'lDepartmentKey', 'lScopeKey', 'lServiceLocationKey', 'lContractKey',
+  'lRepairStatusID', 'lRepairReasonKey', 'lTechnicianKey', 'lSalesRepKey',
+  'lDeliveryMethodKey', 'lPaymentTermsKey', 'lPricingCategoryKey', 'lRepairLevelKey',
+  // WO number & tracking
+  'sWorkOrderNumber', 'sTransNumber', 'sPONumber', 'sTrackingNumberIn', 'sTrackingNumberOut',
+  // Key dates
+  'dtDateIn', 'dtDateOut', 'dtAprRecvd', 'dtExpDelDate', 'dtEvalCompDate', 'dtDateShipped',
+  'dtPromiseDate', 'dtRepairDate',
+  // Amounts
+  'dblAmtRepair', 'dblAmtShipping', 'dblAmtParts', 'dblAmtLabor', 'dblCostParts', 'dblCostLabor',
+  'dblEvalTotal', 'dblApprovedAmount', 'dblAmtSubcontract',
+  // Status fields
+  'bComplete', 'bApproved', 'bVoid', 'bWarranty', 'bLoaner', 'bSubcontract',
+  'bAcquisitionRepair', 'bAvoidableDamage', 'bReturned',
+  // Complaint
+  'sComplaint',
+  // Enrichment fields (added by build-mock-db.js)
+  'sSerialNumber', 'sScopeTypeDesc', 'sManufacturer', 'sScopeCategory', 'sRigidOrFlexible',
+  'sClientName1', 'sDepartmentName', 'sRepairStatus', 'sRepairReason', 'sTechName',
+  'sSalesRepName', 'sContractName1', 'sDeliveryMethodDesc', 'sPaymentTerms',
+  'sServiceLocationName', 'sPricingDescription', 'ProgBarStatus', 'Approved',
+  'ResponsibleTech', 'nApprovedAmount', 'nTurnAroundTime', 'nDaysPastDue', 'nLeadTime',
+  'sShipCity', 'sShipState',
+  // Tags
+  '_region', '_dbKey', '_woType', '_site',
+]);
+
+const INVOICE_KEEP_FIELDS = new Set([
+  'lInvoiceKey', 'lRepairKey', 'lClientKey', 'lDepartmentKey', 'lContractKey',
+  'sInvoiceNumber', 'dtInvoiceDate', 'dtDueDate', 'dtTranDate',
+  'dblInvoiceTotal', 'dblAmtPaid', 'dblAmtDue', 'dblAmtParts', 'dblAmtLabor',
+  'dblAmtShipping', 'dblAmtSubcontract', 'dblAmtTax', 'dblEvalAmount',
+  'bPaid', 'bVoid', 'bCreditMemo',
+  'sClientName1', 'sWorkOrderNumber',
+  'lServiceLocationKey', 'lPaymentTermsKey', 'sSalesRepName',
+]);
+
+function stripFields(arr, keepSet) {
+  return arr.map(row => {
+    const out = {};
+    for (const [k, v] of Object.entries(row)) {
+      if (!keepSet.has(k)) continue;
+      if (v === null || v === undefined || v === '' || v === false) continue;
+      out[k] = v;
+    }
+    return out;
+  });
+}
+
+// 3. Seed each table (with size limits for large tables)
 let totalSeeded = 0;
+let totalTrimmed = 0;
 for (const key of SEED_ORDER) {
-  const data = seed[key];
+  let data = seed[key];
   if (!data || data.length === 0) continue;
   const tableName = TABLE_REMAP[key] || key;
-  w(`// ${key}: ${data.length} records`);
-  fs.writeSync(fd, `MockDB.seed('${tableName}', ${JSON.stringify(data)});\n`);
+  const limit = TABLE_LIMITS[key];
+  const origLen = data.length;
+  if (limit && data.length > limit) {
+    data = data.slice(-limit);
+    totalTrimmed += origLen - limit;
+    w(`// ${key}: ${data.length} records (trimmed from ${origLen.toLocaleString()})`);
+  } else {
+    w(`// ${key}: ${data.length} records`);
+  }
+  // Compact + field-strip heavy tables to reduce file size
+  let compacted;
+  if (key === 'repairs') {
+    compacted = stripFields(data, REPAIR_KEEP_FIELDS);
+  } else if (key === 'invoices') {
+    compacted = stripFields(data, INVOICE_KEEP_FIELDS);
+  } else {
+    compacted = compact(data);
+  }
+  fs.writeSync(fd, `MockDB.seed('${tableName}', ${JSON.stringify(compacted)});\n`);
   totalSeeded += data.length;
 }
 
@@ -425,48 +581,13 @@ w('');
 w(`console.log('[MockDB] Real data seeded: ${totalSeeded.toLocaleString()} records');`);
 w('');
 
-// Dashboard-specific seed data (from Nashville)
-if (Object.keys(dashSeed).length > 0) {
-  w('');
-  w('// ═══════════════════════════════════════════════════════');
-  w('//  DASHBOARD SEED — Nashville extract');
-  w('// ═══════════════════════════════════════════════════════');
-
-  // Register dashboard tables
-  ['taskStatusHistory', 'loanerTrans', 'emails', 'emailAttachments', 'emailTypes',
-   'shippingCharges', 'flagTypes', 'flagLocations', 'flagLocationsUsed', 'flagInstrumentTypes',
-   'profitability', 'contractProfitability'].forEach(t => {
-    w(`if (!MockDB.tables['${t}']) MockDB.tables['${t}'] = [];`);
-  });
-  w('');
-
-  let dashSeeded = 0;
-  for (const key of DASH_SEED_ORDER) {
-    const data = dashSeed[key];
-    if (!data || data.length === 0) continue;
-    w(`// ${key}: ${data.length} records`);
-    fs.writeSync(fd, `MockDB.seed('${key}', ${JSON.stringify(data)});\n`);
-    dashSeeded += data.length;
-  }
-  w('');
-  w(`console.log('[MockDB] Dashboard data seeded: ${dashSeeded.toLocaleString()} records');`);
-  totalSeeded += dashSeeded;
-}
+// Dashboard/task tables are now part of the main seed (tasks, emails, loanerTrans, etc.)
 
 // 4. Static lookups
 w("MockDB.seed('states', " + JSON.stringify(getStates()) + ");");
 w("MockDB.seed('countries', [{ lCountryKey: 1, sCountryName: 'United States' }]);");
 
-// Users from Nashville (real data) or fallback
-if (dashSeed.users && dashSeed.users.length > 0) {
-  w(`MockDB.seed('users', ${JSON.stringify(dashSeed.users)});`);
-} else {
-  // existing static fallback
-  w("MockDB.seed('users', [");
-  w("  { lUserKey: 1, sFirstName: 'Joseph', sLastName: 'Brassell', sUserName: 'JBrassell', sEmailAddress: 'jbrassell@totalscope.com', bActive: true, bIsAdmin: true },");
-  w("  { lUserKey: 2, sFirstName: 'Admin', sLastName: 'System', sUserName: 'admin', sEmailAddress: 'admin@totalscope.com', bActive: true, bIsAdmin: true }");
-  w("]);");
-}
+// Users come from the main seed now (160 real users)
 w('');
 
 // 5. PRNG + Gen3-5
@@ -482,6 +603,9 @@ fs.closeSync(fd);
 const sizeMB = (fs.statSync(MOCKDB_PATH).size / 1024 / 1024).toFixed(1);
 console.log(`\nDone! New mock-db.js: ${sizeMB} MB`);
 console.log(`Seeded ${totalSeeded.toLocaleString()} real records (denormalized)`);
+if (totalTrimmed > 0) {
+  console.log(`Trimmed ${totalTrimmed.toLocaleString()} records from large tables to keep file manageable`);
+}
 
 function getStates() {
   return [
