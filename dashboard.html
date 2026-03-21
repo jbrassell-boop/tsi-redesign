@@ -90,6 +90,7 @@
     .b-complete{background:#F3F4F6;color:var(--steel);border:1px solid #CFD8DC}
     .b-shipped{background:#EDE7F6;color:#5E35B1;border:1px solid #B39DDB}
     .b-quoted{background:#E8EAF6;color:var(--navy);border:1px solid #9FA8DA}
+    .b-draft{background:#FFF8E1;color:#F57F17;border:1px solid #FFD54F}
     .b-invoiced{background:#F5F5F5;color:#616161;border:1px solid #BDBDBD}
 
     /* Sub-row detail line (cockpit density — quiet, scannable) */
@@ -257,7 +258,15 @@
         </div>
         <div class="stat-chip">
           <div class="s-icon" style="background:#F3E8FD">📦</div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped Today</div></div>
+          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon" style="background:#FFF8E1">📝</div>
+          <div class="s-data"><div class="s-val s-amber">0</div><div class="s-lbl">Draft Invoice</div></div>
+        </div>
+        <div class="stat-chip">
+          <div class="s-icon" style="background:#E8F5E9">💰</div>
+          <div class="s-data"><div class="s-val s-green">0</div><div class="s-lbl">Invoiced</div></div>
         </div>
       </div>
 
@@ -678,6 +687,7 @@ function badgeClass(s) {
   if (/ready/i.test(s)) return 'b-complete';
   if (/shipped/i.test(s)) return 'b-shipped';
   if (/quoted/i.test(s)) return 'b-quoted';
+  if (/draft invoice/i.test(s)) return 'b-draft';
   if (/invoiced/i.test(s)) return 'b-invoiced';
   return 'b-inrepair';
 }
@@ -702,21 +712,23 @@ function truncate(s, max) { return s && s.length > max ? s.substring(0, max) + '
 //  STAT COUNTS
 // ═══════════════════════════════════════════════════════
 function calcStats() {
-  const open = SCOPES.filter(s => !/shipped|invoiced/i.test(s.status));
+  const open = SCOPES.filter(s => !/shipped|invoiced|draft invoice/i.test(s.status));
   const inHouse = open.length;
   const waiting = open.filter(s=>/waiting/i.test(s.status)).length;
-  const inRepair = open.filter(s=>/in repair/i.test(s.status)).length;
+  const inRepair = open.filter(s=>/in repair|drying room|special rigid/i.test(s.status)).length;
   const overdue = open.filter(s => s.daysIn > (s.sla || 5)).length;
   const ready = open.filter(s=>/ready/i.test(s.status)).length;
   const loaners = open.filter(s=>/loaner/i.test(s.client)).length;
-  const shipped = SCOPES.filter(s=>/shipped/i.test(s.status)).length; // total shipped, for the chip
-  return {inHouse, waiting, inRepair, overdue, ready, loaners, shipped};
+  const shipped = SCOPES.filter(s=>/^shipped$/i.test(s.status)).length;
+  const draftInvoice = SCOPES.filter(s=>/draft invoice/i.test(s.status)).length;
+  const invoiced = SCOPES.filter(s=> s.status === 'Invoiced').length;
+  return {inHouse, waiting, inRepair, overdue, ready, loaners, shipped, draftInvoice, invoiced};
 }
 
 function updateStats() {
   const stats = calcStats();
   const chips = document.querySelectorAll('#kpiStrip .stat-chip .s-val');
-  if (chips.length >= 7) {
+  if (chips.length >= 9) {
     chips[0].textContent = stats.inHouse;
     chips[1].textContent = stats.waiting;
     chips[2].textContent = stats.inRepair;
@@ -724,6 +736,8 @@ function updateStats() {
     chips[4].textContent = stats.ready;
     chips[5].textContent = stats.loaners;
     chips[6].textContent = stats.shipped;
+    chips[7].textContent = stats.draftInvoice;
+    chips[8].textContent = stats.invoiced;
   }
   // Share KPI values with other dashboard tabs via sessionStorage
   try { sessionStorage.setItem('tsi_dashboard_kpis', JSON.stringify(stats)); } catch(e) {}
@@ -751,9 +765,9 @@ function exportCSV() {
 function getFiltered() {
   let list = [...SCOPES];
 
-  // Dashboard shows open repairs only — exclude shipped/invoiced unless explicitly filtering for them
-  if (activeFilter !== 'shipped') {
-    list = list.filter(s => !/shipped|invoiced/i.test(s.status));
+  // Dashboard shows open repairs only — exclude shipped/invoiced/draft invoice unless explicitly filtering for them
+  if (!['shipped','draftInvoice','invoiced'].includes(activeFilter)) {
+    list = list.filter(s => !/shipped|invoiced|draft invoice/i.test(s.status));
   }
 
   // Segmented filter: Type
@@ -779,11 +793,13 @@ function getFiltered() {
   // Stat chip filter
   if (activeFilter === 'inHouse') { /* no filter, show all */ }
   else if (activeFilter === 'waiting') list = list.filter(s=>/waiting/i.test(s.status));
-  else if (activeFilter === 'inRepair') list = list.filter(s=>/in repair/i.test(s.status));
+  else if (activeFilter === 'inRepair') list = list.filter(s=>/in repair|drying room|special rigid/i.test(s.status));
   else if (activeFilter === 'overdue') list = list.filter(s => s.daysIn > (s.sla || 5));
   else if (activeFilter === 'ready') list = list.filter(s=>/ready/i.test(s.status));
   else if (activeFilter === 'loaners') list = list.filter(s=>/loaner/i.test(s.client));
-  else if (activeFilter === 'shipped') list = list.filter(s=>/shipped/i.test(s.status));
+  else if (activeFilter === 'shipped') list = list.filter(s=>/^shipped$/i.test(s.status));
+  else if (activeFilter === 'draftInvoice') list = list.filter(s=>/draft invoice/i.test(s.status));
+  else if (activeFilter === 'invoiced') list = list.filter(s=> s.status === 'Invoiced');
 
   // Search
   if (searchTerm) {
@@ -955,7 +971,7 @@ document.querySelectorAll('thead th').forEach((th, i) => {
 // ═══════════════════════════════════════════════════════
 //  STAT CHIP CLICKS
 // ═══════════════════════════════════════════════════════
-const CHIP_FILTERS = ['inHouse','waiting','inRepair','overdue','ready','loaners','shipped'];
+const CHIP_FILTERS = ['inHouse','waiting','inRepair','overdue','ready','loaners','shipped','draftInvoice','invoiced'];
 document.querySelectorAll('.stat-chip').forEach((chip, i) => {
   chip.onclick = () => {
     const f = CHIP_FILTERS[i];
@@ -1183,7 +1199,7 @@ function saveQuickEdit() {
 // ═══════════════════════════════════════════════════════
 function generateTechSheets() {
   // Get all approved work orders (have a dateApproved and not shipped/invoiced)
-  const approved = SCOPES.filter(s => s.dateApproved && !/shipped|invoiced/i.test(s.status));
+  const approved = SCOPES.filter(s => s.dateApproved && !/shipped|invoiced|draft invoice/i.test(s.status));
   if (!approved.length) { alert('No approved work orders to extract.'); return; }
 
   // Group by tech

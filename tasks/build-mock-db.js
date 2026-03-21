@@ -157,6 +157,15 @@ if (seed.scopes) {
   console.log('  scopes: +sScopeTypeDesc, +sManufacturer, +sScopeCategory, +sRigidOrFlexible, +sDepartmentName, +sClientName1');
 }
 
+// --- Build invoice-by-repair lookup for status derivation ---
+const invoicedRepairKeys = new Set();
+if (seed.invoices) {
+  seed.invoices.forEach(inv => {
+    if (inv.lRepairKey) invoicedRepairKeys.add(inv.lRepairKey);
+  });
+}
+console.log(`  invoicedRepairKeys: ${invoicedRepairKeys.size} repairs have invoices`);
+
 // --- Enrich repairs (the big one) ---
 if (seed.repairs) {
   seed.repairs.forEach(r => {
@@ -201,6 +210,20 @@ if (seed.repairs) {
     else if (statusId <= 7) r.ProgBarStatus = 'Ready to Ship';
     else if (statusId <= 8) r.ProgBarStatus = 'Shipped';
     else r.ProgBarStatus = r.sRepairStatus || 'Unknown';
+
+    // Derive completion status from dtDateOut + invoice presence
+    // dtDateOut set + invoice exists → Invoiced (closed)
+    // dtDateOut set + no invoice    → Draft Invoice (needs PO# or credit hold)
+    // no dtDateOut                  → keep pipeline status as-is
+    if (r.dtDateOut) {
+      if (invoicedRepairKeys.has(r.lRepairKey)) {
+        r.sRepairStatus = 'Invoiced';
+        r.ProgBarStatus = 'Invoiced';
+      } else {
+        r.sRepairStatus = 'Draft Invoice';
+        r.ProgBarStatus = 'Draft Invoice';
+      }
+    }
 
     // Approved flag
     r.Approved = r.dtAprRecvd ? 'Y' : 'N';

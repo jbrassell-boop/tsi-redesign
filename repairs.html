@@ -6152,9 +6152,11 @@ function renderScopeHistory(currentKey) {
   const sn = document.getElementById('hSerial').textContent;
 
   function statusColor(s) {
+    if (s === 'Invoiced') return 'background:#F5F5F5;color:#616161';
+    if (s === 'Draft Invoice') return 'background:#FFF8E1;color:#F57F17';
     if (s === 'Completed' || s === 'Shipped') return 'background:#DCFCE7;color:#166534';
-    if (s === 'In Repair') return 'background:#DBEAFE;color:#1E40AF';
-    if (s === 'Waiting for Approval') return 'background:#FEF3C7;color:#92400E';
+    if (/in repair/i.test(s)) return 'background:#DBEAFE;color:#1E40AF';
+    if (s === 'Waiting for Approval' || /waiting/i.test(s)) return 'background:#FEF3C7;color:#92400E';
     return 'background:#F3F4F6;color:#4B5563';
   }
 
