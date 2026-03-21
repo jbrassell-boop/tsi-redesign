@@ -559,7 +559,7 @@
                 <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
                 <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:130px" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:120px" onchange="updateStatusBadge(this.value); markDirty()"></select></span>
+                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:auto;min-width:120px;max-width:280px" onchange="updateStatusBadge(this.value); markDirty()"></select></span>
               </div>
               <div class="ref-group">
                 <span class="ref-group-label">Scope</span>
@@ -3686,26 +3686,22 @@ function renderFlags(flags) {
 function populateDetail(d) {
   // ── TOOLBAR / STATUS STRIP ──
   document.getElementById('repairBadge').textContent = '#' + (d.lRepairKey || '');
-  const statusName = getStatusName(d.lRepairStatusID);
-  document.getElementById('ssStatus').querySelector('.ss-val').textContent = statusName || '—';
-  document.getElementById('ssRep').querySelector('.ss-val').textContent = '';
-  document.getElementById('ssTech').querySelector('.ss-val').textContent = '';
+  const statusName = getStatusName(d.lRepairStatusID) || d.sRepairStatus || '—';
+  document.getElementById('ssStatus').querySelector('.ss-val').textContent = statusName;
+  const rep = _salesReps.find(x => (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey);
+  document.getElementById('ssRep').querySelector('.ss-val').textContent = d.sSalesRepName || (rep ? rep.sSalesRepName : '') || '—';
+  const tech = _techs.find(x => x.lTechnicianKey == d.lTechnicianKey);
+  document.getElementById('ssTech').querySelector('.ss-val').textContent = (tech ? tech.sTechName : '') || '—';
   const lvl = _levels.find(x => x.lRepairLevelKey == d.lRepairLevelKey);
   document.getElementById('ssLevel').querySelector('.ss-val').textContent = lvl ? lvl.sRepairLevel : '';
-  document.getElementById('ssCarrier').querySelector('.ss-val').textContent = '';
-  // Look up names from loaded data
-  const rep = _salesReps.find(x => (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey);
-  if (rep) document.getElementById('ssRep').querySelector('.ss-val').textContent = rep.sSalesRepName;
-  const tech = _techs.find(x => x.lTechnicianKey == d.lTechnicianKey);
-  if (tech) document.getElementById('ssTech').querySelector('.ss-val').textContent = tech.sTechName;
   const dm = _deliveryMethods.find(x => x.lDeliveryMethodKey == d.lDeliveryMethodKey);
-  if (dm) document.getElementById('ssCarrier').querySelector('.ss-val').textContent = dm.sDeliveryDesc;
+  document.getElementById('ssCarrier').querySelector('.ss-val').textContent = dm ? dm.sDeliveryDesc : '';
   document.getElementById('ssModified').textContent = d.dtLastUpdate ? 'Modified ' + fmtDate(d.dtLastUpdate) : '';
 
   // ── REFERENCE STRIP ──
   document.getElementById('hDateIn').value = toDateInput(d.dtDateIn);
   document.getElementById('hClient').textContent = d.sShipName1 || d.sBillName1 || d.sClientName1 || (_clients.find(c => c.lClientKey == d.lClientKey) || {}).sClientName1 || '—';
-  document.getElementById('hDept').textContent = d.sShipName2 || (_departments.find(x => x.lDepartmentKey == d.lDepartmentKey) || {}).sDepartmentName || '—';
+  document.getElementById('hDept').textContent = d.sShipName2 || d.sDepartmentName || (_departments.find(x => x.lDepartmentKey == d.lDepartmentKey) || {}).sDepartmentName || '—';
   document.getElementById('hPO').value = d.sPurchaseOrder || '';
   document.getElementById('hWO').textContent = d.sWorkOrderNumber || '—';
   document.getElementById('hRack').value = d.sRackPosition || '';
@@ -3714,7 +3710,8 @@ function populateDetail(d) {
 
   // Scope row (spans, not inputs)
   document.getElementById('hMfr').textContent = d.sManufacturer || '—';
-  document.getElementById('hScopeCat').textContent = d.sScopeCategory || '—';
+  var catLabel = d.sScopeCategory || (d.sRigidOrFlexible === 'F' ? 'Flexible' : d.sRigidOrFlexible === 'R' ? 'Rigid' : '') || '—';
+  document.getElementById('hScopeCat').textContent = catLabel;
   document.getElementById('hModel').textContent = d.sScopeTypeDesc || '—';
   document.getElementById('hSerial').textContent = d.sSerialNumber || '—';
   document.getElementById('hCapFFS').textContent = d.lContractKey ? 'Contract' : 'FFS';
@@ -3727,7 +3724,7 @@ function populateDetail(d) {
     const days = Math.round((end - new Date(d.dtDateIn)) / 86400000);
     document.getElementById('hTAT').textContent = days + 'd' + (d.dtDateOut ? '' : ' (open)');
   } else { document.getElementById('hTAT').textContent = '—'; }
-  document.getElementById('hLeadTime').textContent = '—';
+  document.getElementById('hLeadTime').textContent = d.nLeadTime != null ? d.nLeadTime + 'd' : '—';
   document.getElementById('hDateOutRO').textContent = d.dtDateOut ? fmtDate(d.dtDateOut) : '—';
 
   // ── SCOPE IN TAB ──
