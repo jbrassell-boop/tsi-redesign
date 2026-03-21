@@ -139,21 +139,15 @@
      Single source of truth for the dashboard tab strip.
      Auto-renders when a #dashSubnav element is present.  */
   var DASH_TABS = [
-    { id: 'scopes',       label: 'Scopes',            href: 'dashboard.html' },
-    { id: 'tasks',        label: 'Tasks',             href: 'dashboard_tasks.html',        badge: '5',  badgeId: 'taskTabBadge' },
-    { id: 'loaners',      label: 'Loaners',           href: 'dashboard_loaners.html',      badge: '2',  badgeStyle: 'background:var(--amber)' },
-    { id: 'emails',       label: 'Emails',            href: 'dashboard_emails.html' },
-    { id: 'shipping',     label: 'Shipping Status',   href: 'dashboard_shipping.html' },
-    { id: 'inventory',    label: 'Inventory',          href: 'dashboard_inventory.html' },
-    { id: 'openinv',     label: 'Open Inventory',     href: 'dashboard_openinventory.html' },
-    { id: 'acquisitions', label: 'Acquisitions',       href: 'dashboard_acquisitions.html' },
-    { id: 'invoices',    label: 'Invoices',            href: 'dashboard_invoices.html' },
-    { id: 'searches',     label: 'Quick Searches',     href: 'dashboard_searches.html' },
-    { id: 'metrics',      label: 'Repair Metrics',     href: 'dashboard_metrics.html' },
-    { id: 'tat',          label: 'Turn Around Times',  href: 'dashboard_tat.html' },
-    { id: 'flags',        label: 'Flags',              href: 'dashboard_flags.html',        badge: '8' },
-    { id: 'profitability', label: 'Profitability',     href: 'dashboard_profitability.html' },
-    { id: 'revenue',     label: 'Revenue/Expense',     href: 'dashboard_revenue.html' }
+    { id: 'scopes',         label: 'Scopes',           href: 'dashboard.html' },
+    { id: 'tasks',          label: 'Tasks',             href: 'dashboard_tasks.html',          badge: '5',  badgeId: 'taskTabBadge' },
+    { id: 'emails',         label: 'Emails',            href: 'dashboard_emails.html' },
+    { id: 'shipping',       label: 'Shipping Status',   href: 'dashboard_shipping.html' },
+    { id: 'inventory',      label: 'Inventory',         href: 'dashboard_inventory.html' },
+    { id: 'purchaseorders', label: 'Purchase Orders',   href: 'dashboard_purchaseorders.html' },
+    { id: 'invoices',       label: 'Invoices',          href: 'dashboard_invoices.html' },
+    { id: 'flags',          label: 'Flags',             href: 'dashboard_flags.html',          badge: '8' },
+    { id: 'analytics',      label: 'Analytics',         href: 'dashboard_analytics.html' }
   ];
 
   /** Map filename → tab id for auto-detection */

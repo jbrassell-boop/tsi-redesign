@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dashboard — Analytics | TSI Redesign</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* Additional page-local vars */
+    :root{--hover:#CFFAFE}
+
+    /* PAGE BODY — override for flex column layout */
+    .page-body{display:flex;flex-direction:column;overflow:hidden}
+
+    /* STAT STRIP — overrides only (base in styles.css) */
+    .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
+    .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.alert{background:#FEF9F9}
+    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
+    .stat-chip .s-val{font-size:16px}
+    .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.4px}
+
+    /* SUBNAV */
+    .subnav{display:flex;align-items:center;gap:0;background:linear-gradient(to bottom,#A8C8E0,#C0D8ED);border-bottom:2px solid #98BBDA;padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
+    .subnav-tab:hover{color:var(--navy)}
+    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+    .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
+
+    /* ANALYTICS SECONDARY TABS */
+    .analytics-tabs{display:flex;align-items:center;gap:0;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .analytics-tab{padding:7px 14px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .12s}
+    .analytics-tab:hover{color:var(--navy)}
+    .analytics-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
+
+    /* ANALYTICS PANEL */
+    .analytics-panel{display:none;flex-direction:column;flex:1;overflow:hidden}
+    .analytics-panel.active{display:flex}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .seg-group{display:flex;align-items:center;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
+    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;color:var(--label);cursor:pointer;border:none;background:transparent;font-family:inherit;white-space:nowrap;transition:all .12s}
+    .seg-btn.active{background:var(--navy);color:#fff;font-weight:600}
+    .seg-btn:not(.active):hover{background:var(--bg);color:var(--navy)}
+    .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
+    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;overflow-y:auto;background:var(--bg)}
+
+    /* METRIC CARDS */
+    .metric-cards{display:flex;gap:12px;padding:16px}
+    .metric-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+    .metric-card .mc-val{font-size:24px;font-weight:800;color:var(--navy)}
+    .metric-card .mc-val.mc-green{color:#2E7D32}
+    .metric-card .mc-val.mc-red{color:#C62828}
+    .metric-card .mc-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+    .metric-card .mc-sub{font-size:10px;margin-top:6px;color:var(--label)}
+
+    /* DATA TABLE — shared */
+    .table-wrap{flex:1;overflow:auto;position:relative;padding:0 16px 16px}
+    .section-header{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 8px}
+    table{width:100%;border-collapse:collapse}
+    thead{position:sticky;top:0;z-index:2}
+    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase}
+    th:last-child{border-right:none}
+    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    tbody tr:hover{background:var(--hover)}
+    .rank-cell{font-weight:700;color:var(--muted);text-align:center;width:48px}
+    .model-cell{font-weight:600;color:var(--navy)}
+    .num-cell{text-align:right;font-variant-numeric:tabular-nums}
+
+    /* SORTABLE COLUMNS */
+    th[data-col]{cursor:pointer}
+    th.sorted-asc::after{content:" \u25B2";font-size:9px}
+    th.sorted-desc::after{content:" \u25BC";font-size:9px}
+
+    /* TAT-SPECIFIC */
+    #panel-tat table{min-width:800px}
+    #panel-tat th{text-align:center}
+    #panel-tat th:first-child{text-align:left}
+    #panel-tat td{text-align:center}
+    #panel-tat td:first-child{text-align:left;font-weight:600;color:var(--navy)}
+    #panel-tat .section-header{padding:14px 16px 8px}
+    .tat-cell{font-weight:600;font-size:11.5px}
+    .tat-cell .tat-days{display:block}
+    .tat-cell .tat-count{display:block;font-size:9.5px;font-weight:400;color:var(--muted);margin-top:1px}
+    .tat-green{color:#16A34A}
+    .tat-amber{color:#D97706}
+    .tat-red{color:#DC2626}
+    .tat-na{color:var(--muted);font-weight:400;font-style:italic}
+
+    /* PROFITABILITY-SPECIFIC */
+    #panel-profit table{min-width:1000px}
+    .wo-link{color:var(--navy);font-weight:600;text-decoration:none;font-size:11.5px}
+    .wo-link:hover{text-decoration:underline}
+
+    /* MARGIN BADGES */
+    .margin-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .margin-green{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .margin-amber{background:#FFF8E1;color:#F57F17;border:1px solid #FFD54F}
+    .margin-red{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
+
+    /* FOOTER */
+    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .record-info{font-size:11px;color:var(--muted)}
+    .record-info strong{color:var(--text)}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <!-- Injected by shell.js -->
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <!-- Injected by shell.js -->
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- SUB-NAV TABS (rendered by shell.js) -->
+      <div class="subnav" id="dashSubnav"></div>
+
+      <!-- ANALYTICS SECONDARY TABS -->
+      <div class="analytics-tabs">
+        <div class="analytics-tab active" data-panel="metrics" onclick="switchAnalyticsTab('metrics')">Metrics</div>
+        <div class="analytics-tab" data-panel="tat" onclick="switchAnalyticsTab('tat')">Turn Around Times</div>
+        <div class="analytics-tab" data-panel="profit" onclick="switchAnalyticsTab('profit')">Profitability</div>
+        <div class="analytics-tab" data-panel="revenue" onclick="switchAnalyticsTab('revenue')">Revenue / Expense</div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  PANEL 1: METRICS (default active)                     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="analytics-panel active" id="panel-metrics" style="display:flex">
+
+        <!-- Stat Strip -->
+        <div class="stat-strip">
+          <div class="stat-chip alert">
+            <div class="s-icon" style="background:#FEF2F2">&#x1F527;</div>
+            <div class="s-data"><div class="s-val s-navy" id="m-kInHouse">--</div><div class="s-lbl">In-House</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E3F2FD">&#x23F1;</div>
+            <div class="s-data"><div class="s-val s-navy" id="m-kAvgTat">--</div><div class="s-lbl">Avg TAT (days)</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+            <div class="s-data"><div class="s-val s-green" id="m-kOnTime">--</div><div class="s-lbl">On-Time Ship %</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#F3E8FD">&#x1F4E6;</div>
+            <div class="s-data"><div class="s-val s-navy" id="m-kThruput">--</div><div class="s-lbl">Throughput</div></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <span class="filter-label">Period</span>
+            <div class="seg-group" id="m-periodFilter">
+              <button class="seg-btn active" data-val="MTD">MTD</button>
+              <button class="seg-btn" data-val="QTD">QTD</button>
+              <button class="seg-btn" data-val="YTD">YTD</button>
+            </div>
+          </div>
+          <div class="toolbar-search">
+            <input class="search-input" id="m-metricSearch" type="text" placeholder="Search scope type..."/>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+          <div class="metric-cards">
+            <div class="metric-card">
+              <div class="mc-val" id="m-mcAvgTat">--</div>
+              <div class="mc-lbl">Avg TAT</div>
+              <div class="mc-sub" id="m-mcAvgTatSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="m-mcThruput">--</div>
+              <div class="mc-lbl">Throughput</div>
+              <div class="mc-sub" id="m-mcThruputSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="m-mcOnTime">--</div>
+              <div class="mc-lbl">On-Time Ship %</div>
+              <div class="mc-sub" id="m-mcOnTimeSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="m-mcInHouse">--</div>
+              <div class="mc-lbl">Total In-House</div>
+              <div class="mc-sub" id="m-mcInHouseSub">&nbsp;</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <div class="section-header">Top Scope Types by Volume</div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:48px;text-align:center">Rank</th>
+                  <th>Scope Type</th>
+                  <th style="text-align:right">Repair Count</th>
+                  <th style="text-align:right">Avg TAT (days)</th>
+                  <th style="text-align:right">In Progress</th>
+                  <th style="text-align:right">Completed</th>
+                </tr>
+              </thead>
+              <tbody id="m-metricsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+          <div class="record-info" id="m-metricsRecordInfo">Loading...</div>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  PANEL 2: TURN AROUND TIMES                            -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="analytics-panel" id="panel-tat">
+
+        <!-- Stat Strip -->
+        <div class="stat-strip">
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E3F2FD">&#x23F1;</div>
+            <div class="s-data"><div class="s-val s-navy" id="t-kMinor">--</div><div class="s-lbl">Minor Avg</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#FFF3E0">&#x2699;</div>
+            <div class="s-data"><div class="s-val s-navy" id="t-kMid">--</div><div class="s-lbl">Mid-Level Avg</div></div>
+          </div>
+          <div class="stat-chip warn">
+            <div class="s-icon" style="background:#FFFBEB">&#x26A0;</div>
+            <div class="s-data"><div class="s-val s-amber" id="t-kMajor">--</div><div class="s-lbl">Major Avg</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#F3E8FD">&#x1F50D;</div>
+            <div class="s-data"><div class="s-val s-navy" id="t-kVSI">--</div><div class="s-lbl">VSI Avg</div></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <span class="filter-label">Source</span>
+            <div class="seg-group" id="t-sourceFilter">
+              <button class="seg-btn active" data-val="all">All</button>
+              <button class="seg-btn" data-val="inhouse">In-House</button>
+              <button class="seg-btn" data-val="outsourced">Outsourced</button>
+            </div>
+          </div>
+          <div class="toolbar-search">
+            <input class="search-input" id="t-tatSearch" type="text" placeholder="Search scope type..."/>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+          <div class="section-header">TAT by Repair Level</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align:left">Repair Level</th>
+                  <th>Current Month</th>
+                  <th>Last 30 Days</th>
+                  <th>Last 3 Months</th>
+                  <th>Last 6 Months</th>
+                </tr>
+              </thead>
+              <tbody id="t-matrixTbody"></tbody>
+            </table>
+          </div>
+
+          <div class="section-header">TAT by Scope Type (Top 15)</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align:left">Scope Type</th>
+                  <th>Overall Avg</th>
+                  <th>Current Month</th>
+                  <th>Last 30 Days</th>
+                  <th>Last 3 Months</th>
+                  <th>Last 6 Months</th>
+                  <th style="width:70px">Total</th>
+                </tr>
+              </thead>
+              <tbody id="t-scopeTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+          <div class="record-info" id="t-tatRecordInfo">Loading...</div>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  PANEL 3: PROFITABILITY                                -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="analytics-panel" id="panel-profit">
+
+        <!-- Stat Strip -->
+        <div class="stat-strip">
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E3F2FD">&#x1F4B0;</div>
+            <div class="s-data"><div class="s-val s-navy" id="p-kRevenue">--</div><div class="s-lbl">Total Revenue</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#FEF2F2">&#x1F4C9;</div>
+            <div class="s-data"><div class="s-val s-navy" id="p-kExpenses">--</div><div class="s-lbl">Total Expenses</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+            <div class="s-data"><div class="s-val s-green" id="p-kProfit">--</div><div class="s-lbl">Net Profit</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#F3E8FD">&#x1F4CA;</div>
+            <div class="s-data"><div class="s-val s-navy" id="p-kMargin">--</div><div class="s-lbl">Avg Margin %</div></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <span class="filter-label">Type</span>
+            <div class="seg-group" id="p-typeFilter">
+              <button class="seg-btn active" data-val="All">All</button>
+              <button class="seg-btn" data-val="Standard">Standard</button>
+              <button class="seg-btn" data-val="Contract">Contract</button>
+            </div>
+          </div>
+          <div class="toolbar-search">
+            <input class="search-input" id="p-profitSearch" type="text" placeholder="Search WO#, scope type..."/>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+          <div class="metric-cards">
+            <div class="metric-card">
+              <div class="mc-val" id="p-mcRevenue">--</div>
+              <div class="mc-lbl">Total Revenue</div>
+              <div class="mc-sub" id="p-mcRevenueSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="p-mcExpenses">--</div>
+              <div class="mc-lbl">Total Expenses</div>
+              <div class="mc-sub" id="p-mcExpensesSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val mc-green" id="p-mcProfit">--</div>
+              <div class="mc-lbl">Net Profit</div>
+              <div class="mc-sub" id="p-mcProfitSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="p-mcMargin">--</div>
+              <div class="mc-lbl">Avg Margin %</div>
+              <div class="mc-sub" id="p-mcMarginSub">&nbsp;</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <div class="section-header">Per-Repair Profitability</div>
+            <table>
+              <thead id="p-profitThead">
+                <tr>
+                  <th data-col="wo" style="width:120px">WO#</th>
+                  <th data-col="scopeType">Scope Type</th>
+                  <th data-col="revenue" style="text-align:right">Revenue</th>
+                  <th data-col="outsource" style="text-align:right">Outsource</th>
+                  <th data-col="shipping" style="text-align:right">Shipping</th>
+                  <th data-col="labor" style="text-align:right">Labor</th>
+                  <th data-col="gpo" style="text-align:right">GPO</th>
+                  <th data-col="commission" style="text-align:right">Commission</th>
+                  <th data-col="profit" style="text-align:right">Profit</th>
+                  <th data-col="margin" style="text-align:right;width:100px">Margin %</th>
+                </tr>
+              </thead>
+              <tbody id="p-profitTbody">
+                <tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+          <div class="record-info" id="p-profitRecordInfo">Loading...</div>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  PANEL 4: REVENUE / EXPENSE                            -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="analytics-panel" id="panel-revenue">
+
+        <!-- Stat Strip -->
+        <div class="stat-strip">
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E3F2FD">&#x1F4B0;</div>
+            <div class="s-data"><div class="s-val s-navy" id="r-kRevenue">--</div><div class="s-lbl">Total Revenue</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#E8F5E9">&#x2714;</div>
+            <div class="s-data"><div class="s-val s-green" id="r-kProfit">--</div><div class="s-lbl">Total Profit</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#F3E8FD">&#x1F3C6;</div>
+            <div class="s-data"><div class="s-val s-navy" id="r-kTopState">--</div><div class="s-lbl">Top State</div></div>
+          </div>
+          <div class="stat-chip">
+            <div class="s-icon" style="background:#FFFBEB">&#x2B50;</div>
+            <div class="s-data"><div class="s-val s-navy" id="r-kTopRep">--</div><div class="s-lbl">Top Sales Rep</div></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <span class="filter-label">View</span>
+            <div class="seg-group" id="r-viewFilter">
+              <button class="seg-btn active" data-val="state">By State</button>
+              <button class="seg-btn" data-val="rep">By Sales Rep</button>
+            </div>
+          </div>
+          <div class="toolbar-search">
+            <input class="search-input" id="r-revSearch" type="text" placeholder="Search..."/>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+          <div class="metric-cards">
+            <div class="metric-card">
+              <div class="mc-val" id="r-mcRevenue">--</div>
+              <div class="mc-lbl">Total Revenue</div>
+              <div class="mc-sub" id="r-mcRevenueSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val mc-green" id="r-mcProfit">--</div>
+              <div class="mc-lbl">Total Profit</div>
+              <div class="mc-sub" id="r-mcProfitSub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="r-mcTopEntity">--</div>
+              <div class="mc-lbl" id="r-mcTopEntityLbl">Top State</div>
+              <div class="mc-sub" id="r-mcTopEntitySub">&nbsp;</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-val" id="r-mcAvgMargin">--</div>
+              <div class="mc-lbl">Avg Margin %</div>
+              <div class="mc-sub" id="r-mcAvgMarginSub">&nbsp;</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <div class="section-header" id="r-tableHeader">Revenue by State</div>
+            <table>
+              <thead id="r-revThead">
+                <tr>
+                  <th data-col="name">State</th>
+                  <th data-col="revenue" style="text-align:right">Revenue</th>
+                  <th data-col="expenses" style="text-align:right">Expenses</th>
+                  <th data-col="profit" style="text-align:right">Profit</th>
+                  <th data-col="margin" style="text-align:right;width:100px">Margin %</th>
+                  <th data-col="count" style="text-align:right;width:100px">Repair Count</th>
+                </tr>
+              </thead>
+              <tbody id="r-revTbody">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+          <div class="record-info" id="r-revRecordInfo">Loading...</div>
+          <div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
+<script src="api.js"></script>
+<script>
+// ── Auth Guard ──
+if (!API.requireAuth()) throw new Error('redirect');
+
+// ═══════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+var activePanel = 'metrics';
+
+function switchAnalyticsTab(panelId) {
+  document.querySelectorAll('.analytics-panel').forEach(function(p) { p.style.display = 'none'; });
+  document.getElementById('panel-' + panelId).style.display = 'flex';
+  document.querySelectorAll('.analytics-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelector('.analytics-tab[data-panel="' + panelId + '"]').classList.add('active');
+  activePanel = panelId;
+  if (panelId === 'metrics' && !Metrics.loaded) Metrics.load();
+  if (panelId === 'tat' && !TAT.loaded) TAT.load();
+  if (panelId === 'profit' && !Profit.loaded) Profit.load();
+  if (panelId === 'revenue' && !Revenue.loaded) Revenue.load();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PANEL 1: METRICS
+// ═══════════════════════════════════════════════════════
+var Metrics = {
+  loaded: false,
+  currentPeriod: 'MTD',
+  searchTerm: '',
+  data: null,
+
+  load: function() {
+    var self = this;
+    MockAPI.handleRequest('GET', '/Dashboard/GetRepairMetrics?period=' + self.currentPeriod)
+      .then(function(data) {
+        self.data = data;
+        self.renderCards();
+        self.renderTable();
+        self.loaded = true;
+      })
+      .catch(function(e) { console.error('Metrics load failed:', e); });
+  },
+
+  renderCards: function() {
+    if (!this.data) return;
+    var d = this.data;
+    document.getElementById('m-kInHouse').textContent = d.inHouse;
+    document.getElementById('m-kAvgTat').textContent = d.avgTat + 'd';
+    document.getElementById('m-kOnTime').textContent = d.onTimePct + '%';
+    document.getElementById('m-kThruput').textContent = d.throughput;
+    document.getElementById('m-mcAvgTat').textContent = d.avgTat + 'd';
+    document.getElementById('m-mcAvgTatSub').textContent = d.totalInPeriod + ' repairs in period';
+    document.getElementById('m-mcThruput').textContent = d.throughput;
+    document.getElementById('m-mcThruputSub').textContent = this.currentPeriod + ' shipped';
+    document.getElementById('m-mcOnTime').textContent = d.onTimePct + '%';
+    document.getElementById('m-mcOnTimeSub').textContent = 'within 10-day SLA';
+    document.getElementById('m-mcInHouse').textContent = d.inHouse;
+    document.getElementById('m-mcInHouseSub').textContent = 'awaiting completion';
+  },
+
+  renderTable: function() {
+    if (!this.data) return;
+    var rows = this.data.scopeTypes || [];
+    if (this.searchTerm) {
+      var q = this.searchTerm.toLowerCase();
+      rows = rows.filter(function(r) { return r.type.toLowerCase().includes(q); });
+    }
+    var tbody = document.getElementById('m-metricsTbody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No scope types found</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(function(r, i) {
+        return '<tr>' +
+          '<td class="rank-cell">' + (i + 1) + '</td>' +
+          '<td class="model-cell">' + r.type + '</td>' +
+          '<td class="num-cell">' + r.count + '</td>' +
+          '<td class="num-cell">' + (r.avgTat !== null ? r.avgTat + 'd' : '&#8212;') + '</td>' +
+          '<td class="num-cell">' + r.inProgress + '</td>' +
+          '<td class="num-cell">' + r.completed + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+    var periodLabel = this.currentPeriod === 'MTD' ? 'Month to Date' : this.currentPeriod === 'QTD' ? 'Quarter to Date' : 'Year to Date';
+    document.getElementById('m-metricsRecordInfo').innerHTML = '<strong>' + rows.length + '</strong> scope types &middot; ' + periodLabel;
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  PANEL 2: TURN AROUND TIMES
+// ═══════════════════════════════════════════════════════
+var TAT = {
+  loaded: false,
+  sourceFilter: 'all',
+  searchTerm: '',
+  data: null,
+  SLA: { 'Minor': 5, 'Mid-Level': 8, 'Major': 12, 'VSI': 5 },
+
+  load: function() {
+    var self = this;
+    var params = [];
+    if (self.sourceFilter === 'inhouse') params.push('inhouse=true');
+    if (self.sourceFilter === 'outsourced') params.push('outsourced=true');
+    MockAPI.handleRequest('GET', '/Dashboard/GetTATMatrix' + (params.length ? '?' + params.join('&') : ''))
+      .then(function(data) {
+        self.data = data;
+        self.renderMatrix();
+        self.renderScopeTable();
+        self.updateKPIStrip();
+        self.loaded = true;
+      })
+      .catch(function(e) { console.error('TAT load failed:', e); });
+  },
+
+  tatCell: function(avgTat, count, sla) {
+    if (avgTat === null || count === 0) return '<span class="tat-na">&#8212;</span>';
+    var cls = 'tat-green';
+    if (sla) {
+      if (avgTat > sla) cls = 'tat-red';
+      else if (avgTat > sla * 0.8) cls = 'tat-amber';
+    } else {
+      if (avgTat > 10) cls = 'tat-red';
+      else if (avgTat > 7) cls = 'tat-amber';
+    }
+    return '<span class="tat-cell ' + cls + '"><span class="tat-days">' + avgTat + 'd</span><span class="tat-count">' + count + ' repairs</span></span>';
+  },
+
+  renderMatrix: function() {
+    if (!this.data) return;
+    var self = this;
+    var tbody = document.getElementById('t-matrixTbody');
+    var windows = this.data.windows || ['Current Month', 'Last 30 Days', 'Last 3 Months', 'Last 6 Months'];
+    tbody.innerHTML = this.data.matrix.map(function(row) {
+      var sla = self.SLA[row.level] || 10;
+      return '<tr><td>' + row.level + '</td>' +
+        windows.map(function(w) {
+          var cell = row[w] || { avgTat: null, count: 0 };
+          return '<td>' + self.tatCell(cell.avgTat, cell.count, sla) + '</td>';
+        }).join('') + '</tr>';
+    }).join('');
+  },
+
+  renderScopeTable: function() {
+    if (!this.data) return;
+    var self = this;
+    var rows = this.data.scopeTypes || [];
+    var windows = this.data.windows || ['Current Month', 'Last 30 Days', 'Last 3 Months', 'Last 6 Months'];
+    if (this.searchTerm) {
+      var q = this.searchTerm.toLowerCase();
+      rows = rows.filter(function(r) { return r.type.toLowerCase().includes(q); });
+    }
+    var tbody = document.getElementById('t-scopeTbody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No scope types found</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(function(r) {
+        return '<tr><td>' + r.type + '</td>' +
+          '<td>' + self.tatCell(r.avgTat, r.totalCount, null) + '</td>' +
+          windows.map(function(w) {
+            var cell = r[w] || { avgTat: null, count: 0 };
+            return '<td>' + self.tatCell(cell.avgTat, cell.count, null) + '</td>';
+          }).join('') +
+          '<td style="font-weight:600;text-align:center">' + r.totalCount + '</td></tr>';
+      }).join('');
+    }
+    document.getElementById('t-tatRecordInfo').innerHTML = '<strong>' + rows.length + '</strong> scope types &middot; TAT analysis';
+  },
+
+  updateKPIStrip: function() {
+    if (!this.data || !this.data.matrix) return;
+    var cm = 'Current Month';
+    this.data.matrix.forEach(function(row) {
+      var cell = row[cm] || {};
+      var val = cell.avgTat !== null ? cell.avgTat + 'd' : '--';
+      if (row.level === 'Minor') document.getElementById('t-kMinor').textContent = val;
+      if (row.level === 'Mid-Level') document.getElementById('t-kMid').textContent = val;
+      if (row.level === 'Major') document.getElementById('t-kMajor').textContent = val;
+      if (row.level === 'VSI') document.getElementById('t-kVSI').textContent = val;
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  PANEL 3: PROFITABILITY
+// ═══════════════════════════════════════════════════════
+var Profit = {
+  loaded: false,
+  allData: [],
+  filterType: 'All',
+  searchTerm: '',
+  sortCol: 'profit',
+  sortDir: 'desc',
+
+  escHtml: function(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); },
+
+  fmtCurrency: function(n) {
+    if (n == null || isNaN(n)) return '$0.00';
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  },
+
+  fmtPct: function(n) {
+    if (n == null || isNaN(n)) return '0.0%';
+    return Number(n).toFixed(1) + '%';
+  },
+
+  calcExpenses: function(r) {
+    return (Number(r.OutsourceAmount) || 0) +
+           (Number(r.ShippingAmount) || 0) +
+           (Number(r.LaborAmount) || 0) +
+           (Number(r.GPOAmount) || 0) +
+           (Number(r.CommissionAmount) || 0);
+  },
+
+  calcProfit: function(r) {
+    return (Number(r.RevenueAmount) || 0) - this.calcExpenses(r);
+  },
+
+  calcMargin: function(r) {
+    var rev = Number(r.RevenueAmount) || 0;
+    if (rev === 0) return 0;
+    return (this.calcProfit(r) / rev) * 100;
+  },
+
+  marginClass: function(pct) {
+    if (pct > 30) return 'margin-green';
+    if (pct >= 10) return 'margin-amber';
+    return 'margin-red';
+  },
+
+  mapRow: function(r, source) {
+    var profit = this.calcProfit(r);
+    var margin = this.calcMargin(r);
+    return {
+      wo: r.sWorkOrderNumber || r.sRepairWO || '',
+      scopeType: r.sScopeTypeDesc || '',
+      revenue: Number(r.RevenueAmount) || 0,
+      outsource: Number(r.OutsourceAmount) || 0,
+      shipping: Number(r.ShippingAmount) || 0,
+      labor: Number(r.LaborAmount) || 0,
+      gpo: Number(r.GPOAmount) || 0,
+      commission: Number(r.CommissionAmount) || 0,
+      profit: profit,
+      margin: margin,
+      source: source,
+      _raw: r
+    };
+  },
+
+  load: function() {
+    var self = this;
+    try {
+      var standard = MockDB.getAll('profitability') || [];
+      var contract = MockDB.getAll('contractProfitability') || [];
+      self.allData = [];
+      standard.forEach(function(r) { self.allData.push(self.mapRow(r, 'Standard')); });
+      contract.forEach(function(r) { self.allData.push(self.mapRow(r, 'Contract')); });
+      console.log('[TSI Profitability] Loaded', self.allData.length, 'records (' + standard.length + ' standard, ' + contract.length + ' contract)');
+    } catch (e) {
+      console.error('Failed to load profitability data:', e);
+      self.allData = [];
+    }
+    self.renderCards();
+    self.renderTable();
+    self.loaded = true;
+  },
+
+  getFiltered: function() {
+    var self = this;
+    var list = self.allData.slice();
+
+    if (self.filterType === 'Standard') list = list.filter(function(r) { return r.source === 'Standard'; });
+    else if (self.filterType === 'Contract') list = list.filter(function(r) { return r.source === 'Contract'; });
+
+    if (self.searchTerm) {
+      var q = self.searchTerm.toLowerCase();
+      list = list.filter(function(r) {
+        return r.wo.toLowerCase().includes(q) || r.scopeType.toLowerCase().includes(q);
+      });
+    }
+
+    var col = self.sortCol;
+    var dir = self.sortDir;
+    list.sort(function(a, b) {
+      var va = a[col], vb = b[col];
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb || '').toLowerCase(); }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return list;
+  },
+
+  renderCards: function() {
+    var self = this;
+    var filtered = self.getFiltered();
+    var totalRev = 0, totalExp = 0;
+    filtered.forEach(function(r) {
+      totalRev += r.revenue;
+      totalExp += r.outsource + r.shipping + r.labor + r.gpo + r.commission;
+    });
+    var totalProfit = totalRev - totalExp;
+    var avgMargin = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0;
+
+    document.getElementById('p-kRevenue').textContent = self.fmtCurrency(totalRev);
+    document.getElementById('p-kExpenses').textContent = self.fmtCurrency(totalExp);
+    document.getElementById('p-kProfit').textContent = self.fmtCurrency(totalProfit);
+    document.getElementById('p-kMargin').textContent = self.fmtPct(avgMargin);
+
+    document.getElementById('p-mcRevenue').textContent = self.fmtCurrency(totalRev);
+    document.getElementById('p-mcRevenueSub').textContent = filtered.length + ' repairs';
+    document.getElementById('p-mcExpenses').textContent = self.fmtCurrency(totalExp);
+    document.getElementById('p-mcExpensesSub').textContent = 'across all categories';
+    document.getElementById('p-mcProfit').textContent = self.fmtCurrency(totalProfit);
+    document.getElementById('p-mcProfitSub').textContent = totalProfit >= 0 ? 'net positive' : 'net loss';
+    document.getElementById('p-mcMargin').textContent = self.fmtPct(avgMargin);
+    document.getElementById('p-mcMarginSub').textContent = 'weighted average';
+
+    var profitEl = document.getElementById('p-mcProfit');
+    profitEl.className = 'mc-val ' + (totalProfit >= 0 ? 'mc-green' : 'mc-red');
+  },
+
+  renderTable: function() {
+    var self = this;
+    var filtered = self.getFiltered();
+    var tbody = document.getElementById('p-profitTbody');
+
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+    } else {
+      tbody.innerHTML = filtered.map(function(r) {
+        return '<tr>' +
+          '<td>' + (r.wo ? '<a class="wo-link" href="repairs.html?wo=' + self.escHtml(r.wo) + '">' + self.escHtml(r.wo) + '</a>' : '<span style="color:var(--muted)">&#8212;</span>') + '</td>' +
+          '<td style="font-weight:500">' + self.escHtml(r.scopeType) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.outsource) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.shipping) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.labor) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.gpo) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.commission) + '</td>' +
+          '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? '#2E7D32' : '#C62828') + '">' + self.fmtCurrency(r.profit) + '</td>' +
+          '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // Update sort indicators scoped to profitability thead
+    document.querySelectorAll('#p-profitThead th[data-col]').forEach(function(th) {
+      th.classList.remove('sorted-asc', 'sorted-desc');
+      if (th.dataset.col === self.sortCol) th.classList.add(self.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    });
+
+    var typeLabel = self.filterType === 'All' ? 'All Types' : self.filterType;
+    document.getElementById('p-profitRecordInfo').innerHTML = '<strong>' + filtered.length + '</strong> records &middot; ' + typeLabel;
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  PANEL 4: REVENUE / EXPENSE
+// ═══════════════════════════════════════════════════════
+var Revenue = {
+  loaded: false,
+  allData: [],
+  salesRepMap: {},
+  currentView: 'state',
+  searchTerm: '',
+  sortCol: 'revenue',
+  sortDir: 'desc',
+
+  escHtml: function(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); },
+
+  fmtCurrency: function(n) {
+    if (n == null || isNaN(n)) return '$0.00';
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  },
+
+  fmtPct: function(n) {
+    if (n == null || isNaN(n)) return '0.0%';
+    return Number(n).toFixed(1) + '%';
+  },
+
+  calcExpenses: function(r) {
+    return (Number(r.OutsourceAmount) || 0) +
+           (Number(r.ShippingAmount) || 0) +
+           (Number(r.LaborAmount) || 0) +
+           (Number(r.GPOAmount) || 0) +
+           (Number(r.CommissionAmount) || 0);
+  },
+
+  marginClass: function(pct) {
+    if (pct > 30) return 'margin-green';
+    if (pct >= 10) return 'margin-amber';
+    return 'margin-red';
+  },
+
+  buildRepMap: function() {
+    var self = this;
+    var reps = MockDB.getAll('salesReps') || [];
+    reps.forEach(function(r) {
+      var name = ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim();
+      self.salesRepMap[r.lSalesRepKey] = name || ('Rep #' + r.lSalesRepKey);
+    });
+  },
+
+  load: function() {
+    var self = this;
+    try {
+      self.buildRepMap();
+      var standard = MockDB.getAll('profitability') || [];
+      var contract = MockDB.getAll('contractProfitability') || [];
+      self.allData = standard.concat(contract);
+      console.log('[TSI Revenue] Loaded', self.allData.length, 'records');
+    } catch (e) {
+      console.error('Failed to load revenue data:', e);
+      self.allData = [];
+    }
+    self.renderAll();
+    self.loaded = true;
+  },
+
+  aggregate: function(keyFn, labelFn) {
+    var self = this;
+    var map = {};
+    self.allData.forEach(function(r) {
+      var key = keyFn(r);
+      if (!key) return;
+      if (!map[key]) map[key] = { name: labelFn(r), revenue: 0, expenses: 0, count: 0 };
+      map[key].revenue += (Number(r.RevenueAmount) || 0);
+      map[key].expenses += self.calcExpenses(r);
+      map[key].count++;
+    });
+
+    return Object.values(map).map(function(g) {
+      g.profit = g.revenue - g.expenses;
+      g.margin = g.revenue > 0 ? (g.profit / g.revenue) * 100 : 0;
+      return g;
+    });
+  },
+
+  getAggregated: function() {
+    var self = this;
+    var rows;
+    if (self.currentView === 'state') {
+      rows = self.aggregate(
+        function(r) { return (r.sShipState || '').trim().toUpperCase() || null; },
+        function(r) { return (r.sShipState || '').trim().toUpperCase() || 'Unknown'; }
+      );
+    } else {
+      rows = self.aggregate(
+        function(r) { return r.lSalesRepKey || null; },
+        function(r) { return self.salesRepMap[r.lSalesRepKey] || ('Rep #' + r.lSalesRepKey); }
+      );
+    }
+
+    if (self.searchTerm) {
+      var q = self.searchTerm.toLowerCase();
+      rows = rows.filter(function(r) { return r.name.toLowerCase().includes(q); });
+    }
+
+    var col = self.sortCol;
+    var dir = self.sortDir;
+    rows.sort(function(a, b) {
+      var va = a[col], vb = b[col];
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb || '').toLowerCase(); }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return rows;
+  },
+
+  renderAll: function() {
+    this.renderCards();
+    this.renderTable();
+  },
+
+  renderCards: function() {
+    var self = this;
+    var rows = self.getAggregated();
+    var totalRev = 0, totalProfit = 0, totalCount = 0;
+    rows.forEach(function(r) { totalRev += r.revenue; totalProfit += r.profit; totalCount += r.count; });
+    var avgMargin = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0;
+
+    var topRow = rows.length ? rows.reduce(function(best, r) { return r.revenue > best.revenue ? r : best; }, rows[0]) : null;
+    var topName = topRow ? topRow.name : '--';
+    var topRev = topRow ? self.fmtCurrency(topRow.revenue) : '--';
+
+    document.getElementById('r-kRevenue').textContent = self.fmtCurrency(totalRev);
+    document.getElementById('r-kProfit').textContent = self.fmtCurrency(totalProfit);
+    document.getElementById('r-kTopState').textContent = self.currentView === 'state' ? topName : '--';
+    document.getElementById('r-kTopRep').textContent = self.currentView === 'rep' ? topName : '--';
+
+    document.getElementById('r-mcRevenue').textContent = self.fmtCurrency(totalRev);
+    document.getElementById('r-mcRevenueSub').textContent = totalCount + ' repairs total';
+    document.getElementById('r-mcProfit').textContent = self.fmtCurrency(totalProfit);
+    document.getElementById('r-mcProfitSub').textContent = totalProfit >= 0 ? 'net positive' : 'net loss';
+    document.getElementById('r-mcTopEntity').textContent = topName;
+    document.getElementById('r-mcTopEntityLbl').textContent = self.currentView === 'state' ? 'Top State' : 'Top Sales Rep';
+    document.getElementById('r-mcTopEntitySub').textContent = topRev + ' revenue';
+    document.getElementById('r-mcAvgMargin').textContent = self.fmtPct(avgMargin);
+    document.getElementById('r-mcAvgMarginSub').textContent = 'weighted average';
+  },
+
+  renderTable: function() {
+    var self = this;
+    var rows = self.getAggregated();
+    var tbody = document.getElementById('r-revTbody');
+    var entityLabel = self.currentView === 'state' ? 'State' : 'Sales Rep';
+
+    document.getElementById('r-tableHeader').textContent = 'Revenue by ' + entityLabel;
+
+    var firstTh = document.querySelector('#r-revThead th[data-col="name"]');
+    if (firstTh) firstTh.textContent = entityLabel;
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No data found</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(function(r) {
+        return '<tr>' +
+          '<td style="font-weight:600;color:var(--navy)">' + self.escHtml(r.name) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
+          '<td class="num-cell">' + self.fmtCurrency(r.expenses) + '</td>' +
+          '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? '#2E7D32' : '#C62828') + '">' + self.fmtCurrency(r.profit) + '</td>' +
+          '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
+          '<td class="num-cell">' + r.count + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // Update sort indicators scoped to revenue thead
+    document.querySelectorAll('#r-revThead th[data-col]').forEach(function(th) {
+      th.classList.remove('sorted-asc', 'sorted-desc');
+      if (th.dataset.col === self.sortCol) th.classList.add(self.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    });
+
+    document.getElementById('r-revRecordInfo').innerHTML =
+      '<strong>' + rows.length + '</strong> ' + entityLabel.toLowerCase() + (rows.length !== 1 ? 's' : '') +
+      ' &middot; By ' + entityLabel;
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  FILTER / SEARCH / SORT WIRING (all panels)
+// ═══════════════════════════════════════════════════════
+
+// -- Metrics: Period filter --
+document.getElementById('m-periodFilter').querySelectorAll('.seg-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.getElementById('m-periodFilter').querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    Metrics.currentPeriod = btn.dataset.val;
+    Metrics.load();
+  });
+});
+
+// -- Metrics: Search --
+document.getElementById('m-metricSearch').addEventListener('input', function() {
+  Metrics.searchTerm = this.value.trim();
+  Metrics.renderTable();
+});
+
+// -- TAT: Source filter --
+document.getElementById('t-sourceFilter').querySelectorAll('.seg-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.getElementById('t-sourceFilter').querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    TAT.sourceFilter = btn.dataset.val;
+    TAT.load();
+  });
+});
+
+// -- TAT: Search --
+document.getElementById('t-tatSearch').addEventListener('input', function() {
+  TAT.searchTerm = this.value.trim();
+  TAT.renderScopeTable();
+});
+
+// -- Profitability: Type filter --
+document.getElementById('p-typeFilter').querySelectorAll('.seg-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.getElementById('p-typeFilter').querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    Profit.filterType = btn.dataset.val;
+    Profit.renderCards();
+    Profit.renderTable();
+  });
+});
+
+// -- Profitability: Search --
+document.getElementById('p-profitSearch').addEventListener('input', function() {
+  Profit.searchTerm = this.value.trim();
+  Profit.renderCards();
+  Profit.renderTable();
+});
+
+// -- Profitability: Column sort --
+document.querySelectorAll('#p-profitThead th[data-col]').forEach(function(th) {
+  th.addEventListener('click', function() {
+    var col = th.dataset.col;
+    if (Profit.sortCol === col) { Profit.sortDir = Profit.sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { Profit.sortCol = col; Profit.sortDir = 'desc'; }
+    Profit.renderCards();
+    Profit.renderTable();
+  });
+});
+
+// -- Revenue: View toggle --
+document.getElementById('r-viewFilter').querySelectorAll('.seg-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.getElementById('r-viewFilter').querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    Revenue.currentView = btn.dataset.val;
+    Revenue.sortCol = 'revenue';
+    Revenue.sortDir = 'desc';
+    Revenue.renderAll();
+  });
+});
+
+// -- Revenue: Search --
+document.getElementById('r-revSearch').addEventListener('input', function() {
+  Revenue.searchTerm = this.value.trim();
+  Revenue.renderAll();
+});
+
+// -- Revenue: Column sort --
+document.querySelectorAll('#r-revThead th[data-col]').forEach(function(th) {
+  th.addEventListener('click', function() {
+    var col = th.dataset.col;
+    if (Revenue.sortCol === col) { Revenue.sortDir = Revenue.sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { Revenue.sortCol = col; Revenue.sortDir = 'desc'; }
+    Revenue.renderTable();
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+(function init() {
+  API.UI.init();
+  Metrics.load(); // Load default panel immediately
+})();
+</script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
+</body>
+</html>
