@@ -3704,8 +3704,8 @@ function populateDetail(d) {
 
   // ── REFERENCE STRIP ──
   document.getElementById('hDateIn').value = toDateInput(d.dtDateIn);
-  document.getElementById('hClient').textContent = d.sShipName1 || d.sBillName1 || '—';
-  document.getElementById('hDept').textContent = d.sShipName2 || '—';
+  document.getElementById('hClient').textContent = d.sShipName1 || d.sBillName1 || d.sClientName1 || (_clients.find(c => c.lClientKey == d.lClientKey) || {}).sClientName1 || '—';
+  document.getElementById('hDept').textContent = d.sShipName2 || (_departments.find(x => x.lDepartmentKey == d.lDepartmentKey) || {}).sDepartmentName || '—';
   document.getElementById('hPO').value = d.sPurchaseOrder || '';
   document.getElementById('hWO').textContent = d.sWorkOrderNumber || '—';
   document.getElementById('hRack').value = d.sRackPosition || '';
