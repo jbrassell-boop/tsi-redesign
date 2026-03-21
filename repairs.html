@@ -2063,7 +2063,7 @@
 <!-- WORKFLOW TOAST -->
 <div class="wf-toast" id="wfToast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
 <script src="mock-db.js"></script>
@@ -2489,56 +2489,63 @@ function buildPickListPdf(d) {
 
 // ── Invoice ─────────────────────────────────────────────────────
 function buildInvoicePdf(d) {
-  const E = TSIExport;
-  const doc = E.createPDF();
   const r = d.r;
-  let y = E.addTSIHeader(doc, 'Final Invoice', '');
 
-  y = E.addKeyValueGrid(doc, [
-    ['Invoice #', r.sInvoiceNumber || 'Pending'], ['Date', E.fmtDate(new Date())],
-    ['PO #', r.sPurchaseOrder || '—'], ['W.O. #', d.wo]
-  ], y);
-
-  y = E.addSectionLabel(doc, 'Line Items', y);
-  const visItems = d.visibleItems;
-  const rows = visItems.map(i => [i.desc, i.amount]);
-  if (rows.length) {
-    y = E.addTable(doc, ['Description', 'Amount'], rows, y, {
-      columnStyles: { 1: { halign: 'right', cellWidth: 70 } }
-    });
-  } else {
-    y = E.addParagraph(doc, 'No billable items', y, { color: E.COLORS.steel });
+  // Look up real invoice record from MockDB
+  let inv = null;
+  let details = [];
+  if (typeof MockDB !== 'undefined') {
+    const invoices = MockDB.getAll('invoices') || [];
+    inv = invoices.find(i => i.lRepairKey === r.lRepairKey);
+    if (inv) {
+      details = (MockDB.getAll('invoiceDetails') || []).filter(dt => dt.lInvoiceKey === inv.lInvoiceKey);
+    }
   }
 
-  // Totals
-  const totalAmount = visItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
-  const shipping = r.dblAmtShipping || 0;
-  const tax = parseFloat(r.dblAmtTax) || 0;
-  y = E.checkPageBreak(doc, y, 50);
-  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(E.COLORS.black);
-  const totX = E.PAGE.w - E.PAGE.margin;
-  doc.text('Sub Total: ' + E.fmtCurrency(totalAmount), totX, y, { align: 'right' }); y += 13;
-  doc.text('Shipping: ' + E.fmtCurrency(shipping), totX, y, { align: 'right' }); y += 13;
-  doc.text('Tax: ' + E.fmtCurrency(tax), totX, y, { align: 'right' }); y += 13;
-  doc.setFontSize(11); doc.setTextColor(E.COLORS.navy);
-  doc.text('Total Due: ' + E.fmtCurrency(totalAmount + shipping + tax), totX, y, { align: 'right' }); y += 20;
+  // Fall back: build a synthetic invoice record from repair data
+  if (!inv) {
+    inv = {
+      sTranNumber:    r.sInvoiceNumber || r.sWorkOrderNumber || '',
+      dtTranDate:     r.dtDateShipped || new Date(),
+      dtDueDate:      null,
+      dtAprRecvd:     r.dtApprovalDate || null,
+      sPurchaseOrder: r.sPurchaseOrder || '',
+      sUnderContract: r.sUnderContract || '',
+      dblTranAmount:  parseFloat(r.mMaxCharge) || 0,
+      dblShippingAmt: parseFloat(r.dblAmtShipping) || 0,
+      dblJuris1Name: '', dblJuris1Pct: 0, dblJuris1Amt: 0,
+      dblJuris2Name: '', dblJuris2Pct: 0, dblJuris2Amt: 0,
+      dblJuris3Name: '', dblJuris3Pct: 0, dblJuris3Amt: 0,
+      sBillName1: r.sBillName1 || '', sBillName2: r.sBillName2 || '',
+      sBillAddr1: r.sBillAddr1 || '', sBillAddr2: r.sBillAddr2 || '',
+      sBillCity:  r.sBillCity  || '', sBillState: r.sBillState || '', sBillZip: r.sBillZip || '',
+      sShipName1: r.sShipName1 || '', sShipName2: r.sShipName2 || '',
+      sShipAddr1: r.sShipAddr1 || '', sShipAddr2: r.sShipAddr2 || '',
+      sShipCity:  r.sShipCity  || '', sShipState: r.sShipState || '', sShipZip: r.sShipZip || '',
+      lClientKey: r.lClientKey || '',
+      bIsVoid:    false
+    };
+    // Build detail rows from repair items
+    details = d.visibleItems.map(i => ({
+      sItemDescription: i.desc,
+      dblItemAmount: parseFloat((i.amount || '').replace(/[^0-9.-]/g, '')) || 0
+    }));
+  }
 
-  // Payment Terms + Bill To
-  y = E.checkPageBreak(doc, y, 60);
-  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
-  doc.text('Payment Terms: ' + (r.lPaymentTermsKey || 'Net 30'), E.PAGE.margin, y);
-  y += 16;
+  // Resolve salesperson name
+  let salesperson = d.repName || '';
+  if (!salesperson && typeof MockDB !== 'undefined') {
+    const reps = MockDB.getAll('salesReps') || [];
+    const rep = reps.find(s => s.lSalesRepKey === (r.lSalesRepNameKey || r.lSalesRepKey));
+    if (rep) salesperson = ((rep.sRepFirst || '') + ' ' + (rep.sRepLast || '')).trim();
+  }
 
-  y = E.addAddressBlock(doc, 'Bill To', {
-    name: r.sBillName1 || '',
-    addr1: r.sBillAddr1 || '',
-    addr2: r.sBillAddr2 || '',
-    city: r.sBillCity || '',
-    state: r.sBillState || '',
-    zip: r.sBillZip || ''
-  }, E.PAGE.margin, y);
-
-  E.savePDF(doc, pdfFileName('invoice'));
+  TSIExport.buildInvoicePdf(inv, details, {
+    repair:       r,
+    salesperson:  salesperson,
+    shipVia:      r.sDeliveryMethod || '',
+    paymentTerms: ''
+  });
 }
 
 // ── Packing Slip (Scope Return Verification) ────────────────────
@@ -2965,6 +2972,16 @@ function populateFormDrawer(formId) {
     const otherItems = filteredItems.filter(i => !(i.desc || '').toLowerCase().includes('diagnostic inspection')).sort((a, b) => (a.desc || '').localeCompare(b.desc || ''));
     const visibleItems = [...diItems, ...otherItems];
 
+    // Bill-to: resolve from department record (has sBillName1, sBillAddr1, etc.)
+    const billDept = _departments.find(d => d.lDepartmentKey == r.lDepartmentKey) || {};
+    const billName1 = billDept.sBillName1 || r.sShipName1 || clientName || '—';
+    const billName2 = billDept.sBillName2 || '';
+    const billAddr1 = billDept.sBillAddr1 || billDept.sMailAddr1 || '';
+    const billAddr2 = billDept.sBillAddr2 || '';
+    const billCity = billDept.sBillCity || billDept.sMailCity || '';
+    const billState = billDept.sBillState || billDept.sMailState || '';
+    const billZip = billDept.sBillZip || billDept.sMailZip || '';
+
     reqBody.innerHTML = `
       <!-- BRANDED HEADER BAND -->
       <div class="wf-est-header">
@@ -2983,11 +3000,11 @@ function populateFormDrawer(formId) {
           <div class="wf-est-equip" style="justify-content:flex-start">
             <div class="wf-est-label" style="margin-bottom:4px">Bill To</div>
             <div class="wf-est-addr">
-              ${r.sBillName1 || r.sShipName1 || '—'}<br/>
-              ${r.sBillName2 ? r.sBillName2 + '<br/>' : ''}
-              ${r.sBillAddr1 ? r.sBillAddr1 + '<br/>' : ''}
-              ${r.sBillAddr2 ? r.sBillAddr2 + '<br/>' : ''}
-              ${[r.sBillCity, r.sBillState].filter(Boolean).join(', ')} ${r.sBillZip || ''}
+              ${billName1}<br/>
+              ${billName2 ? billName2 + '<br/>' : ''}
+              ${billAddr1 ? billAddr1 + '<br/>' : ''}
+              ${billAddr2 ? billAddr2 + '<br/>' : ''}
+              ${[billCity, billState].filter(Boolean).join(', ')} ${billZip}
             </div>
           </div>
           <div class="wf-est-equip" style="justify-content:flex-start">
@@ -3005,7 +3022,7 @@ function populateFormDrawer(formId) {
               <div class="wf-est-equip-row"><b>Mfr</b><span>${r.sManufacturer || '—'}</span></div>
               <div class="wf-est-equip-row"><b>Model</b><span>${r.sScopeTypeDesc || '—'}</span></div>
               <div class="wf-est-equip-row"><b>Serial #</b><span>${r.sSerialNumber || '—'}</span></div>
-              <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || '—'}</span></div>
+              <div class="wf-est-equip-row"><b>P.O. #</b><span>${r.sPurchaseOrder || r.sPONumber || '—'}</span></div>
               <div class="wf-est-equip-row"><b>Terms</b><span>${payTerms}</span></div>
             </div>
           </div>
@@ -3740,7 +3757,7 @@ function populateDetail(d) {
   document.getElementById('hDateIn').value = toDateInput(d.dtDateIn);
   document.getElementById('hClient').textContent = d.sShipName1 || d.sBillName1 || d.sClientName1 || (_clients.find(c => c.lClientKey == d.lClientKey) || {}).sClientName1 || '—';
   document.getElementById('hDept').textContent = d.sShipName2 || d.sDepartmentName || (_departments.find(x => x.lDepartmentKey == d.lDepartmentKey) || {}).sDepartmentName || '—';
-  document.getElementById('hPO').value = d.sPurchaseOrder || '';
+  document.getElementById('hPO').value = d.sPurchaseOrder || d.sPONumber || '';
   document.getElementById('hWO').textContent = d.sWorkOrderNumber || '—';
   document.getElementById('hRack').value = d.sRackPosition || '';
   setSelectVal('hRepairLevel', d.lRepairLevelKey);
@@ -3748,9 +3765,9 @@ function populateDetail(d) {
 
   // Scope row (spans, not inputs)
   document.getElementById('hMfr').textContent = d.sManufacturer || '—';
-  // Category: look up from scope record via lScopeKey (scope has sScopeCategory directly)
-  document.getElementById('hScopeCat').textContent = '—';
-  if (d.lScopeKey) {
+  // Category: use repair's own sScopeCategory first, fall back to scope record lookup
+  document.getElementById('hScopeCat').textContent = d.sScopeCategory || '—';
+  if (!d.sScopeCategory && d.lScopeKey) {
     API.getScopeByKey(d.lScopeKey).then(function(scope) {
       if (scope && scope.sScopeCategory) {
         document.getElementById('hScopeCat').textContent = scope.sScopeCategory.trim();

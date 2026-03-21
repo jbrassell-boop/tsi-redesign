@@ -5,6 +5,8 @@
   <title>Dashboard — Invoices | TSI Redesign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
   <style>
     /* Additional page-local vars */
     :root{--hover:#CFFAFE}
@@ -134,10 +136,11 @@
               <th style="width:80px" data-col="tax">Tax</th>
               <th style="width:100px" data-col="total">Total</th>
               <th style="width:90px" data-col="status">Status</th>
+              <th style="width:40px"></th>
             </tr>
           </thead>
           <tbody id="invTbody">
-            <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
+            <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -156,6 +159,7 @@
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
@@ -290,7 +294,7 @@ function renderTable() {
   var filtered = getFiltered();
   var tbody = document.getElementById('invTbody');
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No invoices found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No invoices found</td></tr>';
   } else {
     tbody.innerHTML = filtered.map(function(inv) { return '<tr>' +
       '<td style="font-family:monospace;font-size:11px;font-weight:600">' + escHtml(inv.invoiceNum) + '</td>' +
@@ -301,6 +305,7 @@ function renderTable() {
       '<td style="text-align:right">' + amtCell(inv.tax) + '</td>' +
       '<td style="text-align:right">' + amtCell(inv.total) + '</td>' +
       '<td>' + statusBadge(inv.status) + '</td>' +
+      '<td style="text-align:center"><button onclick="printInvoice(' + inv.id + ')" title="Print Invoice" style="background:none;border:none;cursor:pointer;color:var(--navy);font-size:14px;padding:2px 4px">&#128438;</button></td>' +
     '</tr>'; }).join('');
   }
   var sumFiltered = filtered.reduce(function(s, inv) { return s + inv.total; }, 0);
@@ -333,6 +338,24 @@ document.querySelectorAll('th[data-col]').forEach(function(th) {
     renderTable();
   });
 });
+
+// ── Print Invoice PDF ──
+function printInvoice(invoiceKey) {
+  var inv = INVOICES.find(function(i) { return i.id === invoiceKey; });
+  if (!inv || !inv._raw) { alert('Invoice not found'); return; }
+  var details = (MockDB.getAll('invoiceDetails') || []).filter(function(d) {
+    return d.lInvoiceKey === invoiceKey;
+  });
+  // Resolve salesperson
+  var salesperson = '';
+  var raw = inv._raw;
+  if (raw.lSalesRepKey || raw.lSalesRepNameKey) {
+    var reps = MockDB.getAll('salesReps') || [];
+    var rep = reps.find(function(s) { return s.lSalesRepKey === (raw.lSalesRepNameKey || raw.lSalesRepKey); });
+    if (rep) salesperson = ((rep.sRepFirst || '') + ' ' + (rep.sRepLast || '')).trim();
+  }
+  TSIExport.buildInvoicePdf(raw, details, { salesperson: salesperson });
+}
 
 // ── Init ──
 (async function init() {

@@ -383,6 +383,404 @@ function checkPageBreak(doc, y, needed) {
 }
 
 
+// ── Invoice Helpers ──────────────────────────────────────────────
+
+/**
+ * Invoice-specific header: company info left, "INVOICE" title + number right.
+ * Returns Y after header divider.
+ */
+function addInvoiceHeader(doc, invoiceNum) {
+  var m = PAGE.margin;
+  var y = m;
+
+  // Left: Company name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(COLORS.navy);
+  doc.text(COMPANY.name, m, y + 14);
+
+  // Left: Tagline
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(COLORS.steel);
+  doc.text('The Leader in Medical Device Repair', m, y + 26);
+
+  // Left: Address + phone
+  doc.setFontSize(8);
+  doc.text(COMPANY.addr1, m, y + 38);
+  doc.text(COMPANY.city + ', ' + COMPANY.state + ' ' + COMPANY.zip, m, y + 48);
+  doc.text('Phone: ' + COMPANY.phone + '  |  Fax: ' + COMPANY.fax, m, y + 58);
+
+  // Right: INVOICE title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(COLORS.navy);
+  doc.text('INVOICE', PAGE.w - m, y + 14, { align: 'right' });
+
+  // Right: Invoice number
+  if (invoiceNum) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(COLORS.black);
+    doc.text('Invoice #:  ' + invoiceNum, PAGE.w - m, y + 28, { align: 'right' });
+  }
+
+  // Divider
+  y += 68;
+  doc.setDrawColor(COLORS.navy);
+  doc.setLineWidth(1.5);
+  doc.line(m, y, PAGE.w - m, y);
+
+  return y + 10;
+}
+
+/**
+ * "PLEASE REMIT TO:" block with TSI Accounts Receivable address.
+ * Returns Y after block.
+ */
+function addRemitToBlock(doc, y) {
+  var m = PAGE.margin;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(COLORS.steel);
+  doc.text('PLEASE REMIT TO:', m, y);
+  y += 11;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(COLORS.black);
+  doc.text('Accounts Receivable', m, y); y += 11;
+  doc.text(COMPANY.name, m, y); y += 11;
+  doc.text(COMPANY.addr1, m, y); y += 11;
+  doc.text(COMPANY.city + ', ' + COMPANY.state + ' ' + COMPANY.zip, m, y); y += 11;
+
+  return y + 4;
+}
+
+/**
+ * Detail band: evenly-spaced key-value pairs on a shaded row.
+ * pairs: [['Label','Value'], ...]
+ * Returns Y after band.
+ */
+function addDetailBand(doc, pairs, y) {
+  var m = PAGE.margin;
+  var bandH = 18;
+  var colW = CONTENT_W / pairs.length;
+
+  // Shaded background
+  doc.setFillColor(COLORS.bg);
+  doc.rect(m, y - 2, CONTENT_W, bandH, 'F');
+
+  // Border
+  doc.setDrawColor(COLORS.border);
+  doc.setLineWidth(0.3);
+  doc.rect(m, y - 2, CONTENT_W, bandH, 'S');
+
+  for (var i = 0; i < pairs.length; i++) {
+    var x = m + i * colW + 4;
+    // Label
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.setTextColor(COLORS.steel);
+    doc.text(String(pairs[i][0]).toUpperCase(), x, y + 4);
+    // Value
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(COLORS.black);
+    doc.text(String(pairs[i][1] || '—'), x, y + 13);
+  }
+
+  return y + bandH + 4;
+}
+
+/**
+ * Right-aligned totals block with tax breakdown.
+ * totals: { subtotal, shipping, taxes: [{name, pct, amt}], grandTotal }
+ * Returns Y after block.
+ */
+function addTotalsBlock(doc, totals, y) {
+  var rightX = PAGE.w - PAGE.margin;
+  var labelX = rightX - 120;
+
+  y = checkPageBreak(doc, y, 80);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(COLORS.black);
+
+  // Sub Total
+  doc.text('SUB TOTAL', labelX, y);
+  doc.text(fmtCurrency(totals.subtotal), rightX, y, { align: 'right' });
+  y += 14;
+
+  // Shipping
+  doc.text('SHIPPING', labelX, y);
+  doc.text(fmtCurrency(totals.shipping), rightX, y, { align: 'right' });
+  y += 14;
+
+  // Tax jurisdictions (always show, even $0.00)
+  var taxes = totals.taxes || [];
+  if (taxes.length === 0) {
+    doc.text('TAX', labelX, y);
+    doc.text(fmtCurrency(0), rightX, y, { align: 'right' });
+    y += 14;
+  } else {
+    for (var i = 0; i < taxes.length; i++) {
+      var t = taxes[i];
+      if (t.amt || t.amt === 0) {
+        var taxLabel = t.name ? ('TAX (' + t.name + ')') : 'TAX';
+        doc.text(taxLabel, labelX, y);
+        doc.text(fmtCurrency(t.amt), rightX, y, { align: 'right' });
+        y += 14;
+      }
+    }
+  }
+
+  // Divider line above total
+  doc.setDrawColor(COLORS.navy);
+  doc.setLineWidth(0.8);
+  doc.line(labelX, y - 4, rightX, y - 4);
+
+  // Grand Total
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(COLORS.navy);
+  doc.text('TOTAL', labelX, y + 6);
+  doc.text(fmtCurrency(totals.grandTotal), rightX, y + 6, { align: 'right' });
+
+  return y + 22;
+}
+
+/**
+ * Diagonal VOID watermark across all pages.
+ */
+function addVoidWatermark(doc) {
+  var pages = doc.internal.getNumberOfPages();
+  for (var i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.12 }));
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(120);
+    doc.setTextColor('#C62828');
+    // Rotate 45 degrees and center
+    doc.text('VOID', PAGE.w / 2, PAGE.h / 2, {
+      align: 'center',
+      angle: 45
+    });
+    doc.restoreGraphicsState();
+  }
+}
+
+/**
+ * Build a complete invoice PDF from tblInvoice + tblInvoiceDetl records.
+ * inv:     raw tblInvoice record
+ * details: array of tblInvoiceDetl records
+ * opts:    { repair, salesperson, shipVia, paymentTerms }
+ */
+function buildInvoicePdf(inv, details, opts) {
+  opts = opts || {};
+  var doc = createPDF();
+  var invoiceNum = inv.sTranNumber || inv.sWorkOrderNumber || '';
+
+  // ── Zone 1: Header ──
+  var y = addInvoiceHeader(doc, invoiceNum);
+
+  // ── Zone 2: Remit To ──
+  y = addRemitToBlock(doc, y);
+
+  // ── Zone 3: Dual Address Blocks ──
+  var addrY = y;
+  var billY = addAddressBlock(doc, 'BILL TO:', {
+    name:  inv.sBillName1 || '',
+    attn:  inv.sBillName2 || '',
+    addr1: inv.sBillAddr1 || '',
+    addr2: inv.sBillAddr2 || '',
+    city:  inv.sBillCity  || '',
+    state: inv.sBillState || '',
+    zip:   inv.sBillZip   || ''
+  }, PAGE.margin, addrY);
+
+  var shipY = addAddressBlock(doc, 'SHIP TO:', {
+    name:  inv.sShipName1 || '',
+    attn:  inv.sShipName2 || '',
+    addr1: inv.sShipAddr1 || '',
+    addr2: inv.sShipAddr2 || '',
+    city:  inv.sShipCity  || '',
+    state: inv.sShipState || '',
+    zip:   inv.sShipZip   || ''
+  }, PAGE.margin + CONTENT_W / 2, addrY);
+
+  y = Math.max(billY, shipY) + 4;
+
+  // ── Zone 4: Detail Bands ──
+  // Resolve display values
+  var shipVia = opts.shipVia || inv.sDeliveryMethod || inv.sDeliveryDesc || '—';
+  var terms = opts.paymentTerms || inv.sTermsDesc || 'Due Upon Receipt';
+  var salesperson = opts.salesperson || '';
+  if (!salesperson && inv.sRepFirst) {
+    salesperson = ((inv.sRepFirst || '') + ' ' + (inv.sRepLast || '')).trim();
+  }
+  var custId = inv.lClientKey || '';
+  var woNum = invoiceNum;
+  if (opts.repair) {
+    woNum = opts.repair.sWorkOrderNumber || woNum;
+    if (!shipVia || shipVia === '—') shipVia = opts.repair.sDeliveryMethod || '—';
+  }
+  var poNum = inv.sPurchaseOrder || '—';
+  if (poNum === '—' && inv.sUnderContract === 'Y') poNum = 'Contract';
+
+  y = addDetailBand(doc, [
+    ['Date', fmtDate(inv.dtTranDate)],
+    ['Ship Via', shipVia],
+    ['Terms', terms]
+  ], y);
+
+  y = addDetailBand(doc, [
+    ['Purchase Order #', poNum],
+    ['Approval Date', fmtDate(inv.dtAprRecvd)],
+    ['Salesperson', salesperson],
+    ['Cust. ID', String(custId)],
+    ['W.O. #', woNum]
+  ], y);
+
+  // ── Zone 5: Line Items ──
+  var showDesc = inv.sDisplayItemDescription !== 'N';
+  var showAmt  = inv.sDisplayItemAmount !== 'N';
+
+  var headers = ['Description'];
+  if (showAmt) headers.push('Amount');
+
+  var rows = [];
+  if (details && details.length) {
+    for (var i = 0; i < details.length; i++) {
+      var d = details[i];
+      var desc = showDesc ? (d.sItemDescription || '') : '';
+      var row = [desc];
+      if (showAmt) row.push(fmtCurrency(d.dblItemAmount));
+      rows.push(row);
+    }
+  }
+
+  // If no detail rows, build from repair items if available
+  if (!rows.length && opts.repair) {
+    var r = opts.repair;
+    var desc2 = (r.sInstrumentModelNumber || r.sModelNumber || '') +
+                (r.sSerialNumber ? '\nSerial # ' + r.sSerialNumber : '');
+    rows.push([desc2, showAmt ? fmtCurrency(inv.dblTranAmount) : '']);
+    if (!showAmt) rows[0].pop();
+  }
+
+  if (rows.length) {
+    var colStyles = {};
+    if (showAmt) {
+      colStyles[headers.length - 1] = { halign: 'right', cellWidth: 80 };
+    }
+    y = addTable(doc, headers, rows, y, { columnStyles: colStyles });
+  } else {
+    y = addParagraph(doc, 'No billable items', y, { color: COLORS.steel });
+  }
+
+  // ── Tracking Number (if present) ──
+  var tracking = inv.sShipTrackingNumber || (opts.repair && opts.repair.sShipTrackingNumber) || '';
+  if (tracking) {
+    y = checkPageBreak(doc, y, 20);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(COLORS.black);
+    doc.text('Tracking Number:', PAGE.margin, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tracking, PAGE.margin + 85, y);
+    y += 16;
+  }
+
+  // ── Customer Complaint (if flagged) ──
+  if (inv.sDisplayCustomerComplaint === 'Y' && inv.sComplaintDesc) {
+    y = checkPageBreak(doc, y, 30);
+    y = addSectionLabel(doc, 'Customer Complaint', y);
+    y = addParagraph(doc, inv.sComplaintDesc, y);
+  }
+
+  // ── Discount Comment (if flagged) ──
+  if (inv.sDisplayDiscountComment === 'Y' && inv.sDiscountComment) {
+    y = checkPageBreak(doc, y, 20);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(COLORS.steel);
+    doc.text(inv.sDiscountComment, PAGE.margin, y);
+    y += 14;
+  }
+
+  // ── "Thank you" ──
+  y = checkPageBreak(doc, y, 20);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(COLORS.black);
+  doc.text('THANK YOU FOR YOUR BUSINESS.', PAGE.margin, y);
+  y += 16;
+
+  // ── Zone 6: Totals ──
+  var taxAmt1 = parseFloat(inv.dblJuris1Amt) || 0;
+  var taxAmt2 = parseFloat(inv.dblJuris2Amt) || 0;
+  var taxAmt3 = parseFloat(inv.dblJuris3Amt) || 0;
+  var taxes = [];
+  // Always include at least one tax line
+  if (inv.sJuris1Name || taxAmt1) taxes.push({ name: inv.sJuris1Name || '', pct: inv.dblJuris1Pct, amt: taxAmt1 });
+  if (inv.sJuris2Name || taxAmt2) taxes.push({ name: inv.sJuris2Name || '', pct: inv.dblJuris2Pct, amt: taxAmt2 });
+  if (inv.sJuris3Name || taxAmt3) taxes.push({ name: inv.sJuris3Name || '', pct: inv.dblJuris3Pct, amt: taxAmt3 });
+
+  var subtotal = parseFloat(inv.dblTranAmount) || 0;
+  var shipping = parseFloat(inv.dblShippingAmt) || 0;
+  var totalTax = taxAmt1 + taxAmt2 + taxAmt3;
+
+  y = addTotalsBlock(doc, {
+    subtotal:   subtotal,
+    shipping:   shipping,
+    taxes:      taxes,
+    grandTotal: subtotal + shipping + totalTax
+  }, y);
+
+  // ── Custom Footer (if flagged) ──
+  if (inv.sDisplayFooter === 'Y' && inv.sFooterText) {
+    y = checkPageBreak(doc, y, 20);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(COLORS.steel);
+    doc.text(inv.sFooterText, PAGE.margin, y);
+    y += 14;
+  }
+
+  // ── Zone 7: Footer + Company ──
+  // Company address bottom-right
+  y = checkPageBreak(doc, y, 30);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(COLORS.steel);
+  var footRightX = PAGE.w - PAGE.margin;
+  doc.text(COMPANY.name, footRightX, PAGE.h - 60, { align: 'right' });
+  doc.text(COMPANY.addr1, footRightX, PAGE.h - 50, { align: 'right' });
+  doc.text(COMPANY.city + ', ' + COMPANY.state + ' ' + COMPANY.zip, footRightX, PAGE.h - 40, { align: 'right' });
+
+  // Contact info bottom-left
+  doc.text(COMPANY.phone + '  |  484-490-2150', PAGE.margin, PAGE.h - 60);
+  doc.text('www.totalscopeinc.com', PAGE.margin, PAGE.h - 50);
+  doc.text('ar@totalscopeinc.com', PAGE.margin, PAGE.h - 40);
+
+  // ISO line centered
+  doc.setFontSize(7);
+  doc.text('An ISO Certified Company meeting the Medical Device Standards of ISO 13485', PAGE.w / 2, PAGE.h - 28, { align: 'center' });
+
+  // ── VOID watermark ──
+  if (inv.bIsVoid) {
+    addVoidWatermark(doc);
+  }
+
+  // Save (skip standard footer since we have custom invoice footer)
+  doc.save('Invoice_' + (invoiceNum || 'draft') + '.pdf');
+}
+
+
 // ── Excel Helpers ─────────────────────────────────────────────────
 
 /** Create a new XLSX workbook */
@@ -480,6 +878,13 @@ window.TSIExport = {
   addAddressBlock:  addAddressBlock,
   savePDF:          savePDF,
   checkPageBreak:   checkPageBreak,
+  // Invoice
+  addInvoiceHeader: addInvoiceHeader,
+  addRemitToBlock:  addRemitToBlock,
+  addDetailBand:    addDetailBand,
+  addTotalsBlock:   addTotalsBlock,
+  addVoidWatermark: addVoidWatermark,
+  buildInvoicePdf:  buildInvoicePdf,
   // Excel
   createWorkbook:   createWorkbook,
   addSheet:         addSheet,
