@@ -485,6 +485,7 @@
             <div class="tab" data-tab="expense">Expense</div>
             <div class="tab" data-tab="comments">Comments</div>
             <div class="tab" data-tab="inventory">Inventory</div>
+            <div class="tab" data-tab="inspections">Inspections</div>
             <div class="tab" data-tab="status">Status</div>
             <div class="tab" data-tab="documents">Documents</div>
             <div class="tab" data-tab="financials">Financials</div>
@@ -653,79 +654,6 @@
                 </table>
               </div>
             </div>
-
-            <!-- ═══ INCOMING INSPECTION (D&I) ═══ -->
-            <details class="insp-details" id="incomingInspection">
-              <summary>Incoming Inspection (D&amp;I)</summary>
-              <div class="insp-body" id="incomingInspBody"></div>
-            </details>
-
-            <!-- ═══ POST-REPAIR VERIFICATION ═══ -->
-            <details class="insp-details" id="postRepairVerification">
-              <summary>Post-Repair Verification</summary>
-              <div class="insp-body" id="postRepairInspBody"></div>
-            </details>
-
-            <!-- SCOPE-TYPE DETAILS (WP-R3) -->
-            <details class="section-card" style="margin-top:6px" id="scopeTypeDetails">
-              <summary class="section-head" style="cursor:pointer;list-style:none;user-select:none">
-                Scope-Type Details
-                <svg style="width:14px;height:14px;margin-left:auto;transition:transform .15s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </summary>
-              <div class="section-body" style="padding:10px 14px">
-
-                <!-- Flexible Scopes -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Flexible Scopes</div>
-                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
-                  <div class="field">
-                    <label>Bending Rubber P/F</label>
-                    <div class="qc-pf" style="margin-top:2px">
-                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="P" onchange="markDirty()" style="accent-color:var(--navy)"/> P</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="F" onchange="markDirty()" style="accent-color:var(--navy)"/> F</label>
-                    </div>
-                  </div>
-                  <div class="field"><label>Incoming Epoxy Size</label><input type="number" id="fFlexIncomingEpoxy" step="0.01" onchange="markDirty()"/></div>
-                  <div class="field"><label>Max Epoxy Size</label><input type="number" id="fFlexMaxEpoxy" step="0.01" onchange="markDirty()"/></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRAgeing" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Aging</span></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRMold" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Mold</span></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRCut" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Cut</span></div>
-                </div>
-
-                <!-- Rigid Scopes -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Rigid Scopes</div>
-                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
-                  <div class="field"><label>Eyepiece Type</label><input id="fRgdEyeCup" onchange="markDirty()"/></div>
-                  <div class="field"><label>Fiber Type</label><input id="fRgdFiber" onchange="markDirty()"/></div>
-                  <div class="field"><label>Tube Type</label><input id="fRgdTube" onchange="markDirty()"/></div>
-                  <div class="field"><label>Vision Type</label><input id="fRgdVision" onchange="markDirty()"/></div>
-                </div>
-
-                <!-- Camera/Video -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Camera / Video</div>
-                <div class="qc-check-grid" style="margin-bottom:12px">
-                  <div class="qc-row"><span class="qc-label">Camera Cable</span><div class="qc-pf"><label><input type="radio" name="fCamCable" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCable" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Cable Connector</span><div class="qc-pf"><label><input type="radio" name="fCamCableConn" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCableConn" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCamLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Control Buttons</span><div class="qc-pf"><label><input type="radio" name="fCamControlBtns" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamControlBtns" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Focus</span><div class="qc-pf"><label><input type="radio" name="fCamFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocus" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Video Appearance</span><div class="qc-pf"><label><input type="radio" name="fCamVideoAppear" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamVideoAppear" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera White Balance</span><div class="qc-pf"><label><input type="radio" name="fCamWhiteBal" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamWhiteBal" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCamFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Soak Cap Assembly</span><div class="qc-pf"><label><input type="radio" name="fCamSoakCap" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamSoakCap" value="F" onchange="markDirty()"/> F</label></div></div>
-                </div>
-
-                <!-- Coupler -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Coupler</div>
-                <div class="qc-check-grid">
-                  <div class="qc-row"><span class="qc-label">Coupler Focus</span><div class="qc-pf"><label><input type="radio" name="fCplFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocus" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCplFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Fog</span><div class="qc-pf"><label><input type="radio" name="fCplFog" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFog" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Leak</span><div class="qc-pf"><label><input type="radio" name="fCplLeak" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLeak" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCplLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
-                </div>
-
-              </div>
-            </details>
 
             <!-- NOTES -->
             <div style="margin-top:6px;margin-bottom:4px">
@@ -1324,6 +1252,83 @@
             </div>
 
           </div><!-- /pane-financials -->
+
+          <div class="tab-pane" id="pane-inspections">
+
+            <!-- ═══ INCOMING INSPECTION (D&I) ═══ -->
+            <details class="insp-details" id="incomingInspection" open>
+              <summary>Incoming Inspection (D&amp;I)</summary>
+              <div class="insp-body" id="incomingInspBody"></div>
+            </details>
+
+            <!-- ═══ POST-REPAIR VERIFICATION ═══ -->
+            <details class="insp-details" id="postRepairVerification" open>
+              <summary>Post-Repair Verification</summary>
+              <div class="insp-body" id="postRepairInspBody"></div>
+            </details>
+
+            <!-- SCOPE-TYPE DETAILS -->
+            <details class="section-card" style="margin-top:6px" id="scopeTypeDetails" open>
+              <summary class="section-head" style="cursor:pointer;list-style:none;user-select:none">
+                Scope-Type Details
+                <svg style="width:14px;height:14px;margin-left:auto;transition:transform .15s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </summary>
+              <div class="section-body" style="padding:10px 14px">
+
+                <!-- Flexible Scopes -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Flexible Scopes</div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
+                  <div class="field">
+                    <label>Bending Rubber P/F</label>
+                    <div class="qc-pf" style="margin-top:2px">
+                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="P" onchange="markDirty()" style="accent-color:var(--navy)"/> P</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="F" onchange="markDirty()" style="accent-color:var(--navy)"/> F</label>
+                    </div>
+                  </div>
+                  <div class="field"><label>Incoming Epoxy Size</label><input type="number" id="fFlexIncomingEpoxy" step="0.01" onchange="markDirty()"/></div>
+                  <div class="field"><label>Max Epoxy Size</label><input type="number" id="fFlexMaxEpoxy" step="0.01" onchange="markDirty()"/></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRAgeing" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Aging</span></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRMold" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Mold</span></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRCut" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Cut</span></div>
+                </div>
+
+                <!-- Rigid Scopes -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Rigid Scopes</div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
+                  <div class="field"><label>Eyepiece Type</label><input id="fRgdEyeCup" onchange="markDirty()"/></div>
+                  <div class="field"><label>Fiber Type</label><input id="fRgdFiber" onchange="markDirty()"/></div>
+                  <div class="field"><label>Tube Type</label><input id="fRgdTube" onchange="markDirty()"/></div>
+                  <div class="field"><label>Vision Type</label><input id="fRgdVision" onchange="markDirty()"/></div>
+                </div>
+
+                <!-- Camera/Video -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Camera / Video</div>
+                <div class="qc-check-grid" style="margin-bottom:12px">
+                  <div class="qc-row"><span class="qc-label">Camera Cable</span><div class="qc-pf"><label><input type="radio" name="fCamCable" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCable" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Cable Connector</span><div class="qc-pf"><label><input type="radio" name="fCamCableConn" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCableConn" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCamLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Control Buttons</span><div class="qc-pf"><label><input type="radio" name="fCamControlBtns" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamControlBtns" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Focus</span><div class="qc-pf"><label><input type="radio" name="fCamFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocus" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Video Appearance</span><div class="qc-pf"><label><input type="radio" name="fCamVideoAppear" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamVideoAppear" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera White Balance</span><div class="qc-pf"><label><input type="radio" name="fCamWhiteBal" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamWhiteBal" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCamFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Camera Soak Cap Assembly</span><div class="qc-pf"><label><input type="radio" name="fCamSoakCap" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamSoakCap" value="F" onchange="markDirty()"/> F</label></div></div>
+                </div>
+
+                <!-- Coupler -->
+                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Coupler</div>
+                <div class="qc-check-grid">
+                  <div class="qc-row"><span class="qc-label">Coupler Focus</span><div class="qc-pf"><label><input type="radio" name="fCplFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocus" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCplFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Fog</span><div class="qc-pf"><label><input type="radio" name="fCplFog" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFog" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Leak</span><div class="qc-pf"><label><input type="radio" name="fCplLeak" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLeak" value="F" onchange="markDirty()"/> F</label></div></div>
+                  <div class="qc-row"><span class="qc-label">Coupler Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCplLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
+                </div>
+
+              </div>
+            </details>
+
+          </div><!-- /pane-inspections -->
 
         </div><!-- /detail-scroll -->
     </div><!-- /repair-detail -->
