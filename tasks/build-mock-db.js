@@ -615,6 +615,11 @@ w('');
 // 4. Static lookups
 w("MockDB.seed('states', " + JSON.stringify(getStates()) + ");");
 w("MockDB.seed('countries', [{ lCountryKey: 1, sCountryName: 'United States' }]);");
+w("MockDB.seed('instrumentTypes', " + JSON.stringify([
+  { sInstrumentType: 'C', sDescription: 'Camera / Video' },
+  { sInstrumentType: 'F', sDescription: 'Flexible Endoscope' },
+  { sInstrumentType: 'R', sDescription: 'Rigid Endoscope' },
+]) + ");");
 
 // Users come from the main seed now (160 real users)
 w('');
