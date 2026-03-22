@@ -82,13 +82,15 @@
     .insp-details[open] summary::before{transform:rotate(90deg)}
     .insp-details .insp-body{padding:10px 14px}
     .pf-cat{font-size:7.5px;font-weight:800;color:var(--steel);text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;background:#F0F4FA;line-height:1.2}
-    .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
-    .pf-item{display:flex;align-items:center;height:20px;padding:0 6px;border-bottom:1px solid #f0f2f5;border-right:1px solid #f0f2f5;cursor:pointer;transition:background .08s;gap:6px}
-    .pf-item:hover{background:#F8FAFD}
-    .pf-item.pf-row-pass{background:#F0FDF4}
-    .pf-item.pf-row-fail{background:#FEF2F2}
+    .pf-grid{display:grid;grid-template-columns:1fr 34px 1fr 34px;gap:0}
+    .pf-item{display:contents}
+    .pf-cell{height:20px;display:flex;align-items:center;border-bottom:1px solid #f0f2f5;cursor:pointer;transition:background .08s}
+    .pf-cell.pf-label{padding:0 6px;font-size:10px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
+    .pf-cell.pf-btn-cell{justify-content:center;border-right:1px solid #eee}
+    .pf-cell:hover{background:#F8FAFD}
+    .pf-cell.pf-cell-pass{background:#F0FDF4}
+    .pf-cell.pf-cell-fail{background:#FEF2F2}
     .pf-cat{grid-column:1/-1}
-    .pf-label{font-size:10px;color:var(--text);white-space:nowrap;line-height:1}
     .insp-body{padding:0}
     .pf-btn{width:28px;height:16px;border:1px solid var(--border-dk);border-radius:2px;font-size:8px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);padding:0;line-height:1;font-family:inherit;transition:all .08s;flex-shrink:0;text-align:center}
     .pf-btn:hover{border-color:var(--navy)}
@@ -4791,8 +4793,10 @@ function renderInspectionContent(scopeType, direction) {
     html += '<div class="pf-cat">' + cat.name + '</div>';
     cat.items.forEach(item => {
       const field = dir === 'in' ? item.inField : item.outField;
-      html += '<div class="pf-item" onclick="togglePFRow(this)"><span class="pf-label">' + item.label + '</span>';
-      html += '<button class="pf-btn" data-field="' + field + '" onclick="event.stopPropagation();togglePF(this)">—</button></div>';
+      html += '<div class="pf-item" data-field="' + field + '">';
+      html += '<div class="pf-cell pf-label" onclick="togglePFByField(\'' + field + '\')">' + item.label + '</div>';
+      html += '<div class="pf-cell pf-btn-cell" onclick="togglePFByField(\'' + field + '\')"><button class="pf-btn" data-field="' + field + '">—</button></div>';
+      html += '</div>';
     });
   });
   html += '</div>';
@@ -4914,14 +4918,17 @@ function togglePF(btn) {
   const cur = btn.textContent.trim();
   if (cur === '—' || cur === 'F') { btn.textContent = 'P'; btn.className = 'pf-btn pf-pass'; }
   else { btn.textContent = 'F'; btn.className = 'pf-btn pf-fail'; }
-  // Color the row
-  const row = btn.closest('.pf-item');
-  if (row) { row.className = 'pf-item ' + (btn.textContent === 'P' ? 'pf-row-pass' : 'pf-row-fail'); }
+  // Color both cells (label + btn-cell)
+  const item = btn.closest('.pf-item');
+  if (item) {
+    const cls = btn.textContent === 'P' ? 'pf-cell-pass' : 'pf-cell-fail';
+    item.querySelectorAll('.pf-cell').forEach(c => { c.classList.remove('pf-cell-pass','pf-cell-fail'); c.classList.add(cls); });
+  }
   updatePFCounter(btn);
   markDirty();
 }
-function togglePFRow(row) {
-  const btn = row.querySelector('.pf-btn');
+function togglePFByField(field) {
+  const btn = document.querySelector('.pf-btn[data-field="' + field + '"]');
   if (btn) togglePF(btn);
 }
 function setPFBtn(field, val) {
@@ -4930,16 +4937,16 @@ function setPFBtn(field, val) {
   if (val === 'P') { btn.textContent = 'P'; btn.className = 'pf-btn pf-pass'; }
   else if (val === 'F') { btn.textContent = 'F'; btn.className = 'pf-btn pf-fail'; }
   else { btn.textContent = '—'; btn.className = 'pf-btn'; }
-  const row = btn.closest('.pf-item');
-  if (row) { row.className = 'pf-item' + (val === 'P' ? ' pf-row-pass' : val === 'F' ? ' pf-row-fail' : ''); }
+  const item = btn.closest('.pf-item');
+  if (item) { const cls = val === 'P' ? 'pf-cell-pass' : val === 'F' ? 'pf-cell-fail' : ''; item.querySelectorAll('.pf-cell').forEach(c => { c.classList.remove('pf-cell-pass','pf-cell-fail'); if (cls) c.classList.add(cls); }); }
 }
 function pfAllPass(panelId) {
   const panel = document.getElementById(panelId);
   if (!panel) return;
   panel.querySelectorAll('.pf-btn').forEach(btn => {
     btn.textContent = 'P'; btn.className = 'pf-btn pf-pass';
-    const row = btn.closest('.pf-item');
-    if (row) row.className = 'pf-item pf-row-pass';
+    const item = btn.closest('.pf-item');
+    if (item) item.querySelectorAll('.pf-cell').forEach(c => { c.classList.remove('pf-cell-fail'); c.classList.add('pf-cell-pass'); });
   });
   updatePFCounterByPanel(panelId);
   markDirty();
@@ -4949,8 +4956,8 @@ function pfClearAll(panelId) {
   if (!panel) return;
   panel.querySelectorAll('.pf-btn').forEach(btn => {
     btn.textContent = '—'; btn.className = 'pf-btn';
-    const row = btn.closest('.pf-item');
-    if (row) row.className = 'pf-item';
+    const item = btn.closest('.pf-item');
+    if (item) item.querySelectorAll('.pf-cell').forEach(c => { c.classList.remove('pf-cell-pass','pf-cell-fail'); });
   });
   updatePFCounterByPanel(panelId);
   markDirty();
