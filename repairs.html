@@ -81,17 +81,25 @@
     .insp-details summary::before{content:'▸';font-size:10px;transition:transform .15s}
     .insp-details[open] summary::before{transform:rotate(90deg)}
     .insp-details .insp-body{padding:10px 14px}
-    .pf-cat{font-size:7.5px;font-weight:800;color:var(--steel);text-transform:uppercase;letter-spacing:.5px;margin:3px 0 0;grid-column:1/-1;padding:2px 4px;background:#F0F4FA;border-radius:2px;line-height:1.2}
-    .pf-cat:first-child{margin-top:0}
-    .pf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0 4px}
-    .pf-item{display:flex;align-items:center;gap:3px;padding:0;height:20px}
-    .pf-label{font-size:9.5px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
-    .insp-body{padding:4px 8px}
-    .insp-body .pf-grid{gap:0 4px}
-    .pf-btn{width:20px;height:16px;border:1px solid var(--border-dk);border-radius:2px;font-size:8px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);padding:0;line-height:1;font-family:inherit;transition:all .12s;flex-shrink:0}
+    .pf-cat{font-size:7.5px;font-weight:800;color:var(--steel);text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;background:#F0F4FA;line-height:1.2}
+    .pf-grid{display:flex;flex-direction:column}
+    .pf-item{display:flex;align-items:center;height:22px;padding:0 6px;border-bottom:1px solid #f0f2f5;cursor:pointer;transition:background .08s}
+    .pf-item:hover{background:#F8FAFD}
+    .pf-item.pf-row-pass{background:#F0FDF4}
+    .pf-item.pf-row-fail{background:#FEF2F2}
+    .pf-label{font-size:10px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
+    .insp-body{padding:0}
+    .pf-btn{width:28px;height:16px;border:1px solid var(--border-dk);border-radius:2px;font-size:8px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);padding:0;line-height:1;font-family:inherit;transition:all .08s;flex-shrink:0;text-align:center}
     .pf-btn:hover{border-color:var(--navy)}
-    .pf-btn.pf-pass{background:#DCFCE7;color:#166534;border-color:#86EFAC}
-    .pf-btn.pf-fail{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+    .pf-btn.pf-pass{background:#16A34A;color:#fff;border-color:#16A34A}
+    .pf-btn.pf-fail{background:#DC2626;color:#fff;border-color:#DC2626}
+    .pf-toolbar{display:flex;align-items:center;gap:8px;padding:4px 8px;background:linear-gradient(135deg,#E3EAF6,#EDF1F9);border-bottom:1px solid var(--border)}
+    .pf-toolbar button{height:22px;padding:0 10px;font-size:9px;font-weight:700;border-radius:3px;cursor:pointer;font-family:inherit;border:none;letter-spacing:.3px}
+    .pf-toolbar .pf-all-pass{background:#16A34A;color:#fff}
+    .pf-toolbar .pf-all-pass:hover{background:#15803D}
+    .pf-toolbar .pf-clear-all{background:#fff;color:var(--muted);border:1px solid var(--border)}
+    .pf-toolbar .pf-clear-all:hover{background:#f8f8f8}
+    .pf-counter{font-size:10px;font-weight:700;color:var(--navy);margin-left:auto}
     .insp-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 12px;margin-top:8px}
     .insp-row .field{margin:0}
     .insp-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;margin-top:8px}
@@ -4767,15 +4775,23 @@ function renderInspectionContent(scopeType, direction) {
     html += '</div>';
   }
 
-  // P/F categories — single dense grid with inline category labels
-  html += '<div class="pf-grid">';
+  // Toolbar: All Pass + Clear + counter
+  const panelId = dir + 'PfPanel';
+  html += '<div class="pf-toolbar">';
+  html += '<button class="pf-all-pass" onclick="pfAllPass(\'' + panelId + '\')">&#10003; All Pass</button>';
+  html += '<button class="pf-clear-all" onclick="pfClearAll(\'' + panelId + '\')">Clear</button>';
+  html += '<span class="pf-counter" id="' + panelId + 'Count"></span>';
+  html += '</div>';
+
+  // P/F list — single vertical scan
+  html += '<div class="pf-grid" id="' + panelId + '">';
   tmpl.categories.forEach(cat => {
     if (cat.showIf && d[cat.showIf] !== 'Y') return;
     html += '<div class="pf-cat">' + cat.name + '</div>';
     cat.items.forEach(item => {
       const field = dir === 'in' ? item.inField : item.outField;
-      html += '<div class="pf-item"><span class="pf-label">' + item.label + '</span>';
-      html += '<button class="pf-btn" data-field="' + field + '" onclick="togglePF(this)">—</button></div>';
+      html += '<div class="pf-item" onclick="togglePFRow(this)"><span class="pf-label">' + item.label + '</span>';
+      html += '<button class="pf-btn" data-field="' + field + '" onclick="event.stopPropagation();togglePF(this)">—</button></div>';
     });
   });
   html += '</div>';
@@ -4897,7 +4913,15 @@ function togglePF(btn) {
   const cur = btn.textContent.trim();
   if (cur === '—' || cur === 'F') { btn.textContent = 'P'; btn.className = 'pf-btn pf-pass'; }
   else { btn.textContent = 'F'; btn.className = 'pf-btn pf-fail'; }
+  // Color the row
+  const row = btn.closest('.pf-item');
+  if (row) { row.className = 'pf-item ' + (btn.textContent === 'P' ? 'pf-row-pass' : 'pf-row-fail'); }
+  updatePFCounter(btn);
   markDirty();
+}
+function togglePFRow(row) {
+  const btn = row.querySelector('.pf-btn');
+  if (btn) togglePF(btn);
 }
 function setPFBtn(field, val) {
   const btn = document.querySelector('.pf-btn[data-field="' + field + '"]');
@@ -4905,6 +4929,44 @@ function setPFBtn(field, val) {
   if (val === 'P') { btn.textContent = 'P'; btn.className = 'pf-btn pf-pass'; }
   else if (val === 'F') { btn.textContent = 'F'; btn.className = 'pf-btn pf-fail'; }
   else { btn.textContent = '—'; btn.className = 'pf-btn'; }
+  const row = btn.closest('.pf-item');
+  if (row) { row.className = 'pf-item' + (val === 'P' ? ' pf-row-pass' : val === 'F' ? ' pf-row-fail' : ''); }
+}
+function pfAllPass(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.querySelectorAll('.pf-btn').forEach(btn => {
+    btn.textContent = 'P'; btn.className = 'pf-btn pf-pass';
+    const row = btn.closest('.pf-item');
+    if (row) row.className = 'pf-item pf-row-pass';
+  });
+  updatePFCounterByPanel(panelId);
+  markDirty();
+}
+function pfClearAll(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.querySelectorAll('.pf-btn').forEach(btn => {
+    btn.textContent = '—'; btn.className = 'pf-btn';
+    const row = btn.closest('.pf-item');
+    if (row) row.className = 'pf-item';
+  });
+  updatePFCounterByPanel(panelId);
+  markDirty();
+}
+function updatePFCounter(btn) {
+  const panel = btn.closest('.pf-grid');
+  if (panel && panel.id) updatePFCounterByPanel(panel.id);
+}
+function updatePFCounterByPanel(panelId) {
+  const panel = document.getElementById(panelId);
+  const counter = document.getElementById(panelId + 'Count');
+  if (!panel || !counter) return;
+  const btns = panel.querySelectorAll('.pf-btn');
+  const done = Array.from(btns).filter(b => b.textContent.trim() !== '—').length;
+  const fails = Array.from(btns).filter(b => b.textContent.trim() === 'F').length;
+  counter.textContent = done + '/' + btns.length + (fails ? ' (' + fails + ' fail)' : '');
+  counter.style.color = done === btns.length ? (fails ? '#DC2626' : '#16A34A') : 'var(--navy)';
 }
 function getPFBtn(field) {
   const btn = document.querySelector('.pf-btn[data-field="' + field + '"]');
