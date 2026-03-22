@@ -102,7 +102,7 @@
           <input class="inp" id="filterSearch" placeholder="Search invoices…" style="width:260px"/>
           <select class="inp" id="filterStatus" style="width:150px;cursor:pointer">
             <option value="">All Statuses</option>
-            <option>Unpaid</option><option>Partial</option><option>Overdue</option><option>Paid</option>
+            <option>Current</option><option>Unpaid</option><option>Past Due</option><option>Overdue</option><option>Paid</option>
           </select>
           <select class="inp" id="filterClient" style="width:180px;cursor:pointer">
             <option value="">All Clients</option>
@@ -163,6 +163,22 @@
           <tbody id="dataBody"></tbody>
         </table>
       </div>
+      <!-- PAGINATION -->
+      <div id="paginationRow" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:12px;color:var(--muted)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-weight:500">Rows per page:</label>
+          <select class="inp" id="pageSizeSelect" style="width:70px;cursor:pointer;font-size:12px">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <span id="pageInfo">—</span>
+        <div style="display:flex;gap:4px">
+          <button class="edit-btn" id="btnPrev" style="padding:4px 10px" disabled>← Prev</button>
+          <button class="edit-btn" id="btnNext" style="padding:4px 10px" disabled>Next →</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -182,6 +198,10 @@
   let rows = [];
   let isLive = false;
   let searchTimer = null;
+  let currentPage = 1;
+  let pageSize = 50;
+  let sortCol = null;
+  let sortDir = 'asc';
 
   // ── DOM refs ────────────────────────────────────────────
   const body      = document.getElementById('dataBody');
@@ -191,8 +211,11 @@
   const filterStatus = document.getElementById('filterStatus');
   const filterClient = document.getElementById('filterClient');
   const filterRow    = document.getElementById('filterRow');
-
-  // ── Data badge ──────────────────────────────────────────
+  const pageSizeSelect = document.getElementById('pageSizeSelect');
+  const pageInfo   = document.getElementById('pageInfo');
+  const btnPrev    = document.getElementById('btnPrev');
+  const btnNext    = document.getElementById('btnNext');
+  const paginationRow = document.getElementById('paginationRow');
 
   // ── Helpers ─────────────────────────────────────────────
   function fmt$(v) { return '$' + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
@@ -205,6 +228,7 @@
     if (s.includes('paid') && !s.includes('un'))     return '<span class="badge" style="background:#F0FDF4;color:var(--green)">Paid</span>';
     if (s.includes('partial'))                        return '<span class="badge" style="background:#FFFBEB;color:var(--amber)">Partial</span>';
     if (s.includes('overdue') || s.includes('past'))  return '<span class="badge" style="background:#FEF2F2;color:var(--red)">Overdue</span>';
+    if (s.includes('current'))                        return '<span class="badge" style="background:#F0FDF4;color:var(--green)">Current</span>';
     if (s.includes('draft'))                          return '<span class="badge" style="background:#F0F4FF;color:var(--blue)">Draft</span>';
     if (s.includes('hold'))                           return '<span class="badge" style="background:#FEF2F2;color:var(--red)">On Hold</span>';
     return '<span class="badge" style="background:#FEF2F2;color:var(--red)">Unpaid</span>';
@@ -231,31 +255,57 @@
     return [];
   }
 
-  // Normalize API field names — canonical names are sTranNumber/dblTranAmount/dtTranDate (matching tblInvoice)
+  // Derive status from aging days (not from a broken ternary)
+  function deriveStatus(r) {
+    if (r.bPaid) return 'Paid';
+    if (r.bIsVoid || r.bVoid) return 'Void';
+    const days = agingDays(r.dtDueDate || r.dtTranDate || r.dtInvoiceDate);
+    if (days > 90) return 'Overdue';
+    if (days > 60) return 'Past Due';
+    if (days > 0)  return 'Unpaid';
+    return 'Current';
+  }
+
+  // Normalize API field names
   function normalizeFinancialRow(r) {
-    r.sTranNumber    = r.sTranNumber    || r.sInvoiceNumber || '';
-    r.dblTranAmount  = r.dblTranAmount  || r.dblAmount || r.dblInvoiceAmount || r.balance || 0;
+    // Invoice number: prefer sInvoiceNumber (from GP staging), fall back to sTranNumber (WO number)
+    r.sInvoiceNumber = r.sInvoiceNumber || r.sTranNumber || '';
+    // Amount: prefer TotalAmountDue (GP staging enriched), then dblInvoiceTotal, then dblTranAmount
+    var amt = Number(r.TotalAmountDue || r.dblInvoiceTotal || r.dblTranAmount || r.dblAmount || r.dblInvoiceAmount || 0);
+    r.dblTranAmount  = amt;
     r.dtTranDate     = r.dtTranDate     || r.dtIssuedDate  || r.dtInvoiceDate    || null;
-    r.sStatus        = r.sStatus        || (r.aging > 0 ? 'Unpaid' : 'Unpaid');
-    r.dblTaxAmount   = r.dblTaxAmount   || r.dblTax || 0;
+    // Derive status from aging — never use the broken always-Unpaid ternary
+    r.sStatus        = deriveStatus(r);
+    r.dblTaxAmount   = r.dblTaxAmount   || r.dblTax || r.dblAmtTax || 0;
     r.dblDiscount    = r.dblDiscount    || r.dblDiscountAmount || 0;
-    r.sPaymentTerms  = r.sPaymentTerms  || r.sTerms || '';
-    r.sGLAccountNumber = r.sGLAccountNumber || r.sGLAccount || '';
-    r.sDeliveryMethod  = r.sDeliveryMethod  || r.sInvoiceDeliveryMethod || '';
+    r.sPaymentTerms  = r.sPaymentTerms  || r.sTermsDesc || r.sTerms || '';
+    r.sGLAccountNumber = r.sGLAccountNumber || r.sGLAccount || r.GLAccount || '';
+    r.sDeliveryMethod  = r.sDeliveryMethod  || r.sDeliveryDesc || r.sInvoiceDeliveryMethod || '';
     r.sGreatPlainsID   = r.sGreatPlainsID   || r.sGPID || '';
+    // Compute aging days for sorting/display
+    r.aging = agingDays(r.dtDueDate || r.dtTranDate || r.dtInvoiceDate);
     return r;
   }
 
-  // ── Tab headers ─────────────────────────────────────────
-  const HEADERS = {
-    outstanding: '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th style="text-align:right">Tax</th><th style="text-align:right">Discount</th><th>Terms</th><th>GL Acct</th><th>Issued</th><th>Due Date</th><th style="text-align:right">Aging</th><th>Status</th><th style="width:80px"></th></tr>',
-    drafts:      '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Created</th><th>Delivery</th><th>GP ID</th><th>Status</th><th style="width:80px"></th></tr>',
-    hold:        '<tr><th>Client</th><th>Department</th><th>On Hold Since</th><th>Reason</th><th style="width:100px"></th></tr>',
-    payments:    '<tr><th>Invoice #</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment Date</th><th>Method</th><th style="width:80px"></th></tr>',
-    gl:          '<tr><th>Account #</th><th>Account Name</th><th>Type</th><th>Description</th><th style="width:80px"></th></tr>',
-    atrisk:      '<tr><th>Name</th><th style="text-align:right">Total Revenue</th><th style="text-align:right">Total Expenses</th><th style="text-align:right">Profit Margin</th><th style="text-align:right">Invoices</th><th>Risk Level</th></tr>',
-    trending:    '<tr><th>Period</th><th style="text-align:right">Repairs In</th><th style="text-align:right">Repairs Out</th><th style="text-align:right">Avg TAT</th><th style="text-align:right">Revenue</th><th style="text-align:right">Expenses</th><th style="text-align:right">Margin %</th></tr>'
-  };
+  // ── Sortable header builder ─────────────────────────────
+  function sortTh(label, colKey, align) {
+    const arrow = sortCol === colKey ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '';
+    const style = (align ? 'text-align:' + align + ';' : '') + 'cursor:pointer;user-select:none';
+    return '<th style="' + style + '" onclick="toggleSort(\'' + colKey + '\')">' + label + arrow + '</th>';
+  }
+
+  function buildHeaders(tab) {
+    switch (tab) {
+      case 'outstanding': return '<tr>' + sortTh('Invoice #','sInvoiceNumber') + sortTh('Client','sClientName1') + sortTh('Amount','dblTranAmount','right') + sortTh('Tax','dblTaxAmount','right') + sortTh('Discount','dblDiscount','right') + sortTh('Terms','sPaymentTerms') + sortTh('GL Acct','sGLAccountNumber') + sortTh('Issued','dtTranDate') + sortTh('Due Date','dtDueDate') + sortTh('Aging','aging','right') + sortTh('Status','sStatus') + '<th style="width:80px"></th></tr>';
+      case 'drafts': return '<tr>' + sortTh('Invoice #','sInvoiceNumber') + sortTh('Client','sClientName1') + sortTh('Amount','dblTranAmount','right') + sortTh('Created','dtTranDate') + sortTh('Delivery','sDeliveryMethod') + sortTh('GP ID','sGreatPlainsID') + '<th>Status</th><th style="width:80px"></th></tr>';
+      case 'hold': return '<tr>' + sortTh('Client','sClientName1') + sortTh('Department','sDepartmentName') + sortTh('On Hold Since','dtOnHoldDate') + sortTh('Reason','sReason') + '<th style="width:100px"></th></tr>';
+      case 'payments': return '<tr>' + sortTh('Invoice #','sInvoiceNumber') + sortTh('Client','sClientName1') + sortTh('Amount','dblTranAmount','right') + sortTh('Payment Date','dtPaymentDate') + sortTh('Method','sPaymentMethod') + '<th style="width:80px"></th></tr>';
+      case 'gl': return '<tr>' + sortTh('Account #','sAccountNumber') + sortTh('Account Name','sAccountName') + sortTh('Type','sType') + sortTh('Description','sDescription') + '<th style="width:80px"></th></tr>';
+      case 'atrisk': return '<tr>' + sortTh('Name','sName') + sortTh('Total Revenue','dblRevenue','right') + sortTh('Total Expenses','dblExpenses','right') + sortTh('Profit Margin','dblMargin','right') + sortTh('Invoices','nInvoices','right') + sortTh('Risk Level','sRisk') + '</tr>';
+      case 'trending': return '<tr><th>Period</th><th style="text-align:right">Repairs In</th><th style="text-align:right">Repairs Out</th><th style="text-align:right">Avg TAT</th><th style="text-align:right">Revenue</th><th style="text-align:right">Expenses</th><th style="text-align:right">Margin %</th></tr>';
+      default: return '';
+    }
+  }
 
   // ── Demo data sets ──────────────────────────────────────
   const DEMO = {
@@ -311,7 +361,10 @@
   // ── Load data per tab ───────────────────────────────────
   async function loadTab(tab) {
     activeTab = tab;
-    head.innerHTML = HEADERS[tab] || HEADERS.outstanding;
+    currentPage = 1;
+    sortCol = null;
+    sortDir = 'asc';
+    head.innerHTML = buildHeaders(tab);
 
     // Show/hide filters and toolbars based on tab
     var showFilters = (tab === 'outstanding' || tab === 'drafts' || tab === 'payments');
@@ -371,14 +424,14 @@
   // ── Update financial KPI chips ──────────────────────────
   async function updateFinancialKPIs(liveOutstanding) {
     const inv = liveOutstanding || DEMO.outstanding;
-    const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return !s.includes('paid') || s.includes('un'); });
-    const overdue = inv.filter(r => (r.sStatus || '').toLowerCase().includes('overdue'));
+    const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s !== 'paid' && s !== 'current'; });
+    const overdue = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s.includes('overdue') || s.includes('past'); });
 
-    const totalAR = open.reduce((s, r) => s + Number(r.dblTranAmount || r.dblAmount || 0), 0);
+    const totalAR = open.reduce((s, r) => s + Number(r.dblTranAmount || 0), 0);
 
     let totalAgingDays = 0, agingCount = 0;
     open.forEach(r => {
-      const d = agingDays(r.dtTranDate || r.dtIssuedDate);
+      const d = r.aging || agingDays(r.dtDueDate || r.dtTranDate);
       if (d > 0) { totalAgingDays += d; agingCount++; }
     });
 
@@ -422,7 +475,7 @@
     const cl = filterClient.value || '';
     return rows.filter(r => {
       const name = (r.sClientName1 || r.sClientName || '').toLowerCase();
-      const inv = (r.sTranNumber || r.sInvoiceNumber || r.sAccountNumber || r.sAccountName || '').toLowerCase();
+      const inv = (r.sInvoiceNumber || r.sTranNumber || r.sAccountNumber || r.sAccountName || '').toLowerCase();
       const status = (r.sStatus || '').toLowerCase();
       if (q && !name.includes(q) && !inv.includes(q)) return false;
       if (st && !status.includes(st)) return false;
@@ -431,13 +484,68 @@
     });
   }
 
-  // ── Render rows ─────────────────────────────────────────
-  function renderRows() {
-    const data = getFiltered();
-    if (!data.length) {
-      body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+  // ── Sorting ─────────────────────────────────────────────
+  function sortData(data) {
+    if (!sortCol) return data;
+    var col = sortCol, dir = sortDir;
+    return data.slice().sort(function(a, b) {
+      var va = a[col], vb = b[col];
+      // Numeric sort for known numeric fields
+      if (typeof va === 'number' || typeof vb === 'number') {
+        va = Number(va || 0); vb = Number(vb || 0);
+        return dir === 'asc' ? va - vb : vb - va;
+      }
+      // Date sort
+      if (col.startsWith('dt')) {
+        va = va ? new Date(va).getTime() : 0;
+        vb = vb ? new Date(vb).getTime() : 0;
+        return dir === 'asc' ? va - vb : vb - va;
+      }
+      // String sort
+      va = String(va || '').toLowerCase();
+      vb = String(vb || '').toLowerCase();
+      return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+  }
+
+  // ── Pagination helpers ────────────────────────────────
+  var PAGINATED_TABS = { outstanding: true, drafts: true, payments: true };
+
+  function updatePagination(totalRows) {
+    if (!PAGINATED_TABS[activeTab]) {
+      paginationRow.style.display = 'none';
       return;
     }
+    paginationRow.style.display = '';
+    var totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * pageSize + 1;
+    var end = Math.min(currentPage * pageSize, totalRows);
+    pageInfo.textContent = totalRows ? ('Showing ' + start + '–' + end + ' of ' + totalRows.toLocaleString()) : 'No records';
+    btnPrev.disabled = (currentPage <= 1);
+    btnNext.disabled = (currentPage >= totalPages);
+  }
+
+  function paginate(data) {
+    if (!PAGINATED_TABS[activeTab]) return data;
+    var start = (currentPage - 1) * pageSize;
+    return data.slice(start, start + pageSize);
+  }
+
+  // ── Render rows ─────────────────────────────────────────
+  function renderRows() {
+    // Rebuild headers to show sort arrows
+    head.innerHTML = buildHeaders(activeTab);
+
+    const allData = sortData(getFiltered());
+    if (!allData.length) {
+      body.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
+      updatePagination(0);
+      return;
+    }
+
+    updatePagination(allData.length);
+    var data = paginate(allData);
 
     switch (activeTab) {
       case 'outstanding': renderOutstanding(data); break;
@@ -452,17 +560,17 @@
 
   function renderOutstanding(data) {
     body.innerHTML = data.map(r => {
-      const days = agingDays(r.dtTranDate || r.dtInvoiceDate);
+      const days = r.aging || 0;
       const st = r.sStatus || 'Unpaid';
-      const isOverdue = st.toLowerCase().includes('overdue');
-      const tax = Number(r.dblTaxAmount || r.dblTax || 0);
-      const disc = Number(r.dblDiscount || r.dblDiscountAmount || 0);
-      const terms = r.sPaymentTerms || r.sTerms || '—';
-      const glAcct = r.sGLAccountNumber || r.sGLAccount || '—';
+      const isOverdue = st.toLowerCase().includes('overdue') || st.toLowerCase().includes('past');
+      const tax = Number(r.dblTaxAmount || 0);
+      const disc = Number(r.dblDiscount || 0);
+      const terms = r.sPaymentTerms || '—';
+      const glAcct = r.sGLAccountNumber || '—';
       return '<tr' + (isOverdue ? ' style="background:#FEF9F9"' : '') + '>' +
-        '<td style="color:var(--blue);font-weight:600">' + esc(r.sTranNumber) + '</td>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber || r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
-        '<td style="text-align:right;font-weight:700;color:' + amtColor(st) + '">' + fmt$(r.dblTranAmount || r.dblInvoiceAmount) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:' + amtColor(st) + '">' + fmt$(r.dblTranAmount) + '</td>' +
         '<td style="text-align:right;color:var(--muted)">' + (tax ? fmt$(tax) : '—') + '</td>' +
         '<td style="text-align:right;color:var(--muted)">' + (disc ? fmt$(disc) : '—') + '</td>' +
         '<td style="color:var(--muted)">' + esc(terms) + '</td>' +
@@ -481,9 +589,9 @@
       const delivery = r.sDeliveryMethod || r.sInvoiceDeliveryMethod || '—';
       const gpId = r.sGreatPlainsID || r.sGPID || '—';
       return '<tr>' +
-        '<td style="color:var(--blue);font-weight:600">' + esc(r.sTranNumber) + '</td>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber || r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
-        '<td style="text-align:right;font-weight:700;color:var(--navy)">' + fmt$(r.dblTranAmount || r.dblInvoiceAmount) + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--navy)">' + fmt$(r.dblTranAmount) + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtCreatedDate || r.dtTranDate) + '</td>' +
         '<td style="color:var(--muted)">' + esc(delivery) + '</td>' +
         '<td style="color:var(--muted);font-size:11px">' + esc(gpId) + '</td>' +
@@ -509,7 +617,7 @@
   function renderPayments(data) {
     body.innerHTML = data.map(r => {
       return '<tr>' +
-        '<td style="color:var(--blue);font-weight:600">' + esc(r.sTranNumber) + '</td>' +
+        '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber || r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
         '<td style="text-align:right;font-weight:700;color:var(--green)">' + fmt$(r.dblTranAmount || r.dblPaymentAmount) + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtPaymentDate) + '</td>' +
@@ -533,7 +641,7 @@
 
   // ── At Risk: render & filter ───────────────────────────
   function renderAtRisk() {
-    head.innerHTML = HEADERS.atrisk;
+    head.innerHTML = buildHeaders('atrisk');
     var data = filterAtRiskData();
     if (!data.length) {
       body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No at-risk records found</td></tr>';
@@ -556,13 +664,51 @@
   function filterAtRiskData() {
     var q = (document.getElementById('arSearch').value || '').toLowerCase();
     var minInv = parseInt(document.getElementById('arMinInvoices').value, 10) || 0;
+    var summaryBy = document.getElementById('arSummaryBy').value || 'department';
     var checkedExpenses = [];
     document.querySelectorAll('#atriskToolbar input[data-expense]').forEach(function(cb) {
       if (cb.checked) checkedExpenses.push(cb.getAttribute('data-expense'));
     });
 
-    var data = (DEMO.atrisk || []).slice();
-    return data.filter(function(r) {
+    var rawData = (DEMO.atrisk || []).slice();
+
+    // Group by selected dimension
+    if (summaryBy !== 'department') {
+      var groups = {};
+      rawData.forEach(function(r) {
+        var key;
+        if (summaryBy === 'client') {
+          // Extract client name (after " – " in the sName field)
+          var parts = r.sName.split(' – ');
+          key = parts.length > 1 ? parts[parts.length - 1].trim() : r.sName;
+        } else if (summaryBy === 'salesrep') {
+          // Group by a simulated sales rep based on the name hash
+          var repNames = ['Brian Kenney', 'Dan Hightower', 'Joe Rygiel', 'Account House'];
+          key = repNames[Math.abs(r.sName.length) % repNames.length];
+        } else {
+          key = r.sName;
+        }
+        if (!groups[key]) {
+          groups[key] = { sName: key, dblRevenue: 0, dblExpenses: 0, nInvoices: 0, expenses: { outsource:0, gpo:0, inventory:0, commissions:0, shipping:0, labor:0 } };
+        }
+        var g = groups[key];
+        g.dblRevenue += r.dblRevenue;
+        g.dblExpenses += r.dblExpenses;
+        g.nInvoices += r.nInvoices;
+        if (r.expenses) {
+          ['outsource','gpo','inventory','commissions','shipping','labor'].forEach(function(cat) {
+            g.expenses[cat] += (r.expenses[cat] || 0);
+          });
+        }
+      });
+      rawData = Object.values(groups).map(function(g) {
+        g.dblMargin = g.dblRevenue > 0 ? ((g.dblRevenue - g.dblExpenses) / g.dblRevenue) * 100 : 0;
+        g.sRisk = g.dblMargin < 0 ? 'High Risk' : (g.dblMargin < 10 ? 'Moderate' : 'Low');
+        return g;
+      });
+    }
+
+    return rawData.filter(function(r) {
       if (q && r.sName.toLowerCase().indexOf(q) === -1) return false;
       if (r.nInvoices < minInv) return false;
       // Recalculate expenses based on checked categories
@@ -583,7 +729,7 @@
 
   // ── Trending: render & filter ─────────────────────────
   function renderTrending() {
-    head.innerHTML = HEADERS.trending;
+    head.innerHTML = buildHeaders('trending');
     var data = filterTrendingData();
     if (!data.length) {
       body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No trending data found</td></tr>';
@@ -644,10 +790,85 @@
     }
   };
 
+  // ── Sorting handler ─────────────────────────────────────
+  window.toggleSort = function(col) {
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'asc';
+    }
+    currentPage = 1;
+    renderRows();
+  };
+
+  // ── Pagination handlers ────────────────────────────────
+  pageSizeSelect.addEventListener('change', function() {
+    pageSize = parseInt(this.value, 10) || 50;
+    currentPage = 1;
+    renderRows();
+  });
+  btnPrev.addEventListener('click', function() {
+    if (currentPage > 1) { currentPage--; renderRows(); }
+  });
+  btnNext.addEventListener('click', function() {
+    currentPage++;
+    renderRows();
+  });
+
+  // ── + New Invoice button ──────────────────────────────
+  document.getElementById('btnNewInvoice').addEventListener('click', function() {
+    alert('Create Invoice: Select a completed repair from the Work Orders page to generate an invoice. Invoices are created from the repair workflow (Repair → Draft Invoice → Finalize).');
+  });
+
   // ── Global action stubs ─────────────────────────────────
   window.viewInvoice = function(key) {
-    console.log('[TSI Financial] View invoice:', key);
-    // TODO: open detail panel or modal
+    // Find the invoice row
+    var inv = rows.find(function(r) { return r.lInvoiceKey === key; });
+    if (!inv) { console.warn('Invoice not found:', key); return; }
+
+    // Build detail modal
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+    var amt = Number(inv.dblTranAmount || 0);
+    var tax = Number(inv.dblTaxAmount || 0);
+    var disc = Number(inv.dblDiscount || 0);
+    var total = amt + tax - disc;
+
+    var html = '<div style="background:#fff;border-radius:12px;width:520px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.25)">';
+    html += '<div style="background:var(--navy);color:#fff;padding:16px 20px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div style="font-weight:700;font-size:15px">Invoice Detail</div>';
+    html += '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer">×</button></div>';
+    html += '<div style="padding:20px">';
+    html += '<table style="width:100%;font-size:13px;border-collapse:collapse">';
+    var fields = [
+      ['Invoice #', inv.sInvoiceNumber || inv.sTranNumber],
+      ['WO #', inv.sWorkOrderNumber || inv.sTranNumber || '—'],
+      ['Client', inv.sClientName1 || inv.sClientName || '—'],
+      ['Status', inv.sStatus || '—'],
+      ['Issued', fmtDate(inv.dtTranDate || inv.dtInvoiceDate)],
+      ['Due Date', fmtDate(inv.dtDueDate)],
+      ['Amount', fmt$(amt)],
+      ['Tax', fmt$(tax)],
+      ['Discount', fmt$(disc)],
+      ['Total Due', fmt$(total)],
+      ['Terms', inv.sPaymentTerms || '—'],
+      ['GL Account', inv.sGLAccountNumber || '—'],
+      ['PO #', inv.sPurchaseOrder || '—'],
+      ['Delivery', inv.sDeliveryMethod || inv.sDeliveryDesc || '—'],
+      ['Contract', inv.sUnderContract === 'Y' ? 'Yes' : 'No'],
+      ['Bill To', [inv.sBillName1, inv.sBillAddr1, inv.sBillCity, inv.sBillState, inv.sBillZip].filter(Boolean).join(', ') || '—'],
+      ['Ship To', [inv.sShipName1, inv.sShipAddr1, inv.sShipCity, inv.sShipState, inv.sShipZip].filter(Boolean).join(', ') || '—']
+    ];
+    fields.forEach(function(f) {
+      html += '<tr><td style="padding:6px 8px;color:var(--muted);font-weight:500;width:120px;border-bottom:1px solid var(--border)">' + f[0] + '</td>';
+      html += '<td style="padding:6px 8px;border-bottom:1px solid var(--border)">' + esc(String(f[1])) + '</td></tr>';
+    });
+    html += '</table></div></div>';
+    overlay.innerHTML = html;
+    document.body.appendChild(overlay);
   };
   window.deleteDraft = async function(key) {
     if (!confirm('Delete this draft invoice?')) return;
@@ -675,10 +896,10 @@
   // ── Wire filters ───────────────────────────────────────
   filterSearch.addEventListener('input', function() {
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(renderRows, 200);
+    searchTimer = setTimeout(function() { currentPage = 1; renderRows(); }, 200);
   });
-  filterStatus.addEventListener('change', renderRows);
-  filterClient.addEventListener('change', renderRows);
+  filterStatus.addEventListener('change', function() { currentPage = 1; renderRows(); });
+  filterClient.addEventListener('change', function() { currentPage = 1; renderRows(); });
 
   // ── Wire At Risk toolbar ──────────────────────────────
   document.querySelectorAll('#atriskToolbar input[data-expense]').forEach(function(cb) {

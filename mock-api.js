@@ -421,7 +421,25 @@ const MockAPI = (() => {
   route('GET', '/Contract/GetAllContractClient', () => MockDB.getAll('clients'));
 
   // ── Financials (8) ──────────────────────────────────
-  route('POST', '/Financials/GetOutstandingInvoicesList', () => MockDB.getAll('invoices'));
+  route('POST', '/Financials/GetOutstandingInvoicesList', () => {
+    // Enrich invoices with GP Invoice Staging amounts (tblInvoice.dblTranAmount is always 0)
+    const invoices = MockDB.getAll('invoices');
+    const gpStaging = MockDB.getAll('gpInvoiceStaging');
+    const gpMap = {};
+    gpStaging.forEach(g => { gpMap[g.lInvoiceKey] = g; });
+    return invoices.map(inv => {
+      const gp = gpMap[inv.lInvoiceKey];
+      if (gp) {
+        inv.dblTranAmount = gp.TotalAmountDue || gp.dblTranAmount || inv.dblTranAmount;
+        inv.dblTaxAmount = gp.dblTaxAmount || inv.dblTaxAmount;
+        inv.sGLAccountNumber = gp.GLAccount || inv.sGLAccountNumber || '';
+        inv.sPaymentTerms = gp.PaymentTerms || inv.sPaymentTerms || '';
+        inv.sInvoiceNumber = gp.sTranNumber || inv.sInvoiceNumber || '';
+        if (!inv.dtDueDate) inv.dtDueDate = gp.dtDueDate;
+      }
+      return inv;
+    });
+  });
   route('GET', '/Financials/GetAllGLAccounts', () => MockDB.getAll('glAccounts'));
   route('POST', '/Financials/GetAllClientsOnHold', () => MockDB.getAll('clientsOnHold'));
   route('POST', '/Financials/clientUpdateOnHold', (p, body) => body);
