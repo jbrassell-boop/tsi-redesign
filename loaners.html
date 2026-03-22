@@ -589,7 +589,7 @@ async function loadScopeTypeOptions() {
 
   const sel = document.getElementById('loanerScopeType');
   sel.innerHTML = '<option value="">Select scope type\u2026</option>';
-  scopeTypeOptions.forEach(r => {
+  scopeTypeOptions.slice().sort((a,b) => (a.sScopeTypeDesc||a.sScopeType||'').localeCompare(b.sScopeTypeDesc||b.sScopeType||'')).forEach(r => {
     const key  = r.plScopeTypeKey || r.lScopeTypeKey || r.lScopeKey || 0;
     const desc = r.sScopeTypeDesc || r.sScopeType || r.sSerialNumber || '';
     const sn   = r.sSerialNumber ? ' (' + r.sSerialNumber + ')' : '';

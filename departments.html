@@ -1325,6 +1325,7 @@ function openContactModal(mode){
     try {
       const reps = await API.getAllSalesReps();
       if(!Array.isArray(reps)) return;
+      reps.sort((a, b) => ((a.sRepFirst||'')+' '+(a.sRepLast||'')).localeCompare((b.sRepFirst||'')+' '+(b.sRepLast||'')));
       const sel = $('fSalesRep');
       sel.innerHTML = '<option value="">-- Select --</option>';
       reps.forEach(r=>{
@@ -1353,6 +1354,7 @@ function openContactModal(mode){
     try {
       const cats = await API.getAllPricingCategories({activeOnly:false,defaultFirst:false});
       if(!Array.isArray(cats)) return;
+      cats.sort((a, b) => (a.sPricingCategoryDesc || a.sPricingCategoryName || '').localeCompare(b.sPricingCategoryDesc || b.sPricingCategoryName || ''));
       const sel = $('fPricingCategory');
       sel.innerHTML = '<option value="">-- Select --</option>';
       cats.forEach(c=>{
@@ -1488,7 +1490,7 @@ function openContactModal(mode){
       var models = await API.getScopeTypeNames(instType);
       if(!Array.isArray(models) || !models.length) throw new Error('empty');
       dd.innerHTML = '<option value="">Select model…</option>';
-      models.forEach(function(m){
+      models.slice().sort(function(a,b){ return (a.sScopeTypeDesc||a.sScopeTypeName||'').localeCompare(b.sScopeTypeDesc||b.sScopeTypeName||''); }).forEach(function(m){
         var key  = m.lScopeTypeKey || m.plScopeTypeKey;
         var name = m.sScopeTypeDesc || m.sScopeTypeName || '';
         dd.innerHTML += '<option value="'+key+'">'+name+'</option>';

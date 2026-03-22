@@ -3543,7 +3543,7 @@ function populateSelect(id, items, valKey, textKey, blank) {
   const sel = document.getElementById(id);
   if (!sel) return;
   sel.innerHTML = blank ? '<option value="">—</option>' : '';
-  items.forEach(item => { const o = document.createElement('option'); o.value = item[valKey]; o.textContent = item[textKey]; sel.appendChild(o); });
+  items.slice().sort((a, b) => String(a[textKey] || '').localeCompare(String(b[textKey] || ''))).forEach(item => { const o = document.createElement('option'); o.value = item[valKey]; o.textContent = item[textKey]; sel.appendChild(o); });
 }
 
 function setSelectVal(id, val) {
