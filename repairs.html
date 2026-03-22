@@ -1377,7 +1377,7 @@
 
       <!-- Step 1: Client -->
       <div class="nwo-step-panel active" id="wizPanel1">
-        <input type="text" class="wiz-search" id="wizClientSearch" placeholder="Search by client name, city, or ID..." oninput="wizFilterClients(this.value)"/>
+        <input type="text" class="wiz-search" id="wizClientSearch" placeholder="Search by name, city, state, zip, or ID..." oninput="wizFilterClients(this.value)"/>
         <div class="wiz-grid" id="wizClientGrid"></div>
       </div>
 
@@ -5832,8 +5832,10 @@ function wizRenderClients(filter) {
   if (q) {
     list = list.filter(c => {
       const name = (c.sClientName1 || c.sClientName || '').toLowerCase();
-      const city = (c.sCity || c.sShipCity || '').toLowerCase();
-      return name.includes(q) || city.includes(q) || String(c.lClientKey).includes(q);
+      const city = (c.sCity || c.sShipCity || c.sMailCity || '').toLowerCase();
+      const state = (c.sState || c.sShipState || c.sMailState || '').toLowerCase();
+      const zip = (c.sZipCode || c.sShipZip || c.sMailZip || '').toLowerCase();
+      return name.includes(q) || city.includes(q) || state.includes(q) || zip.includes(q) || String(c.lClientKey).includes(q);
     });
   }
   if (!list.length) { grid.innerHTML = '<div class="wiz-empty">No clients found</div>'; return; }
@@ -6790,77 +6792,18 @@ async function initPage() {
     _liveMode = false;
     showDataBadge(false);
 
-    // ── RICH DEMO DATA ──
-    // Populate lookups with demo values so dropdowns work
-    _statuses = [
-      {lRepairStatusID:1, sRepairStatus:'Evaluation'},
-      {lRepairStatusID:2, sRepairStatus:'Waiting for Approval'},
-      {lRepairStatusID:3, sRepairStatus:'In Repair'},
-      {lRepairStatusID:4, sRepairStatus:'Drying'},
-      {lRepairStatusID:5, sRepairStatus:'Quality Check'},
-      {lRepairStatusID:6, sRepairStatus:'Completed'},
-      {lRepairStatusID:7, sRepairStatus:'Shipped'}
-    ];
-    _levels = [
-      {lRepairLevelKey:1, sRepairLevel:'Minor'},
-      {lRepairLevelKey:2, sRepairLevel:'Mid Level'},
-      {lRepairLevelKey:3, sRepairLevel:'Major'},
-      {lRepairLevelKey:4, sRepairLevel:'Inspection Only'}
-    ];
-    _repairReasons = [
-      {lRepairReasonKey:1, sRepairReason:'Mechanical Failure'},
-      {lRepairReasonKey:2, sRepairReason:'Fluid Invasion'},
-      {lRepairReasonKey:3, sRepairReason:'Image Quality'},
-      {lRepairReasonKey:4, sRepairReason:'Angulation Loss'},
-      {lRepairReasonKey:5, sRepairReason:'Routine Maintenance'},
-      {lRepairReasonKey:6, sRepairReason:'Physical Damage'}
-    ];
-    _safetyLevels = [
-      {lPatientSafetyLevelKey:1, sPatientSafetyLevelDesc:'PS1 - Safe'},
-      {lPatientSafetyLevelKey:2, sPatientSafetyLevelDesc:'PS2 - Marginal'},
-      {lPatientSafetyLevelKey:3, sPatientSafetyLevelDesc:'PS3 - Unsafe'}
-    ];
-    _techs = [
-      {lTechnicianKey:1, sTechName:'Rob Martinez'},
-      {lTechnicianKey:2, sTechName:'Tim Johnson'},
-      {lTechnicianKey:3, sTechName:'Marcus Powell'},
-      {lTechnicianKey:4, sTechName:'Kevin Brooks'}
-    ];
-    _salesReps = [
-      {lSalesRepNameKey:1, sSalesRepName:'John Smith'},
-      {lSalesRepNameKey:2, sSalesRepName:'Sarah Williams'},
-      {lSalesRepNameKey:3, sSalesRepName:'Mike Davis'}
-    ];
-    _deliveryMethods = [
-      {lDeliveryMethodKey:1, sDeliveryDesc:'FedEx Priority Overnight'},
-      {lDeliveryMethodKey:2, sDeliveryDesc:'FedEx Ground'},
-      {lDeliveryMethodKey:3, sDeliveryDesc:'UPS Next Day Air'},
-      {lDeliveryMethodKey:4, sDeliveryDesc:'Customer Pickup'}
-    ];
-    _pricingCategories = [
-      {lPricingCategoryKey:1, sPricingDescription:'Standard'},
-      {lPricingCategoryKey:2, sPricingDescription:'Contract - Tier A'},
-      {lPricingCategoryKey:3, sPricingDescription:'Contract - Tier B'},
-      {lPricingCategoryKey:4, sPricingDescription:'Cap/FFS'}
-    ];
-    _paymentTerms = [
-      {lPaymentTermsKey:1, sTermsDesc:'Net 30'},
-      {lPaymentTermsKey:2, sTermsDesc:'Net 45'},
-      {lPaymentTermsKey:3, sTermsDesc:'Net 60'},
-      {lPaymentTermsKey:4, sTermsDesc:'Due on Receipt'}
-    ];
-    _clients = [
-      {lClientKey:5, sClientName1:'Tift Regional Medical Center'},
-      {lClientKey:12, sClientName1:'Emory University Hospital'},
-      {lClientKey:18, sClientName1:'Piedmont Healthcare'},
-      {lClientKey:23, sClientName1:'WellStar Kennestone Hospital'}
-    ];
-    _departments = [
-      {lDepartmentKey:10, lClientKey:5, sDepartmentName:'Endoscopy'},
-      {lDepartmentKey:11, lClientKey:5, sDepartmentName:'Pulmonology'},
-      {lDepartmentKey:20, lClientKey:12, sDepartmentName:'GI Lab'},
-      {lDepartmentKey:21, lClientKey:12, sDepartmentName:'Surgery'}
-    ];
+    // Load lookups from MockDB as fallback
+    _statuses = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairStatuses') : [];
+    _levels = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairLevels') : [];
+    _repairReasons = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairReasons') : [];
+    _safetyLevels = (typeof MockDB !== 'undefined') ? MockDB.getAll('patientSafetyLevels') : [];
+    _techs = (typeof MockDB !== 'undefined') ? MockDB.getAll('technicians') : [];
+    _salesReps = (typeof MockDB !== 'undefined') ? MockDB.getAll('salesReps') : [];
+    _deliveryMethods = (typeof MockDB !== 'undefined') ? MockDB.getAll('deliveryMethods') : [];
+    _pricingCategories = (typeof MockDB !== 'undefined') ? MockDB.getAll('pricingCategories') : [];
+    _paymentTerms = (typeof MockDB !== 'undefined') ? MockDB.getAll('paymentTerms') : [];
+    _clients = (typeof MockDB !== 'undefined') ? MockDB.getAll('clients') : [];
+    _departments = (typeof MockDB !== 'undefined') ? MockDB.getAll('departments') : [];
 
     // Populate all dropdowns
     populateSelect('hRepairStatus', _statuses, 'lRepairStatusID', 'sRepairStatus', true);
@@ -6872,198 +6815,17 @@ async function initPage() {
     populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingDescription', true);
     populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sTermsDesc', true);
 
-    // Full demo repair record
-    _currentRepair = {
-      lRepairKey: 26601,
-      sWorkOrderNumber: 'NR26006601',
-      lRepairStatusID: 3,
-      lRepairLevelKey: 3,
-      lRepairReasonKey: 2,
-      lClientKey: 5,
-      lDepartmentKey: 10,
-      lTechnicianKey: 1,
-      lSalesRepKey: 2,
-      lDeliveryMethodKey: 1,
-      lPatientSafetyLevelKey: 2,
-      lPricingCategoryKey: 2,
-      lPaymentTermsKey: 1,
+    // Load first repair from MockDB if available
+    if (typeof MockDB !== 'undefined') {
+      var allRepairs = MockDB.getAll('repairs');
+      if (allRepairs.length) {
+        _currentRepair = allRepairs[0];
+        populateDetail(_currentRepair);
+        updateWorkflowForms(_currentRepair.lRepairStatusID || 1);
+      }
+    }
 
-      // Dates
-      dtDateIn: '2026-03-05T08:30:00',
-      dtDateOut: null,
-      dtShipDate: null,
-      dtDeliveryDate: null,
-      dtAprRecvd: '2026-03-06T14:22:00',
-      dtReqSent: '2026-03-05T16:00:00',
-      dtLastUpdate: '2026-03-10T09:15:00',
-      dtCarrierDeliveryDateGuaranteed: null,
-
-      // Scope info
-      sSerialNumber: '2801442',
-      sScopeTypeDesc: 'GIF-H190',
-      sRigidOrFlexible: 'Flexible',
-      nDaysSinceLastIn: 127,
-
-      // Intake
-      sComplaintDesc: 'Fluid invasion detected during leak test. Image degradation noted — foggy output and intermittent pixel dropout on left side. Angulation cable tension loose on up/down axis. Client reports issue worsened over past 2 weeks.',
-      sAngInUp: '185',
-      sAngInDown: '175',
-      sAngInRight: '155',
-      sAngInLeft: '148',
-      nIncomingEpoxySize: 3,
-      sBRJigSize: '9.8',
-      sAngOutUp: '210', sAngOutDown: '90', sAngOutRight: '100', sAngOutLeft: '100',
-      nOutgoingEpoxySize: 10.19, sMaxEpoxy: '10.42',
-      sBrokenFibersIn: '3', sBrokenFibersOut: '0',
-      sLeakTesterSN: 'SN 20111070028573', sLeakTesterVersion: '2.18',
-      sLeakRunID: '28346', sLeakDuration: '60 sec', sLeakResult: 'PASS', sFluidResult: 'PASS',
-      dtLeakTestDate: '2026-03-13T10:45:00',
-      sNotes: 'Scope arrived with minor exterior scuffing on insertion tube near bending section. Case included, cap missing. Water resistance cap cracked — replaced on intake.',
-
-      // Financial
-      mMaxCharge: 3500.00,
-      dblAmtRepair: 2875.00,
-      dblAmtCostLabor: 680.00,
-      dblAmtCostMaterial: 412.50,
-      dblAmtShipping: 45.00,
-      dblAmtCommission: 143.75,
-      dblOutSourceCost: 0,
-
-      // Shipping address
-      sShipName1: 'Tift Regional Medical Center',
-      sShipName2: 'Endoscopy Department',
-      sShipAttention: 'Linda Harper, Service Mgr',
-      sShipAddr1: '901 E 18th Street',
-      sShipAddr2: 'Building C, Suite 200',
-      sShipCity: 'Tifton',
-      sShipState: 'GA',
-      sShipZip: '31794',
-
-      // Billing address
-      sBillName1: 'Tift Regional Medical Center',
-      sBillName2: 'Accounts Payable',
-      sBillAddr1: '901 E 18th Street',
-      sBillAddr2: 'Admin Building, 1st Floor',
-      sBillCity: 'Tifton',
-      sBillState: 'GA',
-      sBillZip: '31794',
-      sBillEmail: 'ap@tiftregional.com',
-      sBillTo: 'C',
-
-      // Tracking
-      sShipTrackingNumberIn: '1Z999AA10312456784',
-      sShipTrackingNumber: '',
-      sShipTrackingNumberVendor: '',
-      sRackPosition: 'B-14',
-      bTrackingNumberRequired: true,
-      sShipWeight: '',
-      sPurchaseOrder: 'PO-2026-03-1147',
-      sInvoiceNumber: '',
-
-      // Display toggles
-      sDisplayItemAmount: 'Y',
-      sDisplayItemDescription: 'Y',
-      sDisplayCustomerComplaint: 'N',
-
-      // Accessories
-      sIncludesCaseYN: 'Y',
-      sIncludesCapYN: 'N',
-      sIncludesWaterResCapYN: 'Y',
-      sIncludesVideoPlugYN: 'Y',
-      sIncludesMouthpieceYN: 'N',
-      sIncludesAngleKnobYN: 'Y',
-
-      // Requisition
-      sReqAprTotalsOnly: 'REQ-2026-0447',
-      sApprName: 'Dr. Patricia Owens',
-      lDistributorKey: 0,
-
-      // Comments
-      mComments: 'Fluid invasion confirmed — full distal end rebuild required. CCD replacement authorized per Linda Harper phone approval 3/6. Parts ordered from Olympus — ETA 3/8.\n\nUpdate 3/8: Parts received. Rob M. beginning distal end teardown.\nUpdate 3/9: CCD installed, light guide bundle inspected — minor fraying noted, client declined replacement at this time.\nUpdate 3/10: Reassembly in progress, epoxy cure overnight.',
-      mCommentsHidden: 'Customer has been notified of repair status via email on 3/6 and 3/8. Estimated completion 3/12. Linda Harper approved up to $3,500 max charge.',
-      mCommentsRework: '',
-      mCommentsDisIns: 'D&I inspection completed 3/5. Fluid invasion path identified: cracked water resistance cap allowed moisture ingress through bending section seal. No evidence of impact damage — normal wear failure.',
-      mCommentsISO: ''
-    };
-
-    // Populate the full UI
-    populateDetail(_currentRepair);
-    // Demo: phases 1-2 already generated since status is "In Repair" (3)
-    _generatedForms = {
-      disassemble: '3/5/2026, 2:00 PM',
-      requisition: '3/5/2026, 4:30 PM'
-    };
-    updateWorkflowForms(_currentRepair.lRepairStatusID);
-    document.getElementById('repairBadge').textContent = '#DEMO';
-
-    // Demo repair line items
-    renderRepairItems([
-      { lRepairItemTranKey:1001, lRepairItemKey:312, sTSICode:'CCD-190', sItemDescription:'CCD Replacement (GIF-H190)', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:1450.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'Y', sComments:'OEM Olympus CCD module' },
-      { lRepairItemTranKey:1002, lRepairItemKey:245, sTSICode:'BND-DIS', sItemDescription:'Bending Section — Distal End Rebuild', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:680.00, sTechInits:'RM', sTech2Inits:'TJ', sPrimaryRepair:'N', sComments:'Full teardown & reseal' },
-      { lRepairItemTranKey:1003, lRepairItemKey:189, sTSICode:'WRC-CAP', sItemDescription:'Water Resistance Cap Replacement', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:125.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Cracked on intake — no charge to client' },
-      { lRepairItemTranKey:1004, lRepairItemKey:156, sTSICode:'EPX-STD', sItemDescription:'Epoxy Application — Standard', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:85.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'' },
-      { lRepairItemTranKey:1005, lRepairItemKey:401, sTSICode:'INS-INS', sItemDescription:'Insertion Tube — Inspect & Clean', sUANWT:'', sFixType:'N', sApproved:'Y', dblRepairPrice:175.00, sTechInits:'TJ', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Minor scuffing noted, functional' },
-      { lRepairItemTranKey:1006, lRepairItemKey:422, sTSICode:'LGB-INS', sItemDescription:'Light Guide Bundle — Inspection', sUANWT:'', sFixType:'N', sApproved:'Y', dblRepairPrice:120.00, sTechInits:'TJ', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Minor fraying — client declined replace' },
-      { lRepairItemTranKey:1007, lRepairItemKey:510, sTSICode:'ANG-CAL', sItemDescription:'Angulation Calibration & Adjustment', sUANWT:'', sFixType:'C', sApproved:'Y', dblRepairPrice:150.00, sTechInits:'RM', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Cable tension reset to spec' },
-      { lRepairItemTranKey:1008, lRepairItemKey:550, sTSICode:'LKT-FNL', sItemDescription:'Final Leak Test & QC Verification', sUANWT:'', sFixType:'A', sApproved:'N', dblRepairPrice:90.00, sTechInits:'MP', sTech2Inits:'', sPrimaryRepair:'N', sComments:'Pending — in drying phase' }
-    ]);
-
-    // Demo inventory (parts consumed)
-    populateInventory([
-      { sLotNumber:'LOT-2026-0089', lQuantity:1, sItemDescription:'CCD Module — Olympus GIF-H190 OEM', sSize:'Standard', sPosted:'Y' },
-      { sLotNumber:'LOT-2026-0112', lQuantity:2, sItemDescription:'Bending Rubber — Distal End', sSize:'9.8mm', sPosted:'Y' },
-      { sLotNumber:'LOT-2025-0847', lQuantity:1, sItemDescription:'Water Resistance Cap — GIF-H Series', sSize:'Standard', sPosted:'Y' },
-      { sLotNumber:'LOT-2026-0034', lQuantity:1, sItemDescription:'Epoxy Kit — Standard Application', sSize:'5ml', sPosted:'N' },
-      { sLotNumber:'LOT-2026-0091', lQuantity:3, sItemDescription:'O-Ring Seal — Distal End', sSize:'9.8mm', sPosted:'Y' },
-      { sLotNumber:'LOT-2025-0723', lQuantity:1, sItemDescription:'Angulation Wire Set — Up/Down', sSize:'GIF-H190', sPosted:'N' }
-    ]);
-
-    // Demo status history
-    populateStatus([
-      { sStatusDesc:'Received / Intake', dtCompleteDate:'2026-03-05T08:30:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'Scope received via FedEx Priority' },
-      { sStatusDesc:'Evaluation', dtCompleteDate:'2026-03-05T10:15:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Leak test positive — fluid invasion confirmed' },
-      { sStatusDesc:'D&I Inspection', dtCompleteDate:'2026-03-05T14:00:00', sUserName:'Tim Johnson', bIsVoid:false, mTranComments:'Disassembly & inspection complete' },
-      { sStatusDesc:'Waiting for Approval', dtCompleteDate:'2026-03-05T16:30:00', sUserName:'System', bIsVoid:false, mTranComments:'Repair estimate sent to client — $2,875' },
-      { sStatusDesc:'Approval Received', dtCompleteDate:'2026-03-06T14:22:00', sUserName:'System', bIsVoid:false, mTranComments:'Phone approval from Linda Harper' },
-      { sStatusDesc:'Parts Ordered', dtCompleteDate:'2026-03-06T15:00:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'CCD module ordered from Olympus — ETA 3/8' },
-      { sStatusDesc:'Parts Received', dtCompleteDate:'2026-03-08T09:45:00', sUserName:'Kevin Brooks', bIsVoid:false, mTranComments:'CCD module received, QC passed' },
-      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-08T10:00:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Distal end rebuild started' },
-      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-09T11:30:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'CCD installed, light guide inspected' },
-      { sStatusDesc:'In Repair', dtCompleteDate:'2026-03-10T08:00:00', sUserName:'Rob Martinez', bIsVoid:false, mTranComments:'Reassembly — epoxy cure in progress' }
-    ]);
-
-    // Demo documents
-    populateDocuments([
-      { sDocumentName:'Intake_Photo_Front.jpg', dtDateUploaded:'2026-03-05T08:45:00' },
-      { sDocumentName:'Intake_Photo_DistalEnd.jpg', dtDateUploaded:'2026-03-05T08:46:00' },
-      { sDocumentName:'Leak_Test_Report.pdf', dtDateUploaded:'2026-03-05T10:30:00' },
-      { sDocumentName:'DI_Inspection_Worksheet.pdf', dtDateUploaded:'2026-03-05T14:15:00' },
-      { sDocumentName:'Repair_Estimate_26601.pdf', dtDateUploaded:'2026-03-05T16:30:00' },
-      { sDocumentName:'Client_Approval_Email.pdf', dtDateUploaded:'2026-03-06T14:30:00' },
-      { sDocumentName:'CCD_Module_QC_Certificate.pdf', dtDateUploaded:'2026-03-08T09:50:00' }
-    ]);
-
-    // Demo flags
-    renderFlags([
-      { sFlag:'Fluid invasion confirmed — full distal end rebuild required' },
-      { sFlag:'CCD replacement authorized by Linda Harper on 3/6' },
-      { sFlag:'Rush repair — 5 day turnaround per contract terms' },
-      { sFlag:'Client on Tier A contract pricing — do not exceed $3,500 max' },
-      { sFlag:'Parts on order from Olympus, ETA 3/8 — hold repair until received' }
-    ]);
-
-    // Set scope info (spans, not inputs)
-    document.getElementById('hMfr').textContent = 'Olympus';
-    document.getElementById('hScopeCat').textContent = 'Gastroscope';
-    document.getElementById('hModel').textContent = 'GIF-H190';
-    document.getElementById('hSerial').textContent = '2801442';
-    document.getElementById('hCapFFS').textContent = 'Contract';
-    document.getElementById('hWithin40').textContent = 'No';
-
-    // Load history badge for this SN#
-    loadScopeHistory();
-
-    // Handle ?action=new even in demo mode
+    // Handle ?action=new even in fallback mode
     const action = params.get('action');
     if (action === 'new') {
       newRepair();

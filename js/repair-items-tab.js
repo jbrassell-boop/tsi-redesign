@@ -17,14 +17,6 @@ let ri_repairStatuses = [];
 let ri_filterType   = '';
 let ri_filterActive = '';
 
-// ─── Demo data ───────────────────────────────────────────────────────────────
-const ri_DEMO_ITEMS = [
-  {lRepairItemKey:1,psItemDescription:'Bending Section Replacement',psTSICode:'BEND-001',psProductID:'P-BEND',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:3,plRepairLevelKey:2,plRepairStatusID:0,pdblAvgCostMaterial:45.00,pdblAvgCostLabor:85.00,ptMinutesTech1:45,ptMinutesTech2:60,ptMinutesTech3:75,ptMinutesTech1SmallDiameter:50,ptMinutesTech2SmallDiameter:65,ptMinutesTech3SmallDiameter:80,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:2,psItemDescription:'Insertion Tube Replacement',psTSICode:'TUBE-001',psProductID:'P-TUBE',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:5,plRepairLevelKey:3,plRepairStatusID:0,pdblAvgCostMaterial:120.00,pdblAvgCostLabor:110.00,ptMinutesTech1:90,ptMinutesTech2:105,ptMinutesTech3:120,ptMinutesTech1SmallDiameter:100,ptMinutesTech2SmallDiameter:115,ptMinutesTech3SmallDiameter:130,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:3,psItemDescription:'CCD Camera Replacement',psTSICode:'CCD-001',psProductID:'P-CCD',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:7,plRepairLevelKey:3,plRepairStatusID:0,pdblAvgCostMaterial:350.00,pdblAvgCostLabor:150.00,ptMinutesTech1:120,ptMinutesTech2:135,ptMinutesTech3:150,ptMinutesTech1SmallDiameter:130,ptMinutesTech2SmallDiameter:145,ptMinutesTech3SmallDiameter:160,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:true},
-  {lRepairItemKey:4,psItemDescription:'Light Guide Replacement',psTSICode:'LG-001',psProductID:'P-LG',psRigidOrFlexible:'F',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:2,plRepairLevelKey:1,plRepairStatusID:0,pdblAvgCostMaterial:25.00,pdblAvgCostLabor:40.00,ptMinutesTech1:30,ptMinutesTech2:40,ptMinutesTech3:50,ptMinutesTech1SmallDiameter:35,ptMinutesTech2SmallDiameter:45,ptMinutesTech3SmallDiameter:55,pbOkayToSkip:true,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-  {lRepairItemKey:5,psItemDescription:'Sheath Replacement - Rigid',psTSICode:'SHEATH-R01',psProductID:'P-SHR',psRigidOrFlexible:'R',psPartOrLabor:'L',pbActive:true,pnTurnAroundTime:1,plRepairLevelKey:1,plRepairStatusID:0,pdblAvgCostMaterial:15.00,pdblAvgCostLabor:30.00,ptMinutesTech1:20,ptMinutesTech2:25,ptMinutesTech3:30,ptMinutesTech1SmallDiameter:20,ptMinutesTech2SmallDiameter:25,ptMinutesTech3SmallDiameter:30,pbOkayToSkip:false,pbIsAdjustment:false,pbSkipPickList:false,pbProfitItemPlus:false,pbProfitItemMinus:false,pbLocked:false},
-];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function ri_setDetailSaveStatus(state, text) {
@@ -110,7 +102,7 @@ async function ri_loadItems() {
     showDataBadge(true);
     ri_isLive = true;
   } catch(e) {
-    ri_allItems = ri_DEMO_ITEMS;
+    ri_allItems = [];
     showDataBadge(false);
     ri_isLive = false;
   }

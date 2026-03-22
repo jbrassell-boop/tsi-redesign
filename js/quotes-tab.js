@@ -4,162 +4,26 @@
    Entry point: iq_initPage() — called lazily when tab first clicked.
 */
 
-// ── Demo Data ──
-var iq_DEMO_QUOTES = [
-  {
-    id:1001, quoteNum:'IQ-2026-001', status:'Sent',
-    clientKey:1, clientName:'Shreveport Endoscopy Center',
-    deptKey:11, deptName:'Endoscopy — Mullica Hill',
-    billTo:{name:'Shreveport Endoscopy Center, Inc.',attn:'Accounts Payable',addr1:'333 Irving Avenue',city:'Bridgeton',state:'NJ',zip:'08302'},
-    shipTo:{name:'Shreveport Endoscopy Ctr — Mullica Hill',attn:'101 Sterile Processing',addr1:'700 Mullica Hill Road',city:'Mullica Hill',state:'NJ',zip:'08062'},
-    salesRep:'Jordan Martin', gpo:'', visitRef:'Van service 03/06/2026',
-    quoteDate:'2026-03-13', sentDate:'2026-03-13', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
-    items:[
-      {id:1,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'2797',issue:'Handle housing cracked and lever broken — damaged beyond repair',techNote:'TSI can offer exchange option for same make/model',repairLevel:3,basePrice:430,amount:430,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS851',mfr:'Storz',model:'33132',serial:'FH01',issue:'Repair rotation knob and replace locking spring, lock and button',techNote:'',repairLevel:2,basePrice:198,amount:170,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:3,instrCode:'OS1477',mfr:'Aesculap',model:'PM973R',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:4,instrCode:'OS1477',mfr:'Aesculap',model:'PM600201',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1002, quoteNum:'IQ-2026-002', status:'Draft',
-    clientKey:2, clientName:'Northside Hospital',
-    deptKey:21, deptName:'GI Lab — East Baltimore',
-    billTo:{name:'Northside Hospital',attn:'Accounts Payable',addr1:'600 N. Wolfe Street',city:'Baltimore',state:'MD',zip:'21287'},
-    shipTo:{name:'Northside Hospital — GI Lab',attn:'Sterile Processing',addr1:'600 N. Wolfe Street, Bldg B',city:'Baltimore',state:'MD',zip:'21287'},
-    salesRep:'Mike Rivera', gpo:'hpg', visitRef:'Field eval 02/28/2026',
-    quoteDate:'2026-03-10', sentDate:null, poNumber:'', reviewedBy:'Alex Torres', notes:'Customer may want to bundle with scope repair.',
-    items:[
-      {id:1,instrCode:'OS1040',mfr:'Olympus',model:'FG-32L',serial:'A22-0441',issue:'Biopsy channel worn — burr snagging biopsy forceps on retrieval',techNote:'Channel replacement required',repairLevel:3,basePrice:540,amount:540,approval:null,outsource:true,outsourceVendor:'Olympus Repair Center',outsourceCost:380},
-      {id:2,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'B09-774',issue:'Sheath cracked at distal end — light loss visible',techNote:'New sheath fabricated in-house',repairLevel:2,basePrice:310,amount:267,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1003, quoteNum:'IQ-2026-003', status:'Approved',
-    clientKey:3, clientName:'Valley Health System',
-    deptKey:31, deptName:'Endoscopy — Hospital of the University of PA',
-    billTo:{name:'Valley Health System / VHS',attn:'Accounts Payable',addr1:'3400 Civic Center Blvd',city:'Philadelphia',state:'PA',zip:'19104'},
-    shipTo:{name:'HUP Endoscopy — Sterile Processing',attn:'SPD Department',addr1:'3400 Civic Center Blvd, 3rd Floor',city:'Philadelphia',state:'PA',zip:'19104'},
-    salesRep:'Jordan Martin', gpo:'viz', visitRef:'Van service 03/01/2026',
-    quoteDate:'2026-03-05', sentDate:'2026-03-05', poNumber:'PO-77423', reviewedBy:'Jordan Martin', notes:'',
-    items:[
-      {id:1,instrCode:'OS2200',mfr:'Storz',model:'26174A',serial:'SC-2201',issue:'Light cable detached at eyepiece end',techNote:'Reattached and retested — passed',repairLevel:1,basePrice:280,amount:95,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS810',mfr:'Gyrus ACMI',model:'A3290',serial:'GY-0981',issue:'Insulation compromised on shaft — patient safety risk',techNote:'Full reinsulation required',repairLevel:3,basePrice:620,amount:620,approval:true,outsource:true,outsourceVendor:'ACMI Service Center',outsourceCost:420},
-      {id:3,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'N/A',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1004, quoteNum:'IQ-2026-004', status:'Partially Approved',
-    clientKey:4, clientName:'Tampa General Hospital',
-    deptKey:41, deptName:'Sterile Processing — Tampa Gen',
-    billTo:{name:'Tampa General Hospital',attn:'Accounts Payable',addr1:'200 Lothrop Street',city:'Pittsburgh',state:'PA',zip:'15213'},
-    shipTo:{name:'Tampa Gen — SPD',attn:'Sterile Processing',addr1:'200 Lothrop St, Level B',city:'Pittsburgh',state:'PA',zip:'15213'},
-    salesRep:'Dana Cole', gpo:'hpg', visitRef:'On-site eval 02/20/2026',
-    quoteDate:'2026-02-24', sentDate:'2026-02-25', poNumber:'TGH-14892', reviewedBy:'Dana Cole', notes:'Customer approved 3 of 5 — two items under internal review.',
-    items:[
-      {id:1,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-0042',issue:'Motor housing cracked — vibration and heat',techNote:'Housing replacement required',repairLevel:3,basePrice:890,amount:890,approval:true,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
-      {id:2,instrCode:'OS321',mfr:'Stryker',model:'375-020-000',serial:'STR-0043',issue:'Motor housing cracked — same issue as STR-0042',techNote:'Same repair as above',repairLevel:3,basePrice:890,amount:890,approval:false,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:640},
-      {id:3,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'ML-5591',issue:'Lever spring broken — handle non-functional',techNote:'Spring replaced in-house',repairLevel:2,basePrice:430,amount:370,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:4,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-112',issue:'Jaw alignment off — grip strength reduced',techNote:'Realigned and tested',repairLevel:1,basePrice:240,amount:82,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:5,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'WLF-003',issue:'Image quality degraded — fiber bundle damage',techNote:'Awaiting vendor assessment',repairLevel:null,basePrice:310,amount:0,approval:null,outsource:true,outsourceVendor:'R. Wolf USA',outsourceCost:0}
-    ]
-  },
-  {
-    id:1005, quoteNum:'IQ-2026-005', status:'Sent',
-    clientKey:5, clientName:'Regional Medical Center',
-    deptKey:51, deptName:'OR — Virtua Voorhees',
-    billTo:{name:'Regional Medical Center',attn:'Accounts Payable',addr1:'401 Young Avenue',city:'Voorhees',state:'NJ',zip:'08043'},
-    shipTo:{name:'Virtua Voorhees OR — SPD',attn:'Sterile Processing',addr1:'100 Bowman Drive',city:'Voorhees',state:'NJ',zip:'08043'},
-    salesRep:'Jordan Martin', gpo:'', visitRef:'Field pick-up 03/10/2026',
-    quoteDate:'2026-03-11', sentDate:'2026-03-12', poNumber:'', reviewedBy:'Jordan Martin', notes:'',
-    items:[
-      {id:1,instrCode:'OS1200',mfr:'Codman',model:'80-1550',serial:'CDM-2201',issue:'Bipolar forcep tips oxidized — electrical conductivity degraded',techNote:'Re-tips required',repairLevel:2,basePrice:380,amount:327,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS990',mfr:'V. Mueller',model:'CH6275',serial:'VM-0043',issue:'Ratchet lock skipping — intermittent failure',techNote:'Ratchet mechanism rebuilt',repairLevel:1,basePrice:290,amount:99,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1006, quoteNum:'IQ-2026-006', status:'Declined',
-    clientKey:6, clientName:'Tift Regional Medical Center',
-    deptKey:61, deptName:'Endoscopy — Robert Wood Johnson',
-    billTo:{name:'Tift Regional Medical Center',attn:'Accounts Payable',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
-    shipTo:{name:'RWJ Endoscopy — SPD',attn:'SPD',addr1:'1 Robert Wood Johnson Pl',city:'New Brunswick',state:'NJ',zip:'08901'},
-    salesRep:'Mike Rivera', gpo:'viz', visitRef:'Drop-off 02/15/2026',
-    quoteDate:'2026-02-17', sentDate:'2026-02-18', poNumber:'', reviewedBy:'Alex Torres', notes:'Customer declined — going to OEM for all repairs.',
-    items:[
-      {id:1,instrCode:'OS1040',mfr:'Olympus',model:'FG-32L',serial:'OLY-8821',issue:'Biopsy channel severely worn',techNote:'Channel replacement',repairLevel:3,basePrice:540,amount:540,approval:false,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-7744',issue:'Motor failure — no power',techNote:'Full motor replacement',repairLevel:3,basePrice:890,amount:890,approval:false,outsource:true,outsourceVendor:'Stryker Instruments',outsourceCost:650},
-      {id:3,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-554',issue:'Tip bent — functional but misaligned',techNote:'Tip replacement',repairLevel:1,basePrice:240,amount:82,approval:false,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1007, quoteNum:'IQ-2026-007', status:'Draft',
-    clientKey:7, clientName:'West Side GI Center',
-    deptKey:71, deptName:'GI Lab — West Side City',
-    billTo:{name:'West Side GI Center',attn:'Accounts Payable',addr1:'1925 Pacific Avenue',city:'Atlantic City',state:'NJ',zip:'08401'},
-    shipTo:{name:'West Side GI Lab',attn:'Endoscopy SPD',addr1:'1925 Pacific Avenue, 4th Floor',city:'Atlantic City',state:'NJ',zip:'08401'},
-    salesRep:'Jordan Martin', gpo:'s3', visitRef:'',
-    quoteDate:'2026-03-13', sentDate:null, poNumber:'', reviewedBy:'', notes:'In-progress — instrument still being evaluated.',
-    items:[
-      {id:1,instrCode:'OS2200',mfr:'Storz',model:'26174A',serial:'SZ-0017',issue:'Imaging fiber bundle partially broken — image degradation',techNote:'Vendor assessment pending',repairLevel:null,basePrice:280,amount:0,approval:null,outsource:true,outsourceVendor:'Karl Storz Endoscopy',outsourceCost:0}
-    ]
-  },
-  {
-    id:1008, quoteNum:'IQ-2026-008', status:'Approved',
-    clientKey:8, clientName:'Coliseum Medical Center',
-    deptKey:81, deptName:'Cath Lab — Thomas Jefferson',
-    billTo:{name:'Thomas Jefferson University Hospital',attn:'Accounts Payable',addr1:'111 S. 11th Street',city:'Philadelphia',state:'PA',zip:'19107'},
-    shipTo:{name:'Jefferson Cath Lab — SPD',attn:'Sterile Processing',addr1:'111 S. 11th Street, Level 1',city:'Philadelphia',state:'PA',zip:'19107'},
-    salesRep:'Dana Cole', gpo:'hpg', visitRef:'Van service 03/03/2026',
-    quoteDate:'2026-03-06', sentDate:'2026-03-06', poNumber:'JEFF-5521', reviewedBy:'Dana Cole', notes:'',
-    items:[
-      {id:1,instrCode:'OS865',mfr:'Microline',model:'3941',serial:'ML-2210',issue:'Housing cracked',techNote:'',repairLevel:2,basePrice:430,amount:370,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS851',mfr:'Storz',model:'33132',serial:'SZ-0881',issue:'Rotation knob stuck',techNote:'',repairLevel:1,basePrice:198,amount:67,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:3,instrCode:'OS990',mfr:'V. Mueller',model:'CH6275',serial:'VM-0071',issue:'Ratchet failure',techNote:'',repairLevel:2,basePrice:290,amount:249,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:4,instrCode:'OS440',mfr:'Aesculap',model:'FB382R',serial:'AES-007',issue:'No Issues Found',techNote:'Received within OEM Spec',repairLevel:null,basePrice:0,amount:0,approval:true,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  },
-  {
-    id:1009, quoteNum:'IQ-2026-009', status:'Sent',
-    clientKey:9, clientName:'Baptist Health',
-    deptKey:91, deptName:'OR — Baptist Health MC',
-    billTo:{name:'Baptist Health Medical Center',attn:'Accounts Payable',addr1:'30 Prospect Avenue',city:'Hackensack',state:'NJ',zip:'07601'},
-    shipTo:{name:'Baptist OR — SPD',attn:'Sterile Processing',addr1:'30 Prospect Avenue, 2nd Floor',city:'Hackensack',state:'NJ',zip:'07601'},
-    salesRep:'Mike Rivera', gpo:'viz', visitRef:'Field eval 03/08/2026',
-    quoteDate:'2026-03-09', sentDate:'2026-03-10', poNumber:'', reviewedBy:'Mike Rivera', notes:'',
-    items:[
-      {id:1,instrCode:'OS1200',mfr:'Codman',model:'80-1550',serial:'CDM-3310',issue:'Insulation damage on bipolar tips',techNote:'Full re-tip',repairLevel:3,basePrice:380,amount:380,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:2,instrCode:'OS320',mfr:'Stryker',model:'375-020-000',serial:'STR-1122',issue:'Blade assembly stuck — fails to retract',techNote:'Blade replaced',repairLevel:2,basePrice:890,amount:765,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0},
-      {id:3,instrCode:'OS712',mfr:'Wolf',model:'8985.431',serial:'WLF-081',issue:'Light guide detached',techNote:'Reattached and tested',repairLevel:1,basePrice:310,amount:105,approval:null,outsource:false,outsourceVendor:'',outsourceCost:0}
-    ]
-  }
-];
-
-// Demo clients for wizard
-var iq_DEMO_CLIENTS = [
-  {lClientKey:1,sClientName1:'Shreveport Endoscopy Center',sClientCity:'Bridgeton',sClientState:'NJ'},
-  {lClientKey:2,sClientName1:'Northside Hospital',sClientCity:'Baltimore',sClientState:'MD'},
-  {lClientKey:3,sClientName1:'Valley Health System',sClientCity:'Philadelphia',sClientState:'PA'},
-  {lClientKey:4,sClientName1:'Tampa General Hospital',sClientCity:'Pittsburgh',sClientState:'PA'},
-  {lClientKey:5,sClientName1:'Regional Medical Center',sClientCity:'Voorhees',sClientState:'NJ'},
-  {lClientKey:6,sClientName1:'Tift Regional Medical Center',sClientCity:'New Brunswick',sClientState:'NJ'},
-  {lClientKey:7,sClientName1:'West Side GI Center',sClientCity:'Atlantic City',sClientState:'NJ'},
-  {lClientKey:8,sClientName1:'Coliseum Medical Center',sClientCity:'Philadelphia',sClientState:'PA'},
-  {lClientKey:9,sClientName1:'Baptist Health',sClientCity:'Hackensack',sClientState:'NJ'}
-];
-var iq_DEMO_DEPTS = {
-  1:[{lDepartmentKey:11,sDepartmentName:'Endoscopy — Mullica Hill'},{lDepartmentKey:12,sDepartmentName:'OR — Shreveport Main'}],
-  2:[{lDepartmentKey:21,sDepartmentName:'GI Lab — East Baltimore'},{lDepartmentKey:22,sDepartmentName:'Surgery — Hopkins Outpatient'}],
-  3:[{lDepartmentKey:31,sDepartmentName:'Endoscopy — Hospital of the University of PA'},{lDepartmentKey:32,sDepartmentName:'OR — Penn Presbyterian'}],
-  4:[{lDepartmentKey:41,sDepartmentName:'Sterile Processing — Tampa Gen'},{lDepartmentKey:42,sDepartmentName:'GI — Tampa Gen Shadyside'}],
-  5:[{lDepartmentKey:51,sDepartmentName:'OR — Virtua Voorhees'},{lDepartmentKey:52,sDepartmentName:'Endoscopy — Virtua Berlin'}],
-  6:[{lDepartmentKey:61,sDepartmentName:'Endoscopy — Robert Wood Johnson'},{lDepartmentKey:62,sDepartmentName:'OR — Monmouth Medical'}],
-  7:[{lDepartmentKey:71,sDepartmentName:'GI Lab — West Side City'},{lDepartmentKey:72,sDepartmentName:'OR — West Side Mainland'}],
-  8:[{lDepartmentKey:81,sDepartmentName:'Cath Lab — Thomas Jefferson'},{lDepartmentKey:82,sDepartmentName:'Endoscopy — Jefferson Northeast'}],
-  9:[{lDepartmentKey:91,sDepartmentName:'OR — Baptist Health MC'},{lDepartmentKey:92,sDepartmentName:'GI — Baptist Southern Ocean'}]
-};
+// ── MockDB accessors (no hardcoded data) ──
+function iq_getClients() {
+  if (typeof MockDB === 'undefined') return [];
+  return MockDB.getAll('clients').map(function(c) {
+    return { lClientKey: c.lClientKey, sClientName1: c.sClientName1 || '', sClientCity: c.sMailCity || c.sShipCity || '', sClientState: c.sMailState || c.sShipState || '' };
+  });
+}
+function iq_getDepts() {
+  if (typeof MockDB === 'undefined') return {};
+  var map = {};
+  MockDB.getAll('departments').forEach(function(d) {
+    var ck = d.lClientKey;
+    if (!map[ck]) map[ck] = [];
+    map[ck].push({ lDepartmentKey: d.lDepartmentKey, sDepartmentName: d.sDepartmentName || '' });
+  });
+  return map;
+}
 
 // ── State ──
-var iq_allQuotes = iq_DEMO_QUOTES.map(function(q) { return JSON.parse(JSON.stringify(q)); });
+var iq_allQuotes = (typeof MockDB !== 'undefined' ? MockDB.getAll('instrumentQuotes') : []).map(function(q) { return JSON.parse(JSON.stringify(q)); });
 var iq_filteredQuotes = [];
 var iq_displayQuotes = [];
 var iq_selectedId = null;
@@ -689,7 +553,7 @@ function iq_wizUpdateNext() {
 
 function iq_wizRenderClients(filter) {
   var q = (filter||'').toLowerCase();
-  var clients = iq_DEMO_CLIENTS.filter(function(c){ return !q || c.sClientName1.toLowerCase().includes(q) || (c.sClientCity||'').toLowerCase().includes(q); });
+  var clients = iq_getClients().filter(function(c){ return !q || c.sClientName1.toLowerCase().includes(q) || (c.sClientCity||'').toLowerCase().includes(q); });
   document.getElementById('iq_wClientGrid').innerHTML = clients.map(function(c) {
     var sel = iq_wizClient && iq_wizClient.lClientKey === c.lClientKey ? ' selected' : '';
     return '<div class="wiz-card' + sel + '" onclick="iq_wizPickClient(' + c.lClientKey + ')">' +
@@ -702,7 +566,7 @@ function iq_wizRenderClients(filter) {
 function iq_wizFilterClients(val) { iq_wizRenderClients(val); }
 
 function iq_wizPickClient(key) {
-  iq_wizClient = iq_DEMO_CLIENTS.find(function(c){ return c.lClientKey === key; });
+  iq_wizClient = iq_getClients().find(function(c){ return c.lClientKey === key; });
   iq_wizDept = null;
   // re-render to show selection
   iq_wizRenderClients(document.getElementById('iq_wClientSearch').value);
@@ -712,7 +576,7 @@ function iq_wizPickClient(key) {
 function iq_wizRenderDepts(filter) {
   if (!iq_wizClient) return;
   document.getElementById('iq_wClientBarName').textContent = iq_wizClient.sClientName1;
-  var depts = (iq_DEMO_DEPTS[iq_wizClient.lClientKey] || []);
+  var depts = (iq_getDepts()[iq_wizClient.lClientKey] || []);
   var q = (filter||'').toLowerCase();
   var filtered = depts.filter(function(d){ return !q || d.sDepartmentName.toLowerCase().includes(q); });
   document.getElementById('iq_wDeptGrid').innerHTML = filtered.map(function(d) {
@@ -726,7 +590,7 @@ function iq_wizRenderDepts(filter) {
 function iq_wizFilterDepts(val) { iq_wizRenderDepts(val); }
 
 function iq_wizPickDept(key) {
-  var depts = iq_DEMO_DEPTS[iq_wizClient ? iq_wizClient.lClientKey : 0] || [];
+  var depts = iq_getDepts()[iq_wizClient ? iq_wizClient.lClientKey : 0] || [];
   iq_wizDept = depts.find(function(d){ return d.lDepartmentKey === key; });
   iq_wizRenderDepts(document.getElementById('iq_wDeptSearch').value);
   iq_wizUpdateNext();

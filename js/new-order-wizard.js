@@ -5,26 +5,6 @@
 (function() {
   'use strict';
 
-  // ── Demo data (mirrors NWO wizard demo in repairs.html) ──────────────────
-  const _DEMO_CLIENTS = [
-    { lClientKey:1, psClientName1:'Memorial Hospital',      psCity:'Philadelphia',   psState:'PA' },
-    { lClientKey:2, psClientName1:'City General Medical',   psCity:'Nashville',      psState:'TN' },
-    { lClientKey:3, psClientName1:'Northside Surgery Center',psCity:'Atlanta',       psState:'GA' },
-    { lClientKey:4, psClientName1:'Regional Medical Center',psCity:'Charlotte',      psState:'NC' },
-    { lClientKey:5, psClientName1:'St. Luke\'s Hospital',   psCity:'Houston',        psState:'TX' },
-    { lClientKey:6, psClientName1:'Valley Health System',   psCity:'Phoenix',        psState:'AZ' },
-  ];
-  const _DEMO_DEPTS = [
-    { lDepartmentKey:10, psDepartmentName:'Endoscopy',     lClientKey:1 },
-    { lDepartmentKey:11, psDepartmentName:'Urology',       lClientKey:1 },
-    { lDepartmentKey:12, psDepartmentName:'GI Lab',        lClientKey:2 },
-    { lDepartmentKey:13, psDepartmentName:'Pulmonology',   lClientKey:2 },
-    { lDepartmentKey:14, psDepartmentName:'Surgical Suite',lClientKey:3 },
-    { lDepartmentKey:15, psDepartmentName:'OR Suite',      lClientKey:4 },
-    { lDepartmentKey:16, psDepartmentName:'Endoscopy',     lClientKey:5 },
-    { lDepartmentKey:17, psDepartmentName:'GI Lab',        lClientKey:6 },
-  ];
-
   // ── State ─────────────────────────────────────────────────────────────────
   let _target = '';          // 'product-sale' or 'endocarts'
   let _title  = '';          // modal title
@@ -85,7 +65,7 @@
 
           <!-- Panel 1: Client -->
           <div id="nowPanel1" style="display:flex;flex-direction:column;flex:1;min-height:0;padding:14px 18px;gap:8px">
-            <input id="nowClientSearch" type="text" placeholder="Search by client name or city…"
+            <input id="nowClientSearch" type="text" placeholder="Search by name, city, state, zip, or ID…"
               oninput="nowFilterClients(this.value)"
               style="height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;font-size:12px;
                      font-family:inherit;outline:none;flex-shrink:0"
@@ -176,25 +156,20 @@
 
     // Load clients
     try {
-      if (typeof API !== 'undefined' && !API.isDemoMode()) {
-        const svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
-        const data = await API.getAllClients(svcKey);
-        _clients = Array.isArray(data) ? data : (data.data || []);
-        if (!_clients.length) throw new Error('empty');
-      } else throw new Error('demo');
+      const svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+      const data = await API.getAllClients(svcKey);
+      _clients = Array.isArray(data) ? data : (data.data || []);
     } catch(e) {
-      _clients = _DEMO_CLIENTS;
+      _clients = [];
     }
 
     // Load depts
     try {
-      if (typeof API !== 'undefined' && !API.isDemoMode()) {
-        const data = await API.getAllDepartments();
-        _depts = Array.isArray(data) ? data : (data.data || []);
-        if (!_depts.length) throw new Error('empty');
-      } else throw new Error('demo');
+      const svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+      const data = await API.getAllDepartments(svcKey);
+      _depts = Array.isArray(data) ? data : (data.data || []);
     } catch(e) {
-      _depts = _DEMO_DEPTS;
+      _depts = [];
     }
 
     nowGoStep(1);
@@ -237,13 +212,17 @@
   function _cName(c) { return c.psClientName1 || c.sClientName1 || ''; }
   function _cCity(c) { return c.psCity || c.sMailCity || ''; }
   function _cState(c) { return c.psState || c.sMailState || ''; }
+  function _cZip(c) { return c.psZip || c.sMailZip || c.sShipZip || ''; }
 
   window.nowFilterClients = function(q) {
     const grid = document.getElementById('nowClientGrid');
     const lower = q.toLowerCase();
     const filtered = q ? _clients.filter(c =>
       _cName(c).toLowerCase().includes(lower) ||
-      _cCity(c).toLowerCase().includes(lower)
+      _cCity(c).toLowerCase().includes(lower) ||
+      _cState(c).toLowerCase().includes(lower) ||
+      _cZip(c).toLowerCase().includes(lower) ||
+      String(c.lClientKey).includes(lower)
     ) : _clients;
 
     if (!filtered.length) {

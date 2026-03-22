@@ -7,29 +7,6 @@
 (function() {
   'use strict';
 
-  // ── Embedded instrument repair index (same data as ir_DEMO_REPAIRS) ────
-  var _IR_INDEX = [
-    { id:2001, orderNum:'IR-2026-001', clientName:'Shreveport Endoscopy Center', status:'Complete',   poNumber:'',          serials:['2797','FH01'] },
-    { id:2002, orderNum:'IR-2026-002', clientName:'Northside Hospital',          status:'In Progress', poNumber:'',          serials:['A22-0441','B09-774'] },
-    { id:2003, orderNum:'IR-2026-003', clientName:'Valley Health System',        status:'Invoiced',    poNumber:'PO-77423',  serials:['SC-2201','GY-0981'] },
-    { id:2004, orderNum:'IR-2026-004', clientName:'Tampa General Hospital',      status:'Outsourced',  poNumber:'TGH-14892', serials:['STR-0042','STR-0043','ML-5591','AES-112'] },
-    { id:2005, orderNum:'IR-2026-005', clientName:'Regional Medical Center',     status:'Received',    poNumber:'',          serials:['CDM-2201','VM-0043'] },
-    { id:2006, orderNum:'IR-2026-006', clientName:'West Side GI Center',         status:'On Hold',     poNumber:'',          serials:['SZ-0017'] },
-    { id:2007, orderNum:'IR-2026-007', clientName:'Coliseum Medical Center',     status:'Invoiced',    poNumber:'JEFF-5521', serials:['ML-2210','SZ-0881','VM-0071','AES-007'] },
-    { id:2008, orderNum:'IR-2026-008', clientName:'Baptist Health',              status:'In Progress', poNumber:'',          serials:['CDM-3310','STR-1122','WLF-081'] }
-  ];
-
-  // ── Embedded endocart quote index ──────────────────────────────────────
-  var _EC_INDEX = [
-    { id:5001, quoteNum:'ECQ-5001', clientName:'Northside Hospital',         status:'Billed' },
-    { id:5002, quoteNum:'ECQ-5002', clientName:'Valley Health System',       status:'Approved' },
-    { id:5003, quoteNum:'ECQ-5003', clientName:'Memorial Hospital',          status:'Quoted' },
-    { id:5004, quoteNum:'ECQ-5004', clientName:'Tampa General Hospital',     status:'Draft' },
-    { id:5005, quoteNum:'ECQ-5005', clientName:'Regional Medical Center',    status:'Quoted' },
-    { id:5006, quoteNum:'ECQ-5006', clientName:'Shreveport Endoscopy Center',status:'Cancelled' },
-    { id:5007, quoteNum:'ECQ-5007', clientName:'City General Medical',       status:'Approved' },
-    { id:5008, quoteNum:'ECQ-5008', clientName:'St. Luke\'s Hospital',       status:'Billed' }
-  ];
 
   // ── Status badge colors ────────────────────────────────────────────────
   function statusColor(s) {
@@ -106,8 +83,8 @@
       });
     }
 
-    // 3. Instrument Repairs (embedded index or global if available)
-    var irList = (typeof ir_DEMO_REPAIRS !== 'undefined') ? ir_DEMO_REPAIRS : _IR_INDEX;
+    // 3. Instrument Repairs (from MockDB)
+    var irList = (typeof MockDB !== 'undefined') ? (MockDB.getAll('instrumentRepairs') || []) : [];
     irList.forEach(function(r) {
       var serialMatch = false;
       if (r.items) {
@@ -133,8 +110,8 @@
       }
     });
 
-    // 4. EndoCarts (embedded index or global if available)
-    var ecList = (typeof _ecDemoQuotes !== 'undefined') ? _ecDemoQuotes : _EC_INDEX;
+    // 4. EndoCarts (from page data or MockDB)
+    var ecList = (typeof _ecDemoQuotes !== 'undefined') ? _ecDemoQuotes : [];
     ecList.forEach(function(e) {
       if ((e.quoteNum || '').toLowerCase().includes(lower)) {
         results.push({

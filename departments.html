@@ -1444,43 +1444,6 @@ function openContactModal(mode){
     document.getElementById('scopeDrawer').classList.remove('open');
     document.getElementById('scopeOverlay').classList.remove('open');
   }
-  var _DEMO_SCOPE_MODELS = {
-    'F': [
-      {lScopeTypeKey:1001, sScopeTypeDesc:'Olympus GIF-H180'},
-      {lScopeTypeKey:1002, sScopeTypeDesc:'Olympus GIF-HQ190'},
-      {lScopeTypeKey:1003, sScopeTypeDesc:'Olympus CF-HQ190L'},
-      {lScopeTypeKey:1004, sScopeTypeDesc:'Olympus PCF-H190DL'},
-      {lScopeTypeKey:1005, sScopeTypeDesc:'Olympus BF-1TH190'},
-      {lScopeTypeKey:1006, sScopeTypeDesc:'Olympus URF-V2'},
-      {lScopeTypeKey:1007, sScopeTypeDesc:'Fujifilm EG-580RD'},
-      {lScopeTypeKey:1008, sScopeTypeDesc:'Fujifilm EC-590WI'},
-      {lScopeTypeKey:1009, sScopeTypeDesc:'Pentax EG-3490K'},
-      {lScopeTypeKey:1010, sScopeTypeDesc:'Pentax EC-3490LK'},
-    ],
-    'R': [
-      {lScopeTypeKey:2001, sScopeTypeDesc:'Storz 27005BA Cystoscope'},
-      {lScopeTypeKey:2002, sScopeTypeDesc:'Storz 26003BA Resectoscope'},
-      {lScopeTypeKey:2003, sScopeTypeDesc:'Wolf 8655.431 Nephroscope'},
-      {lScopeTypeKey:2004, sScopeTypeDesc:'Stryker 10mm Laparoscope 0°'},
-      {lScopeTypeKey:2005, sScopeTypeDesc:'Stryker 10mm Laparoscope 30°'},
-      {lScopeTypeKey:2006, sScopeTypeDesc:'Olympus A4423A Arthroscope'},
-    ],
-    'C': [
-      {lScopeTypeKey:3001, sScopeTypeDesc:'Stryker 1288 Camera Head'},
-      {lScopeTypeKey:3002, sScopeTypeDesc:'Stryker 1588 Camera Head'},
-      {lScopeTypeKey:3003, sScopeTypeDesc:'Karl Storz AIDA HD Camera'},
-      {lScopeTypeKey:3004, sScopeTypeDesc:'Olympus OTV-S200 Camera'},
-      {lScopeTypeKey:3005, sScopeTypeDesc:'Sony MCC-S80MD Camera'},
-    ],
-    'I': [
-      {lScopeTypeKey:4001, sScopeTypeDesc:'Olympus FG-47L Biopsy Forceps'},
-      {lScopeTypeKey:4002, sScopeTypeDesc:'Olympus SD-230U Snare'},
-      {lScopeTypeKey:4003, sScopeTypeDesc:'Boston Scientific Radial Jaw 4'},
-      {lScopeTypeKey:4004, sScopeTypeDesc:'Wilson-Cook Injection Needle'},
-      {lScopeTypeKey:4005, sScopeTypeDesc:'Storz 33351 Grasper'},
-    ],
-  };
-
   async function onScopeTypeChange(){
     var instType = document.getElementById('asType').value;
     var dd = document.getElementById('asModel');
@@ -1496,12 +1459,7 @@ function openContactModal(mode){
         dd.innerHTML += '<option value="'+key+'">'+name+'</option>';
       });
     } catch(e){
-      var demo = _DEMO_SCOPE_MODELS[instType] || [];
-      dd.innerHTML = '<option value="">Select model…</option>';
-      demo.forEach(function(m){
-        dd.innerHTML += '<option value="'+m.lScopeTypeKey+'">'+m.sScopeTypeDesc+'</option>';
-      });
-      if(!demo.length) dd.innerHTML = '<option value="">No models found</option>';
+      dd.innerHTML = '<option value="">No models found</option>';
     }
   }
   async function submitNewScope(){
