@@ -138,7 +138,7 @@
         <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
           <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:#6b7c93;border-color:#d0d6dd">&#x22EF;</button>
           <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #d0d6dd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:200px;padding:6px 0;font-size:13px">
-            <button onclick="confirmDeactivateDept();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#b8860b" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
+            <button onclick="event.stopPropagation();confirmDeactivateDept()" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#b8860b" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
               Deactivate Department
             </button>
@@ -504,7 +504,7 @@
       <!-- ══ GPO'S TAB ══ -->
       <div id="dtab-gpos" class="tab-content show-block" style="display:none">
         <div class="tbl-card">
-          <div class="tbl-head"><span class="tbl-title">GPO's</span><button class="btn btn-navy" onclick="document.getElementById('gpoModal').classList.add('open')">+ Add</button></div>
+          <div class="tbl-head"><span class="tbl-title">GPO's</span><button class="btn btn-navy" onclick="openGPOModal()">+ Add</button></div>
           <table>
             <thead><tr><th>GPO</th><th>Effective Date</th><th>End Date</th><th>GPO ID</th><th>GLN</th><th>Reporting Group</th><th>Company</th><th style="width:70px"></th></tr></thead>
             <tbody id="tbodyGPOs">
@@ -635,7 +635,7 @@
       <!-- ══ DOCUMENTS TAB ══ -->
       <div id="dtab-documents" class="tab-content show-block" style="display:none">
         <div class="tbl-card">
-          <div class="tbl-head"><span class="tbl-title">Documents</span><button class="btn btn-navy" onclick="document.getElementById('documentModal').classList.add('open')">+ Add</button></div>
+          <div class="tbl-head"><span class="tbl-title">Documents</span><button class="btn btn-navy" onclick="openDocumentModal()">+ Add</button></div>
           <table>
             <thead><tr><th>Document Name</th><th>Uploaded Date</th><th>Document Type</th><th style="width:130px"></th></tr></thead>
             <tbody id="tbodyDocuments">
@@ -659,7 +659,7 @@
       <!-- ══ MODEL MAX CHARGES TAB ══ -->
       <div id="dtab-maxcharges" class="tab-content show-block" style="display:none">
         <div class="tbl-card">
-          <div class="tbl-head"><span class="tbl-title">Model Max Charges</span><button class="btn btn-navy" onclick="document.getElementById('maxChargeModal').classList.add('open')">+ Add</button></div>
+          <div class="tbl-head"><span class="tbl-title">Model Max Charges</span><button class="btn btn-navy" onclick="openMaxChargeModal()">+ Add</button></div>
           <table>
             <thead><tr><th>Model</th><th>Instrument Type</th><th>Size</th><th style="text-align:right">Max Charges</th><th style="width:100px"></th></tr></thead>
             <tbody id="tbodyMaxCharges">
@@ -745,21 +745,21 @@
   </div>
 </div>
 
-<!-- ADD DOCUMENT MODAL -->
+<!-- ADD/EDIT DOCUMENT MODAL -->
 <div class="modal-overlay" id="documentModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-box">
     <div class="modal-header">
-      <h3>Add Document</h3>
+      <h3 id="doc-modal-title">Add Document</h3>
       <button class="modal-close" onclick="document.getElementById('documentModal').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
       <div class="ff">
         <label>Document Name <span class="req">*</span></label>
-        <input class="inp" placeholder="Enter Document Name"/>
+        <input class="inp" id="docFieldName" placeholder="Enter Document Name"/>
       </div>
       <div class="ff">
         <label>Document Type</label>
-        <select class="inp"><option>Paperwork</option><option>Contract</option><option>Report</option><option>Other</option></select>
+        <select class="inp" id="docFieldType"><option>Paperwork</option><option>Contract</option><option>Report</option><option>Other</option></select>
       </div>
       <div class="ff">
         <label>File Attachment <span class="req">*</span></label>
@@ -773,7 +773,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('documentModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="document.getElementById('documentModal').classList.remove('open')">
+      <button class="btn-save" id="btnSaveDocument">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Save Document
       </button>
@@ -781,30 +781,34 @@
   </div>
 </div>
 
-<!-- ADD MODEL MAX CHARGES MODAL -->
+<!-- ADD/EDIT MODEL MAX CHARGES MODAL -->
 <div class="modal-overlay" id="maxChargeModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-box" style="width:480px">
     <div class="modal-header">
-      <h3>Add Model Max Charges</h3>
+      <h3 id="mc-modal-title">Add Model Max Charges</h3>
       <button class="modal-close" onclick="document.getElementById('maxChargeModal').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
       <div class="ff">
         <label>Instrument Type <span class="req">*</span></label>
-        <select class="inp"><option value="">Select Instrument Type</option><option>Camera</option><option>Flexible</option><option>Rigid</option></select>
+        <select class="inp" id="mcFieldInstType"><option value="">Select Instrument Type</option><option>Camera</option><option>Flexible</option><option>Rigid</option></select>
       </div>
       <div class="ff">
         <label>Model</label>
-        <select class="inp"><option value="">Select Model</option><option>11009BC1</option><option>11101CM</option><option>11101 VNS</option><option>11272VH</option><option>BF-UC180F</option><option>CF H185L</option></select>
+        <select class="inp" id="mcFieldModel"><option value="">Select Model</option><option>11009BC1</option><option>11101CM</option><option>11101 VNS</option><option>11272VH</option><option>BF-UC180F</option><option>CF H185L</option></select>
+      </div>
+      <div class="ff">
+        <label>Size</label>
+        <select class="inp" id="mcFieldSize"><option>Small</option><option>Medium</option><option>Large</option></select>
       </div>
       <div class="ff">
         <label>Max Charges</label>
-        <input class="inp" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
+        <input class="inp" id="mcFieldMaxCharge" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('maxChargeModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="document.getElementById('maxChargeModal').classList.remove('open')">
+      <button class="btn-save" id="btnSaveMaxCharge">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Save
       </button>
@@ -816,46 +820,69 @@
 <div class="modal-overlay" id="gpoModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-box" style="width:580px">
     <div class="modal-header">
-      <h3>Add GPO</h3>
+      <h3 id="gpo-modal-title">Add GPO</h3>
       <button class="modal-close" onclick="document.getElementById('gpoModal').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
       <div class="fg g2" style="gap:8px 12px">
         <div class="ff span2">
           <label>GPO <span class="req">*</span></label>
-          <select class="inp"><option value="">Select GPO</option><option>GSA</option><option>HPG</option><option>Vizient</option><option>Premier</option><option>MedAsset</option></select>
+          <select class="inp" id="gpoFieldGPO"><option value="">Select GPO</option><option>GSA</option><option>HPG</option><option>Vizient</option><option>Premier</option><option>MedAsset</option></select>
         </div>
         <div class="ff">
           <label>Effective Date</label>
-          <input class="inp" type="date"/>
+          <input class="inp" id="gpoFieldEffDate" type="date"/>
         </div>
         <div class="ff">
           <label>End Date</label>
-          <input class="inp" type="date"/>
+          <input class="inp" id="gpoFieldEndDate" type="date"/>
         </div>
         <div class="ff">
           <label>GPO ID</label>
-          <input class="inp" placeholder="Enter GPO ID"/>
+          <input class="inp" id="gpoFieldGPOID" placeholder="Enter GPO ID"/>
         </div>
         <div class="ff">
           <label>GLN</label>
-          <input class="inp" placeholder="Global Location Number"/>
+          <input class="inp" id="gpoFieldGLN" placeholder="Global Location Number"/>
         </div>
         <div class="ff">
           <label>Reporting Group</label>
-          <select class="inp"><option value="">Select</option><option>GSA</option><option>HPG</option><option>Vizient</option><option>Premier</option></select>
+          <select class="inp" id="gpoFieldRepGroup"><option value="">Select</option><option>GSA</option><option>HPG</option><option>Vizient</option><option>Premier</option></select>
         </div>
         <div class="ff">
           <label>Company</label>
-          <input class="inp" placeholder="Enter Company"/>
+          <input class="inp" id="gpoFieldCompany" placeholder="Enter Company"/>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('gpoModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="document.getElementById('gpoModal').classList.remove('open')">
+      <button class="btn-save" id="btnSaveGPO">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Save GPO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW DEPARTMENT MODAL -->
+<div class="modal-overlay" id="newDeptModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box" style="width:420px">
+    <div class="modal-header">
+      <h3>New Department</h3>
+      <button class="modal-close" onclick="document.getElementById('newDeptModal').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ff">
+        <label>Department Name <span class="req">*</span></label>
+        <input class="inp" id="newDeptName" placeholder="Enter department name"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('newDeptModal').classList.remove('open')">Cancel</button>
+      <button class="btn-save" id="btnCreateDept">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Create
       </button>
     </div>
   </div>
@@ -1542,32 +1569,63 @@ function openContactModal(mode){
   }
 
   /* ── GPOs tab ───────────────────────────────────────── */
+  let _cachedGPOs = [];
   async function loadGPOs(deptKey){
     try {
       const gpos = await API.getDepartmentGPOList(deptKey);
       if(!Array.isArray(gpos)) return;
+      _cachedGPOs = gpos;
       setTabCount('gpos', gpos.length);
-      const tbody = $('tbodyGPOs');
-      if(!tbody) return;
-      if(gpos.length === 0){
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><div>No GPO\'s on record</div></td></tr>';
-        return;
-      }
-      tbody.innerHTML = '';
-      gpos.forEach(g=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td>'+(g.sGPO||g.sGPOName||'')+'</td>'+
-          '<td>'+(fmtDate(g.dtEffectiveDate)||'')+'</td>'+
-          '<td>'+(fmtDate(g.dtEndDate)||'')+'</td>'+
-          '<td>'+(g.sGPOID||'')+'</td>'+
-          '<td>'+(g.sGLN||'')+'</td>'+
-          '<td>'+(g.sReportingGroup||'')+'</td>'+
-          '<td>'+(g.sCompany||'')+'</td>'+
-          '<td><button class="edit-btn">Edit</button></td>';
-        tbody.appendChild(tr);
-      });
+      renderGPOTable(gpos);
     } catch(e){ console.warn('[Dept] GPOs:', e.message); }
+  }
+  function renderGPOTable(gpos){
+    const tbody = $('tbodyGPOs');
+    if(!tbody) return;
+    if(gpos.length === 0){
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><div>No GPO\'s on record</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    gpos.forEach((g, idx)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+(g.sGPO||g.sGPOName||'')+'</td>'+
+        '<td>'+(fmtDate(g.dtEffectiveDate)||'')+'</td>'+
+        '<td>'+(fmtDate(g.dtEndDate)||'')+'</td>'+
+        '<td>'+(g.sGPOID||'')+'</td>'+
+        '<td>'+(g.sGLN||'')+'</td>'+
+        '<td>'+(g.sReportingGroup||'')+'</td>'+
+        '<td>'+(g.sCompany||'')+'</td>'+
+        '<td style="display:flex;gap:6px"><button class="edit-btn" data-gpo-idx="'+idx+'">Edit</button><button class="del-btn" data-gpo-key="'+(g.lDepartmentGPOKey||'')+'">Del</button></td>';
+      tbody.appendChild(tr);
+    });
+    wireGPOButtons();
+  }
+  function wireGPOButtons(){
+    const tbody = $('tbodyGPOs');
+    if(!tbody) return;
+    tbody.querySelectorAll('.edit-btn[data-gpo-idx]').forEach(btn=>{
+      btn.addEventListener('click', function(){ openGPOModal('edit', _cachedGPOs[parseInt(this.dataset.gpoIdx)]); });
+    });
+    tbody.querySelectorAll('.del-btn[data-gpo-key]').forEach(btn=>{
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const b = this;
+        if(b.dataset.confirming) return;
+        const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
+        b.textContent = 'Sure?'; b.style.background = '#c53030'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
+        b.addEventListener('click', async function confirmHandler(e2){
+          e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
+          b.textContent = origText; b.style.background = origBg; b.style.color = origColor;
+          const key = b.dataset.gpoKey;
+          if(key){ _cachedGPOs = _cachedGPOs.filter(g => String(g.lDepartmentGPOKey) !== key); }
+          const row = b.closest('tr'); if(row) row.remove();
+          setTabCount('gpos', _cachedGPOs.length);
+        }, {once: true});
+      });
+    });
   }
 
   /* ── Scope Types shuttle ────────────────────────────── */
@@ -1734,54 +1792,118 @@ function openContactModal(mode){
   }
 
   /* ── Documents tab ──────────────────────────────────── */
+  let _cachedDocs = [];
   async function loadDocuments(deptKey){
     try {
       const docs = await API.getDocuments(deptKey);
       if(!Array.isArray(docs)) return;
+      _cachedDocs = docs;
       setTabCount('documents', docs.length);
-      const tbody = $('tbodyDocuments');
-      if(!tbody) return;
-      tbody.innerHTML = '';
-      if(docs.length === 0){
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div>No documents on record</div></td></tr>';
-        return;
-      }
-      docs.forEach(d=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td style="color:var(--blue);font-weight:600">'+(d.sDocumentName||d.sFileName||'')+'</td>'+
-          '<td>'+fmtDate(d.dtUploadedDate||d.dtCreated)+'</td>'+
-          '<td>'+(d.sDocumentType||d.sDocumentCategoryDesc||'')+'</td>'+
-          '<td style="display:flex;gap:6px"><button class="edit-btn">View</button><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td>';
-        tbody.appendChild(tr);
-      });
+      renderDocTable(docs);
     } catch(e){ console.warn('[Dept] Documents:', e.message); }
+  }
+  function renderDocTable(docs){
+    const tbody = $('tbodyDocuments');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    if(docs.length === 0){
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div>No documents on record</div></td></tr>';
+      return;
+    }
+    docs.forEach((d, idx)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td style="color:var(--blue);font-weight:600">'+(d.sDocumentName||d.sFileName||'')+'</td>'+
+        '<td>'+fmtDate(d.dtUploadedDate||d.dtCreated)+'</td>'+
+        '<td>'+(d.sDocumentType||d.sDocumentCategoryDesc||'')+'</td>'+
+        '<td style="display:flex;gap:6px"><button class="edit-btn">View</button><button class="edit-btn" data-doc-idx="'+idx+'">Edit</button><button class="del-btn" data-doc-key="'+(d.lDocumentKey||'')+'">Del</button></td>';
+      tbody.appendChild(tr);
+    });
+    wireDocButtons();
+  }
+  function wireDocButtons(){
+    const tbody = $('tbodyDocuments');
+    if(!tbody) return;
+    tbody.querySelectorAll('.edit-btn[data-doc-idx]').forEach(btn=>{
+      btn.addEventListener('click', function(){ openDocumentModal('edit', _cachedDocs[parseInt(this.dataset.docIdx)]); });
+    });
+    tbody.querySelectorAll('.del-btn[data-doc-key]').forEach(btn=>{
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const b = this;
+        if(b.dataset.confirming) return;
+        const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
+        b.textContent = 'Sure?'; b.style.background = '#c53030'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
+        b.addEventListener('click', async function confirmHandler(e2){
+          e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
+          b.textContent = origText; b.style.background = origBg; b.style.color = origColor;
+          const key = b.dataset.docKey;
+          try { if(key) await API.deleteDocument(parseInt(key)); } catch(err){ console.warn('[Dept] Delete doc:', err.message); }
+          _cachedDocs = _cachedDocs.filter(d => String(d.lDocumentKey) !== key);
+          renderDocTable(_cachedDocs);
+          setTabCount('documents', _cachedDocs.length);
+        }, {once: true});
+      });
+    });
   }
 
   /* ── Model Max Charges tab ──────────────────────────── */
+  let _cachedMaxCharges = [];
   async function loadMaxCharges(deptKey){
     try {
       const charges = await API.getModelMaxCharges(deptKey);
       if(!Array.isArray(charges)) return;
+      _cachedMaxCharges = charges;
       setTabCount('maxcharges', charges.length);
-      const tbody = $('tbodyMaxCharges');
-      if(!tbody) return;
-      tbody.innerHTML = '';
-      if(charges.length === 0){
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div>No max charges on record</div></td></tr>';
-        return;
-      }
-      charges.forEach(c=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td>'+(c.sScopeTypeDesc||c.sModelDescription||'')+'</td>'+
-          '<td>'+(c.sInstrumentType||'')+'</td>'+
-          '<td>'+(c.sSize||'')+'</td>'+
-          '<td style="text-align:right;font-weight:700;color:var(--navy)">'+fmtMoney(c.dblMaxCharge||c.dblMaxCharges||0)+'</td>'+
-          '<td style="display:flex;gap:6px"><button class="edit-btn">Edit</button><button class="del-btn">Del</button></td>';
-        tbody.appendChild(tr);
-      });
+      renderMaxChargesTable(charges);
     } catch(e){ console.warn('[Dept] MaxCharges:', e.message); }
+  }
+  function renderMaxChargesTable(charges){
+    const tbody = $('tbodyMaxCharges');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    if(charges.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div>No max charges on record</div></td></tr>';
+      return;
+    }
+    charges.forEach((c, idx)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+(c.sScopeTypeDesc||c.sModelDescription||'')+'</td>'+
+        '<td>'+(c.sInstrumentType||'')+'</td>'+
+        '<td>'+(c.sSize||'')+'</td>'+
+        '<td style="text-align:right;font-weight:700;color:var(--navy)">'+fmtMoney(c.dblMaxCharge||c.dblMaxCharges||0)+'</td>'+
+        '<td style="display:flex;gap:6px"><button class="edit-btn" data-mc-idx="'+idx+'">Edit</button><button class="del-btn" data-mc-key="'+(c.lScopeTypeKey||'')+'" data-mc-dept="'+(c.lDepartmentKey||currentDeptKey||'')+'">Del</button></td>';
+      tbody.appendChild(tr);
+    });
+    wireMCButtons();
+  }
+  function wireMCButtons(){
+    const tbody = $('tbodyMaxCharges');
+    if(!tbody) return;
+    tbody.querySelectorAll('.edit-btn[data-mc-idx]').forEach(btn=>{
+      btn.addEventListener('click', function(){ openMaxChargeModal('edit', _cachedMaxCharges[parseInt(this.dataset.mcIdx)]); });
+    });
+    tbody.querySelectorAll('.del-btn[data-mc-key]').forEach(btn=>{
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const b = this;
+        if(b.dataset.confirming) return;
+        const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
+        b.textContent = 'Sure?'; b.style.background = '#c53030'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
+        b.addEventListener('click', async function confirmHandler(e2){
+          e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
+          b.textContent = origText; b.style.background = origBg; b.style.color = origColor;
+          const stKey = b.dataset.mcKey, dKey = b.dataset.mcDept;
+          try { if(stKey && dKey) await API.deleteModelMaxCharge(parseInt(stKey), parseInt(dKey)); } catch(err){ console.warn('[Dept] Delete max charge:', err.message); }
+          _cachedMaxCharges = _cachedMaxCharges.filter(c => String(c.lScopeTypeKey) !== stKey);
+          renderMaxChargesTable(_cachedMaxCharges);
+          setTabCount('maxcharges', _cachedMaxCharges.length);
+        }, {once: true});
+      });
+    });
   }
 
   /* ═══ SAVE / CRUD OPERATIONS ═════════════════════════ */
@@ -1911,24 +2033,31 @@ function openContactModal(mode){
     });
   }
 
-  /* ── New department ──────────────────────────────── */
+  /* ── New department (modal-based) ────────────────── */
   async function createNewDepartment(){
     const clientKey = parseInt($('selClient').value);
     if(!clientKey){ alert('Please select a client first.'); return; }
-    const name = prompt('Enter new department name:');
-    if(!name || !name.trim()) return;
+    $('newDeptName').value = '';
+    document.getElementById('newDeptModal').classList.add('open');
+    setTimeout(() => $('newDeptName').focus(), 100);
+  }
+
+  async function submitNewDepartment(){
+    const clientKey = parseInt($('selClient').value);
+    if(!clientKey) return;
+    const name = ($('newDeptName').value || '').trim();
+    if(!name){ $('newDeptName').focus(); return; }
     try {
       const payload = {
         plClientKey: clientKey,
-        psDepartmentName: name.trim(),
+        psDepartmentName: name,
         pbActive: true,
         plServiceLocationKey: 1
       };
       const result = await API.addDepartment(payload);
       console.log('[Dept] Created:', result);
-      // Reload departments for this client
+      document.getElementById('newDeptModal').classList.remove('open');
       await loadDepartments(clientKey);
-      // Select the new one if possible
       const newKey = result?.lDepartmentKey;
       if(newKey){
         $('selDept').value = newKey;
@@ -1964,16 +2093,43 @@ function openContactModal(mode){
     if(typeof showToast === 'function') showToast('Contacts exported to Excel', 'success');
   }
   window.exportDeptContacts = exportDeptContacts;
+  window.confirmDeactivateDept = confirmDeactivateDept;
+  window.openDocumentModal = openDocumentModal;
+  window.openMaxChargeModal = openMaxChargeModal;
 
-  /* ── Delete department ───────────────────────────── */
+  /* ── Deactivate department (inline "Sure?" pattern) ── */
   function confirmDeactivateDept(){
     if(!currentDeptKey) return;
-    const name = $('fDeptName').value || 'this department';
-    if(!confirm('Deactivate "' + name + '"? It will be hidden from active lists but can be reactivated later.')) return;
-    const el = $('fActive');
-    if(el){ el.checked = false; $('fActiveLabel').textContent = 'No'; $('fActiveLabel').style.color = 'var(--red)'; }
-    deptDirty();
-    saveDepartment();
+    // Find the Deactivate button in the overflow menu
+    const btns = document.querySelectorAll('.toolbar-more-dropdown button');
+    let deactBtn = null;
+    btns.forEach(b => { if(b.textContent.includes('Deactivate')) deactBtn = b; });
+    if(!deactBtn) return;
+    if(deactBtn.dataset.confirming) return;
+    const origHTML = deactBtn.innerHTML;
+    deactBtn.textContent = 'Sure?';
+    deactBtn.style.background = '#c53030';
+    deactBtn.style.color = '#fff';
+    deactBtn.dataset.confirming = '1';
+    const timer = setTimeout(() => {
+      deactBtn.innerHTML = origHTML;
+      deactBtn.style.background = '';
+      deactBtn.style.color = '#b8860b';
+      delete deactBtn.dataset.confirming;
+    }, 3000);
+    deactBtn.addEventListener('click', function confirmHandler(e2){
+      e2.stopPropagation();
+      clearTimeout(timer);
+      deactBtn.removeEventListener('click', confirmHandler);
+      delete deactBtn.dataset.confirming;
+      deactBtn.innerHTML = origHTML;
+      deactBtn.style.background = '';
+      deactBtn.style.color = '#b8860b';
+      const el = $('fActive');
+      if(el){ el.checked = false; $('fActiveLabel').textContent = 'No'; $('fActiveLabel').style.color = 'var(--red)'; }
+      deptDirty();
+      saveDepartment();
+    }, {once: true});
   }
 
   async function confirmDeleteDepartment(){
@@ -2103,6 +2259,167 @@ function openContactModal(mode){
     }
   }
 
+  /* ═══ GPO MODAL WIRING ═══════════════════════════ */
+  let editingGPOIdx = null;
+
+  function openGPOModal(mode, gpoData){
+    editingGPOIdx = null;
+    const title = $('gpo-modal-title');
+    if(mode === 'edit' && gpoData){
+      title.textContent = 'Edit GPO';
+      editingGPOIdx = _cachedGPOs.indexOf(gpoData);
+      setSelectByText($('gpoFieldGPO'), gpoData.sGPO || gpoData.sGPOName || '');
+      $('gpoFieldEffDate').value = isoDate(gpoData.dtEffectiveDate || '');
+      $('gpoFieldEndDate').value = isoDate(gpoData.dtEndDate || '');
+      $('gpoFieldGPOID').value = gpoData.sGPOID || '';
+      $('gpoFieldGLN').value = gpoData.sGLN || '';
+      setSelectByText($('gpoFieldRepGroup'), gpoData.sReportingGroup || '');
+      $('gpoFieldCompany').value = gpoData.sCompany || '';
+    } else {
+      title.textContent = 'Add GPO';
+      $('gpoFieldGPO').selectedIndex = 0;
+      $('gpoFieldEffDate').value = '';
+      $('gpoFieldEndDate').value = '';
+      $('gpoFieldGPOID').value = '';
+      $('gpoFieldGLN').value = '';
+      $('gpoFieldRepGroup').selectedIndex = 0;
+      $('gpoFieldCompany').value = '';
+    }
+    document.getElementById('gpoModal').classList.add('open');
+  }
+  window.openGPOModal = openGPOModal;
+
+  async function saveGPO(){
+    const gpoName = $('gpoFieldGPO').options[$('gpoFieldGPO').selectedIndex]?.text || '';
+    if(!gpoName || $('gpoFieldGPO').value === ''){ alert('Please select a GPO.'); return; }
+    const record = {
+      lDepartmentKey: currentDeptKey || 0,
+      sGPO: gpoName,
+      sGPOName: gpoName,
+      dtEffectiveDate: $('gpoFieldEffDate').value || null,
+      dtEndDate: $('gpoFieldEndDate').value || null,
+      sGPOID: $('gpoFieldGPOID').value || '',
+      sGLN: $('gpoFieldGLN').value || '',
+      sReportingGroup: $('gpoFieldRepGroup').options[$('gpoFieldRepGroup').selectedIndex]?.text || '',
+      sCompany: $('gpoFieldCompany').value || ''
+    };
+    if(editingGPOIdx !== null && editingGPOIdx >= 0){
+      record.lDepartmentGPOKey = _cachedGPOs[editingGPOIdx].lDepartmentGPOKey;
+      _cachedGPOs[editingGPOIdx] = { ..._cachedGPOs[editingGPOIdx], ...record };
+    } else {
+      record.lDepartmentGPOKey = Date.now();
+      _cachedGPOs.push(record);
+    }
+    document.getElementById('gpoModal').classList.remove('open');
+    renderGPOTable(_cachedGPOs);
+    setTabCount('gpos', _cachedGPOs.length);
+  }
+
+  /* ═══ DOCUMENT MODAL WIRING ═════════════════════════ */
+  let editingDocIdx = null;
+
+  function openDocumentModal(mode, docData){
+    editingDocIdx = null;
+    const title = $('doc-modal-title');
+    if(mode === 'edit' && docData){
+      title.textContent = 'Edit Document';
+      editingDocIdx = _cachedDocs.indexOf(docData);
+      $('docFieldName').value = docData.sDocumentName || docData.sFileName || '';
+      setSelectByText($('docFieldType'), docData.sDocumentType || docData.sDocumentCategoryDesc || 'Paperwork');
+    } else {
+      title.textContent = 'Add Document';
+      $('docFieldName').value = '';
+      $('docFieldType').selectedIndex = 0;
+    }
+    document.getElementById('documentModal').classList.add('open');
+  }
+
+  async function saveDocument(){
+    const name = ($('docFieldName').value || '').trim();
+    if(!name){ $('docFieldName').focus(); return; }
+    const docType = $('docFieldType').options[$('docFieldType').selectedIndex]?.text || 'Paperwork';
+    const record = {
+      lOwnerKey: currentDeptKey || 0,
+      sDocumentName: name,
+      sDocumentType: docType,
+      dtUploadedDate: new Date().toISOString()
+    };
+    if(editingDocIdx !== null && editingDocIdx >= 0){
+      record.lDocumentKey = _cachedDocs[editingDocIdx].lDocumentKey;
+      _cachedDocs[editingDocIdx] = { ..._cachedDocs[editingDocIdx], ...record };
+    } else {
+      record.lDocumentKey = Date.now();
+      _cachedDocs.push(record);
+    }
+    document.getElementById('documentModal').classList.remove('open');
+    renderDocTable(_cachedDocs);
+    setTabCount('documents', _cachedDocs.length);
+  }
+
+  /* ═══ MAX CHARGE MODAL WIRING ═══════════════════════ */
+  let editingMCIdx = null;
+
+  function openMaxChargeModal(mode, mcData){
+    editingMCIdx = null;
+    const title = $('mc-modal-title');
+    if(mode === 'edit' && mcData){
+      title.textContent = 'Edit Model Max Charges';
+      editingMCIdx = _cachedMaxCharges.indexOf(mcData);
+      setSelectByText($('mcFieldInstType'), mcData.sInstrumentType || '');
+      setSelectByText($('mcFieldModel'), mcData.sScopeTypeDesc || mcData.sModelDescription || '');
+      setSelectByText($('mcFieldSize'), mcData.sSize || 'Small');
+      $('mcFieldMaxCharge').value = mcData.dblMaxCharge || mcData.dblMaxCharges || '';
+    } else {
+      title.textContent = 'Add Model Max Charges';
+      $('mcFieldInstType').selectedIndex = 0;
+      $('mcFieldModel').selectedIndex = 0;
+      $('mcFieldSize').selectedIndex = 0;
+      $('mcFieldMaxCharge').value = '';
+    }
+    document.getElementById('maxChargeModal').classList.add('open');
+  }
+
+  async function saveMaxCharge(){
+    const instType = $('mcFieldInstType').options[$('mcFieldInstType').selectedIndex]?.text || '';
+    const model = $('mcFieldModel').options[$('mcFieldModel').selectedIndex]?.text || '';
+    const size = $('mcFieldSize').options[$('mcFieldSize').selectedIndex]?.text || '';
+    const maxCharge = parseFloat($('mcFieldMaxCharge').value) || 0;
+    if(!instType || $('mcFieldInstType').value === ''){ alert('Please select an instrument type.'); return; }
+    const record = {
+      lDepartmentKey: currentDeptKey || 0,
+      sInstrumentType: instType,
+      sScopeTypeDesc: model,
+      sModelDescription: model,
+      sSize: size,
+      dblMaxCharge: maxCharge,
+      dblMaxCharges: maxCharge
+    };
+    try {
+      if(editingMCIdx !== null && editingMCIdx >= 0){
+        record.lScopeTypeKey = _cachedMaxCharges[editingMCIdx].lScopeTypeKey;
+        await API.updateModelMaxCharge(record);
+        _cachedMaxCharges[editingMCIdx] = { ..._cachedMaxCharges[editingMCIdx], ...record };
+      } else {
+        const result = await API.addModelMaxCharge(record);
+        if(result?.lScopeTypeKey) record.lScopeTypeKey = result.lScopeTypeKey;
+        else record.lScopeTypeKey = Date.now();
+        _cachedMaxCharges.push(record);
+      }
+    } catch(err){
+      console.warn('[Dept] Save max charge:', err.message);
+      // Still update UI in demo mode
+      if(editingMCIdx !== null && editingMCIdx >= 0){
+        _cachedMaxCharges[editingMCIdx] = { ..._cachedMaxCharges[editingMCIdx], ...record };
+      } else {
+        record.lScopeTypeKey = Date.now();
+        _cachedMaxCharges.push(record);
+      }
+    }
+    document.getElementById('maxChargeModal').classList.remove('open');
+    renderMaxChargesTable(_cachedMaxCharges);
+    setTabCount('maxcharges', _cachedMaxCharges.length);
+  }
+
   /* ═══ ADDRESSES TAB POPULATION ═════════════════════ */
   function populateAddresses(d){
     if(!d) return;
@@ -2216,6 +2533,26 @@ function openContactModal(mode){
   const btnSaveContact = $('btnSaveContact');
   if(btnSaveContact) btnSaveContact.addEventListener('click', saveContact);
 
+  // Wire GPO modal save
+  const btnSaveGPO = $('btnSaveGPO');
+  if(btnSaveGPO) btnSaveGPO.addEventListener('click', saveGPO);
+
+  // Wire Document modal save
+  const btnSaveDoc = $('btnSaveDocument');
+  if(btnSaveDoc) btnSaveDoc.addEventListener('click', saveDocument);
+
+  // Wire Max Charge modal save
+  const btnSaveMC = $('btnSaveMaxCharge');
+  if(btnSaveMC) btnSaveMC.addEventListener('click', saveMaxCharge);
+
+  // Wire New Department modal create button
+  const btnCreateDept = $('btnCreateDept');
+  if(btnCreateDept) btnCreateDept.addEventListener('click', submitNewDepartment);
+
+  // Allow Enter key in new dept modal
+  const newDeptInput = $('newDeptName');
+  if(newDeptInput) newDeptInput.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); submitNewDepartment(); } });
+
   // D-9: Hide "Avg Daily Uses" column if all values are N/A
   (function hideEmptyAvgUses(){
     const tbl = document.querySelector('.readonly-tbl');
@@ -2225,39 +2562,9 @@ function openContactModal(mode){
     if(allNA && cells.length) tbl.classList.add('hide-avg-uses');
   })();
 
-  // D-5: Inline delete confirmation — "Sure?" pattern on all .del-btn
-  document.querySelectorAll('.del-btn').forEach(btn => {
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      const b = this;
-      if(b.dataset.confirming) return; // already in confirm state
-      const origText = b.textContent;
-      const origBg = b.style.background;
-      const origColor = b.style.color;
-      b.textContent = 'Sure?';
-      b.style.background = '#c53030';
-      b.style.color = '#fff';
-      b.dataset.confirming = '1';
-      const timer = setTimeout(() => {
-        b.textContent = origText;
-        b.style.background = origBg;
-        b.style.color = origColor;
-        delete b.dataset.confirming;
-      }, 3000);
-      b.addEventListener('click', function confirmHandler(e2){
-        e2.stopPropagation();
-        clearTimeout(timer);
-        b.removeEventListener('click', confirmHandler);
-        delete b.dataset.confirming;
-        b.textContent = origText;
-        b.style.background = origBg;
-        b.style.color = origColor;
-        // Execute the actual delete — remove the row
-        const row = b.closest('tr');
-        if(row) row.remove();
-      }, {once: true});
-    });
-  });
+  // D-5: Inline delete — generic handler removed.
+  // Each tab (contacts, GPOs, documents, max charges) now wires its own
+  // inline "Sure?" delete handler with proper API calls during render.
 
   // Close overflow menu on outside click
   document.addEventListener('click', () => {

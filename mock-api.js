@@ -183,12 +183,27 @@ const MockAPI = (() => {
   route('POST', '/Departments/UpdateDepartment', (p, body) => { MockDB.update('departments', body.lDepartmentKey, body); return body; });
   route('DELETE', '/Departments/DeleteDepartment', (p) => MockDB.remove('departments', int(p.plDepartmentKey)));
 
-  // ── DepartmentReportingGroups (1) ─────────────────────
+  // ── DepartmentReportingGroups (3) ─────────────────────
   route('GET', '/DepartmentReportingGroups/GetAllDepartmentGPOList', (p) => MockDB.getFiltered('departmentGPOs', g => g.lDepartmentKey === int(p.plDepartmentKey)));
+  route('POST', '/DepartmentReportingGroups/AddDepartmentGPO', (p, body) => MockDB.insert('departmentGPOs', body));
+  route('DELETE', '/DepartmentReportingGroups/DeleteDepartmentGPO', (p) => MockDB.remove('departmentGPOs', int(p.plDepartmentGPOKey)));
 
   // ── SubGroups (4) ─────────────────────────────────────
   route('GET', '/SubGroups/GetAllSubGroupsList', (p) => MockDB.getFiltered('subGroups', g => g.lDepartmentKey === int(p.plDepartmentKey)));
-  route('GET', '/SubGroups/GetAllSubGroupsAvailableList', () => []);
+  route('GET', '/SubGroups/GetAllSubGroupsAvailableList', (p) => {
+    const deptKey = int(p.plDepartmentKey);
+    const assigned = new Set(MockDB.getFiltered('subGroups', g => g.lDepartmentKey === deptKey).map(g => g.lSubGroupKey || g.llSubGroupKey));
+    // Return all subGroups not already assigned to this department
+    const all = MockDB.getAll('subGroups');
+    return all.filter(g => {
+      const key = g.lSubGroupKey || g.llSubGroupKey;
+      return !assigned.has(key);
+    }).map(g => ({
+      lSubGroupKey: g.lSubGroupKey || g.llSubGroupKey,
+      sSubGroupName: (g.sSubGroupName || g.sSubGroup || '').trim(),
+      sSubGroupDesc: (g.sSubGroupDesc || g.sSubGroup || '').trim()
+    }));
+  });
   route('POST', '/SubGroups/AddDepartmentSubGroups', (p, body) => MockDB.insert('subGroups', body));
   route('DELETE', '/SubGroups/DeleteDepartmentSubGroups', (p) => MockDB.remove('subGroups', int(p.plSubGroupKey)));
 
@@ -447,8 +462,9 @@ const MockAPI = (() => {
   route('POST', '/Financials/GetAllDraftInvoices', () => MockDB.getAll('draftInvoices'));
   route('DELETE', '/Financials/DeleteDraftInvoice', (p) => MockDB.remove('draftInvoices', int(p.plInvoiceKey)));
 
-  // ── Documents (3) ───────────────────────────────────
+  // ── Documents (4) ───────────────────────────────────
   route('GET', '/Documents/GetAllDocumentsList', (p) => MockDB.getFiltered('documents', d => d.lOwnerKey === int(p.plOwnerKey)));
+  route('POST', '/Documents/AddDocument', (p, body) => MockDB.insert('documents', body));
   route('DELETE', '/Documents/DeleteDocuments', (p) => MockDB.remove('documents', int(p.plDocumentKey)));
   route('GET', '/Documents/DownloadDocument', () => ({ content: '', fileName: '' }));
 
