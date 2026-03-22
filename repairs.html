@@ -6751,7 +6751,7 @@ async function initPage() {
       const deptParam = params.get('dept');
 
       if (action === 'new' || clientParam || deptParam) {
-        newRepair();
+        newRepair();   // opens the search modal
         if (clientParam) {
           // Accept both numeric key (from shared wizard) and name (legacy)
           const ck = parseInt(clientParam);
@@ -6759,19 +6759,31 @@ async function initPage() {
             ? _clients.find(x => x.lClientKey == ck)
             : _clients.find(x => (x.sClientName1 || x.sClientName || '').toLowerCase() === clientParam.toLowerCase());
           if (c) {
-            wizPickClient(c.lClientKey);
+            // Open wizard panel directly (skip nwoRevealCreate which resets to step 1)
+            document.getElementById('nwoActions').style.display = 'none';
+            document.getElementById('nwoWizard').classList.add('open');
+            _wizClient = c;
             if (deptParam) {
-              setTimeout(() => {
-                const dk = parseInt(deptParam);
-                const d = !isNaN(dk)
-                  ? _departments.find(x => x.lDepartmentKey == dk && x.lClientKey == c.lClientKey)
-                  : _departments.find(x => (x.sDepartmentName || '').toLowerCase() === deptParam.toLowerCase() && x.lClientKey === c.lClientKey);
-                if (d) wizPickDept(d.lDepartmentKey);
-              }, 300);
+              const dk = parseInt(deptParam);
+              const d = !isNaN(dk)
+                ? _departments.find(x => x.lDepartmentKey == dk && x.lClientKey == c.lClientKey)
+                : _departments.find(x => (x.sDepartmentName || '').toLowerCase() === deptParam.toLowerCase() && x.lClientKey === c.lClientKey);
+              if (d) {
+                _wizDept = d;
+                wizGoStep(3);
+                wizLoadScopes();
+              } else {
+                wizGoStep(2);
+                wizRenderDepts('');
+              }
+            } else {
+              wizGoStep(2);
+              wizRenderDepts('');
             }
+          } else {
+            nwoRevealCreate();
           }
         } else {
-          // No pre-selected client — go straight to wizard step 1
           nwoRevealCreate();
         }
       } else {
