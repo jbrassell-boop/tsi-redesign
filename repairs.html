@@ -4664,13 +4664,19 @@ function setRadioVal(name, val) {
 //  SCOPE-TYPE INSPECTION TEMPLATES
 // ═══════════════════════════════════════════════════════
 const INSPECTION_TEMPLATES = {
-  R: { // Rigid
+  // ── RIGID — matches tblRepair sIns*PF + tblRepairInspection columns ──
+  R: {
     categories: [
-      { name: 'Image Quality', items: [
+      { name: 'Image & Optics', items: [
         { label: 'Image Clear/Focus', inField: 'sInsImageClearPF', outField: 'sOutImageClearPF' },
         { label: 'Image Round/Edge', inField: 'sInsImageRoundPF', outField: 'sOutImageRoundPF' },
         { label: 'Free Contamination', inField: 'sInsImageContamPF', outField: 'sOutImageContamPF' },
-        { label: 'Lens System Secure', inField: 'sInsLensSecurePF', outField: 'sOutLensSecurePF' }
+        { label: 'Lens System Secure', inField: 'sInsLensSecurePF', outField: 'sOutLensSecurePF' },
+        { label: 'Vision', inField: 'sInsVisionPF', outField: 'sOutVisionPF' },
+        { label: 'Focal Distance', inField: 'sInsFocalDistancePF', outField: 'sOutFocalDistancePF' },
+        { label: 'Optics Angle', inField: 'sInsOpticsAnglePF', outField: 'sOutOpticsAnglePF' },
+        { label: 'Optics Field', inField: 'sInsOpticsFieldPF', outField: 'sOutOpticsFieldPF' },
+        { label: 'Optics Resolution', inField: 'sInsOpticsResolutionPF', outField: 'sOutOpticsResolutionPF' }
       ]},
       { name: 'Eyepiece', items: [
         { label: 'Eyepiece Color', inField: 'sInsEyepieceColorPF', outField: 'sOutEyepieceColorPF' },
@@ -4684,7 +4690,8 @@ const INSPECTION_TEMPLATES = {
         { label: 'Tubing Finish', inField: 'sInsTubeFinishPF', outField: 'sOutTubeFinishPF' },
         { label: 'Bent/Dents', inField: 'sInsTubeBentPF', outField: 'sOutTubeBentPF' },
         { label: 'Damage to Plating', inField: 'sInsTubePlatingPF', outField: 'sOutTubePlatingPF' },
-        { label: 'Tubing Tip', inField: 'sInsTubeTipPF', outField: 'sOutTubeTipPF' }
+        { label: 'Tubing Tip', inField: 'sInsTubeTipPF', outField: 'sOutTubeTipPF' },
+        { label: 'Insertion Tube', inField: 'sInsInsertionTubePF', outField: 'sOutInsertionTubePF' }
       ]},
       { name: 'Body / Nosecone', items: [
         { label: 'ID Band', inField: 'sInsIDBandPF', outField: 'sOutIDBandPF' },
@@ -4701,21 +4708,30 @@ const INSPECTION_TEMPLATES = {
         { label: 'Objective System', inField: 'sInsObjSystemPF', outField: 'sOutObjSystemPF' },
         { label: 'Free of Dust/Dirt', inField: 'sInsFreeDustPF', outField: 'sOutFreeDustPF' }
       ]},
-      { name: 'Light Fibers', items: [
+      { name: 'Light & Fibers', items: [
         { label: 'Color of Light', inField: 'sInsLightColorPF', outField: 'sOutLightColorPF' },
         { label: 'Fibers Intact', inField: 'sInsFibersIntactPF', outField: 'sOutFibersIntactPF' },
-        { label: 'Fiber Glue', inField: 'sInsFiberGluePF', outField: 'sOutFiberGluePF' }
+        { label: 'Fiber Glue', inField: 'sInsFiberGluePF', outField: 'sOutFiberGluePF' },
+        { label: 'Fiber Angle', inField: 'sInsFiberAnglePF', outField: 'sOutFiberAnglePF' },
+        { label: 'Fiber Light Trans', inField: 'sInsFiberLightTransPF', outField: 'sOutFiberLightTransPF' },
+        { label: 'Light Guide Connector', inField: 'sInsLightGuideConnectorPF', outField: 'sOutLightGuideConnectorPF' }
+      ]},
+      { name: 'Testing', items: [
+        { label: 'Hot/Cold Leak', inField: 'sInsHotColdLeakPF', outField: 'sOutHotColdLeakPF' },
+        { label: 'Final Inspection', inField: 'sInsFinalPF', outField: 'sOutFinalPF' }
       ]}
     ]
   },
-  F: { // Flexible
+  // ── FLEXIBLE — matches tblRepair sIns*PF columns for flex scopes ──
+  F: {
     categories: [
       { name: 'Functional Systems', items: [
         { label: 'Angulation', inField: 'sInsAngulationPF', outField: 'sOutAngulationPF' },
         { label: 'Insertion Tube', inField: 'sInsInsertionTubePF', outField: 'sOutInsertionTubePF' },
         { label: 'Universal Cord', inField: 'sInsUniversalCordPF', outField: 'sOutUniversalCordPF' },
-        { label: 'Light Guide', inField: 'sInsLightGuidePF', outField: 'sOutLightGuidePF' },
-        { label: 'Distal Tip', inField: 'sInsDistalTipPF', outField: 'sOutDistalTipPF' }
+        { label: 'Light Guide Connector', inField: 'sInsLightGuideConnectorPF', outField: 'sOutLightGuideConnectorPF' },
+        { label: 'Distal Tip', inField: 'sInsDistalTipPF', outField: 'sOutDistalTipPF' },
+        { label: 'Eyepiece', inField: 'sInsEyePiecePF', outField: 'sOutEyePiecePF' }
       ]},
       { name: 'Channels', items: [
         { label: 'Forcep Channel', inField: 'sInsForcepChannelPF', outField: 'sOutForcepChannelPF' },
@@ -4724,14 +4740,20 @@ const INSPECTION_TEMPLATES = {
         { label: 'Air/Water', inField: 'sInsAirWaterPF', outField: 'sOutAirWaterPF' }
       ]},
       { name: 'Testing', items: [
-        { label: 'Leak Test', inField: 'sInsLeakTestPF', outField: 'sOutLeakTestPF' },
-        { label: 'Fog Test', inField: 'sInsFogTestPF', outField: 'sOutFogTestPF' },
-        { label: 'Alcohol Wipe', inField: 'sInsAlcoholWipePF', outField: 'sOutAlcoholWipePF' },
-        { label: 'Image Centration', inField: 'sInsImageCentrationPF', outField: 'sOutImageCentrationPF' }
+        { label: 'Leak Test', inField: 'sInsLeakPF', outField: 'sOutLeakPF' },
+        { label: 'Hot/Cold Leak', inField: 'sInsHotColdLeakPF', outField: 'sOutHotColdLeakPF' },
+        { label: 'Fog Test', inField: 'sInsFogPF', outField: 'sOutFogPF' },
+        { label: 'Alcohol Wipe', inField: 'sInsAlcoholWipePF', outField: 'sOutAlcoholWipePF' }
+      ]},
+      { name: 'Image & Optics', items: [
+        { label: 'Image Quality', inField: 'sInsImagePF', outField: 'sOutImagePF' },
+        { label: 'Image Centration', inField: 'sInsImageCentrationPF', outField: 'sOutImageCentrationPF' },
+        { label: 'Vision', inField: 'sInsVisionPF', outField: 'sOutVisionPF' },
+        { label: 'Light Fibers', inField: 'sInsLightFibersPF', outField: 'sOutLightFibersPF' },
+        { label: 'Fiber Light Trans', inField: 'sInsFiberLightTransPF', outField: 'sOutFiberLightTransPF' }
       ]},
       { name: 'Overall', items: [
-        { label: 'Image Quality', inField: 'sInsImagePF', outField: 'sOutImagePF' },
-        { label: 'Final Inspection', inField: 'sInsFinalInspPF', outField: 'sOutFinalInspPF' }
+        { label: 'Final Inspection', inField: 'sInsFinalPF', outField: 'sOutFinalPF' }
       ]}
     ]
   },
