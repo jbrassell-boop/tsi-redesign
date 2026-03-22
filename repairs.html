@@ -482,12 +482,10 @@
             <div class="tab active" data-tab="scopein">Scope In</div>
             <div class="tab" data-tab="details">Details</div>
             <div class="tab" data-tab="outgoing">Outgoing</div>
-            <div class="tab" data-tab="expense">Expense</div>
             <div class="tab" data-tab="comments">Comments</div>
             <div class="tab" data-tab="inventory">Inventory</div>
             <div class="tab" data-tab="inspections">Inspections</div>
-            <div class="tab" data-tab="status">Status</div>
-            <div class="tab" data-tab="documents">Documents</div>
+            <div class="tab" data-tab="history">History</div>
             <div class="tab" data-tab="financials">Financials</div>
           </div>
 
@@ -673,6 +671,8 @@
               <div class="field" style="min-width:160px;flex:1"><label>Out Vendor</label><input id="fOutVendor" onchange="markDirty()"/></div>
               <div class="field" style="min-width:180px;flex:1"><label>Out Tracking</label><input id="fOutTracking" onchange="markDirty()"/></div>
               <div class="field" style="width:105px"><label>Out Cost</label><input id="fOutCost" onchange="markDirty()"/></div>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fOutsourced" onchange="markDirty()" style="width:auto;height:auto"/> Outsourced</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fVendorShipFlag" onchange="markDirty()" style="width:auto;height:auto"/> Vendor Ship</label>
             </div>
 
           </div><!-- /pane-scopein -->
@@ -779,24 +779,8 @@
             </div>
 
 
-            <!-- ROW 3: Vendor / Outsourcing + Loaner + Scope Usage -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;margin-bottom:6px">
-
-              <!-- Vendor / Outsourcing -->
-              <details class="section-card" style="margin-bottom:0" open>
-                <summary class="section-head" style="padding:4px 10px;font-size:9px;cursor:pointer;user-select:none">Vendor / Outsourcing</summary>
-                <div class="section-body" style="padding:6px 10px">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
-                    <div class="field" style="margin:0;grid-column:span 2"><label>Out Vendor</label><input id="fOutVendorKey" onchange="markDirty()" placeholder="Vendor name"/></div>
-                    <div class="field" style="margin:0"><label>Outsource Cost</label><input id="fOutSourceCost2" onchange="markDirty()" placeholder="$0.00"/></div>
-                    <div class="field" style="margin:0"><label>Vendor Tracking</label><input id="fVendorTracking2" onchange="markDirty()"/></div>
-                  </div>
-                  <div style="display:flex;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
-                    <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="fOutsourced" onchange="markDirty()" style="width:auto;height:auto"/> Outsourced</label>
-                    <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="fVendorShipFlag" onchange="markDirty()" style="width:auto;height:auto"/> Vendor Ship</label>
-                  </div>
-                </div>
-              </details>
+            <!-- ROW 3: Loaner + Scope Usage -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;margin-bottom:6px">
 
               <!-- Loaner -->
               <details class="section-card" style="margin-bottom:0" open>
@@ -929,38 +913,28 @@
                   </div>
                 </div>
 
-                <!-- Accessories -->
+                <!-- Accessories & Scope Includes -->
                 <div class="section-card" style="flex:1">
-                  <div class="section-head">Accessories Included</div>
+                  <div class="section-head">Accessories &amp; Scope Includes</div>
                   <div class="section-body" style="padding:8px 12px">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCase" onchange="markDirty()"/><span class="toggle-slider"></span></label>Case</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclCap" onchange="markDirty()"/><span class="toggle-slider"></span></label>Cap</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclWaterCap" onchange="markDirty()"/><span class="toggle-slider"></span></label>Water Res Cap</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclVideoPlug" onchange="markDirty()"/><span class="toggle-slider"></span></label>Video Plug</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclMouthpiece" onchange="markDirty()"/><span class="toggle-slider"></span></label>Mouthpiece</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclAngleKnob" onchange="markDirty()"/><span class="toggle-slider"></span></label>Angle Knob</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclSuctionValve" onchange="markDirty()"/><span class="toggle-slider"></span></label>Suction Valve</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><label class="toggle"><input type="checkbox" id="fInclBiopsy" onchange="markDirty()"/><span class="toggle-slider"></span></label>Biopsy</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 14px">
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclAirWater" style="accent-color:var(--navy)" onchange="markDirty()"/> Air/Water Valve</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclAngleKnob" style="accent-color:var(--navy)" onchange="markDirty()"/> Angle Knob</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclBiopsy" style="accent-color:var(--navy)" onchange="markDirty()"/> Biopsy</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclBox" style="accent-color:var(--navy)" onchange="markDirty()"/> Box</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclCap" style="accent-color:var(--navy)" onchange="markDirty()"/> Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclCase" style="accent-color:var(--navy)" onchange="markDirty()"/> Case</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclETOCap" style="accent-color:var(--navy)" onchange="markDirty()"/> ETO Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclLightPost" style="accent-color:var(--navy)" onchange="markDirty()"/> Light Post Adapter</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclMouthpiece" style="accent-color:var(--navy)" onchange="markDirty()"/> Mouthpiece</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclRimCap" style="accent-color:var(--navy)" onchange="markDirty()"/> Rim Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclSuction" style="accent-color:var(--navy)" onchange="markDirty()"/> Suction Valve</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclSuctionValve" style="accent-color:var(--navy)" onchange="markDirty()"/> Suction Valve (Alt)</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclVideoPlug" style="accent-color:var(--navy)" onchange="markDirty()"/> Video Plug</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclWaterCap" style="accent-color:var(--navy)" onchange="markDirty()"/> Water Res Cap</label>
+                      <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclWaterProof" style="accent-color:var(--navy)" onchange="markDirty()"/> Water Proof Cap</label>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Scope Includes Checklist (WP-R10) -->
-            <div class="section-card" style="margin-top:8px">
-              <div class="section-head">Scope Includes</div>
-              <div class="section-body" style="padding:8px 12px">
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 14px">
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclETOCap" style="accent-color:var(--navy)" onchange="markDirty()"/> ETO Cap</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclAirWater" style="accent-color:var(--navy)" onchange="markDirty()"/> Air/Water Valve</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclWaterProof" style="accent-color:var(--navy)" onchange="markDirty()"/> Water Proof Cap</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclCaseOut" style="accent-color:var(--navy)" onchange="markDirty()"/> Case</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclRimCap" style="accent-color:var(--navy)" onchange="markDirty()"/> Rim Cap</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclSuction" style="accent-color:var(--navy)" onchange="markDirty()"/> Suction Valve</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclLightPost" style="accent-color:var(--navy)" onchange="markDirty()"/> Light Post Adapter</label>
-                  <label style="font-size:10px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="fInclBox" style="accent-color:var(--navy)" onchange="markDirty()"/> Box</label>
                 </div>
               </div>
             </div>
@@ -1033,32 +1007,6 @@
           </div><!-- /pane-outgoing -->
 
           <!-- ═══ PAGE 4: EXPENSE ═══ -->
-          <div class="tab-pane" id="pane-expense">
-            <div class="expense-grid">
-              <div class="section-card">
-                <div class="section-head">Expenses</div>
-                <div class="expense-col">
-                  <div class="exp-row" style="background:#F0F4FA;font-weight:700"><span class="exp-label" style="font-size:11px">Expense (Total)</span><span class="exp-val" id="eExpense" style="font-size:13px">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Labor</span><span class="exp-val" id="eLabor">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Inventory</span><span class="exp-val" id="eInventory">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Shipping</span><span class="exp-val" id="eShipping">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">GPO</span><span class="exp-val" id="eGPO">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Commission</span><span class="exp-val" id="eCommission">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Outsource</span><span class="exp-val" id="eOutsource">$0.00</span></div>
-                </div>
-              </div>
-              <div class="section-card">
-                <div class="section-head">Revenue &amp; Margin</div>
-                <div class="expense-col">
-                  <div class="exp-row" style="background:#F0FDF4"><span class="exp-label" style="font-size:11px;font-weight:700">Revenue</span><span class="exp-val" id="eRevenue" style="color:var(--green);font-size:13px">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Total Expense</span><span class="exp-val" id="eTotalExp">$0.00</span></div>
-                  <div class="exp-row" style="background:#F0F4FA"><span class="exp-label" style="font-weight:700">Repair Margin</span><span class="exp-val" id="eMargin" style="font-size:13px">$0.00</span></div>
-                  <div class="exp-row"><span class="exp-label">Margin %</span><span class="exp-val" id="eMarginPct">0%</span></div>
-                </div>
-              </div>
-            </div>
-          </div><!-- /pane-expense -->
-
           <!-- ═══ PAGE 5: COMMENTS ═══ -->
           <div class="tab-pane" id="pane-comments">
             <div class="section-card" style="flex:1;display:flex;flex-direction:column">
@@ -1117,13 +1065,33 @@
               <button class="btn btn-navy" style="margin-top:12px" onclick="addInventoryRow()">Add</button>
               <button class="btn btn-outline" style="margin-top:12px" onclick="clearInventoryInputs()">Clear</button>
             </div>
+            <!-- Repair Inventory Pick List -->
+            <div class="section-card" style="margin-top:8px">
+              <div class="section-head">Repair Inventory Pick List</div>
+              <div style="overflow-y:auto;max-height:200px">
+                <table class="audit" id="pickListTable">
+                  <thead style="position:sticky;top:0;z-index:1"><tr>
+                    <th>Item Name</th>
+                    <th style="width:120px">Size / Variant</th>
+                    <th style="width:90px">Lot #</th>
+                    <th style="width:60px;text-align:center">Qty</th>
+                  </tr></thead>
+                  <tbody id="pickListBody">
+                    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No pick list items</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div><!-- /pane-inventory -->
 
-          <!-- ═══ PAGE 7: STATUS (Audit Trail) ═══ -->
-          <div class="tab-pane" id="pane-status">
-            <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column">
+          <!-- ═══ PAGE 7: HISTORY (Status + Documents) ═══ -->
+          <div class="tab-pane" id="pane-history">
+
+            <!-- Status History -->
+            <div class="section-card" style="margin-bottom:0">
               <div class="section-head">Status History</div>
-              <div style="flex:1;overflow-y:auto">
+              <div style="overflow-y:auto;max-height:220px">
                 <table class="audit" id="statusTable">
                   <thead style="position:sticky;top:0;z-index:1"><tr>
                     <th>Description</th>
@@ -1156,11 +1124,8 @@
               </div>
             </div>
 
-          </div><!-- /pane-status -->
-
-          <!-- ═══ PAGE 8: DOCUMENTS ═══ -->
-          <div class="tab-pane" id="pane-documents">
-            <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column">
+            <!-- Documents -->
+            <div class="section-card" style="margin-top:6px;flex:1;display:flex;flex-direction:column">
               <div class="section-head" style="gap:12px">
                 Documents
                 <div class="seg-bar" style="margin:0">
@@ -1192,24 +1157,7 @@
               <input type="file" id="docFileInput" style="display:none" multiple/>
             </div>
 
-            <!-- Repair Inventory Pick List (WP-R8) -->
-            <div class="section-card" style="margin-top:8px">
-              <div class="section-head">Repair Inventory Pick List</div>
-              <div style="overflow-y:auto;max-height:200px">
-                <table class="audit" id="pickListTable">
-                  <thead style="position:sticky;top:0;z-index:1"><tr>
-                    <th>Item Name</th>
-                    <th style="width:120px">Size / Variant</th>
-                    <th style="width:90px">Lot #</th>
-                    <th style="width:60px;text-align:center">Qty</th>
-                  </tr></thead>
-                  <tbody id="pickListBody">
-                    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No pick list items</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div><!-- /pane-documents -->
+          </div><!-- /pane-history -->
 
           <!-- ═══ PAGE 9: FINANCIALS ═══ -->
           <div class="tab-pane" id="pane-financials">
@@ -3928,9 +3876,7 @@ function populateDetail(d) {
   document.getElementById('fInboundSvcLevel').value = '';
 
   // -- DETAILS TAB -- Vendor / Outsourcing --
-  document.getElementById('fOutVendorKey').value = d.lVendorKey || d.sVendorName || '';
-  document.getElementById('fOutSourceCost2').value = d.dblOutSourceCost ? fmtMoney(d.dblOutSourceCost) : '';
-  document.getElementById('fVendorTracking2').value = d.sShipTrackingNumberVendor || '';
+  // Vendor/Outsource fields consolidated to Scope In footer (fOutVendor, fOutCost, fOutTracking)
   document.getElementById('fOutsourced').checked = !!d.bOutsourced;
   document.getElementById('fVendorShipFlag').checked = !!d.bVendorShip;
   // Loaner
@@ -4029,18 +3975,6 @@ function populateDetail(d) {
   const revenue = parseFloat(d.dblAmtRepair) || 0;
   const margin = revenue - totalExpense;
   const marginPct = revenue > 0 ? ((margin / revenue) * 100).toFixed(1) : '0';
-
-  document.getElementById('eExpense').textContent = fmtMoney(totalExpense);
-  document.getElementById('eLabor').textContent = fmtMoney(labor);
-  document.getElementById('eInventory').textContent = fmtMoney(material);
-  document.getElementById('eShipping').textContent = fmtMoney(shipping);
-  document.getElementById('eGPO').textContent = '$0.00';
-  document.getElementById('eCommission').textContent = fmtMoney(commission);
-  document.getElementById('eOutsource').textContent = fmtMoney(outsource);
-  document.getElementById('eMargin').textContent = fmtMoney(margin);
-  document.getElementById('eTotalExp').textContent = fmtMoney(totalExpense);
-  document.getElementById('eRevenue').textContent = fmtMoney(revenue);
-  document.getElementById('eMarginPct').textContent = marginPct + '%';
 
   // Financial totals on Scope In action bar
   document.getElementById('aTotalApproved').textContent = fmtMoney(revenue);
