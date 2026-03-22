@@ -200,8 +200,8 @@
   let searchTimer = null;
   let currentPage = 1;
   let pageSize = 50;
-  let sortCol = null;
-  let sortDir = 'asc';
+  let sortCol = 'dblTranAmount';
+  let sortDir = 'desc';
 
   // ── DOM refs ────────────────────────────────────────────
   const body      = document.getElementById('dataBody');
@@ -362,8 +362,9 @@
   async function loadTab(tab) {
     activeTab = tab;
     currentPage = 1;
-    sortCol = null;
-    sortDir = 'asc';
+    // Default sort: Outstanding by amount desc, others unsorted
+    sortCol = (tab === 'outstanding') ? 'dblTranAmount' : null;
+    sortDir = (tab === 'outstanding') ? 'desc' : 'asc';
     head.innerHTML = buildHeaders(tab);
 
     // Show/hide filters and toolbars based on tab
