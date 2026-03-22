@@ -1266,7 +1266,7 @@ async function loadDocuments(supplierKey) {
       '<td>' +
         '<div class="doc-actions" style="justify-content:center">' +
           '<button class="doc-btn" title="View document" onclick="viewDoc(' + key + ')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>' +
-          '<button class="doc-btn doc-del" title="Delete document" onclick="deleteDoc(' + key + ')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+          '<button class="doc-btn doc-del" title="Delete document" onclick="deleteDoc(this,' + key + ')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
         '</div>' +
       '</td>' +
       '</tr>';
@@ -1279,14 +1279,20 @@ async function viewDoc(key) {
   } catch (e) { console.warn('Doc view failed:', e.message); }
 }
 
-async function deleteDoc(key) {
-  if (!confirm('Delete this document?')) return;
+async function deleteDoc(btn, key) {
+  if (!btn._confirming) {
+    btn._confirming = true; btn._origTitle = btn.title; btn.title = 'Click again to confirm';
+    btn.style.background = '#dc3545'; btn.style.color = '#fff'; btn.style.borderColor = '#dc3545';
+    setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.title = btn._origTitle; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; } }, 3000);
+    return;
+  }
+  btn._confirming = false; btn.title = btn._origTitle; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
   try {
     if (_liveMode && key) {
       await API.deleteDocument(key);
       if (_currentSupplier) loadDocuments(_currentSupplier.lSupplierKey);
     }
-  } catch (e) { alert('Delete failed: ' + e.message); }
+  } catch (e) { showToast('Delete failed: ' + e.message, true); }
 }
 
 // ── Save Supplier ────────────────────────────────────

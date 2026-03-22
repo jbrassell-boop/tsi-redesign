@@ -63,27 +63,27 @@
       <!-- STAT STRIP -->
       <div class="stat-strip" id="statStrip">
         <div class="stat-chip active-chip" onclick="switchTab('outstanding')" title="Outstanding A/R">
-          <div class="s-icon" style="background:#EDF2F4;color:var(--navy)">$</div>
+          <div class="s-icon" style="background:#EDF2F4;color:var(--navy)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
           <div class="s-data"><div class="s-val s-navy" id="kpiAR">—</div><div class="s-lbl">Outstanding A/R</div></div>
         </div>
         <div class="stat-chip" onclick="switchTab('outstanding','overdue')" title="Overdue invoices">
-          <div class="s-icon" style="background:#FEF2F2;color:var(--red)">!</div>
+          <div class="s-icon" style="background:#FEF2F2;color:var(--red)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".5" fill="currentColor" stroke="none"/></svg></div>
           <div class="s-data"><div class="s-val s-red" id="kpiOverdue">—</div><div class="s-lbl">Overdue</div></div>
         </div>
         <div class="stat-chip" style="cursor:default" title="Average days to payment">
-          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">⏱</div>
+          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 4.5v3.5l2.5 1.5"/></svg></div>
           <div class="s-data"><div class="s-val s-amber" id="kpiAging">—</div><div class="s-lbl">Avg Days to Pay</div></div>
         </div>
         <div class="stat-chip" onclick="switchTab('drafts')" title="Draft invoices">
-          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">✎</div>
+          <div class="s-icon" style="background:#FFFBEB;color:var(--amber)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M11 2.5a1.5 1.5 0 0 1 2.12 0l.38.38a1.5 1.5 0 0 1 0 2.12L6 12.5 2.5 13.5 3.5 10z"/></svg></div>
           <div class="s-data"><div class="s-val s-amber" id="kpiDrafts">—</div><div class="s-lbl">Drafts</div></div>
         </div>
         <div class="stat-chip" onclick="switchTab('hold')" title="Clients on hold">
-          <div class="s-icon" style="background:#FEF2F2;color:var(--red)">⊘</div>
+          <div class="s-icon" style="background:#FEF2F2;color:var(--red)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="5" y1="8" x2="11" y2="8"/></svg></div>
           <div class="s-data"><div class="s-val s-red" id="kpiHold">—</div><div class="s-lbl">On Hold</div></div>
         </div>
         <div class="stat-chip" onclick="switchTab('payments')" title="Paid this month">
-          <div class="s-icon" style="background:#F0FDF4;color:var(--green)">✓</div>
+          <div class="s-icon" style="background:#F0FDF4;color:var(--green)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></div>
           <div class="s-data"><div class="s-val s-green" id="kpiPaid">—</div><div class="s-lbl">Paid MTD</div></div>
         </div>
         <div class="stat-chip" style="cursor:default" title="Days Sales Outstanding">
@@ -597,7 +597,7 @@
         '<td style="color:var(--muted);font-size:11px">' + esc(gpId) + '</td>' +
         '<td>' + statusBadge('Draft') + '</td>' +
         '<td style="text-align:right"><button class="edit-btn" onclick="viewInvoice(' + (r.lInvoiceKey || 0) + ')">Edit</button>' +
-        ' <button class="edit-btn" style="background:#FEF2F2;color:var(--red)" onclick="deleteDraft(' + (r.lInvoiceKey || 0) + ')">Del</button></td>' +
+        ' <button class="edit-btn" style="background:#FEF2F2;color:var(--red)" onclick="deleteDraft(this,' + (r.lInvoiceKey || 0) + ')">Del</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -609,7 +609,7 @@
         '<td>' + esc(r.sDepartmentName || '') + '</td>' +
         '<td style="color:var(--muted)">' + fmtDate(r.dtOnHoldDate || r.dtHoldDate) + '</td>' +
         '<td>' + esc(r.sReason || r.sHoldReason || '') + '</td>' +
-        '<td style="text-align:right"><button class="edit-btn" onclick="releaseHold(' + (r.lClientKey || 0) + ')">Release</button></td>' +
+        '<td style="text-align:right"><button class="edit-btn" onclick="releaseHold(this,' + (r.lClientKey || 0) + ')">Release</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -870,13 +870,25 @@
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
   };
-  window.deleteDraft = async function(key) {
-    if (!confirm('Delete this draft invoice?')) return;
+  window.deleteDraft = async function(btn, key) {
+    if (!btn._confirming) {
+      btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
+      btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+      setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
+      return;
+    }
+    btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = '';
     try { await API.deleteDraftInvoice(key); loadTab('drafts'); }
     catch (e) { console.warn('Delete failed:', e.message); }
   };
-  window.releaseHold = async function(clientKey) {
-    if (!confirm('Release hold on this client?')) return;
+  window.releaseHold = async function(btn, clientKey) {
+    if (!btn._confirming) {
+      btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
+      btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+      setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
+      return;
+    }
+    btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = '';
     try { await API.clientUpdateOnHold({ plClientKey: clientKey, pbOnHold: false }); loadTab('hold'); }
     catch (e) { console.warn('Release failed:', e.message); }
   };

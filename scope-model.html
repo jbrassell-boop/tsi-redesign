@@ -201,28 +201,32 @@
       <!-- KPI STAT STRIP -->
       <div class="stat-strip">
         <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
-          <div class="s-icon" style="background:#E3F2FD">📋</div>
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div>
           <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Models</div></div>
         </div>
         <div class="stat-chip" id="kpiActive" onclick="chipFilter('active')">
-          <div class="s-icon" style="background:#E8F5E9">✓</div>
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="5.5 8 7 10 10.5 6"/></svg></div>
           <div class="s-data"><div class="s-val s-green" id="kpiActiveVal">0</div><div class="s-lbl">Active</div></div>
         </div>
         <div class="stat-chip" id="kpiInactive" onclick="chipFilter('inactive')">
-          <div class="s-icon" style="background:#FEF2F2">✕</div>
+          <div class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="5.5" x2="5.5" y2="10.5"/></svg></div>
           <div class="s-data"><div class="s-val s-red" id="kpiInactiveVal">0</div><div class="s-lbl">Inactive</div></div>
         </div>
         <div class="stat-chip" id="kpiFlex" onclick="chipFilter('flex')">
-          <div class="s-icon" style="background:#EFF6FF">F</div>
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M4 12c0-4 2-6 4-8s4-1 4 1-2 4-4 6-4 3-4 5"/></svg></div>
           <div class="s-data"><div class="s-val s-blue" id="kpiFlexVal">0</div><div class="s-lbl">Flexible</div></div>
         </div>
         <div class="stat-chip" id="kpiRigid" onclick="chipFilter('rigid')">
-          <div class="s-icon" style="background:#F0FDF4">R</div>
+          <div class="s-icon" style="background:#F0FDF4"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="2" x2="8" y2="14"/><line x1="5" y1="4" x2="11" y2="4"/><line x1="5" y1="12" x2="11" y2="12"/></svg></div>
           <div class="s-data"><div class="s-val s-green" id="kpiRigidVal">0</div><div class="s-lbl">Rigid</div></div>
         </div>
         <div class="stat-chip" id="kpiCamera" onclick="chipFilter('camera')">
-          <div class="s-icon" style="background:#FDF4FF">C</div>
+          <div class="s-icon" style="background:#FDF4FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="4" width="12" height="9" rx="1.5"/><circle cx="8" cy="8.5" r="2.5"/><path d="M5.5 4L6.5 2h3l1 2"/></svg></div>
           <div class="s-data"><div class="s-val s-purple" id="kpiCameraVal">0</div><div class="s-lbl">Camera</div></div>
+        </div>
+        <div class="stat-chip" id="kpiInstrument" onclick="chipFilter('instrument')">
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10.3 2.5a4 4 0 0 0-4.8 5.2L2 11.2V14h2.8l3.5-3.5a4 4 0 0 0 5.2-4.8L11.3 7.9 9.1 5.7z"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiInstrumentVal">0</div><div class="s-lbl">Instrument</div></div>
         </div>
       </div>
 
@@ -505,10 +509,6 @@
 
   <div class="drawer-footer">
     <span id="drawerSaveStatus"></span>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-outline" onclick="confirmDeleteModel()" style="color:var(--red);border-color:var(--red)">Delete</button>
-      <button class="btn btn-navy" onclick="saveModel()">Save</button>
-    </div>
   </div>
 </div>
 
@@ -533,7 +533,7 @@
           <select id="mInstType"><option value="">— Select —</option><option value="F">Flexible</option><option value="R">Rigid</option><option value="C">Camera</option><option value="I">Instrument</option></select>
         </div>
         <div class="field"><label>Category</label>
-          <select id="mCategory"><option value="">— Select —</option><option>Gastroscope</option><option>Colonoscope</option><option>Bronchoscope</option><option>Duodenoscope</option><option>Camera Head</option><option>Arthroscope</option><option>Laparoscope</option><option>Cystoscope</option><option>Sinuscope</option><option>Other</option></select>
+          <select id="mCategory"><option value="">— Select —</option></select>
         </div>
       </div>
       <div class="g2">
@@ -689,6 +689,9 @@ async function loadModels() {
       if (!m.contractCost) m.contractCost = m.dblContractCost || null;
       if (!m.flagCount) m.flagCount = m.lFlagCount || 0;
       if (!m.sCategory) m.sCategory = m.sScopeCategory || '';
+      // Trim whitespace from manufacturer and category names
+      if (m.sManufacturerName) m.sManufacturerName = m.sManufacturerName.trim();
+      if (m.sCategory) m.sCategory = m.sCategory.trim();
     });
     allModels = list;
     isLive = true;
@@ -707,6 +710,12 @@ async function loadModels() {
   // Also populate modal manufacturer dropdown
   const mMfg = document.getElementById('mManufacturer');
   mMfg.innerHTML = '<option value="">— Select —</option>' + manufacturers.map(m => `<option value="${m}">${m}</option>`).join('');
+  // Build category dropdown from actual data
+  const catSet = new Set();
+  allModels.forEach(m => { if (m.sCategory) catSet.add(m.sCategory); });
+  const categories = [...catSet].sort();
+  const mCat = document.getElementById('mCategory');
+  mCat.innerHTML = '<option value="">— Select —</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
   runPipeline();
 }
 
@@ -788,12 +797,13 @@ function renderTable() {
 
 function updateKPIs() {
   const total = allModels.length;
-  let active=0, inactive=0, flex=0, rigid=0, camera=0;
+  let active=0, inactive=0, flex=0, rigid=0, camera=0, instrument=0;
   allModels.forEach(m => {
     if (m.bActive === false) inactive++; else active++;
     if (m.sRigidOrFlexible === 'F') flex++;
     else if (m.sRigidOrFlexible === 'R') rigid++;
     else if (m.sRigidOrFlexible === 'C') camera++;
+    else if (m.sRigidOrFlexible === 'I') instrument++;
   });
   document.getElementById('kpiTotalVal').textContent = total;
   document.getElementById('kpiActiveVal').textContent = active;
@@ -801,6 +811,7 @@ function updateKPIs() {
   document.getElementById('kpiFlexVal').textContent = flex;
   document.getElementById('kpiRigidVal').textContent = rigid;
   document.getElementById('kpiCameraVal').textContent = camera;
+  document.getElementById('kpiInstrumentVal').textContent = instrument;
   // Clear active chip highlights
   document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
   if (filters.status === 'active') document.getElementById('kpiActive').classList.add('active-chip');
@@ -808,6 +819,7 @@ function updateKPIs() {
   else if (filters.type === 'F') document.getElementById('kpiFlex').classList.add('active-chip');
   else if (filters.type === 'R') document.getElementById('kpiRigid').classList.add('active-chip');
   else if (filters.type === 'C') document.getElementById('kpiCamera').classList.add('active-chip');
+  else if (filters.type === 'I') document.getElementById('kpiInstrument').classList.add('active-chip');
 }
 
 function updatePagination() {
@@ -868,9 +880,9 @@ function debounceSearch() {
 }
 
 function chipFilter(chip) {
-  // Type chips: flex, rigid, camera
-  if (chip === 'flex' || chip === 'rigid' || chip === 'camera') {
-    const typeVal = {flex:'F', rigid:'R', camera:'C'}[chip];
+  // Type chips: flex, rigid, camera, instrument
+  if (chip === 'flex' || chip === 'rigid' || chip === 'camera' || chip === 'instrument') {
+    const typeVal = {flex:'F', rigid:'R', camera:'C', instrument:'I'}[chip];
     if (filters.type === typeVal) { filters.type = ''; } else { filters.type = typeVal; filters.status = ''; }
     // Sync type seg
     document.querySelectorAll('#segType .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.type));
@@ -1055,7 +1067,32 @@ function cloneModel(key) {
 function confirmDeleteByKey(key) {
   const model = allModels.find(m => m.lScopeTypeKey === key);
   if (!model) return;
-  if (!confirm(`Delete model "${model.sScopeTypeDesc}"? This cannot be undone.`)) return;
+  // Find the context menu delete item and swap to inline "Sure?" confirm
+  const ctxDel = document.querySelector('#ctxMenu .ctx-item.danger');
+  if (ctxDel && !ctxDel._confirming) {
+    ctxDel._confirming = true;
+    const origHTML = ctxDel.innerHTML;
+    ctxDel.innerHTML = '<span style="font-weight:700;color:var(--red)">Sure? Delete ' + (model.sScopeTypeDesc||'model') + '</span>';
+    ctxDel.onclick = function() {
+      ctxDel._confirming = false;
+      ctxDel.innerHTML = origHTML;
+      ctxDel.onclick = function(){ ctxAction('delete'); };
+      document.getElementById('ctxMenu').style.display = 'none';
+      deleteModel(key);
+    };
+    // Auto-revert after 3 seconds
+    setTimeout(() => {
+      if (ctxDel._confirming) {
+        ctxDel._confirming = false;
+        ctxDel.innerHTML = origHTML;
+        ctxDel.onclick = function(){ ctxAction('delete'); };
+      }
+    }, 3000);
+    // Keep menu visible
+    document.getElementById('ctxMenu').style.display = 'block';
+    return;
+  }
+  // Fallback if triggered from elsewhere (not ctx menu)
   deleteModel(key);
 }
 
@@ -1068,7 +1105,7 @@ async function deleteModel(key) {
 
 // ── Detail Drawer ───────────────────────────────────────
 function openDrawer(key) {
-  if (isDirty && !confirm('You have unsaved changes. Discard?')) return;
+  if (isDirty) { autoSave(); }
   selectedModelKey = key;
   isDirty = false;
   const model = allModels.find(m => m.lScopeTypeKey === key);
@@ -1141,7 +1178,7 @@ function switchTab(tab, el) {
 
 async function loadRepairItems(key) {
   const tbody = document.getElementById('repairItemsBody');
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">Loading\u2026</td></tr>';
   let items = [];
   try {
     const raw = await API.getScopeTypeRepairItems({ Pagination:{PageNumber:1,PageSize:100}, Filters:{plScopeTypeKey:key} });
@@ -1150,23 +1187,14 @@ async function loadRepairItems(key) {
   } catch(e) {
     items = getDemoRepairItems(key);
   }
-  if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">No repair items</td></tr>'; return; }
-  tbody.innerHTML = items.map(it => `<tr>
-    <td>${it.sRepairItemDesc||it.sRepairItem||'—'}</td>
-    <td style="text-align:center">${it.l3Time||it.dblLevel3Time||'—'}</td>
-    <td style="text-align:center">${it.l2Time||it.dblLevel2Time||'—'}</td>
-    <td style="text-align:center">${it.l1Time||it.dblLevel1Time||'—'}</td>
-    <td style="text-align:center">${it.warnTime||it.dblWarningTime||'—'}</td>
-    <td><button class="del-btn" onclick="event.stopPropagation()">✕</button></td>
-  </tr>`).join('');
-  // Also populate inventory left pane
-  const invBody = document.getElementById('invRepairItemsBody');
-  invBody.innerHTML = items.map(it => `<tr><td>${it.sRepairItemDesc||it.sRepairItem||'—'}</td><td style="text-align:center">—</td></tr>`).join('');
+  _currentRepairItems = items;
+  renderRepairItemsTable();
+  renderInvRepairItems();
 }
 
 async function loadFlags(key) {
   const tbody = document.getElementById('flagsBody');
-  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">Loading\u2026</td></tr>';
   let flags = [];
   try {
     const raw = await API.getFlagsByOwner(key);
@@ -1175,13 +1203,8 @@ async function loadFlags(key) {
   } catch(e) {
     flags = getDemoFlags(key);
   }
-  if (!flags.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">No flags</td></tr>'; return; }
-  tbody.innerHTML = flags.map(f => `<tr>
-    <td>${f.sFlag||f.sFlagDescription||'—'}</td>
-    <td>${fmtDate(f.dtCreated||f.dtDateCreated)}</td>
-    <td>${f.sCreatedBy||'—'}</td>
-    <td><button class="del-btn" onclick="event.stopPropagation()">✕</button></td>
-  </tr>`).join('');
+  _currentFlags = flags;
+  renderFlagsTable();
 }
 
 // ── Autosave ────────────────────────────────────────────
@@ -1208,10 +1231,44 @@ async function saveModel(silent) {
   if (!selectedModelKey) return;
   const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
   if (!model) return;
-  // Read fields back to model
-  model.contractCost = parseFloat(document.getElementById('fContractCost').value) || null;
-  model.notes = document.getElementById('fNotes').value;
+  // Read ALL form fields back to model
+  // Configuration
+  model.videoImage = document.getElementById('fVideoImage').value;
+  model.imageSensor = document.getElementById('fImageSensor').value;
+  model.processors = document.getElementById('fProcessors').value;
+  model.lightSources = document.getElementById('fLightSources').value;
   model.avgTAT = parseFloat(document.getElementById('fAvgDays').value) || null;
+  model.expMult = parseFloat(document.getElementById('fExpMult').value) || null;
+  model.contractCost = parseFloat(document.getElementById('fContractCost').value) || null;
+  model.maxCharge = document.getElementById('fMaxCharge').value;
+  model.glAccount = document.getElementById('fGLAccount').value;
+  model.forcePortal = document.getElementById('fForcePortal').checked;
+  model.skipPortal = document.getElementById('fSkipPortal').checked;
+  // Physical Specifications
+  model.insLength = parseFloat(document.getElementById('fInsLength').value) || null;
+  model.insDiam = parseFloat(document.getElementById('fInsDiam').value) || null;
+  model.channel = parseFloat(document.getElementById('fChannel').value) || null;
+  model.fov = parseFloat(document.getElementById('fFOV').value) || null;
+  model.dirView = document.getElementById('fDirView').value;
+  model.depthField = document.getElementById('fDepthField').value;
+  model.epoxyAvg = parseFloat(document.getElementById('fEpoxyAvg').value) || null;
+  model.epoxyMax = parseFloat(document.getElementById('fEpoxyMax').value) || null;
+  // Angulation
+  model.angUp = parseFloat(document.getElementById('fAngUp').value) || null;
+  model.angDown = parseFloat(document.getElementById('fAngDown').value) || null;
+  model.angLeft = parseFloat(document.getElementById('fAngLeft').value) || null;
+  model.angRight = parseFloat(document.getElementById('fAngRight').value) || null;
+  // Pricing
+  model.baseEvalFee = document.getElementById('fBaseEvalFee').value;
+  model.estTAT = parseFloat(document.getElementById('fEstTAT').value) || null;
+  model.minorPrice = document.getElementById('fMinorPrice').value;
+  model.minorWarranty = parseFloat(document.getElementById('fMinorWarranty').value) || null;
+  model.midPrice = document.getElementById('fMidPrice').value;
+  model.midWarranty = parseFloat(document.getElementById('fMidWarranty').value) || null;
+  model.majorPrice = document.getElementById('fMajorPrice').value;
+  model.majorWarranty = parseFloat(document.getElementById('fMajorWarranty').value) || null;
+  // Notes
+  model.notes = document.getElementById('fNotes').value;
   // Save via API
   try {
     await API.addUpdateScopeType({ plScopeTypeKey: selectedModelKey, pdblContractCost: model.contractCost });
@@ -1224,10 +1281,7 @@ async function saveModel(silent) {
   renderTable();
 }
 
-function confirmDeleteModel() {
-  if (!selectedModelKey) return;
-  confirmDeleteByKey(selectedModelKey);
-}
+// Delete is now only available via right-click context menu with inline "Sure?" confirm
 
 function updateSaveStatus(state) {
   const el = document.getElementById('drawerSaveStatus');
@@ -1289,9 +1343,132 @@ async function submitAddModel() {
   openDrawer(newModel.lScopeTypeKey);
 }
 
-// ── Stub handlers ───────────────────────────────────────
-function addRepairItem() { alert('Add repair item — coming soon'); }
-function addFlag() { alert('Add flag — coming soon'); }
+// ── Styled input modal (replaces prompt()) ──────────────
+function _showInputModal(label, placeholder, callback) {
+  let overlay = document.getElementById('inputModalOverlay');
+  if (overlay) overlay.remove();
+  overlay = document.createElement('div');
+  overlay.id = 'inputModalOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:8px;padding:24px 28px;max-width:380px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.18);font-family:inherit">'
+    + '<label style="font-size:12.5px;color:var(--navy,#1B2A4A);font-weight:600">' + label + '</label>'
+    + '<input id="inputModalValue" type="text" style="width:100%;margin:8px 0 16px;padding:7px 10px;border:1px solid var(--border,#D1D5DB);border-radius:5px;font-size:12.5px;font-family:inherit;box-sizing:border-box" placeholder="' + (placeholder||'') + '">'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button id="inputModalCancel" class="btn btn-outline" style="font-size:11px;padding:5px 14px">Cancel</button>'
+    + '<button id="inputModalSubmit" class="btn btn-navy" style="font-size:11px;padding:5px 14px">Add</button>'
+    + '</div></div>';
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('inputModalValue').focus(), 50);
+  document.getElementById('inputModalCancel').onclick = function() { overlay.remove(); };
+  document.getElementById('inputModalSubmit').onclick = function() { const v = document.getElementById('inputModalValue').value; overlay.remove(); callback(v); };
+  document.getElementById('inputModalValue').onkeydown = function(e) { if (e.key === 'Enter') document.getElementById('inputModalSubmit').click(); if (e.key === 'Escape') overlay.remove(); };
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+}
+
+// ── Repair Item & Flag management ───────────────────────
+let _currentRepairItems = [];
+let _currentFlags = [];
+
+function addRepairItem() {
+  if (!selectedModelKey) return;
+  _showInputModal('Repair item description:', 'Enter description...', function(desc) {
+    if (!desc || !desc.trim()) return;
+    const item = { sRepairItemDesc: desc.trim(), l3Time: 0, l2Time: 0, l1Time: 0, warnTime: 0 };
+    _currentRepairItems.push(item);
+    const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
+    if (model) model.repairItemCount = _currentRepairItems.length;
+    renderRepairItemsTable();
+    renderInvRepairItems();
+    renderTable();
+  });
+}
+
+function removeRepairItem(idx) {
+  const btn = event.currentTarget;
+  if (!btn._confirming) {
+    btn._confirming = true;
+    btn.textContent = 'Sure?';
+    btn.style.fontWeight = '700';
+    setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = '\u2715'; btn.style.fontWeight = ''; } }, 3000);
+    return;
+  }
+  btn._confirming = false;
+  _currentRepairItems.splice(idx, 1);
+  const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
+  if (model) model.repairItemCount = _currentRepairItems.length;
+  renderRepairItemsTable();
+  renderInvRepairItems();
+  renderTable();
+}
+
+function renderRepairItemsTable() {
+  const tbody = document.getElementById('repairItemsBody');
+  if (!_currentRepairItems.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:12px;color:var(--muted)">No repair items</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _currentRepairItems.map((it, i) => `<tr>
+    <td>${it.sRepairItemDesc||it.sRepairItem||'\u2014'}</td>
+    <td style="text-align:center">${it.l3Time||it.dblLevel3Time||'\u2014'}</td>
+    <td style="text-align:center">${it.l2Time||it.dblLevel2Time||'\u2014'}</td>
+    <td style="text-align:center">${it.l1Time||it.dblLevel1Time||'\u2014'}</td>
+    <td style="text-align:center">${it.warnTime||it.dblWarningTime||'\u2014'}</td>
+    <td><button class="del-btn" onclick="event.stopPropagation();removeRepairItem(${i})">\u2715</button></td>
+  </tr>`).join('');
+}
+
+function renderInvRepairItems() {
+  const invBody = document.getElementById('invRepairItemsBody');
+  if (!_currentRepairItems.length) {
+    invBody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:12px;color:var(--muted)">\u2014</td></tr>';
+    return;
+  }
+  invBody.innerHTML = _currentRepairItems.map(it => `<tr><td>${it.sRepairItemDesc||it.sRepairItem||'\u2014'}</td><td style="text-align:center">\u2014</td></tr>`).join('');
+}
+
+function addFlag() {
+  if (!selectedModelKey) return;
+  _showInputModal('Flag description:', 'Enter flag...', function(desc) {
+    if (!desc || !desc.trim()) return;
+    const flag = { sFlag: desc.trim(), dtCreated: new Date().toISOString(), sCreatedBy: 'You' };
+    _currentFlags.push(flag);
+    const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
+    if (model) model.flagCount = _currentFlags.length;
+    renderFlagsTable();
+    renderTable();
+  });
+}
+
+function removeFlag(idx) {
+  const btn = event.currentTarget;
+  if (!btn._confirming) {
+    btn._confirming = true;
+    btn.textContent = 'Sure?';
+    btn.style.fontWeight = '700';
+    setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = '\u2715'; btn.style.fontWeight = ''; } }, 3000);
+    return;
+  }
+  btn._confirming = false;
+  _currentFlags.splice(idx, 1);
+  const model = allModels.find(m => m.lScopeTypeKey === selectedModelKey);
+  if (model) model.flagCount = _currentFlags.length;
+  renderFlagsTable();
+  renderTable();
+}
+
+function renderFlagsTable() {
+  const tbody = document.getElementById('flagsBody');
+  if (!_currentFlags.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted)">No flags</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _currentFlags.map((f, i) => `<tr>
+    <td>${f.sFlag||f.sFlagDescription||'\u2014'}</td>
+    <td>${fmtDate(f.dtCreated||f.dtDateCreated)}</td>
+    <td>${f.sCreatedBy||'\u2014'}</td>
+    <td><button class="del-btn" onclick="event.stopPropagation();removeFlag(${i})">\u2715</button></td>
+  </tr>`).join('');
+}
 function changeServiceLocation() {
   localStorage.setItem('tsi_svcLocation', document.getElementById('svcLocation').value);
 }

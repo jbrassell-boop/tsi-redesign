@@ -176,27 +176,27 @@
     <!-- KPI STAT STRIP -->
     <div class="stat-strip">
       <div class="stat-chip active-chip" id="kpiTotal" onclick="chipFilter('')">
-        <div class="s-icon s-navy">📋</div>
+        <div class="s-icon s-navy" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiTotalVal">8</div><div class="s-lbl">TOTAL CONTRACTS</div></div>
       </div>
       <div class="stat-chip" id="kpiActive" onclick="chipFilter('Active')">
-        <div class="s-icon s-green">✓</div>
+        <div class="s-icon s-green" style="background:#F0FDF4"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="5.5 8 7 10 10.5 6"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiActiveVal">5</div><div class="s-lbl">ACTIVE</div></div>
       </div>
       <div class="stat-chip" id="kpiExpiring" onclick="chipFilter('Expiring')">
-        <div class="s-icon s-amber">⚠</div>
+        <div class="s-icon s-amber" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiExpiringVal">2</div><div class="s-lbl">EXPIRING ≤90d</div></div>
       </div>
       <div class="stat-chip" id="kpiExpired" onclick="chipFilter('Expired')">
-        <div class="s-icon s-red">✕</div>
+        <div class="s-icon s-red" style="background:#FEF2F2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="5.5" x2="5.5" y2="10.5"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiExpiredVal">1</div><div class="s-lbl">EXPIRED</div></div>
       </div>
       <div class="stat-chip" id="kpiACV">
-        <div class="s-icon s-navy">💲</div>
+        <div class="s-icon s-navy" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiACVVal">$268K</div><div class="s-lbl">ANNUAL VALUE</div></div>
       </div>
       <div class="stat-chip" id="kpiAvgLen">
-        <div class="s-icon s-blue">📅</div>
+        <div class="s-icon s-blue" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2.5" y="3" width="11" height="10.5" rx="1.5"/><path d="M5.5 1.5v3M10.5 1.5v3M2.5 6.5h11"/></svg></div>
         <div class="s-data"><div class="s-val" id="kpiAvgLenVal">24 mo</div><div class="s-lbl">AVG LENGTH</div></div>
       </div>
       <div class="stat-chip" style="cursor:default" title="Contract Renewal Rate">
@@ -2073,9 +2073,19 @@ async function createContract() {
 }
 
 // ── CRUD: Delete Contract ─────────────────────────────
-async function deleteContract() {
+let _deleteContractPending = false;
+async function deleteContract(e) {
   if (!selectedContractKey) { showToast('No contract selected', true); return; }
-  if (!confirm('Delete contract CNT-' + selectedContractKey + '? This cannot be undone.')) return;
+  const btn = (e && e.currentTarget) ? e.currentTarget : (e instanceof HTMLElement ? e : null);
+  if (!_deleteContractPending) {
+    _deleteContractPending = true;
+    if (btn) { btn._origText = btn.textContent; btn._origBg = btn.style.background; btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff'; }
+    else { showToast('Click again to confirm delete'); }
+    setTimeout(() => { _deleteContractPending = false; if (btn) { btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
+    return;
+  }
+  _deleteContractPending = false;
+  if (btn) { btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; }
 
   try {
     await API.deleteContract(selectedContractKey);

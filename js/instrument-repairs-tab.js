@@ -226,6 +226,20 @@ function ir_sortBy(col) {
   if (ir_sortCol === col) ir_sortDir = ir_sortDir === 'asc' ? 'desc' : 'asc';
   else { ir_sortCol = col; ir_sortDir = 'asc'; }
   ir_applySort(); ir_paginate(); ir_renderTable(); ir_updatePagination();
+  // Update sort indicators on <th> elements
+  var table = document.getElementById('ir_tableBody');
+  if (table) {
+    var thead = table.closest('table').querySelector('thead');
+    if (thead) {
+      thead.querySelectorAll('th').forEach(function(th) { th.classList.remove('sorted','asc','desc'); });
+      var cols = ['orderNum','clientName','deptName','dateReceived','dateDue','items','total','status'];
+      var idx = cols.indexOf(col);
+      if (idx >= 0) {
+        var ths = thead.querySelectorAll('th');
+        if (ths[idx]) { ths[idx].classList.add('sorted', ir_sortDir); }
+      }
+    }
+  }
 }
 
 function ir_chipFilter(status) {
@@ -282,8 +296,9 @@ function ir_renderTable() {
   tbody.innerHTML = ir_display.map(function(r) {
     var tot = ir_orderTotal(r);
     var dueC = ir_dueClass(r);
-    var dueTd = '<td class="' + (dueC==='overdue' ? 'ir-overdue' : dueC==='due-soon' ? 'ir-due-soon' : '') + '">' + ir_fmtDate(r.dateDue) + '</td>';
-    return '<tr class="' + (r.id === ir_selectedId ? 'selected' : '') + '" onclick="ir_openDrawer(' + r.id + ')">' +
+    var dueTd = '<td>' + ir_fmtDate(r.dateDue) + '</td>';
+    var trClass = (r.id === ir_selectedId ? 'selected' : '') + (dueC==='overdue' ? ' ir-overdue' : dueC==='due-soon' ? ' ir-due-soon' : '');
+    return '<tr class="' + trClass.trim() + '" onclick="ir_openDrawer(' + r.id + ')">' +
       '<td><span class="code-link">' + ir_esc(r.orderNum) + '</span>' + (r.quoteRef ? ' <span class="ir-ref-link" title="Quote: ' + ir_esc(r.quoteRef) + '">&#x1F517;</span>' : '') + '</td>' +
       '<td title="' + ir_esc(r.clientName) + '">' + ir_esc(r.clientName) + '</td>' +
       '<td title="' + ir_esc(r.deptName) + '">' + ir_esc(r.deptName) + '</td>' +
@@ -377,7 +392,7 @@ function ir_onStatusChange() {
 function ir_renderDrawerItems(r) {
   var tbody = document.getElementById('ir_itemsBody');
   if (!r.items || !r.items.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No items on this order.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No items on this order.</td></tr>';
     ir_updateDrawerTotals(r);
     return;
   }
@@ -392,9 +407,25 @@ function ir_renderDrawerItems(r) {
       '<td style="text-align:right;font-weight:600">' + (item.amount > 0 ? fmtCur(item.amount) : '<span style="color:var(--muted)">—</span>') + '</td>' +
       '<td>' + (item.outsource ? '<span class="ir-out-dot" title="Outsourced to: ' + ir_esc(item.outsourceVendor||'TBD') + '">&#x21A5;</span>' : '') + '</td>' +
       '<td>' + ir_itemStatusBadge(item.status) + '</td>' +
+      '<td><button class="del-btn" onclick="ir_removeItem(' + idx + ')" title="Remove">&#x2715;</button></td>' +
       '</tr>';
   }).join('');
   ir_updateDrawerTotals(r);
+}
+
+function ir_addItem() {
+  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
+  if (!r) return;
+  var newId = r.items.length ? Math.max.apply(null, r.items.map(function(i){ return i.id; })) + 1 : 1;
+  r.items.push({id:newId,instrCode:'',mfr:'',model:'',serial:'',description:'',repairLevel:null,amount:0,status:'Received',outsource:false,outsourceVendor:'',outsourceCost:0,techNote:''});
+  ir_markDirty(); ir_renderDrawerItems(r); ir_renderDrawerOutsource(r);
+}
+
+function ir_removeItem(idx) {
+  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
+  if (!r) return;
+  r.items.splice(idx, 1);
+  ir_markDirty(); ir_renderDrawerItems(r); ir_renderDrawerOutsource(r);
 }
 
 function ir_updateDrawerTotals(r) {
@@ -492,12 +523,26 @@ function ir_setSaveStatus(state, msg) {
   el.style.color = state==='saved' ? 'var(--green)' : state==='dirty' ? 'var(--amber)' : 'var(--muted)';
 }
 
-function ir_deleteRepair() {
+function ir_deleteRepair(btn) {
   var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
   if (!r) return;
-  if (!confirm('Delete ' + r.orderNum + '? This cannot be undone.')) return;
-  ir_allRepairs = ir_allRepairs.filter(function(x){ return x.id !== ir_selectedId; });
-  ir_closeDrawer(); ir_applyFilters(); ir_updateKPIs();
+  if (!btn) return;
+  if (btn.dataset.confirming) {
+    ir_allRepairs = ir_allRepairs.filter(function(x){ return x.id !== ir_selectedId; });
+    ir_closeDrawer(); ir_applyFilters(); ir_updateKPIs();
+    return;
+  }
+  btn.dataset.confirming = '1';
+  var orig = btn.innerHTML;
+  btn.innerHTML = 'Sure?';
+  btn.style.color = '#fff';
+  btn.style.background = 'var(--red)';
+  setTimeout(function() {
+    delete btn.dataset.confirming;
+    btn.innerHTML = orig;
+    btn.style.color = '';
+    btn.style.background = '';
+  }, 2500);
 }
 
 // ─── New Repair Wizard ────────────────────────────────────────────────────────

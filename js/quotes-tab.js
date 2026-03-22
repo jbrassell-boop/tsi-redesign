@@ -541,7 +541,7 @@ function iq_renderOutsourceTab(q) {
     totCost += item.outsourceCost || 0;
     totBilled += item.amount || 0;
     var margin = (item.amount || 0) - (item.outsourceCost || 0);
-    var mClass = margin >= 0 ? 'margin-pos' : 'margin-neg';
+    var mClass = margin >= 0 ? 'ir-margin-pos' : 'ir-margin-neg';
     return '<tr>' +
       '<td><span class="code-link">' + iq_esc(item.instrCode) + '</span><br/><span style="font-size:10px;color:var(--muted)">' + iq_esc(item.mfr) + ' ' + iq_esc(item.model) + '</span></td>' +
       '<td><input type="text" value="' + iq_esc(item.outsourceVendor) + '" placeholder="Vendor name" onchange="iq_updateOutVendor(\'' + item.id + '\',this.value)" style="width:140px"/></td>' +
@@ -551,7 +551,7 @@ function iq_renderOutsourceTab(q) {
       '</tr>';
   }).join('');
   var totMargin = totBilled - totCost;
-  var totMClass = totMargin >= 0 ? 'margin-pos' : 'margin-neg';
+  var totMClass = totMargin >= 0 ? 'ir-margin-pos' : 'ir-margin-neg';
   el.innerHTML = '<table class="out-table">' +
     '<thead><tr><th>Instrument</th><th>Vendor</th><th>Our Cost</th><th>Billed</th><th>Margin</th></tr></thead>' +
     '<tbody>' + rows + '</tbody>' +
@@ -622,12 +622,26 @@ function iq_markSent() {
   iq_saveDrawer(true);
 }
 
-function iq_deleteQuote() {
+function iq_deleteQuote(btn) {
   var q = iq_allQuotes.find(function(x){ return x.id === iq_selectedId; });
   if (!q) return;
-  if (!confirm('Delete ' + q.quoteNum + '? This cannot be undone.')) return;
-  iq_allQuotes = iq_allQuotes.filter(function(x){ return x.id !== iq_selectedId; });
-  iq_closeDrawer(); iq_applyFilters(); iq_updateKPIs();
+  if (!btn) return;
+  if (btn.dataset.confirming) {
+    iq_allQuotes = iq_allQuotes.filter(function(x){ return x.id !== iq_selectedId; });
+    iq_closeDrawer(); iq_applyFilters(); iq_updateKPIs();
+    return;
+  }
+  btn.dataset.confirming = '1';
+  var orig = btn.innerHTML;
+  btn.innerHTML = 'Sure?';
+  btn.style.color = '#fff';
+  btn.style.background = 'var(--red)';
+  setTimeout(function() {
+    delete btn.dataset.confirming;
+    btn.innerHTML = orig;
+    btn.style.color = '';
+    btn.style.background = '';
+  }, 2500);
 }
 
 // ── New Quote Wizard ──

@@ -193,12 +193,33 @@ var WIDGET_DEFS = [
     desc: 'Open scope repairs by status',
     span: 2,
     render: function(body) {
+      var repairs = (typeof MockDB !== 'undefined' && MockDB.repairs) ? MockDB.repairs : [];
+      var open = repairs.filter(function(r) { return !r.bComplete && !r.bCancelled; });
+
+      // Status buckets
+      var received = open.filter(function(r) { return (r.sRepairStatus || '').match(/received|logged/i); }).length;
+      var inRepair = open.filter(function(r) { return (r.sRepairStatus || '').match(/in.?repair|in.?progress|repair/i); }).length;
+      var qcHold = open.filter(function(r) { return (r.sRepairStatus || '').match(/qc|hold|inspect/i); }).length;
+      var shipReady = open.filter(function(r) { return (r.sRepairStatus || '').match(/ship|complete|ready/i); }).length;
+      // Overdue = open repairs past SLA (7 days default)
+      var now = new Date();
+      var overdue = open.filter(function(r) {
+        if (!r.dtDateReceived) return false;
+        var d = Math.floor((now - new Date(r.dtDateReceived)) / 86400000);
+        return d > 7;
+      }).length;
+
+      // Fallback if no status classification matched
+      if (received + inRepair + qcHold + shipReady === 0 && open.length > 0) {
+        inRepair = open.length;
+      }
+
       var data = [
-        {status:'Received',  count:4,  cls:'b-blue'},
-        {status:'In Repair', count:11, cls:'b-amber'},
-        {status:'QC Hold',   count:2,  cls:'b-red'},
-        {status:'Ship Ready',count:6,  cls:'b-green'},
-        {status:'Overdue',   count:3,  cls:'b-red'},
+        {status:'Received',  count:received || 0, cls:'b-blue'},
+        {status:'In Repair', count:inRepair || 0, cls:'b-amber'},
+        {status:'QC Hold',   count:qcHold || 0,   cls:'b-red'},
+        {status:'Ship Ready',count:shipReady || 0, cls:'b-green'},
+        {status:'Overdue',   count:overdue || 0,   cls:'b-red'},
       ];
       var chips = data.map(function(d) {
         return '<div class="ws-chip ' + (d.cls==='b-red'?'red':d.cls==='b-amber'?'amber':d.cls==='b-green'?'green':'') + '" onclick="location=\'repairs.html\'">' +
@@ -206,21 +227,26 @@ var WIDGET_DEFS = [
           '<div class="ws-chip-lbl">' + d.status + '</div>' +
           '</div>';
       }).join('');
-      var rows = [
-        {wo:'NR26006541', client:'Shreveport Endoscopy Center',    scope:'PCF-190TL', days:8,  sla:7,  stat:'Overdue'},
-        {wo:'NR26006538', client:'Northside Hospital',       scope:'GIF-HQ190', days:5,  sla:7,  stat:'In Repair'},
-        {wo:'NR26006535', client:'Valley Health System',       scope:'URF-V2',    days:3,  sla:5,  stat:'Received'},
-        {wo:'NR26006531', client:'Tampa General Hospital',  scope:'CF-HQ190I', days:6,  sla:7,  stat:'Ship Ready'},
-      ];
-      var tbl = rows.map(function(r) {
-        var over = r.days > r.sla;
-        var cls = over ? 'b-red' : (r.sla - r.days <= 1 ? 'b-amber' : 'b-blue');
+
+      // Recent open repairs — first 4 by date
+      var recent = open.sort(function(a,b) {
+        return new Date(b.dtDateReceived || 0) - new Date(a.dtDateReceived || 0);
+      }).slice(0, 4);
+      var tbl = recent.map(function(r) {
+        var days = r.dtDateReceived ? Math.floor((now - new Date(r.dtDateReceived)) / 86400000) : 0;
+        var sla = 7;
+        var over = days > sla;
+        var cls = over ? 'b-red' : (sla - days <= 1 ? 'b-amber' : 'b-blue');
+        var wo = r.sTaskNumber || r.sRepairNumber || ('WO-' + (r.lRepairKey || ''));
+        var client = r.sClientName || r.sClientName1 || '';
+        var scope = r.sScopeTypeDesc || r.sScopeType || '';
+        var stat = r.sRepairStatus || 'Open';
         return '<tr onclick="location=\'repairs.html\'">' +
-          '<td><span class="ws-tbl-code">' + r.wo + '</span></td>' +
-          '<td>' + r.client + '</td>' +
-          '<td style="font-family:monospace;font-size:10.5px">' + r.scope + '</td>' +
-          '<td style="text-align:center"><span class="ws-tbl-badge ' + cls + '">' + r.days + 'd / ' + r.sla + 'd</span></td>' +
-          '<td><span class="ws-tbl-badge b-blue">' + r.stat + '</span></td>' +
+          '<td><span class="ws-tbl-code">' + wo + '</span></td>' +
+          '<td>' + client + '</td>' +
+          '<td style="font-family:monospace;font-size:10.5px">' + scope + '</td>' +
+          '<td style="text-align:center"><span class="ws-tbl-badge ' + cls + '">' + days + 'd / ' + sla + 'd</span></td>' +
+          '<td><span class="ws-tbl-badge b-blue">' + stat + '</span></td>' +
           '</tr>';
       }).join('');
       body.innerHTML = '<div class="ws-chips">' + chips + '</div>' +
@@ -259,18 +285,29 @@ var WIDGET_DEFS = [
     desc: 'Repairs past or approaching SLA',
     span: 1,
     render: function(body) {
-      var items = [
-        {wo:'NR26006541', client:'Shreveport Endoscopy Center',   scope:'PCF-190TL', days:8, sla:7},
-        {wo:'NR26006529', client:'Regional Medical Center',      scope:'GIF-Q180', days:9, sla:7},
-        {wo:'NR26006522', client:'West Side GI Center',        scope:'CF-HQ190', days:11,sla:7},
-        {wo:'NR26006537', client:'Baptist Health',scope:'PCF-H190', days:7, sla:7},
-      ];
-      var tbl = items.map(function(r) {
-        var over = r.days > r.sla;
+      var repairs = (typeof MockDB !== 'undefined' && MockDB.repairs) ? MockDB.repairs : [];
+      var now = new Date();
+      var sla = 7;
+      var atRisk = repairs.filter(function(r) {
+        if (r.bComplete || r.bCancelled || !r.dtDateReceived) return false;
+        var days = Math.floor((now - new Date(r.dtDateReceived)) / 86400000);
+        return days >= sla - 1;
+      }).sort(function(a,b) {
+        return new Date(a.dtDateReceived || 0) - new Date(b.dtDateReceived || 0);
+      }).slice(0, 4);
+
+      if (!atRisk.length) {
+        body.innerHTML = '<div class="ws-empty">No overdue or at-risk repairs.</div>';
+        return;
+      }
+      var tbl = atRisk.map(function(r) {
+        var days = Math.floor((now - new Date(r.dtDateReceived)) / 86400000);
+        var over = days > sla;
+        var wo = r.sTaskNumber || r.sRepairNumber || ('WO-' + (r.lRepairKey || ''));
         return '<tr onclick="location=\'repairs.html\'">' +
-          '<td><span class="ws-tbl-code">' + r.wo + '</span></td>' +
-          '<td>' + r.client + '</td>' +
-          '<td><span class="ws-tbl-badge ' + (over?'b-red':'b-amber') + '">' + r.days + 'd / ' + r.sla + 'd</span></td>' +
+          '<td><span class="ws-tbl-code">' + wo + '</span></td>' +
+          '<td>' + (r.sClientName || r.sClientName1 || '') + '</td>' +
+          '<td><span class="ws-tbl-badge ' + (over?'b-red':'b-amber') + '">' + days + 'd / ' + sla + 'd</span></td>' +
           '</tr>';
       }).join('');
       body.innerHTML = '<table class="ws-table"><thead><tr><th>WO #</th><th>Client</th><th>TAT/SLA</th></tr></thead><tbody>' + tbl + '</tbody></table>';
@@ -647,6 +684,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+if (typeof API !== 'undefined' && API.UI) API.UI.init();
 renderGrid();
 </script>
 <script src="js/new-order-wizard.js"></script>

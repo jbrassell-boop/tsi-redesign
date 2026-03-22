@@ -188,11 +188,14 @@
       var bId    = b.id    !== undefined ? b.id    : (tab.badgeId || '');
 
       html += '<a class="' + cls + '" href="' + tab.href + '">' + tab.label;
-      if (bText) {
+      if (bText && bText !== '0') {
         html += '<span class="tab-badge"';
         if (bId)    html += ' id="' + bId + '"';
         if (bStyle) html += ' style="' + bStyle + '"';
         html += '>' + bText + '</span>';
+      } else if (bId) {
+        // Render hidden badge placeholder so JS can update it later
+        html += '<span class="tab-badge" id="' + bId + '" style="display:none"' + (bStyle ? ' data-style="' + bStyle + '"' : '') + '>0</span>';
       }
       html += '</a>';
     }

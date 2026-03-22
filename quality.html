@@ -357,7 +357,7 @@
   </div>
   <div class="drawer-body" id="drawerBody"></div>
   <div class="drawer-footer">
-    <button class="btn btn-outline" onclick="closeDrawer()">Close</button>
+    <span style="font-size:10.5px;color:var(--muted)">Record detail</span>
   </div>
 </div>
 
@@ -837,13 +837,93 @@ function openQualityReportPanel(idx) {
     + '<div class="section-head">Report Parameters</div>'
     + '<div class="section-body">' + params + '</div></div>'
     + '<div style="padding:16px;display:flex;gap:8px">'
-    + '<button class="btn btn-navy" style="flex:1" onclick="showToast(\'Generating report...\',\'info\')">Generate Report</button>'
+    + '<button class="btn btn-navy" style="flex:1" onclick="runQualityReport(' + idx + ')">Run Report</button>'
     + '<button class="btn btn-outline" style="flex:1" onclick="showToast(\'Exporting to Excel...\',\'info\')">Export to Excel</button>'
     + '</div>'
     + '<div class="section-card">'
     + '<div class="section-head">About This Report</div>'
     + '<div class="section-body"><div class="field"><label>Description</label><div style="font-size:11px;color:var(--muted);line-height:1.5;padding:4px 0">' + r.desc + '</div></div></div></div>'
   );
+}
+
+// ══════════════════════════════════════════════════════════
+// TOAST NOTIFICATION
+// ══════════════════════════════════════════════════════════
+function showToast(msg, type) {
+  var existing = document.getElementById('qcToast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'qcToast';
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;color:#fff;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .3s;' +
+    (type === 'info' ? 'background:var(--navy)' : type === 'error' ? 'background:var(--red)' : 'background:var(--green)');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 2500);
+}
+
+// ══════════════════════════════════════════════════════════
+// RUN REPORT — generate basic filtered data view in drawer
+// ══════════════════════════════════════════════════════════
+function runQualityReport(idx) {
+  var r = QUALITY_REPORTS[idx]; if (!r) return;
+  var dateFrom = document.querySelector('#qcDrawer .drawer-body input[type="date"]:first-of-type');
+  var dateTo = document.querySelector('#qcDrawer .drawer-body input[type="date"]:last-of-type');
+  var from = dateFrom ? dateFrom.value : '';
+  var to = dateTo ? dateTo.value : '';
+
+  // Generate filtered report data based on report type
+  var reportHTML = '';
+  if (r.name.indexOf('Non-Conformance') >= 0) {
+    var rows = DEMO_NCR.filter(function(n) {
+      if (from && n.date < from) return false;
+      if (to && n.date > to) return false;
+      return true;
+    });
+    reportHTML = '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr style="background:#F0F4FA"><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">NCR#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">WO#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Severity</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Status</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Date</th></tr></thead><tbody>' +
+      rows.map(function(n) {
+        return '<tr><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + n.ncr + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + n.wo + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + severityBadge(n.severity) + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + ncrStatusBadge(n.status) + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + fmtDate(n.date) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+    if (!rows.length) reportHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">No records found for the selected date range.</div>';
+  } else if (r.name.indexOf('Repairs Within 40 Days') >= 0) {
+    var rows = DEMO_REWORK.filter(function(rw) {
+      if (from && rw.origComplete < from) return false;
+      if (to && rw.origComplete > to) return false;
+      return true;
+    });
+    reportHTML = '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr style="background:#F0F4FA"><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">RW#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">WO#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Serial#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Status</th></tr></thead><tbody>' +
+      rows.map(function(rw) {
+        return '<tr><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + rw.rw + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + rw.wo + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + rw.serial + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + reworkStatusBadge(rw.status) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+    if (!rows.length) reportHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">No records found for the selected date range.</div>';
+  } else if (r.name.indexOf('Defect Tracking') >= 0) {
+    var rows = DEMO_INSPECTIONS.filter(function(ins) {
+      if (from && ins.date < from) return false;
+      if (to && ins.date > to) return false;
+      return ins.result !== 'Pass';
+    });
+    reportHTML = '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr style="background:#F0F4FA"><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">WO#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Serial#</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Result</th><th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--navy)">Score</th></tr></thead><tbody>' +
+      rows.map(function(ins) {
+        return '<tr><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + ins.wo + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + ins.serial + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + resultBadge(ins.result) + '</td><td style="padding:5px 8px;border-bottom:1px solid var(--border);font-weight:700">' + ins.score + '</td></tr>';
+      }).join('') + '</tbody></table>';
+    if (!rows.length) reportHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">No defects found for the selected date range.</div>';
+  } else {
+    reportHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Report generated. ' + DEMO_INSPECTIONS.length + ' records processed.</div>';
+  }
+
+  // Find or create the results section in the drawer
+  var resultsCard = document.getElementById('reportResults');
+  if (!resultsCard) {
+    var card = document.createElement('div');
+    card.className = 'section-card';
+    card.id = 'reportResults';
+    card.innerHTML = '<div class="section-head">Report Results</div><div class="section-body" id="reportResultsBody" style="padding:0;max-height:300px;overflow-y:auto"></div>';
+    document.getElementById('drawerBody').appendChild(card);
+  }
+  document.getElementById('reportResultsBody').innerHTML = reportHTML;
+  showToast('Report generated', 'info');
 }
 
 // ══════════════════════════════════════════════════════════

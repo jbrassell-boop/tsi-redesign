@@ -230,27 +230,27 @@
       <!-- STAT STRIP -->
       <div class="stat-strip">
         <div class="stat-chip">
-          <div class="s-icon" style="background:#EFF6FF">📦</div>
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 4.5L8 1.5l6 3v7l-6 3-6-3z"/><path d="M2 4.5L8 7.5l6-3"/><line x1="8" y1="7.5" x2="8" y2="14.5"/></svg></div>
           <div class="s-data"><div class="s-val s-navy" id="ssItemCount">127</div><div class="s-lbl">TOTAL ITEMS</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#F0FDF4">✓</div>
+          <div class="s-icon" style="background:#F0FDF4"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="5.5 8 7 10 10.5 6"/></svg></div>
           <div class="s-data"><div class="s-val s-green" id="ssActiveCount">112</div><div class="s-lbl">ACTIVE</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#F8FAFF">—</div>
+          <div class="s-icon" style="background:#F8FAFF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="5" y1="8" x2="11" y2="8"/></svg></div>
           <div class="s-data"><div class="s-val s-muted" id="ssInactiveCount">15</div><div class="s-lbl">INACTIVE</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#EFF6FF">📄</div>
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10 1.5H4a1.5 1.5 0 0 0-1.5 1.5v10A1.5 1.5 0 0 0 4 14.5h8A1.5 1.5 0 0 0 13.5 13V5z"/><polyline points="10 1.5 10 5 13.5 5"/></svg></div>
           <div class="s-data"><div class="s-val s-blue">3</div><div class="s-lbl">OPEN POs</div></div>
         </div>
         <div class="stat-chip" id="ssLowStockChip">
-          <div class="s-icon" style="background:#FFFBEB">⚠</div>
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
           <div class="s-data"><div class="s-val s-amber" id="ssLowStockCount">4</div><div class="s-lbl">LOW STOCK</div></div>
         </div>
         <div class="stat-chip">
-          <div class="s-icon" style="background:#EFF6FF">📥</div>
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="8 2 8 11"/><polyline points="5 8 8 11 11 8"/><path d="M2.5 12v1.5h11V12"/></svg></div>
           <div class="s-data"><div class="s-val s-blue">6</div><div class="s-lbl">PENDING RECEIVES</div></div>
         </div>
         <div class="stat-chip" style="cursor:default" title="Inventory Turns (annualized)">
@@ -289,7 +289,7 @@
                 Low Stock
               </button>
               <button class="btn-xs btn-navy" onclick="document.getElementById('addItemModal').classList.add('open')">+ Add</button>
-              <button class="btn-xs btn-outline" style="border:1px solid var(--border-dk);background:#fff;color:var(--label)">Refresh</button>
+              <button class="btn-xs btn-outline" style="border:1px solid var(--border-dk);background:#fff;color:var(--label)" onclick="refreshInventory()">Refresh</button>
             </div>
           </div>
           <div class="split-left-list" id="itemList">
@@ -439,9 +439,9 @@
               <div class="sd-head">
                 <span class="tbl-title" id="sdTitle">DUR-B</span>
                 <div style="display:flex;gap:2px">
-                  <button class="sd-btn" onclick="document.getElementById('suppliersModal').classList.add('open')">Suppliers</button>
-                  <button class="sd-btn" onclick="document.getElementById('lotsModal').classList.add('open')">Lots</button>
-                  <button class="sd-btn" onclick="document.getElementById('buildModal').classList.add('open')">Build</button>
+                  <button class="sd-btn" onclick="openSizeModal('suppliersModal')">Suppliers</button>
+                  <button class="sd-btn" onclick="openSizeModal('lotsModal')">Lots</button>
+                  <button class="sd-btn" onclick="openSizeModal('buildModal')">Build</button>
                 </div>
               </div>
               <div class="sd-body">
@@ -1685,8 +1685,9 @@ function selectItem(name) {
   if (toggles[2]) toggles[2].checked = data.notRepair;
   if (toggles[3]) toggles[3].checked = data.noCount;
   if (toggles[4]) toggles[4].checked = data.skipPick;
-  const headerDiam = document.getElementById('headerDiam');
-  if (headerDiam) headerDiam.value = data.diameter || 'Small';
+  // Update diameter field via already-captured headerDiam reference
+  const headerDiamById = document.getElementById('headerDiam');
+  if (headerDiamById) headerDiamById.value = data.diameter || 'Small';
 
   // Rebuild sizes grid
   const tbody = document.querySelector('#sizeGrid tbody');
@@ -1709,10 +1710,10 @@ function selectItem(name) {
   // Update size count
   const sizeCount = document.querySelector('.sizes-grid-col .tab-count');
   if (sizeCount) sizeCount.textContent = data.sizes.length;
-  const pagInfo = document.querySelector('.sizes-grid-col .pagination-bar span');
-  if (pagInfo) pagInfo.textContent = '1–' + data.sizes.length + ' of ' + data.sizes.length;
-  const pageNav = document.getElementById('sizePageNav');
-  if (pageNav) pageNav.textContent = '/ 1';
+
+  // Reset size pagination
+  _sizePage = 1;
+  if (typeof paginateSizeGrid === 'function') paginateSizeGrid();
 
   // Auto-select first size
   const firstRow = tbody.querySelector('.size-row');
@@ -1898,25 +1899,39 @@ function toggleLowStockFilter() {
       row.style.display = '';
       return;
     }
-    const name = row.dataset.item;
-    const health = getItemHealth(name);
+    let health;
+    if (_liveMode) {
+      // API mode: look up stock health from cached API items
+      const key = row.dataset.key;
+      const apiItem = _apiItems.find(i => String(i.lInventoryKey) === String(key));
+      health = apiItem ? getStockHealth(apiItem) : 'green';
+    } else {
+      // Demo mode: look up from inventoryData
+      const name = row.dataset.item;
+      health = getItemHealth(name);
+    }
     row.style.display = (health === 'red' || health === 'amber') ? '' : 'none';
   });
 }
 
 // ═══════ BATCH SELECT — AUTO-SUGGEST & RUNNING TOTAL ═══════
 function autoSuggestQtys() {
+  // Columns: checkbox(0), Order Qty(1), Part Number(2), Vendor SKU(3),
+  //          Inventory Item(4), Size Description(5), Reorder Level(6),
+  //          Qty Per Unit(7), Unit Cost(8)
   const rows = document.querySelectorAll('#batchSelectModal .check-tbl tbody tr');
   rows.forEach(row => {
-    const curCell = row.cells[6]; // Current column
-    const reorderCell = row.cells[7]; // Reorder column
+    const reorderCell = row.cells[6]; // Reorder Level column
+    const qtyPerUnitCell = row.cells[7]; // Qty Per Unit column
     const qtyInp = row.querySelector('.qty-inp');
     const cb = row.querySelector('input[type=checkbox]');
-    if (!curCell || !reorderCell || !qtyInp) return;
-    const cur = parseInt(curCell.textContent) || 0;
+    if (!reorderCell || !qtyPerUnitCell || !qtyInp) return;
     const reorder = parseInt(reorderCell.textContent) || 0;
-    if (cur <= reorder) {
-      const suggest = reorder - cur + Math.ceil(reorder * 0.5); // reorder qty + 50% buffer
+    const qtyPerUnit = parseInt(qtyPerUnitCell.textContent) || 1;
+    if (reorder > 0) {
+      // Suggest enough units to reach reorder level + 50% buffer, rounded up to qty-per-unit multiples
+      const target = reorder + Math.ceil(reorder * 0.5);
+      const suggest = Math.max(1, Math.ceil(target / qtyPerUnit));
       qtyInp.value = suggest;
       qtyInp.classList.add('qty-suggested');
       if (cb) cb.checked = true;
@@ -1949,8 +1964,22 @@ function updateBatchTotal() {
   if (countEl) countEl.textContent = items;
 }
 
+// Wire up batch modal "Select All" header checkbox
+(function() {
+  const selectAllCb = document.querySelector('#batchSelectModal .check-tbl thead input[type=checkbox]');
+  if (selectAllCb) {
+    selectAllCb.addEventListener('change', function() {
+      const checked = this.checked;
+      document.querySelectorAll('#batchSelectModal .check-tbl tbody input[type=checkbox]').forEach(cb => {
+        cb.checked = checked;
+      });
+      updateBatchTotal();
+    });
+  }
+})();
+
 // Wire up batch modal checkboxes and qty inputs for running total
-document.querySelectorAll('#batchSelectModal .check-tbl input[type=checkbox]').forEach(cb => {
+document.querySelectorAll('#batchSelectModal .check-tbl tbody input[type=checkbox]').forEach(cb => {
   cb.addEventListener('change', updateBatchTotal);
 });
 document.querySelectorAll('#batchSelectModal .qty-inp').forEach(inp => {
@@ -2096,12 +2125,148 @@ function renderApiSizes(sizes, parentItem) {
   // Update size count
   const sizeCount = document.querySelector('.sizes-grid-col .tab-count');
   if (sizeCount) sizeCount.textContent = sizes.length;
-  const pagInfo = document.querySelector('.sizes-grid-col .pagination-bar span');
-  if (pagInfo) pagInfo.textContent = '1\u2013' + sizes.length + ' of ' + sizes.length;
+
+  // Reset size pagination
+  _sizePage = 1;
+  if (typeof paginateSizeGrid === 'function') paginateSizeGrid();
 
   // Auto-select first size
   const firstRow = tbody.querySelector('.size-row');
   if (firstRow) selectSizeRow(firstRow);
+}
+
+// ═══════ OPEN SIZE MODAL (Suppliers/Lots/Build) ═══════
+// Updates modal titles to show the currently selected size name
+function openSizeModal(modalId) {
+  const sizeName = document.getElementById('sdTitle')?.textContent || 'N/A';
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  const h3 = modal.querySelector('.modal-header h3');
+  if (h3) {
+    const prefix = modalId === 'suppliersModal' ? 'Suppliers' :
+                   modalId === 'lotsModal' ? 'Lot Tracking' : 'Build / Assembly';
+    h3.textContent = prefix + ' \u2014 ' + sizeName;
+  }
+  modal.classList.add('open');
+}
+
+// ═══════ DATA BADGE ═══════
+function showDataBadge(live) {
+  const b = document.getElementById('dataBadge');
+  if (!b) return;
+  b.style.display = 'inline-block';
+  if (live) {
+    b.textContent = 'Live Data';
+    b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0';
+  } else {
+    b.textContent = 'Demo Data';
+    b.style.background = '#FFFBEB'; b.style.color = '#92400E'; b.style.border = '1px solid #FDE68A';
+  }
+}
+
+// ═══════ PAGINATION — Item List ═══════
+let _itemPage = 1;
+let _itemPageSize = 50;
+
+function paginateItemList() {
+  const rows = Array.from(document.querySelectorAll('#itemList .item-row'));
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / _itemPageSize));
+  if (_itemPage > totalPages) _itemPage = totalPages;
+  const start = (_itemPage - 1) * _itemPageSize;
+  const end = start + _itemPageSize;
+  rows.forEach((row, i) => {
+    row.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+  // Update footer
+  const pageInput = document.querySelector('.split-left-footer .page-nav input');
+  if (pageInput) pageInput.value = _itemPage;
+  const pageTotal = document.getElementById('invPageTotal');
+  if (pageTotal) pageTotal.textContent = 'of ' + totalPages;
+}
+
+function wireItemPagination() {
+  const footer = document.querySelector('#itab-inventory .split-left-footer');
+  if (!footer) return;
+  const pageSel = document.getElementById('invPageSize');
+  if (pageSel) {
+    pageSel.addEventListener('change', function() {
+      _itemPageSize = parseInt(this.value) || 50;
+      _itemPage = 1;
+      paginateItemList();
+    });
+  }
+  const btns = footer.querySelectorAll('.page-nav button');
+  if (btns[0]) btns[0].addEventListener('click', function() { if (_itemPage > 1) { _itemPage--; paginateItemList(); } });
+  if (btns[1]) btns[1].addEventListener('click', function() {
+    const total = document.querySelectorAll('#itemList .item-row').length;
+    const totalPages = Math.max(1, Math.ceil(total / _itemPageSize));
+    if (_itemPage < totalPages) { _itemPage++; paginateItemList(); }
+  });
+  const pageInput = footer.querySelector('.page-nav input');
+  if (pageInput) {
+    pageInput.addEventListener('change', function() {
+      const total = document.querySelectorAll('#itemList .item-row').length;
+      const totalPages = Math.max(1, Math.ceil(total / _itemPageSize));
+      _itemPage = Math.max(1, Math.min(parseInt(this.value) || 1, totalPages));
+      paginateItemList();
+    });
+  }
+}
+
+// ═══════ PAGINATION — Sizes Grid ═══════
+let _sizePage = 1;
+const _sizePageSize = 25;
+
+function paginateSizeGrid() {
+  const rows = Array.from(document.querySelectorAll('#sizeGrid tbody .size-row'));
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / _sizePageSize));
+  if (_sizePage > totalPages) _sizePage = totalPages;
+  const start = (_sizePage - 1) * _sizePageSize;
+  const end = start + _sizePageSize;
+  rows.forEach((row, i) => {
+    row.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+  const pagInfo = document.querySelector('.sizes-grid-col .pagination-bar span');
+  if (pagInfo) pagInfo.textContent = (start + 1) + '\u2013' + Math.min(end, total) + ' of ' + total;
+  const pageNav = document.getElementById('sizePageNav');
+  if (pageNav) pageNav.textContent = '/ ' + totalPages;
+}
+
+function wireSizePagination() {
+  const bar = document.querySelector('.sizes-grid-col .pagination-bar');
+  if (!bar) return;
+  const btns = bar.querySelectorAll('button');
+  if (btns[0]) btns[0].addEventListener('click', function() { if (_sizePage > 1) { _sizePage--; paginateSizeGrid(); } });
+  if (btns[1]) btns[1].addEventListener('click', function() {
+    const total = document.querySelectorAll('#sizeGrid tbody .size-row').length;
+    const totalPages = Math.max(1, Math.ceil(total / _sizePageSize));
+    if (_sizePage < totalPages) { _sizePage++; paginateSizeGrid(); }
+  });
+  const pageInput = bar.querySelector('input[type=number]');
+  if (pageInput) {
+    pageInput.addEventListener('change', function() {
+      const total = document.querySelectorAll('#sizeGrid tbody .size-row').length;
+      const totalPages = Math.max(1, Math.ceil(total / _sizePageSize));
+      _sizePage = Math.max(1, Math.min(parseInt(this.value) || 1, totalPages));
+      paginateSizeGrid();
+    });
+  }
+}
+
+// ═══════ REFRESH BUTTON ═══════
+function refreshInventory() {
+  _itemPage = 1;
+  _sizePage = 1;
+  if (_liveMode) {
+    initPage();
+  } else {
+    buildDemoItemList();
+    const firstDemoName = Object.keys(inventoryData).sort()[0];
+    if (firstDemoName) selectItem(firstDemoName);
+    paginateItemList();
+  }
 }
 
 // ── Page Init ─────────────────────────────────────────
@@ -2115,8 +2280,9 @@ async function initPage() {
     if (items.length > 0) {
       _liveMode = true;
       _apiItems = items;
-      API.UI.updateDemoBadge('api');
+      showDataBadge(true);
       populateItemList(items);
+      paginateItemList();
       // Auto-select first item
       const first = items[0];
       await selectApiItem(first.lInventoryKey, first.sItemDescription);
@@ -2129,13 +2295,16 @@ async function initPage() {
 
   // Fallback to demo data
   _liveMode = false;
-  API.UI.updateDemoBadge('demo');
+  showDataBadge(false);
   buildDemoItemList();
+  paginateItemList();
   // Auto-select first item
   const firstDemoName = Object.keys(inventoryData).sort()[0];
   if (firstDemoName) selectItem(firstDemoName);
 }
 
+wireItemPagination();
+wireSizePagination();
 initPage();
 
 // ═══════════════════════════════════════════════════════
@@ -2163,12 +2332,22 @@ initPage();
     const showInactive = this.checked;
     document.querySelectorAll('#itemList .item-row').forEach(row => {
       const name = row.dataset.item;
-      const data = inventoryData[name];
-      if (!data) return;
+      let isActive = true;
+      if (_liveMode) {
+        // API mode: look up active status from cached API items
+        const key = row.dataset.key;
+        const apiItem = _apiItems.find(i => String(i.lInventoryKey) === String(key));
+        isActive = apiItem ? apiItem.bActive !== false : true;
+      } else {
+        // Demo mode: look up from inventoryData
+        const data = inventoryData[name];
+        if (!data) return;
+        isActive = data.active;
+      }
       // When toggle OFF (default): show all items (active + inactive)
       // When toggle ON: show only inactive items
       if (showInactive) {
-        row.style.display = data.active ? 'none' : '';
+        row.style.display = isActive ? 'none' : '';
       } else {
         row.style.display = '';
       }

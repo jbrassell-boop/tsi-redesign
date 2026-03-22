@@ -72,8 +72,8 @@
     .ctx-item.danger:hover{background:#FEF2F2}
 
     /* ── Slide-Out Drawer ── */
-    .visit-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
-    .visit-drawer.open{transform:translateX(0)}
+    .visit-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:#fff;border-left:1.5px solid var(--border-dk);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .visit-drawer.open{transform:translateX(0);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12)}
     .drawer-header{padding:14px 18px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .drawer-header .dh-info{min-width:0}
     .drawer-header .dh-sn{font-size:15px;font-weight:800;letter-spacing:-.2px}
@@ -260,14 +260,13 @@
 
 <!-- RIGHT-CLICK CONTEXT MENU -->
 <div class="ctx-menu" id="ctxMenu">
-  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Details</div>
-  <div class="ctx-item" onclick="ctxAction('edit')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Visit</div>
+  <div class="ctx-item" onclick="ctxAction('view')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Visit</div>
   <div class="ctx-sep"></div>
   <div class="ctx-item" onclick="ctxAction('invoice')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="ctxInvoiceLabel">Mark as Invoiced</span></div>
   <div class="ctx-item" onclick="ctxAction('print')"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Invoice</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item danger" onclick="ctxAction('void')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Void Visit</div>
-  <div class="ctx-item danger" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete Visit</div>
+  <div class="ctx-item danger" id="ctxVoid" onclick="ctxAction('void')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Void Visit</div>
+  <div class="ctx-item danger" id="ctxDelete" onclick="ctxAction('delete')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete Visit</div>
 </div>
 
 <!-- DRAWER OVERLAY -->
@@ -389,10 +388,7 @@
   </div>
 
   <div class="drawer-footer">
-    <span id="drawerSaveStatus"></span>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-outline" onclick="closeDrawer()">Close</button>
-    </div>
+    <span id="drawerSaveStatus" style="font-size:10.5px;color:var(--muted)"></span>
   </div>
 </div>
 
@@ -657,7 +653,15 @@ function populateTechFilter() {
 }
 
 function populateModalDropdowns() {
-  const clients = [...new Set(allVisits.map(v => v.clientName))].sort();
+  // Pull clients from full mock-db if available, otherwise fall back to existing visits
+  var clients;
+  if (typeof MockDB !== 'undefined') {
+    var allClients = MockDB.getAll('clients');
+    clients = allClients.map(c => c.sClientName || c.name || '').filter(Boolean);
+    clients = [...new Set(clients)].sort();
+  } else {
+    clients = [...new Set(allVisits.map(v => v.clientName))].sort();
+  }
   document.getElementById('mClient').innerHTML = '<option value="">-- Select Client --</option>' +
     clients.map(c => '<option value="' + c + '">' + c + '</option>').join('');
   const techs = [...new Set(allVisits.map(v => v.techName))].sort();
@@ -668,7 +672,23 @@ function populateModalDropdowns() {
 
 function onModalClientChange() {
   const client = document.getElementById('mClient').value;
-  const depts = [...new Set(allVisits.filter(v => v.clientName === client).map(v => v.deptName))].sort();
+  var depts;
+  if (typeof MockDB !== 'undefined') {
+    var allClients = MockDB.getAll('clients');
+    var clientObj = allClients.find(c => (c.sClientName || c.name) === client);
+    if (clientObj) {
+      var allDepts = MockDB.getAll('departments');
+      var clientDepts = allDepts.filter(d => d.lClientKey === clientObj.lClientKey);
+      depts = clientDepts.map(d => d.sDepartmentName || d.name || '').filter(Boolean);
+      depts = [...new Set(depts)].sort();
+    } else {
+      depts = [];
+    }
+  }
+  // Fall back to existing visits if no mock-db match
+  if (!depts || !depts.length) {
+    depts = [...new Set(allVisits.filter(v => v.clientName === client).map(v => v.deptName))].sort();
+  }
   document.getElementById('mDept').innerHTML = '<option value="">-- Select Department --</option>' +
     depts.map(d => '<option value="' + d + '">' + d + '</option>').join('');
 }
@@ -938,14 +958,37 @@ function generateOnsitePdf(visit) {
   E.savePDF(doc, 'OnsiteService_' + (visit.invoiceNum || 'draft') + '.pdf');
 }
 
+function _inlineCtxConfirm(id, label, svgMarkup) {
+  const el = document.getElementById(id);
+  if (!el) return false;
+  if (!el._confirming) {
+    el._confirming = true; el._origHTML = el.innerHTML;
+    el.innerHTML = svgMarkup + 'Sure?';
+    el.style.background = '#dc3545'; el.style.color = '#fff';
+    setTimeout(() => { if (el._confirming) { el._confirming = false; el.innerHTML = el._origHTML; el.style.background = ''; el.style.color = ''; } }, 3000);
+    return false;
+  }
+  el._confirming = false; el.innerHTML = el._origHTML; el.style.background = ''; el.style.color = '';
+  return true;
+}
+
 function ctxAction(action) {
+  if ((action === 'void' || action === 'delete') &&
+      !_inlineCtxConfirm(
+        action === 'void' ? 'ctxVoid' : 'ctxDelete', '',
+        action === 'void'
+          ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+          : '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+      )) {
+    event.stopPropagation(); // keep menu open
+    return;
+  }
   document.getElementById('ctxMenu').style.display = 'none';
   if (!ctxVisitKey) return;
   const visit = allVisits.find(v => v.key === ctxVisitKey);
   if (!visit) return;
   switch(action) {
     case 'view': openDrawer(ctxVisitKey); break;
-    case 'edit': openDrawer(ctxVisitKey); break;
     case 'invoice':
       if (visit.status !== 'Invoiced') {
         visit.status = 'Invoiced';
@@ -955,16 +998,12 @@ function ctxAction(action) {
       break;
     case 'print': generateOnsitePdf(visit); break;
     case 'void':
-      if (confirm('Void visit ' + visit.invoiceNum + '? This cannot be undone.')) {
-        visit.status = 'Void'; runPipeline();
-      }
+      visit.status = 'Void'; runPipeline();
       break;
     case 'delete':
-      if (confirm('Delete visit ' + visit.invoiceNum + '? This cannot be undone.')) {
-        allVisits = allVisits.filter(v => v.key !== ctxVisitKey);
-        if (selectedVisitKey === ctxVisitKey) closeDrawer();
-        runPipeline();
-      }
+      allVisits = allVisits.filter(v => v.key !== ctxVisitKey);
+      if (selectedVisitKey === ctxVisitKey) closeDrawer();
+      runPipeline();
       break;
   }
 }
@@ -1169,13 +1208,36 @@ function autoSave() {
   var visit = allVisits.find(function(v){return v.key === selectedVisitKey;});
   if (!visit) return;
   document.getElementById('drawerSaveStatus').innerHTML = '<span class="save-saving">Saving...</span>';
-  // Simulate save
+  // Save ALL editable fields
+  visit.salesRep = document.getElementById('fSalesRep').value;
+  visit.paymentTerms = document.getElementById('fPaymentTerms').value;
+  // Save bill-to address
+  var billName = document.getElementById('fBillName1').value.trim();
+  var billAddr = document.getElementById('fBillAddr1').value.trim();
+  var billCity = document.getElementById('fBillCity').value.trim();
+  var billState = document.getElementById('fBillState').value.trim().toUpperCase();
+  var billZip = document.getElementById('fBillZip').value.trim();
+  var billLine3 = billCity + (billState ? ', ' + billState : '') + (billZip ? ' ' + billZip : '');
+  visit.billTo = [billName, billAddr, billLine3].filter(Boolean).join('\n');
+  // Save ship-to address
+  if (document.getElementById('fShipSameBill').checked) {
+    visit.shipTo = visit.billTo;
+  } else {
+    var shipName = document.getElementById('fShipName1').value.trim();
+    var shipAddr = document.getElementById('fShipAddr1').value.trim();
+    var shipCity = document.getElementById('fShipCity').value.trim();
+    var shipState = document.getElementById('fShipState').value.trim().toUpperCase();
+    var shipZip = document.getElementById('fShipZip').value.trim();
+    var shipLine3 = shipCity + (shipState ? ', ' + shipState : '') + (shipZip ? ' ' + shipZip : '');
+    visit.shipTo = [shipName, shipAddr, shipLine3].filter(Boolean).join('\n');
+  }
   visit.notes = document.getElementById('fNotes').value;
   setTimeout(function() {
     isDirty = false;
     var now = new Date();
     document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   }, 400);
+  runPipeline();
 }
 
 // ── Add Modal ───────────────────────────────────────────

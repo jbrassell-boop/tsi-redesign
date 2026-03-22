@@ -454,8 +454,22 @@ const API = (() => {
     updateDemoBadge: function(status) {
       const badge = document.getElementById('dataBadge');
       if (!badge) return;
-      badge.className = 'data-badge demo';
-      badge.textContent = 'Demo Data';
+      if (status === 'api' || status === 'live') {
+        badge.className = 'data-badge live';
+        badge.textContent = 'Live Data';
+        badge.style.background = '#E8F5E9';
+        badge.style.color = '#2E7D32';
+      } else if (status === 'mock') {
+        badge.className = 'data-badge mock';
+        badge.textContent = 'Mock Data';
+        badge.style.background = '#EFF6FF';
+        badge.style.color = '#1D4ED8';
+      } else {
+        badge.className = 'data-badge demo';
+        badge.textContent = 'Demo Data';
+        badge.style.background = '#FFFBEB';
+        badge.style.color = '#D97706';
+      }
     },
     setupNewOrderDropdown: function() {
       document.addEventListener('click', function(e) {

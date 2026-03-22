@@ -58,6 +58,19 @@
     .cond-good{background:#EFF6FF;color:#1D4ED8}
     .cond-fair{background:#FFFBEB;color:var(--amber)}
     .cond-poor{background:#FEF2F2;color:var(--red)}
+
+    /* SORTABLE HEADERS */
+    .tbl-wrap th{cursor:pointer;transition:background .1s;user-select:none}
+    .tbl-wrap th:hover{background:linear-gradient(to bottom,#B0CCE4,#D0E0F0)}
+    .tbl-wrap th .sort{font-size:9px;opacity:.5;margin-left:3px}
+    .tbl-wrap th.sorted .sort{opacity:1}
+    .tbl-wrap th.sorted.asc .sort::after{content:'\25B2'}
+    .tbl-wrap th.sorted.desc .sort::after{content:'\25BC'}
+
+    /* STAT CHIP INTERACTIVE */
+    .stat-chip{cursor:pointer;transition:background .12s,outline-color .12s}
+    .stat-chip:hover{background:var(--bg)}
+    .stat-chip.active-chip{outline:2.5px solid var(--navy);outline-offset:-2px;background:#ECFEFF}
   </style>
 </head>
 <body>
@@ -80,24 +93,24 @@
 
     <!-- STAT STRIP -->
     <div class="stat-strip" id="acqKpiStrip">
-      <div class="stat-chip">
+      <div class="stat-chip active-chip" id="chipInHouse" onclick="acqChipFilter('inhouse')">
         <div class="s-icon" style="background:#E3F2FD;color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
         <div class="s-data"><div class="s-val s-navy" id="kpiInHouse">0</div><div class="s-lbl">In-House</div></div>
       </div>
-      <div class="stat-chip">
-        <div class="s-icon" style="background:#FFFBEB;color:var(--amber)">↺</div>
+      <div class="stat-chip" id="chipConsigned" onclick="acqChipFilter('consigned')">
+        <div class="s-icon" style="background:#FFFBEB;color:var(--amber)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="1 3 1 7 5 7"/><path d="M2.5 10A5.5 5.5 0 1 0 4 4.5L1 7"/></svg></div>
         <div class="s-data"><div class="s-val s-amber" id="kpiConsigned">0</div><div class="s-lbl">Consigned</div></div>
       </div>
-      <div class="stat-chip">
-        <div class="s-icon" style="background:#F0FDF4;color:var(--green)">✓</div>
+      <div class="stat-chip" id="chipSold" onclick="acqChipFilter('sold')">
+        <div class="s-icon" style="background:#F0FDF4;color:var(--green)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></div>
         <div class="s-data"><div class="s-val s-green" id="kpiSold">0</div><div class="s-lbl">Sold</div></div>
       </div>
-      <div class="stat-chip">
-        <div class="s-icon" style="background:#E3EAF6;color:var(--navy)">$</div>
+      <div class="stat-chip" id="chipInHouseCost" onclick="acqChipFilter('inhouse')">
+        <div class="s-icon" style="background:#E3EAF6;color:var(--navy)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
         <div class="s-data"><div class="s-val s-navy" id="kpiInHouseCost">$0</div><div class="s-lbl">In-House Value</div></div>
       </div>
-      <div class="stat-chip">
-        <div class="s-icon" style="background:#F0FDF4;color:var(--green)">$</div>
+      <div class="stat-chip" id="chipSoldRevenue" onclick="acqChipFilter('sold')">
+        <div class="s-icon" style="background:#F0FDF4;color:var(--green)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
         <div class="s-data"><div class="s-val s-green" id="kpiSoldRevenue">$0</div><div class="s-lbl">Sold Revenue</div></div>
       </div>
     </div>
@@ -118,16 +131,16 @@
           <table>
             <thead>
               <tr>
-                <th>Serial #</th>
-                <th>Model / Type</th>
-                <th>Supplier</th>
-                <th>PO #</th>
-                <th>Department</th>
-                <th>Client</th>
-                <th>Date Acquired</th>
-                <th>PO Date</th>
-                <th>Condition</th>
-                <th style="text-align:right">Cost</th>
+                <th data-sort-col="sSerialNumber" onclick="sortAcqColumn('sSerialNumber')">Serial # <span class="sort"></span></th>
+                <th data-sort-col="sScopeTypeDesc" onclick="sortAcqColumn('sScopeTypeDesc')">Model / Type <span class="sort"></span></th>
+                <th data-sort-col="sSupplierName" onclick="sortAcqColumn('sSupplierName')">Supplier <span class="sort"></span></th>
+                <th data-sort-col="sPONumber" onclick="sortAcqColumn('sPONumber')">PO # <span class="sort"></span></th>
+                <th data-sort-col="sDepartmentName" onclick="sortAcqColumn('sDepartmentName')">Department <span class="sort"></span></th>
+                <th data-sort-col="sClientName" onclick="sortAcqColumn('sClientName')">Client <span class="sort"></span></th>
+                <th data-sort-col="dtAcquiredDate" onclick="sortAcqColumn('dtAcquiredDate')">Date Acquired <span class="sort"></span></th>
+                <th data-sort-col="dtPODate" onclick="sortAcqColumn('dtPODate')">PO Date <span class="sort"></span></th>
+                <th data-sort-col="psCondition" onclick="sortAcqColumn('psCondition')">Condition <span class="sort"></span></th>
+                <th style="text-align:right" data-sort-col="pnCost" onclick="sortAcqColumn('pnCost')">Cost <span class="sort"></span></th>
               </tr>
             </thead>
             <tbody id="inhouseBody"></tbody>
@@ -156,16 +169,16 @@
           <table>
             <thead>
               <tr>
-                <th>Serial #</th>
-                <th>Model / Type</th>
-                <th>Supplier</th>
-                <th>PO #</th>
-                <th>Department</th>
-                <th>Client</th>
-                <th>Consign Date</th>
-                <th>PO Date</th>
-                <th>Condition</th>
-                <th style="text-align:right">Cost</th>
+                <th data-sort-col="sSerialNumber" onclick="sortAcqColumn('sSerialNumber')">Serial # <span class="sort"></span></th>
+                <th data-sort-col="sScopeTypeDesc" onclick="sortAcqColumn('sScopeTypeDesc')">Model / Type <span class="sort"></span></th>
+                <th data-sort-col="sSupplierName" onclick="sortAcqColumn('sSupplierName')">Supplier <span class="sort"></span></th>
+                <th data-sort-col="sPONumber" onclick="sortAcqColumn('sPONumber')">PO # <span class="sort"></span></th>
+                <th data-sort-col="sDepartmentName" onclick="sortAcqColumn('sDepartmentName')">Department <span class="sort"></span></th>
+                <th data-sort-col="sClientName" onclick="sortAcqColumn('sClientName')">Client <span class="sort"></span></th>
+                <th data-sort-col="dtConsignDate" onclick="sortAcqColumn('dtConsignDate')">Consign Date <span class="sort"></span></th>
+                <th data-sort-col="dtPODate" onclick="sortAcqColumn('dtPODate')">PO Date <span class="sort"></span></th>
+                <th data-sort-col="psCondition" onclick="sortAcqColumn('psCondition')">Condition <span class="sort"></span></th>
+                <th style="text-align:right" data-sort-col="pnCost" onclick="sortAcqColumn('pnCost')">Cost <span class="sort"></span></th>
               </tr>
             </thead>
             <tbody id="consignedBody"></tbody>
@@ -209,12 +222,12 @@
           <table>
             <thead>
               <tr>
-                <th>Serial #</th>
-                <th>Model</th>
-                <th>Client</th>
-                <th>Sale Date</th>
-                <th style="text-align:right">Sale Price</th>
-                <th>Buyer</th>
+                <th data-sort-col="sSerialNumber" onclick="sortAcqColumn('sSerialNumber')">Serial # <span class="sort"></span></th>
+                <th data-sort-col="sScopeTypeDesc" onclick="sortAcqColumn('sScopeTypeDesc')">Model <span class="sort"></span></th>
+                <th data-sort-col="sClientName" onclick="sortAcqColumn('sClientName')">Client <span class="sort"></span></th>
+                <th data-sort-col="dtSaleDate" onclick="sortAcqColumn('dtSaleDate')">Sale Date <span class="sort"></span></th>
+                <th style="text-align:right" data-sort-col="pnSalePrice" onclick="sortAcqColumn('pnSalePrice')">Sale Price <span class="sort"></span></th>
+                <th data-sort-col="psBuyer" onclick="sortAcqColumn('psBuyer')">Buyer <span class="sort"></span></th>
               </tr>
             </thead>
             <tbody id="soldBody"></tbody>
@@ -243,6 +256,55 @@
 
   // ── Constants ─────────────────────────────────────────────────
   const PAGE_SIZE = 50;
+  let acqSortCol = null, acqSortDir = 'asc';
+
+  // ── Sort helper ──────────────────────────────────────────────
+  function sortRows(rows, col, dir) {
+    if (!col) return rows;
+    var d = dir === 'asc' ? 1 : -1;
+    return rows.slice().sort(function(a, b) {
+      var va = a[col], vb = b[col];
+      if (va == null) va = '';
+      if (vb == null) vb = '';
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * d;
+      return String(va).localeCompare(String(vb)) * d;
+    });
+  }
+
+  function sortAcqColumn(col) {
+    if (acqSortCol === col) {
+      acqSortDir = acqSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      acqSortCol = col;
+      acqSortDir = 'asc';
+    }
+    state[activeTab].page = 1;
+    renderTab(activeTab);
+    updateAcqSortHeaders();
+  }
+  window.sortAcqColumn = sortAcqColumn;
+
+  function updateAcqSortHeaders() {
+    document.querySelectorAll('#mv-' + activeTab + ' th').forEach(function(th) {
+      th.classList.remove('sorted', 'asc', 'desc');
+      if (th.dataset.sortCol === acqSortCol) th.classList.add('sorted', acqSortDir);
+    });
+  }
+
+  // ── Service Location filter ─────────────────────────────────
+  function changeServiceLocation() {
+    ['inhouse', 'consigned', 'sold'].forEach(function(tab) {
+      var searchId = tab === 'inhouse' ? 'inhouseSearch' : tab === 'consigned' ? 'consignedSearch' : 'soldSearch';
+      applyFilter(tab, document.getElementById(searchId).value);
+    });
+    updateAcqKPIs();
+  }
+  window.changeServiceLocation = changeServiceLocation;
+
+  function getSelectedLocation() {
+    var el = document.getElementById('svcLocation');
+    return el ? el.value : '';
+  }
 
   // ── Demo data ─────────────────────────────────────────────────
   const demoInHouse = [
@@ -362,10 +424,25 @@
     document.getElementById('kpiSoldRevenue').textContent = '$' + slRev.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
   }
 
+  // ── Chip filter (navigate to tab) ────────────────────────────
+  function acqChipFilter(tab) {
+    document.querySelectorAll('#acqKpiStrip .stat-chip').forEach(function(c) { c.classList.remove('active-chip'); });
+    var chipMap = { inhouse:'chipInHouse', consigned:'chipConsigned', sold:'chipSold' };
+    var el = document.getElementById(chipMap[tab]);
+    if (el) el.classList.add('active-chip');
+    var mtab = document.querySelector('.mtab[onclick*="' + tab + '"]') ||
+               document.querySelectorAll('.mtab')[tab === 'inhouse' ? 0 : tab === 'consigned' ? 1 : 2];
+    window.switchTab(tab, mtab);
+  }
+  window.acqChipFilter = acqChipFilter;
+
   function renderTab(tab) {
     const s = state[tab];
-    const slice = s.filtered.slice((s.page - 1) * PAGE_SIZE, s.page * PAGE_SIZE);
+    // Apply sort if set
+    var sorted = acqSortCol ? sortRows(s.filtered, acqSortCol, acqSortDir) : s.filtered;
+    const slice = sorted.slice((s.page - 1) * PAGE_SIZE, s.page * PAGE_SIZE);
 
+    updateAcqSortHeaders();
     if (tab === 'inhouse') {
       renderInhouse(slice);
       buildPagination('inhouse',
@@ -448,10 +525,15 @@
   function applyFilter(tab, q) {
     const s = state[tab];
     q = (q || '').toLowerCase().trim();
+    var loc = getSelectedLocation();
+    var base = s.rows;
+    if (loc) {
+      base = base.filter(function(r) { return (r.sLocation || r.psLocationCode || '') === loc; });
+    }
     if (!q) {
-      s.filtered = s.rows.slice();
+      s.filtered = base.slice();
     } else {
-      s.filtered = s.rows.filter(function (r) {
+      s.filtered = base.filter(function (r) {
         return (
           (r.sSerialNumber  || r.psSerialNumber  || '').toLowerCase().includes(q) ||
           (r.sScopeTypeDesc || r.sModelDesc      || r.sModel || '').toLowerCase().includes(q) ||

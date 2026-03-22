@@ -470,7 +470,7 @@
         <span class="save-icon" id="saveIcon">&#9679;</span><span id="saveText">Ready</span>
       </span>
       <span style="font-size:10px;color:var(--muted);margin:0 8px" id="ssModified"></span>
-      <button class="btn btn-danger" onclick="confirmDeleteRepair()" style="gap:4px;height:26px;font-size:11px;padding:0 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
+      <button class="btn btn-danger" onclick="confirmDeleteRepair(this)" style="gap:4px;height:26px;font-size:11px;padding:0 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
     </div>
 
     <!-- DETAIL PANEL (full width) -->
@@ -1591,7 +1591,7 @@
       </div>
 
       <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;gap:6px">
-        <button class="btn btn-navy" onclick="closeAmendment()">Close Amendment</button>
+        <button class="btn btn-navy" onclick="closeAmendment(this)">Close Amendment</button>
       </div>
     </div>
   </div>
@@ -5171,10 +5171,16 @@ function syncFormToRepair() {
 function getSelectVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
 // ── Delete Repair ──
-async function confirmDeleteRepair() {
+async function confirmDeleteRepair(btn) {
   if (!_currentRepair || !_currentRepair.lRepairKey) { showToast('No repair loaded'); return; }
   const wo = _currentRepair.sWorkOrderNumber || _currentRepair.lRepairKey;
-  if (!confirm('Delete work order ' + wo + '? This cannot be undone.')) return;
+  if (btn && !btn._confirming) {
+    btn._confirming = true; btn._origText = btn.innerHTML; btn._origBg = btn.style.background;
+    btn.innerHTML = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+    setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.innerHTML = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
+    return;
+  }
+  if (btn) { btn._confirming = false; }
   try {
     if (_liveMode && _currentRepair.lRepairKey > 0) {
       await API.deleteRepair(_currentRepair.lRepairKey);
@@ -5234,7 +5240,7 @@ function renderSlips() {
       + '<td>' + esc(s.reason || '') + '</td>'
       + '<td>' + esc(techName ? techName.sTechName : '—') + '</td>'
       + '<td><span style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + statusColor + '">' + esc(status) + '</span></td>'
-      + '<td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="event.stopPropagation();removeSlip(' + i + ')">&times;</button></td>'
+      + '<td><button class="btn btn-outline" style="height:20px;font-size:9px;padding:0 6px" onclick="event.stopPropagation();removeSlip(this,' + i + ')">&times;</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -5319,8 +5325,14 @@ function markSlipComplete() {
   showToast('Slip marked complete');
 }
 
-function removeSlip(idx) {
-  if (!confirm('Delete slip US-' + (idx+1) + '?')) return;
+function removeSlip(btn, idx) {
+  if (!btn._confirming) {
+    btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
+    btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff'; btn.style.borderColor = '#dc3545';
+    setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; btn.style.borderColor = ''; } }, 3000);
+    return;
+  }
+  btn._confirming = false;
   _updateSlips.splice(idx, 1);
   _selectedSlipIdx = -1;
   serializeSlips();
@@ -5524,10 +5536,17 @@ function removeAmendItem(idx) {
   renderAmendments();
 }
 
-function closeAmendment() {
+function closeAmendment(btn) {
   if (!_activeAmendment) return;
   if (!_activeAmendment.items.length) {
-    if (!confirm('No items added. Discard this amendment?')) return;
+    // Inline "Sure?" confirm for discard
+    if (btn && !btn._confirming) {
+      btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
+      btn.textContent = 'Sure? Discard'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+      setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
+      return;
+    }
+    if (btn) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; }
     _activeAmendment = null;
     serializeAmendments();
     renderAmendments();
@@ -5544,15 +5563,35 @@ function closeAmendment() {
   updateAmendPanels();
   showToast('Amendment closed — ' + _amendments[_amendments.length-1].items.length + ' item(s) amended');
 
-  // Prompt: Reset Approval Date?
-  if (confirm('Reset Approval Date?\n\nOK = revert to quoting stage (new Requisition needed)\nCancel = continue without resetting')) {
+  // Modal: Reset Approval Date?
+  _showResetApprovalModal();
+}
+
+function _showResetApprovalModal() {
+  let overlay = document.getElementById('resetApprovalOverlay');
+  if (overlay) { overlay.style.display = 'flex'; return; }
+  overlay = document.createElement('div');
+  overlay.id = 'resetApprovalOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:8px;padding:24px 28px;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.18);font-family:inherit">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:var(--navy,#1B2A4A)">Reset Approval Date?</h3>'
+    + '<p style="margin:0 0 18px;font-size:12.5px;color:#555;line-height:1.5">This will revert to the quoting stage. A new Requisition will be needed.</p>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button id="resetApprNo" class="btn btn-outline" style="font-size:11px;padding:5px 14px">Keep Date</button>'
+    + '<button id="resetApprYes" class="btn btn-navy" style="font-size:11px;padding:5px 14px;background:#dc3545;border-color:#dc3545">Reset Date</button>'
+    + '</div></div>';
+  document.body.appendChild(overlay);
+  document.getElementById('resetApprNo').onclick = function() { overlay.style.display = 'none'; };
+  document.getElementById('resetApprYes').onclick = function() {
+    overlay.style.display = 'none';
     if (_currentRepair) {
       _currentRepair.dtAprRecvd = null;
       if (document.getElementById('fRecvdApproval')) document.getElementById('fRecvdApproval').value = '';
       markDirty();
       showToast('Approval date reset — send new Requisition');
     }
-  }
+  };
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.style.display = 'none'; };
 }
 
 function serializeAmendments() {
@@ -5635,13 +5674,34 @@ function logDefect() {
 
 function resolveDefect(idx) {
   if (!_defects[idx]) return;
-  const notes = prompt('Resolution notes (optional):');
-  _defects[idx].resolved = true;
-  _defects[idx].resolvedAt = new Date().toISOString();
-  _defects[idx].resolvedNotes = notes || '';
-  serializeDefects();
-  renderDefects();
-  showToast('Defect resolved');
+  let overlay = document.getElementById('resolveDefectOverlay');
+  if (overlay) overlay.remove();
+  overlay = document.createElement('div');
+  overlay.id = 'resolveDefectOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:8px;padding:24px 28px;max-width:380px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.18);font-family:inherit">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:var(--navy,#1B2A4A)">Resolve Defect</h3>'
+    + '<label style="font-size:11px;color:#555;font-weight:500">Resolution notes <span style="color:var(--muted)">(optional)</span></label>'
+    + '<input id="resolveDefectNotes" type="text" style="width:100%;margin:6px 0 16px;padding:7px 10px;border:1px solid var(--border,#D1D5DB);border-radius:5px;font-size:12.5px;font-family:inherit;box-sizing:border-box" placeholder="Enter notes...">'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button id="resolveDefectCancel" class="btn btn-outline" style="font-size:11px;padding:5px 14px">Cancel</button>'
+    + '<button id="resolveDefectSubmit" class="btn btn-navy" style="font-size:11px;padding:5px 14px">Resolve</button>'
+    + '</div></div>';
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('resolveDefectNotes').focus(), 50);
+  document.getElementById('resolveDefectCancel').onclick = function() { overlay.remove(); };
+  document.getElementById('resolveDefectSubmit').onclick = function() {
+    const notes = document.getElementById('resolveDefectNotes').value;
+    overlay.remove();
+    _defects[idx].resolved = true;
+    _defects[idx].resolvedAt = new Date().toISOString();
+    _defects[idx].resolvedNotes = notes || '';
+    serializeDefects();
+    renderDefects();
+    showToast('Defect resolved');
+  };
+  document.getElementById('resolveDefectNotes').onkeydown = function(e) { if (e.key === 'Enter') document.getElementById('resolveDefectSubmit').click(); };
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 }
 
 function hasUnresolvedDefects() {

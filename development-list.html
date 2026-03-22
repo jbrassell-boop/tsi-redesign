@@ -117,6 +117,11 @@
     .btn-save:disabled{opacity:.5;cursor:not-allowed}
     .req{color:var(--red)}
 
+    /* SORT ARROWS */
+    th[data-sort]:hover{background:linear-gradient(to bottom,#B0CCE4,#D0E0F0)}
+    th[data-sort] .sort-arrow{font-size:9px;opacity:.3;margin-left:2px}
+    th[data-sort].sorted .sort-arrow{opacity:1}
+
     /* TOAST */
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;pointer-events:none}
     .toast.show{opacity:1}
@@ -188,11 +193,11 @@
               <thead>
                 <tr>
                   <th class="col-num">#</th>
-                  <th>Title</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Target</th>
-                  <th>Assignee</th>
+                  <th data-sort="title" style="cursor:pointer">Title <span class="sort-arrow"></span></th>
+                  <th data-sort="priority" style="cursor:pointer">Priority <span class="sort-arrow"></span></th>
+                  <th data-sort="status" style="cursor:pointer">Status <span class="sort-arrow"></span></th>
+                  <th data-sort="target" style="cursor:pointer">Target <span class="sort-arrow"></span></th>
+                  <th data-sort="assignee" style="cursor:pointer">Assignee <span class="sort-arrow"></span></th>
                 </tr>
               </thead>
               <tbody id="itemTableBody">
@@ -370,6 +375,8 @@ let PRIORITIES   = [];
 let FILTERED     = [];
 let SELECTED_ID  = null;
 let IS_DEMO      = false;
+let sortCol      = null;
+let sortDir      = 'asc';
 
 // ═══════════════════════════════════════
 //  DEMO DATA
@@ -382,9 +389,10 @@ const demoStatuses = [
 ];
 
 const demoPriorities = [
-  {plToDoPriorityKey:1, psPriority:'High'},
-  {plToDoPriorityKey:2, psPriority:'Medium'},
-  {plToDoPriorityKey:3, psPriority:'Low'}
+  {plToDoPriorityKey:1, psPriority:'Critical'},
+  {plToDoPriorityKey:2, psPriority:'High'},
+  {plToDoPriorityKey:3, psPriority:'Medium'},
+  {plToDoPriorityKey:4, psPriority:'Low'}
 ];
 
 const demoItems = [
@@ -427,7 +435,7 @@ function showToast(msg, isError) {
 function getPriorityBadge(key) {
   const p = PRIORITIES.find(x => x.plToDoPriorityKey === key);
   const name = p ? p.psPriority : key;
-  const cls = name === 'High' ? 'pri-high' : name === 'Medium' ? 'pri-medium' : 'pri-low';
+  const cls = name === 'Critical' ? 'pri-high' : name === 'High' ? 'pri-high' : name === 'Medium' ? 'pri-medium' : 'pri-low';
   return '<span class="badge ' + cls + '">' + name + '</span>';
 }
 
@@ -498,8 +506,11 @@ async function loadLookups() {
       API.getDevTodoStatuses(),
       API.getDevTodoPriorities()
     ]);
-    STATUSES   = (Array.isArray(statusData) ? statusData : demoStatuses).map(normalizeDevStatus);
-    PRIORITIES = (Array.isArray(priData)    ? priData    : demoPriorities).map(normalizeDevPriority);
+    const rawStatuses = Array.isArray(statusData) ? statusData : [];
+    const rawPriorities = Array.isArray(priData) ? priData : [];
+    // Fall back to demo lookups when API returns empty arrays
+    STATUSES   = (rawStatuses.length   ? rawStatuses   : demoStatuses).map(normalizeDevStatus);
+    PRIORITIES = (rawPriorities.length ? rawPriorities : demoPriorities).map(normalizeDevPriority);
   } catch(e) {
     console.warn('[DevList] Using demo lookups:', e.message || e);
     STATUSES   = demoStatuses;
@@ -543,10 +554,19 @@ async function loadItems() {
       plToDoPriorityKey: '',
       plAssigneeUserKey: ''
     });
-    ALL_ITEMS = (Array.isArray(raw) ? raw : []).map(normalizeDevItem);
-    IS_DEMO   = false;
-    showDataBadge(true);
-    console.log('[DevList] Loaded', ALL_ITEMS.length, 'items from API');
+    const items = (Array.isArray(raw) ? raw : []).map(normalizeDevItem);
+    if (items.length > 0) {
+      ALL_ITEMS = items;
+      IS_DEMO   = false;
+      showDataBadge(true);
+      console.log('[DevList] Loaded', ALL_ITEMS.length, 'items from API');
+    } else {
+      // API succeeded but returned empty — use demo fallback
+      console.warn('[DevList] API returned 0 items, using demo data as fallback');
+      ALL_ITEMS = demoItems.map(x => Object.assign({}, x));
+      IS_DEMO   = true;
+      showDataBadge(false);
+    }
   } catch(e) {
     console.warn('[DevList] API unavailable, using demo data:', e.message || e);
     ALL_ITEMS = demoItems.map(x => Object.assign({}, x));
@@ -573,6 +593,7 @@ function applyFilters() {
     return matchQ && matchSt && matchPr;
   });
 
+  sortFiltered();
   renderTable();
   updateStatStrip();
 }
@@ -856,6 +877,63 @@ async function submitAddItem() {
     btn.disabled = false;
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg> Add Item';
   }
+}
+
+// ═══════════════════════════════════════
+//  TABLE SORTING
+// ═══════════════════════════════════════
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', function() {
+    const col = this.dataset.sort;
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'asc';
+    }
+    // Update header visuals
+    document.querySelectorAll('th[data-sort]').forEach(h => {
+      h.classList.remove('sorted');
+      h.querySelector('.sort-arrow').textContent = '';
+    });
+    this.classList.add('sorted');
+    this.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
+    applyFilters();
+  });
+});
+
+function sortFiltered() {
+  if (!sortCol) return;
+  FILTERED.sort((a, b) => {
+    let va, vb;
+    switch (sortCol) {
+      case 'title':
+        va = (a.psToDoTitle || '').toLowerCase();
+        vb = (b.psToDoTitle || '').toLowerCase();
+        break;
+      case 'priority':
+        va = a.plToDoPriorityKey || 99;
+        vb = b.plToDoPriorityKey || 99;
+        break;
+      case 'status':
+        va = a.plToDoStatusID || 99;
+        vb = b.plToDoStatusID || 99;
+        break;
+      case 'target':
+        va = (a.plRequestedDeliveryYear || 0) * 10 + (a.plRequestedDeliveryQuarter || 0);
+        vb = (b.plRequestedDeliveryYear || 0) * 10 + (b.plRequestedDeliveryQuarter || 0);
+        break;
+      case 'assignee':
+        va = (a.psAssigneeName || '').toLowerCase();
+        vb = (b.psAssigneeName || '').toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
 }
 
 // ═══════════════════════════════════════

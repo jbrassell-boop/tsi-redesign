@@ -162,31 +162,31 @@
       <!-- KPI STAT STRIP -->
       <div class="stat-strip">
         <div class="stat-chip" id="kpiTotal" onclick="chipFilter('')">
-          <div class="s-icon" style="background:#E3F2FD">&#128203;</div>
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div>
           <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">0</div><div class="s-lbl">Total Orders</div></div>
         </div>
         <div class="stat-chip" id="kpiOpen" onclick="chipFilter('Open')">
-          <div class="s-icon" style="background:#EFF6FF">&#128194;</div>
+          <div class="s-icon" style="background:#EFF6FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M13 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/><path d="M5 2v3h6V2"/></svg></div>
           <div class="s-data"><div class="s-val s-blue" id="kpiOpenVal">0</div><div class="s-lbl">Open</div></div>
         </div>
         <div class="stat-chip" id="kpiInvoiced" onclick="chipFilter('Invoiced')">
-          <div class="s-icon" style="background:#E8F5E9">&#10003;</div>
+          <div class="s-icon" style="background:#E8F5E9"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="5.5 8 7 10 10.5 6"/></svg></div>
           <div class="s-data"><div class="s-val s-green" id="kpiInvoicedVal">0</div><div class="s-lbl">Invoiced</div></div>
         </div>
         <div class="stat-chip" id="kpiDraft" onclick="chipFilter('Draft')">
-          <div class="s-icon" style="background:#FFFBEB">&#9999;</div>
+          <div class="s-icon" style="background:#FFFBEB"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M11 2.5a1.5 1.5 0 0 1 2.12 0l.38.38a1.5 1.5 0 0 1 0 2.12L6 12.5 2.5 13.5 3.5 10z"/></svg></div>
           <div class="s-data"><div class="s-val s-amber" id="kpiDraftVal">0</div><div class="s-lbl">Draft</div></div>
         </div>
         <div class="stat-chip" id="kpiQuoted" onclick="chipFilter('Quote Sent')">
-          <div class="s-icon" style="background:#F5F3FF">&#128203;</div>
+          <div class="s-icon" style="background:#F5F3FF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M14 3H2v8h5l3 3v-3h4z"/></svg></div>
           <div class="s-data"><div class="s-val s-purple" id="kpiQuotedVal">0</div><div class="s-lbl">Quoted</div></div>
         </div>
         <div class="stat-chip" id="kpiCancelled" onclick="chipFilter('Cancelled')">
-          <div class="s-icon" style="background:#FEF2F2">&#10005;</div>
+          <div class="s-icon" style="background:#FEF2F2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="5.5" x2="5.5" y2="10.5"/></svg></div>
           <div class="s-data"><div class="s-val s-red" id="kpiCancelledVal">0</div><div class="s-lbl">Cancelled</div></div>
         </div>
         <div class="stat-chip" id="kpiRevenue" onclick="chipFilter('')">
-          <div class="s-icon" style="background:#E3F2FD">&#128178;</div>
+          <div class="s-icon" style="background:#E3F2FD"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
           <div class="s-data"><div class="s-val s-navy" id="kpiRevenueVal">$0</div><div class="s-lbl">Total Revenue</div></div>
         </div>
       </div>
@@ -838,7 +838,7 @@ function updateKPIs() {
   document.getElementById('kpiDraftVal').textContent = recs.filter(function(s){ return s.status==='Draft'; }).length;
   document.getElementById('kpiQuotedVal').textContent = recs.filter(function(s){ return s.status==='Quote Sent'; }).length;
   document.getElementById('kpiCancelledVal').textContent = recs.filter(function(s){ return s.status==='Cancelled'; }).length;
-  var totalRevenue = recs.reduce(function(sum,s){ return sum + (s.total||0); }, 0);
+  var totalRevenue = recs.filter(function(s){ return s.status!=='Cancelled'; }).reduce(function(sum,s){ return sum + (s.total||0); }, 0);
   document.getElementById('kpiRevenueVal').textContent = fmtMoneyShort(totalRevenue);
 }
 
@@ -949,12 +949,22 @@ function generateSalePdf(sale) {
 
   // Bill-To / Ship-To addresses
   y = E.checkPageBreak(doc, y, 80);
-  var billParts = (sale.billToAddr || '').split('\n');
-  var billCL = (billParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
-  var billAddr = { name: billParts[0] || sale.clientName || '', addr1: billParts[1] || '', city: billCL[1] || billParts[2] || '', state: billCL[2] || '', zip: billCL[3] || '' };
-  var shipParts = (sale.shipToAddr || sale.billToAddr || '').split('\n');
-  var shipCL = (shipParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
-  var shipAddr = { name: shipParts[0] || '', addr1: shipParts[1] || '', city: shipCL[1] || shipParts[2] || '', state: shipCL[2] || '', zip: shipCL[3] || '' };
+  // Parse address: find city/state/zip line (last matching line), everything between name and that is addr
+  function parsePdfAddr(raw, fallbackName) {
+    var parts = (raw || '').split('\n');
+    var name = parts[0] || fallbackName || '';
+    var cityIdx = -1;
+    for (var pi = parts.length - 1; pi >= 1; pi--) {
+      if (/,\s*[A-Z]{2}\s+\d{5}/.test(parts[pi])) { cityIdx = pi; break; }
+    }
+    var addrLines = cityIdx > 1 ? parts.slice(1, cityIdx).join(', ') : (parts[1] || '');
+    if (cityIdx === -1 && parts.length > 2) addrLines = parts.slice(1, parts.length - 1).join(', ');
+    var cityRaw = cityIdx >= 0 ? parts[cityIdx] : (parts.length > 2 ? parts[parts.length - 1] : (parts[2] || ''));
+    var cm = cityRaw.match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+    return { name: name, addr1: addrLines, city: cm[1] || '', state: cm[2] || '', zip: cm[3] || '' };
+  }
+  var billAddr = parsePdfAddr(sale.billToAddr, sale.clientName);
+  var shipAddr = parsePdfAddr(sale.shipToAddr || sale.billToAddr, '');
   var addrY = y;
   var leftY = E.addAddressBlock(doc, 'BILL TO', billAddr, E.PAGE.margin, addrY);
   var rightY = E.addAddressBlock(doc, 'SHIP TO', shipAddr, E.PAGE.margin + 270, addrY);
@@ -1000,6 +1010,20 @@ function generateSalePdf(sale) {
 }
 
 function ctxAction(action) {
+  // Inline "Sure?" confirm for delete — keep menu open on first click
+  if (action === 'delete') {
+    var delItem = document.querySelector('#ctxMenu .ctx-item.danger');
+    if (delItem && !delItem._confirming) {
+      delItem._confirming = true;
+      delItem._origHTML = delItem.innerHTML;
+      delItem.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sure?';
+      delItem.style.background = '#dc3545'; delItem.style.color = '#fff';
+      setTimeout(function() { if (delItem._confirming) { delItem._confirming = false; delItem.innerHTML = delItem._origHTML; delItem.style.background = ''; delItem.style.color = ''; } }, 3000);
+      if (event) event.stopPropagation();
+      return;
+    }
+    if (delItem) { delItem._confirming = false; delItem.innerHTML = delItem._origHTML; delItem.style.background = ''; delItem.style.color = ''; }
+  }
   document.getElementById('ctxMenu').style.display = 'none';
   var sale = allSales.find(function(s) { return s.lSaleKey === ctxKey; });
   if (!sale) return;
@@ -1032,11 +1056,9 @@ function ctxAction(action) {
       runPipeline();
       break;
     case 'delete':
-      if (confirm('Delete ' + sale.invoiceNum + '? This cannot be undone.')) {
-        allSales = allSales.filter(function(s) { return s.lSaleKey !== ctxKey; });
-        if (selectedSaleKey === ctxKey) closeDrawer();
-        runPipeline();
-      }
+      allSales = allSales.filter(function(s) { return s.lSaleKey !== ctxKey; });
+      if (selectedSaleKey === ctxKey) closeDrawer();
+      runPipeline();
       break;
   }
 }
@@ -1083,23 +1105,38 @@ function populateDrawer(s) {
   document.getElementById('fShipMethod').value = s.shipMethod || 'Ground';
   document.getElementById('fLocation').value = s.location;
 
-  // Parse bill-to address
+  // Parse bill-to address (may be 2-4 lines: name, [attn], [addr], city/state/zip)
   var billParts = (s.billToAddr || '').split('\n');
   document.getElementById('fBillName1').value = billParts[0] || '';
-  document.getElementById('fBillAddr1').value = billParts[1] || '';
-  var billCityLine = (billParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
-  document.getElementById('fBillCity').value = billCityLine[1] || billParts[2] || '';
+  // Find city/state/zip line (last line with pattern), everything between name and that is address
+  var billCityIdx = -1;
+  for (var bi = billParts.length - 1; bi >= 1; bi--) {
+    if (/,\s*[A-Z]{2}\s+\d{5}/.test(billParts[bi])) { billCityIdx = bi; break; }
+  }
+  var billAddrLines = billCityIdx > 1 ? billParts.slice(1, billCityIdx).join(', ') : (billParts[1] || '');
+  if (billCityIdx === -1 && billParts.length > 2) billAddrLines = billParts.slice(1, billParts.length - 1).join(', ');
+  document.getElementById('fBillAddr1').value = billAddrLines;
+  var billCityRaw = billCityIdx >= 0 ? billParts[billCityIdx] : (billParts.length > 2 ? billParts[billParts.length - 1] : (billParts[2] || ''));
+  var billCityLine = billCityRaw.match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  document.getElementById('fBillCity').value = billCityLine[1] || (billCityIdx < 0 && !billCityRaw.match(/,/) ? '' : billCityRaw) || '';
   document.getElementById('fBillState').value = billCityLine[2] || '';
   document.getElementById('fBillZip').value = billCityLine[3] || '';
 
-  // Parse ship-to address
+  // Parse ship-to address (same logic)
   var shipParts = (s.shipToAddr || '').split('\n');
   var shipSame = !s.shipToAddr || s.shipToAddr === s.billToAddr;
   document.getElementById('fShipSame').checked = shipSame;
   document.getElementById('fShipName1').value = shipParts[0] || '';
-  document.getElementById('fShipAddr1').value = shipParts[1] || '';
-  var shipCityLine = (shipParts[2] || '').match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
-  document.getElementById('fShipCity').value = shipCityLine[1] || shipParts[2] || '';
+  var shipCityIdx = -1;
+  for (var si = shipParts.length - 1; si >= 1; si--) {
+    if (/,\s*[A-Z]{2}\s+\d{5}/.test(shipParts[si])) { shipCityIdx = si; break; }
+  }
+  var shipAddrLines = shipCityIdx > 1 ? shipParts.slice(1, shipCityIdx).join(', ') : (shipParts[1] || '');
+  if (shipCityIdx === -1 && shipParts.length > 2) shipAddrLines = shipParts.slice(1, shipParts.length - 1).join(', ');
+  document.getElementById('fShipAddr1').value = shipAddrLines;
+  var shipCityRaw = shipCityIdx >= 0 ? shipParts[shipCityIdx] : (shipParts.length > 2 ? shipParts[shipParts.length - 1] : (shipParts[2] || ''));
+  var shipCityLine = shipCityRaw.match(/^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/) || [];
+  document.getElementById('fShipCity').value = shipCityLine[1] || (shipCityIdx < 0 && !shipCityRaw.match(/,/) ? '' : shipCityRaw) || '';
   document.getElementById('fShipState').value = shipCityLine[2] || '';
   document.getElementById('fShipZip').value = shipCityLine[3] || '';
   var shipFields = ['fShipName1','fShipAddr1','fShipCity','fShipState','fShipZip'];
@@ -1161,15 +1198,7 @@ function markDirty() {
 
 function saveNotes() {
   if (!isDirty || !selectedSaleKey) return;
-  var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
-  if (!sale) return;
-  document.getElementById('drawerSaveStatus').textContent = 'Saving...';
-  sale.notes = document.getElementById('fNotes').value;
-  isDirty = false;
-  setTimeout(function() {
-    var now = new Date();
-    document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
-  }, 400);
+  saveDrawer();
 }
 
 /* ─── SAVE DRAWER ─── */
@@ -1177,6 +1206,7 @@ function saveDrawer() {
   if (!selectedSaleKey) return;
   var sale = allSales.find(function(s) { return s.lSaleKey === selectedSaleKey; });
   if (!sale) return;
+  document.getElementById('drawerSaveStatus').textContent = 'Saving...';
   sale.status = document.getElementById('fStatus').value;
   sale.salesRep = document.getElementById('fSalesRep').value;
   sale.poNumber = document.getElementById('fPO').value.trim();
@@ -1199,8 +1229,10 @@ function saveDrawer() {
   }
   sale.notes = document.getElementById('fNotes').value;
   isDirty = false;
-  var now = new Date();
-  document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
+  setTimeout(function() {
+    var now = new Date();
+    document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
+  }, 400);
   runPipeline();
 }
 
@@ -1333,19 +1365,19 @@ function generateQuote(saleKey) {
     +'body{font-family:\'Segoe UI\',Arial,sans-serif;font-size:12px;color:#1F2937;background:#fff;padding:32px}'
     +'@media print{body{padding:24px} .no-print{display:none} @page{margin:16mm 14mm}}'
     +'.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}'
-    +'.co-name{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.3px}'
+    +'.co-name{font-size:22px;font-weight:900;color:#1A365D;letter-spacing:-.3px}'
     +'.co-tag{font-size:10px;color:#6B7280;margin-top:2px}'
-    +'.quote-stamp{background:var(--navy);color:#fff;padding:8px 18px;border-radius:6px;text-align:center}'
+    +'.quote-stamp{background:#1A365D;color:#fff;padding:8px 18px;border-radius:6px;text-align:center}'
     +'.quote-stamp .qs-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.7}'
     +'.quote-stamp .qs-num{font-size:16px;font-weight:800;letter-spacing:-.2px}'
-    +'.divider{height:2px;background:linear-gradient(90deg,var(--navy),#2E74B5);margin:0 0 20px}'
+    +'.divider{height:2px;background:linear-gradient(90deg,#1A365D,#2E74B5);margin:0 0 20px}'
     +'.meta-row{display:flex;gap:40px;margin-bottom:20px;flex-wrap:wrap}'
     +'.meta-block{flex:1;min-width:140px}'
     +'.meta-lbl{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}'
     +'.meta-val{font-size:12px;color:#1F2937;font-weight:600}'
     +'.bill-box{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:12px 16px;margin-bottom:20px}'
     +'.bill-title{font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}'
-    +'.bill-name{font-size:14px;font-weight:800;color:var(--navy)}'
+    +'.bill-name{font-size:14px;font-weight:800;color:#1A365D}'
     +'.bill-dept{font-size:11px;color:#6B7280;margin-top:2px}'
     +'table.items{width:100%;border-collapse:collapse;margin-bottom:20px}'
     +'table.items th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:#0E7490;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:left;border-bottom:1px solid #B0C8DE}'
@@ -1355,7 +1387,7 @@ function generateQuote(saleKey) {
     +'.totals-block{display:flex;justify-content:flex-end;margin-bottom:24px}'
     +'.totals-tbl{width:240px;border-collapse:collapse}'
     +'.totals-tbl td{padding:5px 10px;font-size:12px}'
-    +'.totals-tbl tr:last-child td{border-top:2px solid var(--navy);font-weight:800;font-size:13px;color:var(--navy);padding-top:8px}'
+    +'.totals-tbl tr:last-child td{border-top:2px solid #1A365D;font-weight:800;font-size:13px;color:#1A365D;padding-top:8px}'
     +'.footer{border-top:1px solid #E5E7EB;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px;color:#9CA3AF}'
     +'.footer-co{font-size:11px;font-weight:700;color:#374151}'
     +'.terms{font-style:italic;font-size:10px;color:#6B7280}'
@@ -1452,7 +1484,9 @@ function createSale() {
   if (!rep) { alert('Please select a sales rep.'); return; }
 
   var nextKey = allSales.reduce(function(mx,s) { return Math.max(mx, s.lSaleKey); }, 2400) + 1;
-  var nextInv = 'PS-' + nextKey;
+  var loc = document.getElementById('mLocation').value || 'Upper Chichester';
+  var prefix = (loc === 'Nashville') ? 'SI-' : 'NI-';
+  var nextInv = prefix + nextKey;
 
   var deptObj = client.depts ? client.depts.find(function(d) { return d.name === dept; }) : null;
   var billToAddr = buildDeptAddr(client.name, deptObj, 'bill');
