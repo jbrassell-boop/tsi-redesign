@@ -21,6 +21,8 @@ var ir_saveTimer     = null;
 var ir_wizStep       = 1;
 var ir_wizClient     = null;
 var ir_wizDept       = null;
+var ir_wizClients    = [];
+var ir_wizDepts      = [];
 var ir_nextOrderNum  = 9;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -440,8 +442,18 @@ function ir_deleteRepair(btn) {
 }
 
 // ─── New Repair Wizard ────────────────────────────────────────────────────────
-function ir_newRepair() {
+async function ir_newRepair() {
   ir_wizStep = 1; ir_wizClient = null; ir_wizDept = null;
+  // Load clients + departments from API if not cached
+  if (!ir_wizClients.length) {
+    try {
+      var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+      var cData = await API.getAllClients(svcKey);
+      ir_wizClients = Array.isArray(cData) ? cData : (cData.data || []);
+      var dData = await API.getAllDepartments(svcKey);
+      ir_wizDepts = Array.isArray(dData) ? dData : (dData.data || []);
+    } catch(e) { ir_wizClients = []; ir_wizDepts = []; }
+  }
   ir_wizGoStep(1);
   ir_wizRenderClients('');
   document.getElementById('ir_wClientSearch').value = '';
@@ -486,17 +498,22 @@ function ir_wizUpdateNext() {
   btn.style.pointerEvents = enabled ? 'all' : 'none';
 }
 
-// Reuse iq_DEMO_CLIENTS and iq_DEMO_DEPTS — same client/dept data
 function ir_wizRenderClients(filter) {
   var q = (filter||'').toLowerCase();
-  var clients = (typeof iq_DEMO_CLIENTS !== 'undefined' ? iq_DEMO_CLIENTS : []).filter(function(c){
-    return !q || c.sClientName1.toLowerCase().includes(q) || (c.sClientCity||'').toLowerCase().includes(q);
+  var clients = ir_wizClients.filter(function(c){
+    var name = (c.sClientName1 || c.psClientName1 || '').toLowerCase();
+    var city = (c.sCity || c.sMailCity || c.psCity || '').toLowerCase();
+    var state = (c.sState || c.sMailState || c.psState || '').toLowerCase();
+    return !q || name.includes(q) || city.includes(q) || state.includes(q) || String(c.lClientKey).includes(q);
   });
-  document.getElementById('ir_wClientGrid').innerHTML = clients.map(function(c) {
+  document.getElementById('ir_wClientGrid').innerHTML = clients.slice(0, 60).map(function(c) {
+    var name = c.sClientName1 || c.psClientName1 || 'Client ' + c.lClientKey;
+    var city = c.sCity || c.sMailCity || c.psCity || '';
+    var state = c.sState || c.sMailState || c.psState || '';
     var sel = ir_wizClient && ir_wizClient.lClientKey === c.lClientKey ? ' selected' : '';
     return '<div class="wiz-card' + sel + '" onclick="ir_wizPickClient(' + c.lClientKey + ')">' +
-      '<div class="wiz-card-name">' + ir_esc(c.sClientName1) + '</div>' +
-      '<div class="wiz-card-detail">' + ir_esc(c.sClientCity) + ', ' + ir_esc(c.sClientState) + '</div>' +
+      '<div class="wiz-card-name">' + ir_esc(name) + '</div>' +
+      '<div class="wiz-card-detail">' + ir_esc(city) + (state ? ', ' + ir_esc(state) : '') + '</div>' +
       '</div>';
   }).join('') || '<div style="padding:16px;color:var(--muted);font-size:11px">No clients match.</div>';
 }
@@ -504,8 +521,7 @@ function ir_wizRenderClients(filter) {
 function ir_wizFilterClients(val) { ir_wizRenderClients(val); }
 
 function ir_wizPickClient(key) {
-  var clients = typeof iq_DEMO_CLIENTS !== 'undefined' ? iq_DEMO_CLIENTS : [];
-  ir_wizClient = clients.find(function(c){ return c.lClientKey === key; });
+  ir_wizClient = ir_wizClients.find(function(c){ return c.lClientKey === key; });
   ir_wizDept = null;
   ir_wizRenderClients(document.getElementById('ir_wClientSearch').value);
   ir_wizUpdateNext();
@@ -513,15 +529,19 @@ function ir_wizPickClient(key) {
 
 function ir_wizRenderDepts(filter) {
   if (!ir_wizClient) return;
-  var depts_map = typeof iq_DEMO_DEPTS !== 'undefined' ? iq_DEMO_DEPTS : {};
-  document.getElementById('ir_wClientBarName').textContent = ir_wizClient.sClientName1;
-  var depts = (depts_map[ir_wizClient.lClientKey] || []);
+  var clientName = ir_wizClient.sClientName1 || ir_wizClient.psClientName1 || '';
+  document.getElementById('ir_wClientBarName').textContent = clientName;
+  var depts = ir_wizDepts.filter(function(d){ return d.lClientKey === ir_wizClient.lClientKey; });
   var q = (filter||'').toLowerCase();
-  var filtered = depts.filter(function(d){ return !q || d.sDepartmentName.toLowerCase().includes(q); });
+  var filtered = depts.filter(function(d){
+    var name = (d.sDepartmentName || d.psDepartmentName || '').toLowerCase();
+    return !q || name.includes(q);
+  });
   document.getElementById('ir_wDeptGrid').innerHTML = filtered.map(function(d) {
+    var name = d.sDepartmentName || d.psDepartmentName || 'Dept ' + d.lDepartmentKey;
     var sel = ir_wizDept && ir_wizDept.lDepartmentKey === d.lDepartmentKey ? ' selected' : '';
     return '<div class="wiz-card' + sel + '" onclick="ir_wizPickDept(' + d.lDepartmentKey + ')">' +
-      '<div class="wiz-card-name">' + ir_esc(d.sDepartmentName) + '</div>' +
+      '<div class="wiz-card-name">' + ir_esc(name) + '</div>' +
       '</div>';
   }).join('') || '<div style="padding:16px;color:var(--muted);font-size:11px">No departments found.</div>';
 }
@@ -529,15 +549,13 @@ function ir_wizRenderDepts(filter) {
 function ir_wizFilterDepts(val) { ir_wizRenderDepts(val); }
 
 function ir_wizPickDept(key) {
-  var depts_map = typeof iq_DEMO_DEPTS !== 'undefined' ? iq_DEMO_DEPTS : {};
-  var depts = depts_map[ir_wizClient ? ir_wizClient.lClientKey : 0] || [];
-  ir_wizDept = depts.find(function(d){ return d.lDepartmentKey === key; });
+  ir_wizDept = ir_wizDepts.find(function(d){ return d.lDepartmentKey === key; });
   ir_wizRenderDepts(document.getElementById('ir_wDeptSearch').value);
   ir_wizUpdateNext();
 }
 
 function ir_wizRenderSummary() {
-  document.getElementById('ir_wSummaryName').textContent = (ir_wizClient ? ir_wizClient.sClientName1 : '—') + ' — ' + (ir_wizDept ? ir_wizDept.sDepartmentName : '—');
+  document.getElementById('ir_wSummaryName').textContent = (ir_wizClient ? (ir_wizClient.sClientName1 || ir_wizClient.psClientName1 || '') : '—') + ' — ' + (ir_wizDept ? (ir_wizDept.sDepartmentName || ir_wizDept.psDepartmentName || '') : '—');
   document.getElementById('ir_wQuoteRef').value  = '';
   document.getElementById('ir_wPoNumber').value  = '';
   document.getElementById('ir_wTech').value      = '';
