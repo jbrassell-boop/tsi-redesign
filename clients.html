@@ -2156,8 +2156,8 @@ function populateClientList(clients) {
     tr.innerHTML = `
       <td style="font-weight:600;color:var(--blue)">${name}</td>
       <td>#${key}</td>
-      <td style="font-weight:600">${c.sZipCode || c.zip || ''}</td>
-      <td>${c.sCity || c.city || ''}${c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : '')}</td>
+      <td style="font-weight:600">${c.sMailZip || c.sZipCode || c.zip || ''}</td>
+      <td>${c.sMailCity || c.sCity || c.city || ''}${c.sMailState ? ', ' + c.sMailState : (c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : ''))}</td>
       <td>${c.sServiceLocation || ''}</td>
       <td><span class="badge ${c.bActive === false ? 'b-inactive' : 'b-active'}">${c.bActive === false ? 'Inactive' : 'Active'}</span></td>`;
     tbody.appendChild(tr);
@@ -2242,8 +2242,8 @@ async function loadLookupDropdowns() {
     ]);
 
     // Sales Reps
-    populateSelect('def-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.repName })));
-    populateSelect('add-dept-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.repName })), true);
+    populateSelect('def-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.sSalesRepName || ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim() || r.repName || '' })));
+    populateSelect('add-dept-salesrep', (reps || []).map(r => ({ value: r.lSalesRepKey, text: r.sSalesRepName || ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim() || r.repName || '' })), true);
 
     // Pricing Categories
     populateSelect('def-pricing', (pricing || []).filter(p => p.bActive !== false).map(p => ({ value: p.lPricingCategoryKey, text: p.sPricingDescription })));
@@ -2253,7 +2253,7 @@ async function loadLookupDropdowns() {
     populateSelect('def-terms', (terms || []).map(t => ({ value: t.lPaymentTermsKey, text: t.sTermsDesc })));
 
     // Credit Limits
-    populateSelect('def-credit', (limits || []).map(l => ({ value: l.lSystemCodesKey, text: l.sItemText })));
+    populateSelect('def-credit', (limits || []).map(l => ({ value: l.lCreditLimitKey || l.lSystemCodesKey, text: l.sItemText })));
 
     // Distributors
     populateSelect('def-dist', (dists || []).filter(d => d.bActive !== false).map(d => ({ value: d.lDistributorKey, text: d.sDistName1 })));

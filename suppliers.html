@@ -979,8 +979,9 @@ function populateDetail(s) {
   // Header
   document.getElementById('detailName').textContent = s.sSupplierName1 || '';
   document.getElementById('detailCity').textContent = [s.sCity, s.sState].filter(Boolean).join(', ');
-  document.getElementById('detailGpId').textContent = s.sGPVendorId ? 'GP: ' + s.sGPVendorId : '';
-  document.getElementById('detailGpId').style.display = s.sGPVendorId ? '' : 'none';
+  var gpId = s.sGPID || s.sGPVendorId || s.sGpVendorId || '';
+  document.getElementById('detailGpId').textContent = gpId ? 'GP: ' + gpId : '';
+  document.getElementById('detailGpId').style.display = gpId ? '' : 'none';
 
   // Role chips
   const setChip = (id, on) => {
@@ -1002,20 +1003,20 @@ function populateDetail(s) {
 
   // Contact fields
   document.getElementById('fSupplierName').value = s.sSupplierName1 || '';
-  document.getElementById('fAddress1').value = s.sAddress1 || '';
-  document.getElementById('fAddress2').value = s.sAddress2 || '';
-  setSelectValue('fCountry', s.sCountry || 'USA');
-  document.getElementById('fZip').value = s.sZip || '';
-  document.getElementById('fCity').value = s.sCity || '';
-  setSelectValue('fState', s.sState || '');
-  document.getElementById('fPhone').value = s.sPhone || s.sPhoneNumber || '';
-  document.getElementById('fFax').value = s.sFax || s.sFaxNumber || '';
+  document.getElementById('fAddress1').value = s.sMailAddr1 || s.sAddress1 || '';
+  document.getElementById('fAddress2').value = s.sMailAddr2 || s.sAddress2 || '';
+  setSelectValue('fCountry', s.sMailCountry || s.sCountry || 'USA');
+  document.getElementById('fZip').value = s.sMailZip || s.sZip || '';
+  document.getElementById('fCity').value = s.sMailCity || s.sCity || '';
+  setSelectValue('fState', s.sMailState || s.sState || '');
+  document.getElementById('fPhone').value = s.sPhoneVoice || s.sPhone || s.sPhoneNumber || '';
+  document.getElementById('fFax').value = s.sPhoneFAX || s.sFax || s.sFaxNumber || '';
 
   // Billing
   document.getElementById('fBillAddress').checked = !!s.bBillAddress;
   document.getElementById('fBillEmail').checked = !!s.bBillEmail;
-  document.getElementById('fEmailName').value = s.sEmailName || s.sBillingContactName || '';
-  document.getElementById('fEmailAddress').value = s.sEmailAddress || s.sBillingEmail || '';
+  document.getElementById('fEmailName').value = s.sBillEmailName || s.sEmailName || s.sBillingContactName || '';
+  document.getElementById('fEmailAddress').value = s.sBillEmail || s.sEmailAddress || s.sBillingEmail || '';
 
   // Roles
   document.getElementById('fRoleParts').checked = !!s.bPartsVendor;
@@ -1024,8 +1025,8 @@ function populateDetail(s) {
   document.getElementById('fRoleCarts').checked = !!s.bCartsVendor;
 
   // Settings
-  document.getElementById('fMinOrder').value = s.dblMinimumOrder ? formatCurrency(s.dblMinimumOrder) : '';
-  document.getElementById('fGpVendorId').value = s.sGPVendorId || s.sGpVendorId || '';
+  document.getElementById('fMinOrder').value = (s.dblOrderMinimum || s.dblMinimumOrder) ? formatCurrency(s.dblOrderMinimum || s.dblMinimumOrder) : '';
+  document.getElementById('fGpVendorId').value = s.sGPID || s.sGPVendorId || s.sGpVendorId || '';
   setSelectValue('fSupplierLevel', s.sSupplierLevel || 'Non Critical');
   setSelectValue('fDefaultPOType', s.sDefaultPOType || 'Parts');
   document.getElementById('fAdditionalPOCost').value = s.dblAdditionalPOCost ? formatCurrency(s.dblAdditionalPOCost) : '';
@@ -1292,7 +1293,7 @@ async function deleteDoc(key) {
 async function saveSupplier() {
   if (!_currentSupplier) { alert('No supplier selected'); return; }
   const data = collectFormData();
-  data.plSupplierKey = _currentSupplier.lSupplierKey;
+  data.lSupplierKey = _currentSupplier.lSupplierKey;
 
   try {
     if (_liveMode) {
@@ -1314,6 +1315,9 @@ async function addNewSupplier() {
   const toggles = modal.querySelectorAll('.toggle input[type=checkbox]');
 
   // Build add payload from modal fields (positional, matching the layout order)
+  // Toggles layout: [0]=Bill Address, [1]=Bill Email, [2]=Parts, [3]=Repair,
+  //   [4]=Acquisition, [5]=Carts, [6]=Active, [7]=Dashboard, [8]=Create Part#,
+  //   [9]=Use Vendor SKU, [10]=Show Vendor SKU, [11]=Blind PO, [12]=Acq Supplier
   const data = {
     psSupplierName1: inputs[0]?.value || '',
     psAddress1: inputs[1]?.value || '',
@@ -1326,11 +1330,19 @@ async function addNewSupplier() {
     psFax: inputs[8]?.value || '',
     psEmailName: inputs[9]?.value || '',
     psEmailAddress: inputs[10]?.value || '',
-    pbPartsVendor: toggles[0]?.checked || false,
-    pbRepairVendor: toggles[1]?.checked || false,
-    pbAcquisitionVendor: toggles[2]?.checked || false,
-    pbCartsVendor: toggles[3]?.checked || false,
-    pbActive: toggles[4]?.checked || true,
+    pbBillAddress: toggles[0]?.checked || false,
+    pbBillEmail: toggles[1]?.checked || false,
+    pbPartsVendor: toggles[2]?.checked || false,
+    pbRepairVendor: toggles[3]?.checked || false,
+    pbAcquisitionVendor: toggles[4]?.checked || false,
+    pbCartsVendor: toggles[5]?.checked || false,
+    pbActive: toggles[6]?.checked !== undefined ? toggles[6].checked : true,
+    pbDashboardOpenInv: toggles[7]?.checked || false,
+    pbCreatePartNumber: toggles[8]?.checked || false,
+    pbUseVendorSKU: toggles[9]?.checked || false,
+    pbShowVendorSKUOnPO: toggles[10]?.checked || false,
+    pbBlindPOForGP: toggles[11]?.checked || false,
+    pbAcquisitionSupplier: toggles[12]?.checked || false,
     plServiceLocationKey: parseInt(document.getElementById('svcLocation').value) || 1
   };
 

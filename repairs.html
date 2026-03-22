@@ -3122,12 +3122,13 @@ function populateFormDrawer(formId) {
     // PS3 lookups
     const psIn = _safetyLevels.find(s => s.lPatientSafetyLevelKey == r.lPatientSafetyLevelKey);
     const psOut = _safetyLevels.find(s => s.lPatientSafetyLevelKey == r.lPatientSafetyLevelOutKey);
-    const psInLabel = psIn ? psIn.sPatientSafetyLevel : '—';
-    const psOutLabel = psOut ? psOut.sPatientSafetyLevel : '—';
+    const psInLabel = psIn ? (psIn.sPatientSafetyLevelDesc || psIn.sPatientSafetyLevel) : '—';
+    const psOutLabel = psOut ? (psOut.sPatientSafetyLevelDesc || psOut.sPatientSafetyLevel) : '—';
     const psColor = (lvl) => {
       if (!lvl) return { bg: '#F7F9FC', fg: '#5A6F8A' };
-      if (lvl.sPatientSafetyLevel.includes('PS1')) return { bg: '#F0FDF4', fg: '#166534' };
-      if (lvl.sPatientSafetyLevel.includes('PS2')) return { bg: '#FFFBEB', fg: '#92400E' };
+      var desc = lvl.sPatientSafetyLevelDesc || lvl.sPatientSafetyLevel || '';
+      if (desc.includes('PS1') || desc.includes('Level 1') || desc.includes('Low')) return { bg: '#F0FDF4', fg: '#166534' };
+      if (desc.includes('PS2') || desc.includes('Level 2') || desc.includes('Moderate')) return { bg: '#FFFBEB', fg: '#92400E' };
       return { bg: '#FEF2F2', fg: '#B91C1C' };
     };
     const psInC = psColor(psIn), psOutC = psColor(psOut);
@@ -3735,6 +3736,11 @@ function populateDetail(d) {
   const scopeType = d.sRigidOrFlexible || 'R';
   document.getElementById('incomingInspBody').innerHTML = renderInspectionContent(scopeType, 'in');
   document.getElementById('postRepairInspBody').innerHTML = renderInspectionContent(scopeType, 'out');
+
+  // Populate dynamically-created dropdowns after inspection HTML is built
+  populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
+  // Pre-populate QC tech dropdowns (also populated on drawer open)
+  populateDrawerTechDropdowns();
 
   // Populate P/F buttons for current scope type
   const tmpl = INSPECTION_TEMPLATES[scopeType] || INSPECTION_TEMPLATES.R;
@@ -6641,11 +6647,11 @@ async function initPage() {
     populateSelect('hRepairStatus', _statuses, 'lRepairStatusID', 'sRepairStatus', true);
     populateSelect('hRepairLevel', _levels, 'lRepairLevelKey', 'sRepairLevel', true);
     populateSelect('fRepairReason', _repairReasons, 'lRepairReasonKey', 'sRepairReason', true);
-    populateSelect('fPSLevelIn', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevel', false);
-    populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevel', false);
+    populateSelect('fPSLevelIn', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
+    populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
     populateSelect('fSalesRep', _salesReps, 'lSalesRepNameKey', 'sSalesRepName', true);
-    populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingCategory', true);
-    populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sPaymentTerms', true);
+    populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingDescription', true);
+    populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sTermsDesc', true);
 
     _liveMode = !API.isDemoMode();
     
@@ -6750,9 +6756,9 @@ async function initPage() {
       {lRepairReasonKey:6, sRepairReason:'Physical Damage'}
     ];
     _safetyLevels = [
-      {lPatientSafetyLevelKey:1, sPatientSafetyLevel:'PS1 - Safe'},
-      {lPatientSafetyLevelKey:2, sPatientSafetyLevel:'PS2 - Marginal'},
-      {lPatientSafetyLevelKey:3, sPatientSafetyLevel:'PS3 - Unsafe'}
+      {lPatientSafetyLevelKey:1, sPatientSafetyLevelDesc:'PS1 - Safe'},
+      {lPatientSafetyLevelKey:2, sPatientSafetyLevelDesc:'PS2 - Marginal'},
+      {lPatientSafetyLevelKey:3, sPatientSafetyLevelDesc:'PS3 - Unsafe'}
     ];
     _techs = [
       {lTechnicianKey:1, sTechName:'Rob Martinez'},
@@ -6772,16 +6778,16 @@ async function initPage() {
       {lDeliveryMethodKey:4, sDeliveryDesc:'Customer Pickup'}
     ];
     _pricingCategories = [
-      {lPricingCategoryKey:1, sPricingCategory:'Standard'},
-      {lPricingCategoryKey:2, sPricingCategory:'Contract - Tier A'},
-      {lPricingCategoryKey:3, sPricingCategory:'Contract - Tier B'},
-      {lPricingCategoryKey:4, sPricingCategory:'Cap/FFS'}
+      {lPricingCategoryKey:1, sPricingDescription:'Standard'},
+      {lPricingCategoryKey:2, sPricingDescription:'Contract - Tier A'},
+      {lPricingCategoryKey:3, sPricingDescription:'Contract - Tier B'},
+      {lPricingCategoryKey:4, sPricingDescription:'Cap/FFS'}
     ];
     _paymentTerms = [
-      {lPaymentTermsKey:1, sPaymentTerms:'Net 30'},
-      {lPaymentTermsKey:2, sPaymentTerms:'Net 45'},
-      {lPaymentTermsKey:3, sPaymentTerms:'Net 60'},
-      {lPaymentTermsKey:4, sPaymentTerms:'Due on Receipt'}
+      {lPaymentTermsKey:1, sTermsDesc:'Net 30'},
+      {lPaymentTermsKey:2, sTermsDesc:'Net 45'},
+      {lPaymentTermsKey:3, sTermsDesc:'Net 60'},
+      {lPaymentTermsKey:4, sTermsDesc:'Due on Receipt'}
     ];
     _clients = [
       {lClientKey:5, sClientName1:'Tift Regional Medical Center'},
@@ -6800,11 +6806,11 @@ async function initPage() {
     populateSelect('hRepairStatus', _statuses, 'lRepairStatusID', 'sRepairStatus', true);
     populateSelect('hRepairLevel', _levels, 'lRepairLevelKey', 'sRepairLevel', true);
     populateSelect('fRepairReason', _repairReasons, 'lRepairReasonKey', 'sRepairReason', true);
-    populateSelect('fPSLevelIn', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevel', false);
-    populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevel', false);
+    populateSelect('fPSLevelIn', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
+    populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
     populateSelect('fSalesRep', _salesReps, 'lSalesRepNameKey', 'sSalesRepName', true);
-    populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingCategory', true);
-    populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sPaymentTerms', true);
+    populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingDescription', true);
+    populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sTermsDesc', true);
 
     // Full demo repair record
     _currentRepair = {

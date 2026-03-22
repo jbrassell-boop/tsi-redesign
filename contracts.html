@@ -1153,6 +1153,14 @@ function updateDataSourceBadge() {
 
 // ── Render Contract List ──────────────────────────────
 function renderList(data) {
+  // Sort: Active/Expiring first, Expired last; within group sort by end date desc
+  var statusOrder = {'Active':0, 'Expiring':1, 'Expired':2};
+  data = (data || []).slice().sort(function(a, b) {
+    var sa = statusOrder[deriveStatus(a)] ?? 1;
+    var sb = statusOrder[deriveStatus(b)] ?? 1;
+    if (sa !== sb) return sa - sb;
+    return (b.dtEndDate || '').localeCompare(a.dtEndDate || '');
+  });
   filteredContracts = data;
   const el = document.getElementById('contractList');
   if (!data || data.length === 0) {
@@ -1188,13 +1196,15 @@ function toggleListPanel() {
 }
 
 // ── Select Contract (load detail) ─────────────────────
+let _firstSelection = true; // track first auto-selection to skip collapse
 async function selectContract(el, contractKey) {
-  // Auto-collapse list on selection
-  if (!listCollapsed) {
+  // Auto-collapse list on selection (but NOT on first auto-selection from load)
+  if (!listCollapsed && !_firstSelection) {
     const lp = document.querySelector('.list-panel');
     listCollapsed = true;
     lp.classList.add('collapsed');
   }
+  _firstSelection = false;
   document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
   if (el) el.classList.add('selected');
   selectedContractKey = contractKey;
@@ -1348,7 +1358,7 @@ function populateSpecsTab(d) {
   const pd = document.getElementById('ctPOsPerDept');       if (pd) pd.checked = !!d.bPOsPerDepartment;
 
   // Scope count stat chips
-  const scAll  = document.getElementById('scopeCountAll');       if (scAll) scAll.textContent = d.nCountAll ?? d.nCountFlexible + d.nCountRigid + d.nCountInstrument + d.nCountCamera || 16;
+  const scAll  = document.getElementById('scopeCountAll');       if (scAll) scAll.textContent = d.nCountAll ?? ((d.nCountFlexible + d.nCountRigid + d.nCountInstrument + d.nCountCamera) || 16);
   const scFlex = document.getElementById('scopeCountFlexible');  if (scFlex) scFlex.textContent = d.nCountFlexible ?? 8;
   const scRig  = document.getElementById('scopeCountRigid');     if (scRig) scRig.textContent = d.nCountRigid ?? 4;
   const scCam  = document.getElementById('scopeCountCamera');    if (scCam) scCam.textContent = d.nCountCamera ?? 2;
@@ -1432,16 +1442,27 @@ async function loadDepartmentsTab(contractKey) {
     const assignedArr = Array.isArray(assigned) ? assigned : [];
     const availableArr = Array.isArray(available) ? available : [];
 
+    // Build department name lookup from the available (full) departments list
+    var deptNameMap = {};
+    availableArr.forEach(function(d) { deptNameMap[d.lDepartmentKey] = d.sDepartmentName || d.sDeptName || ''; });
+
+    // Resolve assigned department names from the lookup
+    var assignedKeys = {};
     if (assignedList) {
       tab.querySelector('.transfer-box:first-child .transfer-head span:last-child').textContent = assignedArr.length + ' assigned';
-      assignedList.innerHTML = assignedArr.map(d =>
-        '<div class="transfer-item" data-key="' + (d.lContractDepartmentKey || d.lDepartmentKey || 0) + '">' + (d.sDepartmentName || d.sDeptName || '(unnamed)') + '</div>'
-      ).join('') || '<div class="empty-state">No departments assigned</div>';
+      assignedList.innerHTML = assignedArr.map(d => {
+        var dk = d.lDepartmentKey || 0;
+        assignedKeys[dk] = true;
+        var name = d.sDepartmentName || d.sDeptName || deptNameMap[dk] || '(Dept #' + dk + ')';
+        return '<div class="transfer-item" data-key="' + (d.lContractDepartmentKey || dk) + '">' + name + '</div>';
+      }).join('') || '<div class="empty-state">No departments assigned</div>';
     }
 
+    // Filter available list to exclude already-assigned departments
     if (availableList) {
-      tab.querySelector('.transfer-box:last-child .transfer-head span:last-child').textContent = availableArr.length + ' available';
-      availableList.innerHTML = availableArr.map(d =>
+      var unassigned = availableArr.filter(function(d) { return !assignedKeys[d.lDepartmentKey]; });
+      tab.querySelector('.transfer-box:last-child .transfer-head span:last-child').textContent = unassigned.length + ' available';
+      availableList.innerHTML = unassigned.map(d =>
         '<div class="transfer-item" data-key="' + (d.lDepartmentKey || 0) + '">' + (d.sDepartmentName || d.sDeptName || '(unnamed)') + '</div>'
       ).join('') || '<div class="empty-state">No departments available</div>';
     }
@@ -2098,14 +2119,30 @@ async function loadContracts() {
     }
 
     if (list.length > 0) {
+      // Invoice frequency map (lInstallmentTypeID → label)
+      var freqMap = {1:'Monthly', 2:'Quarterly', 3:'Annual', 4:'18 Months', 5:'Once'};
       // Normalize API field names (sContractName1 → sContractName, etc.)
-      contracts = list.map(c => ({
-        ...c,
-        sContractName:  c.sContractName  || c.sContractName1  || '',
-        dtEndDate:      c.dtEndDate      || c.dtDateTermination || '',
-        dtStartDate:    c.dtStartDate    || c.dtDateEffective   || '',
-        dblAnnualValue: c.dblAnnualValue ?? c.dblAmtTotal       ?? 0
-      }));
+      contracts = list.map(c => {
+        // Resolve contract type from lContractTypeKey using loaded lookup
+        var typeName = c.sContractType || '';
+        if (!typeName && c.lContractTypeKey && contractTypes.length) {
+          var ct = contractTypes.find(t => t.lContractTypeKey === c.lContractTypeKey);
+          if (ct) typeName = ct.sContractTypeName || ct.sContractType || '';
+        }
+        // Resolve invoice frequency from lInstallmentTypeID
+        var freq = c.sInvoiceFrequency || '';
+        if (!freq && c.lInstallmentTypeID) freq = freqMap[c.lInstallmentTypeID] || '';
+        if (!freq && c.lBillType) freq = freqMap[c.lBillType] || '';
+        return {
+          ...c,
+          sContractName:     c.sContractName  || c.sContractName1  || '',
+          sContractType:     typeName,
+          sInvoiceFrequency: freq,
+          dtEndDate:         c.dtEndDate      || c.dtDateTermination || '',
+          dtStartDate:       c.dtStartDate    || c.dtDateEffective   || '',
+          dblAnnualValue:    c.dblAnnualValue ?? c.dblAmtTotal       ?? 0
+        };
+      });
       DATA_SOURCE = 'api';
       console.log('[Contracts] Loaded ' + contracts.length + ' contracts from API');
     } else {
@@ -2118,6 +2155,7 @@ async function loadContracts() {
   }
 
   API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'demo');
+  _firstSelection = true; // reset so next renderList auto-select doesn't collapse
   updateStatusCounts();
 
   // Update list header count
@@ -2134,8 +2172,8 @@ async function loadContracts() {
 // ═══════════════════════════════════════════════════════
 API.UI.init();
 wireButtons();
-loadContracts();
-loadLookups();
+// Load lookups first so type/frequency resolution works, then contracts
+loadLookups().then(() => loadContracts());
 
 // Tab bar scroll-fade indicator
 (function() {
