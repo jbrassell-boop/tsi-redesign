@@ -1497,8 +1497,11 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
             </select>
           </div>
           <div style="flex:1">
-            <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">Rack Position</label>
-            <input type="text" id="wizRack" placeholder="e.g. A-12" style="width:100%;height:28px;font-size:11px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-family:inherit;box-sizing:border-box"/>
+            <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">Rack Position <button onclick="wizShowRackPicker()" style="background:none;border:none;color:var(--blue);font-size:10px;cursor:pointer;text-decoration:underline;font-family:inherit;font-weight:600">Show Available</button></label>
+            <input type="text" id="wizRack" placeholder="e.g. 35" style="width:100%;height:28px;font-size:11px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-family:inherit;box-sizing:border-box"/>
+            <div id="wizRackGrid" style="display:none;margin-top:4px;max-height:80px;overflow-y:auto;border:1px solid var(--neutral-200);border-radius:5px;padding:4px;background:var(--card)">
+              <div style="display:flex;flex-wrap:wrap;gap:3px" id="wizRackSlots"></div>
+            </div>
           </div>
           <div style="flex:1">
             <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">PO Number</label>
@@ -6817,6 +6820,38 @@ async function wizCreateScope() {
 }
 
 // ── Step 4: Summary & Confirm ──
+async function wizShowRackPicker() {
+  var grid = document.getElementById('wizRackGrid');
+  var slots = document.getElementById('wizRackSlots');
+  if (grid.style.display === 'block') { grid.style.display = 'none'; return; }
+  slots.innerHTML = '<span style="font-size:10px;color:var(--muted)">Loading...</span>';
+  grid.style.display = 'block';
+  // Get occupied racks from current repairs
+  var occupied = new Set();
+  try {
+    var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+    var repairs = typeof MockDB !== 'undefined' ? MockDB.getAll('repairs') : [];
+    repairs.forEach(function(r) {
+      if (r.lServiceLocationKey == svcKey && r.sRackPosition && r.sRackPosition !== 'N/A') {
+        var s = (r.sRepairStatus || '').toLowerCase();
+        if (s.indexOf('shipped') === -1 && s.indexOf('invoiced') === -1) occupied.add(String(r.sRackPosition).trim());
+      }
+    });
+  } catch(e) {}
+  // Generate slots 1-150, show available as green, occupied as red
+  var html = '';
+  for (var i = 1; i <= 150; i++) {
+    var num = String(i);
+    var taken = occupied.has(num);
+    if (taken) {
+      html += '<span style="width:28px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;border-radius:3px;background:#FEE2E2;color:#991B1B;opacity:.5" title="Occupied">' + num + '</span>';
+    } else {
+      html += '<span onclick="document.getElementById(\'wizRack\').value=\'' + num + '\';document.getElementById(\'wizRackGrid\').style.display=\'none\'" style="width:28px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;border-radius:3px;background:#DCFCE7;color:#166534;cursor:pointer;font-weight:600" title="Available — click to assign">' + num + '</span>';
+    }
+  }
+  slots.innerHTML = html;
+}
+
 function wizPopulateIntake() {
   var clientName = _wizClient ? (_wizClient.sClientName1 || '') : '';
   var deptName = _wizDept ? (_wizDept.sDepartmentName || '') : '';
