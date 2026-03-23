@@ -86,6 +86,8 @@
         </button>
       </div>
 
+      <div id="skClients" style="padding:4px 12px"></div>
+
       <!-- STATUS STRIP -->
       <div class="stat-strip">
         <div class="stat-chip" id="statusChip" style="flex-shrink:0">
@@ -708,6 +710,16 @@
           </tbody>
         </table>
       </div>
+      <div class="empty-state-full" id="emptyClients" style="display:none">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="empty-state-title">No clients found</div>
+        <div class="empty-state-msg">Try a different search term or add a new client</div>
+        <div class="empty-state-action">
+          <button class="btn btn-navy" onclick="document.getElementById('searchModal').classList.remove('open');openAddClientModal()">+ New Client</button>
+        </div>
+      </div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px">Click a row to load that client.</div>
     </div>
   </div>
@@ -728,7 +740,8 @@
         <div class="fg g2" style="gap:7px 12px">
           <div class="ff span2">
             <label>Client Name <span class="req">*</span></label>
-            <input id="add-name" class="inp" placeholder="e.g. Memorial Regional Hospital"/>
+            <input id="add-name" class="inp" placeholder="e.g. Memorial Regional Hospital" required/>
+            <div class="ff-error">Client name is required</div>
           </div>
           <div class="ff span2">
             <label>Unit / Building</label>
@@ -736,7 +749,8 @@
           </div>
           <div class="ff span2">
             <label>Address Line 1 <span class="req">*</span></label>
-            <input id="add-addr1" class="inp" placeholder="Street address"/>
+            <input id="add-addr1" class="inp" placeholder="Street address" required/>
+            <div class="ff-error">Address is required</div>
           </div>
           <div class="ff span2">
             <label>Address Line 2</label>
@@ -744,15 +758,17 @@
           </div>
           <div class="ff">
             <label>Zip <span class="req">*</span> <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— city &amp; state auto-fill</span></label>
-            <input id="add-zip" class="inp" placeholder="Enter zip first…" onblur="lookupZipAdd(this.value)" maxlength="5"/>
+            <input id="add-zip" class="inp" placeholder="Enter zip first…" onblur="lookupZipAdd(this.value)" maxlength="5" required/>
+            <div class="ff-error">Zip code is required</div>
           </div>
           <div class="ff">
             <label>City <span class="req">*</span></label>
-            <input id="add-city" class="inp" placeholder="Auto-filled from zip"/>
+            <input id="add-city" class="inp" placeholder="Auto-filled from zip" required/>
+            <div class="ff-error">City is required</div>
           </div>
           <div class="ff">
             <label>State <span class="req">*</span></label>
-            <select id="add-state" class="inp">
+            <select id="add-state" class="inp" required>
               <option value="">— Select —</option>
               <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
               <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
@@ -760,6 +776,7 @@
               <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
               <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
             </select>
+            <div class="ff-error">State is required</div>
           </div>
           <div class="ff">
             <label>Country <span class="req">*</span></label>
@@ -795,33 +812,37 @@
           <div class="fg g2" style="gap:7px 12px">
             <div class="ff span2">
               <label>Department Name <span class="req">*</span></label>
-              <select id="add-dept-name" class="inp">
+              <select id="add-dept-name" class="inp" required>
                 <option value="">— Select —</option>
                 <option>Biomedical Engineering</option><option>Endoscopy</option><option>GI Lab</option><option>Surgery / OR</option>
                 <option>ICU / Critical Care</option><option>Pulmonology</option><option>Urology</option><option>Cardiology</option>
                 <option>Gastroenterology</option><option>Pediatrics</option><option>Emergency</option><option>Radiology</option>
               </select>
+              <div class="ff-error">Department name is required</div>
             </div>
             <div class="ff">
               <label>Sales Rep <span class="req">*</span></label>
-              <select id="add-dept-salesrep" class="inp">
+              <select id="add-dept-salesrep" class="inp" required>
                 <option value="">— Select —</option>
                 <option>Brandi Cook</option><option>Joseph Brassell</option><option>Rob Mancini</option><option>Tom Velez</option><option>Debbie Hightower</option>
               </select>
+              <div class="ff-error">Sales rep is required</div>
             </div>
             <div class="ff">
               <label>Pricing Category <span class="req">*</span></label>
-              <select id="add-dept-pricing" class="inp">
+              <select id="add-dept-pricing" class="inp" required>
                 <option value="">— Select —</option>
                 <option>GSA 2014 (Joint)</option><option>Standard</option><option>Federal</option><option>VA</option><option>Premier</option>
               </select>
+              <div class="ff-error">Pricing category is required</div>
             </div>
             <div class="ff">
               <label>Department Type <span class="req">*</span></label>
-              <select id="add-dept-type" class="inp">
+              <select id="add-dept-type" class="inp" required>
                 <option value="">— Select —</option>
                 <option>Biomedical</option><option>Surgery</option><option>Endoscopy</option><option>GI Lab</option><option>OR</option>
               </select>
+              <div class="ff-error">Department type is required</div>
             </div>
           </div>
         </div>
@@ -1800,7 +1821,32 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2800);
 }
 
+// ── Inline Validation ──────────────────────────────────
+function validateRequired(formContainer) {
+  var valid = true;
+  var fields = formContainer.querySelectorAll('.inp[required]');
+  fields.forEach(function(f) {
+    var val = (f.value || '').trim();
+    if (!val) {
+      f.classList.add('error');
+      valid = false;
+    }
+  });
+  if (!valid && window.TSI && TSI.toast) {
+    TSI.toast.error('Required Fields', 'Please fill in all required fields');
+  }
+  return valid;
+}
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+
 async function saveNewClient() {
+  var modal = document.getElementById('addClientModal');
+  if (!validateRequired(modal)) return;
   const name = document.getElementById('add-name').value.trim();
   const deptName = document.getElementById('add-dept-name').value;
   const salesRep = document.getElementById('add-dept-salesrep').value;
@@ -2072,9 +2118,16 @@ function showTab(name, el) {
 
 function filterClients(val) {
   const q = val.toLowerCase();
+  let visibleCount = 0;
   document.querySelectorAll('#clientSearchBody .search-row').forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    const show = row.textContent.toLowerCase().includes(q);
+    row.style.display = show ? '' : 'none';
+    if (show) visibleCount++;
   });
+  const emptyEl = document.getElementById('emptyClients');
+  const tableEl = document.getElementById('clientSearchTable');
+  if (emptyEl) emptyEl.style.display = visibleCount === 0 ? '' : 'none';
+  if (tableEl) tableEl.style.display = visibleCount === 0 ? 'none' : '';
 }
 
 function selectClient(row, name, id) {
@@ -2438,6 +2491,7 @@ document.addEventListener('keydown', e => {
 // ── Page Init ─────────────────────────────────────────
 async function initPage() {
   API.UI.init();
+  API.UI.showSkeleton('skClients', 6);
 
   // Try loading from API
   try {
@@ -2478,9 +2532,10 @@ async function initPage() {
   _liveMode = false;
   API.UI.updateDemoBadge('demo');
   loadClient(CLIENTS['88th Medical Group']);
+  API.UI.hideSkeleton('skClients');
 }
 
-initPage();
+initPage().then(function() { API.UI.hideSkeleton('skClients'); });
 
 // Autosave: listen to all form fields in the Main tab
 document.querySelectorAll('#tab-main input, #tab-main select').forEach(el => {

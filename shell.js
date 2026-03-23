@@ -124,6 +124,14 @@
     /* Save indicator */
     html += '<div class="save-indicator" id="saveIndicator"></div>';
 
+    /* Density toggle */
+    var isCompact = localStorage.getItem('tsi_density') === 'compact';
+    html += '<button id="densityToggle" class="btn-icon btn-sm" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;margin-left:4px" title="Toggle compact mode" onclick="toggleDensity()">';
+    html += isCompact
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M4 14h16M4 10h16M7 18l5-4 5 4M17 6l-5 4-5-4"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M4 14h16M4 10h16M7 6l5 4 5-4M17 18l-5-4-5 4"/></svg>';
+    html += '</button>';
+
     /* Separator + Service Location */
     html += '<span style="opacity:0.5; margin: 0 4px;">|</span>';
     html += 'Service Location ';
@@ -243,4 +251,32 @@
     ts.src = 'js/toast.js';
     document.head.appendChild(ts);
   }
+
+  // Apply density preference immediately (before paint)
+  if (localStorage.getItem('tsi_density') === 'compact') {
+    document.body.setAttribute('data-density', 'compact');
+  }
+
+  // Density toggle function (global)
+  window.toggleDensity = function () {
+    var body = document.body;
+    var isCompact = body.getAttribute('data-density') === 'compact';
+    if (isCompact) {
+      body.removeAttribute('data-density');
+      localStorage.setItem('tsi_density', 'comfortable');
+    } else {
+      body.setAttribute('data-density', 'compact');
+      localStorage.setItem('tsi_density', 'compact');
+    }
+    // Swap icon
+    var btn = document.getElementById('densityToggle');
+    if (btn) {
+      btn.innerHTML = body.getAttribute('data-density') === 'compact'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M4 14h16M4 10h16M7 18l5-4 5 4M17 6l-5 4-5-4"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M4 14h16M4 10h16M7 6l5 4 5-4M17 18l-5-4-5 4"/></svg>';
+    }
+    if (window.TSI && window.TSI.toast) {
+      TSI.toast.info('Display', isCompact ? 'Comfortable mode' : 'Compact mode', 2000);
+    }
+  };
 })();

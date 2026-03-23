@@ -184,11 +184,17 @@ function ir_updateKPIs() {
 // ─── Render Table ─────────────────────────────────────────────────────────────
 function ir_renderTable() {
   var tbody = document.getElementById('ir_tableBody');
+  var emptyEl = document.getElementById('emptyInstruments');
+  var tableWrap = tbody ? tbody.closest('.table-wrap') : null;
   if (!ir_display.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No repairs match the current filters.</td></tr>';
+    tbody.innerHTML = '';
+    if (tableWrap) tableWrap.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
     document.getElementById('ir_recordInfo').textContent = '0 records';
     return;
   }
+  if (tableWrap) tableWrap.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
   tbody.innerHTML = ir_display.map(function(r) {
     var tot = ir_orderTotal(r);
     var dueC = ir_dueClass(r);

@@ -241,12 +241,21 @@
         <div class="toolbar-search"><input class="search-input" id="reqSearchInput" type="text" placeholder="Search requests…"/></div>
       </div>
 
+      <div id="skLoaners" style="padding:4px 12px"></div>
+
       <!-- DATA TABLE -->
-      <div class="table-wrap">
+      <div class="table-wrap" id="loanerTableWrap">
         <table>
           <thead id="tableHead"></thead>
           <tbody id="tableBody"></tbody>
         </table>
+      </div>
+      <div class="empty-state-full" id="emptyLoaners" style="display:none">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div class="empty-state-title">No loaner records</div>
+        <div class="empty-state-msg">No loaners match your current filters</div>
       </div>
 
       <!-- TABLE FOOTER -->
@@ -727,13 +736,16 @@ function renderTaskLoaners() {
   updateSortHeaders();
   renderLoanerPagination(totalFiltered);
   const tbody = document.getElementById('tableBody');
+  var emptyLoaners = document.getElementById('emptyLoaners');
+  var loanerWrap = document.getElementById('loanerTableWrap');
 
   if (!paged.length) {
-    tbody.innerHTML = `<tr><td colspan="12" class="empty-state">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      <div>No task loaners found</div>
-    </td></tr>`;
+    tbody.innerHTML = '';
+    if (loanerWrap) loanerWrap.style.display = 'none';
+    if (emptyLoaners) emptyLoaners.style.display = '';
   } else {
+    if (loanerWrap) loanerWrap.style.display = '';
+    if (emptyLoaners) emptyLoaners.style.display = 'none';
     tbody.innerHTML = paged.map(r => {
       const key = r.lTaskLoanerKey || r.plTaskScopeTypeKey || 0;
       const loc = r.sLocation || r.psLocationCode || '';
@@ -1378,10 +1390,12 @@ function getSelectedLocation() {
 //  INIT
 // ═══════════════════════════════════════════════════════
 API.UI.init();
+API.UI.showSkeleton('skLoaners', 6);
 loadScopeTypeOptions();
 // Load active loaners first (for pool stats), then task loaners
 loadActiveLoaners().then(() => {
   switchTab('task');
+  API.UI.hideSkeleton('skLoaners');
 });
 </script>
 <script src="js/new-order-wizard.js"></script>

@@ -218,7 +218,8 @@
               <div class="fg g2">
                 <div class="ff span2">
                   <label>Name <span class="req">*</span></label>
-                  <input class="inp" id="fDeptName" value="Biomedical Engineering"/>
+                  <input class="inp" id="fDeptName" value="Biomedical Engineering" required/>
+                  <div class="ff-error">Department name is required</div>
                 </div>
                 <div class="ff">
                   <label>Customer Since</label>
@@ -873,7 +874,8 @@
     <div class="modal-body">
       <div class="ff">
         <label>Department Name <span class="req">*</span></label>
-        <input class="inp" id="newDeptName" placeholder="Enter department name"/>
+        <input class="inp" id="newDeptName" placeholder="Enter department name" required/>
+        <div class="ff-error">Department name is required</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -990,6 +992,29 @@
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
+// ── Inline Validation ──────────────────────────────────
+function validateRequired(formContainer) {
+  var valid = true;
+  var fields = formContainer.querySelectorAll('.inp[required]');
+  fields.forEach(function(f) {
+    var val = (f.value || '').trim();
+    if (!val) {
+      f.classList.add('error');
+      valid = false;
+    }
+  });
+  if (!valid && window.TSI && TSI.toast) {
+    TSI.toast.error('Required Fields', 'Please fill in all required fields');
+  }
+  return valid;
+}
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+
 /* ── Tab switching (preserved) ────────────────────────── */
 function showDeptTab(name,el){
   ['main','addresses','scopes','gpos','scopetypes','subgroups','contacts','documents','maxcharges'].forEach(t=>{
@@ -1950,6 +1975,8 @@ function openContactModal(mode){
   /* ── Save department ─────────────────────────────── */
   async function saveDepartment(){
     if(!currentDeptKey) return;
+    var mainTab = document.getElementById('dtab-main');
+    if(mainTab && !validateRequired(mainTab)) return;
     showSaveStatus('saving');
     if(isDemo){
       await new Promise(r => setTimeout(r, 400));
@@ -2006,6 +2033,8 @@ function openContactModal(mode){
   }
 
   async function submitNewDepartment(){
+    var modal = document.getElementById('newDeptModal');
+    if(!validateRequired(modal)) return;
     const clientKey = parseInt($('selClient').value);
     if(!clientKey) return;
     const name = ($('newDeptName').value || '').trim();

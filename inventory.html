@@ -291,8 +291,16 @@
               <button class="btn-xs btn-outline" style="border:1px solid var(--border-dk);background:#fff;color:var(--label)" onclick="refreshInventory()">Refresh</button>
             </div>
           </div>
+          <div id="skInventory" style="padding:4px 12px"></div>
           <div class="split-left-list" id="itemList">
             <!-- Populated dynamically from inventoryData -->
+          </div>
+          <div class="empty-state-full" id="emptyInventory" style="display:none">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div class="empty-state-title">No inventory items</div>
+            <div class="empty-state-msg">No items match your current filters</div>
           </div>
           <div class="dot-legend" id="dotLegend">
             <div class="dot-legend-item"><span class="stock-dot dot-green"></span> In Stock</div>
@@ -2023,6 +2031,14 @@ function getStockHealth(item) {
 function populateItemList(items) {
   const list = document.getElementById('itemList');
   list.innerHTML = '';
+  var emptyEl = document.getElementById('emptyInventory');
+  if (!items || items.length === 0) {
+    if (emptyEl) emptyEl.style.display = '';
+    list.style.display = 'none';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  list.style.display = '';
   items.forEach((item, i) => {
     const name = item.sItemDescription || item.name || '';
     const key = item.lInventoryKey || '';
@@ -2311,6 +2327,7 @@ function refreshInventory() {
 // ── Page Init ─────────────────────────────────────────
 async function initPage() {
   API.UI.init();
+  API.UI.showSkeleton('skInventory', 6);
 
   try {
     const data = await API.getInventoryList({ pbIncludeInactive: false });
@@ -2344,7 +2361,7 @@ async function initPage() {
 
 wireItemPagination();
 wireSizePagination();
-initPage();
+initPage().then(function() { API.UI.hideSkeleton('skInventory'); });
 
 // ═══════════════════════════════════════════════════════
 //  UX AUDIT FIXES (Sprint 1 + Sprint 2 low-effort)

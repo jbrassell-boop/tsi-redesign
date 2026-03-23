@@ -476,6 +476,22 @@ const API = (() => {
         const menu = document.getElementById('newOrderMenu');
         if (menu && !e.target.closest('#newOrderWrap')) menu.classList.remove('open');
       });
+    },
+    showSkeleton: function(containerId, rows) {
+      var el = document.getElementById(containerId);
+      if (!el) return;
+      var html = '';
+      for (var i = 0; i < (rows || 5); i++) {
+        html += '<div class="skeleton skeleton-row"></div>';
+      }
+      el.innerHTML = html;
+      el.style.display = '';
+    },
+    hideSkeleton: function(containerId) {
+      var el = document.getElementById(containerId);
+      if (!el) return;
+      var skeletons = el.querySelectorAll('.skeleton');
+      skeletons.forEach(function(s) { s.remove(); });
     }
   };
 

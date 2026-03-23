@@ -461,6 +461,21 @@
 .wf-est-contact{font-size:10px;color:#5A6F8A;margin-top:16px;padding-top:12px;border-top:1px solid #E8ECF2}
 .wf-est-contact b{color:#00257A}
 .wf-est-iso{font-size:8px;color:#8896AA;margin-top:6px}
+
+/* ── REPAIR LIST PANEL + FILTER CHIPS ── */
+.chip-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 6px;border-radius:9px;font-size:10px;font-weight:700;background:var(--neutral-200);color:var(--neutral-700);margin-left:4px}
+.chip.on .chip-count{background:rgba(255,255,255,.3);color:#fff}
+#repairListPanel{border-bottom:1px solid var(--border);background:var(--card);overflow:hidden;transition:max-height .2s ease}
+#repairListPanel.collapsed #rlBody{display:none}
+#rlToggle{background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);font-family:inherit;display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px}
+#rlToggle:hover{background:var(--primary-light)}
+#rlToggle svg{width:10px;height:10px;transition:transform .15s}
+#repairListPanel.collapsed #rlToggle svg{transform:rotate(-90deg)}
+table.rl-table{width:100%;border-collapse:collapse}
+table.rl-table th{background:var(--neutral-50);font-size:9px;font-weight:700;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;text-align:left;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:1}
+table.rl-table td{padding:4px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
+table.rl-table tbody tr:hover td{background:var(--primary-light)}
+table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
   </style>
 </head>
 <body>
@@ -495,8 +510,47 @@
     <!-- SMART ALERTS BAR -->
     <div class="alerts-bar" id="alertsBar"></div>
 
+    <!-- REPAIR LIST PANEL — filter chips + compact table -->
+    <div id="repairListPanel">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--neutral-200)">
+        <button id="rlToggle" onclick="toggleRepairList()">
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,3 5,7 8,3"/></svg>
+          Repair List
+        </button>
+        <div class="chip-group" id="repairFilters" style="margin:0">
+          <button class="chip on" data-status="all">All <span class="chip-count" id="fcAll">0</span></button>
+          <button class="chip" data-status="Inspection">Inspection <span class="chip-count" id="fcInspection">0</span></button>
+          <button class="chip" data-status="In Repair">In Repair <span class="chip-count" id="fcInRepair">0</span></button>
+          <button class="chip" data-status="Approval">Approval <span class="chip-count" id="fcApproval">0</span></button>
+          <button class="chip" data-status="Shipping">Shipping <span class="chip-count" id="fcShipping">0</span></button>
+          <button class="chip" data-status="Other">Other <span class="chip-count" id="fcOther">0</span></button>
+        </div>
+      </div>
+      <div id="rlBody" style="max-height:220px;overflow-y:auto">
+        <table class="rl-table" id="rlTable">
+          <thead><tr>
+            <th>Work Order</th><th>Date In</th><th>Client</th><th>Model</th><th>Serial</th><th>Status</th><th>Level</th>
+          </tr></thead>
+          <tbody id="rlTbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Loading repairs...</td></tr>
+          </tbody>
+        </table>
+        <div class="empty-state-full" id="emptyRepairs" style="display:none">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div class="empty-state-title">No repairs found</div>
+          <div class="empty-state-msg">Try adjusting your filters or create a new work order</div>
+          <div class="empty-state-action">
+            <button class="btn btn-navy" onclick="nwoRevealCreate()">+ New Repair</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- DETAIL PANEL (full width) -->
     <div class="repair-detail">
+        <div id="skRepairs" style="padding:4px 12px"></div>
         <div class="detail-scroll" id="detailScroll">
 
           <!-- TABS -->
@@ -5849,6 +5903,29 @@ function serializeDefects() {
   markDirty();
 }
 
+// ── Inline Validation ──────────────────────────────────
+function validateRequired(formContainer) {
+  var valid = true;
+  var fields = formContainer.querySelectorAll('.inp[required]');
+  fields.forEach(function(f) {
+    var val = (f.value || '').trim();
+    if (!val) {
+      f.classList.add('error');
+      valid = false;
+    }
+  });
+  if (!valid && window.TSI && TSI.toast) {
+    TSI.toast.error('Required Fields', 'Please fill in all required fields');
+  }
+  return valid;
+}
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+});
+
 function showToast(msg, ms) {
   let t = document.getElementById('tsiToast');
   if (!t) { t = document.createElement('div'); t.id = 'tsiToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;font-family:inherit;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
@@ -5874,6 +5951,131 @@ document.querySelectorAll('.wf-drawer').forEach(function(el) {
 });
 
 function reloadRepairs() { initPage(); }
+
+// ── Repair List Panel — filter chips + compact table ──
+var _repairListData = [];
+var _repairListFilter = 'all';
+
+// Map detailed statuses to chip categories
+function statusCategory(statusName) {
+  if (!statusName) return 'Other';
+  var s = statusName.toLowerCase();
+  if (s.indexOf('inspection') !== -1 || s === 'waiting on inspection') return 'Inspection';
+  if (s.indexOf('in repair') !== -1 || s.indexOf('drying') !== -1 || s.indexOf('semi rigid') !== -1 || s.indexOf('special rigid') !== -1 || s.indexOf('build') !== -1) return 'In Repair';
+  if (s.indexOf('approv') !== -1 || s.indexOf('waiting for') !== -1 || s.indexOf('more info') !== -1 || s === 'qc - waiting customer approval') return 'Approval';
+  if (s.indexOf('ship') !== -1 || s.indexOf('scheduled') !== -1) return 'Shipping';
+  if (s.indexOf('outsource') !== -1 || s.indexOf('parts hold') !== -1 || s.indexOf('additional evaluation') !== -1) return 'Other';
+  return 'Other';
+}
+
+function resolveStatusName(r) {
+  // Repair list items may have sRepairStatus directly, or need lookup via lRepairStatusID
+  if (r.sRepairStatus) return r.sRepairStatus;
+  if (r.lRepairStatusID && _statuses.length) {
+    var found = _statuses.find(function(s) { return s.lRepairStatusID === r.lRepairStatusID; });
+    return found ? found.sRepairStatus : '';
+  }
+  return '';
+}
+
+function statusPillStyle(s) {
+  if (!s) return 'background:#F3F4F6;color:#4B5563';
+  if (/ship|scheduled/i.test(s)) return 'background:#DCFCE7;color:#166534';
+  if (/in repair|drying|build|semi rigid|special rigid/i.test(s)) return 'background:#DBEAFE;color:#1E40AF';
+  if (/approv|waiting/i.test(s)) return 'background:#FEF3C7;color:#92400E';
+  if (/inspection/i.test(s)) return 'background:#EDE9FE;color:#6D28D9';
+  return 'background:#F3F4F6;color:#4B5563';
+}
+
+async function loadRepairList() {
+  var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+  try {
+    var list = await API.getRepairList(svcKey);
+    _repairListData = Array.isArray(list) ? list : [];
+  } catch (e) {
+    if (typeof MockDB !== 'undefined') {
+      _repairListData = MockDB.getAll('repairs');
+    }
+  }
+  // Resolve status names
+  _repairListData.forEach(function(r) {
+    if (!r._statusName) r._statusName = resolveStatusName(r);
+    if (!r._category) r._category = statusCategory(r._statusName);
+  });
+  // Sort by date descending
+  _repairListData.sort(function(a, b) { return (b.dtDateIn || '').localeCompare(a.dtDateIn || ''); });
+  updateRepairListCounts();
+  renderRepairList();
+}
+
+function updateRepairListCounts() {
+  var counts = { all: _repairListData.length, Inspection: 0, 'In Repair': 0, Approval: 0, Shipping: 0, Other: 0 };
+  _repairListData.forEach(function(r) {
+    var cat = r._category || 'Other';
+    if (counts[cat] !== undefined) counts[cat]++;
+  });
+  document.getElementById('fcAll').textContent = counts.all;
+  document.getElementById('fcInspection').textContent = counts.Inspection;
+  document.getElementById('fcInRepair').textContent = counts['In Repair'];
+  document.getElementById('fcApproval').textContent = counts.Approval;
+  document.getElementById('fcShipping').textContent = counts.Shipping;
+  document.getElementById('fcOther').textContent = counts.Other;
+}
+
+function renderRepairList() {
+  var tbody = document.getElementById('rlTbody');
+  var visible = _repairListFilter === 'all'
+    ? _repairListData
+    : _repairListData.filter(function(r) { return r._category === _repairListFilter; });
+
+  var emptyEl = document.getElementById('emptyRepairs');
+  var tableEl = document.getElementById('rlTable');
+  if (!visible.length) {
+    tbody.innerHTML = '';
+    if (tableEl) tableEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if (tableEl) tableEl.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  var activeKey = _currentRepair ? _currentRepair.lRepairKey : 0;
+  tbody.innerHTML = visible.slice(0, 100).map(function(r) {
+    var isActive = r.lRepairKey === activeKey;
+    return '<tr class="' + (isActive ? 'rl-active' : '') + '" data-rkey="' + r.lRepairKey + '" onclick="rlSelectRepair(' + r.lRepairKey + ')">' +
+      '<td><code style="font-size:10px;font-weight:600">' + (r.sWorkOrderNumber || '') + '</code></td>' +
+      '<td>' + fmtDate(r.dtDateIn) + '</td>' +
+      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.sClientName || r.sShipName1 || '—') + '</td>' +
+      '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.sScopeTypeDesc || r.sModel || '—') + '</td>' +
+      '<td>' + (r.sSerialNumber || '—') + '</td>' +
+      '<td><span class="status-pill" style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600;' + statusPillStyle(r._statusName) + '">' + (r._statusName || '—') + '</span></td>' +
+      '<td>' + (r.sRepairLevel || '—') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function rlSelectRepair(key) {
+  loadRepair(key).then(function() {
+    // Update active row highlight
+    document.querySelectorAll('#rlTbody tr').forEach(function(tr) {
+      tr.classList.toggle('rl-active', parseInt(tr.dataset.rkey) === key);
+    });
+  });
+}
+
+function toggleRepairList() {
+  document.getElementById('repairListPanel').classList.toggle('collapsed');
+}
+
+// Wire chip clicks
+document.getElementById('repairFilters').addEventListener('click', function(e) {
+  var chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('#repairFilters .chip').forEach(function(c) { c.classList.remove('on'); });
+  chip.classList.add('on');
+  _repairListFilter = chip.dataset.status;
+  renderRepairList();
+});
 
 // ── New Work Order ──
 let _nwoSelectedRepair = null;
@@ -5943,6 +6145,11 @@ function wizNext() {
   if (_wizStep === 1 && _wizClient) { wizGoStep(2); wizRenderDepts(); }
   else if (_wizStep === 2 && _wizDept) { wizGoStep(3); wizLoadScopes(); }
   else if (_wizStep === 3 && _wizScope) { wizGoStep(4); wizRenderSummary(); }
+  else {
+    // Validation feedback when no selection made
+    var labels = {1:'client',2:'department',3:'scope'};
+    showToast('Please select a ' + (labels[_wizStep] || 'selection') + ' before continuing');
+  }
 }
 
 function wizUpdateNextBtn() {
@@ -6792,6 +6999,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Init ──
 async function initPage() {
   updateUserInfo();
+  API.UI.showSkeleton('skRepairs', 6);
 
   // Check URL for a specific repair key (e.g. repairs.html?key=12345)
   // or work order number (e.g. repairs.html?wo=NR26072001)
@@ -6856,6 +7064,9 @@ async function initPage() {
     }
 
     console.log('[TSI Repairs] Lookups loaded. Clients:', _clients.length, 'Departments:', _departments.length);
+
+    // Load repair list for filter panel (non-blocking)
+    loadRepairList();
 
     // Handle URL parameters for direct actions
     if (requestedKey) {
@@ -6958,6 +7169,9 @@ async function initPage() {
     populateSelect('fPricingCat', _pricingCategories, 'lPricingCategoryKey', 'sPricingDescription', true);
     populateSelect('fPaymentTerms', _paymentTerms, 'lPaymentTermsKey', 'sTermsDesc', true);
 
+    // Load repair list for filter panel (fallback)
+    loadRepairList();
+
     // Load first repair from MockDB if available
     if (typeof MockDB !== 'undefined') {
       var allRepairs = MockDB.getAll('repairs');
@@ -6977,6 +7191,7 @@ async function initPage() {
   }
 }
 initPage().then(() => {
+  API.UI.hideSkeleton('skRepairs');
   API.UI.init();
 });
 initItemContextMenu();
