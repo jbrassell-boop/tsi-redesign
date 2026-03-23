@@ -2096,10 +2096,18 @@ async function generateForm(formId) {
 
   if (form) {
     showWorkflowToast(form.name + ' generated');
-    // Add generated form to Documents tab
     addGeneratedFormDoc(form, now);
-    // Generate the actual PDF
-    generateFormPDF(formId);
+    try {
+      generateFormPDF(formId);
+    } catch(e) {
+      console.error('[TSI] PDF generation error for', formId, e);
+    }
+    // Re-open the current form's drawer after generation (ensures it stays visible)
+    const currentDrawer = document.getElementById('drawer-form-' + formId);
+    if (currentDrawer) {
+      requestAnimationFrame(() => currentDrawer.classList.add('open'));
+    }
+    console.log('[TSI Workflow] Generated', formId, '— status now', targetStatus || '(unchanged)');
   }
 }
 
