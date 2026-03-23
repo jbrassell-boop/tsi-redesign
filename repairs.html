@@ -725,7 +725,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                 <table class="items" id="repairItemsTable">
                   <thead style="position:sticky;top:0;z-index:1">
                     <tr>
-                      <th style="width:40px;text-align:center">Appr</th>
+                      <th style="width:58px;text-align:center">Appr</th>
                       <th style="width:70px">Code</th>
                       <th>Repair Item</th>
                       <th style="width:68px;text-align:center" title="User Abuse or Normal Wear & Tear">Cause</th>
@@ -752,6 +752,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
             <div class="action-bar">
               <div class="action-group"><div class="lbl">Approved</div><div class="val green" id="aTotalApproved">$0.00</div></div>
               <div class="action-group"><div class="lbl">Unapproved</div><div class="val red" id="aTotalUnapproved">$0.00</div></div>
+              <div class="action-group" style="display:none"><div class="lbl">Blind</div><div class="val" id="aTotalBlind" style="color:#92400E">$0.00</div></div>
               <div class="action-group"><div class="lbl">Consumption</div><div class="val" id="aTotalConsumption">$0.00</div></div>
               <div style="flex:1"></div>
               <div class="field" style="width:105px"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly/></div>
@@ -4241,16 +4242,24 @@ function renderRepairItems(ds) {
     const key = item.lRepairItemTranKey || '';
     const appr = item.sApproved || '';
     const isApproved = appr === 'Y';
+    const isBlind = item.bBlind === true || item.bBlind === 'Y';
     const tech = item.sTechInits || item.sTech1 || '';
     const tech2 = item.sTechInits2 || item.sTech2Inits || item.sTech2 || '';
     const techDisplay = tech + (tech2 ? '/' + tech2 : '');
     const comment = item.sComments || '';
-    return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')" style="' + (isApproved ? 'background:#F0FDF4' : '') + '">' +
-      '<td style="text-align:center"><button class="btn-xs" style="width:28px;height:22px;border-radius:4px;border:1.5px solid ' + (isApproved ? 'var(--success)' : 'var(--neutral-200)') + ';background:' + (isApproved ? 'var(--success)' : 'var(--card)') + ';color:' + (isApproved ? '#fff' : 'var(--neutral-500)') + ';cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" onclick="event.stopPropagation();toggleApproval(' + i + ')" title="Toggle approval">' + (isApproved ? '✓' : '—') + '</button></td>' +
+    const rowBg = isBlind ? 'background:#F9FAFB;opacity:.65' : (isApproved ? 'background:#F0FDF4' : '');
+    const descStyle = isBlind ? 'font-weight:500;font-style:italic;text-decoration:line-through;color:var(--neutral-500)' : 'font-weight:500';
+    return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')" style="' + rowBg + '">' +
+      '<td style="text-align:center;white-space:nowrap">' +
+        '<button class="btn-xs" style="width:28px;height:22px;border-radius:4px;border:1.5px solid ' + (isApproved ? 'var(--success)' : 'var(--neutral-200)') + ';background:' + (isApproved ? 'var(--success)' : 'var(--card)') + ';color:' + (isApproved ? '#fff' : 'var(--neutral-500)') + ';cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" onclick="event.stopPropagation();toggleApproval(' + i + ')" title="Toggle approval">' + (isApproved ? '✓' : '—') + '</button>' +
+        '<button class="btn-xs" style="width:22px;height:22px;border-radius:4px;border:1px solid ' + (isBlind ? 'var(--warning)' : 'var(--neutral-200)') + ';background:' + (isBlind ? '#FEF3C7' : 'var(--card)') + ';color:' + (isBlind ? '#92400E' : 'var(--neutral-400)') + ';cursor:pointer;font-size:10px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px" onclick="event.stopPropagation();toggleBlind(' + i + ')" title="' + (isBlind ? 'Blind — hidden from client' : 'Mark as blind (hide from client)') + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">' + (isBlind ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>') + '</svg>' +
+        '</button>' +
+      '</td>' +
       '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
-      '<td><span style="font-weight:500">' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</span></td>' +
+      '<td><span style="' + descStyle + '">' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + (isBlind ? ' <span style="font-size:8px;font-weight:700;color:#92400E;font-style:normal;text-decoration:none">BLIND</span>' : '') + '</span></td>' +
       '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: User Abuse / Normal Wear &amp; Tear / None">' + uanwtPill(item.sUAorNWT||item.sUANWT||'') + '</td>' +
-      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: Warranty / Non-conformance / Customer / Amendment / None">' + wncaPill(item.sFixType||item.sWNCA||'') + '</td>' +
+      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: Repair / Warranty / Non-conformance / Customer / Amendment / None">' + wncaPill(item.sFixType||item.sWNCA||'') + '</td>' +
       '<td style="text-align:right;font-family:var(--mono);font-weight:600">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
       '<td style="font-size:10px;color:var(--neutral-500)">' + techDisplay + '</td>' +
       '<td style="font-size:10px;color:var(--neutral-700);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + comment.replace(/"/g,'&quot;') + '">' + comment + '</td></tr>';
@@ -4280,14 +4289,17 @@ function autoPopulateRepairLevel(items) {
 }
 
 function updateItemTotals() {
-  let approved = 0, unapproved = 0;
+  let approved = 0, unapproved = 0, blind = 0;
   _repairItems.forEach(item => {
     const amt = parseFloat(item.dblRepairPrice || item.mAmount || item.dblAmount || 0);
-    if (item.sApproved === 'Y') approved += amt;
+    if (item.bBlind) blind += amt;
+    else if (item.sApproved === 'Y') approved += amt;
     else unapproved += amt;
   });
   document.getElementById('aTotalApproved').textContent = fmtMoney(approved);
   document.getElementById('aTotalUnapproved').textContent = fmtMoney(unapproved);
+  var blindEl = document.getElementById('aTotalBlind');
+  if (blindEl) { blindEl.textContent = fmtMoney(blind); blindEl.parentElement.style.display = blind > 0 ? '' : 'none'; }
 }
 
 let _selectedItemIdx = -1;
@@ -4418,6 +4430,12 @@ function initItemContextMenu() {
 function toggleApproval(i) {
   if (!_repairItems[i]) return;
   _repairItems[i].sApproved = _repairItems[i].sApproved === 'Y' ? 'N' : 'Y';
+  renderRepairItems(_repairItems);
+  markDirty();
+}
+function toggleBlind(i) {
+  if (!_repairItems[i]) return;
+  _repairItems[i].bBlind = !_repairItems[i].bBlind;
   renderRepairItems(_repairItems);
   markDirty();
 }
