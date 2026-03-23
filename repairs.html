@@ -1409,9 +1409,10 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
             <th style="width:12%">Model</th>
             <th style="width:16%">Serial Number</th>
             <th style="width:10%">P.O. #</th>
+            <th style="width:60px"></th>
           </tr></thead>
           <tbody id="nwoResults">
-            <tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>
+            <tr><td colspan="8" class="msg-empty">Enter search criteria above and click Search.</td></tr>
           </tbody>
         </table>
       </div>
@@ -6429,7 +6430,7 @@ function newRepair() {
   _wizClient = null; _wizDept = null; _wizScope = null;
   document.getElementById('nwoQuery').value = '';
   document.getElementById('nwoOnlyOpen').checked = true;
-  document.getElementById('nwoResults').innerHTML = '<tr><td colspan="7" class="msg-empty">Enter search criteria above and click Search.</td></tr>';
+  document.getElementById('nwoResults').innerHTML = '<tr><td colspan="8" class="msg-empty">Enter search criteria above and click Search.</td></tr>';
   document.getElementById('nwoWizard').classList.remove('open');
   document.getElementById('nwoActions').style.display = 'flex';
   document.getElementById('nwoBtnOpen').style.opacity = '.5';
@@ -6936,11 +6937,11 @@ async function nwoSearch() {
   document.getElementById('nwoBtnOpen').style.pointerEvents = 'none';
 
   if (!q) {
-    tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">Enter a WO#, SN#, or PO# above and click Search.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="msg-empty">Enter a WO#, SN#, or PO# above and click Search.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = '<tr><td colspan="7" class="msg-empty" style="color:var(--blue)">Searching...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="msg-empty" style="color:var(--blue)">Searching...</td></tr>';
 
   try {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
@@ -6955,17 +6956,20 @@ async function nwoSearch() {
     );
 
     if (!results.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">No matching repairs found for "<b>' + esc(q) + '</b>"</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="msg-empty">No matching repairs found for "<b>' + esc(q) + '</b>"</td></tr>';
     } else {
-      tbody.innerHTML = results.slice(0, 50).map(r =>
-        '<tr onclick="nwoSelectRow(this,' + r.lRepairKey + ')">' +
-        '<td style="font-weight:600">' + (r.sClientName || r.sShipName1 || '—') + '</td>' +
-        '<td>' + (r.sDepartmentName || r.sShipName2 || '—') + '</td>' +
-        '<td><code style="font-size:10px">' + (r.sWorkOrderNumber || '') + '</code></td>' +
+      // Store results for quick-create
+      window._nwoSearchResults = results;
+      tbody.innerHTML = results.slice(0, 50).map((r, idx) =>
+        '<tr>' +
+        '<td style="font-weight:600;cursor:pointer" onclick="nwoSelectRow(this.parentElement,' + r.lRepairKey + ')">' + (r.sClientName || r.sShipName1 || '—') + '</td>' +
+        '<td style="cursor:pointer" onclick="nwoSelectRow(this.parentElement,' + r.lRepairKey + ')">' + (r.sDepartmentName || r.sShipName2 || '—') + '</td>' +
+        '<td style="cursor:pointer" onclick="nwoSelectRow(this.parentElement,' + r.lRepairKey + ')"><code style="font-size:10px">' + (r.sWorkOrderNumber || '') + '</code></td>' +
         '<td>' + fmtDate(r.dtDateIn) + '</td>' +
         '<td>' + (r.sScopeTypeDesc || r.sModel || '—') + '</td>' +
         '<td>' + (r.sSerialNumber || '—') + '</td>' +
         '<td>' + (r.sPurchaseOrder || '') + '</td>' +
+        '<td style="text-align:right"><button onclick="event.stopPropagation();nwoQuickCreate(' + idx + ')" style="height:22px;padding:0 8px;border:1.5px solid var(--green);border-radius:4px;background:#fff;color:var(--green);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+ New WO</button></td>' +
         '</tr>'
       ).join('');
     }
@@ -6978,8 +6982,47 @@ async function nwoSearch() {
     }
   } catch (e) {
     // Demo fallback
-    tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">Search unavailable in demo mode. Click <b>Create New</b> to start a fresh work order.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="msg-empty">Search unavailable in demo mode. Click <b>Create New</b> to start a fresh work order.</td></tr>';
   }
+}
+
+// Quick-create a new WO from a search result — skips client/dept/scope steps
+function nwoQuickCreate(idx) {
+  var r = (window._nwoSearchResults || [])[idx];
+  if (!r) { showToast('Could not load repair data'); return; }
+  // Build wizard state from the search result
+  _wizClient = {
+    lClientKey: r.lClientKey || 0,
+    sClientName1: r.sClientName || r.sShipName1 || '',
+    lSalesRepKey: r.lSalesRepKey || 0,
+    lPricingCategoryKey: r.lPricingCategoryKey || 0,
+    lPaymentTermsKey: r.lPaymentTermsKey || 0
+  };
+  _wizDept = {
+    lDepartmentKey: r.lDepartmentKey || 0,
+    sDepartmentName: r.sDepartmentName || r.sShipName2 || '',
+    lSalesRepKey: r.lSalesRepKey || 0,
+    lPricingCategoryKey: r.lPricingCategoryKey || 0,
+    lPaymentTermsKey: r.lPaymentTermsKey || 0,
+    lDeliveryMethodKey: r.lDeliveryMethodKey || 0,
+    lContractKey: r.lContractKey || 0
+  };
+  _wizScope = {
+    lScopeKey: r.lScopeKey || 0,
+    sSerialNumber: r.sSerialNumber || '',
+    sScopeTypeDesc: r.sScopeTypeDesc || r.sModel || '',
+    sRigidOrFlexible: r.sRigidOrFlexible || 'F',
+    sManufacturer: r.sManufacturer || '',
+    sScopeTypeCategory: r.sScopeTypeCategory || ''
+  };
+  // Close the search modal
+  closeNWO();
+  // Open NWO wizard directly on intake step
+  document.getElementById('nwoActions').style.display = 'none';
+  document.getElementById('nwoWizard').classList.add('open');
+  wizGoStep(4);
+  wizPopulateIntake();
+  showToast('Creating new WO for SN# ' + (_wizScope.sSerialNumber || ''));
 }
 
 function nwoSelectRow(tr, repairKey) {
