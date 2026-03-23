@@ -236,4 +236,11 @@
     var menu = document.getElementById('newOrderMenu');
     if (menu && !e.target.closest('#newOrderWrap')) menu.classList.remove('open');
   });
+
+  // Inject toast.js if not already loaded
+  if (!window.TSI || !window.TSI.toast) {
+    var ts = document.createElement('script');
+    ts.src = 'js/toast.js';
+    document.head.appendChild(ts);
+  }
 })();
