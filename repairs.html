@@ -1422,7 +1422,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
         <div class="nwo-step-tab active" id="wizTab1"><span class="step-num">1</span> Client</div>
         <div class="nwo-step-tab" id="wizTab2"><span class="step-num">2</span> Department</div>
         <div class="nwo-step-tab" id="wizTab3"><span class="step-num">3</span> Scope</div>
-        <div class="nwo-step-tab" id="wizTab4"><span class="step-num">4</span> Confirm</div>
+        <div class="nwo-step-tab" id="wizTab4"><span class="step-num">4</span> Intake</div>
       </div>
 
       <!-- Step 1: Client -->
@@ -1469,23 +1469,60 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
         </div>
       </div>
 
-      <!-- Step 4: Confirm -->
+      <!-- Step 4: Intake Details -->
       <div class="nwo-step-panel" id="wizPanel4">
-        <div class="wiz-summary">
-          <div class="wiz-summary-card">
-            <h4>Client</h4>
-            <div class="val" id="wizSumClient">—</div>
+        <div id="wizIntakeSummary" style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-weight:700;color:var(--green)">Client:</span> <span id="wizIntClient"></span></div>
+          <div><span style="font-weight:700;color:var(--green)">Dept:</span> <span id="wizIntDept"></span></div>
+          <div><span style="font-weight:700;color:var(--green)">Scope:</span> <span id="wizIntScope"></span></div>
+        </div>
+
+        <div id="wizOpenRepairWarn" style="display:none;margin-bottom:10px;padding:8px 12px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;font-size:11px;color:#92400E;font-weight:600"></div>
+
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">Customer Complaint *</label>
+          <textarea id="wizComplaint" rows="3" placeholder="What did the customer report? (e.g., Leaking at base, No image, Angulation stiff...)" style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-dk);border-radius:5px;padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-bottom:10px">
+          <div style="flex:1">
+            <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">Packaging Received In</label>
+            <select id="wizPackaging" style="width:100%;height:28px;font-size:11px;border:1.5px solid var(--border-dk);border-radius:5px;font-family:inherit">
+              <option value="Box">Box</option>
+              <option value="Case">Carrying Case</option>
+              <option value="Padded Envelope">Padded Envelope</option>
+              <option value="Tray">Tray</option>
+              <option value="None">No Packaging</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
-          <div class="wiz-summary-card">
-            <h4>Department</h4>
-            <div class="val" id="wizSumDept">—</div>
+          <div style="flex:1">
+            <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">Rack Position</label>
+            <input type="text" id="wizRack" placeholder="e.g. A-12" style="width:100%;height:28px;font-size:11px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-family:inherit;box-sizing:border-box"/>
           </div>
-          <div class="wiz-summary-card">
-            <h4>Scope</h4>
-            <div class="val" id="wizSumScope">—</div>
+          <div style="flex:1">
+            <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block">PO Number</label>
+            <input type="text" id="wizPO" placeholder="If provided" style="width:100%;height:28px;font-size:11px;border:1.5px solid var(--border-dk);border-radius:5px;padding:0 8px;font-family:inherit;box-sizing:border-box"/>
           </div>
         </div>
-        <div id="wizOpenRepairWarn" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;font-size:11px;color:#92400E;font-weight:600"></div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block">Accessories Received</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px">
+            <label><input type="checkbox" id="wizAccNone" onchange="if(this.checked){document.querySelectorAll('#wizAccList input').forEach(c=>c.checked=false)}"> None</label>
+            <span id="wizAccList" style="display:contents">
+              <label><input type="checkbox"> ETO Cap</label>
+              <label><input type="checkbox" checked> A/W Button</label>
+              <label><input type="checkbox" checked> Suction Button</label>
+              <label><input type="checkbox"> Water Res. Cap</label>
+              <label><input type="checkbox"> Biopsy Valve</label>
+              <label><input type="checkbox"> Light Post Adapter</label>
+              <label><input type="checkbox"> Mouthpiece</label>
+              <label><input type="checkbox"> Carrying Case</label>
+              <label><input type="checkbox"> Video Plug</label>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="nwo-wizard-nav">
@@ -1493,7 +1530,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
         <div style="flex:1"></div>
         <button id="wizBtnCancel" onclick="wizCancel()" style="height:32px;padding:0 16px;border:1.5px solid var(--border-dk);border-radius:6px;background:#fff;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">Cancel</button>
         <button id="wizBtnNext" onclick="wizNext()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none">Next</button>
-        <button id="wizBtnCreate" onclick="wizSubmit()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:none">Create Work Order</button>
+        <button id="wizBtnCreate" onclick="wizSubmit()" style="height:32px;padding:0 20px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:none">+ Create Order</button>
       </div>
     </div>
 
@@ -6428,16 +6465,9 @@ function wizGoStep(step) {
   }
   document.getElementById('wizBtnBack').style.display = step > 1 ? '' : 'none';
   document.getElementById('wizBtnNext').style.display = step < 4 ? '' : 'none';
-  // Create button only on step 4 AND requires scope
+  // Create button on step 4 (intake) — always enabled, complaint validated on submit
   var createBtn = document.getElementById('wizBtnCreate');
   createBtn.style.display = step === 4 ? '' : 'none';
-  if (step === 4 && !_wizScope) {
-    createBtn.style.opacity = '.5';
-    createBtn.style.pointerEvents = 'none';
-  } else {
-    createBtn.style.opacity = '';
-    createBtn.style.pointerEvents = '';
-  }
   wizUpdateNextBtn();
   console.log('[NWO] Step', step, '| Client:', !!_wizClient, '| Dept:', !!_wizDept, '| Scope:', !!_wizScope);
 }
@@ -6447,7 +6477,7 @@ function wizBack() { if (_wizStep > 1) wizGoStep(_wizStep - 1); }
 function wizNext() {
   if (_wizStep === 1 && _wizClient) { wizGoStep(2); wizRenderDepts(); }
   else if (_wizStep === 2 && _wizDept) { wizGoStep(3); wizLoadScopes(); }
-  else if (_wizStep === 3 && _wizScope) { wizGoStep(4); wizRenderSummary(); }
+  else if (_wizStep === 3 && _wizScope) { wizGoStep(4); wizPopulateIntake(); }
   else {
     // Validation feedback when no selection made
     var labels = {1:'client',2:'department',3:'scope'};
@@ -6620,8 +6650,8 @@ function wizPickScope(key) {
   _wizScope = _wizDeptScopes.find(s => s.lScopeKey == key) || null;
   wizRenderScopes(document.getElementById('wizScopeSearch').value);
   wizUpdateNextBtn();
-  // Skip confirm — go straight to creating the WO
-  if (_wizScope) setTimeout(() => wizSubmit(), 200);
+  // Advance to intake step
+  if (_wizScope) setTimeout(() => { wizGoStep(4); wizPopulateIntake(); }, 200);
 }
 
 // ── Cascading: Instrument Type → Model (searchable) ──
@@ -6755,7 +6785,7 @@ async function wizCreateScope() {
       showToast('Scope created');
       await wizLoadScopes();
       const found = _wizDeptScopes.find(s => s.sSerialNumber === sn);
-      if (found) { _wizScope = found; wizRenderScopes(); wizUpdateNextBtn(); setTimeout(() => wizSubmit(), 300); }
+      if (found) { _wizScope = found; wizRenderScopes(); wizUpdateNextBtn(); setTimeout(() => { wizGoStep(4); wizPopulateIntake(); }, 300); }
     } catch(e) { showToast('API error — adding locally'); }
   }
 
@@ -6777,8 +6807,8 @@ async function wizCreateScope() {
     _wizScope = localScope;
     wizRenderScopes();
     wizUpdateNextBtn();
-    showToast('Scope added — creating work order...');
-    setTimeout(() => wizSubmit(), 300);
+    showToast('Scope added');
+    setTimeout(() => { wizGoStep(4); wizPopulateIntake(); }, 300);
   }
 
   document.getElementById('wizNewSN').value = '';
@@ -6787,6 +6817,28 @@ async function wizCreateScope() {
 }
 
 // ── Step 4: Summary & Confirm ──
+function wizPopulateIntake() {
+  var clientName = _wizClient ? (_wizClient.sClientName1 || '') : '';
+  var deptName = _wizDept ? (_wizDept.sDepartmentName || '') : '';
+  var scopeDesc = _wizScope ? ((_wizScope.sScopeTypeDesc || '') + ' / SN# ' + (_wizScope.sSerialNumber || '')) : '';
+  document.getElementById('wizIntClient').textContent = clientName;
+  document.getElementById('wizIntDept').textContent = deptName;
+  document.getElementById('wizIntScope').textContent = scopeDesc;
+  // Focus complaint field
+  setTimeout(function() { var c = document.getElementById('wizComplaint'); if (c) c.focus(); }, 100);
+  // Check for open repairs on this scope
+  var warn = document.getElementById('wizOpenRepairWarn');
+  if (warn) warn.style.display = 'none';
+  if (_wizScope && _wizScope.lScopeKey > 0) {
+    API.checkOpenRepairForScope(_wizScope.lScopeKey).then(function(r) {
+      if (r && (r.hasOpenRepair || r.lRepairKey)) {
+        warn.textContent = '⚠ This scope already has an open repair (WO# ' + (r.sWorkOrderNumber || r.lRepairKey) + '). Creating another will result in a duplicate.';
+        warn.style.display = 'block';
+      }
+    }).catch(function() {});
+  }
+}
+
 async function wizRenderSummary() {
   const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
   const clientAddr = [_wizClient.sAddress1 || _wizClient.sShipAddr1, _wizClient.sCity || _wizClient.sShipCity, _wizClient.sState || _wizClient.sShipState, _wizClient.sZip || _wizClient.sShipZip].filter(Boolean).join(', ');
@@ -6883,6 +6935,16 @@ function nwoOpenSelected() {
 // ── Wizard Submit — Create Work Order ──
 function wizSubmit() {
   if (!_wizClient || !_wizDept || !_wizScope) { showToast('Complete all steps first'); return; }
+  // Capture intake fields
+  var complaint = (document.getElementById('wizComplaint') || {}).value || '';
+  var rack = (document.getElementById('wizRack') || {}).value || '';
+  var po = (document.getElementById('wizPO') || {}).value || '';
+  var packaging = (document.getElementById('wizPackaging') || {}).value || '';
+  if (!complaint.trim()) { showToast('Enter the customer complaint'); document.getElementById('wizComplaint').focus(); return; }
+  // Collect accessories
+  var accChecks = document.querySelectorAll('#wizAccList input[type="checkbox"]:checked');
+  var accessories = [];
+  accChecks.forEach(function(c) { var lbl = c.parentElement ? c.parentElement.textContent.trim() : ''; if (lbl) accessories.push(lbl); });
 
   const clientKey = _wizClient.lClientKey;
   const clientName = _wizClient.sClientName1 || _wizClient.sClientName || '';
@@ -6945,7 +7007,11 @@ function wizSubmit() {
     dtAprRecvd: null, dtReqSent: null, dtLastUpdate: null,
     dtCarrierDeliveryDateGuaranteed: null,
     sSerialNumber: scopeSN, sScopeTypeDesc: scopeModel, sRigidOrFlexible: scopeRF, nDaysSinceLastIn: 0,
-    sComplaintDesc: '', sAngInUp: '', sAngInDown: '', sAngInRight: '', sAngInLeft: '',
+    sComplaintDesc: complaint, sAngInUp: '', sAngInDown: '', sAngInRight: '', sAngInLeft: '',
+    sRackPosition: rack, sPurchaseOrder: po, sPackaging: packaging,
+    sIncludesCaseYN: accessories.includes('Carrying Case') ? 'Y' : 'N',
+    sIncludesCapYN: accessories.includes('ETO Cap') ? 'Y' : 'N',
+    sIncludesWaterResCapYN: accessories.includes('Water Res. Cap') ? 'Y' : 'N',
     nIncomingEpoxySize: '', sBRJigSize: '', sNotes: '',
     mMaxCharge: 0, dblAmtRepair: 0, dblAmtCostLabor: 0, dblAmtCostMaterial: 0,
     dblAmtShipping: 0, dblAmtCommission: 0, dblOutSourceCost: 0,
@@ -6957,8 +7023,8 @@ function wizSubmit() {
     sBillCity: _wizClient.sCity || _wizClient.sBillCity || '', sBillState: _wizClient.sState || _wizClient.sBillState || '',
     sBillZip: _wizClient.sZip || _wizClient.sBillZip || '', sBillEmail: _wizClient.sBillEmail || '', sBillTo: 'C',
     sShipTrackingNumberIn: '', sShipTrackingNumber: '', sShipTrackingNumberVendor: '',
-    sRackPosition: '', bTrackingNumberRequired: false, sShipWeight: '',
-    sPurchaseOrder: '', sInvoiceNumber: '',
+    sRackPosition: rack, bTrackingNumberRequired: false, sShipWeight: '',
+    sPurchaseOrder: po, sInvoiceNumber: '',
     sDisplayItemAmount: 'Y', sDisplayItemDescription: 'Y', sDisplayCustomerComplaint: 'N',
     sIncludesCaseYN: 'N', sIncludesCapYN: 'N', sIncludesWaterResCapYN: 'N',
     sIncludesVideoPlugYN: 'N', sIncludesMouthpieceYN: 'N', sIncludesAngleKnobYN: 'N',
