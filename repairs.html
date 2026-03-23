@@ -535,7 +535,6 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
       <div class="ss-chip ss-neutral" id="ssTech"><span class="ss-label">Tech</span> <span class="ss-val">—</span></div>
       <div class="ss-chip ss-neutral" id="ssLevel"><span class="ss-label">Level</span> <span class="ss-val">—</span></div>
       <div class="ss-chip ss-neutral" id="ssCarrier"><span class="ss-label">Carrier</span> <span class="ss-val">—</span></div>
-      <div class="ss-chip ss-info" id="ssScopes"><span class="ss-label">Scopes</span> <span class="ss-val">—</span></div>
       <div class="ss-chip ss-warn" id="ssContract" style="display:none"></div>
       <div style="flex:1"></div>
       <span id="saveStatus" style="font-size:10px;display:flex;align-items:center;gap:4px;color:var(--muted)" class="save-ready">
@@ -3729,8 +3728,7 @@ function populateDetail(d) {
   document.getElementById('ssStatus').querySelector('.ss-val').textContent = statusName;
   const rep = _salesReps.find(x => (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey);
   document.getElementById('ssRep').querySelector('.ss-val').textContent = d.sSalesRepName || (rep ? rep.sSalesRepName : '') || '—';
-  const tech = _techs.find(x => x.lTechnicianKey == d.lTechnicianKey);
-  document.getElementById('ssTech').querySelector('.ss-val').textContent = (tech ? tech.sTechName : '') || '—';
+  document.getElementById('ssTech').querySelector('.ss-val').textContent = d.sTechName || '—';
   const lvl = _levels.find(x => x.lRepairLevelKey == d.lRepairLevelKey);
   document.getElementById('ssLevel').querySelector('.ss-val').textContent = lvl ? lvl.sRepairLevel : '';
   const dm = _deliveryMethods.find(x => x.lDeliveryMethodKey == d.lDeliveryMethodKey);
