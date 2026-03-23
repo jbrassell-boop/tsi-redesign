@@ -703,6 +703,7 @@ async function loadDashboardData(filters) {
   API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'fallback');
   updateStats();
   renderTable();
+  populateKpiHero();
 }
 
 // ── Demo Data & User Info centralized in API.UI ──
@@ -1678,25 +1679,19 @@ function changeServiceLocation() {
 //  KPI HERO ROW — prominent top-level metrics
 // ═══════════════════════════════════════════════════════
 function populateKpiHero() {
-  if (typeof MockDB === 'undefined') return;
+  // ── KPI 1: Open Repairs — from SCOPES (same data the stat strip uses) ──
+  var stats = calcStats();
+  var openCount = stats.inHouse;
 
-  var repairs = MockDB.getAll('repairs') || [];
-  var invoices = MockDB.getAll('invoices') || [];
-  var gpStaging = MockDB.getAll('gpInvoiceStaging') || [];
+  // ── KPI 2-4: from MockDB for TAT + volume + revenue ──
+  var repairs = (typeof MockDB !== 'undefined') ? (MockDB.getAll('repairs') || []) : [];
+  var invoices = (typeof MockDB !== 'undefined') ? (MockDB.getAll('invoices') || []) : [];
+  var gpStaging = (typeof MockDB !== 'undefined') ? (MockDB.getAll('gpInvoiceStaging') || []) : [];
 
   var now = new Date();
   var thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   var lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-
-  // ── KPI 1: Open Repairs (exclude closed statuses) ──
-  var closedStatuses = ['invoiced', 'draft invoice', 'shipped', 'shipping today', 'scheduled to ship'];
-  function isClosed(r) {
-    var s = (r.sRepairStatus || r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
-    return closedStatuses.some(function(cs) { return s.indexOf(cs) !== -1; });
-  }
-  var openRepairs = repairs.filter(function(r) { return !isClosed(r); });
-  var openCount = openRepairs.length;
 
   // ── KPI 2: Avg Turnaround (days, completed this month) ──
   var tatDays = [];
@@ -1754,19 +1749,17 @@ function populateKpiHero() {
     else { el.className = 'kpi-hero-trend flat'; el.textContent = '\u2192 0%'; }
   }
 
-  // For TAT, lower is better — invert the trend direction
   function setTatTrend(id, current, previous) {
     var el = document.getElementById(id);
     if (!el) return;
     if (!previous || !current) { el.textContent = ''; return; }
     var pct = Math.round(((current - previous) / previous) * 100);
-    // Negative change (faster) is good, positive (slower) is bad
     if (pct < 0) { el.className = 'kpi-hero-trend up'; el.textContent = '\u2191 ' + Math.abs(pct) + '% faster'; }
     else if (pct > 0) { el.className = 'kpi-hero-trend down'; el.textContent = '\u2193 ' + pct + '% slower'; }
     else { el.className = 'kpi-hero-trend flat'; el.textContent = '\u2192 0%'; }
   }
 
-  // Open Repairs is a point-in-time balance — no period trend makes sense
+  // Open Repairs is a point-in-time balance — show "current" not a % trend
   var openEl = document.getElementById('kpiOpenTrend');
   if (openEl) { openEl.className = 'kpi-hero-trend flat'; openEl.textContent = 'current'; }
   setTatTrend('kpiTatTrend', avgTat, avgTatLast);
@@ -1778,9 +1771,11 @@ function populateKpiHero() {
 //  INIT — load from API, then render
 // ═══════════════════════════════════════════════════════
 API.UI.init();
-populateKpiHero();
 API.UI.showSkeleton('skDashboard', 6);
-loadDashboardData({ instrumentTypeValue: 'all' }).then(function() { API.UI.hideSkeleton('skDashboard'); });
+loadDashboardData({ instrumentTypeValue: 'all' }).then(function() {
+  API.UI.hideSkeleton('skDashboard');
+  populateKpiHero();
+});
 
 // Add Admin badge to Analytics subnav tab
 setTimeout(function() {
