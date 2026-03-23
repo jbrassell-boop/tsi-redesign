@@ -708,37 +708,35 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
               <div class="field" style="width:56px;margin:0"><label>BR Jig</label><input id="fBRJig" style="text-align:center" onchange="markDirty()"/></div>
             </div>
 
-            <!-- ★ REPAIR ITEMS TABLE — the main work area ★ -->
+            <!-- ★ REPAIR ITEMS — the main work area ★ -->
             <div class="section-card" style="margin-top:0;flex:1;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(var(--primary-rgb),.1);border-color:var(--border-dk)">
-              <div class="section-head">
+              <div class="section-head" style="display:flex;align-items:center;gap:8px">
                 Repair Items
+                <span id="riApprCounter" style="font-size:10px;font-weight:700;color:var(--success);margin-left:4px"></span>
                 <div style="display:flex;gap:4px;margin-left:auto">
-                  <button class="btn btn-outline btn-xs" onclick="approveAllItems()">Approve All</button><span class="role-badge rb-manager">Manager</span>
+                  <button class="btn btn-outline btn-xs" style="color:var(--success);border-color:var(--success)" onclick="approveAllItems()">✓ Approve All</button><span class="role-badge rb-manager">Manager</span>
                   <button class="btn btn-outline btn-xs" onclick="unapproveAllItems()">Unapprove All</button>
                   <button class="btn btn-outline btn-xs" onclick="openTechsDrawer()">Techs</button>
                   <button class="btn btn-outline btn-xs" onclick="openInvDrawer()">Inventory</button>
-                  <button class="btn btn-outline btn-xs" onclick="openItemPicker()">+ Add Item</button>
+                  <button class="btn btn-outline btn-xs" style="color:var(--primary);border-color:var(--primary);font-weight:700" onclick="openItemPicker()">+ Add Item</button>
                 </div>
               </div>
               <div style="flex:1;overflow-y:auto;min-height:120px">
                 <table class="items" id="repairItemsTable">
                   <thead style="position:sticky;top:0;z-index:1">
                     <tr>
-                      <th style="width:80px">TSI Code</th>
+                      <th style="width:40px;text-align:center">Appr</th>
+                      <th style="width:70px">Code</th>
                       <th>Repair Item</th>
-                      <th style="width:55px;text-align:center">UA/NWT</th>
-                      <th style="width:55px;text-align:center">W/N/C/A</th>
-                      <th style="width:48px;text-align:center">Appr</th>
+                      <th style="width:50px;text-align:center" title="Unavoidable / New Warranty">UA/NWT</th>
+                      <th style="width:50px;text-align:center" title="Warranty / Non-conformance / Customer / Amendment">W/N/C/A</th>
                       <th style="width:85px;text-align:right">Amount</th>
-                      <th style="width:75px">Tech 1</th>
-                      <th style="width:75px">Tech 2</th>
-                      <th style="width:42px;text-align:center">Pri</th>
-                      <th style="width:65px">Repaired By</th>
+                      <th style="width:55px">Tech</th>
                       <th>Comments</th>
                     </tr>
                   </thead>
                   <tbody id="repairItemsBody">
-                    <tr><td colspan="11" class="empty-state">No repair items</td></tr>
+                    <tr><td colspan="8" class="empty-state">No repair items</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -4235,31 +4233,31 @@ function renderRepairItems(ds) {
   _repairItems = ds || [];
   const tbody = document.getElementById('repairItemsBody');
   if (!_repairItems.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">No repair items for this work order</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No repair items for this work order</td></tr>';
     updateItemTotals();
     return;
   }
   tbody.innerHTML = _repairItems.map((item, i) => {
     const key = item.lRepairItemTranKey || '';
     const appr = item.sApproved || '';
-    const apprClass = appr === 'Y' ? 'color:var(--green);font-weight:700' : appr === 'N' ? 'color:var(--red)' : '';
-    const pri = item.sPrimaryRepair || '';
-    return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')">' +
+    const isApproved = appr === 'Y';
+    const tech = item.sTechInits || item.sTech1 || '';
+    const tech2 = item.sTechInits2 || item.sTech2Inits || item.sTech2 || '';
+    const techDisplay = tech + (tech2 ? '/' + tech2 : '');
+    const comment = item.sComments || '';
+    return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')" style="' + (isApproved ? 'background:#F0FDF4' : '') + '">' +
+      '<td style="text-align:center"><button class="btn-xs" style="width:28px;height:22px;border-radius:4px;border:1.5px solid ' + (isApproved ? 'var(--success)' : 'var(--neutral-200)') + ';background:' + (isApproved ? 'var(--success)' : 'var(--card)') + ';color:' + (isApproved ? '#fff' : 'var(--neutral-500)') + ';cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" onclick="event.stopPropagation();toggleApproval(' + i + ')" title="Toggle approval">' + (isApproved ? '✓' : '—') + '</button></td>' +
       '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
-      '<td>' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</td>' +
+      '<td><span style="font-weight:500">' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</span></td>' +
       '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: UA / NWT / —"><span style="' + uanwtStyle(item.sUAorNWT||item.sUANWT) + '">' + (item.sUAorNWT||item.sUANWT||'—') + '</span></td>' +
       '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: W / N / C / A / —"><span style="' + wncaStyle(item.sFixType||item.sWNCA) + '">' + (item.sFixType||item.sWNCA||'—') + '</span></td>' +
-      '<td style="text-align:center;' + apprClass + '">' + appr + '</td>' +
-      '<td style="text-align:right">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
-      '<td>' + (item.sTechInits||item.sTech1||'') + '</td>' +
-      '<td>' + (item.sTechInits2||item.sTech2Inits||item.sTech2||'') + '</td>' +
-      '<td style="text-align:center;' + (pri==='Y'?'font-weight:700;color:var(--navy)':'') + '">' + pri + '</td>' +
-      '<td><input type="text" value="' + (item.sRepairedBy||'') + '" style="width:55px;height:22px;font-size:10px;text-align:center;border:1px solid var(--border);border-radius:3px;font-family:inherit;outline:none;padding:0 4px" onchange="setRepairedBy(' + i + ',this.value)" onclick="event.stopPropagation()"/></td>' +
-      '<td style="font-size:10px;color:var(--red);font-weight:500">' + (item.sComments||'') + '</td></tr>';
+      '<td style="text-align:right;font-family:var(--mono);font-weight:600">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
+      '<td style="font-size:10px;color:var(--neutral-500)">' + techDisplay + '</td>' +
+      '<td style="font-size:10px;color:var(--neutral-700);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + comment.replace(/"/g,'&quot;') + '">' + comment + '</td></tr>';
   }).join('');
-  // Approved count summary
+  // Update counter in header
   const approvedCount = _repairItems.filter(x => x.sApproved === 'Y').length;
-  tbody.insertAdjacentHTML('beforeend', '<tr style="background:#F0F4FA;border-top:2px solid var(--border-dk)"><td colspan="4" style="text-align:right;font-size:10px;font-weight:700;color:var(--navy);padding:5px 14px">Approved: ' + approvedCount + ' / ' + _repairItems.length + '</td><td colspan="7"></td></tr>');
+  document.getElementById('riApprCounter').textContent = approvedCount + '/' + _repairItems.length + ' approved';
   updateItemTotals();
 }
 
@@ -4417,6 +4415,12 @@ function initItemContextMenu() {
   });
 }
 
+function toggleApproval(i) {
+  if (!_repairItems[i]) return;
+  _repairItems[i].sApproved = _repairItems[i].sApproved === 'Y' ? 'N' : 'Y';
+  renderRepairItems(_repairItems);
+  markDirty();
+}
 function approveAllItems() {
   if (!_repairItems.length) return;
   _repairItems.forEach(item => item.sApproved = 'Y');
