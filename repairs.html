@@ -6428,8 +6428,18 @@ function wizGoStep(step) {
   }
   document.getElementById('wizBtnBack').style.display = step > 1 ? '' : 'none';
   document.getElementById('wizBtnNext').style.display = step < 4 ? '' : 'none';
-  document.getElementById('wizBtnCreate').style.display = step === 4 ? '' : 'none';
+  // Create button only on step 4 AND requires scope
+  var createBtn = document.getElementById('wizBtnCreate');
+  createBtn.style.display = step === 4 ? '' : 'none';
+  if (step === 4 && !_wizScope) {
+    createBtn.style.opacity = '.5';
+    createBtn.style.pointerEvents = 'none';
+  } else {
+    createBtn.style.opacity = '';
+    createBtn.style.pointerEvents = '';
+  }
   wizUpdateNextBtn();
+  console.log('[NWO] Step', step, '| Client:', !!_wizClient, '| Dept:', !!_wizDept, '| Scope:', !!_wizScope);
 }
 
 function wizBack() { if (_wizStep > 1) wizGoStep(_wizStep - 1); }
