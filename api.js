@@ -7,6 +7,7 @@ const API = (() => {
   // API supports CORS — call directly from any origin.
   // Netlify proxy is available as fallback at /api/* if needed.
   const BASE_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  const LOCAL_URL = 'http://localhost:4000/api';
 
   // ── Token Management ──────────────────────────────────
   function getToken() {
@@ -19,7 +20,25 @@ const API = (() => {
   }
 
   function isMockMode() {
+    // Local mode bypasses MockAPI — use real Express server
+    if (isLocalMode()) return false;
     return typeof MockAPI !== 'undefined' && typeof MockDB !== 'undefined';
+  }
+
+  function isLocalMode() {
+    // URL param ?api=local or localStorage flag
+    if (typeof window !== 'undefined') {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('api') === 'local') {
+        localStorage.setItem('tsi_api_mode', 'local');
+        return true;
+      }
+      if (params.get('api') === 'mock') {
+        localStorage.removeItem('tsi_api_mode');
+        return false;
+      }
+    }
+    return localStorage.getItem('tsi_api_mode') === 'local';
   }
 
   function setToken(token) {
@@ -153,9 +172,13 @@ const API = (() => {
       return MockAPI.handleRequest(method, endpoint, body);
     }
 
+    // ── Choose base URL: local Express server or BrightLogix cloud ──
+    const baseUrl = isLocalMode() ? LOCAL_URL : BASE_URL;
+
     const token = getToken();
     const headers = { 'Content-Type': 'application/json' };
-    if (token) {
+    // Skip auth token for local mode (Windows auth on SQL Server)
+    if (token && !isLocalMode()) {
       headers['Authorization'] = 'Bearer ' + token;
     }
 
@@ -164,7 +187,7 @@ const API = (() => {
       opts.body = JSON.stringify(body);
     }
 
-    const res = await fetch(BASE_URL + endpoint, opts);
+    const res = await fetch(baseUrl + endpoint, opts);
 
     // Token expired or invalid
     if (res.status === 401) {
@@ -184,7 +207,16 @@ const API = (() => {
 
     const envelope = await res.json();
 
-    // API wraps responses in { responseData: "JSON string", isEnType: false }
+    // ── Local mode: Express server returns raw JSON (arrays/objects) ──
+    if (isLocalMode()) {
+      // Paginated response: { dataSource: [...], totalRecord: N }
+      if (envelope && typeof envelope === 'object' && !Array.isArray(envelope) && Array.isArray(envelope.dataSource)) {
+        return envelope.dataSource;
+      }
+      return envelope;
+    }
+
+    // ── BrightLogix mode: API wraps in { responseData: "JSON string" } ──
     let json;
     try {
       if (envelope.responseData && typeof envelope.responseData === 'string') {
@@ -200,8 +232,6 @@ const API = (() => {
 
     if (json.statusCode === 200) {
       const d = json.data;
-      // Some paginated POST endpoints return { dataSource: [...], totalRecord: N }
-      // instead of a plain array — unwrap it so callers always get an array.
       if (d && typeof d === 'object' && !Array.isArray(d) && Array.isArray(d.dataSource)) {
         return d.dataSource;
       }
@@ -509,6 +539,7 @@ const API = (() => {
   return {
     // Auth & Core
     login, logout, isLoggedIn, requireAuth, getToken, getUser,
+    isLocalMode, isMockMode,
     get, post, del,
     UI,
 

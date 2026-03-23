@@ -1,0 +1,69 @@
+// ═══════════════════════════════════════════════════════
+//  db.js — SQL Server connection pool + query helpers
+//  Uses Windows Authentication (no credentials needed)
+// ═══════════════════════════════════════════════════════
+const sql = require('mssql/msnodesqlv8');
+
+const config = {
+  database: 'WinScopeNet',
+  driver: 'msnodesqlv8',
+  connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=WinScopeNet;Trusted_Connection=yes;TrustServerCertificate=yes;',
+  pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
+};
+
+let _pool = null;
+
+async function connect() {
+  if (_pool) return _pool;
+  _pool = await new sql.ConnectionPool(config).connect();
+  console.log('[DB] Connected to', config.server + '/' + config.database);
+  return _pool;
+}
+
+async function close() {
+  if (_pool) { await _pool.close(); _pool = null; }
+}
+
+// Run a parameterized query — params is { name: value } object
+async function query(sqlText, params) {
+  const pool = await connect();
+  const req = pool.request();
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v === null || v === undefined) req.input(k, sql.NVarChar, null);
+      else if (typeof v === 'number') req.input(k, Number.isInteger(v) ? sql.Int : sql.Float, v);
+      else if (typeof v === 'boolean') req.input(k, sql.Bit, v);
+      else if (v instanceof Date) req.input(k, sql.DateTime, v);
+      else req.input(k, sql.NVarChar, String(v));
+    });
+  }
+  const result = await req.query(sqlText);
+  return result.recordset || [];
+}
+
+// Return first row or null
+async function queryOne(sqlText, params) {
+  const rows = await query(sqlText, params);
+  return rows[0] || null;
+}
+
+// Paginated query — adds ORDER BY + OFFSET/FETCH, returns { dataSource, totalRecord }
+async function queryPage(sqlText, orderBy, params, pagination) {
+  const page = pagination || {};
+  const pageNum = parseInt(page.PageNumber) || 1;
+  const pageSize = parseInt(page.PageSize) || 50;
+  const offset = (pageNum - 1) * pageSize;
+
+  // Get total count
+  const countSql = `SELECT COUNT(*) AS cnt FROM (${sqlText}) AS _t`;
+  const countResult = await query(countSql, params);
+  const totalRecord = countResult[0] ? countResult[0].cnt : 0;
+
+  // Get page
+  const pageSql = `${sqlText} ORDER BY ${orderBy} OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+  const rows = await query(pageSql, params);
+
+  return { dataSource: rows, totalRecord };
+}
+
+module.exports = { connect, close, query, queryOne, queryPage, sql };
