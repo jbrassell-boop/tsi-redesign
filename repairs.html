@@ -6888,27 +6888,47 @@ function wizSubmit() {
   const scopeKey = _wizScope.lScopeKey;
   const scopeSN = _wizScope.sSerialNumber || '';
   const scopeModel = _wizScope.sScopeTypeDesc || _wizScope.sScopeTypeName || '';
-  const scopeMfr = _wizScope.sManufacturerName || '';
+  const scopeMfr = _wizScope.sManufacturerName || _wizScope.sManufacturer || '';
   const scopeRF = _wizScope.sRigidOrFlexible || '';
+  const scopeCat = _wizScope.sScopeTypeCategory || _wizScope.sScopeModelCategory || '';
 
   closeNWO();
 
-  // Generate temp WO number
+  // Generate WO number with proper NR/SR prefix
   const now = new Date();
+  const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+  const prefix = svcKey === 2 ? 'SR' : 'NR';
   const ts = String(now.getFullYear()).slice(2) +
     String(now.getMonth()+1).padStart(2,'0') +
     String(now.getDate()).padStart(2,'0');
   const seq = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
 
+  // Inherit defaults from client/department
+  const deptSalesRep = _wizDept.lSalesRepKey || _wizClient.lSalesRepKey || 0;
+  const deptPricing = _wizDept.lPricingCategoryKey || _wizClient.lPricingCategoryKey || 0;
+  const deptPayTerms = _wizDept.lPaymentTermsKey || _wizClient.lPaymentTermsKey || 0;
+  const deptDelivery = _wizDept.lDeliveryMethodKey || _wizClient.lDeliveryMethodKey || 3; // default UPS
+  // Check if department has an active contract
+  const deptContract = _wizDept.lContractKey || 0;
+  const isCap = deptContract > 0;
+
   _currentRepair = {
     lRepairKey: 0,
-    sWorkOrderNumber: 'NEW-' + ts + '-' + seq,
+    sWorkOrderNumber: prefix + ts + seq,
     lRepairStatusID: 1,
-    lRepairLevelKey: null, lRepairReasonKey: null,
+    lRepairLevelKey: 1, // Default: Evaluation Only
+    lRepairReasonKey: 1, // Default: first reason
     lClientKey: clientKey, lDepartmentKey: parseInt(deptKey),
-    lScopeKey: scopeKey,
-    lTechnicianKey: null, lSalesRepKey: null, lDeliveryMethodKey: null,
-    lPatientSafetyLevelKey: null, lPricingCategoryKey: null, lPaymentTermsKey: null,
+    lScopeKey: scopeKey, lContractKey: deptContract,
+    lTechnicianKey: null,
+    lSalesRepKey: deptSalesRep,
+    lDeliveryMethodKey: deptDelivery,
+    lPatientSafetyLevelKey: null,
+    lPricingCategoryKey: deptPricing,
+    lPaymentTermsKey: deptPayTerms,
+    lServiceLocationKey: svcKey,
+    sManufacturer: scopeMfr,
+    sScopeTypeCategory: scopeCat,
     dtDateIn: now.toISOString(),
     dtDateOut: null, dtShipDate: null, dtDeliveryDate: null,
     dtAprRecvd: null, dtReqSent: null, dtLastUpdate: null,
@@ -6947,10 +6967,10 @@ function wizSubmit() {
 
   // Populate scope info in header
   document.getElementById('hMfr').textContent = scopeMfr || '—';
-  document.getElementById('hScopeCat').textContent = _wizScope.sScopeModelCategory || '—';
+  document.getElementById('hScopeCat').textContent = scopeCat || '—';
   document.getElementById('hModel').textContent = scopeModel || '—';
   document.getElementById('hSerial').textContent = scopeSN || '—';
-  document.getElementById('hCapFFS').textContent = '—';
+  document.getElementById('hCapFFS').textContent = isCap ? 'Contract' : 'FFS';
   document.getElementById('hWithin40').textContent = '—';
   document.getElementById('repairBadge').textContent = '#NEW';
 
