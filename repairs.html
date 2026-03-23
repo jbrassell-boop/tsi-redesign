@@ -2128,24 +2128,17 @@ function collectFormData(r) {
   const repName = _rep ? (_rep.sSalesRepName || [_rep.sRepFirst, _rep.sRepLast].filter(Boolean).join(' ') || '—') : '—';
 
   // Extract repair items from DOM table
-  const itemRows = document.querySelectorAll('#repairItemsBody tr');
-  const items = [];
-  itemRows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 6) {
-      const descText = cells[1]?.textContent?.trim() || '';
-      items.push({
-        code: cells[0]?.textContent?.trim() || '',
-        desc: descText,
-        uanwt: cells[2]?.textContent?.trim() || '',
-        approved: cells[4]?.textContent?.trim() || '',
-        amount: cells[5]?.textContent?.trim() || '',
-        isBlind: descText.startsWith('!'),
-        isAmended: row.dataset.amended === 'true',
-        comments: cells[cells.length - 1]?.textContent?.trim() || ''
-      });
-    }
-  });
+  const items = (_repairItems || []).map(item => ({
+    code: item.sTSICode || item.sRepairCode || '',
+    desc: item.sItemDescription || item.sDescription || item.sRepairItem || '',
+    uanwt: item.sUAorNWT || item.sUANWT || '',
+    fixType: item.sFixType || item.sWNCA || '',
+    approved: item.sApproved || '',
+    amount: fmtMoney(item.dblRepairPrice || item.mAmount || item.dblAmount || 0),
+    amountNum: parseFloat(item.dblRepairPrice || item.mAmount || item.dblAmount || 0),
+    isBlind: item.bBlind === true || item.bBlind === 'Y',
+    comments: item.sComments || ''
+  }));
 
   return {
     r, clientName, deptName, repName, items,
@@ -2752,24 +2745,17 @@ function populateFormDrawer(formId) {
   const _rep = _salesReps.find(s => (s.lSalesRepNameKey || s.lSalesRepKey) == r.lSalesRepKey);
   const repName = _rep ? (_rep.sSalesRepName || [_rep.sRepFirst, _rep.sRepLast].filter(Boolean).join(' ') || '—') : '—';
 
-  const itemRows = document.querySelectorAll('#repairItemsBody tr');
-  const items = [];
-  itemRows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 6) {
-      const descText = cells[1]?.textContent?.trim() || '';
-      items.push({
-        code: cells[0]?.textContent?.trim() || '',
-        desc: descText,
-        uanwt: cells[2]?.textContent?.trim() || '',
-        approved: cells[4]?.textContent?.trim() || '',
-        amount: cells[5]?.textContent?.trim() || '',
-        isBlind: descText.startsWith('!'),
-        isAmended: row.dataset.amended === 'true',
-        comments: cells[cells.length - 1]?.textContent?.trim() || ''
-      });
-    }
-  });
+  const items = (_repairItems || []).map(item => ({
+    code: item.sTSICode || item.sRepairCode || '',
+    desc: item.sItemDescription || item.sDescription || item.sRepairItem || '',
+    uanwt: item.sUAorNWT || item.sUANWT || '',
+    fixType: item.sFixType || item.sWNCA || '',
+    approved: item.sApproved || '',
+    amount: fmtMoney(item.dblRepairPrice || item.mAmount || item.dblAmount || 0),
+    amountNum: parseFloat(item.dblRepairPrice || item.mAmount || item.dblAmount || 0),
+    isBlind: item.bBlind === true || item.bBlind === 'Y',
+    comments: item.sComments || ''
+  }));
 
   const headerHTML = `
     <div class="wf-form-header">
