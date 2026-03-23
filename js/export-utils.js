@@ -403,7 +403,7 @@ function addInvoiceHeader(doc, invoiceNum) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(COLORS.steel);
-  doc.text('The Leader in Medical Device Repair', m, y + 26);
+  doc.text(COMPANY.tagline, m, y + 26);
 
   // Left: Address + phone
   doc.setFontSize(8);
