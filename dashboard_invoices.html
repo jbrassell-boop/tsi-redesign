@@ -188,7 +188,7 @@ function deriveStatus(r) {
 function mapInvoice(r) {
   var taxAmt = (r.dblJuris1Amt || 0) + (r.dblJuris2Amt || 0) + (r.dblJuris3Amt || 0);
   var amount = r.dblTranAmount || 0;
-  var total = amount + (r.dblShippingAmt || 0) + taxAmt;
+  var total = amount + (r.dblAmtShipping || r.dblShippingAmt || 0) + taxAmt;
   var status = deriveStatus(r);
   return {
     id:         r.lInvoiceKey || 0,

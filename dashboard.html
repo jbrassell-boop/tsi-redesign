@@ -1691,13 +1691,13 @@ function populateKpiHero() {
 
   // ── KPI 1: Open Repairs (not Shipped, not Invoiced) ──
   var openRepairs = repairs.filter(function(r) {
-    var s = (r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
+    var s = (r.sRepairStatus || r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
     return s.indexOf('shipped') === -1 && s.indexOf('invoiced') === -1;
   });
   var openCount = openRepairs.length;
 
   var lastMonthOpen = repairs.filter(function(r) {
-    var s = (r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
+    var s = (r.sRepairStatus || r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
     if (s.indexOf('shipped') !== -1 || s.indexOf('invoiced') !== -1) return false;
     var d = r.dtDateIn ? new Date(r.dtDateIn) : null;
     return d && d >= lastMonthStart && d <= lastMonthEnd;
