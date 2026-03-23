@@ -1843,9 +1843,11 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
     <!-- Populated by JS -->
   </div>
   <div class="wf-footer-actions">
+    <button class="btn btn-outline" onclick="printBlankDI()" title="Print a blank form for paper backup">Print Blank</button>
     <button class="btn btn-outline" onclick="printFormDocument('disassemble')">Print</button>
     <button class="btn btn-outline">Email</button>
-    <button class="btn btn-navy" onclick="generateForm('disassemble')">Generate PDF</button>
+    <button class="btn btn-navy" style="margin-right:auto" onclick="generateForm('disassemble')">Generate PDF</button>
+    <button class="btn" style="background:var(--success);color:#fff;font-weight:700" onclick="saveDIForm()">✓ Submit D&I Results</button>
   </div>
   </div>
 </div>
@@ -3408,6 +3410,91 @@ function renderInspectionCategories(detailed) {
   return html;
 }
 
+// Angulation spec check — green if within 10% of spec, red if out
+function checkAngSpec(input, specVal) {
+  if (!specVal || isNaN(specVal) || !input.value) { input.style.borderColor = ''; input.style.background = ''; return; }
+  var measured = parseFloat(input.value);
+  if (isNaN(measured)) { input.style.borderColor = ''; input.style.background = ''; return; }
+  var threshold = specVal * 0.9; // 10% tolerance
+  if (measured >= threshold) {
+    input.style.borderColor = 'var(--success)'; input.style.background = '#F0FDF4';
+  } else {
+    input.style.borderColor = 'var(--danger)'; input.style.background = '#FEF2F2';
+  }
+}
+
+// Save D&I form data back to the repair record
+function saveDIForm() {
+  if (!_currentRepair) { showToast('No repair loaded'); return; }
+  // Angulation measurements
+  var angUp = document.getElementById('diAngUp');
+  var angDown = document.getElementById('diAngDown');
+  var angRight = document.getElementById('diAngRight');
+  var angLeft = document.getElementById('diAngLeft');
+  if (angUp) _currentRepair.sAngInUp = angUp.value;
+  if (angDown) _currentRepair.sAngInDown = angDown.value;
+  if (angRight) _currentRepair.sAngInRight = angRight.value;
+  if (angLeft) _currentRepair.sAngInLeft = angLeft.value;
+  // Tech notes
+  var notes = document.getElementById('diTechNotes');
+  if (notes) _currentRepair.mCommentsDisIns = notes.value;
+  // Collect all P/F/NA radio values
+  var radios = document.querySelectorAll('#wfDIBody input[type="radio"]:checked');
+  var pfData = {};
+  radios.forEach(function(r) { pfData[r.name] = r.value; });
+  _currentRepair._diResults = pfData;
+  // Collect all checked defect checkboxes
+  var checks = document.querySelectorAll('#wfDIBody input[type="checkbox"]:checked');
+  var defects = [];
+  checks.forEach(function(c) {
+    var label = c.parentElement ? c.parentElement.textContent.trim() : '';
+    if (label) defects.push(label);
+  });
+  _currentRepair._diDefects = defects;
+  // Scope condition
+  var condition = document.querySelector('#wfDIBody input[name="scopeCondition"]:checked');
+  if (condition) _currentRepair._diCondition = condition.value;
+  markDirty();
+  if (typeof TSI !== 'undefined' && TSI.toast) TSI.toast.success('D&I results saved to repair record');
+  else showToast('D&I results saved');
+}
+
+// Print blank D&I form (no data, just structure)
+function printBlankDI() {
+  var body = document.getElementById('wfDIBody');
+  if (!body) return;
+  // Clone the form, clear all inputs
+  var clone = body.cloneNode(true);
+  clone.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(function(i) { i.value = ''; });
+  clone.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function(i) { i.checked = false; });
+  // Print
+  var w = window.open('', '_blank', 'width=900,height=1100');
+  w.document.write('<html><head><title>D&I Blank Form — OM05-1</title><style>');
+  w.document.write('body{font-family:Arial,sans-serif;font-size:11px;margin:20px;color:#333}');
+  w.document.write('.wf-card{border:1px solid #ccc;border-radius:4px;margin-bottom:12px;break-inside:avoid}');
+  w.document.write('.wf-card-head{background:#f0f2f5;padding:6px 10px;font-weight:700;font-size:12px;border-bottom:1px solid #ccc}');
+  w.document.write('.wf-card-body{padding:8px 10px}');
+  w.document.write('.wf-di-table{width:100%;border-collapse:collapse}');
+  w.document.write('.wf-di-table td{padding:4px 6px;border-bottom:1px solid #eee;vertical-align:top}');
+  w.document.write('.wf-di-cat td{background:#f8f9fa;font-weight:700;font-size:11px;padding:6px}');
+  w.document.write('.wf-di-input{border:1px solid #ccc;border-radius:3px;padding:2px 4px;font-size:10px;height:20px}');
+  w.document.write('.wf-di-input.wide{width:120px}');
+  w.document.write('input[type="radio"],input[type="checkbox"]{margin:0 2px}');
+  w.document.write('.wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;font-size:11px}');
+  w.document.write('@media print{body{margin:10px}}');
+  w.document.write('</style></head><body>');
+  w.document.write('<div style="text-align:center;margin-bottom:16px"><h2 style="margin:0">Total Scope, Inc.</h2><div style="font-size:12px;color:#666">Flexible Endoscope Diagnostic Report — OM05-1 (Blank)</div></div>');
+  w.document.write('<div class="wf-form-header">');
+  w.document.write('<div><b>Client:</b> _________________________</div><div><b>W.O. #:</b> _______________</div>');
+  w.document.write('<div><b>Department:</b> ___________________</div><div><b>Serial #:</b> _______________</div>');
+  w.document.write('<div><b>Model:</b> _________________________</div><div><b>Date:</b> _______________</div>');
+  w.document.write('</div>');
+  w.document.write(clone.innerHTML);
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(function() { w.print(); }, 300);
+}
+
 function renderFlexDIChecklist() {
   const r = _currentRepair || {};
 
@@ -3441,9 +3528,40 @@ function renderFlexDIChecklist() {
   html += diRow('r3a2', 'Fluid Invasion Detected', `&rarr; Location: <span class="wf-di-defects">${chk('BS')}${chk('CB')}${chk('SC')}${chk('LGC')}${chk('Lenses')}${chk('Other:')} <input class="wf-di-input"></span>`);
 
   // 3B. Angulation System
+  const specU = r.sAngSpecUp || '—', specD = r.sAngSpecDown || '—', specL = r.sAngSpecLeft || '—', specR = r.sAngSpecRight || '—';
   html += `<tr class="wf-di-cat"><td colspan="2">3B. Angulation System</td></tr>`;
-  html += diRow('r3b1', 'Angulation Specs',
-    `U: <input class="wf-di-input" style="width:40px" value="${r.sAngInUp||''}"> D: <input class="wf-di-input" style="width:40px" value="${r.sAngInDown||''}"> R: <input class="wf-di-input" style="width:40px" value="${r.sAngInRight||''}"> L: <input class="wf-di-input" style="width:40px" value="${r.sAngInLeft||''}"> <span style="font-size:9px;color:var(--steel);margin-left:6px">(Factory: U180/D180/R160/L160)</span>`);
+  html += `<tr>
+    <td style="width:90px;white-space:nowrap" class="wf-di-radios">
+      <label><input type="radio" name="r3b1" value="P"> P</label>
+      <label><input type="radio" name="r3b1" value="F"> F</label>
+      <label><input type="radio" name="r3b1" value="NA"> N/A</label>
+    </td>
+    <td>
+      <b>Angulation Measured vs Spec</b>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;margin:6px 0;font-size:11px">
+        <div style="text-align:center">
+          <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase">Up</div>
+          <input class="wf-di-input" id="diAngUp" style="width:48px;text-align:center" value="${r.sAngInUp||''}" oninput="checkAngSpec(this,${specU})">
+          <div style="font-size:9px;color:var(--muted)">Spec: ${specU}°</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase">Down</div>
+          <input class="wf-di-input" id="diAngDown" style="width:48px;text-align:center" value="${r.sAngInDown||''}" oninput="checkAngSpec(this,${specD})">
+          <div style="font-size:9px;color:var(--muted)">Spec: ${specD}°</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase">Right</div>
+          <input class="wf-di-input" id="diAngRight" style="width:48px;text-align:center" value="${r.sAngInRight||''}" oninput="checkAngSpec(this,${specR})">
+          <div style="font-size:9px;color:var(--muted)">Spec: ${specR}°</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase">Left</div>
+          <input class="wf-di-input" id="diAngLeft" style="width:48px;text-align:center" value="${r.sAngInLeft||''}" oninput="checkAngSpec(this,${specL})">
+          <div style="font-size:9px;color:var(--muted)">Spec: ${specL}°</div>
+        </div>
+      </div>
+    </td>
+  </tr>`;
   html += diRow('r3b2', 'Angulation System', `<span class="wf-di-defects">${chk('Play')}${chk('Stiff/Grinding')}${chk('Broken Cable')}${chk('Slip Stopper')}${chk('Orientation Off')}${chk('Broken Bracket')}</span>`);
   html += diRow('r3b3', 'Angulation Knobs', `<span class="wf-di-defects">${chk('Moving Together')}${chk('Not Locking')}${chk('Leaking')}</span> — Location: <input class="wf-di-input wide">`);
   html += diRow('r3b4', 'Angulation Lock', `<span class="wf-di-defects">${chk('Too Tight')}${chk('Too Loose')}${chk('Brake Not Functioning')}${chk('Missing')}</span>`);
@@ -3517,7 +3635,7 @@ function renderFlexDIChecklist() {
   // ── SECTION 5: REPAIR ASSESSMENT ──
   html += `<div class="wf-card"><div class="wf-card-head">5. Repair Assessment</div>
     <div class="wf-card-body">
-      <textarea class="wf-textarea" rows="5" placeholder="Tech notes...">${r.mCommentsDisIns || ''}</textarea>
+      <textarea class="wf-textarea" id="diTechNotes" rows="5" placeholder="Tech notes...">${r.mCommentsDisIns || ''}</textarea>
     </div>
   </div>`;
 

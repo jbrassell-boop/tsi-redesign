@@ -192,6 +192,11 @@ if (seed.repairs) {
     r.sScopeCategory = st ? (lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '') : '';
     r.sScopeTypeCategory = st ? st.sScopeTypeCategory : '';
     r.sRigidOrFlexible = st ? st.sRigidOrFlexible : '';
+    // Angulation factory specs from scope type (for D&I form)
+    r.sAngSpecUp = st ? (st.sAngUp || '') : '';
+    r.sAngSpecDown = st ? (st.sAngDown || '') : '';
+    r.sAngSpecLeft = st ? (st.sAngLeft || '') : '';
+    r.sAngSpecRight = st ? (st.sAngRight || '') : '';
     r.sClientName1 = client ? client.sClientName1 : '';
     r.sDepartmentName = dept ? dept.sDepartmentName : '';
     r.sRepairStatus = status ? status.sRepairStatus : '';
@@ -544,6 +549,7 @@ const REPAIR_KEEP_FIELDS = new Set([
   'sDeliveryMethodDesc', 'sDepartmentName', 'sManufacturer',
   'sPaymentTerms', 'sPONumber', 'sPricingDescription', 'sPurchaseOrder',
   'sRackPosition', 'sRepairReason', 'sRepairStatus', 'sRigidOrFlexible',
+  'sAngSpecUp', 'sAngSpecDown', 'sAngSpecLeft', 'sAngSpecRight',
   'sSalesRepName', 'sScopeCategory', 'sScopeTypeCategory', 'sScopeTypeDesc', 'sSerialNumber',
   'sServiceLocationName',
   'sShipAddr1', 'sShipAddr2', 'sShipAttention', 'sShipCity', 'sShipName1', 'sShipName2', 'sShipState', 'sShipZip',
