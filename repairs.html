@@ -728,8 +728,8 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                       <th style="width:40px;text-align:center">Appr</th>
                       <th style="width:70px">Code</th>
                       <th>Repair Item</th>
-                      <th style="width:50px;text-align:center" title="Unavoidable / New Warranty">UA/NWT</th>
-                      <th style="width:50px;text-align:center" title="Warranty / Non-conformance / Customer / Amendment">W/N/C/A</th>
+                      <th style="width:68px;text-align:center" title="User Abuse or Normal Wear & Tear">Cause</th>
+                      <th style="width:68px;text-align:center" title="Warranty / Non-conformance / Customer / Amendment">Fix Type</th>
                       <th style="width:85px;text-align:right">Amount</th>
                       <th style="width:55px">Tech</th>
                       <th>Comments</th>
@@ -4249,8 +4249,8 @@ function renderRepairItems(ds) {
       '<td style="text-align:center"><button class="btn-xs" style="width:28px;height:22px;border-radius:4px;border:1.5px solid ' + (isApproved ? 'var(--success)' : 'var(--neutral-200)') + ';background:' + (isApproved ? 'var(--success)' : 'var(--card)') + ';color:' + (isApproved ? '#fff' : 'var(--neutral-500)') + ';cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" onclick="event.stopPropagation();toggleApproval(' + i + ')" title="Toggle approval">' + (isApproved ? '✓' : '—') + '</button></td>' +
       '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
       '<td><span style="font-weight:500">' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + '</span></td>' +
-      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: UA / NWT / —"><span style="' + uanwtStyle(item.sUAorNWT||item.sUANWT) + '">' + (item.sUAorNWT||item.sUANWT||'—') + '</span></td>' +
-      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: W / N / C / A / —"><span style="' + wncaStyle(item.sFixType||item.sWNCA) + '">' + (item.sFixType||item.sWNCA||'—') + '</span></td>' +
+      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: User Abuse / Normal Wear &amp; Tear / None">' + uanwtPill(item.sUAorNWT||item.sUANWT||'') + '</td>' +
+      '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: Warranty / Non-conformance / Customer / Amendment / None">' + wncaPill(item.sFixType||item.sWNCA||'') + '</td>' +
       '<td style="text-align:right;font-family:var(--mono);font-weight:600">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
       '<td style="font-size:10px;color:var(--neutral-500)">' + techDisplay + '</td>' +
       '<td style="font-size:10px;color:var(--neutral-700);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + comment.replace(/"/g,'&quot;') + '">' + comment + '</td></tr>';
@@ -4449,9 +4449,15 @@ function cycleUANWT(idx) {
   renderRepairItems(_repairItems);
   markDirty();
 }
+function uanwtPill(v) {
+  var pill = 'display:inline-block;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600;letter-spacing:.02em';
+  if (v === 'UA') return '<span style="' + pill + ';background:#FEE2E2;color:#991B1B">User Abuse</span>';
+  if (v === 'NWT') return '<span style="' + pill + ';background:#FEF3C7;color:#92400E">Normal W&T</span>';
+  return '<span style="color:var(--neutral-300);font-size:10px;cursor:pointer" title="Click to set">·</span>';
+}
 function uanwtStyle(v) {
-  if (v === 'UA') return 'background:#FEF2F2;color:var(--red);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
-  if (v === 'NWT') return 'background:#FFFBEB;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'UA') return 'background:#FEE2E2;color:#991B1B;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
+  if (v === 'NWT') return 'background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
   return 'color:var(--muted);font-size:10px';
 }
 
@@ -4468,11 +4474,19 @@ function cycleWNCA(idx) {
   renderRepairItems(_repairItems);
   markDirty();
 }
+function wncaPill(v) {
+  var pill = 'display:inline-block;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600;letter-spacing:.02em';
+  if (v === 'W') return '<span style="' + pill + ';background:#DCFCE7;color:#166534">Warranty</span>';
+  if (v === 'N') return '<span style="' + pill + ';background:#FEE2E2;color:#991B1B">Non-conf</span>';
+  if (v === 'C') return '<span style="' + pill + ';background:#DBEAFE;color:#1E40AF">Customer</span>';
+  if (v === 'A') return '<span style="' + pill + ';background:#FEF3C7;color:#92400E">Amend</span>';
+  return '<span style="color:var(--neutral-300);font-size:10px;cursor:pointer" title="Click to set">·</span>';
+}
 function wncaStyle(v) {
-  if (v === 'W') return 'background:#F0FDF4;color:var(--green);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
-  if (v === 'N') return 'background:#FEF2F2;color:var(--red);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
-  if (v === 'C') return 'background:#EFF6FF;color:var(--blue);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
-  if (v === 'A') return 'background:#FFFBEB;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600';
+  if (v === 'W') return 'background:#DCFCE7;color:#166534;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
+  if (v === 'N') return 'background:#FEE2E2;color:#991B1B;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
+  if (v === 'C') return 'background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
+  if (v === 'A') return 'background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
   return 'color:var(--muted);font-size:10px';
 }
 
