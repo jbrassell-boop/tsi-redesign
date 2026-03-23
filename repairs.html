@@ -4540,7 +4540,9 @@ async function openItemPicker() {
   document.getElementById('itemPicker').classList.add('open');
   document.getElementById('itemPickerSearch').value = '';
   document.getElementById('itemPickerSearch').focus();
-  if (!_itemCatalog.length) await loadItemCatalog(null, 'Flexible');
+  var scopeType = (_currentRepair && _currentRepair.sRigidOrFlexible) || 'F';
+  var catType = /^R/i.test(scopeType) ? 'Rigid' : 'Flexible';
+  if (!_itemCatalog.length) await loadItemCatalog(null, catType);
   else renderPickerList(_itemCatalog);
 }
 function closeItemPicker() { document.getElementById('itemPicker').classList.remove('open'); }
@@ -5720,9 +5722,11 @@ async function populateAmendItemDropdown() {
   const sel = document.getElementById('amendItem');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select repair item —</option>';
-  // Load full catalog if not already loaded
+  // Load catalog matching current repair's scope type
+  var scopeType = (_currentRepair && _currentRepair.sRigidOrFlexible) || 'F';
+  var catType = /^R/i.test(scopeType) ? 'Rigid' : 'Flexible';
   if (!_itemCatalog.length) {
-    try { await loadItemCatalog(null, 'Flexible'); } catch(e) {}
+    try { await loadItemCatalog(null, catType); } catch(e) {}
   }
   const items = _itemCatalog.length ? _itemCatalog : _repairItems || [];
   items.forEach(item => {
