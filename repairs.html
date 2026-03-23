@@ -1457,11 +1457,11 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
           </div>
           <div class="field-row">
             <div style="min-width:140px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
-            <div style="flex:2;min-width:250px;position:relative">
+            <div style="flex:2;min-width:250px">
               <label>Model * <span id="wizModelCount" style="font-weight:400;color:var(--muted)"></span></label>
-              <input type="text" id="wizModelSearch" placeholder="Type to search models..." oninput="wizFilterModels(this.value)" onfocus="wizFilterModels(this.value)" style="width:100%" disabled/>
-              <div id="wizModelDropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1.5px solid var(--border-dk);border-top:none;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:200;box-shadow:0 8px 24px rgba(var(--primary-rgb),.12)"></div>
+              <input type="text" id="wizModelSearch" placeholder="Type to search models..." oninput="wizFilterModels(this.value)" style="width:100%" disabled/>
               <input type="hidden" id="wizNewModel" value=""/>
+              <div id="wizModelGrid" style="max-height:140px;overflow-y:auto;border:1px solid var(--neutral-200);border-radius:6px;margin-top:4px;display:none"></div>
             </div>
             <div style="min-width:180px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
             <div style="display:flex;align-items:flex-end"><button onclick="wizCreateScope()" style="height:28px;padding:0 14px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Add Scope</button></div>
@@ -6620,7 +6620,8 @@ function wizPickScope(key) {
   _wizScope = _wizDeptScopes.find(s => s.lScopeKey == key) || null;
   wizRenderScopes(document.getElementById('wizScopeSearch').value);
   wizUpdateNextBtn();
-  setTimeout(() => { if (_wizScope) wizNext(); }, 200);
+  // Skip confirm — go straight to creating the WO
+  if (_wizScope) setTimeout(() => wizSubmit(), 200);
 }
 
 // ── Cascading: Instrument Type → Model (searchable) ──
@@ -6629,11 +6630,11 @@ let _wizFilteredModels = [];
 async function wizOnInstTypeChange() {
   const instType = document.getElementById('wizNewInstType').value;
   const searchInp = document.getElementById('wizModelSearch');
-  const dd = document.getElementById('wizModelDropdown');
+  const grid = document.getElementById('wizModelGrid');
 
   document.getElementById('wizNewModel').value = '';
   searchInp.value = '';
-  dd.style.display = 'none';
+  grid.style.display = 'none';
   _wizFilteredModels = [];
 
   if (!instType) {
@@ -6698,36 +6699,34 @@ async function wizOnInstTypeChange() {
 }
 
 function wizFilterModels(query) {
-  const dd = document.getElementById('wizModelDropdown');
+  const grid = document.getElementById('wizModelGrid');
   const q = (query || '').toLowerCase();
   let matches = _wizFilteredModels;
   if (q) matches = matches.filter(t => (t.sScopeTypeDesc || '').toLowerCase().includes(q));
 
   if (!matches.length) {
-    dd.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted);font-size:11px">' + (q ? 'No models matching "' + esc(q) + '"' : 'No models available') + '</div>';
+    grid.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted);font-size:11px">' + (q ? 'No models matching "' + esc(q) + '"' : 'No models available') + '</div>';
   } else {
-    dd.innerHTML = matches.slice(0, 80).map(t => {
+    const selKey = document.getElementById('wizNewModel').value;
+    grid.innerHTML = matches.slice(0, 60).map(t => {
       const desc = t.sScopeTypeDesc || 'Model ' + t.lScopeTypeKey;
-      const sel = document.getElementById('wizNewModel').value == t.lScopeTypeKey;
-      return '<div onmousedown="wizPickModel(' + t.lScopeTypeKey + ',\'' + esc(desc).replace(/'/g, "\\'") + '\')" style="padding:6px 10px;font-size:11px;cursor:pointer;border-bottom:1px solid #f0f2f5;' + (sel ? 'background:#ECFEFF;font-weight:600' : '') + '" onmouseover="this.style.background=\'#ECFEFF\'" onmouseout="this.style.background=\'' + (sel ? '#ECFEFF' : '') + '\'">' + esc(desc) + '</div>';
-    }).join('') + (matches.length > 80 ? '<div style="padding:6px 10px;font-size:10px;color:var(--muted);text-align:center">Showing 80 of ' + matches.length + ' — type to narrow</div>' : '');
+      const mfr = t.sManufacturerName || '';
+      const sel = String(selKey) === String(t.lScopeTypeKey);
+      return '<div onclick="wizPickModel(' + t.lScopeTypeKey + ',\'' + esc(desc).replace(/'/g, "\\'") + '\')" style="padding:5px 10px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--neutral-100);display:flex;justify-content:space-between;align-items:center;' + (sel ? 'background:var(--primary-light);font-weight:700;border-left:3px solid var(--primary)' : '') + '" onmouseover="this.style.background=\'var(--neutral-50)\'" onmouseout="this.style.background=\'' + (sel ? 'var(--primary-light)' : '') + '\'">' +
+        '<span>' + esc(desc) + '</span>' +
+        (mfr ? '<span style="font-size:9px;color:var(--neutral-500)">' + esc(mfr) + '</span>' : '') +
+        '</div>';
+    }).join('') + (matches.length > 60 ? '<div style="padding:5px 10px;font-size:10px;color:var(--muted);text-align:center">Showing 60 of ' + matches.length + ' — type to narrow</div>' : '');
   }
-  dd.style.display = 'block';
+  grid.style.display = 'block';
 }
 
 function wizPickModel(key, name) {
   document.getElementById('wizNewModel').value = key;
   document.getElementById('wizModelSearch').value = name;
-  document.getElementById('wizModelDropdown').style.display = 'none';
+  // Highlight selected in grid
+  wizFilterModels(document.getElementById('wizModelSearch').value);
 }
-
-// Close model dropdown on blur
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#wizModelSearch') && !e.target.closest('#wizModelDropdown')) {
-    const dd = document.getElementById('wizModelDropdown');
-    if (dd) dd.style.display = 'none';
-  }
-});
 
 async function wizCreateScope() {
   const instTypeKey = document.getElementById('wizNewInstType').value;
@@ -6754,7 +6753,7 @@ async function wizCreateScope() {
       showToast('Scope created');
       await wizLoadScopes();
       const found = _wizDeptScopes.find(s => s.sSerialNumber === sn);
-      if (found) { _wizScope = found; wizRenderScopes(); wizUpdateNextBtn(); setTimeout(() => wizNext(), 300); }
+      if (found) { _wizScope = found; wizRenderScopes(); wizUpdateNextBtn(); setTimeout(() => wizSubmit(), 300); }
     } catch(e) { showToast('API error — adding locally'); }
   }
 
@@ -6773,8 +6772,8 @@ async function wizCreateScope() {
     _wizScope = localScope;
     wizRenderScopes();
     wizUpdateNextBtn();
-    showToast('Scope added');
-    setTimeout(() => wizNext(), 300);
+    showToast('Scope added — creating work order...');
+    setTimeout(() => wizSubmit(), 300);
   }
 
   document.getElementById('wizNewSN').value = '';
