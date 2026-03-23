@@ -6820,6 +6820,27 @@ async function wizCreateScope() {
 }
 
 // ── Step 4: Summary & Confirm ──
+function wizAutoAssignRack() {
+  var occupied = new Set();
+  try {
+    var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
+    var repairs = typeof MockDB !== 'undefined' ? MockDB.getAll('repairs') : [];
+    repairs.forEach(function(r) {
+      if (r.lServiceLocationKey == svcKey && r.sRackPosition && r.sRackPosition !== 'N/A') {
+        var s = (r.sRepairStatus || '').toLowerCase();
+        if (s.indexOf('shipped') === -1 && s.indexOf('invoiced') === -1) occupied.add(String(r.sRackPosition).trim());
+      }
+    });
+  } catch(e) {}
+  // Find lowest available
+  for (var i = 1; i <= 999; i++) {
+    if (!occupied.has(String(i))) {
+      document.getElementById('wizRack').value = String(i);
+      return;
+    }
+  }
+}
+
 async function wizShowRackPicker() {
   var grid = document.getElementById('wizRackGrid');
   var slots = document.getElementById('wizRackSlots');
@@ -6859,6 +6880,8 @@ function wizPopulateIntake() {
   document.getElementById('wizIntClient').textContent = clientName;
   document.getElementById('wizIntDept').textContent = deptName;
   document.getElementById('wizIntScope').textContent = scopeDesc;
+  // Auto-assign lowest available rack
+  wizAutoAssignRack();
   // Focus complaint field
   setTimeout(function() { var c = document.getElementById('wizComplaint'); if (c) c.focus(); }, 100);
   // Check for open repairs on this scope
