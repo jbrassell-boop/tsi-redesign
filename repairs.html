@@ -4524,6 +4524,7 @@ let _itemCatalog = [], _itemCatalogFiltered = [];
 let _pickerSelected = new Set(); // keys of selected items
 async function openItemPicker() {
   _pickerSelected.clear();
+  _pickerMeta = {};
   updatePickerFooter();
   document.getElementById('itemPicker').classList.add('open');
   document.getElementById('itemPickerSearch').value = '';
@@ -4557,6 +4558,9 @@ function filterItemPicker(q) {
   renderPickerList(_itemCatalogFiltered);
 }
 
+let _pickerMeta = {}; // keyed by lRepairItemKey: {comment, cause, fixType, amount}
+function getPickerMeta(key) { return _pickerMeta[key] || {comment:'',cause:'',fixType:'',amount:''}; }
+
 function renderPickerList(items) {
   const list = document.getElementById('itemPickerList');
   if (!items.length) {
@@ -4567,13 +4571,25 @@ function renderPickerList(items) {
   list.innerHTML = shown.map(item => {
     const key = item.lRepairItemKey;
     const checked = _pickerSelected.has(key);
-    return '<div class="picker-item' + (checked ? ' pi-selected' : '') + '" onclick="togglePickerItem(' + key + ',this)">' +
+    const meta = getPickerMeta(key);
+    var html = '<div class="picker-item' + (checked ? ' pi-selected' : '') + '" onclick="togglePickerItem(' + key + ',this)" data-pk="' + key + '">' +
     '<span style="width:18px;height:18px;border:1.5px solid ' + (checked ? 'var(--green)' : 'var(--border-dk)') + ';border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:' + (checked ? 'var(--green)' : '#fff') + ';transition:all .12s">' +
     (checked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '') + '</span>' +
     '<span class="pi-code">' + (key || '') + '</span>' +
     '<span class="pi-desc">' + (item.sItemDescription || '') + '</span>' +
     '<span class="pi-type">' + (item.sInstrumentType || '') + '</span>' +
     '</div>';
+    if (checked) {
+      html += '<div class="pi-detail" onclick="event.stopPropagation()" style="display:flex;gap:8px;align-items:center;padding:4px 16px 8px 44px;background:#F0FDF4;border-bottom:1px solid var(--neutral-200);flex-wrap:wrap">' +
+        '<select style="height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 4px;font-family:inherit" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].cause=this.value">' +
+          '<option value="">Cause…</option><option value="UA"' + (meta.cause==='UA'?' selected':'') + '>User Abuse</option><option value="NWT"' + (meta.cause==='NWT'?' selected':'') + '>Normal Wear & Tear</option></select>' +
+        '<select style="height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 4px;font-family:inherit" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].fixType=this.value">' +
+          '<option value="">Fix Type…</option><option value="W"' + (meta.fixType==='W'?' selected':'') + '>Warranty</option><option value="N"' + (meta.fixType==='N'?' selected':'') + '>Non-conformance</option><option value="C"' + (meta.fixType==='C'?' selected':'') + '>Customer</option><option value="A"' + (meta.fixType==='A'?' selected':'') + '>Amendment</option></select>' +
+        '<input type="text" placeholder="Amount" value="' + (meta.amount||'') + '" style="width:70px;height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 6px;font-family:inherit;text-align:right" onclick="event.stopPropagation()" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].amount=this.value">' +
+        '<input type="text" placeholder="Comment…" value="' + (meta.comment||'').replace(/"/g,'&quot;') + '" style="flex:1;min-width:120px;height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 6px;font-family:inherit" onclick="event.stopPropagation()" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].comment=this.value">' +
+      '</div>';
+    }
+    return html;
   }).join('') + (items.length > 200 ? '<div style="text-align:center;padding:8px;color:var(--muted);font-size:10px">Showing 200 of ' + items.length + ' — refine your search</div>' : '');
   updatePickerFooter();
 }
@@ -4581,18 +4597,14 @@ function renderPickerList(items) {
 function togglePickerItem(key, el) {
   if (_pickerSelected.has(key)) {
     _pickerSelected.delete(key);
-    el.classList.remove('pi-selected');
+    delete _pickerMeta[key];
   } else {
     _pickerSelected.add(key);
-    el.classList.add('pi-selected');
+    _pickerMeta[key] = {comment:'',cause:'',fixType:'',amount:''};
   }
-  // Re-render the checkbox in this row
-  const cb = el.querySelector('span:first-child');
-  const checked = _pickerSelected.has(key);
-  cb.style.borderColor = checked ? 'var(--green)' : 'var(--border-dk)';
-  cb.style.background = checked ? 'var(--green)' : '#fff';
-  cb.innerHTML = checked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
-  updatePickerFooter();
+  // Re-render to show/hide detail row
+  const term = document.getElementById('itemPickerSearch').value.trim().toLowerCase();
+  renderPickerList(term ? _itemCatalogFiltered : _itemCatalog);
 }
 
 function updatePickerFooter() {
@@ -4614,24 +4626,28 @@ function addSelectedItems() {
   _pickerSelected.forEach(key => {
     const item = _itemCatalog.find(x => x.lRepairItemKey === key);
     if (!item) return;
+    const meta = getPickerMeta(key);
     _repairItems.push({
       lRepairItemKey: item.lRepairItemKey,
       sItemDescription: item.sItemDescription,
       sApproved: 'N',
-      dblRepairPrice: 0,
+      dblRepairPrice: parseFloat(meta.amount) || 0,
       sTechInits: '',
       sTech2Inits: '',
       sPrimaryRepair: '',
-      sFixType: '',
-      sUANWT: '',
-      sComments: '',
+      sFixType: meta.fixType || '',
+      sWNCA: meta.fixType || '',
+      sUAorNWT: meta.cause || '',
+      sUANWT: meta.cause || '',
+      sComments: meta.comment || '',
       sTSICode: ''
     });
   });
+  _pickerMeta = {};
   renderRepairItems(_repairItems);
   closeItemPicker();
   markDirty();
-  console.log('[TSI] Added', _pickerSelected.size, 'repair items — local only');
+  console.log('[TSI] Added', _pickerSelected.size, 'repair items with metadata — local only');
 }
 
 function resetMaxCharge() {
