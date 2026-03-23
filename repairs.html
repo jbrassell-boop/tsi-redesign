@@ -491,11 +491,15 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
 
     <!-- REPAIR LIST PANEL — collapsed by default, click to expand -->
     <div id="repairListPanel" class="collapsed">
-      <div style="display:flex;align-items:center;gap:8px;padding:4px 16px;border-bottom:1px solid var(--neutral-200)">
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 16px;border-bottom:1px solid var(--neutral-200);flex-wrap:wrap">
         <button id="rlToggle" onclick="toggleRepairList()">
           <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,3 5,7 8,3"/></svg>
           Repair List
         </button>
+        <div style="position:relative;flex:0 0 200px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--neutral-500);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="inp" id="rlSearch" type="text" placeholder="Search WO#, client, serial, model…" style="height:26px;font-size:11px;padding-left:26px;width:100%" oninput="onRlSearch()">
+        </div>
         <div class="chip-group" id="repairFilters" style="margin:0">
           <button class="chip on" data-status="all">All <span class="chip-count" id="fcAll">0</span></button>
           <button class="chip" data-status="Inspection">Inspection <span class="chip-count" id="fcInspection">0</span></button>
@@ -6033,11 +6037,30 @@ function updateRepairListCounts() {
   document.getElementById('fcOther').textContent = counts.Other;
 }
 
+var _rlSearchTerm = '';
+var _rlSearchTimer = null;
+function onRlSearch() {
+  clearTimeout(_rlSearchTimer);
+  _rlSearchTimer = setTimeout(function() {
+    _rlSearchTerm = (document.getElementById('rlSearch').value || '').toLowerCase().trim();
+    renderRepairList();
+  }, 200);
+}
+
 function renderRepairList() {
   var tbody = document.getElementById('rlTbody');
   var visible = _repairListFilter === 'all'
     ? _repairListData
     : _repairListData.filter(function(r) { return r._category === _repairListFilter; });
+  // Apply search filter
+  if (_rlSearchTerm) {
+    visible = visible.filter(function(r) {
+      var hay = ((r.sWorkOrderNumber || '') + ' ' + (r.sClientName || r.sShipName1 || '') + ' ' +
+        (r.sSerialNumber || '') + ' ' + (r.sScopeTypeDesc || r.sModel || '') + ' ' +
+        (r.sPurchaseOrder || r.sPONumber || '')).toLowerCase();
+      return hay.indexOf(_rlSearchTerm) !== -1;
+    });
+  }
 
   var emptyEl = document.getElementById('emptyRepairs');
   var tableEl = document.getElementById('rlTable');
