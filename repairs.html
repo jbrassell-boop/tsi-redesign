@@ -4461,8 +4461,8 @@ function uanwtStyle(v) {
   return 'color:var(--muted);font-size:10px';
 }
 
-const _wncaCycle = ['W','N','C','A',''];
-const _wncaLabels = {W:'Warranty',N:'Non-conformance',C:'Customer Service',A:'Amendment','':'—'};
+const _wncaCycle = ['R','W','N','C','A',''];
+const _wncaLabels = {R:'Repair',W:'Warranty',N:'Non-conformance',C:'Customer Service',A:'Amendment','':'—'};
 function cycleWNCA(idx) {
   const item = _repairItems[idx];
   if (!item) return;
@@ -4476,6 +4476,7 @@ function cycleWNCA(idx) {
 }
 function wncaPill(v) {
   var pill = 'display:inline-block;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600;letter-spacing:.02em';
+  if (v === 'R') return '<span style="' + pill + ';background:#E8F0FE;color:#1B3A5C">Repair</span>';
   if (v === 'W') return '<span style="' + pill + ';background:#DCFCE7;color:#166534">Warranty</span>';
   if (v === 'N') return '<span style="' + pill + ';background:#FEE2E2;color:#991B1B">Non-conf</span>';
   if (v === 'C') return '<span style="' + pill + ';background:#DBEAFE;color:#1E40AF">Customer</span>';
@@ -4483,6 +4484,7 @@ function wncaPill(v) {
   return '<span style="color:var(--neutral-300);font-size:10px;cursor:pointer" title="Click to set">·</span>';
 }
 function wncaStyle(v) {
+  if (v === 'R') return 'background:#E8F0FE;color:#1B3A5C;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
   if (v === 'W') return 'background:#DCFCE7;color:#166534;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
   if (v === 'N') return 'background:#FEE2E2;color:#991B1B;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
   if (v === 'C') return 'background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:9999px;font-size:9px;font-weight:600';
@@ -4584,7 +4586,7 @@ function renderPickerList(items) {
         '<select style="height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 4px;font-family:inherit" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].cause=this.value">' +
           '<option value="">Cause…</option><option value="UA"' + (meta.cause==='UA'?' selected':'') + '>User Abuse</option><option value="NWT"' + (meta.cause==='NWT'?' selected':'') + '>Normal Wear & Tear</option></select>' +
         '<select style="height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 4px;font-family:inherit" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].fixType=this.value">' +
-          '<option value="">Fix Type…</option><option value="W"' + (meta.fixType==='W'?' selected':'') + '>Warranty</option><option value="N"' + (meta.fixType==='N'?' selected':'') + '>Non-conformance</option><option value="C"' + (meta.fixType==='C'?' selected':'') + '>Customer</option><option value="A"' + (meta.fixType==='A'?' selected':'') + '>Amendment</option></select>' +
+          '<option value="">Fix Type…</option><option value="R"' + (meta.fixType==='R'?' selected':'') + '>Repair</option><option value="W"' + (meta.fixType==='W'?' selected':'') + '>Warranty</option><option value="N"' + (meta.fixType==='N'?' selected':'') + '>Non-conformance</option><option value="C"' + (meta.fixType==='C'?' selected':'') + '>Customer</option><option value="A"' + (meta.fixType==='A'?' selected':'') + '>Amendment</option></select>' +
         '<input type="text" placeholder="Comment…" value="' + (meta.comment||'').replace(/"/g,'&quot;') + '" style="flex:1;min-width:120px;height:24px;font-size:10px;border:1px solid var(--neutral-200);border-radius:4px;padding:0 6px;font-family:inherit" onclick="event.stopPropagation()" onchange="_pickerMeta[' + key + ']=_pickerMeta[' + key + ']||{};_pickerMeta[' + key + '].comment=this.value">' +
       '</div>';
     }
