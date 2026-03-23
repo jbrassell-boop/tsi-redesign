@@ -315,9 +315,11 @@
 .wf-phase{display:flex;align-items:center;gap:4px}
 .wf-phase-label{font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.04em;margin-right:4px;opacity:.7}
 .wf-divider{width:1px;height:22px;background:var(--border-dk);margin:0 10px;flex-shrink:0}
-.wf-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600;border:1.5px solid transparent;cursor:default;transition:all .15s;white-space:nowrap;font-family:inherit;background:none}
+.wf-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600;border:1.5px solid var(--primary);color:var(--primary);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;background:var(--card)}
+.wf-pill:hover{background:var(--primary-light)}
 .wf-pill svg{width:13px;height:13px;flex-shrink:0}
 .wf-locked{background:#F0F2F5;color:#999;border-color:#DDE3EE;cursor:not-allowed;opacity:.7}
+.wf-locked:hover{background:#F0F2F5}
 .wf-locked svg{stroke:#bbb}
 .wf-available{background:var(--primary-light);color:var(--navy);border-color:var(--blue);cursor:pointer;animation:wfPulse 2s ease-in-out infinite}
 .wf-available:hover{background:var(--primary-light);box-shadow:0 0 0 2px rgba(46,116,181,.15)}
@@ -592,6 +594,10 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
             <span class="wf-divider"></span>
             <div class="wf-phase">
               <span class="wf-phase-label">Repair</span>
+              <button class="wf-pill" id="wf-slips" onclick="openDrawer('slips')" title="Update Slips — mid-repair corrections">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+                Update Slips
+              </button>
               <button class="wf-pill wf-locked" id="wf-inspection" data-form="inspection" onclick="openFormPreview('inspection')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 Inspect
@@ -599,10 +605,6 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
               <button class="wf-pill wf-locked" id="wf-picklist" data-form="picklist" onclick="openFormPreview('picklist')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 Pick List
-              </button>
-              <button class="wf-pill" id="wf-slips" onclick="openDrawer('slips')" title="Update Slips — mid-repair corrections">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
-                Update Slips
               </button>
             </div>
             <span class="wf-divider"></span>
