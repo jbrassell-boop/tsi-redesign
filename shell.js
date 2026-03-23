@@ -44,6 +44,15 @@
     return file;
   }
 
+  /* ── SECTION LABELS for sidebar nav grouping ──────────── */
+  var SECTION_LABELS = {
+    0:  'Overview',
+    2:  'Operations',
+    5:  'Catalog',
+    9:  'Services',
+    16: 'Management'
+  };
+
   /* ── BUILD SIDEBAR HTML ────────────────────────────────── */
   function buildSidebar() {
     var cur = currentPage();
@@ -54,6 +63,9 @@
     html += '</div>';
     html += '<div class="nav-group">';
     for (var i = 0; i < NAV.length; i++) {
+      if (SECTION_LABELS[i] !== undefined) {
+        html += '<div class="nav-section-label">' + SECTION_LABELS[i] + '</div>';
+      }
       var n = NAV[i];
       var isActive = (n.href === cur);
       if (isActive) {
@@ -139,6 +151,7 @@
      Single source of truth for the dashboard tab strip.
      Auto-renders when a #dashSubnav element is present.  */
   var DASH_TABS = [
+    { id: 'briefing',       label: 'Morning Briefing',  href: 'dashboard_briefing.html' },
     { id: 'scopes',         label: 'Scopes',           href: 'dashboard.html' },
     { id: 'tasks',          label: 'Tasks',             href: 'dashboard_tasks.html',          badge: '0',  badgeId: 'taskTabBadge' },
     { id: 'emails',         label: 'Emails',            href: 'dashboard_emails.html' },
