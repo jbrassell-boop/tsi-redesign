@@ -6948,11 +6948,16 @@ async function nwoSearch() {
     const list = await API.getRepairList(svcKey);
     let results = Array.isArray(list) ? list : [];
 
-    // Filter — match against WO#, SN#, or PO#
+    // Filter by service location first (NR = North, SR = South)
+    results = results.filter(r => !r.lServiceLocationKey || r.lServiceLocationKey == svcKey);
+
+    // Then filter by search term — match WO#, SN#, PO#, client name, model
     results = results.filter(r =>
       (r.sWorkOrderNumber || '').toLowerCase().includes(q) ||
       (r.sSerialNumber || '').toLowerCase().includes(q) ||
-      (r.sPurchaseOrder || '').toLowerCase().includes(q)
+      (r.sPurchaseOrder || '').toLowerCase().includes(q) ||
+      (r.sClientName || r.sClientName1 || r.sShipName1 || '').toLowerCase().includes(q) ||
+      (r.sScopeTypeDesc || '').toLowerCase().includes(q)
     );
 
     if (!results.length) {
