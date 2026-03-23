@@ -5716,15 +5716,19 @@ function openAmendment() {
   showToast('Amendment opened — add repair items to amend the quote');
 }
 
-function populateAmendItemDropdown() {
+async function populateAmendItemDropdown() {
   const sel = document.getElementById('amendItem');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select repair item —</option>';
-  const items = _repairItems || [];
+  // Load full catalog if not already loaded
+  if (!_itemCatalog.length) {
+    try { await loadItemCatalog(null, 'Flexible'); } catch(e) {}
+  }
+  const items = _itemCatalog.length ? _itemCatalog : _repairItems || [];
   items.forEach(item => {
     const opt = document.createElement('option');
-    opt.value = item.lRepairItemTranKey || item.lRepairItemKey || '';
-    opt.textContent = item.sItemDescription || item.sDescription || item.sRepairItem || item.sRepairItemDesc || '(unnamed)';
+    opt.value = item.lRepairItemKey || item.lRepairItemTranKey || '';
+    opt.textContent = (item.sItemDescription || item.sDescription || item.sRepairItem || '(unnamed)');
     sel.appendChild(opt);
   });
 }
@@ -5754,6 +5758,25 @@ async function addAmendItem() {
     itemKey, description: itemDesc, isBlind,
     addedAt: new Date().toISOString()
   });
+
+  // Add to local repair items array so it shows in the table immediately
+  const catItem = _itemCatalog.find(x => String(x.lRepairItemKey) === String(itemKey));
+  _repairItems.push({
+    lRepairItemKey: parseInt(itemKey),
+    sItemDescription: itemDesc,
+    sApproved: 'N',
+    dblRepairPrice: catItem ? (catItem.dblRepairPrice || 0) : 0,
+    sFixType: 'A',
+    sWNCA: 'A',
+    sUAorNWT: '',
+    sComments: 'Amendment: ' + (_activeAmendment.reason || ''),
+    bBlind: isBlind,
+    sTSICode: catItem ? (catItem.sTSICode || '') : '',
+    sTechInits: '',
+    sTech2Inits: '',
+    sPrimaryRepair: ''
+  });
+  renderRepairItems(_repairItems);
 
   // Try API call to add amended line item
   if (_liveMode && _currentRepair) {
