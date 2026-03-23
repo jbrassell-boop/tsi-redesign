@@ -1689,19 +1689,14 @@ function populateKpiHero() {
   var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   var lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-  // ── KPI 1: Open Repairs (not Shipped, not Invoiced) ──
-  var openRepairs = repairs.filter(function(r) {
+  // ── KPI 1: Open Repairs (exclude closed statuses) ──
+  var closedStatuses = ['invoiced', 'draft invoice', 'shipped', 'shipping today', 'scheduled to ship'];
+  function isClosed(r) {
     var s = (r.sRepairStatus || r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
-    return s.indexOf('shipped') === -1 && s.indexOf('invoiced') === -1;
-  });
+    return closedStatuses.some(function(cs) { return s.indexOf(cs) !== -1; });
+  }
+  var openRepairs = repairs.filter(function(r) { return !isClosed(r); });
   var openCount = openRepairs.length;
-
-  var lastMonthOpen = repairs.filter(function(r) {
-    var s = (r.sRepairStatus || r.sRepairStatusDesc || r.sStatusDescription || '').toLowerCase();
-    if (s.indexOf('shipped') !== -1 || s.indexOf('invoiced') !== -1) return false;
-    var d = r.dtDateIn ? new Date(r.dtDateIn) : null;
-    return d && d >= lastMonthStart && d <= lastMonthEnd;
-  }).length;
 
   // ── KPI 2: Avg Turnaround (days, completed this month) ──
   var tatDays = [];
@@ -1771,7 +1766,9 @@ function populateKpiHero() {
     else { el.className = 'kpi-hero-trend flat'; el.textContent = '\u2192 0%'; }
   }
 
-  setTrend('kpiOpenTrend', openCount, lastMonthOpen);
+  // Open Repairs is a point-in-time balance — no period trend makes sense
+  var openEl = document.getElementById('kpiOpenTrend');
+  if (openEl) { openEl.className = 'kpi-hero-trend flat'; openEl.textContent = 'current'; }
   setTatTrend('kpiTatTrend', avgTat, avgTatLast);
   setTrend('kpiMonthTrend', thisMonthRepairs, lastMonthRepairs);
   setTrend('kpiRevTrend', revMtd, revLastMonth);
