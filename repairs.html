@@ -2840,15 +2840,17 @@ function populateFormDrawer(formId) {
             <div class="wf-fh-item"><b>Serial #</b> ${r.sSerialNumber || '—'}</div>
             <div class="wf-fh-item"><b>Package Type</b> ${r.sRigidOrFlexible || '—'}</div>
           </div>
-          <div style="margin-top:8px;font-size:10.5px"><b style="font-size:9px;color:var(--steel)">ACCESSORIES RECEIVED:</b></div>
-          <div class="wf-di-defects" style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px">
-            <label><input type="checkbox"> None</label>
-            <label><input type="checkbox" ${r.sIncludesCapYN==='Y'?'checked':''}> ETO Cap</label>
-            <label><input type="checkbox" checked> A/W Button</label>
-            <label><input type="checkbox" checked> Suction Button</label>
-            <label><input type="checkbox" ${r.sIncludesWaterResCapYN==='Y'?'checked':''}> Water Cap</label>
-            <label><input type="checkbox"> Biopsy Valve</label>
-            <label><input type="checkbox"> Light Post Adapter</label>
+          <div style="margin-top:8px;font-size:10.5px"><b style="font-size:9px;color:var(--steel)">ACCESSORIES RECEIVED AT INTAKE:</b></div>
+          <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:10.5px">
+            ${[
+              r.sIncludesCapYN==='Y' ? '✓ ETO Cap' : '',
+              '✓ A/W Button',
+              '✓ Suction Button',
+              r.sIncludesWaterResCapYN==='Y' ? '✓ Water Cap' : '',
+              r.sIncludesCaseYN==='Y' ? '✓ Carrying Case' : '',
+              r.sIncludesVideoPlugYN==='Y' ? '✓ Video Plug' : '',
+              r.sIncludesMouthpieceYN==='Y' ? '✓ Mouthpiece' : ''
+            ].filter(Boolean).map(a => '<span style="background:#E8F0FE;color:var(--navy);padding:2px 8px;border-radius:9999px;font-size:9px;font-weight:600">' + a + '</span>').join('') || '<span style="color:var(--muted);font-size:10px">None recorded</span>'}
           </div>
         </div>
       </div>
