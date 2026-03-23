@@ -4178,17 +4178,11 @@ function populateDetail(d) {
       t.classList.add('ctx-dimmed');
     }
   });
-  // Auto-activate the first recommended tab
-  if (recommended.length) {
-    var firstRec = document.querySelector('#tabBar .tab[data-tab="' + recommended[0] + '"]');
-    if (firstRec) {
-      document.querySelectorAll('#tabBar .tab').forEach(function(t){ t.classList.remove('active'); });
-      document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
-      firstRec.classList.add('active');
-      var recPane = document.getElementById('pane-' + recommended[0]);
-      if (recPane) recPane.classList.add('active');
-    }
-  }
+  // Always reset to Scope In tab — recommended tabs are highlighted but not auto-switched
+  document.querySelectorAll('#tabBar .tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelector('#tabBar .tab[data-tab="scopein"]').classList.add('active');
+  document.getElementById('pane-scopein').classList.add('active');
 
   // ── SCOPE TIMELINE ──
   renderScopeTimeline(d.lScopeKey, d.lRepairKey);
