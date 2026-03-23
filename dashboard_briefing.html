@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TSI — Morning Briefing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .page-body{display:flex;flex-direction:column;overflow-y:auto}
+    .briefing-kpis{margin-bottom:0}
+    .queue-cards{margin-top:0}
+    .attention-empty{padding:12px 8px;font-size:11px;color:var(--muted);font-style:italic}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar"></nav>
+  <div class="main">
+    <header class="topbar"></header>
+
+    <!-- DASHBOARD SUBNAV — rendered by shell.js -->
+    <div id="dashSubnav" class="subnav" style="display:flex;gap:0;padding:0 14px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);margin:0;flex-shrink:0"></div>
+
+    <div class="page-body" style="padding:0">
+
+      <!-- BIG KPI CARDS -->
+      <div class="briefing-kpis" id="kpiCards">
+        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">Throughput</div><div class="kpi-big-sub">shipped this month</div></div>
+        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">In-House</div><div class="kpi-big-sub">currently in process</div></div>
+        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">On-Time %</div><div class="kpi-big-sub">within SLA target</div></div>
+        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">Avg TAT</div><div class="kpi-big-sub">days turnaround</div></div>
+      </div>
+
+      <!-- NEEDS ATTENTION -->
+      <div class="attention-section" id="attentionSection">
+        <div class="attention-header">NEEDS ATTENTION</div>
+        <div id="attentionList"></div>
+      </div>
+
+      <!-- YOUR QUEUES -->
+      <div class="attention-section">
+        <div class="attention-header">YOUR QUEUES</div>
+      </div>
+      <div class="queue-cards" id="queueCards"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
+<script src="api.js"></script>
+<script src="shell.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+//  MORNING BRIEFING — Live KPIs from MockDB
+// ═══════════════════════════════════════════════════════
+
+function loadBriefing() {
+  if (typeof MockDB === 'undefined') return;
+
+  var repairs = MockDB.getAll('repairs') || [];
+  var loaners = MockDB.getAll('loanerTrans') || [];
+  var flags   = MockDB.getAll('flags') || [];
+  var tasks   = MockDB.getAll('tasks') || [];
+  var emailQ  = MockDB.getAll('emailQueue') || [];
+  var shipQ   = MockDB.getAll('shippingQueue') || [];
+  var invSizes= MockDB.getAll('inventorySizes') || [];
+  var invoices= MockDB.getAll('invoices') || [];
+
+  var now = new Date();
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // ── KPI 1: Throughput (shipped this month) ──────────
+  var shipped = repairs.filter(function(r) {
+    return r.dtDateOut && new Date(r.dtDateOut) >= monthStart;
+  });
+  var throughput = shipped.length;
+
+  // ── KPI 2: In-House (received but not shipped) ─────
+  var inHouse = repairs.filter(function(r) {
+    return r.dtDateIn && !r.dtDateOut;
+  }).length;
+
+  // ── KPI 3: On-Time % (shipped within 10 biz days) ──
+  var onTimeCount = 0;
+  shipped.forEach(function(r) {
+    if (!r.dtDateIn) return;
+    var days = bizDays(new Date(r.dtDateIn), new Date(r.dtDateOut));
+    if (days <= 10) onTimeCount++;
+  });
+  var onTimePct = shipped.length ? Math.round((onTimeCount / shipped.length) * 100) : 0;
+
+  // ── KPI 4: Avg TAT (calendar days for shipped) ─────
+  var totalDays = 0;
+  var tatCount = 0;
+  shipped.forEach(function(r) {
+    if (!r.dtDateIn) return;
+    var d = Math.round((new Date(r.dtDateOut) - new Date(r.dtDateIn)) / 86400000);
+    totalDays += d;
+    tatCount++;
+  });
+  var avgTat = tatCount ? (totalDays / tatCount).toFixed(1) : '—';
+
+  // Render KPI cards
+  var cards = document.querySelectorAll('#kpiCards .kpi-big-val');
+  cards[0].textContent = throughput;
+  cards[1].textContent = inHouse;
+  cards[2].textContent = onTimePct + '%';
+  cards[3].textContent = avgTat;
+
+  // ── NEEDS ATTENTION ─────────────────────────────────
+  var items = [];
+
+  // Aging repairs (in-house > 10 days)
+  repairs.filter(function(r) { return r.dtDateIn && !r.dtDateOut; }).forEach(function(r) {
+    var days = Math.round((now - new Date(r.dtDateIn)) / 86400000);
+    if (days > 10) {
+      var wo = r.sWorkOrderNumber || r.psWorkOrderNumber || '?';
+      var client = r.sClientName1 || '';
+      items.push({ severity: 'danger', msg: 'WO# ' + wo + ' aging ' + days + ' days \u2014 ' + client, meta: 'SLA breach', sort: days });
+    }
+  });
+
+  // Overdue loaners
+  loaners.filter(function(l) { return l.dtDueDate && !l.dtReturnDate && new Date(l.dtDueDate) < now; }).forEach(function(l) {
+    var dueStr = l.dtDueDate ? l.dtDueDate.slice(0, 10) : '';
+    items.push({ severity: 'warning', msg: 'Loaner overdue \u2014 ' + (l.sScopeTypeDesc || l.sScopeType || 'Scope'), meta: 'due ' + dueStr, sort: 50 });
+  });
+
+  // Unresolved flags > 3 days
+  flags.filter(function(f) { return !f.bResolved && f.dtCreated && (now - new Date(f.dtCreated)) / 86400000 > 3; }).forEach(function(f) {
+    var days = Math.round((now - new Date(f.dtCreated)) / 86400000);
+    items.push({ severity: 'info', msg: f.sFlagDesc || 'Unresolved flag', meta: days + ' days open', sort: days });
+  });
+
+  // Sort by severity then age, cap at 15
+  var sevOrder = { danger: 0, warning: 1, info: 2 };
+  items.sort(function(a, b) { return (sevOrder[a.severity] || 9) - (sevOrder[b.severity] || 9) || b.sort - a.sort; });
+  items = items.slice(0, 15);
+
+  var listEl = document.getElementById('attentionList');
+  if (items.length === 0) {
+    listEl.innerHTML = '<div class="attention-empty">All clear \u2014 no items need attention</div>';
+  } else {
+    var html = '';
+    items.forEach(function(it) {
+      html += '<div class="attention-item">'
+            + '<span class="attention-dot attention-dot-' + it.severity + '"></span>'
+            + '<span class="attention-msg">' + esc(it.msg) + '</span>'
+            + '<span class="attention-meta">' + esc(it.meta) + '</span>'
+            + '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  // ── YOUR QUEUES ─────────────────────────────────────
+  var lowStock = invSizes.filter(function(s) {
+    return (s.nLevelCurrent || 0) < (s.nReorderPoint || 0) && (s.nReorderPoint || 0) > 0;
+  }).length;
+
+  var queues = [
+    { label: 'Tasks',                count: tasks.length,     href: 'dashboard_tasks.html' },
+    { label: 'Emails',               count: emailQ.length,    href: 'dashboard_emails.html' },
+    { label: 'Shipping',             count: shipQ.length,     href: 'dashboard_shipping.html' },
+    { label: 'Inventory Low Stock',  count: lowStock,         href: 'dashboard_inventory.html' },
+    { label: 'Flags',                count: flags.length,     href: 'dashboard_flags.html' },
+    { label: 'Invoices Outstanding', count: invoices.length,  href: 'dashboard_invoices.html' }
+  ];
+
+  var qHtml = '';
+  queues.forEach(function(q) {
+    qHtml += '<div class="queue-card" onclick="location.href=\'' + q.href + '\'">'
+           + '<span class="queue-card-count">' + q.count + '</span>'
+           + '<span class="queue-card-label">' + q.label + '</span>'
+           + '</div>';
+  });
+  document.getElementById('queueCards').innerHTML = qHtml;
+
+  API.UI.updateDemoBadge('live');
+}
+
+// ── Business-day calculator ───────────────────────────
+function bizDays(start, end) {
+  var count = 0;
+  var cur = new Date(start);
+  while (cur < end) {
+    cur.setDate(cur.getDate() + 1);
+    var dow = cur.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+  }
+  return count;
+}
+
+// ── HTML escape ───────────────────────────────────────
+function esc(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+(function init() {
+  API.UI.init();
+  loadBriefing();
+})();
+</script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/order-search.js"></script>
+<script src="js/smart-alerts.js"></script>
+<script src="js/command-palette.js"></script>
+<script src="js/keyboard-nav.js"></script>
+</body>
+</html>

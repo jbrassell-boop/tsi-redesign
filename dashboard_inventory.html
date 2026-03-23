@@ -6,7 +6,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    :root{--hover:#CFFAFE}
+    :root{--hover:var(--primary-light)}
 
     .page-body{display:flex;flex-direction:column;overflow:hidden}
 
@@ -14,7 +14,7 @@
     .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
     .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
     .stat-chip:hover{background:var(--bg)}
-    .stat-chip.active{background:#E3F2FD;box-shadow:inset 0 -2px 0 var(--navy)}
+    .stat-chip.active{background:var(--primary-light);box-shadow:inset 0 -2px 0 var(--navy)}
     .stat-chip.alert{background:#FEF9F9}
     .stat-chip.warn{background:#FFFDF7}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:6px}
@@ -22,29 +22,24 @@
     .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.4px}
 
     /* SUBNAV */
-    .subnav{display:flex;align-items:center;gap:0;background:linear-gradient(to bottom,#A8C8E0,#C0D8ED);border-bottom:2px solid #98BBDA;padding:0 14px;flex-shrink:0;overflow-x:auto}
+    .subnav{display:flex;align-items:center;gap:0;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);padding:0 14px;flex-shrink:0;overflow-x:auto}
     .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
     .subnav-tab:hover{color:var(--navy)}
     .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
     .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
 
     /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);border-bottom:1px solid #B0C8DE;flex-shrink:0;flex-wrap:wrap}
+    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--neutral-200);flex-shrink:0;flex-wrap:wrap}
     .toolbar-search{margin-left:auto;display:flex;align-items:center;gap:6px}
     .search-input{height:30px;width:220px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
     .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
-    .seg-group{display:flex;border:1px solid var(--border-dk);border-radius:6px;overflow:hidden}
-    .seg-btn{padding:5px 10px;font-size:11px;font-weight:500;background:var(--card);border:none;border-right:1px solid var(--border-dk);cursor:pointer;font-family:inherit;color:var(--label);white-space:nowrap}
-    .seg-btn:last-child{border-right:none}
-    .seg-btn.active{background:var(--navy);color:#fff}
-    .seg-btn:hover:not(.active){background:var(--bg)}
     .tb-label{font-size:11px;font-weight:600;color:var(--label)}
 
     /* DATA TABLE */
     .table-wrap{flex:1;overflow:auto;position:relative}
     table{width:100%;border-collapse:collapse;min-width:700px}
     thead{position:sticky;top:0;z-index:2}
-    th{background:linear-gradient(to bottom,#C0D8ED,#DCEAF5);color:var(--navy);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid rgba(180,200,220,.3);border-bottom:1px solid #B0C8DE;letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
+    th{background:var(--neutral-50);color:var(--neutral-500);font-size:10.5px;font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid var(--neutral-200);border-bottom:1px solid var(--neutral-200);letter-spacing:.3px;user-select:none;text-transform:uppercase;cursor:pointer}
     th:last-child{border-right:none}
     td{padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
     tbody tr:nth-child(even){background:var(--row-alt)}
@@ -77,25 +72,25 @@
       <!-- STAT STRIP -->
       <div class="stat-strip" id="invStatStrip">
         <div class="stat-chip" data-filter="all">
-          <div class="s-icon" style="background:#E3F2FD">
+          <div class="s-icon si-navy">
             <svg viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" style="width:16px;height:16px"><path d="M5 8h14M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 8v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>
           </div>
           <div class="s-data"><div class="s-val s-navy" id="kpiTotal">--</div><div class="s-lbl">TOTAL ITEMS</div></div>
         </div>
         <div class="stat-chip alert" data-filter="critical">
-          <div class="s-icon" style="background:#FEF2F2">
+          <div class="s-icon si-red">
             <svg viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2" style="width:16px;height:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
           <div class="s-data"><div class="s-val s-red" id="kpiCritical">--</div><div class="s-lbl">CRITICAL</div></div>
         </div>
         <div class="stat-chip warn" data-filter="low">
-          <div class="s-icon" style="background:#FFFBEB">
+          <div class="s-icon si-amber">
             <svg viewBox="0 0 24 24" fill="none" stroke="#E65100" stroke-width="2" style="width:16px;height:16px"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
           </div>
           <div class="s-data"><div class="s-val s-amber" id="kpiLow">--</div><div class="s-lbl">LOW</div></div>
         </div>
         <div class="stat-chip" data-filter="ok">
-          <div class="s-icon" style="background:#E8F5E9">
+          <div class="s-icon si-green">
             <svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="s-data"><div class="s-val s-green" id="kpiOK">--</div><div class="s-lbl">OK</div></div>
@@ -358,5 +353,8 @@ loadData();
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>
+<script src="js/smart-alerts.js"></script>
+<script src="js/command-palette.js"></script>
+<script src="js/keyboard-nav.js"></script>
 </body>
 </html>
