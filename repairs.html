@@ -3751,15 +3751,8 @@ function populateDetail(d) {
 
   // Scope row (spans, not inputs)
   document.getElementById('hMfr').textContent = d.sManufacturer || '—';
-  // Category: use repair's own sScopeCategory first, fall back to scope record lookup
-  document.getElementById('hScopeCat').textContent = d.sScopeCategory || '—';
-  if (!d.sScopeCategory && d.lScopeKey) {
-    API.getScopeByKey(d.lScopeKey).then(function(scope) {
-      if (scope && scope.sScopeCategory) {
-        document.getElementById('hScopeCat').textContent = scope.sScopeCategory.trim();
-      }
-    }).catch(function() {});
-  }
+  // Category: sScopeTypeCategory = "Gastroscope", "Colonoscope", etc. from scopeTypeCategories table
+  document.getElementById('hScopeCat').textContent = d.sScopeTypeCategory || d.sScopeCategory || '—';
   document.getElementById('hModel').textContent = d.sScopeTypeDesc || '—';
   document.getElementById('hSerial').textContent = d.sSerialNumber || '—';
   document.getElementById('hCapFFS').textContent = d.lContractKey ? 'Contract' : 'FFS';

@@ -91,13 +91,16 @@ if (seed.salesReps) {
   console.log('  salesReps: +sSalesRepName, +lSalesRepNameKey');
 }
 
-// --- Enrich scope types with manufacturer name ---
+// --- Enrich scope types with manufacturer name + scope type category ---
+const scopeTypeCatMap = buildMap(seed.scopeTypeCategories || [], 'lScopeTypeCategoryKey');
 if (seed.scopeTypes) {
   seed.scopeTypes.forEach(st => {
     st.sManufacturerName = lk(mfrMap, st.lManufacturerKey, 'sManufacturer') || '';
     st.sScopeCategory = lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '';
+    st.sScopeTypeCategory = lk(scopeTypeCatMap, st.lScopeTypeCatKey, 'sScopeTypeCategory') || '';
+    st.sRigidOrFlexible = lk(scopeTypeCatMap, st.lScopeTypeCatKey, 'sInstrumentType') || '';
   });
-  console.log('  scopeTypes: +sManufacturerName, +sScopeCategory');
+  console.log('  scopeTypes: +sManufacturerName, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible');
 }
 
 // --- Enrich clients ---
@@ -150,11 +153,12 @@ if (seed.scopes) {
     s.sScopeTypeDesc = st ? st.sScopeTypeDesc : '';
     s.sManufacturer = st ? (lk(mfrMap, st.lManufacturerKey, 'sManufacturer') || '') : '';
     s.sScopeCategory = st ? (lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '') : '';
+    s.sScopeTypeCategory = st ? st.sScopeTypeCategory : '';
     s.sRigidOrFlexible = st ? st.sRigidOrFlexible : '';
     s.sDepartmentName = dept ? dept.sDepartmentName : '';
     s.sClientName1 = client ? client.sClientName1 : '';
   });
-  console.log('  scopes: +sScopeTypeDesc, +sManufacturer, +sScopeCategory, +sRigidOrFlexible, +sDepartmentName, +sClientName1');
+  console.log('  scopes: +sScopeTypeDesc, +sManufacturer, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible, +sDepartmentName, +sClientName1');
 }
 
 // --- Build invoice-by-repair lookup for status derivation ---
@@ -186,6 +190,7 @@ if (seed.repairs) {
     r.sScopeTypeDesc = st ? st.sScopeTypeDesc : '';
     r.sManufacturer = st ? (lk(mfrMap, st.lManufacturerKey, 'sManufacturer') || '') : '';
     r.sScopeCategory = st ? (lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '') : '';
+    r.sScopeTypeCategory = st ? st.sScopeTypeCategory : '';
     r.sRigidOrFlexible = st ? st.sRigidOrFlexible : '';
     r.sClientName1 = client ? client.sClientName1 : '';
     r.sDepartmentName = dept ? dept.sDepartmentName : '';
@@ -539,7 +544,7 @@ const REPAIR_KEEP_FIELDS = new Set([
   'sDeliveryMethodDesc', 'sDepartmentName', 'sManufacturer',
   'sPaymentTerms', 'sPONumber', 'sPricingDescription', 'sPurchaseOrder',
   'sRackPosition', 'sRepairReason', 'sRepairStatus', 'sRigidOrFlexible',
-  'sSalesRepName', 'sScopeCategory', 'sScopeTypeDesc', 'sSerialNumber',
+  'sSalesRepName', 'sScopeCategory', 'sScopeTypeCategory', 'sScopeTypeDesc', 'sSerialNumber',
   'sServiceLocationName',
   'sShipAddr1', 'sShipAddr2', 'sShipAttention', 'sShipCity', 'sShipName1', 'sShipName2', 'sShipState', 'sShipZip',
   'sTechName', 'sTrackingNumberIn', 'sTrackingNumberOut',
