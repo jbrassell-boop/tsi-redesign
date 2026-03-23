@@ -6955,7 +6955,7 @@ async function nwoSearch() {
     );
 
     if (!results.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">No matching repairs found. Click <b>Create New</b> below to start a fresh work order.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="msg-empty">No matching repairs found for "<b>' + esc(q) + '</b>"</td></tr>';
     } else {
       tbody.innerHTML = results.slice(0, 50).map(r =>
         '<tr onclick="nwoSelectRow(this,' + r.lRepairKey + ')">' +
@@ -6968,6 +6968,13 @@ async function nwoSearch() {
         '<td>' + (r.sPurchaseOrder || '') + '</td>' +
         '</tr>'
       ).join('');
+    }
+    // Always show Create New button after search
+    tbody.insertAdjacentHTML('afterend', '');
+    var createRow = document.getElementById('nwoCreateNewRow');
+    if (!createRow) {
+      var tbl = tbody.closest('table');
+      tbl.insertAdjacentHTML('afterend', '<div id="nwoCreateNewRow" style="text-align:center;padding:10px"><button onclick="nwoRevealCreate()" style="height:36px;padding:0 24px;border:none;border-radius:6px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ Create New Work Order</button></div>');
     }
   } catch (e) {
     // Demo fallback
