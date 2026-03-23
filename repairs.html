@@ -6760,6 +6760,7 @@ async function wizCreateScope() {
   }
 
   if (!created) {
+    var modelLookup = _wizFilteredModels.find(t => t.lScopeTypeKey == modelKey);
     const localScope = {
       lScopeKey: -(Date.now()),
       lDepartmentKey: _wizDept.lDepartmentKey,
@@ -6767,7 +6768,9 @@ async function wizCreateScope() {
       lScopeTypeKey: parseInt(modelKey),
       sScopeTypeDesc: modelName,
       sRigidOrFlexible: rigFlex,
-      sManufacturerName: '',
+      sManufacturer: modelLookup ? (modelLookup.sManufacturerName || '') : '',
+      sManufacturerName: modelLookup ? (modelLookup.sManufacturerName || '') : '',
+      sScopeTypeCategory: modelLookup ? (modelLookup.sScopeTypeCategory || '') : '',
       bScopeIsDead: false
     };
     _wizDeptScopes.push(localScope);
@@ -6888,9 +6891,17 @@ function wizSubmit() {
   const scopeKey = _wizScope.lScopeKey;
   const scopeSN = _wizScope.sSerialNumber || '';
   const scopeModel = _wizScope.sScopeTypeDesc || _wizScope.sScopeTypeName || '';
-  const scopeMfr = _wizScope.sManufacturerName || _wizScope.sManufacturer || '';
+  var scopeMfr = _wizScope.sManufacturer || _wizScope.sManufacturerName || '';
   const scopeRF = _wizScope.sRigidOrFlexible || '';
-  const scopeCat = _wizScope.sScopeTypeCategory || _wizScope.sScopeModelCategory || '';
+  var scopeCat = _wizScope.sScopeTypeCategory || _wizScope.sScopeModelCategory || '';
+  // If manufacturer/category not on scope, look up from scope types
+  if (!scopeMfr || !scopeCat) {
+    var stLookup = _wizFilteredModels.find(t => t.lScopeTypeKey == _wizScope.lScopeTypeKey);
+    if (stLookup) {
+      if (!scopeMfr) scopeMfr = stLookup.sManufacturerName || '';
+      if (!scopeCat) scopeCat = stLookup.sScopeTypeCategory || '';
+    }
+  }
 
   closeNWO();
 
