@@ -484,21 +484,61 @@ const API = (() => {
     updateDemoBadge: function(status) {
       const badge = document.getElementById('dataBadge');
       if (!badge) return;
+
+      // Local SQL Server mode — show prominent warning
+      if (isLocalMode()) {
+        badge.className = 'data-badge live';
+        badge.textContent = '⚡ SQL Server — LIVE';
+        badge.style.background = '#DC2626';
+        badge.style.color = '#fff';
+        badge.style.fontWeight = '700';
+        badge.style.cursor = 'pointer';
+        badge.title = 'Connected to local WinScopeNet. Changes are REAL. Click to switch to mock mode.';
+        badge.onclick = function() {
+          if (confirm('Switch to mock data mode? (No more writes to SQL Server)')) {
+            localStorage.removeItem('tsi_api_mode');
+            location.reload();
+          }
+        };
+        // Show banner if not already present
+        if (!document.getElementById('sqlBanner')) {
+          var banner = document.createElement('div');
+          banner.id = 'sqlBanner';
+          banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#DC2626;color:#fff;text-align:center;padding:4px 16px;font-size:11px;font-weight:600;font-family:Inter,system-ui,sans-serif;letter-spacing:.02em';
+          banner.innerHTML = '⚡ SQL SERVER MODE — All changes write directly to WinScopeNet production database. <a href="javascript:void(0)" onclick="localStorage.removeItem(\'tsi_api_mode\');location.reload()" style="color:#FCA5A5;text-decoration:underline;margin-left:8px">Switch to Mock</a>';
+          document.body.appendChild(banner);
+        }
+        return;
+      }
+
+      // Remove SQL banner if switching away
+      var oldBanner = document.getElementById('sqlBanner');
+      if (oldBanner) oldBanner.remove();
+
       if (status === 'api' || status === 'live') {
         badge.className = 'data-badge live';
         badge.textContent = 'Live Data';
         badge.style.background = '#E8F5E9';
         badge.style.color = '#2E7D32';
+        badge.style.fontWeight = '';
+        badge.style.cursor = '';
+        badge.onclick = null;
       } else if (status === 'mock') {
         badge.className = 'data-badge mock';
         badge.textContent = 'Mock Data';
         badge.style.background = '#EFF6FF';
         badge.style.color = '#1D4ED8';
+        badge.style.fontWeight = '';
+        badge.style.cursor = '';
+        badge.onclick = null;
       } else {
         badge.className = 'data-badge demo';
         badge.textContent = 'Demo Data';
         badge.style.background = '#FFFBEB';
         badge.style.color = '#D97706';
+        badge.style.fontWeight = '';
+        badge.style.cursor = '';
+        badge.onclick = null;
       }
     },
     setupNewOrderDropdown: function() {
