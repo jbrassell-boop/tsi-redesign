@@ -78,7 +78,8 @@ router.get('/Repair/GetAllRepairs', async (req, res, next) => {
     const rows = await db.query(`${REPAIR_SELECT}
       WHERE (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
         AND (@deptKey = 0 OR r.lDepartmentKey = @deptKey)
-      ORDER BY r.dtDateIn DESC`, { svcKey, deptKey });
+      ORDER BY r.dtDateIn DESC
+      OFFSET 0 ROWS FETCH NEXT 500 ROWS ONLY`, { svcKey, deptKey });
     res.json(rows);
   } catch (e) { next(e); }
 });
