@@ -115,6 +115,7 @@
       </div>
     </div>
 
+    <div id="skAcquisitions" style="padding:4px 12px"></div>
     <!-- ═══════════ TAB: IN-HOUSE ═══════════ -->
     <div class="module-view show" id="mv-inhouse">
       <div class="toolbar">
@@ -669,7 +670,8 @@
 
   // ── Init ──────────────────────────────────────────────────────
   API.UI.init();
-  loadInhouse();
+  if(API && API.UI) API.UI.showSkeleton('skAcquisitions', 5);
+  loadInhouse().then(function() { if(API && API.UI) API.UI.hideSkeleton('skAcquisitions'); });
 
 }());
 </script>

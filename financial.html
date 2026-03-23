@@ -53,6 +53,7 @@
         <div class="subnav-tab" data-tab="gl">GL Accounts</div>
         <div class="subnav-tab" data-tab="atrisk">At Risk</div>
         <div class="subnav-tab" data-tab="trending">Trending</div>
+        <span class="role-badge rb-admin" style="margin-left:auto;margin-right:12px">Admin</span>
       </div>
 
       <!-- STAT STRIP -->
@@ -115,6 +116,10 @@
             <option value="">All Clients</option>
           </select>
         </div>
+        <button class="btn btn-outline btn-sm" onclick="exportTableCSV('finTableWrap','financial-export')" title="Export to CSV" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Export
+        </button>
         <button class="btn btn-navy" id="btnNewInvoice">+ New Invoice</button>
       </div>
 
@@ -152,8 +157,9 @@
         <button class="btn btn-navy" id="btnTrSearch" onclick="filterTrending()">Search</button>
       </div>
 
+      <div id="skFinancial" style="padding:4px 12px"></div>
       <!-- TABLE -->
-      <div class="tbl-wrap">
+      <div class="tbl-wrap" id="finTableWrap">
         <table>
           <thead id="dataHead">
             <tr>
@@ -193,6 +199,7 @@
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 (function() {
   'use strict';
@@ -939,6 +946,7 @@
 
   // ── Init ───────────────────────────────────────────────
   API.UI.init();
+  if(API && API.UI) API.UI.showSkeleton('skFinancial', 5);
   updateFinancialKPIs();
 
   // Load financial health waterfall
@@ -964,7 +972,7 @@
     });
   }
 
-  loadTab('outstanding');
+  loadTab('outstanding').then(function() { if(API && API.UI) API.UI.hideSkeleton('skFinancial'); });
 
 })();
 </script>

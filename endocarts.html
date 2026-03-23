@@ -223,6 +223,7 @@
           <input class="search-input" id="searchInput" placeholder="Search quote#, client, model..." oninput="debounceSearch()" style="margin-left:auto"/>
         </div>
 
+        <div id="skEndocarts" style="padding:4px 12px"></div>
         <!-- DATA TABLE -->
         <div class="table-wrap">
           <table>
@@ -1399,7 +1400,8 @@ async function init() {
     observer.observe(nom, { attributes:true, attributeFilter:['class'] });
   }
 }
-init();
+if(API && API.UI) API.UI.showSkeleton('skEndocarts', 5);
+init().then(function() { if(API && API.UI) API.UI.hideSkeleton('skEndocarts'); });
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

@@ -149,6 +149,7 @@
         </button>
       </div>
 
+      <div id="skWorkspace" style="padding:4px 12px"></div>
       <!-- Widget Grid -->
       <div class="ws-grid" id="wsGrid"></div>
 
@@ -714,11 +715,13 @@ function applyPreset(presetKey) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 if (typeof API !== 'undefined' && API.UI) API.UI.init();
+if(API && API.UI) API.UI.showSkeleton('skWorkspace', 5);
 // Restore preset selection
 var savedPreset = localStorage.getItem('tsi_ws_preset') || '';
 var presetSel = document.getElementById('presetSelect');
 if (presetSel && savedPreset) presetSel.value = savedPreset;
 renderGrid();
+if(API && API.UI) API.UI.hideSkeleton('skWorkspace');
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

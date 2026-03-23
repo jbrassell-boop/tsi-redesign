@@ -178,6 +178,7 @@
         <div class="cat-pill" data-cat="business" onclick="switchCat('business',this)">Business Config</div>
         <div class="cat-pill" data-cat="product" onclick="switchCat('product',this)">Product &amp; Repair</div>
         <div class="cat-pill" data-cat="hr" onclick="switchCat('hr',this)">HR &amp; Finance</div>
+        <span class="role-badge rb-admin" style="margin-left:auto">Admin</span>
       </div>
 
       <!-- TAB BAR -->
@@ -217,12 +218,17 @@
             <option value="Accounting">Accounting</option>
           </select>
           <div style="flex:1"></div>
+          <button class="btn btn-outline btn-sm" onclick="exportTableCSV('usersTableWrap','users-export')" title="Export to CSV" style="margin-right:4px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export
+          </button>
           <button class="btn btn-navy" onclick="openUserDrawer(null)" style="height:30px;padding:0 14px;font-size:12px;font-weight:700">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add User
           </button>
         </div>
-        <div class="table-wrap">
+        <div id="skAdmin" style="padding:4px 12px"></div>
+        <div class="table-wrap" id="usersTableWrap">
           <table>
             <thead>
               <tr>
@@ -945,6 +951,7 @@
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>
 <script>
@@ -2151,6 +2158,7 @@
      INIT
      ============================== */
 
+  if(API && API.UI) API.UI.showSkeleton('skAdmin', 5);
   renderUsers(USERS);
   renderSecurityGroups();
   renderPricing(PRICING);
@@ -2171,6 +2179,7 @@
   renderHolidays(HOLIDAYS);
   renderBonusPools(BONUS_POOLS.filter(function(b){return b.type==='tech';}));
   renderSalesTax(SALES_TAX);
+  if(API && API.UI) API.UI.hideSkeleton('skAdmin');
 
 })();
 </script>

@@ -195,6 +195,7 @@
             <button class="btn-xs" style="background:#fff;border:1px solid var(--border-dk);color:var(--label)">Clear</button>
           </div>
         </div>
+        <div id="skSuppliers" style="padding:4px 12px"></div>
         <div class="split-left-list" id="supplierList">
           <!-- Dynamically populated -->
         </div>
@@ -1510,7 +1511,8 @@ document.addEventListener('keydown', function(e) {
 
 // ── Init ─────────────────────────────────────────────
 API.UI.init();
-reloadSuppliers();
+if(API && API.UI) API.UI.showSkeleton('skSuppliers', 5);
+reloadSuppliers().then(function() { if(API && API.UI) API.UI.hideSkeleton('skSuppliers'); });
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

@@ -862,6 +862,48 @@ function fmtCurrency(n) {
 }
 
 
+// ── CSV Export ────────────────────────────────────────────────────
+
+/** Export an HTML table to CSV and trigger download.
+ *  @param {string} tableId — ID of the <table> or its parent wrapper
+ *  @param {string} filename — download filename (without .csv)
+ */
+function tableToCSV(tableId, filename) {
+  var el = document.getElementById(tableId);
+  if (!el) { console.warn('[Export] Table not found:', tableId); return; }
+  // If el is not a table, try to find one inside it
+  var table = el.tagName === 'TABLE' ? el : el.querySelector('table');
+  if (!table) { console.warn('[Export] No <table> inside:', tableId); return; }
+
+  var csv = [];
+  var rows = table.querySelectorAll('tr');
+  for (var i = 0; i < rows.length; i++) {
+    // Skip hidden group/separator rows
+    if (rows[i].classList.contains('group-hidden')) continue;
+    var cells = rows[i].querySelectorAll('th, td');
+    var row = [];
+    for (var j = 0; j < cells.length; j++) {
+      // Skip action columns (buttons only, no text)
+      var text = (cells[j].textContent || '').trim().replace(/[\r\n]+/g, ' ');
+      row.push('"' + text.replace(/"/g, '""') + '"');
+    }
+    csv.push(row.join(','));
+  }
+
+  var blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (filename || 'export') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/** Convenience global — pages can call exportTableCSV(id, name) directly */
+window.exportTableCSV = function(tableId, filename) { tableToCSV(tableId, filename); };
+
 // ── Public API ────────────────────────────────────────────────────
 window.TSIExport = {
   // PDF
@@ -890,6 +932,8 @@ window.TSIExport = {
   addSheet:         addSheet,
   saveWorkbook:     saveWorkbook,
   tableToExcel:     tableToExcel,
+  // CSV
+  tableToCSV:       tableToCSV,
   // Util
   fmtDate:          fmtDate,
   fmtCurrency:      fmtCurrency,

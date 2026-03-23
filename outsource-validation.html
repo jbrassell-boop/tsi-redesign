@@ -227,6 +227,7 @@
         <input class="search-input" id="searchInput" placeholder="Search WO#, serial, client, vendor..." oninput="debounceSearch()" style="margin-left:auto"/>
       </div>
 
+      <div id="skOutsource" style="padding:4px 12px"></div>
       <!-- DATA TABLE -->
       <div class="table-wrap">
         <table>
@@ -1003,7 +1004,8 @@ async function init() {
     dd.appendChild(opt);
   });
 }
-init();
+if(API && API.UI) API.UI.showSkeleton('skOutsource', 5);
+init().then(function() { if(API && API.UI) API.UI.hideSkeleton('skOutsource'); });
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

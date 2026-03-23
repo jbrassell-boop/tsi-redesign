@@ -213,6 +213,7 @@
         <input class="search-input" id="searchInput" placeholder="Search invoice, client, dept..." oninput="debounceSearch()" style="margin-left:auto"/>
       </div>
 
+      <div id="skOnsite" style="padding:4px 12px"></div>
       <!-- DATA TABLE -->
       <div class="table-wrap">
         <table>
@@ -1275,7 +1276,8 @@ function changeServiceLocation() {
 }
 
 // ── Boot ────────────────────────────────────────────────
-init();
+if(API && API.UI) API.UI.showSkeleton('skOnsite', 5);
+init().then(function() { if(API && API.UI) API.UI.hideSkeleton('skOnsite'); });
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

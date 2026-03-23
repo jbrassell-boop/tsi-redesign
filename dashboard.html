@@ -237,7 +237,7 @@
           <div class="kpi-hero-icon si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
           <div class="kpi-hero-data">
             <div class="kpi-hero-val" id="kpiOpenRepairs">&mdash;</div>
-            <div class="kpi-hero-lbl">Open Repairs</div>
+            <div class="kpi-hero-lbl">Open Repairs <span class="ctx-help">?<span class="ctx-help-tip">Count of all repairs not yet shipped or invoiced across both facilities.</span></span></div>
           </div>
           <div class="kpi-hero-trend" id="kpiOpenTrend"></div>
         </div>
@@ -245,7 +245,7 @@
           <div class="kpi-hero-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
           <div class="kpi-hero-data">
             <div class="kpi-hero-val" id="kpiAvgTat">&mdash;</div>
-            <div class="kpi-hero-lbl">Avg Turnaround</div>
+            <div class="kpi-hero-lbl">Avg Turnaround <span class="ctx-help">?<span class="ctx-help-tip">Average calendar days from received to shipped for repairs completed this month.</span></span></div>
           </div>
           <div class="kpi-hero-trend" id="kpiTatTrend"></div>
         </div>
@@ -261,7 +261,7 @@
           <div class="kpi-hero-icon si-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           <div class="kpi-hero-data">
             <div class="kpi-hero-val" id="kpiRevenueMtd">&mdash;</div>
-            <div class="kpi-hero-lbl">Revenue MTD</div>
+            <div class="kpi-hero-lbl">Revenue MTD <span class="ctx-help">?<span class="ctx-help-tip">Month-to-date invoiced revenue from GP staging. Includes all repair and contract billing.</span></span></div>
           </div>
           <div class="kpi-hero-trend" id="kpiRevTrend"></div>
         </div>
@@ -1784,6 +1784,16 @@ API.UI.init();
 populateKpiHero();
 API.UI.showSkeleton('skDashboard', 6);
 loadDashboardData({ instrumentTypeValue: 'all' }).then(function() { API.UI.hideSkeleton('skDashboard'); });
+
+// Add Admin badge to Analytics subnav tab
+setTimeout(function() {
+  var tabs = document.querySelectorAll('#dashSubnav .subnav-tab');
+  tabs.forEach(function(t) {
+    if (t.textContent.trim().indexOf('Analytics') === 0) {
+      t.insertAdjacentHTML('beforeend', ' <span class="role-badge rb-admin">Admin</span>');
+    }
+  });
+}, 50);
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

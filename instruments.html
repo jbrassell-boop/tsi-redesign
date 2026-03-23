@@ -274,6 +274,7 @@
           <input class="search-input" id="ir_searchInput" placeholder="Search order, client, dept, PO…" oninput="ir_debounceSearch()"/>
         </div>
 
+        <div id="skInstruments" style="padding:4px 12px"></div>
         <!-- Table -->
         <div class="table-wrap">
           <table>
@@ -854,7 +855,9 @@ document.addEventListener('keydown', function(e) {
 
 // ── Init repairs tab (default) ──
 _tabInited['repairs'] = true;
+if(API && API.UI) API.UI.showSkeleton('skInstruments', 5);
 ir_initPage();
+if(API && API.UI) API.UI.hideSkeleton('skInstruments');
 
 // Handle ?action=new (with optional client/dept keys from shared wizard)
 (function() {

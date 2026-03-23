@@ -199,12 +199,17 @@
           <input class="search-input" id="taskSearch" type="text" placeholder="Search tasks..."/>
         </div>
         <div class="toolbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="exportTableCSV('tasksTableWrap','tasks-export')" title="Export to CSV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export
+          </button>
           <button class="tb-btn" onclick="openAddTask()">+ Add Task</button>
         </div>
       </div>
 
+      <div id="skTasks" style="padding:4px 12px"></div>
       <!-- DATA TABLE -->
-      <div class="table-wrap">
+      <div class="table-wrap" id="tasksTableWrap">
         <table>
           <thead>
             <tr>
@@ -346,6 +351,7 @@
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
@@ -1067,6 +1073,7 @@ document.querySelectorAll('#taskStatStrip .stat-chip[data-filter]').forEach(chip
 // ===============================================================
 (async function init() {
   API.UI.init();
+  if(API && API.UI) API.UI.showSkeleton('skTasks', 5);
   // Load dropdown lookups and task data in parallel
   await Promise.all([
     loadTaskTypes(),
@@ -1074,6 +1081,7 @@ document.querySelectorAll('#taskStatStrip .stat-chip[data-filter]').forEach(chip
     loadTaskStatuses(),
     loadTasks()
   ]);
+  if(API && API.UI) API.UI.hideSkeleton('skTasks');
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>

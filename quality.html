@@ -148,6 +148,7 @@
         <button class="subnav-btn" onclick="switchTab('capa',this)">CAPA Log</button>
         <button class="subnav-btn" onclick="switchTab('rework',this)">Rework Tracking</button>
         <button class="subnav-btn" onclick="switchTab('reports',this)">Reports</button>
+        <span class="role-badge rb-manager" style="margin-left:auto;margin-right:12px">Manager</span>
       </div>
 
       <!-- QC INSPECTIONS TAB -->
@@ -165,8 +166,13 @@
           <span style="font-size:10px;color:var(--muted)">to</span>
           <input type="date" class="date-input" id="insDateTo" onchange="renderInspections()" title="To date"/>
           <input class="search-input" id="insSearch" placeholder="Search WO#, Serial#, Client..." oninput="renderInspections()" style="margin-left:auto"/>
+          <button class="btn btn-outline btn-sm" onclick="exportTableCSV('insTableWrap','quality-inspections')" title="Export to CSV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export
+          </button>
         </div>
-        <div class="table-wrap">
+        <div id="skQuality" style="padding:4px 12px"></div>
+        <div class="table-wrap" id="insTableWrap">
           <table>
             <thead>
               <tr>
@@ -344,6 +350,7 @@
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
 <script src="api.js"></script>
+<script src="js/export-utils.js"></script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>
 <script>
@@ -909,7 +916,9 @@ function runQualityReport(idx) {
 // INIT
 // ══════════════════════════════════════════════════════════
 _tabInited.inspections = true;
+if(API && API.UI) API.UI.showSkeleton('skQuality', 5);
 renderInspections();
+if(API && API.UI) API.UI.hideSkeleton('skQuality');
 
 </script>
 <script src="js/smart-alerts.js"></script>

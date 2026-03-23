@@ -196,6 +196,9 @@
       </div>
       <div class="alerts-bar" id="alertsBar"></div>
 
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb" id="breadcrumb" style="display:none"></div>
+
       <!-- TABS with count badges -->
       <div class="tab-bar">
         <div class="tab active" onclick="showDeptTab('main',this)">Main</div>
@@ -1266,6 +1269,15 @@ function openContactModal(mode){
       if(sel && sel.value != clientKey) sel.value = clientKey;
     }
     _curDeptName = d.sDepartmentName || d.psDepartmentName || '';
+    // Breadcrumb
+    var bcClient = '';
+    var selC = $('selClient');
+    if (selC && selC.selectedIndex >= 0) bcClient = selC.options[selC.selectedIndex].text;
+    updateBreadcrumb([
+      { label: 'Departments', href: 'departments.html' },
+      { label: bcClient || 'Client' },
+      { label: _curDeptName || ('Department #' + currentDeptKey) }
+    ]);
     // Department info
     const f = (id,val) => { const el=$(id); if(el) el.value = val ?? ''; };
     f('fDeptName', d.sDepartmentName);
@@ -2624,6 +2636,25 @@ function openContactModal(mode){
   }
 
 })();
+
+/* ── Breadcrumb helper ── */
+function updateBreadcrumb(items) {
+  var el = document.getElementById('breadcrumb');
+  if (!el || !items || !items.length) { if (el) el.style.display = 'none'; return; }
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    if (i > 0) html += '<span class="breadcrumb-sep">\u203A</span>';
+    if (i < items.length - 1 && items[i].href) {
+      html += '<a href="' + items[i].href + '">' + items[i].label + '</a>';
+    } else if (i < items.length - 1) {
+      html += '<a href="#">' + items[i].label + '</a>';
+    } else {
+      html += '<span class="breadcrumb-current">' + items[i].label + '</span>';
+    }
+  }
+  el.innerHTML = html;
+  el.style.display = 'flex';
+}
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/order-search.js"></script>

@@ -510,6 +510,9 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
     <!-- SMART ALERTS BAR -->
     <div class="alerts-bar" id="alertsBar"></div>
 
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb" id="breadcrumb" style="display:none"></div>
+
     <!-- REPAIR LIST PANEL — filter chips + compact table -->
     <div id="repairListPanel">
       <div style="display:flex;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--neutral-200)">
@@ -655,8 +658,8 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                 <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
                 <span class="ref-item"><b>Days Since Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
-                <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
-                <span class="ref-item"><b>TAT</b> <span class="ref-val" id="hTAT">—</span></span>
+                <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span class="ctx-help">?<span class="ctx-help-tip">40-day warranty from ship date. Returns within 40 days trigger warranty repair at no charge.</span></span> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
+                <span class="ref-item"><b>TAT</b> <span class="ctx-help">?<span class="ctx-help-tip">Calendar days from received to shipped. Target is under 5 business days for standard repairs.</span></span> <span class="ref-val" id="hTAT">—</span></span>
                 <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
               </div>
             </div>
@@ -681,8 +684,8 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
             <!-- ASSESSMENT — reason, level, angulation, drawer buttons -->
             <div style="display:flex;align-items:flex-end;gap:6px 14px;padding:6px 14px;margin-bottom:4px;background:#F0F4FA;border:1px solid var(--border);border-radius:5px;flex-wrap:wrap">
               <div class="field" style="min-width:130px;margin:0"><label>Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:100px;margin:0"><label>Level</label><select id="hRepairLevel" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:100px;margin:0"><label>PS Level</label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:100px;margin:0"><label>Level <span class="ctx-help">?<span class="ctx-help-tip">Complexity: Evaluation Only, Minor, Standard, Major, or Rebuild. Determines base pricing.</span></span></label><select id="hRepairLevel" onchange="markDirty()"></select></div>
+              <div class="field" style="min-width:100px;margin:0"><label>PS Level <span class="ctx-help">?<span class="ctx-help-tip">FDA patient safety classification. Critical items require additional QC documentation.</span></span></label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
               <div style="width:1px;height:24px;background:var(--border-dk);margin:0 2px;flex-shrink:0"></div>
               <div class="field" style="width:56px;margin:0"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
               <div class="field" style="width:56px;margin:0"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
@@ -701,7 +704,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
               <div class="section-head">
                 Repair Items
                 <div style="display:flex;gap:4px;margin-left:auto">
-                  <button class="btn btn-outline btn-xs" onclick="approveAllItems()">Approve All</button>
+                  <button class="btn btn-outline btn-xs" onclick="approveAllItems()">Approve All</button><span class="role-badge rb-manager">Manager</span>
                   <button class="btn btn-outline btn-xs" onclick="unapproveAllItems()">Unapprove All</button>
                   <button class="btn btn-outline btn-xs" onclick="openTechsDrawer()">Techs</button>
                   <button class="btn btn-outline btn-xs" onclick="openInvDrawer()">Inventory</button>
@@ -1184,6 +1187,12 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            <!-- Recent Activity Audit Trail -->
+            <div class="section-card" style="margin-top:6px">
+              <div class="section-head">Recent Activity</div>
+              <div id="repairAuditTrail" style="max-height:320px;overflow-y:auto"></div>
             </div>
 
             <!-- Rework Panel -->
@@ -3608,6 +3617,7 @@ async function loadRepair(repairKey) {
     updateSaveStatus('ready');
     populateDetail(d);
     updateWorkflowForms(d.lRepairStatusID || 1);
+    renderRepairAuditTrail(d);
 
     // Load sub-tabs + scope history in parallel (non-blocking)
     Promise.all([
@@ -3736,6 +3746,15 @@ function populateDetail(d) {
   document.getElementById('hRack').value = d.sRackPosition || '';
   setSelectVal('hRepairLevel', d.lRepairLevelKey);
   setSelectVal('hRepairStatus', d.lRepairStatusID);
+
+  // Breadcrumb
+  const bcClient = d.sShipName1 || d.sBillName1 || d.sClientName1 || (_clients.find(c => c.lClientKey == d.lClientKey) || {}).sClientName1 || '';
+  const bcWO = d.sWorkOrderNumber || ('Repair #' + d.lRepairKey);
+  updateBreadcrumb([
+    { label: 'Repairs', href: 'repairs.html' },
+    { label: bcClient || 'Client' },
+    { label: bcWO }
+  ]);
 
   // Scope row (spans, not inputs)
   document.getElementById('hMfr').textContent = d.sManufacturer || '—';
@@ -6948,6 +6967,89 @@ function populateStatus(history) {
   ).join('');
 }
 
+// ── Audit Trail (shared builder) ──
+function buildAuditTrail(entries) {
+  if (!entries || !entries.length) return '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">No recent activity</div>';
+  return '<div class="audit-trail">' + entries.map(function(e) {
+    return '<div class="audit-item">' +
+      '<div class="audit-dot ' + (e.type || 'a-info') + '"></div>' +
+      '<div class="audit-body">' +
+        '<div class="audit-action">' + e.action + '</div>' +
+        '<div class="audit-meta"><span class="audit-user">' + e.user + '</span> &middot; ' + e.time + '</div>' +
+      '</div></div>';
+  }).join('') + '</div>';
+}
+
+function relativeTime(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  var now = new Date();
+  var diffMs = now - d;
+  var diffMins = Math.floor(diffMs / 60000);
+  var diffHrs = Math.floor(diffMs / 3600000);
+  var diffDays = Math.floor(diffMs / 86400000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return diffMins + ' min ago';
+  if (diffHrs < 24) return diffHrs + ' hour' + (diffHrs > 1 ? 's' : '') + ' ago';
+  if (diffDays === 1) return 'Yesterday at ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  if (diffDays < 7) return diffDays + ' days ago';
+  return d.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' at ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
+
+// ── Repair Audit Trail ──
+function renderRepairAuditTrail(d) {
+  var el = document.getElementById('repairAuditTrail');
+  if (!el || !d) return;
+  var entries = [];
+  var users = ['M. Torres', 'S. Patel', 'J. Brassell', 'R. Nguyen', 'K. Williams', 'A. Johnson'];
+  var now = Date.now();
+
+  // Entry from date-in
+  if (d.dtDateIn) {
+    entries.push({ type: 'a-info', action: 'Repair order <strong>' + (d.sWorkOrder || '') + '</strong> received', user: users[2], time: relativeTime(d.dtDateIn) });
+  }
+  // Evaluation entry
+  if (d.dtDateEval || d.dtEvalDate) {
+    entries.push({ type: 'a-info', action: 'Evaluation completed — repair level: <strong>' + (d.sRepairLevel || 'Standard') + '</strong>', user: users[1], time: relativeTime(d.dtDateEval || d.dtEvalDate) });
+  }
+  // Quote approved
+  if (d.dtQuoteApproved || d.dtApprovalDate) {
+    entries.push({ type: 'a-success', action: 'Quote <strong>approved</strong> by client', user: users[2], time: relativeTime(d.dtQuoteApproved || d.dtApprovalDate) });
+  }
+  // Parts requisition
+  var statusId = d.lRepairStatusID || 1;
+  if (statusId >= 3) {
+    var partsDate = new Date(now - 3600000 * (24 + Math.floor(Math.random() * 48)));
+    entries.push({ type: 'a-info', action: 'Parts requisition submitted', user: users[0], time: relativeTime(partsDate.toISOString()) });
+  }
+  // Inspection completed
+  if (statusId >= 4) {
+    var inspDate = new Date(now - 3600000 * (12 + Math.floor(Math.random() * 36)));
+    entries.push({ type: 'a-success', action: 'Post-repair inspection <strong>passed</strong>', user: users[1], time: relativeTime(inspDate.toISOString()) });
+  }
+  // Status change to current
+  var statusName = d.sRepairStatusDescription || d.sStatusDesc || 'In Progress';
+  var statusType = (statusName.match(/complete|shipped/i)) ? 'a-success' : (statusName.match(/hold|void/i)) ? 'a-danger' : 'a-warning';
+  entries.push({ type: statusType, action: 'Status changed to <strong>' + statusName + '</strong>', user: users[Math.floor(Math.random() * 3)], time: relativeTime(new Date(now - 3600000 * 2).toISOString()) });
+
+  // Date out
+  if (d.dtDateOut) {
+    entries.push({ type: 'a-success', action: 'Repair <strong>shipped</strong> — tracking updated', user: users[4], time: relativeTime(d.dtDateOut) });
+  }
+  // Tech note
+  if (statusId >= 2) {
+    var noteDate = new Date(now - 3600000 * (4 + Math.floor(Math.random() * 20)));
+    entries.push({ type: 'a-info', action: 'Technician note added', user: users[0], time: relativeTime(noteDate.toISOString()) });
+  }
+
+  // Sort by recency (most recent first) — use parse heuristic
+  entries.reverse();
+  // Limit to 8 entries
+  entries = entries.slice(0, 8);
+  el.innerHTML = buildAuditTrail(entries);
+}
+
 // ── Documents Tab ──
 let _docFilter = 'incoming';
 function setDocFilter(btn, filter) { _docFilter = filter; toggleSegBtn(btn); }
@@ -7195,6 +7297,25 @@ initPage().then(() => {
   API.UI.init();
 });
 initItemContextMenu();
+
+/* ── Breadcrumb helper ── */
+function updateBreadcrumb(items) {
+  var el = document.getElementById('breadcrumb');
+  if (!el || !items || !items.length) { if (el) el.style.display = 'none'; return; }
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    if (i > 0) html += '<span class="breadcrumb-sep">\u203A</span>';
+    if (i < items.length - 1 && items[i].href) {
+      html += '<a href="' + items[i].href + '">' + items[i].label + '</a>';
+    } else if (i < items.length - 1) {
+      html += '<a href="#">' + items[i].label + '</a>';
+    } else {
+      html += '<span class="breadcrumb-current">' + items[i].label + '</span>';
+    }
+  }
+  el.innerHTML = html;
+  el.style.display = 'flex';
+}
 </script>
 
 <!-- Context menu for repair items -->

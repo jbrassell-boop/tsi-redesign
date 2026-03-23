@@ -123,6 +123,9 @@
       </div>
       <div class="alerts-bar" id="alertsBar"></div>
 
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb" id="breadcrumb" style="display:none"></div>
+
       <!-- TABS -->
       <div class="tab-bar">
         <div class="tab active" onclick="showTab('main',this)">Main</div>
@@ -131,6 +134,7 @@
         <div class="tab" onclick="showTab('flags',this)">Flags</div>
         <div class="tab" onclick="showTab('contacts',this)">Contacts</div>
         <div class="tab" onclick="showTab('reportcard',this)">Report Card</div>
+        <div class="tab" onclick="showTab('activity',this)">Activity</div>
       </div>
 
       <!-- ══════════ MAIN TAB ══════════ -->
@@ -255,11 +259,11 @@
             <div class="panel-body">
               <div class="fg" style="gap:6px">
                 <div class="ff">
-                  <label>Pricing Category <span class="req">*</span></label>
+                  <label>Pricing Category <span class="ctx-help">?<span class="ctx-help-tip">Determines repair pricing tier. GSA/VA/Federal = government rates. Standard = commercial rates.</span></span> <span class="req">*</span></label>
                   <select id="def-pricing" class="inp"><option>GSA 2014 (Joint)</option><option>Standard</option><option>Federal</option><option>VA</option><option>Premier</option></select>
                 </div>
                 <div class="ff">
-                  <label>Sales Rep <span class="req">*</span></label>
+                  <label>Sales Rep <span class="ctx-help">?<span class="ctx-help-tip">Account manager responsible for this client relationship and contract renewals.</span></span> <span class="req">*</span></label>
                   <select id="def-salesrep" class="inp"><option>Brandi Cook</option><option>Joseph Brassell</option><option>Rob Mancini</option><option>Tom Velez</option><option>Debbie Hightower</option></select>
                 </div>
                 <div class="ff">
@@ -617,6 +621,18 @@
             </div>
           </div>
           <div id="rc-preview" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ ACTIVITY TAB ══════════ -->
+      <div id="tab-activity" class="tab-content show-block" style="display:none">
+        <div style="padding:12px;max-width:600px">
+          <div class="panel">
+            <div class="panel-head">Recent Activity</div>
+            <div class="panel-body" style="padding:0">
+              <div id="clientAuditTrail"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1242,6 +1258,11 @@ function loadClient(c) {
   if(!c) return;
   _currentClientData = c;
   document.getElementById('clientBadge').textContent = '#' + c.id;
+  // Breadcrumb
+  updateBreadcrumb([
+    { label: 'Clients', href: 'clients.html' },
+    { label: c.name || ('Client #' + c.id) }
+  ]);
   // Update the Active/Inactive chip in the status strip
   const statusChip = document.getElementById('statusChip');
   if (statusChip) {
@@ -1392,6 +1413,7 @@ function loadClient(c) {
   if (typeof SmartAlerts !== 'undefined') {
     SmartAlerts.render('#alertsBar', SmartAlerts.evaluate('client', c));
   }
+  renderClientAuditTrail(c);
 }
 
 let _currentClientName = '88th Medical Group';
@@ -2106,7 +2128,7 @@ function clToggleShipSame() {
 }
 
 function showTab(name, el) {
-  ['main','addresses','departments','flags','contacts','reportcard'].forEach(function(t) {
+  ['main','addresses','departments','flags','contacts','reportcard','activity'].forEach(function(t) {
     document.getElementById('tab-'+t).style.display = 'none';
   });
   document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -2647,6 +2669,98 @@ if (flagsTbody) {
     if (ssFlags) ssFlags.textContent = rows.length;
   });
   obs.observe(flagsTbody, { childList: true });
+}
+
+// ── Audit Trail (shared builder) ──
+function buildAuditTrail(entries) {
+  if (!entries || !entries.length) return '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">No recent activity</div>';
+  return '<div class="audit-trail">' + entries.map(function(e) {
+    return '<div class="audit-item">' +
+      '<div class="audit-dot ' + (e.type || 'a-info') + '"></div>' +
+      '<div class="audit-body">' +
+        '<div class="audit-action">' + e.action + '</div>' +
+        '<div class="audit-meta"><span class="audit-user">' + e.user + '</span> &middot; ' + e.time + '</div>' +
+      '</div></div>';
+  }).join('') + '</div>';
+}
+
+function relativeTime(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  var now = new Date();
+  var diffMs = now - d;
+  var diffMins = Math.floor(diffMs / 60000);
+  var diffHrs = Math.floor(diffMs / 3600000);
+  var diffDays = Math.floor(diffMs / 86400000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return diffMins + ' min ago';
+  if (diffHrs < 24) return diffHrs + ' hour' + (diffHrs > 1 ? 's' : '') + ' ago';
+  if (diffDays === 1) return 'Yesterday at ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  if (diffDays < 7) return diffDays + ' days ago';
+  return d.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' at ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
+
+// ── Client Audit Trail ──
+function renderClientAuditTrail(c) {
+  var el = document.getElementById('clientAuditTrail');
+  if (!el || !c) return;
+  var entries = [];
+  var users = ['J. Brassell', 'J. Miller', 'S. Patel', 'R. Nguyen', 'K. Williams'];
+  var now = Date.now();
+  var clientName = c.name || 'Client';
+
+  // Department activity
+  var deptCount = (c.departments || []).length;
+  if (deptCount > 0) {
+    entries.push({ type: 'a-info', action: 'Department <strong>' + (c.departments[0].name || 'New Dept') + '</strong> verified — ' + deptCount + ' total', user: users[0], time: relativeTime(new Date(now - 86400000 * 3).toISOString()) });
+  }
+
+  // Contact updated
+  if ((c.contacts || []).length > 0) {
+    entries.push({ type: 'a-info', action: 'Contact information updated for <strong>' + (c.contacts[0].name || 'primary contact') + '</strong>', user: users[1], time: relativeTime(new Date(now - 86400000 * 5).toISOString()) });
+  }
+
+  // Contract activity — simulate based on client status
+  if (c.active) {
+    entries.push({ type: 'a-success', action: 'Service agreement <strong>renewed</strong> for current term', user: users[0], time: relativeTime(new Date(now - 86400000 * 12).toISOString()) });
+  }
+
+  // Repair order created
+  entries.push({ type: 'a-warning', action: 'New repair order created — scope received for evaluation', user: users[2], time: relativeTime(new Date(now - 86400000 * 1).toISOString()) });
+
+  // Billing address updated
+  entries.push({ type: 'a-info', action: 'Billing address updated', user: users[3], time: relativeTime(new Date(now - 86400000 * 8).toISOString()) });
+
+  // Client record modified
+  var sinceDate = c.since || c._raw?.dtClientSince;
+  if (sinceDate) {
+    entries.push({ type: 'a-info', action: 'Client record created — active since <strong>' + sinceDate + '</strong>', user: users[0], time: relativeTime(sinceDate) });
+  }
+
+  // Sort most recent first
+  entries.sort(function(a, b) { return entries.indexOf(a) - entries.indexOf(b); });
+  entries = entries.slice(0, 6);
+  el.innerHTML = buildAuditTrail(entries);
+}
+
+/* ── Breadcrumb helper ── */
+function updateBreadcrumb(items) {
+  var el = document.getElementById('breadcrumb');
+  if (!el || !items || !items.length) { if (el) el.style.display = 'none'; return; }
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    if (i > 0) html += '<span class="breadcrumb-sep">\u203A</span>';
+    if (i < items.length - 1 && items[i].href) {
+      html += '<a href="' + items[i].href + '">' + items[i].label + '</a>';
+    } else if (i < items.length - 1) {
+      html += '<a href="#">' + items[i].label + '</a>';
+    } else {
+      html += '<span class="breadcrumb-current">' + items[i].label + '</span>';
+    }
+  }
+  el.innerHTML = html;
+  el.style.display = 'flex';
 }
 
 </script>

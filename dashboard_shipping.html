@@ -90,6 +90,7 @@
         </div>
       </div>
 
+      <div id="skShipping" style="padding:4px 12px"></div>
       <!-- DATA TABLE -->
       <div class="table-wrap">
         <table id="shipTable">
@@ -245,7 +246,9 @@ document.querySelectorAll('th[data-col]').forEach(th => {
 // ── Init ──
 (async function init() {
   API.UI.init();
+  if(API && API.UI) API.UI.showSkeleton('skShipping', 5);
   await loadShipments();
+  if(API && API.UI) API.UI.hideSkeleton('skShipping');
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>
