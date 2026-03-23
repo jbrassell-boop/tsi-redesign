@@ -543,6 +543,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
       <div class="ss-chip ss-neutral" id="ssCarrier"><span class="ss-label">Carrier</span> <span class="ss-val">—</span></div>
       <div class="ss-chip ss-warn" id="ssContract" style="display:none"></div>
       <div style="flex:1"></div>
+      <span id="localChangesTag" style="display:none;font-size:9px;background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:3px;cursor:pointer;font-weight:600;margin-right:4px" onclick="clearPersistedRepair()" title="Local changes saved — click to reset to original">LOCAL</span>
       <span id="saveStatus" style="font-size:10px;display:flex;align-items:center;gap:4px;color:var(--muted)" class="save-ready">
         <span class="save-icon" id="saveIcon">&#9679;</span><span id="saveText">Ready</span>
       </span>
@@ -3731,9 +3732,17 @@ async function loadRepair(repairKey) {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
     const detail = await API.getRepairDetail(repairKey, svcKey);
     const d = Array.isArray(detail) ? detail[0] : detail;
+    // Check localStorage for persisted changes
+    const persisted = loadPersistedRepair(repairKey);
+    if (persisted && persisted.repair) {
+      // Merge persisted fields over the fresh API data
+      Object.assign(d, persisted.repair);
+      console.log('[TSI Repairs] Restored persisted repair state for key:', repairKey);
+    }
     _currentRepair = d;
     _dirty = false;
     updateSaveStatus('ready');
+    updateLocalTag(!!persisted);
     populateDetail(d);
     updateWorkflowForms(d.lRepairStatusID || 1);
     renderRepairAuditTrail(d);
@@ -4316,6 +4325,14 @@ function populateDetail(d) {
 
 // ── Repair Items ──
 async function loadRepairItems(repairKey) {
+  // Check localStorage for persisted items first
+  const persisted = loadPersistedRepair(repairKey);
+  if (persisted && persisted.items && persisted.items.length) {
+    console.log('[TSI Repairs] Restored', persisted.items.length, 'persisted repair items for key:', repairKey);
+    renderRepairItems(persisted.items);
+    autoPopulateRepairLevel(persisted.items);
+    return;
+  }
   // Try Detail endpoint first (gives editable fields), fall back to RepairItems
   try {
     let ds = [];
@@ -4807,7 +4824,7 @@ function toggleShipSame() {
 }
 
 // ── Autosave ──
-function markDirty() { _dirty = true; updateSaveStatus('unsaved'); clearTimeout(_saveTimer); _saveTimer = setTimeout(autoSave, 1500); }
+function markDirty() { _dirty = true; updateSaveStatus('unsaved'); clearTimeout(_saveTimer); _saveTimer = setTimeout(autoSave, 1500); if (_currentRepair) persistRepairState(); }
 async function autoSave() {
   if (!_dirty || !_currentRepair) return;
   updateSaveStatus('saving');
@@ -4819,12 +4836,59 @@ async function autoSave() {
     syncFormToRepair();
     _dirty = false;
     updateSaveStatus('saved');
+    // Clear localStorage on successful live API save
+    if (_liveMode && _currentRepair.lRepairKey > 0) {
+      localStorage.removeItem(_lsKey(_currentRepair.lRepairKey));
+      updateLocalTag(false);
+    }
     console.log('[TSI Repairs] Autosave — key:', _currentRepair.lRepairKey);
   } catch (e) {
     console.warn('[TSI Repairs] Autosave failed:', e.message);
     updateSaveStatus('error');
     _dirty = true;
   }
+}
+
+// ── localStorage persistence for demo survival ──
+const _LS_PREFIX = 'tsi_repair_';
+function _lsKey(repairKey) { return _LS_PREFIX + repairKey; }
+
+function persistRepairState() {
+  if (!_currentRepair || !_currentRepair.lRepairKey) return;
+  syncFormToRepair();
+  const bundle = { repair: _currentRepair, items: _repairItems, ts: Date.now() };
+  try { localStorage.setItem(_lsKey(_currentRepair.lRepairKey), JSON.stringify(bundle)); } catch (e) { console.warn('[TSI Repairs] Persist failed:', e.message); }
+  updateLocalTag(true);
+}
+
+function loadPersistedRepair(repairKey) {
+  try {
+    const raw = localStorage.getItem(_lsKey(repairKey));
+    if (!raw) return null;
+    const bundle = JSON.parse(raw);
+    if (!bundle || !bundle.repair) return null;
+    // Expire after 24 hours
+    if (Date.now() - (bundle.ts || 0) > 86400000) { localStorage.removeItem(_lsKey(repairKey)); return null; }
+    return bundle;
+  } catch (e) { return null; }
+}
+
+function clearPersistedRepair() {
+  if (!_currentRepair || !_currentRepair.lRepairKey) return;
+  localStorage.removeItem(_lsKey(_currentRepair.lRepairKey));
+  updateLocalTag(false);
+  showToast('Local changes cleared — reloading original');
+  loadRepair(_currentRepair.lRepairKey);
+}
+
+function clearAllPersistedRepairs() {
+  Object.keys(localStorage).filter(k => k.startsWith(_LS_PREFIX)).forEach(k => localStorage.removeItem(k));
+  updateLocalTag(false);
+}
+
+function updateLocalTag(show) {
+  const el = document.getElementById('localChangesTag');
+  if (el) el.style.display = show ? 'inline-block' : 'none';
 }
 
 // ── Build API payload from form fields (Hungarian notation, p-prefixed) ──
