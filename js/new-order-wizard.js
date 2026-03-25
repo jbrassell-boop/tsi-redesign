@@ -65,11 +65,17 @@
 
           <!-- Panel 1: Client -->
           <div id="nowPanel1" style="display:flex;flex-direction:column;flex:1;min-height:0;padding:14px 18px;gap:8px">
-            <input id="nowClientSearch" type="text" placeholder="Search by name, city, state, zip, or ID…"
-              oninput="nowFilterClients(this.value)"
-              style="height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;font-size:12px;
-                     font-family:inherit;outline:none;flex-shrink:0"
->
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+              <input id="nowClientSearch" type="text" placeholder="Search by name, city, state, zip, or ID…"
+                oninput="nowFilterClients(this.value)"
+                style="height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;font-size:12px;
+                       font-family:inherit;outline:none;flex:1">
+              <button onclick="nowOpenNewClientModal()" style="height:32px;padding:0 12px;border:1.5px solid var(--navy);
+                      border-radius:5px;background:#fff;color:var(--navy);font-size:11px;font-weight:600;cursor:pointer;
+                      font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:4px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
+                  <path d="M12 5v14M5 12h14"/></svg>New Customer</button>
+            </div>
             <div id="nowClientGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-y:auto;flex:1"></div>
           </div>
 
@@ -132,6 +138,7 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && document.getElementById('nowOverlay').style.display !== 'none') nowClose();
     });
+    _injectNewClientModal();
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -287,6 +294,215 @@
   function _esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
+
+  // ── New Client Modal ───────────────────────────────────────────────────
+  function _injectNewClientModal() {
+    if (document.getElementById('nowNewClientOverlay')) return;
+    const el = document.createElement('div');
+    el.id = 'nowNewClientOverlay';
+    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,37,.45);z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(2px)';
+    el.innerHTML = `
+      <div style="background:#fff;border-radius:10px;width:540px;max-height:80vh;overflow:hidden;
+            box-shadow:0 24px 72px rgba(0,0,37,.32);display:flex;flex-direction:column">
+        <div style="padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);
+              color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/>
+              <line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            <span style="font-size:14px;font-weight:600;letter-spacing:.3px">New Customer</span>
+          </div>
+          <button onclick="nowCloseNewClientModal()" style="background:transparent;border:1px solid rgba(255,255,255,.4);
+                color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;
+                display:flex;align-items:center;justify-content:center">&times;</button>
+        </div>
+        <div style="padding:16px 20px;overflow-y:auto;flex:1">
+          <div id="nowNewClientError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;
+                border-radius:5px;padding:8px 12px;font-size:11px;color:#DC2626;margin-bottom:10px"></div>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px">
+            <div>
+              <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">
+                Facility Name <span style="color:#DC2626">*</span></label>
+              <input id="nowNC_name" type="text" placeholder="e.g. Keystone Surgical Center"
+                style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                       font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">Address</label>
+                <input id="nowNC_addr" type="text" placeholder="Street address"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">Zip Code</label>
+                <input id="nowNC_zip" type="text" placeholder="e.g. 19341" maxlength="10"
+                  onblur="nowNCLookupZip(this.value)"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 100px;gap:10px">
+              <div>
+                <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">City</label>
+                <input id="nowNC_city" type="text" placeholder="City"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">State</label>
+                <input id="nowNC_state" type="text" placeholder="PA" maxlength="2"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px;text-transform:uppercase">
+              </div>
+            </div>
+            <div style="border-top:1px solid #DDE3EE;padding-top:10px;margin-top:2px">
+              <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">Primary Contact</label>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label style="font-size:10px;font-weight:600;color:#6B7280;letter-spacing:.3px">Contact Name</label>
+                <input id="nowNC_contact" type="text" placeholder="Full name"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:600;color:#6B7280;letter-spacing:.3px">Phone</label>
+                <input id="nowNC_phone" type="text" placeholder="(555) 555-1234"
+                  style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                         font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:600;color:#6B7280;letter-spacing:.3px">Email</label>
+              <input id="nowNC_email" type="email" placeholder="contact@facility.com"
+                style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                       font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+            </div>
+            <div style="border-top:1px solid #DDE3EE;padding-top:10px;margin-top:2px">
+              <label style="font-size:10px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px">Default Department</label>
+              <input id="nowNC_dept" type="text" placeholder="e.g. Endoscopy" value="Endoscopy"
+                style="width:100%;height:32px;border:1.5px solid #DDE3EE;border-radius:5px;padding:0 10px;
+                       font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:3px">
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid #DDE3EE;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+          <button onclick="nowCloseNewClientModal()" style="height:34px;padding:0 16px;border:1.5px solid #DDE3EE;
+                border-radius:6px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+          <button onclick="nowSaveNewClient()" style="height:34px;padding:0 20px;border:none;border-radius:6px;
+                background:var(--navy);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
+                display:flex;align-items:center;gap:5px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px">
+              <path d="M12 5v14M5 12h14"/></svg>Create &amp; Select</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.addEventListener('click', function(e) { if (e.target === el) nowCloseNewClientModal(); });
+  }
+
+  window.nowOpenNewClientModal = function() {
+    _injectNewClientModal();
+    // Clear all fields
+    ['nowNC_name','nowNC_addr','nowNC_zip','nowNC_city','nowNC_state',
+     'nowNC_contact','nowNC_phone','nowNC_email'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('nowNC_dept').value = 'Endoscopy';
+    document.getElementById('nowNewClientError').style.display = 'none';
+    document.getElementById('nowNewClientOverlay').style.display = 'flex';
+    setTimeout(function() {
+      var inp = document.getElementById('nowNC_name');
+      if (inp) inp.focus();
+    }, 50);
+  };
+
+  window.nowCloseNewClientModal = function() {
+    var el = document.getElementById('nowNewClientOverlay');
+    if (el) el.style.display = 'none';
+  };
+
+  window.nowNCLookupZip = async function(zip) {
+    if (!zip || zip.length < 5) return;
+    try {
+      var result = await API.getCityStateByZip(zip);
+      if (result && result.length > 0) {
+        var r = result[0];
+        var cityEl = document.getElementById('nowNC_city');
+        var stateEl = document.getElementById('nowNC_state');
+        if (cityEl && !cityEl.value) cityEl.value = r.sCity || r.City || '';
+        if (stateEl && !stateEl.value) stateEl.value = r.sState || r.State || '';
+      }
+    } catch(e) { /* silently fail */ }
+  };
+
+  window.nowSaveNewClient = async function() {
+    var name = (document.getElementById('nowNC_name').value || '').trim();
+    if (!name) {
+      var err = document.getElementById('nowNewClientError');
+      err.textContent = 'Facility name is required.';
+      err.style.display = 'block';
+      document.getElementById('nowNC_name').focus();
+      return;
+    }
+
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+
+    // Build client payload matching the API field naming convention
+    var clientPayload = {
+      psClientName1: name,
+      sClientName1: name,
+      sMailAddr1: (document.getElementById('nowNC_addr').value || '').trim(),
+      sMailCity: (document.getElementById('nowNC_city').value || '').trim(),
+      sMailState: (document.getElementById('nowNC_state').value || '').trim().toUpperCase(),
+      sMailZip: (document.getElementById('nowNC_zip').value || '').trim(),
+      sPhone1: (document.getElementById('nowNC_phone').value || '').trim(),
+      sEmail: (document.getElementById('nowNC_email').value || '').trim(),
+      lServiceLocationKey: svcKey,
+      bActive: true
+    };
+
+    try {
+      var clientResult = await API.addClient(clientPayload);
+      var newClientKey = clientResult.lClientKey || clientResult;
+
+      // Create default department
+      var deptName = (document.getElementById('nowNC_dept').value || 'Endoscopy').trim();
+      var deptPayload = {
+        lClientKey: newClientKey,
+        psDepartmentName: deptName,
+        sDepartmentName: deptName,
+        lServiceLocationKey: svcKey,
+        bActive: true
+      };
+      await API.addDepartment(deptPayload);
+
+      // Reload clients list
+      var data = await API.getAllClients(svcKey);
+      _clients = Array.isArray(data) ? data : (data.data || []);
+
+      // Reload depts
+      var deptData = await API.getAllDepartments(svcKey);
+      _depts = Array.isArray(deptData) ? deptData : (deptData.data || []);
+
+      // Close modal
+      nowCloseNewClientModal();
+
+      // Auto-select the new client
+      nowFilterClients('');
+      nowSelectClient(newClientKey);
+
+      // Toast if available
+      if (window.TSI && window.TSI.toast) {
+        TSI.toast.success('Customer Created', name + ' has been added.', 2500);
+      }
+    } catch(e) {
+      var err = document.getElementById('nowNewClientError');
+      err.textContent = 'Failed to create customer: ' + (e.message || 'Unknown error');
+      err.style.display = 'block';
+    }
+  };
 
   // Auto-inject on load
   if (document.readyState === 'loading') {
