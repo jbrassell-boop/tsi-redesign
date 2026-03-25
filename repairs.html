@@ -269,11 +269,15 @@
     .wiz-search{width:100%;height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px 0 30px;font-size:12px;outline:none;font-family:inherit;margin-bottom:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 9px center}
     .wiz-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
     .wiz-empty{text-align:center;padding:20px;color:var(--muted);font-size:11px}
-    .wiz-new-scope{border:1.5px dashed var(--blue);border-radius:8px;padding:14px;background:#F8FAFF;margin-top:8px}
+    .wiz-new-scope{border:1px solid var(--border-dk);border-radius:8px;padding:0;background:#fff;margin-top:10px;overflow:hidden}
+    .wiz-new-scope-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:linear-gradient(135deg,#EFF6FF,#F8FAFF);border-bottom:1px solid var(--border);cursor:default}
+    .wiz-new-scope-body{padding:14px}
+    .wiz-new-scope-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:10px}
+    .wiz-new-scope-row:last-child{margin-bottom:0}
     .wiz-new-scope .field-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .wiz-new-scope .field-row label{font-size:10px;font-weight:700;color:var(--label);display:block;margin-bottom:2px}
-    .wiz-new-scope .field-row input,.wiz-new-scope .field-row select{height:28px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 8px;font-size:11px;font-family:inherit;outline:none}
-    .wiz-new-scope .field-row input:focus,.wiz-new-scope .field-row select:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .wiz-new-scope label{font-size:10px;font-weight:700;color:var(--label);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.03em}
+    .wiz-new-scope input,.wiz-new-scope select{height:30px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 8px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box}
+    .wiz-new-scope input:focus,.wiz-new-scope select:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
     .wiz-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
     .wiz-summary-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
     .wiz-summary-card h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
@@ -310,7 +314,10 @@
 .tab.ctx-dimmed:hover{opacity:0.85}
 .tab.active.ctx-dimmed{opacity:1}
 /* WORKFLOW FORMS BAR */
-.wf-bar{display:flex;align-items:center;gap:2px;padding:7px 14px;background:#F8FAFF;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;flex-wrap:wrap;min-height:36px}
+.wf-bar{display:flex;align-items:center;gap:2px;padding:7px 14px;background:#F8FAFF;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;flex-wrap:nowrap;min-height:36px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border-dk) transparent}
+.wf-bar::-webkit-scrollbar{height:4px}
+.wf-bar::-webkit-scrollbar-thumb{background:var(--border-dk);border-radius:2px}
+.wf-bar::-webkit-scrollbar-track{background:transparent}
 .wf-label{font-size:11px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-right:10px;flex-shrink:0}
 .wf-phase{display:flex;align-items:center;gap:4px}
 .wf-phase-label{font-size:9px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.04em;margin-right:4px;opacity:.7}
@@ -624,8 +631,8 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                 Defect
               </button>
             </div>
-            <span class="wf-divider"></span>
-            <div class="wf-phase">
+            <span class="wf-divider" id="wf-close-divider"></span>
+            <div class="wf-phase" id="wf-close-phase">
               <span class="wf-phase-label">Close</span>
               <button class="wf-pill wf-locked" id="wf-invoice" data-form="invoice" onclick="openFormPreview('invoice')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -1451,22 +1458,26 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
         <input type="text" class="wiz-search" id="wizScopeSearch" placeholder="Search by serial number or model..." oninput="wizFilterScopes(this.value)"/>
         <div class="wiz-grid" id="wizScopeGrid"></div>
         <div class="wiz-new-scope" id="wizNewScopeForm">
-          <div style="display:flex;align-items:center;gap:6px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span style="font-size:11px;font-weight:700;color:var(--navy)">Add New Scope</span>
-            <span style="font-size:10px;color:var(--muted)">(scope not in system yet)</span>
+          <div class="wiz-new-scope-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span style="font-size:12px;font-weight:700;color:var(--navy)">Add New Scope</span>
+            <span style="font-size:10px;color:var(--muted);margin-left:auto">Scope not in system yet</span>
           </div>
-          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px">
-            <div style="min-width:140px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
-            <div style="flex:1">
-              <label>Search Model * <span id="wizModelCount" style="font-weight:400;color:var(--muted)"></span></label>
-              <input type="text" id="wizModelSearch" placeholder="Select type first, then search..." oninput="wizFilterModels(this.value)" style="width:100%" disabled/>
-              <input type="hidden" id="wizNewModel" value=""/>
+          <div class="wiz-new-scope-body">
+            <div class="wiz-new-scope-row">
+              <div style="flex:0 0 160px"><label>Instrument Type *</label><select id="wizNewInstType" onchange="wizOnInstTypeChange()" style="width:100%"><option value="">-- Select --</option></select></div>
+              <div style="flex:1">
+                <label>Search Model * <span id="wizModelCount" style="font-weight:400;color:var(--muted);text-transform:none"></span></label>
+                <input type="text" id="wizModelSearch" placeholder="Select type first, then search..." oninput="wizFilterModels(this.value)" style="width:100%" disabled/>
+                <input type="hidden" id="wizNewModel" value=""/>
+              </div>
             </div>
-            <div style="min-width:140px"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
-            <div><button onclick="wizCreateScope()" style="height:28px;padding:0 14px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Add Scope</button></div>
+            <div id="wizModelGrid" style="max-height:140px;overflow-y:auto;border:1px solid var(--neutral-200);border-radius:6px;display:none;background:var(--card);margin-bottom:10px"></div>
+            <div class="wiz-new-scope-row">
+              <div style="flex:1"><label>Serial Number *</label><input type="text" id="wizNewSN" placeholder="e.g. 2801442" style="width:100%"/></div>
+              <div style="flex:0 0 auto;padding-top:14px"><button onclick="wizCreateScope()" style="height:30px;padding:0 20px;background:var(--green);color:#fff;font-weight:700;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Scope</button></div>
+            </div>
           </div>
-          <div id="wizModelGrid" style="max-height:160px;overflow-y:auto;border:1px solid var(--neutral-200);border-radius:6px;display:none;background:var(--card)"></div>
         </div>
       </div>
 
@@ -2068,6 +2079,14 @@ function updateWorkflowForms(statusId) {
       pill.title = f.name + ' — Locked (status not reached)';
     }
   });
+  // Hide Close phase entirely when all its pills are locked (phase 4 not reached)
+  var closePhase = document.getElementById('wf-close-phase');
+  var closeDivider = document.getElementById('wf-close-divider');
+  if (closePhase && closeDivider) {
+    var showClose = currentPhase >= 4;
+    closePhase.style.display = showClose ? '' : 'none';
+    closeDivider.style.display = showClose ? '' : 'none';
+  }
 }
 
 function showWorkflowToast(message) {
@@ -2777,7 +2796,7 @@ function openFormPreview(formId) {
 function tsiFormHeader(formName, formNum) {
   return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #00257A;padding-bottom:10px">
     <div style="display:flex;align-items:center;gap:12px">
-      <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:48px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
+      <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:48px">
       <div style="font-size:9px;color:#666;line-height:1.5">17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
     </div>
     <div style="text-align:right">
@@ -2922,7 +2941,7 @@ function populateFormDrawer(formId) {
       <!-- BRANDED HEADER BAND -->
       <div class="wf-est-header">
         <div class="wf-est-header-left">
-          <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:42px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
+          <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:42px">
         </div>
         <div class="wf-est-header-right">
           <div class="est-title">Service Estimate</div>
@@ -3110,7 +3129,7 @@ function populateFormDrawer(formId) {
       <!-- BRANDED HEADER BAND -->
       <div class="wf-est-header">
         <div class="wf-est-header-left">
-          <img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:42px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)">
+          <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:42px">
         </div>
         <div class="wf-est-header-right">
           <div class="est-title">Invoice</div>
@@ -3276,7 +3295,7 @@ function populateFormDrawer(formId) {
     body.innerHTML = `
       <!-- HEADER -->
       <div class="wf-est-header" style="padding:14px 24px">
-        <div class="wf-est-header-left"><img src="assets/logo-white.png" alt="Total Scope, Inc." style="height:36px;filter:brightness(0) saturate(100%) invert(10%) sepia(60%) saturate(4000%) hue-rotate(220deg) brightness(70%)"></div>
+        <div class="wf-est-header-left"><img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:36px"></div>
         <div class="wf-est-header-right"><div class="est-title" style="font-size:17px">Final Inspection Report</div><div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &bull; ${inspDate}</div></div>
       </div>
 
@@ -6885,6 +6904,20 @@ function wizPopulateIntake() {
   document.getElementById('wizIntScope').textContent = scopeDesc;
   // Auto-assign lowest available rack
   wizAutoAssignRack();
+  // Set accessory defaults based on scope type (Flexible vs Rigid/Camera)
+  var rf = _wizScope ? (_wizScope.sRigidOrFlexible || '').toUpperCase() : '';
+  var isFlex = rf === 'F' || rf === 'FLEXIBLE';
+  var accBoxes = document.querySelectorAll('#wizAccList input[type="checkbox"]');
+  accBoxes.forEach(function(cb) {
+    var lbl = (cb.parentElement ? cb.parentElement.textContent.trim() : '').toLowerCase();
+    if (isFlex) {
+      cb.checked = lbl.indexOf('a/w') !== -1 || lbl.indexOf('suction') !== -1;
+    } else {
+      // Rigid/Camera: no default accessories
+      cb.checked = false;
+    }
+  });
+  document.getElementById('wizAccNone').checked = !isFlex;
   // Focus complaint field
   setTimeout(function() { var c = document.getElementById('wizComplaint'); if (c) c.focus(); }, 100);
   // Check for open repairs on this scope
@@ -7175,6 +7208,7 @@ function wizSubmit() {
   _dirty = false;
   updateSaveStatus('ready');
   document.getElementById('fComplaint').focus();
+  showToast('Work order created: ' + _currentRepair.sWorkOrderNumber, 'success');
   console.log('[TSI Repairs] New work order:', clientName, '/', deptName, '/ SN#', scopeSN);
 
   // ── Attempt API create (non-blocking) ──
@@ -7835,6 +7869,7 @@ function updateBreadcrumb(items) {
 </div>
 
 <script src="js/new-order-wizard.js"></script>
+<script src="js/receiving.js"></script>
 <script src="js/order-search.js"></script>
 <script src="js/smart-alerts.js"></script>
 <script src="js/command-palette.js"></script>

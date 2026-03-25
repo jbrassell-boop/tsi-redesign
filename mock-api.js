@@ -341,6 +341,24 @@ const MockAPI = (() => {
   route('GET', '/Repair/GetAllPatientSafetyLevels', () => MockDB.getAll('patientSafetyLevels'));
   route('POST', '/Repair/AddRepair', (p, body) => MockDB.insert('repairs', body));
   route('POST', '/Repair/UpdateRepair', (p, body) => { MockDB.update('repairs', body.lRepairKey, body); return body; });
+  route('GET', '/Repair/GetReadyToShip', (p) => {
+    return MockDB.getFiltered('repairs', r => {
+      var st = (r.sRepairStatusDesc || r.ProgBarStatus || '').toLowerCase();
+      return (st === 'complete' || st === 'ready') && !r.sShipTrackingNumber;
+    });
+  });
+  route('POST', '/Repair/BatchShip', (p, body) => {
+    var items = body.items || [];
+    items.forEach(item => {
+      MockDB.update('repairs', item.lRepairKey, {
+        sShipTrackingNumber: item.sShipTrackingNumber,
+        dtShipDate: item.dtShipDate,
+        sRepairStatusDesc: 'Shipped',
+        lRepairStatusID: 5
+      });
+    });
+    return { success: true, count: items.length };
+  });
   route('DELETE', '/Repair/DeleteRepair', (p) => MockDB.remove('repairs', int(p.plRepairKey)));
 
   // ── RepairItems (8) ─────────────────────────────────
@@ -775,6 +793,194 @@ const MockAPI = (() => {
     if (!typeKey) return MockDB.getAll('flags');
     return MockDB.getFiltered('flags', f => f.lFlagTypeKey === typeKey);
   });
+
+  // ── CONTRACT HEALTH SCORE ──────────────────────────────
+  route('GET', '/Contract/GetContractHealth', (p) => {
+    const ck = int(p.plContractKey);
+    const contract = MockDB.getByKey('contracts', ck);
+    if (!contract) return null;
+    const repairs = MockDB.getFiltered('repairs', r => (r.lContractKey || r.lAgreementKey || 0) == ck);
+    const contractScopes = MockDB.getFiltered('contractScopes', s => (s.lContractKey || 0) == ck);
+    const contractInvoices = (MockDB.getAll('contractInvoices') || []).filter(i => (i.lContractKey || 0) == ck);
+    // Factor 1: Expense multiplier (40%)
+    const totalRevenue = contractInvoices.reduce((s, i) => s + (parseFloat(i.dblAmount || i.dblTranAmount || 0)), 0) || 1;
+    const totalExpense = repairs.reduce((s, r) => s + (parseFloat(r.dblAmtRepair || 0)), 0);
+    const expMult = totalExpense / totalRevenue;
+    const expScore = Math.max(0, Math.min(100, Math.round((1 - Math.min(expMult, 2) / 2) * 100)));
+    // Factor 2: Avoidable damage rate (20%)
+    const avoidable = repairs.filter(r => (r.sRepairReason || '').toLowerCase().includes('damage')).length;
+    const avoidRate = repairs.length ? avoidable / repairs.length : 0;
+    const avoidScore = Math.max(0, Math.round((1 - avoidRate) * 100));
+    // Factor 3: Utilization (20%)
+    const scopeCount = (contractScopes && contractScopes.length) || 1;
+    const utilRate = Math.min(repairs.length / (scopeCount * 2), 1);
+    const utilScore = Math.round(utilRate * 100);
+    // Factor 4: Days to expiry (20%)
+    const endDate = contract.dtEndDate || contract.dtContractEnd;
+    const daysLeft = endDate ? Math.round((new Date(endDate) - new Date()) / 86400000) : 365;
+    const expiryScore = daysLeft > 90 ? 100 : daysLeft > 30 ? 70 : daysLeft > 0 ? 30 : 0;
+    const score = Math.round(expScore * 0.4 + avoidScore * 0.2 + utilScore * 0.2 + expiryScore * 0.2);
+    const grade = score >= 70 ? 'A' : score >= 40 ? 'B' : score >= 20 ? 'C' : 'F';
+    return { score, grade, factors: { expenseMultiplier: +expMult.toFixed(2), avoidableDamage: +avoidRate.toFixed(2), utilization: +utilRate.toFixed(2), daysToExpiry: daysLeft }};
+  });
+
+  // ── NEEDS ATTENTION (Morning Briefing) ─────────────────
+  route('GET', '/Dashboard/GetNeedsAttention', () => {
+    const repairs = MockDB.getAll('repairs') || [];
+    const loaners = MockDB.getAll('loanerTrans') || [];
+    const flags = MockDB.getAll('flags') || [];
+    const now = new Date();
+    const items = [];
+    repairs.filter(r => r.dtDateIn && !r.dtDateOut).forEach(r => {
+      const days = Math.round((now - new Date(r.dtDateIn)) / 86400000);
+      if (days > 10) items.push({ type:'aging', severity:'danger', label:'WO# ' + (r.sWorkOrderNumber || r.psWorkOrderNumber || '?') + ' aging ' + days + 'd', key:r.lRepairKey, link:'repairs', meta:'SLA breach' });
+    });
+    loaners.filter(l => l.dtDueDate && !l.dtReturnDate && new Date(l.dtDueDate) < now).forEach(l => {
+      const days = Math.round((now - new Date(l.dtDueDate)) / 86400000);
+      items.push({ type:'loaner', severity:'warning', label:'Loaner overdue ' + days + 'd', key:l.lLoanerTranKey, link:'loaners', meta:'overdue' });
+    });
+    flags.filter(f => !f.bResolved && f.dtCreated && (now - new Date(f.dtCreated)) / 86400000 > 3).forEach(f => {
+      const days = Math.round((now - new Date(f.dtCreated)) / 86400000);
+      items.push({ type:'flag', severity:'info', label:f.sFlagDesc || 'Unresolved flag', key:f.lFlagKey, link:'dashboard_flags', meta:days + 'd open' });
+    });
+    return items.slice(0, 20);
+  });
+
+  // ── FINANCIAL HEALTH ───────────────────────────────────
+  route('GET', '/Financials/GetFinancialHealth', () => {
+    const invoices = MockDB.getAll('invoices') || [];
+    const gpStaging = MockDB.getAll('gpInvoiceStaging') || [];
+    const payments = MockDB.getAll('invoicePayments') || [];
+    let totalInvoiced = 0, totalPaid = 0, outstanding = 0, atRisk = 0;
+    const now = new Date();
+    invoices.forEach(inv => {
+      const gp = gpStaging.find(g => (g.lInvoiceKey || 0) == (inv.lInvoiceKey || 0));
+      const amt = gp ? parseFloat(gp.TotalAmountDue || gp.dblTranAmount || 0) : parseFloat(inv.dblTranAmount || 0);
+      totalInvoiced += amt;
+      const paid = payments.filter(p => (p.lInvoiceKey || 0) == (inv.lInvoiceKey || 0)).reduce((s, p) => s + parseFloat(p.dblAmount || 0), 0);
+      totalPaid += paid;
+      const remain = amt - paid;
+      if (remain > 0) {
+        outstanding += remain;
+        if (inv.dtDueDate && (now - new Date(inv.dtDueDate)) / 86400000 > 90) atRisk += remain;
+      }
+    });
+    const dso = totalInvoiced > 0 ? Math.round((outstanding / totalInvoiced) * 365) : 0;
+    const collectionRate = totalInvoiced > 0 ? Math.round((totalPaid / totalInvoiced) * 100) : 0;
+    return { totalInvoiced, totalPaid, outstanding, atRisk, dso, collectionRate };
+  });
+
+  // ── INVENTORY DEMAND FORECAST ──────────────────────────
+  route('GET', '/Inventory/GetDemandForecast', (p) => {
+    const invKey = int(p.plInventoryKey);
+    const sizes = MockDB.getFiltered('inventorySizes', s => (s.lInventoryKey || 0) == invKey) || [];
+    const totalStock = sizes.reduce((s, sz) => s + (sz.nLevelCurrent || 0), 0);
+    // Estimate daily consumption from repair details referencing this inventory
+    const repairInv = MockDB.getFiltered('repairInventory', ri => (ri.lInventoryKey || 0) == invKey) || [];
+    const now = new Date();
+    const ninetyDaysAgo = new Date(now - 90 * 86400000);
+    const recentUsage = repairInv.filter(ri => ri.dtCreated && new Date(ri.dtCreated) > ninetyDaysAgo).length;
+    const avgDaily = recentUsage > 0 ? recentUsage / 90 : 0.1;
+    const daysRemaining = avgDaily > 0 ? Math.round(totalStock / avgDaily) : 999;
+    const projectedDate = new Date(now.getTime() + daysRemaining * 86400000);
+    return { daysRemaining, avgDailyConsumption: +avgDaily.toFixed(2), projectedReorderDate: projectedDate.toISOString().slice(0,10), totalStock };
+  });
+
+  // ── Technicians ────────────────────────────────────────
+  route('GET', '/Technicians/GetAllTechnicians', () => MockDB.getAll('technicians'));
+  route('POST', '/Repair/FlagForRevisedQuote', (p, body) => {
+    var key = body.lRepairKey || int(p.plRepairKey);
+    MockDB.update('repairs', key, { bFlaggedForRevisedQuote: true });
+    return { success: true };
+  });
+
+  // ── Invoicing Engine ──────────────────────────────────
+  route('GET', '/Invoice/GetReadyToInvoice', (p) => {
+    return MockDB.getFiltered('repairs', r => {
+      var st = (r.sRepairStatusDesc || '').toLowerCase();
+      return st === 'shipped' && !r.sInvoiceNumber;
+    });
+  });
+
+  route('POST', '/Invoice/GenerateInvoices', (p, body) => {
+    var repairKeys = body.repairKeys || [];
+    var results = [];
+    var year = new Date().getFullYear();
+    var existing = MockDB.getAll('invoices') || [];
+    var nextNum = existing.length + 1;
+    repairKeys.forEach(key => {
+      var repair = MockDB.getByKey('repairs', key);
+      if (!repair) return;
+      var invNum = 'INV-' + year + '-' + String(nextNum++).padStart(4, '0');
+      MockDB.update('repairs', key, { sInvoiceNumber: invNum });
+      var invoice = {
+        sInvoiceNumber: invNum,
+        lRepairKey: key,
+        lClientKey: repair.lClientKey,
+        sClientName1: repair.sClientName1 || '',
+        sWorkOrderNumber: repair.sWorkOrderNumber || '',
+        sPurchaseOrder: repair.sPurchaseOrder || '',
+        dtInvoiceDate: new Date().toISOString().split('T')[0],
+        dblAmount: repair.dblAmtRepair || 0,
+        dblTax: (repair.dblAmtRepair || 0) * 0.07,
+        dblTotal: (repair.dblAmtRepair || 0) * 1.07,
+        bFinalized: false,
+        bPaid: false
+      };
+      MockDB.insert('invoices', invoice);
+      results.push(invoice);
+    });
+    return { success: true, invoices: results };
+  });
+
+  route('GET', '/Invoice/GetAllInvoices', () => MockDB.getAll('invoices'));
+
+  // ── PendingArrivals (6) ─────────────────────────────
+  route('GET', '/PendingArrival/GetAllPendingArrivals', (p) => {
+    var arrivals = MockDB.getAll('pendingArrivals');
+    if (int(p.plServiceLocationKey)) arrivals = arrivals.filter(a => a.lServiceLocationKey === int(p.plServiceLocationKey));
+    if (p.psStatus) arrivals = arrivals.filter(a => a.sStatus === p.psStatus);
+    return arrivals;
+  });
+  route('GET', '/PendingArrival/GetPendingArrivalByKey', (p) => MockDB.getByKey('pendingArrivals', int(p.plPendingArrivalKey)));
+  route('POST', '/PendingArrival/AddPendingArrival', (p, body) => MockDB.insert('pendingArrivals', body));
+  route('POST', '/PendingArrival/UpdatePendingArrival', (p, body) => { MockDB.update('pendingArrivals', body.lPendingArrivalKey, body); return body; });
+  route('DELETE', '/PendingArrival/DeletePendingArrival', (p) => MockDB.remove('pendingArrivals', int(p.plPendingArrivalKey)));
+  route('POST', '/PendingArrival/ReceiveArrival', (p, body) => {
+    var arrival = MockDB.getByKey('pendingArrivals', body.lPendingArrivalKey);
+    if (!arrival) throw new Error('Pending arrival not found');
+    MockDB.update('pendingArrivals', body.lPendingArrivalKey, {
+      sStatus: 'received',
+      lRepairKey: body.lRepairKey,
+      sWorkOrderNumber: body.sWorkOrderNumber,
+      sCorrectedModel: body.sCorrectedModel || null,
+      sCorrectedSerialNumber: body.sCorrectedSerialNumber || null,
+      dtReceivedDate: new Date().toISOString().split('T')[0]
+    });
+    return MockDB.getByKey('pendingArrivals', body.lPendingArrivalKey);
+  });
+
+  // ── Instrument Codes (2) ────────────────────────────
+  route('GET', '/InstrumentCode/GetAll', () => MockDB.getAll('instrumentCodes').filter(c => c.bActive));
+  route('GET', '/InstrumentCode/Search', (p) => {
+    var q = (p.psQuery || '').toLowerCase();
+    return MockDB.getAll('instrumentCodes').filter(c => c.bActive && (
+      c.sCode.toLowerCase().includes(q) ||
+      c.sDescription.toLowerCase().includes(q) ||
+      c.sCategory.toLowerCase().includes(q)
+    ));
+  });
+
+  // ── Instrument Repairs (5) ──────────────────────────
+  route('GET', '/InstrumentRepair/GetAll', (p) => {
+    var repairs = MockDB.getAll('instrumentRepairs');
+    if (int(p.plServiceLocationKey)) repairs = repairs.filter(r => r.lServiceLocationKey === int(p.plServiceLocationKey));
+    return repairs;
+  });
+  route('GET', '/InstrumentRepair/GetByKey', (p) => MockDB.getByKey('instrumentRepairs', int(p.plInstrRepairKey)));
+  route('POST', '/InstrumentRepair/Add', (p, body) => MockDB.insert('instrumentRepairs', body));
+  route('POST', '/InstrumentRepair/Update', (p, body) => { MockDB.update('instrumentRepairs', body.lInstrRepairKey, body); return body; });
+  route('DELETE', '/InstrumentRepair/Delete', (p) => MockDB.remove('instrumentRepairs', int(p.plInstrRepairKey)));
 
   console.log('[MockAPI] ' + _routes.length + ' routes registered');
 

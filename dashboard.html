@@ -269,6 +269,10 @@
 
       <!-- STAT STRIP — compact pulse, not hero cards -->
       <div class="stat-strip" id="kpiStrip">
+        <div class="stat-chip" id="chipExpectedArrivals" onclick="openReceiving()" style="cursor:pointer" title="Click to open Receiving">
+          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 4.5L8 1.5l6 3v7l-6 3-6-3z"/><path d="M2 4.5L8 7.5l6-3"/><line x1="8" y1="7.5" x2="8" y2="14.5"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="statExpectedArrivals">0</div><div class="s-lbl">Expected</div></div>
+        </div>
         <div class="stat-chip alert">
           <div class="s-icon si-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10.3 2.5a4 4 0 0 0-4.8 5.2L2 11.2V14h2.8l3.5-3.5a4 4 0 0 0 5.2-4.8L11.3 7.9 9.1 5.7z"/></svg></div>
           <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
@@ -794,19 +798,47 @@ function calcStats() {
 function updateStats() {
   const stats = calcStats();
   const chips = document.querySelectorAll('#kpiStrip .stat-chip .s-val');
-  if (chips.length >= 9) {
-    chips[0].textContent = stats.inHouse;
-    chips[1].textContent = stats.waiting;
-    chips[2].textContent = stats.inRepair;
-    chips[3].textContent = stats.overdue;
-    chips[4].textContent = stats.ready;
-    chips[5].textContent = stats.loaners;
-    chips[6].textContent = stats.shipped;
-    chips[7].textContent = stats.draftInvoice;
-    chips[8].textContent = stats.invoiced;
+  // chip[0] = Expected Arrivals (loaded separately), chip[1..9] = repair stats
+  if (chips.length >= 10) {
+    chips[1].textContent = stats.inHouse;
+    chips[2].textContent = stats.waiting;
+    chips[3].textContent = stats.inRepair;
+    chips[4].textContent = stats.overdue;
+    chips[5].textContent = stats.ready;
+    chips[6].textContent = stats.loaners;
+    chips[7].textContent = stats.shipped;
+    chips[8].textContent = stats.draftInvoice;
+    chips[9].textContent = stats.invoiced;
   }
   // Share KPI values with other dashboard tabs via sessionStorage
   try { sessionStorage.setItem('tsi_dashboard_kpis', JSON.stringify(stats)); } catch(e) {}
+
+  // Load expected arrivals count
+  _loadExpectedArrivalsCount();
+}
+
+async function _loadExpectedArrivalsCount() {
+  try {
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+    var arrivals = await API.getPendingArrivals(svcKey, 'pending');
+    var arr = Array.isArray(arrivals) ? arrivals : (arrivals.data || []);
+    // Exclude expired (>30 days)
+    arr = arr.filter(function(a) {
+      var days = Math.floor((Date.now() - new Date(a.dtDateSubmitted).getTime()) / 86400000);
+      return days < 30;
+    });
+    var el = document.getElementById('statExpectedArrivals');
+    if (el) el.textContent = arr.length;
+    // Flag chip if any overdue
+    var overdue = arr.some(function(a) {
+      return Math.floor((Date.now() - new Date(a.dtDateSubmitted).getTime()) / 86400000) >= 14;
+    });
+    var chip = document.getElementById('chipExpectedArrivals');
+    if (chip) {
+      if (overdue) chip.classList.add('alert');
+      else chip.classList.remove('alert');
+    }
+  } catch(e) { console.warn('Expected arrivals load failed:', e); }
 }
 
 function exportCSV() {
@@ -1788,6 +1820,7 @@ setTimeout(function() {
 }, 50);
 </script>
 <script src="js/new-order-wizard.js"></script>
+<script src="js/receiving.js"></script>
 <script src="js/order-search.js"></script>
 <script src="js/smart-alerts.js"></script>
 <script src="js/command-palette.js"></script>

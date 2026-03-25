@@ -2,10 +2,11 @@
    Part of merged instruments page. Loaded by instruments.html.
    All functions/variables prefixed with ir_ to avoid namespace collisions.
    Entry point: ir_initPage() — called lazily when tab first clicked.
+   COCKPIT REDESIGN — inline detail view replaces slide-out drawer.
 */
 
 // ─── State ────────────────────────────────────────────────────────────────────
-var ir_allRepairs    = (typeof MockDB !== 'undefined' ? MockDB.getAll('instrumentRepairs') : []).map(function(r){ return JSON.parse(JSON.stringify(r)); });
+var ir_allRepairs    = [];
 var ir_filtered      = [];
 var ir_display       = [];
 var ir_selectedId    = null;
@@ -24,6 +25,10 @@ var ir_wizDept       = null;
 var ir_wizClients    = [];
 var ir_wizDepts      = [];
 var ir_nextOrderNum  = 9;
+var ir_instrCodes    = [];
+
+// New cockpit state
+var ir_currentRepair = null;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function ir_esc(s) {
@@ -74,10 +79,32 @@ function ir_itemStatusBadge(s) {
   return '<span class="ir-badge ' + (map[s]||'ir-b-received') + '" style="font-size:9px">' + ir_esc(s) + '</span>';
 }
 
+function ir_fmtTs(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
-function ir_initPage() {
+async function ir_initPage() {
   showDataBadge(false);
+  var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+  try {
+    var data = await API.getInstrumentRepairs(svcKey);
+    ir_allRepairs = (Array.isArray(data) ? data : (data.data || [])).map(function(r) { return JSON.parse(JSON.stringify(r)); });
+  } catch(e) { ir_allRepairs = []; }
+  // Also load instrument codes for the picker
+  try {
+    var codes = await API.getInstrumentCodes();
+    ir_instrCodes = Array.isArray(codes) ? codes : (codes.data || []);
+  } catch(e) { ir_instrCodes = []; }
+  ir_allRepairs.forEach(function(r) {
+    if (!r.comments) r.comments = [];
+    if (!r.history) r.history = [];
+    if (!r.items) r.items = [];
+  });
   ir_applyFilters();
+  ir_renderListPanel();
+  if (ir_filtered.length) ir_selectRepair(ir_filtered[0].id || ir_filtered[0].lInstrRepairKey);
 }
 
 // ─── Filtering / Sorting / Paging ─────────────────────────────────────────────
@@ -96,10 +123,7 @@ function ir_applyFilters() {
   });
   ir_applySort();
   ir_updateKPIs();
-  ir_currentPage = 1;
-  ir_paginate();
-  ir_renderTable();
-  ir_updatePagination();
+  ir_renderListPanel();
 }
 
 function ir_applySort() {
@@ -112,30 +136,6 @@ function ir_applySort() {
     if (typeof av === 'number') return ir_sortDir === 'asc' ? av - bv : bv - av;
     return ir_sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
   });
-}
-
-function ir_paginate() {
-  ir_display = ir_filtered.slice((ir_currentPage-1)*ir_pageSize, ir_currentPage*ir_pageSize);
-}
-
-function ir_sortBy(col) {
-  if (ir_sortCol === col) ir_sortDir = ir_sortDir === 'asc' ? 'desc' : 'asc';
-  else { ir_sortCol = col; ir_sortDir = 'asc'; }
-  ir_applySort(); ir_paginate(); ir_renderTable(); ir_updatePagination();
-  // Update sort indicators on <th> elements
-  var table = document.getElementById('ir_tableBody');
-  if (table) {
-    var thead = table.closest('table').querySelector('thead');
-    if (thead) {
-      thead.querySelectorAll('th').forEach(function(th) { th.classList.remove('sorted','asc','desc'); });
-      var cols = ['orderNum','clientName','deptName','dateReceived','dateDue','items','total','status'];
-      var idx = cols.indexOf(col);
-      if (idx >= 0) {
-        var ths = thead.querySelectorAll('th');
-        if (ths[idx]) { ths[idx].classList.add('sorted', ir_sortDir); }
-      }
-    }
-  }
 }
 
 function ir_chipFilter(status) {
@@ -181,86 +181,86 @@ function ir_updateKPIs() {
   document.getElementById('ir_kpiValueVal').textContent     = fmtCur(totalValue);
 }
 
-// ─── Render Table ─────────────────────────────────────────────────────────────
-function ir_renderTable() {
-  var tbody = document.getElementById('ir_tableBody');
-  var emptyEl = document.getElementById('emptyInstruments');
-  var tableWrap = tbody ? tbody.closest('.table-wrap') : null;
-  if (!ir_display.length) {
-    tbody.innerHTML = '';
-    if (tableWrap) tableWrap.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = '';
-    document.getElementById('ir_recordInfo').textContent = '0 records';
+// ─── List Panel ───────────────────────────────────────────────────────────────
+function ir_renderListPanel() {
+  var tbody = document.getElementById('irListTbody');
+  if (!tbody) return;
+  var info = document.getElementById('ir_recordInfo');
+  if (info) info.textContent = ir_filtered.length + ' record' + (ir_filtered.length !== 1 ? 's' : '');
+
+  if (!ir_filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--muted);font-size:11px">No repairs found.</td></tr>';
     return;
   }
-  if (tableWrap) tableWrap.style.display = '';
-  if (emptyEl) emptyEl.style.display = 'none';
-  tbody.innerHTML = ir_display.map(function(r) {
-    var tot = ir_orderTotal(r);
-    var dueC = ir_dueClass(r);
-    var dueTd = '<td>' + ir_fmtDate(r.dateDue) + '</td>';
-    var trClass = (r.id === ir_selectedId ? 'selected' : '') + (dueC==='overdue' ? ' ir-overdue' : dueC==='due-soon' ? ' ir-due-soon' : '');
-    return '<tr class="' + trClass.trim() + '" onclick="ir_openDrawer(' + r.id + ')">' +
-      '<td><span class="code-link">' + ir_esc(r.orderNum) + '</span>' + (r.quoteRef ? ' <span class="ir-ref-link" title="Quote: ' + ir_esc(r.quoteRef) + '">&#x1F517;</span>' : '') + '</td>' +
-      '<td title="' + ir_esc(r.clientName) + '">' + ir_esc(r.clientName) + '</td>' +
-      '<td title="' + ir_esc(r.deptName) + '">' + ir_esc(r.deptName) + '</td>' +
-      '<td>' + ir_fmtDate(r.dateReceived) + '</td>' +
-      dueTd +
+  tbody.innerHTML = ir_filtered.map(function(r) {
+    var rKey = r.lInstrRepairKey || r.id;
+    var curKey = ir_currentRepair ? (ir_currentRepair.lInstrRepairKey || ir_currentRepair.id) : null;
+    var activeClass = (curKey && curKey === rKey) ? ' irl-active' : '';
+    return '<tr class="' + activeClass.trim() + '" onclick="ir_selectRepair(' + rKey + ')">' +
+      '<td><span style="font-weight:700;color:var(--navy);font-size:10.5px">' + ir_esc(r.orderNum) + '</span></td>' +
+      '<td style="font-size:10px;color:var(--muted)">' + ir_fmtDate(r.dateReceived) + '</td>' +
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + ir_esc(r.clientName) + '">' + ir_esc(r.clientName) + '</td>' +
       '<td style="text-align:center">' + r.items.length + '</td>' +
-      '<td style="font-weight:600">' + (tot > 0 ? fmtCur(tot) : '<span style="color:var(--muted)">—</span>') + '</td>' +
       '<td>' + ir_statusBadge(r.status) + '</td>' +
       '</tr>';
   }).join('');
-  var total = ir_filtered.length;
-  var start = (ir_currentPage-1)*ir_pageSize+1;
-  var end   = Math.min(ir_currentPage*ir_pageSize, total);
-  document.getElementById('ir_recordInfo').textContent = total + ' record' + (total!==1?'s':'') + (total > ir_pageSize ? ' (showing '+start+'–'+end+')' : '');
 }
 
-function ir_updatePagination() {
-  var totalPages = Math.ceil(ir_filtered.length / ir_pageSize);
-  var pg = document.getElementById('ir_pagination');
-  if (totalPages <= 1) { pg.innerHTML = ''; return; }
-  var html = '<button class="pg-btn" onclick="ir_gotoPage('+(ir_currentPage-1)+')" '+(ir_currentPage===1?'disabled':'')+'>&#8592;</button>';
-  for (var i = 1; i <= totalPages; i++) {
-    if (i===1 || i===totalPages || Math.abs(i-ir_currentPage)<=1) {
-      html += '<button class="pg-btn'+(i===ir_currentPage?' active':'')+'" onclick="ir_gotoPage('+i+')">'+i+'</button>';
-    } else if (Math.abs(i-ir_currentPage)===2) { html += '<span style="padding:0 3px;color:var(--muted)">…</span>'; }
-  }
-  html += '<button class="pg-btn" onclick="ir_gotoPage('+(ir_currentPage+1)+')" '+(ir_currentPage===totalPages?'disabled':'')+'>&#8594;</button>';
-  pg.innerHTML = html;
+function ir_toggleListPanel() {
+  var panel = document.getElementById('irListPanel');
+  if (panel) panel.classList.toggle('collapsed');
 }
 
-function ir_gotoPage(p) {
-  var totalPages = Math.ceil(ir_filtered.length / ir_pageSize);
-  if (p < 1 || p > totalPages) return;
-  ir_currentPage = p; ir_paginate(); ir_renderTable(); ir_updatePagination();
-}
-
-// ─── Drawer ───────────────────────────────────────────────────────────────────
-function ir_openDrawer(id) {
-  ir_selectedId = id;
-  var r = ir_allRepairs.find(function(x){ return x.id === id; });
+// ─── Selection ────────────────────────────────────────────────────────────────
+function ir_selectRepair(id) {
+  var r = ir_allRepairs.find(function(x){ return (x.lInstrRepairKey || x.id) === id; });
   if (!r) return;
-  ir_populateDrawer(r);
-  document.getElementById('ir_drawer').classList.add('open');
-  document.getElementById('ir_drawerOverlay').classList.add('open');
-  ir_renderTable();
+  // Save any pending changes from previously selected repair
+  if (ir_isDirty && ir_currentRepair) {
+    ir_saveRepair(true);
+  }
+  ir_currentRepair = r;
+  ir_selectedId = id;
+  ir_isDirty = false;
+  // Show detail area
+  var detailArea = document.getElementById('irDetailArea');
+  if (detailArea) detailArea.classList.add('active');
+  // Hide empty state
+  var emptyEl = document.getElementById('emptyInstruments');
+  if (emptyEl) emptyEl.style.display = 'none';
+  // Populate everything
+  ir_populateDetail();
+  ir_renderListPanel();
 }
 
-function ir_closeDrawer() {
-  document.getElementById('ir_drawer').classList.remove('open');
-  document.getElementById('ir_drawerOverlay').classList.remove('open');
+function ir_deselectRepair() {
+  if (ir_isDirty && ir_currentRepair) {
+    ir_saveRepair(true);
+  }
+  ir_currentRepair = null;
   ir_selectedId = null;
-  ir_renderTable();
+  ir_isDirty = false;
+  var detailArea = document.getElementById('irDetailArea');
+  if (detailArea) detailArea.classList.remove('active');
+  ir_renderListPanel();
 }
 
-function ir_populateDrawer(r) {
-  document.getElementById('ir_dhOrderNum').textContent   = r.orderNum;
-  document.getElementById('ir_dhSub').textContent        = r.clientName + ' — ' + r.deptName;
-  document.getElementById('ir_dhStatusBadge').innerHTML  = ir_statusBadge(r.status);
+// ─── Detail Population ────────────────────────────────────────────────────────
+function ir_populateDetail() {
+  if (!ir_currentRepair) return;
+  var r = ir_currentRepair;
 
-  document.getElementById('ir_dStatus').value       = r.status;
+  ir_updateRefStrip();
+  ir_updateWorkflowBar();
+  ir_updateBreadcrumb();
+
+  // Status strip
+  document.getElementById('ir_ssBadge').textContent = r.orderNum;
+  document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(r.status);
+  document.getElementById('ir_ssTech').textContent = r.techAssigned || '—';
+
+  // Populate detail form fields
+  document.getElementById('ir_dTechAssigned').value = r.techAssigned || '';
   document.getElementById('ir_dDateReceived').value = r.dateReceived || '';
   document.getElementById('ir_dDateDue').value      = r.dateDue || '';
   document.getElementById('ir_dDateCompleted').value= r.dateCompleted || '';
@@ -268,7 +268,6 @@ function ir_populateDrawer(r) {
   document.getElementById('ir_dDept').value         = r.deptName;
   document.getElementById('ir_dPoNumber').value     = r.poNumber || '';
   document.getElementById('ir_dQuoteRef').value     = r.quoteRef || '';
-  document.getElementById('ir_dTechAssigned').value = r.techAssigned || '';
   document.getElementById('ir_dNotes').value        = r.notes || '';
 
   // Show/hide date completed based on status
@@ -276,77 +275,173 @@ function ir_populateDrawer(r) {
   var isClosing = (r.status === 'Complete' || r.status === 'Invoiced');
   compRow.style.display = isClosing ? '' : 'none';
 
-  ir_renderDrawerItems(r);
-  ir_renderDrawerOutsource(r);
+  // D&I header fields
+  var dClaimedEl = document.getElementById('ir_dClaimedCount');
+  if (dClaimedEl) dClaimedEl.value = r.claimedCount != null ? r.claimedCount : '';
+  var dActualEl = document.getElementById('ir_dActualCount');
+  if (dActualEl) dActualEl.value = (r.items || []).length;
+  ir_updateCountDiscrepancy();
+  var dCleanEl = document.getElementById('ir_dCleanReceipt');
+  if (dCleanEl) dCleanEl.checked = !!r.cleanOnReceipt;
+  var dRackEl = document.getElementById('ir_dRackNumber');
+  if (dRackEl) dRackEl.value = r.rackNumber || '';
+  var dShipEl = document.getElementById('ir_dShipContainer');
+  if (dShipEl) dShipEl.checked = !!r.shipContainer;
+
+  // Render the active tab content
+  ir_renderItemsTab();
+  ir_renderOutsourceTab();
+  ir_renderCommentsTab();
+  ir_renderHistoryTab();
+  ir_renderFinancialsTab();
+  ir_renderQCTab();
+
   ir_setSaveStatus('', '');
-  ir_isDirty = false;
-  ir_drawerSwitchTab('details', document.querySelector('#ir_drawer .ir-dtab'));
+
+  // Switch to first tab
+  ir_switchTab('details', document.querySelector('.ir-detail-tabs .ir-tab'));
 }
 
-function ir_onStatusChange() {
-  var s = document.getElementById('ir_dStatus').value;
-  var compRow = document.getElementById('ir_dCompletedRow');
-  compRow.style.display = (s === 'Complete' || s === 'Invoiced') ? '' : 'none';
-  ir_markDirty();
+function ir_updateRefStrip() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  document.getElementById('ir_refOrder').textContent  = r.orderNum;
+  document.getElementById('ir_refClient').textContent = r.clientName;
+  document.getElementById('ir_refDept').textContent   = r.deptName;
+  document.getElementById('ir_refPO').textContent     = r.poNumber || '—';
+  document.getElementById('ir_refStatus').value       = r.status;
+  document.getElementById('ir_refDateRecv').textContent = ir_fmtDate(r.dateReceived);
+  document.getElementById('ir_refDateDue').textContent  = ir_fmtDate(r.dateDue);
+  document.getElementById('ir_refDateComp').textContent = ir_fmtDate(r.dateCompleted);
+
+  // Days open
+  var daysOpen = '—';
+  if (r.dateReceived) {
+    var start = new Date(r.dateReceived);
+    var end = r.dateCompleted ? new Date(r.dateCompleted) : new Date();
+    daysOpen = Math.max(0, Math.round((end - start) / 86400000));
+  }
+  document.getElementById('ir_refDaysOpen').textContent = daysOpen;
+  document.getElementById('ir_refItemCount').textContent = r.items.length;
 }
 
-// ─── Drawer Item List ─────────────────────────────────────────────────────────
-function ir_renderDrawerItems(r) {
+function ir_updateWorkflowBar() {
+  var r = ir_currentRepair;
+  if (!r) return;
+
+  // Status → Phase mapping
+  var phaseMap = {
+    'Received': 1,
+    'In Progress': 2,
+    'Outsourced': 2,
+    'On Hold': 2,
+    'Complete': 3,
+    'Invoiced': 4
+  };
+  var currentPhase = phaseMap[r.status] || 1;
+
+  var pills = [
+    {id: 'ir_wf-receive',  phase: 1},
+    {id: 'ir_wf-inprog',   phase: 2},
+    {id: 'ir_wf-complete', phase: 3},
+    {id: 'ir_wf-invoice',  phase: 4}
+  ];
+
+  pills.forEach(function(p) {
+    var el = document.getElementById(p.id);
+    if (!el) return;
+    el.classList.remove('ir-wf-locked', 'ir-wf-available', 'ir-wf-done');
+    if (p.phase < currentPhase) {
+      el.classList.add('ir-wf-done');
+    } else if (p.phase === currentPhase) {
+      el.classList.add('ir-wf-available');
+    } else {
+      el.classList.add('ir-wf-locked');
+    }
+  });
+}
+
+function ir_updateBreadcrumb() {
+  var r = ir_currentRepair;
+  var bc = document.getElementById('ir_breadcrumb');
+  if (!bc || !r) return;
+  bc.innerHTML = 'Instruments &rsaquo; <span>' + ir_esc(r.clientName) + '</span> &rsaquo; <span>' + ir_esc(r.orderNum) + '</span>';
+}
+
+// ─── Tab Switching ────────────────────────────────────────────────────────────
+function ir_switchTab(name, btn) {
+  document.querySelectorAll('.ir-detail-tabs .ir-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.ir-tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var pane = document.getElementById('ir_pane-' + name);
+  if (pane) pane.classList.add('active');
+}
+
+// ─── Tab Renderers ────────────────────────────────────────────────────────────
+function ir_renderDetailsTab() {
+  // Details are populated via ir_populateDetail — static form fields
+}
+
+function ir_renderItemsTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
   var tbody = document.getElementById('ir_itemsBody');
   if (!r.items || !r.items.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No items on this order.</td></tr>';
     ir_updateDrawerTotals(r);
+    ir_updateCountDiscrepancy();
     return;
   }
-  tbody.innerHTML = r.items.map(function(item, idx) {
-    var lvlLabel = item.repairLevel ? 'L' + item.repairLevel : 'N/A';
-    return '<tr>' +
-      '<td><span style="font-family:monospace;font-size:10.5px;color:var(--blue)">' + ir_esc(item.instrCode) + '</span></td>' +
-      '<td><div style="font-size:10.5px;font-weight:600;color:var(--navy)">' + ir_esc(item.mfr) + '</div>' +
-          '<div style="font-size:9.5px;color:var(--muted)">' + ir_esc(item.model) + ' · ' + ir_esc(item.serial) + '</div></td>' +
-      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + ir_esc(item.description) + '">' + ir_esc(item.description) + '</td>' +
-      '<td style="text-align:center"><span class="ir-lvl-badge">' + lvlLabel + '</span></td>' +
-      '<td style="text-align:right;font-weight:600">' + (item.amount > 0 ? fmtCur(item.amount) : '<span style="color:var(--muted)">—</span>') + '</td>' +
-      '<td>' + (item.outsource ? '<span class="ir-out-dot" title="Outsourced to: ' + ir_esc(item.outsourceVendor||'TBD') + '">&#x21A5;</span>' : '') + '</td>' +
-      '<td>' + ir_itemStatusBadge(item.status) + '</td>' +
-      '<td><button class="del-btn" onclick="ir_removeItem(' + idx + ')" title="Remove">&#x2715;</button></td>' +
-      '</tr>';
-  }).join('');
-  ir_updateDrawerTotals(r);
-}
 
-function ir_addItem() {
-  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
-  if (!r) return;
-  var newId = r.items.length ? Math.max.apply(null, r.items.map(function(i){ return i.id; })) + 1 : 1;
-  r.items.push({id:newId,instrCode:'',mfr:'',model:'',serial:'',description:'',repairLevel:null,amount:0,status:'Received',outsource:false,outsourceVendor:'',outsourceCost:0,techNote:''});
-  ir_markDirty(); ir_renderDrawerItems(r); ir_renderDrawerOutsource(r);
-}
-
-function ir_removeItem(idx) {
-  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
-  if (!r) return;
-  r.items.splice(idx, 1);
-  ir_markDirty(); ir_renderDrawerItems(r); ir_renderDrawerOutsource(r);
-}
-
-function ir_updateDrawerTotals(r) {
-  var total = 0, complete = 0, inprog = 0, outsourced = 0;
-  (r.items||[]).forEach(function(i) {
-    total += i.amount || 0;
-    if (i.status === 'Complete') complete++;
-    else if (i.status === 'In Progress') inprog++;
-    else if (i.status === 'Outsourced') outsourced++;
+  // Group items by category (look up from instrument codes if not on item)
+  var groups = {};
+  var groupOrder = [];
+  r.items.forEach(function(item, idx) {
+    var cat = item.category || item.sCategory;
+    if (!cat && item.instrCode && ir_instrCodes.length) {
+      var code = ir_instrCodes.find(function(c) { return c.sCode === item.instrCode; });
+      if (code) cat = code.sCategory;
+    }
+    cat = cat || 'Uncategorized';
+    if (!groups[cat]) { groups[cat] = []; groupOrder.push(cat); }
+    groups[cat].push({item: item, idx: idx});
   });
-  document.getElementById('ir_qtItems').textContent    = (r.items||[]).length;
-  document.getElementById('ir_qtComplete').textContent = complete;
-  document.getElementById('ir_qtInprog').textContent   = inprog;
-  document.getElementById('ir_qtOut').textContent      = outsourced;
-  document.getElementById('ir_qtTotal').textContent    = fmtCur(total);
+
+  var html = '';
+  groupOrder.forEach(function(cat) {
+    var items = groups[cat];
+    var catTotal = items.reduce(function(s, o) { return s + (o.item.amount || 0); }, 0);
+    html += '<tr class="ir-cat-header"><td colspan="8" style="background:var(--neutral-50);padding:6px 10px;font-size:10px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--neutral-200)">' +
+      ir_esc(cat) + ' <span style="font-weight:400;color:var(--muted)">(' + items.length + ' item' + (items.length !== 1 ? 's' : '') + ' &mdash; ' + fmtCur(catTotal) + ')</span></td></tr>';
+    items.forEach(function(o) {
+      var item = o.item;
+      var idx = o.idx;
+      var isBer = !!(item.ber);
+      var lvlLabel = item.repairLevel ? 'L' + item.repairLevel : 'N/A';
+      var berBorder = isBer ? 'border-left:3px solid var(--red);' : '';
+      var amtStyle = isBer ? 'text-align:right;font-weight:600;text-decoration:line-through;color:var(--muted)' : 'text-align:right;font-weight:600';
+      html += '<tr style="' + berBorder + '">' +
+        '<td><span style="font-family:monospace;font-size:10.5px;color:var(--blue)">' + ir_esc(item.instrCode) + '</span>' +
+          (isBer ? ' <span style="font-size:8px;color:var(--red);font-weight:700">BER</span>' : '') + '</td>' +
+        '<td><div style="font-size:10.5px;font-weight:600;color:var(--navy)">' + ir_esc(item.mfr) + '</div>' +
+            '<div style="font-size:9.5px;color:var(--muted)">' + ir_esc(item.model) + ' &middot; ' + ir_esc(item.serial) + '</div></td>' +
+        '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + ir_esc(item.description) + '">' + ir_esc(item.description) + '</td>' +
+        '<td style="text-align:center"><span class="ir-lvl-badge">' + lvlLabel + '</span></td>' +
+        '<td style="' + amtStyle + '">' + (item.amount > 0 ? fmtCur(item.amount) : '<span style="color:var(--muted)">&mdash;</span>') + '</td>' +
+        '<td>' + (item.outsource ? '<span class="ir-out-dot" title="Outsourced to: ' + ir_esc(item.outsourceVendor||'TBD') + '">&#x21A5;</span>' : '') + '</td>' +
+        '<td>' + ir_itemStatusBadge(item.status) + '</td>' +
+        '<td><button class="del-btn" onclick="ir_removeItem(' + idx + ')" title="Remove">&#x2715;</button></td>' +
+        '</tr>';
+    });
+  });
+  tbody.innerHTML = html;
+  ir_updateDrawerTotals(r);
+  ir_updateCountDiscrepancy();
 }
 
-// ─── Drawer Outsource Tab ─────────────────────────────────────────────────────
-function ir_renderDrawerOutsource(r) {
+function ir_renderOutsourceTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
   var items = (r.items||[]).filter(function(i){ return i.outsource; });
   var el = document.getElementById('ir_outsourceContent');
   if (!items.length) {
@@ -382,13 +477,265 @@ function ir_renderDrawerOutsource(r) {
     '</table>';
 }
 
-// ─── Drawer Tab Switching ─────────────────────────────────────────────────────
-function ir_drawerSwitchTab(name, btn) {
-  document.querySelectorAll('#ir_drawer .ir-dtab').forEach(function(t){ t.classList.remove('active'); });
-  document.querySelectorAll('#ir_drawer .ir-dpane').forEach(function(p){ p.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  var pane = document.getElementById('ir_dpane-' + name);
-  if (pane) pane.classList.add('active');
+function ir_renderCommentsTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var list = document.getElementById('ir_commentsList');
+  if (!r.comments || !r.comments.length) {
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No comments yet.</div>';
+    return;
+  }
+  list.innerHTML = r.comments.map(function(c) {
+    return '<div class="ir-comment">' +
+      '<div class="ir-comment-ts">' + ir_fmtTs(new Date(c.ts)) + '</div>' +
+      '<div class="ir-comment-text">' + ir_esc(c.text) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function ir_addComment() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var input = document.getElementById('ir_commentInput');
+  var text = (input.value || '').trim();
+  if (!text) return;
+  if (!r.comments) r.comments = [];
+  r.comments.push({ts: new Date().toISOString(), text: text});
+  input.value = '';
+  ir_renderCommentsTab();
+}
+
+function ir_renderHistoryTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var tbody = document.getElementById('ir_historyBody');
+  if (!r.history || !r.history.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No history entries.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = r.history.map(function(h) {
+    return '<tr>' +
+      '<td style="white-space:nowrap">' + ir_fmtTs(new Date(h.ts)) + '</td>' +
+      '<td>' + ir_esc(h.action) + '</td>' +
+      '<td>' + (h.from ? ir_statusBadge(h.from) : '—') + '</td>' +
+      '<td>' + (h.to ? ir_statusBadge(h.to) : '—') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function ir_renderFinancialsTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var revenue = 0, cost = 0;
+  (r.items||[]).forEach(function(item) {
+    revenue += item.amount || 0;
+    if (item.outsource) cost += item.outsourceCost || 0;
+  });
+  var margin = revenue - cost;
+  document.getElementById('ir_finRevenue').textContent = fmtCur(revenue);
+  document.getElementById('ir_finCost').textContent    = fmtCur(cost);
+  var marginEl = document.getElementById('ir_finMargin');
+  marginEl.textContent = fmtCur(margin);
+  marginEl.style.color = margin >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ─── Item Totals ──────────────────────────────────────────────────────────────
+function ir_updateDrawerTotals(r) {
+  var total = 0, complete = 0, inprog = 0, outsourced = 0;
+  (r.items||[]).forEach(function(i) {
+    total += i.amount || 0;
+    if (i.status === 'Complete') complete++;
+    else if (i.status === 'In Progress') inprog++;
+    else if (i.status === 'Outsourced') outsourced++;
+  });
+  document.getElementById('ir_qtItems').textContent    = (r.items||[]).length;
+  document.getElementById('ir_qtComplete').textContent = complete;
+  document.getElementById('ir_qtInprog').textContent   = inprog;
+  document.getElementById('ir_qtOut').textContent      = outsourced;
+  document.getElementById('ir_qtTotal').textContent    = fmtCur(total);
+}
+
+// ─── Count Discrepancy ────────────────────────────────────────────────────────
+function ir_updateCountDiscrepancy() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var actualEl = document.getElementById('ir_dActualCount');
+  if (actualEl) actualEl.value = (r.items || []).length;
+  var discEl = document.getElementById('ir_dCountDiscrepancy');
+  if (!discEl) return;
+  var claimed = parseInt(document.getElementById('ir_dClaimedCount').value) || 0;
+  var actual = (r.items || []).length;
+  if (!claimed) { discEl.textContent = '--'; discEl.style.color = 'var(--muted)'; return; }
+  var diff = actual - claimed;
+  if (diff === 0) { discEl.textContent = 'Match'; discEl.style.color = 'var(--green)'; }
+  else if (diff < 0) { discEl.textContent = Math.abs(diff) + ' short'; discEl.style.color = 'var(--red)'; }
+  else { discEl.textContent = diff + ' over'; discEl.style.color = 'var(--amber)'; }
+}
+
+// ─── Add Item Modal ──────────────────────────────────────────────────────────
+function ir_addItem() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  // Build and show the add-item modal overlay
+  var existing = document.getElementById('ir_addItemOverlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'ir_addItemOverlay';
+  overlay.className = 'wiz-overlay open';
+  overlay.innerHTML =
+    '<div class="wiz-box" style="width:680px">' +
+      '<div class="wiz-head"><div class="wiz-title">Add Line Item</div><button class="wiz-close" onclick="ir_closeAddItem()">&#10005;</button></div>' +
+      '<div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px">' +
+        // OS Code picker
+        '<div class="dc"><div class="dc-head">Instrument Code</div><div class="dc-body">' +
+          '<input class="inp" id="ir_aiCodeSearch" type="text" placeholder="Search by code, description, or category..." oninput="ir_aiFilterCodes(this.value)" style="margin-bottom:6px"/>' +
+          '<div id="ir_aiCodeResults" style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:4px"></div>' +
+          '<div id="ir_aiCodeSelected" style="margin-top:4px;font-size:10px;color:var(--muted)">No code selected</div>' +
+        '</div></div>' +
+        // Details
+        '<div class="dc"><div class="dc-head">Item Details</div><div class="dc-body">' +
+          '<div class="fg g2">' +
+            '<div class="ff"><label>Manufacturer</label>' +
+              '<select class="inp" id="ir_aiMfr" onchange="if(this.value===\'__custom\'){this.style.display=\'none\';document.getElementById(\'ir_aiMfrCustom\').style.display=\'\';document.getElementById(\'ir_aiMfrCustom\').focus();}">' +
+                '<option value="">-- Select --</option><option>gSource</option><option>V. Mueller</option><option>Storz</option><option>Miltex</option><option>Generic</option><option value="__custom">Other (type in)...</option>' +
+              '</select>' +
+              '<input class="inp" id="ir_aiMfrCustom" type="text" placeholder="Type manufacturer..." style="display:none;margin-top:4px"/>' +
+            '</div>' +
+            '<div class="ff"><label>Model Number</label><input class="inp" id="ir_aiModel" type="text"/></div>' +
+            '<div class="ff"><label>Serial Number</label><div style="display:flex;gap:4px"><input class="inp" id="ir_aiSerial" type="text" style="flex:1"/><button class="btn btn-outline" onclick="document.getElementById(\'ir_aiSerial\').value=\'N/A\'" style="height:28px;padding:0 8px;font-size:10px;white-space:nowrap">N/A</button></div></div>' +
+            '<div class="ff"><label>Quantity</label><input class="inp" id="ir_aiQty" type="number" value="1" min="1" style="width:70px"/></div>' +
+          '</div>' +
+        '</div></div>' +
+        // Repairs needed
+        '<div class="dc"><div class="dc-head">Repairs Needed</div><div class="dc-body">' +
+          '<div id="ir_aiRepairChips" style="display:flex;flex-wrap:wrap;gap:6px">' +
+            ['Sharpen','Clean','Reset','Adjust','Replace','Resurface','Realign'].map(function(rp) {
+              return '<label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1.5px solid var(--border-dk);border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;user-select:none;transition:all .12s">' +
+                '<input type="checkbox" value="' + rp + '" style="display:none" onchange="this.parentElement.style.background=this.checked?\'var(--primary-light)\':\'\';;this.parentElement.style.borderColor=this.checked?\'var(--blue)\':\'var(--border-dk)\';this.parentElement.style.color=this.checked?\'var(--navy)\':\'\'"/>' + rp + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div></div>' +
+        // BER toggle
+        '<div class="dc"><div class="dc-head">BER (Beyond Economical Repair)</div><div class="dc-body">' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;cursor:pointer"><input type="checkbox" id="ir_aiBer" onchange="ir_aiToggleBer(this.checked)"/> Mark as BER</label>' +
+          '</div>' +
+          '<div id="ir_aiBerReason" style="display:none;margin-top:8px"><div class="ff"><label>BER Findings / Reason</label><textarea class="inp" id="ir_aiBerFindings" rows="2"></textarea></div></div>' +
+        '</div></div>' +
+        // Notes
+        '<div class="dc"><div class="dc-head">Notes / Findings</div><div class="dc-body">' +
+          '<textarea class="inp" id="ir_aiNotes" rows="2" placeholder="Tech notes, findings..."></textarea>' +
+        '</div></div>' +
+      '</div>' +
+      '<div class="wiz-footer">' +
+        '<button class="btn btn-outline" onclick="ir_closeAddItem()">Cancel</button>' +
+        '<button class="btn btn-navy" onclick="ir_saveAddItem()">Add Item</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  // Render initial code list
+  ir_aiFilterCodes('');
+}
+
+var ir_aiSelectedCode = null;
+
+function ir_closeAddItem() {
+  var el = document.getElementById('ir_addItemOverlay');
+  if (el) el.remove();
+  ir_aiSelectedCode = null;
+}
+
+function ir_aiToggleBer(checked) {
+  var berReason = document.getElementById('ir_aiBerReason');
+  if (berReason) berReason.style.display = checked ? '' : 'none';
+}
+
+function ir_aiFilterCodes(q) {
+  var el = document.getElementById('ir_aiCodeResults');
+  if (!el) return;
+  var filter = (q || '').toLowerCase();
+  var matches = ir_instrCodes.filter(function(c) {
+    if (!filter) return true;
+    return (c.sCode || '').toLowerCase().includes(filter) ||
+           (c.sDescription || '').toLowerCase().includes(filter) ||
+           (c.sCategory || '').toLowerCase().includes(filter);
+  }).slice(0, 40);
+  if (!matches.length) {
+    el.innerHTML = '<div style="padding:8px 10px;font-size:10px;color:var(--muted)">No codes found</div>';
+    return;
+  }
+  el.innerHTML = matches.map(function(c) {
+    var selStyle = (ir_aiSelectedCode && ir_aiSelectedCode.sCode === c.sCode) ? 'background:var(--primary-light);border-left:2px solid var(--navy);' : '';
+    return '<div style="padding:5px 10px;font-size:10.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;' + selStyle + '" onclick="ir_aiPickCode(\'' + ir_esc(c.sCode) + '\')">' +
+      '<span style="font-family:monospace;font-weight:700;color:var(--blue);min-width:60px">' + ir_esc(c.sCode) + '</span>' +
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + ir_esc(c.sDescription || '') + '</span>' +
+      '<span style="font-size:9px;color:var(--muted)">' + ir_esc(c.sCategory || '') + '</span>' +
+      '<span style="font-size:10px;font-weight:600;min-width:50px;text-align:right">' + ((c.nBaseRate || c.dMaxCharge) ? fmtCur(c.nBaseRate || c.dMaxCharge) : '--') + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function ir_aiPickCode(code) {
+  ir_aiSelectedCode = ir_instrCodes.find(function(c) { return c.sCode === code; });
+  if (!ir_aiSelectedCode) return;
+  var selEl = document.getElementById('ir_aiCodeSelected');
+  if (selEl) selEl.innerHTML = '<span style="font-weight:700;color:var(--navy)">' + ir_esc(ir_aiSelectedCode.sCode) + '</span> &mdash; ' + ir_esc(ir_aiSelectedCode.sDescription || '') + ' <span style="color:var(--muted)">(' + ir_esc(ir_aiSelectedCode.sCategory || '') + ')</span>';
+  // Re-render to show selected highlight
+  var searchEl = document.getElementById('ir_aiCodeSearch');
+  ir_aiFilterCodes(searchEl ? searchEl.value : '');
+}
+
+function ir_saveAddItem() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var isBer = document.getElementById('ir_aiBer').checked;
+  var mfrSel = document.getElementById('ir_aiMfr');
+  var mfrCustom = document.getElementById('ir_aiMfrCustom');
+  var mfr = mfrSel.style.display === 'none' ? mfrCustom.value : (mfrSel.value === '__custom' ? '' : mfrSel.value);
+  var qty = parseInt(document.getElementById('ir_aiQty').value) || 1;
+
+  // Gather selected repair chips
+  var repairChips = [];
+  document.querySelectorAll('#ir_aiRepairChips input[type=checkbox]:checked').forEach(function(cb) { repairChips.push(cb.value); });
+
+  var baseCode = isBer ? 'OS090' : (ir_aiSelectedCode ? ir_aiSelectedCode.sCode : '');
+  var baseAmt = isBer ? 0 : (ir_aiSelectedCode ? (ir_aiSelectedCode.nBaseRate || ir_aiSelectedCode.dMaxCharge || 0) : 0);
+  var baseCat = ir_aiSelectedCode ? (ir_aiSelectedCode.sCategory || 'Uncategorized') : 'Uncategorized';
+  var baseDesc = ir_aiSelectedCode ? (ir_aiSelectedCode.sDescription || '') : '';
+
+  for (var q = 0; q < qty; q++) {
+    var newId = r.items.length ? Math.max.apply(null, r.items.map(function(i){ return i.id || 0; })) + 1 : 1;
+    r.items.push({
+      id: newId,
+      instrCode: baseCode,
+      mfr: mfr,
+      model: document.getElementById('ir_aiModel').value,
+      serial: document.getElementById('ir_aiSerial').value || 'N/A',
+      description: baseDesc,
+      category: baseCat,
+      sCategory: baseCat,
+      repairLevel: null,
+      amount: baseAmt,
+      status: 'Received',
+      outsource: false,
+      outsourceVendor: '',
+      outsourceCost: 0,
+      techNote: document.getElementById('ir_aiNotes').value,
+      repairsNeeded: repairChips,
+      ber: isBer,
+      berFindings: isBer ? document.getElementById('ir_aiBerFindings').value : ''
+    });
+  }
+  ir_closeAddItem();
+  ir_markDirty(); ir_renderItemsTab(); ir_renderOutsourceTab(); ir_renderFinancialsTab(); ir_updateRefStrip();
+}
+
+function ir_removeItem(idx) {
+  var r = ir_currentRepair;
+  if (!r) return;
+  r.items.splice(idx, 1);
+  ir_markDirty(); ir_renderItemsTab(); ir_renderOutsourceTab(); ir_renderFinancialsTab(); ir_updateRefStrip();
 }
 
 // ─── Save / Dirty ─────────────────────────────────────────────────────────────
@@ -399,12 +746,12 @@ function ir_markDirty() {
   ir_saveTimer = setTimeout(ir_autoSave, 2000);
 }
 
-function ir_autoSave() { if (ir_isDirty) ir_saveDrawer(true); }
+function ir_autoSave() { if (ir_isDirty) ir_saveRepair(true); }
 
-function ir_saveDrawer(silent) {
-  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
+function ir_saveRepair(silent) {
+  var r = ir_currentRepair;
   if (!r) return;
-  r.status        = document.getElementById('ir_dStatus').value;
+  r.status        = document.getElementById('ir_refStatus').value;
   r.dateReceived  = document.getElementById('ir_dDateReceived').value;
   r.dateDue       = document.getElementById('ir_dDateDue').value;
   r.dateCompleted = document.getElementById('ir_dDateCompleted').value || null;
@@ -412,26 +759,74 @@ function ir_saveDrawer(silent) {
   r.quoteRef      = document.getElementById('ir_dQuoteRef').value;
   r.techAssigned  = document.getElementById('ir_dTechAssigned').value;
   r.notes         = document.getElementById('ir_dNotes').value;
-  document.getElementById('ir_dhStatusBadge').innerHTML = ir_statusBadge(r.status);
+
+  // D&I header fields
+  var claimedEl = document.getElementById('ir_dClaimedCount');
+  if (claimedEl) r.claimedCount = claimedEl.value ? parseInt(claimedEl.value) : null;
+  var cleanEl = document.getElementById('ir_dCleanReceipt');
+  if (cleanEl) r.cleanOnReceipt = cleanEl.checked;
+  var rackEl = document.getElementById('ir_dRackNumber');
+  if (rackEl) r.rackNumber = rackEl.value;
+  var shipEl = document.getElementById('ir_dShipContainer');
+  if (shipEl) r.shipContainer = shipEl.checked;
+
+  // QC fields
+  ir_saveQCFields();
+
+  // Update status strip
+  document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(r.status);
+  document.getElementById('ir_ssTech').textContent = r.techAssigned || '—';
+
+  // Persist via API
+  try { API.updateInstrumentRepair(r); } catch(e) { /* silent fail for demo */ }
+
   ir_isDirty = false;
   ir_setSaveStatus('saved', 'Saved');
   if (!silent) { setTimeout(function(){ ir_setSaveStatus('', ''); }, 2500); }
-  ir_updateKPIs(); ir_renderTable();
+  ir_updateKPIs(); ir_renderListPanel(); ir_updateRefStrip(); ir_updateWorkflowBar();
 }
 
 function ir_setSaveStatus(state, msg) {
-  var el = document.getElementById('ir_drawerSaveStatus');
+  var el = document.getElementById('ir_saveIndicator');
+  if (!el) return;
   el.textContent = msg;
   el.style.color = state==='saved' ? 'var(--green)' : state==='dirty' ? 'var(--amber)' : 'var(--muted)';
 }
 
+function ir_onStatusChange() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var newStatus = document.getElementById('ir_refStatus').value;
+  var oldStatus = r.status;
+  if (newStatus !== oldStatus) {
+    // Log history entry
+    if (!r.history) r.history = [];
+    r.history.push({ts: new Date().toISOString(), action: 'Status changed', from: oldStatus, to: newStatus});
+    r.status = newStatus;
+    // Auto-set date completed
+    if ((newStatus === 'Complete' || newStatus === 'Invoiced') && !r.dateCompleted) {
+      r.dateCompleted = new Date().toISOString().split('T')[0];
+      document.getElementById('ir_dDateCompleted').value = r.dateCompleted;
+    }
+    // Show/hide date completed row
+    var compRow = document.getElementById('ir_dCompletedRow');
+    compRow.style.display = (newStatus === 'Complete' || newStatus === 'Invoiced') ? '' : 'none';
+  }
+  ir_markDirty();
+  ir_updateWorkflowBar();
+  ir_updateRefStrip();
+  ir_renderHistoryTab();
+  document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(newStatus);
+}
+
 function ir_deleteRepair(btn) {
-  var r = ir_allRepairs.find(function(x){ return x.id === ir_selectedId; });
+  var r = ir_currentRepair;
   if (!r) return;
   if (!btn) return;
   if (btn.dataset.confirming) {
-    ir_allRepairs = ir_allRepairs.filter(function(x){ return x.id !== ir_selectedId; });
-    ir_closeDrawer(); ir_applyFilters(); ir_updateKPIs();
+    var rKey = r.lInstrRepairKey || r.id;
+    ir_allRepairs = ir_allRepairs.filter(function(x){ return (x.lInstrRepairKey || x.id) !== rKey; });
+    ir_deselectRepair(); ir_applyFilters(); ir_updateKPIs();
     return;
   }
   btn.dataset.confirming = '1';
@@ -589,10 +984,89 @@ function ir_wizCreate() {
     quoteRef:     document.getElementById('ir_wQuoteRef').value,
     techAssigned: document.getElementById('ir_wTech').value,
     notes:        '',
-    items:        []
+    items:        [],
+    comments:     [],
+    history:      [{ts: now.toISOString(), action: 'Order created', from: null, to: 'Received'}]
   };
   ir_allRepairs.unshift(newR);
   ir_closeWiz();
   ir_applyFilters(); ir_updateKPIs();
-  setTimeout(function(){ ir_openDrawer(newR.id); }, 100);
+  setTimeout(function(){ ir_selectRepair(newR.id); }, 100);
+}
+
+// ─── QC Tab ────────────────────────────────────────────────────────────────────
+function ir_renderQCTab() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  if (!r.techQC) r.techQC = {};
+  if (!r.commercialQC) r.commercialQC = {};
+  var tq = r.techQC;
+  var cq = r.commercialQC;
+
+  // Tech QC fields
+  var el;
+  el = document.getElementById('ir_qcTechCount');       if (el) el.value = tq.verifiedCount || '';
+  el = document.getElementById('ir_qcTechVisualP');     if (el) el.checked = tq.visualInspection === 'pass';
+  el = document.getElementById('ir_qcTechVisualF');     if (el) el.checked = tq.visualInspection === 'fail';
+  el = document.getElementById('ir_qcTechFuncP');       if (el) el.checked = tq.functionalInspection === 'pass';
+  el = document.getElementById('ir_qcTechFuncF');       if (el) el.checked = tq.functionalInspection === 'fail';
+  el = document.getElementById('ir_qcTechInspector');   if (el) el.value = tq.inspector || '';
+  el = document.getElementById('ir_qcTechDate');        if (el) el.value = tq.date || '';
+  el = document.getElementById('ir_qcTechNotes');       if (el) el.value = tq.notes || '';
+
+  // Commercial QC fields
+  el = document.getElementById('ir_qcCommCount');       if (el) el.value = cq.verifiedCount || '';
+  el = document.getElementById('ir_qcCommVisualP');     if (el) el.checked = cq.visualInspection === 'pass';
+  el = document.getElementById('ir_qcCommVisualF');     if (el) el.checked = cq.visualInspection === 'fail';
+  el = document.getElementById('ir_qcCommInspector');   if (el) el.value = cq.inspector || '';
+  el = document.getElementById('ir_qcCommDate');        if (el) el.value = cq.date || '';
+  el = document.getElementById('ir_qcCommNotes');       if (el) el.value = cq.notes || '';
+
+  // Status indicators
+  var techStatus = document.getElementById('ir_qcTechStatus');
+  if (techStatus) {
+    var techPassed = tq.visualInspection === 'pass' && tq.functionalInspection === 'pass' && tq.inspector && tq.date;
+    techStatus.innerHTML = techPassed ?
+      '<span style="color:var(--green);font-weight:700;font-size:11px">&#x2713; Passed</span>' :
+      '<span style="color:var(--amber);font-weight:700;font-size:11px">&#x26A0; Not complete</span>';
+  }
+  var commStatus = document.getElementById('ir_qcCommStatus');
+  if (commStatus) {
+    var commPassed = cq.visualInspection === 'pass' && cq.inspector && cq.date;
+    commStatus.innerHTML = commPassed ?
+      '<span style="color:var(--green);font-weight:700;font-size:11px">&#x2713; Passed</span>' :
+      '<span style="color:var(--amber);font-weight:700;font-size:11px">&#x26A0; Not complete</span>';
+  }
+}
+
+function ir_saveQCFields() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  if (!r.techQC) r.techQC = {};
+  if (!r.commercialQC) r.commercialQC = {};
+
+  var el;
+  // Tech QC
+  el = document.getElementById('ir_qcTechCount');       if (el) r.techQC.verifiedCount = el.value ? parseInt(el.value) : null;
+  el = document.getElementById('ir_qcTechVisualP');     if (el && el.checked) r.techQC.visualInspection = 'pass';
+  el = document.getElementById('ir_qcTechVisualF');     if (el && el.checked) r.techQC.visualInspection = 'fail';
+  el = document.getElementById('ir_qcTechFuncP');       if (el && el.checked) r.techQC.functionalInspection = 'pass';
+  el = document.getElementById('ir_qcTechFuncF');       if (el && el.checked) r.techQC.functionalInspection = 'fail';
+  el = document.getElementById('ir_qcTechInspector');   if (el) r.techQC.inspector = el.value;
+  el = document.getElementById('ir_qcTechDate');        if (el) r.techQC.date = el.value;
+  el = document.getElementById('ir_qcTechNotes');       if (el) r.techQC.notes = el.value;
+
+  // Commercial QC
+  el = document.getElementById('ir_qcCommCount');       if (el) r.commercialQC.verifiedCount = el.value ? parseInt(el.value) : null;
+  el = document.getElementById('ir_qcCommVisualP');     if (el && el.checked) r.commercialQC.visualInspection = 'pass';
+  el = document.getElementById('ir_qcCommVisualF');     if (el && el.checked) r.commercialQC.visualInspection = 'fail';
+  el = document.getElementById('ir_qcCommInspector');   if (el) r.commercialQC.inspector = el.value;
+  el = document.getElementById('ir_qcCommDate');        if (el) r.commercialQC.date = el.value;
+  el = document.getElementById('ir_qcCommNotes');       if (el) r.commercialQC.notes = el.value;
+}
+
+function ir_qcChanged() {
+  ir_saveQCFields();
+  ir_markDirty();
+  ir_renderQCTab();
 }

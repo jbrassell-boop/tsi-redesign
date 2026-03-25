@@ -62,9 +62,10 @@
   function buildSidebar() {
     var cur = currentPage();
     var html = '';
-    html += '<div class="sidebar-brand" onclick="window.location=\'index.html\'" style="cursor:pointer" title="Back to Hub">';
-    html += '  <div class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>';
-    html += '  <div class="brand-text"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>';
+    html += '<div class="sidebar-brand">';
+    html += '  <div class="brand-logo" onclick="window.location=\'index.html\'" style="cursor:pointer" title="Back to Hub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>';
+    html += '  <div class="brand-text" onclick="window.location=\'index.html\'" style="cursor:pointer" title="Back to Hub"><div class="t1">Total Scope, Inc.</div><div class="t2">The Leader in Medical Device Repair</div></div>';
+    html += '  <button class="sidebar-toggle" onclick="event.stopPropagation();toggleSidebar()" title="Collapse sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>';
     html += '</div>';
     html += '<div class="nav-group">';
     for (var i = 0; i < NAV.length; i++) {
@@ -109,10 +110,13 @@
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>';
     html += '</button>';
     html += '<div id="newOrderMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #DDE3EE;border-radius:8px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.18);min-width:200px;z-index:9999;overflow:hidden">';
+    html += menuItem("openReceiving()",
+      '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+      'Receive Scope', 'Expected arrivals & walk-in intake', '1px solid #f0f2f5');
     html += menuItem("openOrderSearch()",
       '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
       'Find / Open Order', 'Search by WO#, SN#, PO#', '2px solid var(--border)');
-    html += menuItem("openNewOrderWizard('repairs','New Repair Order','repair')",
+    html += menuItem("window.location='repairs?action=new'",
       '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
       'Repair Order', 'New scope repair work order', '1px solid #f0f2f5');
     html += menuItem("openNewOrderWizard('instruments','New Instrument Repair','repair')",
@@ -173,7 +177,8 @@
     { id: 'purchaseorders', label: 'Purchase Orders',   href: 'dashboard_purchaseorders.html' },
     { id: 'invoices',       label: 'Invoices',          href: 'dashboard_invoices.html' },
     { id: 'flags',          label: 'Flags',             href: 'dashboard_flags.html',          badge: '0',  badgeId: 'flagTabBadge' },
-    { id: 'analytics',      label: 'Analytics',         href: 'dashboard_analytics.html' }
+    { id: 'analytics',      label: 'Analytics',         href: 'dashboard_analytics.html' },
+    { id: 'techbench',      label: 'Tech Bench',        href: 'dashboard_techbench.html' }
   ];
 
   /** Map filename → tab id for auto-detection */
@@ -284,4 +289,19 @@
       TSI.toast.info('Display', isCompact ? 'Comfortable mode' : 'Compact mode', 2000);
     }
   };
+
+  // Sidebar collapse function (global)
+  window.toggleSidebar = function () {
+    var sb = document.querySelector('.sidebar');
+    if (!sb) return;
+    var isCollapsed = sb.classList.toggle('collapsed');
+    localStorage.setItem('tsi_sidebarCollapsed', isCollapsed ? '1' : '0');
+  };
+
+  // Apply sidebar collapse preference immediately
+  var sbPref = localStorage.getItem('tsi_sidebarCollapsed');
+  if (sbPref === '1' || (sbPref === null && window.innerWidth <= 1440)) {
+    var sb = document.querySelector('.sidebar');
+    if (sb) sb.classList.add('collapsed');
+  }
 })();

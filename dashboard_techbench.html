@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tech Bench | BrightLogix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  .page-body{display:flex;flex-direction:column;overflow:hidden}
+  .stat-strip{display:flex;gap:8px;padding:10px 16px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--border)}
+  .stat-chip{flex:1;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:10px}
+  .stat-chip .sc-val{font-size:22px;font-weight:800;color:var(--navy)}
+  .stat-chip .sc-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
+  .toolbar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .seg-group{display:flex;border:1px solid var(--border);border-radius:5px;overflow:hidden}
+  .seg-btn{padding:5px 12px;font-size:11px;font-weight:600;border:none;background:#fff;cursor:pointer;color:var(--muted);font-family:inherit;border-right:1px solid var(--border)}
+  .seg-btn:last-child{border-right:none}
+  .seg-btn.active{background:var(--navy);color:#fff}
+  .table-wrap{flex:1;overflow:auto;padding:0 16px 16px}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  thead th{position:sticky;top:0;z-index:2;background:#F7F8FC;padding:7px 8px;text-align:left;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.3px;border-bottom:1.5px solid var(--border-dk);cursor:pointer;white-space:nowrap;user-select:none}
+  tbody td{padding:7px 8px;border-bottom:1px solid #F0F2F5}
+  tbody tr:hover{background:#F7FBFF}
+  .urgency-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .urgency-green{background:#16A34A}
+  .urgency-amber{background:#F59E0B}
+  .urgency-red{background:#DC2626}
+  .advance-btn{padding:3px 10px;border:1.5px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .advance-btn:hover{background:var(--navy);color:#fff}
+  .flag-btn{padding:3px 8px;border:1.5px solid #F59E0B;border-radius:4px;background:#fff;color:#D97706;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .flag-btn:hover{background:#FFFBEB}
+  .flag-btn.flagged{background:#FEF3C7;border-color:#F59E0B;color:#92400E}
+  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
+  .b-received{background:#EFF6FF;color:#1D4ED8}
+  .b-evaluation{background:#FEF3C7;color:#92400E}
+  .b-inrepair{background:#F3E8FF;color:#7C3AED}
+  .b-complete{background:#F0FDF4;color:#16A34A}
+  .b-shipped{background:#F0F9FF;color:#0284C7}
+  .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0}
+  .search-input{height:30px;width:220px;border:1.5px solid var(--border);border-radius:5px;padding:0 10px 0 30px;font-size:11.5px;font-family:inherit;outline:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") 9px center/14px no-repeat}
+  .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+  select.tech-select{height:30px;min-width:160px;border:1.5px solid var(--border);border-radius:5px;padding:0 8px;font-size:11.5px;font-family:inherit;outline:none;color:var(--navy);font-weight:600}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar"></nav>
+  <div class="main">
+    <header class="topbar"></header>
+    <div class="page-body">
+
+  <!-- Stat Strip -->
+  <div class="stat-strip">
+    <div class="stat-chip">
+      <div><div class="sc-val" id="kpiAssigned">0</div><div class="sc-lbl">Assigned</div></div></div>
+    <div class="stat-chip">
+      <div><div class="sc-val" id="kpiInRepair">0</div><div class="sc-lbl">In Repair</div></div></div>
+    <div class="stat-chip">
+      <div><div class="sc-val" id="kpiOnHold">0</div><div class="sc-lbl">On Hold</div></div></div>
+    <div class="stat-chip">
+      <div><div class="sc-val" id="kpiCompletedToday">0</div><div class="sc-lbl">Completed Today</div></div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <select id="techFilter" class="tech-select" onchange="tbApplyFilters()">
+      <option value="">All Technicians</option>
+    </select>
+    <div class="seg-group" id="statusGroup">
+      <button class="seg-btn active" onclick="tbSetStatus('',this)">All</button>
+      <button class="seg-btn" onclick="tbSetStatus('Received',this)">Received</button>
+      <button class="seg-btn" onclick="tbSetStatus('Evaluation',this)">Evaluation</button>
+      <button class="seg-btn" onclick="tbSetStatus('In Repair',this)">In Repair</button>
+      <button class="seg-btn" onclick="tbSetStatus('Complete',this)">Complete</button>
+    </div>
+    <div style="flex:1"></div>
+    <input type="text" class="search-input" id="tbSearch" placeholder="Search WO#, serial, client…" oninput="tbApplyFilters()"/>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table id="tbTable">
+      <thead><tr>
+        <th style="width:40px"></th>
+        <th data-col="wo" style="width:90px">WO#</th>
+        <th data-col="serial" style="width:110px">Serial#</th>
+        <th data-col="model">Model</th>
+        <th data-col="client">Customer</th>
+        <th data-col="days" style="width:70px;text-align:center">Days</th>
+        <th data-col="status" style="width:90px">Status</th>
+        <th style="width:160px;text-align:right">Actions</th>
+      </tr></thead>
+      <tbody id="tbTbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="record-info" id="tbFooter">0 repairs</div>
+</div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="mock-db.js"></script>
+<script src="mock-api.js"></script>
+<script src="shell.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/order-search.js"></script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/receiving.js"></script>
+<script src="js/smart-alerts.js"></script>
+<script src="js/command-palette.js"></script>
+<script src="js/keyboard-nav.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  var _repairs = [];
+  var _filtered = [];
+  var _techs = [];
+  var _filterStatus = '';
+  var _sortCol = 'days';
+  var _sortAsc = false;
+
+  var STATUS_ORDER = { 'Received': 'Evaluation', 'Evaluation': 'In Repair', 'In Repair': 'Complete', 'Complete': 'Shipped' };
+  var STATUS_IDS = { 'Received': 1, 'Evaluation': 2, 'In Repair': 3, 'Complete': 4, 'Shipped': 5 };
+
+  // ── Helpers: normalize field names across live + mock API ──
+  function _getStatus(r) {
+    return r.sRepairStatusDesc || r.sRepairStatus || r.ProgBarStatus || '';
+  }
+  function _getTech(r) {
+    return r.ResponsibleTech || r.sTechName || '';
+  }
+  function _getDays(r) {
+    return parseInt(r.nTurnAroundTime) || parseInt(r.nDaysSinceLastIn) || _daysInHouse(r);
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  async function init() {
+    if (typeof renderDashboardSubnav === 'function') renderDashboardSubnav('techbench');
+
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+
+    // Load repairs using the SAME endpoint as the working main dashboard
+    try {
+      var repData = await API.getDashboardScopes({ plServiceLocationKey: svcKey, inHouseValue: true });
+      _repairs = Array.isArray(repData) ? repData : (repData.data || []);
+    } catch(e) {
+      // Fallback to GetAllRepairs if getDashboardScopes isn't available
+      try {
+        var repData2 = await API.getDashboardRepairs(svcKey);
+        _repairs = Array.isArray(repData2) ? repData2 : (repData2.data || []);
+      } catch(e2) { _repairs = []; }
+    }
+
+    // Filter to only non-shipped, non-invoiced (active bench work)
+    _repairs = _repairs.filter(function(r) {
+      var st = _getStatus(r).toLowerCase();
+      return st !== 'shipped' && st !== 'invoiced' && st !== 'cancelled' && st !== 'draft invoice';
+    });
+
+    // Extract unique tech names from repair data (works with live API)
+    var techSet = {};
+    _repairs.forEach(function(r) {
+      var name = _getTech(r);
+      var key = r.lTechnicianKey || name;
+      if (name && key) techSet[key] = name;
+    });
+    _techs = Object.keys(techSet).map(function(k) {
+      return { lTechnicianKey: k, sName: techSet[k] };
+    }).sort(function(a, b) { return a.sName.localeCompare(b.sName); });
+
+    var techSel = document.getElementById('techFilter');
+    _techs.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.lTechnicianKey;
+      opt.textContent = t.sName;
+      techSel.appendChild(opt);
+    });
+
+    tbApplyFilters();
+  }
+
+  // ── Filters ────────────────────────────────────────────────
+  window.tbSetStatus = function(status, btn) {
+    _filterStatus = status;
+    document.querySelectorAll('#statusGroup .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    tbApplyFilters();
+  };
+
+  window.tbApplyFilters = function() {
+    var techKey = document.getElementById('techFilter').value;
+    var search = (document.getElementById('tbSearch').value || '').toLowerCase();
+
+    _filtered = _repairs.filter(function(r) {
+      if (_filterStatus) {
+        var st = _getStatus(r);
+        // Use regex matching like the main dashboard does (handles "In Repair", "Drying Room", etc.)
+        if (_filterStatus === 'Received' && !/received|waiting/i.test(st)) return false;
+        if (_filterStatus === 'Evaluation' && !/evaluation|inspection|approved/i.test(st)) return false;
+        if (_filterStatus === 'In Repair' && !/in repair|drying|steriliz/i.test(st)) return false;
+        if (_filterStatus === 'Complete' && !/complete|ready/i.test(st)) return false;
+      }
+      // Match tech by key OR by name (live API uses name, mock uses key)
+      if (techKey) {
+        var matchKey = String(r.lTechnicianKey || '') === techKey;
+        var matchName = _getTech(r) === techKey;
+        if (!matchKey && !matchName) return false;
+      }
+      if (search) {
+        var hay = [(r.sWorkOrderNumber||''), (r.sSerialNumber||''), (r.sClientName1||''),
+                   (r.sScopeTypeDesc||''), (r.sDepartmentName||''), _getTech(r)].join(' ').toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
+    });
+
+    // Sort
+    _filtered.sort(function(a, b) {
+      var va, vb;
+      if (_sortCol === 'days') {
+        va = _getDays(a); vb = _getDays(b);
+      } else if (_sortCol === 'wo') {
+        va = a.sWorkOrderNumber || ''; vb = b.sWorkOrderNumber || '';
+      } else if (_sortCol === 'client') {
+        va = a.sClientName1 || ''; vb = b.sClientName1 || '';
+      } else if (_sortCol === 'status') {
+        va = _getStatus(a); vb = _getStatus(b);
+      } else {
+        va = a[_sortCol] || ''; vb = b[_sortCol] || '';
+      }
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      var cmp = va < vb ? -1 : (va > vb ? 1 : 0);
+      return _sortAsc ? cmp : -cmp;
+    });
+
+    _render();
+    _updateKPIs();
+  };
+
+  function _daysInHouse(r) {
+    var din = r.dtDateIn || r.DateIn;
+    if (!din) return 0;
+    var d = new Date(din);
+    if (isNaN(d)) return 0;
+    var now = new Date();
+    return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  }
+
+  function _urgencyClass(days) {
+    if (days <= 5) return 'urgency-green';
+    if (days <= 10) return 'urgency-amber';
+    return 'urgency-red';
+  }
+
+  function _statusBadge(status) {
+    var s = (status || '').toLowerCase().replace(/\s+/g, '');
+    var cls = 'b-' + s;
+    return '<span class="badge ' + cls + '">' + _esc(status) + '</span>';
+  }
+
+  function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Render ─────────────────────────────────────────────────
+  function _render() {
+    var tbody = document.getElementById('tbTbody');
+    if (!_filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:30px;text-align:center;color:var(--muted);font-size:12px">' +
+        'No repairs match the current filters</td></tr>';
+      document.getElementById('tbFooter').innerHTML = '0 repairs';
+      return;
+    }
+
+    tbody.innerHTML = _filtered.map(function(r) {
+      var days = _getDays(r);
+      var status = _getStatus(r) || 'Received';
+      var tech = _getTech(r);
+      // Map raw status to simplified status for advance button
+      var simplified = 'Received';
+      if (/in repair|drying|steriliz/i.test(status)) simplified = 'In Repair';
+      else if (/evaluation|inspection|approved/i.test(status)) simplified = 'Evaluation';
+      else if (/complete|ready/i.test(status)) simplified = 'Complete';
+      else if (/received|waiting/i.test(status)) simplified = 'Received';
+      var nextStatus = STATUS_ORDER[simplified];
+      var flagged = r.bFlaggedForRevisedQuote;
+
+      return '<tr style="cursor:pointer" onclick="if(!event.target.closest(\'button\'))window.location=\'repairs?wo=' + _esc(r.sWorkOrderNumber || '') + '\'">' +
+        '<td style="text-align:center"><span class="urgency-dot ' + _urgencyClass(days) + '"></span></td>' +
+        '<td style="font-family:monospace;font-size:11px;font-weight:600;color:var(--navy)">' + _esc(r.sWorkOrderNumber) + '</td>' +
+        '<td style="font-family:monospace;font-size:10.5px">' + _esc(r.sSerialNumber) + '</td>' +
+        '<td style="font-size:11px">' + _esc(r.sScopeTypeDesc) + '</td>' +
+        '<td style="font-size:11px;font-weight:500">' + _esc(r.sClientName1) +
+          (tech ? '<div style="font-size:9px;color:var(--muted);font-weight:400">' + _esc(tech) + '</div>' : '') + '</td>' +
+        '<td style="text-align:center;font-weight:700;color:' + (days > 10 ? 'var(--red)' : days > 5 ? '#D97706' : 'var(--navy)') + '">' + days + '</td>' +
+        '<td>' + _statusBadge(status) + '</td>' +
+        '<td style="text-align:right;white-space:nowrap">' +
+          (nextStatus ? '<button class="advance-btn" onclick="tbAdvance(' + r.lRepairKey + ',\'' + nextStatus + '\')">' + nextStatus + ' &rarr;</button> ' : '') +
+          '<button class="flag-btn' + (flagged ? ' flagged' : '') + '" onclick="tbFlagQuote(' + r.lRepairKey + ')" title="Flag for revised quote">' +
+          (flagged ? '&#9888; Flagged' : '&#9888; Flag') + '</button>' +
+        '</td></tr>';
+    }).join('');
+
+    document.getElementById('tbFooter').innerHTML = '<strong>' + _filtered.length + '</strong> repair' +
+      (_filtered.length !== 1 ? 's' : '') + ' shown';
+  }
+
+  function _updateKPIs() {
+    var techKey = document.getElementById('techFilter').value;
+    var techRepairs = techKey ? _repairs.filter(function(r) {
+      return String(r.lTechnicianKey || '') === techKey || _getTech(r) === techKey;
+    }) : _repairs;
+    var today = new Date().toISOString().split('T')[0];
+
+    document.getElementById('kpiAssigned').textContent = techRepairs.length;
+    document.getElementById('kpiInRepair').textContent = techRepairs.filter(function(r) { return /in repair|drying|steriliz/i.test(_getStatus(r)); }).length;
+    document.getElementById('kpiOnHold').textContent = techRepairs.filter(function(r) { return /on hold/i.test(_getStatus(r)); }).length;
+    document.getElementById('kpiCompletedToday').textContent = techRepairs.filter(function(r) {
+      return /complete|ready/i.test(_getStatus(r)) && ((r.dtDateOut||'').startsWith(today) || (r.DateOut||'').startsWith(today));
+    }).length;
+  }
+
+  // ── Actions ────────────────────────────────────────────────
+  window.tbAdvance = async function(repairKey, nextStatus) {
+    try {
+      await API.updateRepair({ lRepairKey: repairKey, sRepairStatusDesc: nextStatus, lRepairStatusID: STATUS_IDS[nextStatus] || 0 });
+      var r = _repairs.find(function(x) { return x.lRepairKey === repairKey; });
+      if (r) {
+        r.sRepairStatusDesc = nextStatus;
+        r.lRepairStatusID = STATUS_IDS[nextStatus] || 0;
+        if (nextStatus === 'Complete') r.dtDateOut = new Date().toISOString().split('T')[0];
+      }
+      tbApplyFilters();
+      if (window.TSI && window.TSI.toast) TSI.toast.success('Status Updated', 'Repair advanced to ' + nextStatus, 2000);
+    } catch(e) {
+      if (window.TSI && window.TSI.toast) TSI.toast.error('Error', 'Failed to update status', 2000);
+    }
+  };
+
+  window.tbFlagQuote = async function(repairKey) {
+    try {
+      await API.flagForRevisedQuote(repairKey);
+      var r = _repairs.find(function(x) { return x.lRepairKey === repairKey; });
+      if (r) r.bFlaggedForRevisedQuote = true;
+      tbApplyFilters();
+      if (window.TSI && window.TSI.toast) TSI.toast.warn('Flagged', 'Repair flagged for revised quote', 2000);
+    } catch(e) {
+      if (window.TSI && window.TSI.toast) TSI.toast.error('Error', 'Failed to flag repair', 2000);
+    }
+  };
+
+  // ── Sort ───────────────────────────────────────────────────
+  document.addEventListener('click', function(e) {
+    var th = e.target.closest('th[data-col]');
+    if (!th) return;
+    var col = th.dataset.col;
+    if (_sortCol === col) { _sortAsc = !_sortAsc; } else { _sortCol = col; _sortAsc = true; }
+    tbApplyFilters();
+  });
+
+  // ── Boot ───────────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

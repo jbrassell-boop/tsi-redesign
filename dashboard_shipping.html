@@ -1,55 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <title>Dashboard — Shipping Status | TSI Redesign</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles.css"/>
-  <style>
-    /* Additional page-local vars */
-    :root{--hover:var(--primary-light)}
-
-    /* PAGE BODY — override for flex column layout */
-    .page-body{display:flex;flex-direction:column;overflow:hidden}
-
-    /* STAT STRIP — overrides only (base in styles.css) */
-    .stat-strip{align-items:center;border-bottom:1px solid var(--border);overflow-x:auto}
-    .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
-    .stat-chip:hover{background:var(--bg)}
-    .stat-chip.alert{background:#FEF9F9}
-    .stat-chip.warn{background:#FFFDF7}
-    .stat-chip .s-icon{width:28px;height:28px;border-radius:var(--radius-md)}
-    .stat-chip .s-val{font-size:16px}
-    .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.04em}
-
-    /* SUBNAV */
-    .subnav{display:flex;align-items:center;gap:0;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);padding:0 14px;flex-shrink:0;overflow-x:auto}
-    .subnav-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;position:relative;text-decoration:none}
-    .subnav-tab:hover{color:var(--navy)}
-    .subnav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
-    .subnav-tab .tab-badge{position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.2}
-
-    /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--neutral-200);flex-shrink:0;flex-wrap:wrap}
-    .toolbar-search{display:flex;align-items:center;gap:6px;margin-left:auto}
-    .search-input{height:30px;width:260px;border:1.5px solid var(--border-dk);border-radius:var(--radius-md);padding:0 10px 0 30px;font-size:12px;font-family:inherit;outline:none;color:var(--text);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") no-repeat 10px center}
-    .search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)}
-
-    /* DATA TABLE */
-    .table-wrap{flex:1;overflow:auto;position:relative}
-    table{width:100%;border-collapse:collapse;min-width:600px}
-    thead{position:sticky;top:0;z-index:2}
-    th{background:var(--neutral-50);color:var(--neutral-500);font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;border-right:1px solid var(--neutral-200);border-bottom:1px solid var(--neutral-200);letter-spacing:.04em;user-select:none;text-transform:uppercase;cursor:pointer}
-    th:last-child{border-right:none}
-    td{padding:6px 8px;font-size:11.5px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
-    tbody tr:nth-child(even){background:var(--row-alt)}
-    tbody tr:hover{background:var(--hover)}
-
-    /* FOOTER */
-    .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .record-info{font-size:11px;color:var(--muted)}
-    .record-info strong{color:var(--text)}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Shipping | BrightLogix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  /* Same styling patterns as dashboard_invoices.html */
+  .page-body{display:flex;flex-direction:column;overflow:hidden}
+  .stat-strip{display:flex;gap:8px;padding:10px 16px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--border)}
+  .stat-chip{flex:1;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px}
+  .stat-chip .sc-val{font-size:22px;font-weight:800;color:var(--navy)}
+  .stat-chip .sc-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
+  .toolbar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .seg-group{display:flex;border:1px solid var(--border);border-radius:5px;overflow:hidden}
+  .seg-btn{padding:5px 12px;font-size:11px;font-weight:600;border:none;background:#fff;cursor:pointer;color:var(--muted);font-family:inherit;border-right:1px solid var(--border)}
+  .seg-btn:last-child{border-right:none}
+  .seg-btn.active{background:var(--navy);color:#fff}
+  .table-wrap{flex:1;overflow:auto;padding:0 16px 16px}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  thead th{position:sticky;top:0;z-index:2;background:#F7F8FC;padding:7px 8px;text-align:left;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.3px;border-bottom:1.5px solid var(--border-dk);white-space:nowrap;user-select:none}
+  tbody td{padding:7px 8px;border-bottom:1px solid #F0F2F5}
+  tbody tr:hover{background:#F7FBFF}
+  .batch-bar{display:none;padding:8px 16px;background:#EFF6FF;border-bottom:1px solid #BFDBFE;flex-shrink:0;align-items:center;gap:10px}
+  .batch-bar.visible{display:flex}
+  .ship-btn{height:32px;padding:0 16px;border:none;border-radius:6px;background:#16A34A;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+  .search-input{height:30px;width:220px;border:1.5px solid var(--border);border-radius:5px;padding:0 10px 0 30px;font-size:11.5px;font-family:inherit;outline:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") 9px center/14px no-repeat}
+  .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0}
+  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+  .b-ready{background:#FEF3C7;color:#92400E}
+  .b-shipped{background:#F0FDF4;color:#16A34A}
+  .print-btn{padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--navy);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit}
+  /* Ship Modal */
+  .ship-overlay{position:fixed;inset:0;background:rgba(0,0,37,.4);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+  .ship-overlay.open{display:flex}
+  .ship-modal{background:#fff;border-radius:10px;width:580px;max-height:80vh;overflow:hidden;box-shadow:0 24px 72px rgba(0,0,37,.28);display:flex;flex-direction:column}
+  /* Client grouping borders */
+  .group-border-blue{border-left:3px solid #3B82F6}
+  .group-border-green{border-left:3px solid #10B981}
+  .group-border-amber{border-left:3px solid #F59E0B}
+  .group-border-purple{border-left:3px solid #8B5CF6}
+  .group-border-rose{border-left:3px solid #F43F5E}
+  .group-border-cyan{border-left:3px solid #06B6D4}
+  .group-border-orange{border-left:3px solid #F97316}
+  .group-border-indigo{border-left:3px solid #6366F1}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -68,193 +64,425 @@
     <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- STAT STRIP -->
-      <div class="stat-strip" id="shipStatStrip">
-        <div class="stat-chip">
-          <div class="s-icon si-navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M1 3h9v8H1z"/><path d="M10 6h3l2 3v2h-5V6z"/><circle cx="4" cy="12.5" r="1.5"/><circle cx="12.5" cy="12.5" r="1.5"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy" id="kpiTotal">0</div><div class="s-lbl">Total Shipments</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
-          <div class="s-data"><div class="s-val s-green" id="kpiCharges">$0</div><div class="s-lbl">Total Charges</div></div>
-        </div>
-      </div>
+  <div class="stat-strip">
+    <div class="stat-chip"><div class="sc-val" id="kpiReady">0</div><div class="sc-lbl">Ready to Ship</div></div>
+    <div class="stat-chip"><div class="sc-val" id="kpiShippedToday">0</div><div class="sc-lbl">Shipped Today</div></div>
+    <div class="stat-chip"><div class="sc-val" id="kpiTotalCharges">$0</div><div class="sc-lbl">Total Charges</div></div>
+  </div>
 
-      <!-- SUB-NAV TABS (rendered by shell.js) -->
-      <div class="subnav" id="dashSubnav"></div>
+  <!-- SUB-NAV TABS (rendered by shell.js) -->
+  <div class="subnav" id="dashSubnav"></div>
 
-      <!-- TOOLBAR -->
-      <div class="toolbar">
-        <div class="toolbar-search">
-          <input class="search-input" id="shipSearch" type="text" placeholder="Search by tracking#..." oninput="applyFilters()"/>
-        </div>
-      </div>
+  <div class="toolbar">
+    <div class="seg-group" id="segGroup">
+      <button class="seg-btn active" onclick="shSetSegment('ready',this)">Ready to Ship <span id="segReadyCount"></span></button>
+      <button class="seg-btn" onclick="shSetSegment('today',this)">Shipped Today <span id="segTodayCount"></span></button>
+      <button class="seg-btn" onclick="shSetSegment('all',this)">All Shipped</button>
+    </div>
+    <div style="flex:1"></div>
+    <input type="text" class="search-input" id="shSearch" placeholder="Search WO#, serial, client, tracking..." oninput="shApplyFilters()"/>
+  </div>
 
-      <div id="skShipping" style="padding:4px 12px"></div>
-      <!-- DATA TABLE -->
-      <div class="table-wrap">
-        <table id="shipTable">
-          <thead>
-            <tr>
-              <th data-col="tracking">Tracking#</th>
-              <th style="width:130px;text-align:right" data-col="charge">Shipping Charge</th>
-              <th style="width:130px" data-col="invoice">Invoice#</th>
-            </tr>
-          </thead>
-          <tbody id="shipTbody">
-            <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="batch-bar" id="batchBar">
+    <span id="batchCount" style="font-size:12px;font-weight:600;color:var(--navy)">0 selected</span>
+    <div style="flex:1"></div>
+    <button class="ship-btn" onclick="shOpenShipModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+        <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Ship Selected</button>
+  </div>
 
-      <!-- FOOTER -->
-      <div class="table-footer">
-        <div class="record-info" id="shipRecordInfo">Loading...</div>
-        <div></div>
-      </div>
+  <div class="table-wrap">
+    <table id="shTable">
+      <thead id="shThead"></thead>
+      <tbody id="shTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="record-info" id="shFooter">0 records</div>
 
     </div>
   </div>
 </div>
 
-<script src="shell.js"></script>
+<!-- Ship Modal -->
+<div class="ship-overlay" id="shipOverlay">
+  <div class="ship-modal">
+    <div style="padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-size:14px;font-weight:600">Ship Scopes</span>
+      <button onclick="shCloseShipModal()" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center">&times;</button>
+    </div>
+    <div id="shipModalBody" style="padding:16px 20px;overflow-y:auto;flex:1"></div>
+    <div style="padding:12px 20px;border-top:1px solid #DDE3EE;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="shCloseShipModal()" style="height:34px;padding:0 16px;border:1.5px solid #DDE3EE;border-radius:6px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+      <button id="shipConfirmBtn" onclick="shConfirmShip()" style="height:34px;padding:0 20px;border:none;border-radius:6px;background:#16A34A;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>Confirm Ship</button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
-<script src="api.js"></script>
-<script>
-// ── Auth Guard ──
-if (!API.requireAuth()) throw new Error('redirect');
-
-// ===============================================================
-//  SHIPPING STATUS — Real Nashville data
-// ===============================================================
-let SHIPMENTS = [];
-let searchTerm = '';
-let sortCol = 'tracking';
-let sortDir = 'asc';
-
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function fmtCurrency(v) {
-  if (v == null || isNaN(v)) return '$0.00';
-  return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-// ── Map raw record → UI object ──
-function mapShipment(r) {
-  return {
-    id:       r.lShippingChargeKey || 0,
-    tracking: (r.sTrackingNumber || '').trim(),
-    charge:   r.nShippingCharge || 0,
-    invoice:  r.lShippingInvoiceKey || 0,
-    _raw: r
-  };
-}
-
-// ── Load data ──
-async function loadShipments() {
-  try {
-    const data = await MockAPI.handleRequest('GET', '/ShippingCharge/GetAllShippingChargeList');
-    const raw = Array.isArray(data) ? data : [];
-    if (raw.length > 0) {
-      SHIPMENTS = raw.map(mapShipment);
-      console.log('[TSI Shipping] Loaded', SHIPMENTS.length, 'shipping charges from mock-db');
-      API.UI.updateDemoBadge('live');
-    } else {
-      throw new Error('Empty shipping list');
-    }
-  } catch (e) {
-    console.warn('[TSI Shipping] Mock unavailable:', e.message);
-    SHIPMENTS = [];
-    API.UI.updateDemoBadge('demo');
-  }
-  updateKPIs();
-  renderShipments();
-}
-
-// ── KPIs ──
-function updateKPIs() {
-  const total = SHIPMENTS.length;
-  const totalCharge = SHIPMENTS.reduce((sum, s) => sum + (s.charge || 0), 0);
-  document.getElementById('kpiTotal').textContent = total;
-  document.getElementById('kpiCharges').textContent = fmtCurrency(totalCharge);
-}
-
-// ── Filtering & Sorting ──
-function getFiltered() {
-  let list = [...SHIPMENTS];
-  if (searchTerm) {
-    const q = searchTerm.toLowerCase();
-    list = list.filter(s =>
-      s.tracking.toLowerCase().includes(q) ||
-      String(s.invoice).includes(q) ||
-      fmtCurrency(s.charge).toLowerCase().includes(q)
-    );
-  }
-  list.sort((a, b) => {
-    let va, vb;
-    if (sortCol === 'charge') {
-      va = a.charge || 0;
-      vb = b.charge || 0;
-    } else if (sortCol === 'invoice') {
-      va = a.invoice || 0;
-      vb = b.invoice || 0;
-    } else {
-      va = String(a[sortCol] || '').toLowerCase();
-      vb = String(b[sortCol] || '').toLowerCase();
-    }
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ? 1 : -1;
-    return 0;
-  });
-  return list;
-}
-
-function renderShipments() {
-  const filtered = getFiltered();
-  const tbody = document.getElementById('shipTbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No shipments found</td></tr>';
-  } else {
-    tbody.innerHTML = filtered.map(s => `<tr>
-      <td style="font-family:monospace;font-size:11px">${escHtml(s.tracking) || '<span style="color:var(--muted)">&#8212;</span>'}</td>
-      <td style="text-align:right;font-weight:500">${fmtCurrency(s.charge)}</td>
-      <td style="font-family:monospace;font-size:11px">${s.invoice ? escHtml(String(s.invoice)) : '<span style="color:var(--muted)">&#8212;</span>'}</td>
-    </tr>`).join('');
-  }
-  const totalCharge = filtered.reduce((sum, s) => sum + (s.charge || 0), 0);
-  document.getElementById('shipRecordInfo').innerHTML =
-    '<strong>' + filtered.length + '</strong> shipment' + (filtered.length !== 1 ? 's' : '') +
-    ' &middot; <strong>' + fmtCurrency(totalCharge) + '</strong> total';
-}
-
-function applyFilters() {
-  searchTerm = document.getElementById('shipSearch').value.trim();
-  renderShipments();
-}
-
-// ── Column sort wiring ──
-document.querySelectorAll('th[data-col]').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.col;
-    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
-    else { sortCol = col; sortDir = 'asc'; }
-    renderShipments();
-  });
-});
-
-// ── Init ──
-(async function init() {
-  API.UI.init();
-  if(API && API.UI) API.UI.showSkeleton('skShipping', 5);
-  await loadShipments();
-  if(API && API.UI) API.UI.hideSkeleton('skShipping');
-})();
-</script>
-<script src="js/new-order-wizard.js"></script>
+<script src="shell.js"></script>
+<script src="js/toast.js"></script>
 <script src="js/order-search.js"></script>
+<script src="js/new-order-wizard.js"></script>
+<script src="js/receiving.js"></script>
 <script src="js/smart-alerts.js"></script>
 <script src="js/command-palette.js"></script>
 <script src="js/keyboard-nav.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  var _readyRepairs = [];
+  var _shippedRepairs = [];
+  var _filtered = [];
+  var _segment = 'ready'; // 'ready', 'today', 'all'
+  var _selected = new Set();
+  var _groupColors = ['blue','green','amber','purple','rose','cyan','orange','indigo'];
+
+  function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function _fmtDate(d) { if (!d) return '\u2014'; var p = d.split('-'); return (p[1]||'')+'/'+(p[2]||'').substring(0,2)+'/'+(p[0]||''); }
+  function _fmtCurrency(v) { return '$' + (parseFloat(v)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+  async function init() {
+    if (typeof renderDashboardSubnav === 'function') renderDashboardSubnav('shipping');
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+
+    try {
+      var allRepairs = await API.getDashboardRepairs(svcKey);
+      var arr = Array.isArray(allRepairs) ? allRepairs : (allRepairs.data || []);
+
+      _readyRepairs = arr.filter(function(r) {
+        var st = (r.sRepairStatusDesc || r.ProgBarStatus || '').toLowerCase();
+        return (st === 'complete' || st === 'ready' || st === 'qc passed') && !r.sShipTrackingNumber;
+      });
+
+      _shippedRepairs = arr.filter(function(r) {
+        return !!r.sShipTrackingNumber;
+      });
+    } catch(e) {
+      _readyRepairs = [];
+      _shippedRepairs = [];
+    }
+
+    _updateCounts();
+    shSetSegment('ready', document.querySelector('#segGroup .seg-btn'));
+  }
+
+  function _updateCounts() {
+    var today = new Date().toISOString().split('T')[0];
+    var shippedToday = _shippedRepairs.filter(function(r) { return (r.dtShipDate||'').startsWith(today); });
+
+    document.getElementById('kpiReady').textContent = _readyRepairs.length;
+    document.getElementById('kpiShippedToday').textContent = shippedToday.length;
+    var totalCharges = _shippedRepairs.reduce(function(s, r) { return s + (parseFloat(r.dblAmtShipping)||0); }, 0);
+    document.getElementById('kpiTotalCharges').textContent = _fmtCurrency(totalCharges);
+
+    var readySpan = document.getElementById('segReadyCount');
+    if (readySpan) readySpan.textContent = '(' + _readyRepairs.length + ')';
+    var todaySpan = document.getElementById('segTodayCount');
+    if (todaySpan) todaySpan.textContent = '(' + shippedToday.length + ')';
+  }
+
+  // Build a map of client name -> color class for grouping
+  function _buildClientColorMap(rows) {
+    var map = {};
+    var idx = 0;
+    rows.forEach(function(r) {
+      var client = r.sClientName1 || '';
+      if (!map[client]) {
+        map[client] = _groupColors[idx % _groupColors.length];
+        idx++;
+      }
+    });
+    return map;
+  }
+
+  window.shSetSegment = function(seg, btn) {
+    _segment = seg;
+    _selected.clear();
+    _updateBatchBar();
+    document.querySelectorAll('#segGroup .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    shApplyFilters();
+  };
+
+  window.shApplyFilters = function() {
+    var search = (document.getElementById('shSearch').value || '').toLowerCase();
+    var today = new Date().toISOString().split('T')[0];
+    var source;
+
+    if (_segment === 'ready') {
+      source = _readyRepairs;
+    } else if (_segment === 'today') {
+      source = _shippedRepairs.filter(function(r) { return (r.dtShipDate||'').startsWith(today); });
+    } else {
+      source = _shippedRepairs;
+    }
+
+    _filtered = source;
+    if (search) {
+      _filtered = _filtered.filter(function(r) {
+        return [(r.sWorkOrderNumber||''),(r.sSerialNumber||''),(r.sClientName1||''),(r.sShipTrackingNumber||''),(r.sScopeTypeDesc||'')].join(' ').toLowerCase().includes(search);
+      });
+    }
+
+    // Sort: ready by client name (for grouping), shipped by date desc
+    if (_segment === 'ready') {
+      _filtered.sort(function(a,b) { return (a.sClientName1||'').localeCompare(b.sClientName1||''); });
+    } else {
+      _filtered.sort(function(a,b) { return (b.dtShipDate||'').localeCompare(a.dtShipDate||''); });
+    }
+
+    _render();
+  };
+
+  function _render() {
+    var thead = document.getElementById('shThead');
+    var tbody = document.getElementById('shTbody');
+
+    if (_segment === 'ready') {
+      thead.innerHTML = '<tr>' +
+        '<th style="width:32px"><input type="checkbox" onchange="shToggleAll(this.checked)"/></th>' +
+        '<th style="width:90px">WO#</th><th style="width:110px">Serial#</th><th>Customer</th>' +
+        '<th>Department</th><th>Model</th><th style="width:60px;text-align:center">Days</th></tr>';
+
+      if (!_filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--muted)">No scopes ready to ship</td></tr>';
+      } else {
+        var colorMap = _buildClientColorMap(_filtered);
+        var lastClient = '';
+        tbody.innerHTML = _filtered.map(function(r) {
+          var isNew = r.sClientName1 !== lastClient;
+          lastClient = r.sClientName1 || '';
+          var completedDate = r.dtDateCompleted || r.dtDateOut || r.dtDateIn;
+          var days = completedDate ? Math.max(0, Math.floor((new Date() - new Date(completedDate)) / 86400000)) : 0;
+          var checked = _selected.has(r.lRepairKey) ? ' checked' : '';
+          var borderClass = 'group-border-' + (colorMap[r.sClientName1||''] || 'blue');
+          return '<tr class="' + borderClass + '" style="' + (isNew ? 'border-top:2px solid #BFDBFE;' : '') + '">' +
+            '<td><input type="checkbox" class="sh-cb" data-key="' + r.lRepairKey + '"' + checked + ' onchange="shToggleOne(this)"/></td>' +
+            '<td style="font-family:monospace;font-size:11px;font-weight:600;color:var(--navy)">' + _esc(r.sWorkOrderNumber) + '</td>' +
+            '<td style="font-family:monospace;font-size:10.5px">' + _esc(r.sSerialNumber) + '</td>' +
+            '<td style="font-weight:500">' + _esc(r.sClientName1) + '</td>' +
+            '<td style="color:var(--muted)">' + _esc(r.sDepartmentName) + '</td>' +
+            '<td>' + _esc(r.sScopeTypeDesc) + '</td>' +
+            '<td style="text-align:center">' + days + '</td></tr>';
+        }).join('');
+      }
+    } else {
+      thead.innerHTML = '<tr>' +
+        '<th style="width:90px">WO#</th><th>Customer</th><th style="width:130px">Tracking#</th>' +
+        '<th style="width:90px">Ship Date</th><th style="width:100px;text-align:right">Charge</th>' +
+        '<th style="width:100px">Invoice#</th><th style="width:60px"></th></tr>';
+
+      if (!_filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--muted)">No shipped items</td></tr>';
+      } else {
+        tbody.innerHTML = _filtered.map(function(r) {
+          return '<tr>' +
+            '<td style="font-family:monospace;font-size:11px;font-weight:600;color:var(--navy)">' + _esc(r.sWorkOrderNumber) + '</td>' +
+            '<td style="font-weight:500">' + _esc(r.sClientName1) + '</td>' +
+            '<td style="font-family:monospace;font-size:11px">' + _esc(r.sShipTrackingNumber) + '</td>' +
+            '<td>' + _fmtDate(r.dtShipDate) + '</td>' +
+            '<td style="text-align:right;font-weight:600">' + _fmtCurrency(r.dblAmtShipping) + '</td>' +
+            '<td style="font-family:monospace;font-size:10.5px">' + _esc(r.sInvoiceNumber||'\u2014') + '</td>' +
+            '<td><button class="print-btn" onclick="shPrintSlip(' + r.lRepairKey + ')">Print</button></td></tr>';
+        }).join('');
+      }
+    }
+
+    document.getElementById('shFooter').innerHTML = '<strong>' + _filtered.length + '</strong> record' + (_filtered.length!==1?'s':'');
+  }
+
+  // -- Selection --
+  window.shToggleAll = function(checked) {
+    _selected.clear();
+    if (checked) _filtered.forEach(function(r) { _selected.add(r.lRepairKey); });
+    document.querySelectorAll('.sh-cb').forEach(function(cb) { cb.checked = checked; });
+    _updateBatchBar();
+  };
+
+  window.shToggleOne = function(cb) {
+    var key = parseInt(cb.dataset.key);
+    if (cb.checked) _selected.add(key); else _selected.delete(key);
+    _updateBatchBar();
+  };
+
+  function _updateBatchBar() {
+    var bar = document.getElementById('batchBar');
+    var count = _selected.size;
+    bar.className = 'batch-bar' + (count > 0 ? ' visible' : '');
+    document.getElementById('batchCount').textContent = count + ' selected';
+  }
+
+  // -- Ship Modal --
+  window.shOpenShipModal = function() {
+    var selected = _readyRepairs.filter(function(r) { return _selected.has(r.lRepairKey); });
+    if (!selected.length) return;
+
+    // Group by customer
+    var groups = {};
+    selected.forEach(function(r) {
+      var key = r.lClientKey || r.sClientName1;
+      if (!groups[key]) groups[key] = { client: r.sClientName1 || '', scopes: [] };
+      groups[key].scopes.push(r);
+    });
+
+    var today = new Date().toISOString().split('T')[0];
+    var html = Object.keys(groups).map(function(gk, gi) {
+      var g = groups[gk];
+      return '<div style="' + (gi > 0 ? 'margin-top:14px;padding-top:14px;border-top:1px solid #DDE3EE;' : '') + '">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">' + _esc(g.client) +
+        ' <span style="font-weight:400;color:var(--muted)">(' + g.scopes.length + ' scope' + (g.scopes.length!==1?'s':'') + ')</span>' +
+        ' <button class="print-btn" style="margin-left:8px" onclick="shPrintGroupSlip(' + gi + ')">Print Packing Slip</button></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 8px;margin-bottom:6px">' +
+        '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Carrier</label>' +
+        '<select id="shCarrier' + gi + '" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px">' +
+        '<option value="FedEx">FedEx</option><option value="UPS">UPS</option><option value="DHL">DHL</option><option value="Hand Delivery">Hand Delivery</option></select></div>' +
+        '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Tracking #</label>' +
+        '<input id="shTrack' + gi + '" type="text" placeholder="Enter tracking#" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 8px;font-size:11px;font-family:monospace;outline:none;box-sizing:border-box;margin-top:2px"></div>' +
+        '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Ship Date</label>' +
+        '<input id="shDate' + gi + '" type="date" value="' + today + '" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px"></div></div>' +
+        '<div style="font-size:10px;color:var(--muted)">' + g.scopes.map(function(s) {
+          return _esc(s.sSerialNumber||'') + ' (' + _esc(s.sScopeTypeDesc||'') + ')';
+        }).join(', ') + '</div></div>';
+    }).join('');
+
+    document.getElementById('shipModalBody').innerHTML = html;
+    document.getElementById('shipOverlay').classList.add('open');
+    // Store groups for confirm
+    window._shipGroups = groups;
+    window._shipGroupKeys = Object.keys(groups);
+  };
+
+  window.shCloseShipModal = function() {
+    document.getElementById('shipOverlay').classList.remove('open');
+  };
+
+  window.shConfirmShip = async function() {
+    var btn = document.getElementById('shipConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = 'Shipping\u2026';
+
+    var groups = window._shipGroups;
+    var gKeys = window._shipGroupKeys;
+    var batchItems = [];
+
+    // Build batch items
+    for (var gi = 0; gi < gKeys.length; gi++) {
+      var g = groups[gKeys[gi]];
+      var tracking = (document.getElementById('shTrack' + gi).value || '').trim();
+      var shipDate = document.getElementById('shDate' + gi).value || new Date().toISOString().split('T')[0];
+      var carrier = document.getElementById('shCarrier' + gi).value;
+
+      for (var si = 0; si < g.scopes.length; si++) {
+        var r = g.scopes[si];
+        batchItems.push({
+          lRepairKey: r.lRepairKey,
+          sShipTrackingNumber: tracking,
+          dtShipDate: shipDate,
+          lDeliveryMethodKey: carrier === 'FedEx' ? 1 : carrier === 'UPS' ? 2 : carrier === 'DHL' ? 3 : 4
+        });
+      }
+    }
+
+    // Try batch API first, fall back to individual updates
+    try {
+      await API.batchShip(batchItems);
+    } catch(e) {
+      // Fallback: update individually
+      for (var i = 0; i < batchItems.length; i++) {
+        try {
+          await API.updateRepair({
+            lRepairKey: batchItems[i].lRepairKey,
+            sShipTrackingNumber: batchItems[i].sShipTrackingNumber,
+            dtShipDate: batchItems[i].dtShipDate,
+            dtDateOut: batchItems[i].dtShipDate,
+            sRepairStatusDesc: 'Shipped',
+            lRepairStatusID: 5
+          });
+        } catch(e2) { /* continue */ }
+      }
+    }
+
+    // Update local state for all shipped items
+    for (var gi2 = 0; gi2 < gKeys.length; gi2++) {
+      var g2 = groups[gKeys[gi2]];
+      var tracking2 = (document.getElementById('shTrack' + gi2).value || '').trim();
+      var shipDate2 = document.getElementById('shDate' + gi2).value || new Date().toISOString().split('T')[0];
+      for (var si2 = 0; si2 < g2.scopes.length; si2++) {
+        var rep = g2.scopes[si2];
+        rep.sShipTrackingNumber = tracking2;
+        rep.dtShipDate = shipDate2;
+        rep.dtDateOut = shipDate2;
+        rep.sRepairStatusDesc = 'Shipped';
+        _readyRepairs = _readyRepairs.filter(function(x) { return x.lRepairKey !== rep.lRepairKey; });
+        _shippedRepairs.push(rep);
+      }
+    }
+
+    shCloseShipModal();
+    _selected.clear();
+    _updateBatchBar();
+    _updateCounts();
+
+    var total = gKeys.reduce(function(s, k) { return s + groups[k].scopes.length; }, 0);
+    if (window.TSI && window.TSI.toast) {
+      TSI.toast.success('Scopes Shipped', total + ' scope' + (total!==1?'s':'') + ' shipped to ' + gKeys.length + ' customer' + (gKeys.length!==1?'s':''), 3000);
+    }
+    shSetSegment('today', document.querySelectorAll('#segGroup .seg-btn')[1]);
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>Confirm Ship';
+  };
+
+  // -- Packing Slip (single repair from shipped table) --
+  window.shPrintSlip = function(repairKey) {
+    var r = _shippedRepairs.find(function(x) { return x.lRepairKey === repairKey; });
+    if (!r) return;
+    _openPackingSlipWindow(r.sClientName1 || '', r.sShipTrackingNumber || '', _fmtDate(r.dtShipDate), [r]);
+  };
+
+  // -- Packing Slip (group from ship modal) --
+  window.shPrintGroupSlip = function(groupIndex) {
+    var groups = window._shipGroups;
+    var gKeys = window._shipGroupKeys;
+    if (!groups || !gKeys || !gKeys[groupIndex]) return;
+    var g = groups[gKeys[groupIndex]];
+    var tracking = (document.getElementById('shTrack' + groupIndex) || {}).value || '';
+    var shipDate = (document.getElementById('shDate' + groupIndex) || {}).value || '';
+    _openPackingSlipWindow(g.client, tracking, _fmtDate(shipDate), g.scopes);
+  };
+
+  function _openPackingSlipWindow(clientName, tracking, shipDateFmt, scopes) {
+    var win = window.open('', '_blank', 'width=600,height=500');
+    var rows = scopes.map(function(s) {
+      return '<tr><td>' + _esc(s.sWorkOrderNumber) + '</td><td>' + _esc(s.sSerialNumber) + '</td><td>' +
+        _esc(s.sScopeTypeDesc) + '</td><td>' + _esc(s.sDepartmentName) + '</td></tr>';
+    }).join('');
+
+    win.document.write('<html><head><title>Packing Slip</title><style>body{font-family:Inter,sans-serif;padding:40px;font-size:12px}' +
+      'h1{font-size:18px;color:#002579}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #ddd}' +
+      'th{background:#f7f8fc;font-size:10px;text-transform:uppercase;font-weight:700;color:#002579}' +
+      '.meta{margin-top:12px;font-size:12px;color:#333}.meta strong{color:#002579}' +
+      '@media print{body{padding:20px}}</style></head><body>' +
+      '<h1>Total Scope Inc. \u2014 Packing Slip</h1>' +
+      '<div class="meta"><p><strong>Ship To:</strong> ' + _esc(clientName) + '</p>' +
+      '<p><strong>Tracking:</strong> ' + _esc(tracking) + ' &nbsp; <strong>Date:</strong> ' + shipDateFmt + '</p>' +
+      '<p><strong>Items:</strong> ' + scopes.length + ' scope' + (scopes.length !== 1 ? 's' : '') + '</p></div>' +
+      '<table><thead><tr><th>WO#</th><th>Serial#</th><th>Model</th><th>Department</th></tr></thead><tbody>' +
+      rows +
+      '</tbody></table></body></html>');
+    win.document.close();
+    win.print();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
 </body>
 </html>

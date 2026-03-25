@@ -573,6 +573,39 @@ const API = (() => {
   async function getDevTodoStatuses() { return get('/DevelopmentList/GetAllTodoStatuses'); }
   async function getDevTodoPriorities() { return get('/DevelopmentList/GetAllTodoPriorities'); }
 
+  // ── Tech Bench & Technicians ──────────────────────────
+  async function getAllTechnicians() { return get('/Technicians/GetAllTechnicians'); }
+  async function flagForRevisedQuote(repairKey) { return post('/Repair/FlagForRevisedQuote', { lRepairKey: repairKey }); }
+  async function getDashboardRepairs(svcKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
+  async function getReadyToShip(svcKey) { return get('/Repair/GetReadyToShip?plServiceLocationKey=' + (svcKey||1)); }
+  async function batchShip(items) { return post('/Repair/BatchShip', { items: items }); }
+
+  // ── Invoicing Engine ────────────────────────────────────
+  async function getReadyToInvoice(svcKey) { return get('/Invoice/GetReadyToInvoice?plServiceLocationKey=' + (svcKey||1)); }
+  async function generateInvoices(repairKeys) { return post('/Invoice/GenerateInvoices', { repairKeys: repairKeys }); }
+  async function getAllInvoices() { return get('/Invoice/GetAllInvoices'); }
+
+  // ── Pending Arrivals (6) ─────────────────────────────
+  async function getPendingArrivals(svcKey, status) {
+    var url = '/PendingArrival/GetAllPendingArrivals?plServiceLocationKey=' + (svcKey || 0);
+    if (status) url += '&psStatus=' + status;
+    return get(url);
+  }
+  async function getPendingArrivalByKey(key) { return get('/PendingArrival/GetPendingArrivalByKey?plPendingArrivalKey=' + key); }
+  async function addPendingArrival(data) { return post('/PendingArrival/AddPendingArrival', data); }
+  async function updatePendingArrival(data) { return post('/PendingArrival/UpdatePendingArrival', data); }
+  async function deletePendingArrival(key) { return del('/PendingArrival/DeletePendingArrival?plPendingArrivalKey=' + key); }
+  async function receivePendingArrival(data) { return post('/PendingArrival/ReceiveArrival', data); }
+
+  // ── Instrument Codes + Repairs (7) ───────────────────
+  async function getInstrumentCodes() { return get('/InstrumentCode/GetAll'); }
+  async function searchInstrumentCodes(query) { return get('/InstrumentCode/Search?psQuery=' + encodeURIComponent(query)); }
+  async function getInstrumentRepairs(svcKey) { return get('/InstrumentRepair/GetAll?plServiceLocationKey=' + (svcKey||0)); }
+  async function getInstrumentRepairByKey(key) { return get('/InstrumentRepair/GetByKey?plInstrRepairKey=' + key); }
+  async function addInstrumentRepair(data) { return post('/InstrumentRepair/Add', data); }
+  async function updateInstrumentRepair(data) { return post('/InstrumentRepair/Update', data); }
+  async function deleteInstrumentRepair(key) { return del('/InstrumentRepair/Delete?plInstrRepairKey=' + key); }
+
   // ═══════════════════════════════════════════════════════
   //  Public Interface
   // ═══════════════════════════════════════════════════════
@@ -689,6 +722,23 @@ const API = (() => {
     // Dev Todo
     getDevTodoList, addDevTodoItem, updateDevTodoStatus, getDevTodoDetails,
     getDevTodoStatuses, getDevTodoPriorities,
+
+    // Tech Bench
+    getAllTechnicians, flagForRevisedQuote, getDashboardRepairs,
+    getReadyToShip, batchShip,
+
+    // Invoicing Engine
+    getReadyToInvoice, generateInvoices, getAllInvoices,
+
+    // Pending Arrivals
+    getPendingArrivals, getPendingArrivalByKey,
+    addPendingArrival, updatePendingArrival, deletePendingArrival,
+    receivePendingArrival,
+
+    // Instrument Codes + Repairs
+    getInstrumentCodes, searchInstrumentCodes,
+    getInstrumentRepairs, getInstrumentRepairByKey,
+    addInstrumentRepair, updateInstrumentRepair, deleteInstrumentRepair,
 
     // Config
     BASE_URL,
