@@ -264,7 +264,21 @@
     /* ── IR Cockpit: Detail area wrapper ── */
     #irDetailArea{display:none;flex:1;flex-direction:column;overflow:hidden}
     #irDetailArea.active{display:flex}
-    .ir-detail-scroll{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+    .ir-detail-scroll{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}
+
+    /* ── D&I Count Strip (inline above items table) ── */
+    .ir-di-strip{display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F8FAFF;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;flex-wrap:wrap;flex-shrink:0}
+    .ir-di-strip .ir-di-field{display:flex;align-items:center;gap:4px;font-size:11px}
+    .ir-di-strip .ir-di-field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+    .ir-di-strip .ir-di-field input[type=number]{width:55px;height:24px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;text-align:center;outline:none}
+    .ir-di-strip .ir-di-field input[type=number]:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.1)}
+    .ir-di-strip .ir-di-field input[type=text]{width:60px;height:24px;border:1px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none}
+    .ir-di-strip .ir-di-field input[type=text]:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.1)}
+    .ir-di-strip .ir-di-disc{font-weight:700;font-size:11px;padding:2px 8px;border-radius:4px}
+    .ir-di-strip .ir-di-sep{width:1px;height:20px;background:var(--border-dk);flex-shrink:0}
+
+    /* ── Items toolbar ── */
+    .ir-items-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--neutral-50);border:1px solid var(--border);border-radius:6px 6px 0 0;border-bottom:none;flex-shrink:0}
 
     /* ── IR Cockpit: History / Audit table ── */
     .ir-audit-table{width:100%;border-collapse:collapse}
@@ -387,7 +401,7 @@
           <div class="ir-status-strip" id="ir_statusStrip2">
             <div class="ir-ss-chip"><span class="ir-ss-label">#</span> <span class="ir-ss-val" id="ir_ssBadge">--</span></div>
             <div class="ir-ss-chip"><span class="ir-ss-label">STATUS</span> <span class="ir-ss-val" id="ir_ssStatus">--</span></div>
-            <div class="ir-ss-chip"><span class="ir-ss-label">TECH</span> <span class="ir-ss-val" id="ir_ssTech">--</span></div>
+            <div class="ir-ss-chip" id="ir_ssItemsChip"><span class="ir-ss-label">ITEMS</span> <span class="ir-ss-val" id="ir_ssItems">--</span></div>
             <div style="flex:1"></div>
             <span id="ir_saveIndicator" style="font-size:10px;color:var(--muted)"></span>
           </div>
@@ -397,8 +411,8 @@
 
           <!-- Detail tabs -->
           <div class="ir-detail-tabs">
-            <div class="ir-tab active" onclick="ir_switchTab('details',this)">Order Details</div>
-            <div class="ir-tab" onclick="ir_switchTab('items',this)">Line Items</div>
+            <div class="ir-tab" onclick="ir_switchTab('items',this)">Instruments</div>
+            <div class="ir-tab" onclick="ir_switchTab('details',this)">Order Info</div>
             <div class="ir-tab" onclick="ir_switchTab('qc',this)">QC</div>
             <div class="ir-tab" onclick="ir_switchTab('outsource',this)">Outsource</div>
             <div class="ir-tab" onclick="ir_switchTab('comments',this)">Comments</div>
@@ -469,15 +483,7 @@
 
             <!-- Tab panes -->
             <!-- Order Details -->
-            <div class="ir-tab-pane active" id="ir_pane-details">
-              <div class="dc"><div class="dc-head">Order Info</div><div class="dc-body">
-                <div class="fg g2">
-                  <div class="ff"><label>Tech Assigned</label><input class="inp" id="ir_dTechAssigned" type="text" onchange="ir_markDirty()"/></div>
-                  <div class="ff"><label>Date Received</label><input class="inp" id="ir_dDateReceived" type="date" onchange="ir_markDirty()"/></div>
-                  <div class="ff"><label>Date Due</label><input class="inp" id="ir_dDateDue" type="date" onchange="ir_markDirty()"/></div>
-                  <div class="ff" id="ir_dCompletedRow" style="display:none"><label>Date Completed</label><input class="inp" id="ir_dDateCompleted" type="date" onchange="ir_markDirty()"/></div>
-                </div>
-              </div></div>
+            <div class="ir-tab-pane" id="ir_pane-details">
               <div class="dc"><div class="dc-head">Client &amp; Billing</div><div class="dc-body">
                 <div class="fg g2">
                   <div class="ff"><label>Client</label><input class="inp" id="ir_dClient" type="text" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
@@ -486,13 +492,15 @@
                   <div class="ff"><label>Quote Reference</label><input class="inp" id="ir_dQuoteRef" type="text" onchange="ir_markDirty()"/></div>
                 </div>
               </div></div>
-              <div class="dc"><div class="dc-head">D&amp;I (Decontamination &amp; Intake)</div><div class="dc-body">
+              <div class="dc"><div class="dc-head">Dates</div><div class="dc-body">
                 <div class="fg g3">
-                  <div class="ff"><label>Claimed Count</label><input class="inp" id="ir_dClaimedCount" type="number" min="0" onchange="ir_updateCountDiscrepancy();ir_markDirty()"/></div>
-                  <div class="ff"><label>Actual Count</label><input class="inp" id="ir_dActualCount" type="number" readonly style="background:#F8FAFC;color:var(--muted)"/></div>
-                  <div class="ff"><label>Discrepancy</label><div id="ir_dCountDiscrepancy" style="font-size:12px;font-weight:700;padding-top:4px">--</div></div>
-                  <div class="ff"><label>Clean on Receipt</label><div style="padding-top:2px"><input type="checkbox" id="ir_dCleanReceipt" onchange="ir_markDirty()" style="width:16px;height:16px;cursor:pointer"/></div></div>
-                  <div class="ff"><label>Rack #</label><input class="inp" id="ir_dRackNumber" type="text" onchange="ir_markDirty()"/></div>
+                  <div class="ff"><label>Date Received</label><input class="inp" id="ir_dDateReceived" type="date" onchange="ir_markDirty()"/></div>
+                  <div class="ff"><label>Date Due</label><input class="inp" id="ir_dDateDue" type="date" onchange="ir_markDirty()"/></div>
+                  <div class="ff" id="ir_dCompletedRow" style="display:none"><label>Date Completed</label><input class="inp" id="ir_dDateCompleted" type="date" onchange="ir_markDirty()"/></div>
+                </div>
+              </div></div>
+              <div class="dc"><div class="dc-head">Shipping</div><div class="dc-body">
+                <div class="fg g2">
                   <div class="ff"><label>Ship Container</label><div style="padding-top:2px"><input type="checkbox" id="ir_dShipContainer" onchange="ir_markDirty()" style="width:16px;height:16px;cursor:pointer"/></div></div>
                 </div>
               </div></div>
@@ -509,12 +517,30 @@
             </div>
 
             <!-- Line Items -->
-            <div class="ir-tab-pane" id="ir_pane-items">
-              <div class="dc" style="overflow:hidden">
-                <div class="dc-head" style="display:flex;align-items:center;justify-content:space-between">
-                  Instruments
-                  <button class="btn btn-navy" onclick="ir_addItem()" style="padding:2px 10px;font-size:10.5px;height:22px">+ Add</button>
-                </div>
+            <div class="ir-tab-pane active" id="ir_pane-items">
+              <!-- D&I Count Strip -->
+              <div class="ir-di-strip" id="ir_diStrip">
+                <span style="font-size:9px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.05em">D&amp;I</span>
+                <div class="ir-di-field"><label>Claimed</label><input type="number" id="ir_diClaimed" min="0" onchange="ir_diStripChanged()"/></div>
+                <div class="ir-di-field"><label>Actual</label><span id="ir_diActual" style="font-weight:700;color:var(--navy);min-width:20px;text-align:center">0</span></div>
+                <div class="ir-di-disc" id="ir_diDisc">--</div>
+                <div class="ir-di-sep"></div>
+                <div class="ir-di-field"><label>Clean</label><input type="checkbox" id="ir_diClean" onchange="ir_diStripChanged()" style="width:15px;height:15px;cursor:pointer"/></div>
+                <div class="ir-di-field"><label>Rack</label><input type="text" id="ir_diRack" onchange="ir_diStripChanged()" placeholder="#"/></div>
+              </div>
+
+              <!-- Items Toolbar -->
+              <div class="ir-items-toolbar">
+                <button class="btn btn-navy" onclick="ir_addItem()" style="height:30px;padding:0 14px;font-size:11.5px;font-weight:700;gap:5px">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Instrument
+                </button>
+                <div style="flex:1"></div>
+                <span style="font-size:10px;color:var(--muted)" id="ir_itemsInfo"></span>
+              </div>
+
+              <!-- Items Table -->
+              <div class="dc" style="overflow:hidden;border-radius:0 0 6px 6px;border-top:none">
                 <table class="items-table">
                   <thead>
                     <tr>
@@ -967,9 +993,9 @@
       <div class="dc"><div class="dc-head">Order Details</div><div class="dc-body">
         <div class="fg g2">
           <div class="ff"><label>Date Due</label><input class="inp" id="ir_wDateDue" type="date"/></div>
-          <div class="ff"><label>Tech Assigned</label><input class="inp" id="ir_wTech" type="text" placeholder="Optional"/></div>
-          <div class="ff"><label>Quote Reference</label><input class="inp" id="ir_wQuoteRef" type="text" placeholder="e.g. IQ-2026-001"/></div>
           <div class="ff"><label>PO Number</label><input class="inp" id="ir_wPoNumber" type="text" placeholder="Optional"/></div>
+          <div class="ff"><label>Quote Reference</label><input class="inp" id="ir_wQuoteRef" type="text" placeholder="e.g. IQ-2026-001"/></div>
+          <div class="ff"><label>Customer Says</label><input class="inp" id="ir_wClaimedDesc" type="text" placeholder="e.g. 15 graspers"/></div>
         </div>
       </div></div>
     </div>

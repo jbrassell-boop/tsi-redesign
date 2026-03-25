@@ -257,10 +257,9 @@ function ir_populateDetail() {
   // Status strip
   document.getElementById('ir_ssBadge').textContent = r.orderNum;
   document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(r.status);
-  document.getElementById('ir_ssTech').textContent = r.techAssigned || '—';
+  ir_updateItemsChip();
 
   // Populate detail form fields
-  document.getElementById('ir_dTechAssigned').value = r.techAssigned || '';
   document.getElementById('ir_dDateReceived').value = r.dateReceived || '';
   document.getElementById('ir_dDateDue').value      = r.dateDue || '';
   document.getElementById('ir_dDateCompleted').value= r.dateCompleted || '';
@@ -275,16 +274,14 @@ function ir_populateDetail() {
   var isClosing = (r.status === 'Complete' || r.status === 'Invoiced');
   compRow.style.display = isClosing ? '' : 'none';
 
-  // D&I header fields
-  var dClaimedEl = document.getElementById('ir_dClaimedCount');
-  if (dClaimedEl) dClaimedEl.value = r.claimedCount != null ? r.claimedCount : '';
-  var dActualEl = document.getElementById('ir_dActualCount');
-  if (dActualEl) dActualEl.value = (r.items || []).length;
+  // D&I strip fields (now on Instruments tab)
+  var diClaimedEl = document.getElementById('ir_diClaimed');
+  if (diClaimedEl) diClaimedEl.value = r.claimedCount != null ? r.claimedCount : '';
   ir_updateCountDiscrepancy();
-  var dCleanEl = document.getElementById('ir_dCleanReceipt');
-  if (dCleanEl) dCleanEl.checked = !!r.cleanOnReceipt;
-  var dRackEl = document.getElementById('ir_dRackNumber');
-  if (dRackEl) dRackEl.value = r.rackNumber || '';
+  var diCleanEl = document.getElementById('ir_diClean');
+  if (diCleanEl) diCleanEl.checked = !!r.cleanOnReceipt;
+  var diRackEl = document.getElementById('ir_diRack');
+  if (diRackEl) diRackEl.value = r.rackNumber || '';
   var dShipEl = document.getElementById('ir_dShipContainer');
   if (dShipEl) dShipEl.checked = !!r.shipContainer;
 
@@ -298,8 +295,8 @@ function ir_populateDetail() {
 
   ir_setSaveStatus('', '');
 
-  // Switch to first tab
-  ir_switchTab('details', document.querySelector('.ir-detail-tabs .ir-tab'));
+  // Switch to Instruments tab (first tab, the primary workspace)
+  ir_switchTab('items', document.querySelector('.ir-detail-tabs .ir-tab'));
 }
 
 function ir_updateRefStrip() {
@@ -559,17 +556,55 @@ function ir_updateDrawerTotals(r) {
 function ir_updateCountDiscrepancy() {
   var r = ir_currentRepair;
   if (!r) return;
-  var actualEl = document.getElementById('ir_dActualCount');
-  if (actualEl) actualEl.value = (r.items || []).length;
-  var discEl = document.getElementById('ir_dCountDiscrepancy');
-  if (!discEl) return;
-  var claimed = parseInt(document.getElementById('ir_dClaimedCount').value) || 0;
   var actual = (r.items || []).length;
-  if (!claimed) { discEl.textContent = '--'; discEl.style.color = 'var(--muted)'; return; }
+  // Update actual count display
+  var actualEl = document.getElementById('ir_diActual');
+  if (actualEl) actualEl.textContent = actual;
+  // Update discrepancy
+  var discEl = document.getElementById('ir_diDisc');
+  if (!discEl) return;
+  var claimedEl = document.getElementById('ir_diClaimed');
+  var claimed = claimedEl ? (parseInt(claimedEl.value) || 0) : 0;
+  if (!claimed) { discEl.textContent = '--'; discEl.style.color = 'var(--muted)'; discEl.style.background = ''; return; }
   var diff = actual - claimed;
-  if (diff === 0) { discEl.textContent = 'Match'; discEl.style.color = 'var(--green)'; }
-  else if (diff < 0) { discEl.textContent = Math.abs(diff) + ' short'; discEl.style.color = 'var(--red)'; }
-  else { discEl.textContent = diff + ' over'; discEl.style.color = 'var(--amber)'; }
+  if (diff === 0) { discEl.textContent = '\u2713 Match'; discEl.style.color = 'var(--green)'; discEl.style.background = '#F0FDF4'; }
+  else if (diff < 0) { discEl.textContent = Math.abs(diff) + ' short'; discEl.style.color = 'var(--red)'; discEl.style.background = '#FEF2F2'; }
+  else { discEl.textContent = diff + ' over'; discEl.style.color = 'var(--amber)'; discEl.style.background = '#FFFBEB'; }
+  // Also update status strip items chip
+  ir_updateItemsChip();
+}
+
+function ir_updateItemsChip() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var el = document.getElementById('ir_ssItems');
+  var chip = document.getElementById('ir_ssItemsChip');
+  if (!el) return;
+  var actual = (r.items || []).length;
+  var claimed = r.claimedCount || 0;
+  if (claimed && actual < claimed) {
+    el.textContent = actual + '/' + claimed + ' (' + (claimed - actual) + ' short)';
+    if (chip) { chip.style.background = '#FEF2F2'; chip.style.borderColor = '#FECACA'; }
+  } else if (claimed && actual === claimed) {
+    el.textContent = actual + ' Items';
+    if (chip) { chip.style.background = '#F0FDF4'; chip.style.borderColor = '#BBF7D0'; }
+  } else {
+    el.textContent = actual + ' Items';
+    if (chip) { chip.style.background = ''; chip.style.borderColor = ''; }
+  }
+}
+
+function ir_diStripChanged() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var claimedEl = document.getElementById('ir_diClaimed');
+  if (claimedEl) r.claimedCount = claimedEl.value ? parseInt(claimedEl.value) : null;
+  var cleanEl = document.getElementById('ir_diClean');
+  if (cleanEl) r.cleanOnReceipt = cleanEl.checked;
+  var rackEl = document.getElementById('ir_diRack');
+  if (rackEl) r.rackNumber = rackEl.value;
+  ir_updateCountDiscrepancy();
+  ir_markDirty();
 }
 
 // ─── Add Item Modal ──────────────────────────────────────────────────────────
@@ -585,7 +620,7 @@ function ir_addItem() {
   overlay.className = 'wiz-overlay open';
   overlay.innerHTML =
     '<div class="wiz-box" style="width:680px">' +
-      '<div class="wiz-head"><div class="wiz-title">Add Line Item</div><button class="wiz-close" onclick="ir_closeAddItem()">&#10005;</button></div>' +
+      '<div class="wiz-head"><div class="wiz-title">Add Instrument <span id="ir_aiCounter" style="font-size:11px;font-weight:400;opacity:.7"></span></div><button class="wiz-close" onclick="ir_closeAddItem()">&#10005;</button></div>' +
       '<div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px">' +
         // OS Code picker
         '<div class="dc"><div class="dc-head">Instrument Code</div><div class="dc-body">' +
@@ -630,20 +665,49 @@ function ir_addItem() {
       '</div>' +
       '<div class="wiz-footer">' +
         '<button class="btn btn-outline" onclick="ir_closeAddItem()">Cancel</button>' +
-        '<button class="btn btn-navy" onclick="ir_saveAddItem()">Add Item</button>' +
+        '<div style="flex:1"></div>' +
+        '<button class="btn btn-outline" onclick="ir_saveAddItem(false)" style="border-color:var(--navy);color:var(--navy)">Add &amp; Close</button>' +
+        '<button class="btn btn-navy" onclick="ir_saveAddItem(true)">Add &amp; Next</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
+  ir_aiAddedCount = 0;
   // Render initial code list
   ir_aiFilterCodes('');
 }
 
 var ir_aiSelectedCode = null;
+var ir_aiAddedCount = 0;
+var ir_aiLastMfr = '';
 
 function ir_closeAddItem() {
   var el = document.getElementById('ir_addItemOverlay');
   if (el) el.remove();
   ir_aiSelectedCode = null;
+  ir_aiAddedCount = 0;
+}
+
+function ir_aiClearFields() {
+  // Clear fields for next item, keep manufacturer
+  ir_aiSelectedCode = null;
+  document.getElementById('ir_aiCodeSearch').value = '';
+  document.getElementById('ir_aiCodeSelected').innerHTML = 'No code selected';
+  ir_aiFilterCodes('');
+  document.getElementById('ir_aiModel').value = '';
+  document.getElementById('ir_aiSerial').value = '';
+  document.getElementById('ir_aiQty').value = '1';
+  document.getElementById('ir_aiNotes').value = '';
+  document.getElementById('ir_aiBer').checked = false;
+  ir_aiToggleBer(false);
+  document.getElementById('ir_aiBerFindings').value = '';
+  document.querySelectorAll('#ir_aiRepairChips input[type=checkbox]').forEach(function(cb) {
+    cb.checked = false;
+    cb.parentElement.style.background = '';
+    cb.parentElement.style.borderColor = 'var(--border-dk)';
+    cb.parentElement.style.color = '';
+  });
+  // Keep mfr selection (same box = same manufacturer often)
+  document.getElementById('ir_aiCodeSearch').focus();
 }
 
 function ir_aiToggleBer(checked) {
@@ -686,7 +750,7 @@ function ir_aiPickCode(code) {
   ir_aiFilterCodes(searchEl ? searchEl.value : '');
 }
 
-function ir_saveAddItem() {
+function ir_saveAddItem(keepOpen) {
   var r = ir_currentRepair;
   if (!r) return;
   var isBer = document.getElementById('ir_aiBer').checked;
@@ -727,8 +791,19 @@ function ir_saveAddItem() {
       berFindings: isBer ? document.getElementById('ir_aiBerFindings').value : ''
     });
   }
-  ir_closeAddItem();
+
+  ir_aiAddedCount += qty;
+  ir_aiLastMfr = mfr;
   ir_markDirty(); ir_renderItemsTab(); ir_renderOutsourceTab(); ir_renderFinancialsTab(); ir_updateRefStrip();
+
+  if (keepOpen) {
+    // Update counter in modal header
+    var counter = document.getElementById('ir_aiCounter');
+    if (counter) counter.textContent = '(' + ir_aiAddedCount + ' added)';
+    ir_aiClearFields();
+  } else {
+    ir_closeAddItem();
+  }
 }
 
 function ir_removeItem(idx) {
@@ -757,15 +832,14 @@ function ir_saveRepair(silent) {
   r.dateCompleted = document.getElementById('ir_dDateCompleted').value || null;
   r.poNumber      = document.getElementById('ir_dPoNumber').value;
   r.quoteRef      = document.getElementById('ir_dQuoteRef').value;
-  r.techAssigned  = document.getElementById('ir_dTechAssigned').value;
   r.notes         = document.getElementById('ir_dNotes').value;
 
-  // D&I header fields
-  var claimedEl = document.getElementById('ir_dClaimedCount');
+  // D&I strip fields
+  var claimedEl = document.getElementById('ir_diClaimed');
   if (claimedEl) r.claimedCount = claimedEl.value ? parseInt(claimedEl.value) : null;
-  var cleanEl = document.getElementById('ir_dCleanReceipt');
+  var cleanEl = document.getElementById('ir_diClean');
   if (cleanEl) r.cleanOnReceipt = cleanEl.checked;
-  var rackEl = document.getElementById('ir_dRackNumber');
+  var rackEl = document.getElementById('ir_diRack');
   if (rackEl) r.rackNumber = rackEl.value;
   var shipEl = document.getElementById('ir_dShipContainer');
   if (shipEl) r.shipContainer = shipEl.checked;
@@ -775,7 +849,7 @@ function ir_saveRepair(silent) {
 
   // Update status strip
   document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(r.status);
-  document.getElementById('ir_ssTech').textContent = r.techAssigned || '—';
+  ir_updateItemsChip();
 
   // Persist via API
   try { API.updateInstrumentRepair(r); } catch(e) { /* silent fail for demo */ }
@@ -959,7 +1033,8 @@ function ir_wizRenderSummary() {
   document.getElementById('ir_wSummaryName').textContent = (ir_wizClient ? (ir_wizClient.sClientName1 || ir_wizClient.psClientName1 || '') : '—') + ' — ' + (ir_wizDept ? (ir_wizDept.sDepartmentName || ir_wizDept.psDepartmentName || '') : '—');
   document.getElementById('ir_wQuoteRef').value  = '';
   document.getElementById('ir_wPoNumber').value  = '';
-  document.getElementById('ir_wTech').value      = '';
+  var claimedDescEl = document.getElementById('ir_wClaimedDesc');
+  if (claimedDescEl) claimedDescEl.value = '';
   // Default due date = today + 7
   var due = new Date(); due.setDate(due.getDate() + 7);
   document.getElementById('ir_wDateDue').value   = due.toISOString().split('T')[0];
@@ -982,8 +1057,8 @@ function ir_wizCreate() {
     dateCompleted:null,
     poNumber:     document.getElementById('ir_wPoNumber').value,
     quoteRef:     document.getElementById('ir_wQuoteRef').value,
-    techAssigned: document.getElementById('ir_wTech').value,
-    notes:        '',
+    techAssigned: '',
+    notes:        document.getElementById('ir_wClaimedDesc').value ? 'Customer says: ' + document.getElementById('ir_wClaimedDesc').value : '',
     items:        [],
     comments:     [],
     history:      [{ts: now.toISOString(), action: 'Order created', from: null, to: 'Received'}]
