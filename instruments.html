@@ -298,6 +298,12 @@
     .ir-fin-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center}
     .ir-fin-val{font-size:18px;font-weight:800;color:var(--navy)}
     .ir-fin-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+
+    /* ── Inline editable cells ── */
+    .ir-editable{cursor:pointer;position:relative;transition:background .1s}
+    .ir-editable:hover{background:var(--primary-light) !important}
+    .ir-editable:hover::after{content:'✎';position:absolute;right:2px;top:2px;font-size:8px;color:var(--blue);opacity:.6}
+    .ir-editable input{height:24px !important}
   </style>
 </head>
 <body>
@@ -365,7 +371,7 @@
         </div>
 
         <!-- Collapsible List Panel -->
-        <div id="irListPanel" class="collapsed">
+        <div id="irListPanel">
           <div style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border)">
             <button id="irListToggle" onclick="ir_toggleListPanel()">
               <svg viewBox="0 0 10 10"><polyline points="2,2 5,5 2,8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -402,6 +408,11 @@
             <div class="ir-ss-chip"><span class="ir-ss-label">#</span> <span class="ir-ss-val" id="ir_ssBadge">--</span></div>
             <div class="ir-ss-chip"><span class="ir-ss-label">STATUS</span> <span class="ir-ss-val" id="ir_ssStatus">--</span></div>
             <div class="ir-ss-chip" id="ir_ssItemsChip"><span class="ir-ss-label">ITEMS</span> <span class="ir-ss-val" id="ir_ssItems">--</span></div>
+            <div class="ir-ss-chip"><span class="ir-ss-label">TECH</span>
+              <select id="ir_ssTech" onchange="ir_techChanged()" style="border:none;background:transparent;font-size:11px;font-weight:600;color:var(--navy);font-family:inherit;cursor:pointer;outline:none;padding:0;min-width:80px">
+                <option value="">— Assign —</option><option>JR</option><option>MB</option><option>KL</option><option>DP</option>
+              </select>
+            </div>
             <div style="flex:1"></div>
             <span id="ir_saveIndicator" style="font-size:10px;color:var(--muted)"></span>
           </div>
@@ -426,9 +437,13 @@
               <span class="ir-wf-label">WORKFLOW</span>
               <div class="ir-wf-phase">
                 <span class="ir-wf-phase-label">Intake</span>
-                <button class="ir-wf-pill ir-wf-locked" id="ir_wf-receive">
+                <button class="ir-wf-pill ir-wf-locked" id="ir_wf-receive" onclick="ir_wfReceive()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 2 8 11"/><polyline points="5 8 8 11 11 8"/><path d="M2.5 12v1.5h11V12"/></svg>
                   Receive
+                </button>
+                <button class="ir-wf-pill ir-wf-locked" id="ir_wf-di" onclick="ir_printDI()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  D&amp;I
                 </button>
               </div>
               <span class="ir-wf-divider"></span>
@@ -540,22 +555,27 @@
               </div>
 
               <!-- Items Table -->
-              <div class="dc" style="overflow:hidden;border-radius:0 0 6px 6px;border-top:none">
+              <div class="dc" style="overflow:hidden;border-radius:0 0 6px 6px;border-top:none;flex:1;display:flex;flex-direction:column">
+                <div style="flex:1;overflow-y:auto">
                 <table class="items-table">
                   <thead>
                     <tr>
                       <th style="width:70px">Code</th>
-                      <th style="width:140px">Instrument</th>
+                      <th style="width:100px">Mfr</th>
+                      <th style="width:90px">Model</th>
+                      <th style="width:80px">Serial</th>
                       <th>Description</th>
+                      <th style="width:50px;text-align:center">Repairs</th>
                       <th style="width:40px;text-align:center">Lvl</th>
                       <th style="width:75px;text-align:right">Amount</th>
                       <th style="width:20px"></th>
-                      <th style="width:90px">Status</th>
+                      <th style="width:80px">Status</th>
                       <th style="width:24px"></th>
                     </tr>
                   </thead>
                   <tbody id="ir_itemsBody"></tbody>
                 </table>
+                </div>
                 <div class="drawer-totals">
                   <div class="dt-chip"><div class="dt-val" id="ir_qtItems">--</div><div class="dt-lbl">Items</div></div>
                   <div class="dt-chip"><div class="dt-val s-green" id="ir_qtComplete">--</div><div class="dt-lbl">Complete</div></div>

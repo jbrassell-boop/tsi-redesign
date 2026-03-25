@@ -384,13 +384,15 @@ function ir_renderItemsTab() {
   if (!r) return;
   var tbody = document.getElementById('ir_itemsBody');
   if (!r.items || !r.items.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted);font-size:11px">No items on this order.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--muted);font-size:11px">' +
+      '<div style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:32px;height:32px;opacity:.4"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg></div>' +
+      'No instruments on this order.<br><span style="font-size:10px;color:var(--blue);cursor:pointer" onclick="ir_addItem()">+ Add Instrument</span></td></tr>';
     ir_updateDrawerTotals(r);
     ir_updateCountDiscrepancy();
     return;
   }
 
-  // Group items by category (look up from instrument codes if not on item)
+  // Group items by category
   var groups = {};
   var groupOrder = [];
   r.items.forEach(function(item, idx) {
@@ -408,21 +410,30 @@ function ir_renderItemsTab() {
   groupOrder.forEach(function(cat) {
     var items = groups[cat];
     var catTotal = items.reduce(function(s, o) { return s + (o.item.amount || 0); }, 0);
-    html += '<tr class="ir-cat-header"><td colspan="8" style="background:var(--neutral-50);padding:6px 10px;font-size:10px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--neutral-200)">' +
+    html += '<tr class="ir-cat-header"><td colspan="11" style="background:var(--neutral-50);padding:6px 10px;font-size:10px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--neutral-200)">' +
       ir_esc(cat) + ' <span style="font-weight:400;color:var(--muted)">(' + items.length + ' item' + (items.length !== 1 ? 's' : '') + ' &mdash; ' + fmtCur(catTotal) + ')</span></td></tr>';
     items.forEach(function(o) {
       var item = o.item;
       var idx = o.idx;
       var isBer = !!(item.ber);
-      var lvlLabel = item.repairLevel ? 'L' + item.repairLevel : 'N/A';
+      var lvlLabel = item.repairLevel ? 'L' + item.repairLevel : '—';
       var berBorder = isBer ? 'border-left:3px solid var(--red);' : '';
       var amtStyle = isBer ? 'text-align:right;font-weight:600;text-decoration:line-through;color:var(--muted)' : 'text-align:right;font-weight:600';
-      html += '<tr style="' + berBorder + '">' +
+      var rn = item.repairsNeeded || [];
+      if (typeof rn === 'string') rn = rn.split(',').map(function(s){return s.trim();}).filter(Boolean);
+      var repairsStr = rn.join(', ') || '—';
+      html += '<tr style="' + berBorder + '" data-idx="' + idx + '">' +
         '<td><span style="font-family:monospace;font-size:10.5px;color:var(--blue)">' + ir_esc(item.instrCode) + '</span>' +
           (isBer ? ' <span style="font-size:8px;color:var(--red);font-weight:700">BER</span>' : '') + '</td>' +
-        '<td><div style="font-size:10.5px;font-weight:600;color:var(--navy)">' + ir_esc(item.mfr) + '</div>' +
-            '<div style="font-size:9.5px;color:var(--muted)">' + ir_esc(item.model) + ' &middot; ' + ir_esc(item.serial) + '</div></td>' +
-        '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + ir_esc(item.description) + '">' + ir_esc(item.description) + '</td>' +
+        '<td class="ir-editable" data-field="mfr" data-idx="' + idx + '" onclick="ir_inlineEdit(this)" title="Click to edit">' +
+          '<span style="font-size:10.5px;font-weight:600;color:var(--navy)">' + ir_esc(item.mfr || '—') + '</span></td>' +
+        '<td class="ir-editable" data-field="model" data-idx="' + idx + '" onclick="ir_inlineEdit(this)" title="Click to edit">' +
+          '<span style="font-size:10.5px">' + ir_esc(item.model || '—') + '</span></td>' +
+        '<td class="ir-editable" data-field="serial" data-idx="' + idx + '" onclick="ir_inlineEdit(this)" title="Click to edit">' +
+          '<span style="font-size:10.5px">' + ir_esc(item.serial || 'N/A') + '</span></td>' +
+        '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + ir_esc(item.description) + '">' + ir_esc(item.description) + '</td>' +
+        '<td style="text-align:center;font-size:9.5px;color:var(--muted)" title="' + ir_esc(repairsStr) + '">' +
+          (rn.length ? rn.length : '—') + '</td>' +
         '<td style="text-align:center"><span class="ir-lvl-badge">' + lvlLabel + '</span></td>' +
         '<td style="' + amtStyle + '">' + (item.amount > 0 ? fmtCur(item.amount) : '<span style="color:var(--muted)">&mdash;</span>') + '</td>' +
         '<td>' + (item.outsource ? '<span class="ir-out-dot" title="Outsourced to: ' + ir_esc(item.outsourceVendor||'TBD') + '">&#x21A5;</span>' : '') + '</td>' +
@@ -1145,3 +1156,187 @@ function ir_qcChanged() {
   ir_markDirty();
   ir_renderQCTab();
 }
+
+// ─── Inline Edit ──────────────────────────────────────────────────────────────
+function ir_inlineEdit(td) {
+  if (td.querySelector('input')) return; // already editing
+  var r = ir_currentRepair;
+  if (!r) return;
+  var idx = parseInt(td.dataset.idx);
+  var field = td.dataset.field;
+  var item = r.items[idx];
+  if (!item) return;
+  var val = item[field] || '';
+  var origHTML = td.innerHTML;
+  td.innerHTML = '<input class="inp" type="text" value="' + ir_esc(val) + '" style="height:24px;font-size:11px;width:100%;padding:0 4px"/>';
+  var inp = td.querySelector('input');
+  inp.focus();
+  inp.select();
+  function commit() {
+    var newVal = inp.value.trim();
+    item[field] = newVal;
+    ir_markDirty();
+    ir_renderItemsTab();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') { td.innerHTML = origHTML; }
+  });
+}
+
+// ─── Tech Assignment ────────────────────────────────────────────────────────
+function ir_techChanged() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  r.techAssigned = document.getElementById('ir_ssTech').value;
+  ir_markDirty();
+}
+
+// ─── Workflow Actions ───────────────────────────────────────────────────────
+function ir_wfReceive() {
+  var r = ir_currentRepair;
+  if (!r || r.status !== 'Received') return;
+  // Switch to instruments tab to start entering items
+  ir_switchTab('items', document.querySelector('.ir-detail-tabs .ir-tab'));
+  ir_addItem();
+}
+
+// ─── D&I Print ──────────────────────────────────────────────────────────────
+function ir_printDI() {
+  var r = ir_currentRepair;
+  if (!r) return;
+  var items = r.items || [];
+  var maxRows = Math.max(items.length + 5, 25);
+  var rowsHtml = '';
+  for (var i = 0; i < maxRows; i++) {
+    var item = items[i];
+    if (item) {
+      rowsHtml += '<tr>' +
+        '<td style="text-align:center;font-size:10px">' + (i+1) + '</td>' +
+        '<td style="font-family:monospace;font-size:10px">' + ir_esc(item.instrCode || '') + '</td>' +
+        '<td style="font-size:10px">' + ir_esc(item.description || '') + '</td>' +
+        '<td style="font-size:10px">' + ir_esc(item.mfr || '') + '</td>' +
+        '<td style="font-size:10px">' + ir_esc(item.model || '') + '</td>' +
+        '<td style="font-size:10px">' + ir_esc(item.serial || '') + '</td>' +
+        '<td style="font-size:10px">' + ir_esc((Array.isArray(item.repairsNeeded) ? item.repairsNeeded : (item.repairsNeeded||'').split(',')).filter(Boolean).join(', ') || '') + '</td>' +
+        '<td style="font-size:10px">' + (item.ber ? 'BER' : '') + '</td>' +
+        '</tr>';
+    } else {
+      rowsHtml += '<tr>' +
+        '<td style="text-align:center;font-size:10px;color:#ccc">' + (i+1) + '</td>' +
+        '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>' +
+        '</tr>';
+    }
+  }
+  var cleanStatus = r.cleanOnReceipt ? '&#x2611; Clean' : '&#x2610; Unclean';
+  var html = '<!DOCTYPE html><html><head><title>D&I — ' + ir_esc(r.orderNum) + '</title>' +
+    '<style>@page{size:landscape;margin:0.4in}' +
+    'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#222;margin:0;padding:12px}' +
+    '.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a3a6b;padding-bottom:6px;margin-bottom:10px}' +
+    '.hdr-left{font-size:16px;font-weight:800;color:#1a3a6b;letter-spacing:-.3px}' +
+    '.hdr-sub{font-size:9px;color:#666;margin-top:2px}' +
+    '.hdr-right{text-align:right;font-size:10px;color:#444}' +
+    '.meta{display:flex;gap:24px;margin-bottom:10px;padding:6px 10px;background:#f0f4f8;border-radius:4px;font-size:10.5px}' +
+    '.meta b{color:#1a3a6b}' +
+    '.di-info{display:flex;gap:20px;margin-bottom:8px;font-size:10.5px}' +
+    '.di-info span{display:inline-flex;align-items:center;gap:4px}' +
+    'table{width:100%;border-collapse:collapse;margin-top:4px}' +
+    'th{background:#e8eef5;color:#1a3a6b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 6px;text-align:left;border:1px solid #c0cfe0}' +
+    'td{padding:3px 6px;border:1px solid #dde3ee;min-height:18px}' +
+    'tr:nth-child(even){background:#f8fafc}' +
+    '.sig{margin-top:16px;display:flex;gap:40px;font-size:10px}' +
+    '.sig-line{border-bottom:1px solid #333;min-width:180px;margin-left:6px}' +
+    '.form-id{font-size:8px;color:#999;margin-top:12px;text-align:right}' +
+    '</style></head><body>' +
+    '<div class="hdr">' +
+      '<div><div class="hdr-left">Total Scope, Inc.</div><div class="hdr-sub">The Leader in Medical Device Repair</div></div>' +
+      '<div class="hdr-right"><b>DECONTAMINATION &amp; INSPECTION</b><br>Instrument Repair</div>' +
+    '</div>' +
+    '<div class="meta">' +
+      '<span><b>W.O.#</b> ' + ir_esc(r.orderNum) + '</span>' +
+      '<span><b>Client</b> ' + ir_esc(r.clientName) + '</span>' +
+      '<span><b>Dept</b> ' + ir_esc(r.deptName) + '</span>' +
+      '<span><b>PO</b> ' + ir_esc(r.poNumber || '—') + '</span>' +
+      '<span><b>Received</b> ' + ir_fmtDate(r.dateReceived) + '</span>' +
+      '<span><b>Due</b> ' + ir_fmtDate(r.dateDue) + '</span>' +
+    '</div>' +
+    '<div class="di-info">' +
+      '<span><b>Claimed Count:</b> ' + (r.claimedCount || '___') + '</span>' +
+      '<span><b>Actual Count:</b> ' + (items.length || '___') + '</span>' +
+      '<span>' + cleanStatus + '</span>' +
+      '<span><b>Rack #:</b> ' + ir_esc(r.rackNumber || '___') + '</span>' +
+      '<span><b>Customer Description:</b> ' + ir_esc(r.notes || '—') + '</span>' +
+    '</div>' +
+    '<table><thead><tr>' +
+      '<th style="width:30px">#</th><th style="width:60px">Code</th><th>Description</th>' +
+      '<th style="width:80px">Mfr</th><th style="width:70px">Model</th><th style="width:70px">Serial</th>' +
+      '<th>Repairs Needed</th><th style="width:30px">BER</th>' +
+    '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+    '<div class="sig">' +
+      '<span>Tech: <span class="sig-line"></span></span>' +
+      '<span>Date: <span class="sig-line"></span></span>' +
+      '<span>Rack #: <span class="sig-line"></span></span>' +
+    '</div>' +
+    '<div class="form-id">OM05-IR Rev. 1 &mdash; Printed ' + new Date().toLocaleDateString() + '</div>' +
+    '</body></html>';
+  var w = window.open('', '_blank', 'width=1100,height=800');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function() { w.print(); }, 300);
+}
+
+// ─── Update workflow bar to include D&I pill ─────────────────────────────────
+var ir_origUpdateWorkflowBar = ir_updateWorkflowBar;
+ir_updateWorkflowBar = function() {
+  var r = ir_currentRepair;
+  if (!r) return;
+
+  var phaseMap = {
+    'Received': 1,
+    'In Progress': 2,
+    'Outsourced': 2,
+    'On Hold': 2,
+    'Complete': 3,
+    'Invoiced': 4
+  };
+  var currentPhase = phaseMap[r.status] || 1;
+
+  var pills = [
+    {id: 'ir_wf-receive',  phase: 1},
+    {id: 'ir_wf-di',       phase: 1},
+    {id: 'ir_wf-inprog',   phase: 2},
+    {id: 'ir_wf-complete', phase: 3},
+    {id: 'ir_wf-invoice',  phase: 4}
+  ];
+
+  pills.forEach(function(p) {
+    var el = document.getElementById(p.id);
+    if (!el) return;
+    el.classList.remove('ir-wf-locked', 'ir-wf-available', 'ir-wf-done');
+    if (p.phase < currentPhase) {
+      el.classList.add('ir-wf-done');
+    } else if (p.phase === currentPhase) {
+      el.classList.add('ir-wf-available');
+    } else {
+      el.classList.add('ir-wf-locked');
+    }
+  });
+
+  // D&I pill is always available (can reprint anytime)
+  var diPill = document.getElementById('ir_wf-di');
+  if (diPill && currentPhase >= 1) {
+    diPill.classList.remove('ir-wf-locked');
+    diPill.classList.add(r.items && r.items.length ? 'ir-wf-done' : 'ir-wf-available');
+  }
+};
+
+// ─── Populate tech on detail load ────────────────────────────────────────────
+var ir_origPopulateDetail = ir_populateDetail;
+ir_populateDetail = function() {
+  ir_origPopulateDetail();
+  var r = ir_currentRepair;
+  if (!r) return;
+  var techEl = document.getElementById('ir_ssTech');
+  if (techEl) techEl.value = r.techAssigned || '';
+};
