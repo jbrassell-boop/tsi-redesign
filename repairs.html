@@ -2350,6 +2350,10 @@ function buildRequisitionPdf(d) {
   const billName = billDept.sBillName1 || r.sShipName1 || d.clientName || '—';
 
   const addrY = y;
+  const colW = Math.floor(E.PAGE.contentW / 3);  // ~180pt per column
+  const col1 = m, col2 = m + colW, col3 = m + colW * 2;
+  const addrMaxW = colW - 10;  // 10pt gutter
+
   // Bill To
   y = E.addAddressBlock(doc, 'BILL TO:', {
     name:  billName,
@@ -2359,7 +2363,7 @@ function buildRequisitionPdf(d) {
     city:  billDept.sBillCity  || billDept.sMailCity || '',
     state: billDept.sBillState || billDept.sMailState || '',
     zip:   billDept.sBillZip   || billDept.sMailZip || ''
-  }, m, addrY);
+  }, col1, addrY, addrMaxW);
 
   // Ship To
   const shipY = E.addAddressBlock(doc, 'SHIP TO:', {
@@ -2370,10 +2374,10 @@ function buildRequisitionPdf(d) {
     city:  r.sShipCity  || '',
     state: r.sShipState || '',
     zip:   r.sShipZip   || ''
-  }, m + 190, addrY);
+  }, col2, addrY, addrMaxW);
 
   // Equipment info (right column)
-  const eqX = m + 380;
+  const eqX = col3;
   let eqY = addrY;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);

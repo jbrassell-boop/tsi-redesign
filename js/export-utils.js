@@ -32,6 +32,7 @@ const COLORS = {
 // 1pt = 1/72 inch. Letter = 612 x 792 pt
 const PAGE = { w: 612, h: 792, margin: 36 };
 const CONTENT_W = PAGE.w - PAGE.margin * 2; // 540
+PAGE.contentW = CONTENT_W; // expose for external callers
 
 // ── PDF Helpers ───────────────────────────────────────────────────
 
@@ -339,7 +340,8 @@ function addParagraph(doc, text, y, opts) {
  * addr: { name, addr1, addr2, city, state, zip }
  * Returns Y after block.
  */
-function addAddressBlock(doc, label, addr, x, y) {
+function addAddressBlock(doc, label, addr, x, y, maxW) {
+  maxW = maxW || 170; // default column width to prevent overflow into adjacent columns
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(COLORS.navy);
@@ -347,7 +349,7 @@ function addAddressBlock(doc, label, addr, x, y) {
   y += 12;
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(COLORS.black);
 
   var lines = [];
@@ -360,8 +362,12 @@ function addAddressBlock(doc, label, addr, x, y) {
   if (csz.trim()) lines.push(csz);
 
   lines.forEach(function(ln) {
-    doc.text(ln, x, y);
-    y += 11;
+    // splitTextToSize wraps long lines within maxW to prevent column overflow
+    var wrapped = doc.splitTextToSize(String(ln), maxW);
+    wrapped.forEach(function(wl) {
+      doc.text(wl, x, y);
+      y += 10;
+    });
   });
   return y + 4;
 }
