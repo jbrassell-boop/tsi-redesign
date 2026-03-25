@@ -43,45 +43,76 @@ function createPDF(opts) {
   return new jsPDF(o);
 }
 
-/** Add TSI branded header block. Returns Y after header. */
+// ── Logo preloading ──────────────────────────────────────────────
+
+let _logoDataUrl = null;
+let _logoNaturalW = 1;
+let _logoNaturalH = 1;
+
+/** Pre-fetch logo image and cache as data URL. Call once at page load. Returns Promise. */
+function preloadLogo(src) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      _logoNaturalW = img.naturalWidth || 1;
+      _logoNaturalH = img.naturalHeight || 1;
+      var c = document.createElement('canvas');
+      c.width = _logoNaturalW;
+      c.height = _logoNaturalH;
+      c.getContext('2d').drawImage(img, 0, 0);
+      _logoDataUrl = c.toDataURL('image/jpeg', 0.95);
+      resolve(_logoDataUrl);
+    };
+    img.onerror = function() { resolve(null); };
+    img.src = src;
+  });
+}
+
+/** Draw the logo. targetW is desired width in pt. Returns actual height drawn. */
+function addLogoImage(doc, x, y, targetW) {
+  if (!_logoDataUrl) return 0;
+  var h = targetW * (_logoNaturalH / _logoNaturalW);
+  doc.addImage(_logoDataUrl, 'JPEG', x, y, targetW, h);
+  return h;
+}
+
+/** True if logo has been preloaded. */
+function hasLogo() { return !!_logoDataUrl; }
+
+/** Add TSI branded header block (navy band). Returns Y after header. */
 function addTSIHeader(doc, formName, formNum) {
-  const m = PAGE.margin;
-  let y = m;
+  const BAND_H = 72;
+  const LOGO_W = 52;
 
-  // Company name
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(COLORS.navy);
-  doc.text(COMPANY.name, m, y + 14);
+  // Navy band full-width
+  doc.setFillColor(COLORS.navy);
+  doc.rect(0, 0, PAGE.w, BAND_H, 'F');
 
-  // Tagline + address
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(COLORS.steel);
-  doc.text(COMPANY.tagline, m, y + 26);
-  doc.text(COMPANY.fullAddr + '  |  ' + COMPANY.phone, m, y + 36);
+  // White logo left
+  if (_logoDataUrl) {
+    addLogoImage(doc, 18, (BAND_H - LOGO_W) / 2, LOGO_W);
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(COLORS.white);
+    doc.text(COMPANY.name, 18, BAND_H / 2 + 6);
+  }
 
-  // Form name (right-aligned)
+  // Form name right (white text)
   if (formName) {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(COLORS.navy);
-    doc.text(formName, PAGE.w - m, y + 14, { align: 'right' });
+    doc.setFontSize(16);
+    doc.setTextColor(COLORS.white);
+    doc.text(formName, PAGE.w - 18, 30, { align: 'right' });
     if (formNum && formNum !== '—') {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
-      doc.setTextColor(COLORS.steel);
-      doc.text('Form ' + formNum, PAGE.w - m, y + 26, { align: 'right' });
+      doc.setTextColor('#9DABE2');
+      doc.text('Form ' + formNum, PAGE.w - 18, 46, { align: 'right' });
     }
   }
 
-  // Divider line
-  y += 44;
-  doc.setDrawColor(COLORS.navy);
-  doc.setLineWidth(1.5);
-  doc.line(m, y, PAGE.w - m, y);
-
-  return y + 12;
+  return BAND_H + 14;
 }
 
 /** Add page footer with page number and ISO cert */
@@ -912,6 +943,10 @@ window.exportTableCSV = function(tableId, filename) { tableToCSV(tableId, filena
 
 // ── Public API ────────────────────────────────────────────────────
 window.TSIExport = {
+  // Logo
+  preloadLogo:      preloadLogo,
+  addLogoImage:     addLogoImage,
+  hasLogo:          hasLogo,
   // PDF
   createPDF:        createPDF,
   addTSIHeader:     addTSIHeader,

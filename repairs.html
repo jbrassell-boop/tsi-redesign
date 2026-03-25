@@ -402,14 +402,14 @@
 .wf-textarea{width:100%;min-height:100px;border:1.5px solid var(--border-dk);border-radius:4px;padding:8px 10px;font-size:11px;font-family:inherit;resize:vertical;box-sizing:border-box}
 .wf-form-footer{font-size:8px;color:var(--muted);text-align:right;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)}
 /* ── Premium Customer Estimate (.wf-est-*) ── */
-.wf-est-header{background:var(--card);color:#00257A;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;margin:-12px -16px 16px;border-bottom:2px solid #00257A}
-.wf-est-header img{height:36px;margin-right:14px}
+.wf-est-header{background:#00257A;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin:-12px -16px 16px}
+.wf-est-header img{height:56px;margin-right:14px}
 .wf-est-header-left{display:flex;align-items:center}
-.wf-est-header-left .est-company{font-size:17px;font-weight:700;letter-spacing:.2px;color:#00257A}
-.wf-est-header-left .est-tagline{font-size:9px;color:#5A6F8A;margin-top:2px}
+.wf-est-header-left .est-company{font-size:17px;font-weight:700;letter-spacing:.2px;color:#fff}
+.wf-est-header-left .est-tagline{font-size:9px;color:#9DABE2;margin-top:2px}
 .wf-est-header-right{text-align:right}
-.wf-est-header-right .est-title{font-size:20px;font-weight:300;letter-spacing:.05em;color:#00257A}
-.wf-est-header-right .est-meta{font-size:10px;color:#5A6F8A;margin-top:4px}
+.wf-est-header-right .est-title{font-size:20px;font-weight:300;letter-spacing:.05em;color:#fff}
+.wf-est-header-right .est-meta{font-size:10px;color:#9DABE2;margin-top:4px}
 .wf-est-section{padding:20px 28px}
 .wf-est-section+.wf-est-section{border-top:1px solid #D0D8E4}
 .wf-est-label{font-size:9px;font-weight:700;color:#5A6F8A;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
@@ -2309,41 +2309,40 @@ function buildRequisitionPdf(d) {
   const m = E.PAGE.margin;
   const rightX = E.PAGE.w - m;
 
-  // ── Header: "Service Estimate" (matches HTML form) ──
-  let y = m;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(E.COLORS.navy);
-  doc.text(E.COMPANY.name, m, y + 14);
+  // ── Header: full-width navy band ──
+  const BAND_H = 72;
+  const LOGO_W = 52;
+  doc.setFillColor(E.COLORS.navy);
+  doc.rect(0, 0, E.PAGE.w, BAND_H, 'F');
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(E.COLORS.steel);
-  doc.text(E.COMPANY.tagline, m, y + 26);
-  doc.text(E.COMPANY.fullAddr + '  |  ' + E.COMPANY.phone, m, y + 36);
+  // White logo left (centered vertically in band)
+  if (E.hasLogo()) {
+    const logoH = E.addLogoImage(doc, 18, (BAND_H - LOGO_W) / 2, LOGO_W);
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(E.COLORS.white);
+    doc.text(E.COMPANY.name, 18, BAND_H / 2 + 6);
+  }
 
-  // Right side: Service Estimate title
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(E.COLORS.navy);
-  doc.text('Service Estimate', rightX, y + 14, { align: 'right' });
-
+  // Right side: form title in white, meta in light blue
   const reqDate = r.dtReqSent ? E.fmtDate(r.dtReqSent) : E.fmtDate(new Date());
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(E.COLORS.white);
+  doc.text('Service Estimate', E.PAGE.w - 18, 30, { align: 'right' });
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.setTextColor(E.COLORS.steel);
-  doc.text('W.O. # ' + (r.sWorkOrderNumber || '—') + '   •   ' + reqDate, rightX, y + 26, { align: 'right' });
+  doc.setTextColor('#9DABE2');
+  doc.text('W.O. # ' + (r.sWorkOrderNumber || '—') + '   •   ' + reqDate, E.PAGE.w - 18, 46, { align: 'right' });
 
   if (form.formNum && form.formNum !== '—') {
     doc.setFontSize(8);
-    doc.text('Form ' + form.formNum, rightX, y + 36, { align: 'right' });
+    doc.text('Form ' + form.formNum, E.PAGE.w - 18, 58, { align: 'right' });
   }
 
-  y += 44;
-  doc.setDrawColor(E.COLORS.navy);
-  doc.setLineWidth(1.5);
-  doc.line(m, y, rightX, y);
-  y += 12;
+  let y = BAND_H + 14;
 
   // ── Bill To / Ship To / Equipment (3-column) ──
   const billDept = _departments.find(dept => dept.lDepartmentKey == r.lDepartmentKey) || {};
@@ -2859,8 +2858,8 @@ th{background:#f0f4fa;font-size:9px;text-transform:uppercase;font-weight:700;col
 .sig-line{border-bottom:1px solid #000;height:30px;margin-bottom:2px}
 .sig-label{font-size:8px;color:#666}
 /* Premium estimate styles */
-.wf-est-header{background:#fff;color:#00257A;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:2px solid #00257A}
-.wf-est-header img{height:32px;margin-right:12px}
+.wf-est-header{background:#00257A;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.wf-est-header img{height:56px;margin-right:12px}
 .wf-est-header-left{display:flex;align-items:center}
 .est-company{font-size:15px;font-weight:700;color:#00257A}
 .est-tagline{font-size:8px;color:#5A6F8A;margin-top:1px}
@@ -3094,7 +3093,7 @@ function populateFormDrawer(formId) {
       <!-- BRANDED HEADER BAND -->
       <div class="wf-est-header">
         <div class="wf-est-header-left">
-          <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:42px">
+          <img src="assets/logo-white.png" alt="Total Scope, Inc.">
         </div>
         <div class="wf-est-header-right">
           <div class="est-title">Service Estimate</div>
@@ -3282,7 +3281,7 @@ function populateFormDrawer(formId) {
       <!-- BRANDED HEADER BAND -->
       <div class="wf-est-header">
         <div class="wf-est-header-left">
-          <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:42px">
+          <img src="assets/logo-white.png" alt="Total Scope, Inc.">
         </div>
         <div class="wf-est-header-right">
           <div class="est-title">Invoice</div>
@@ -3448,7 +3447,7 @@ function populateFormDrawer(formId) {
     body.innerHTML = `
       <!-- HEADER -->
       <div class="wf-est-header" style="padding:14px 24px">
-        <div class="wf-est-header-left"><img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:36px"></div>
+        <div class="wf-est-header-left"><img src="assets/logo-white.png" alt="Total Scope, Inc."></div>
         <div class="wf-est-header-right"><div class="est-title" style="font-size:17px">Final Inspection Report</div><div class="est-meta">W.O. #${r.sWorkOrderNumber || '—'} &bull; ${inspDate}</div></div>
       </div>
 
@@ -7785,6 +7784,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Init ──
 async function initPage() {
   updateUserInfo();
+  if (window.TSIExport) TSIExport.preloadLogo('assets/logo-white.png');
   API.UI.showSkeleton('skRepairs', 6);
 
   // Check URL for a specific repair key (e.g. repairs.html?key=12345)
