@@ -2446,7 +2446,14 @@ function buildRequisitionPdf(d) {
   doc.text('Based on our diagnostic inspection, we recommend the following repairs:', m, y);
   y += 12;
 
-  const reqItems = d.visibleItems;
+  // Filter: hide blind/internal items and discount adjustments — keep Diagnostic Inspection
+  // Sort: Diagnostic Inspection first, rest alphabetical (matches HTML preview)
+  const allItems = d.visibleItems
+    .filter(i => !(i.code || '').startsWith('ZZ') && !(i.desc || '').includes('Discount Adjustment'));
+  const diItems = allItems.filter(i => (i.desc || '').toLowerCase().includes('diagnostic inspection'));
+  const otherItems = allItems.filter(i => !(i.desc || '').toLowerCase().includes('diagnostic inspection'))
+    .sort((a, b) => (a.desc || '').localeCompare(b.desc || ''));
+  const reqItems = [...diItems, ...otherItems];
   const rows = reqItems.map(i => {
     const name = (i.desc || '').replace(/^!+/, '').trim();
     const tag = i.uanwt === 'UA' ? 'Avoidable' : (i.uanwt === 'N' || i.uanwt === 'NWT') ? 'Normal Wear' : '';
