@@ -502,6 +502,34 @@ const MockAPI = (() => {
   route('GET', '/CreditLimit/GetAllCreditLimits', () => MockDB.getAll('creditLimits'));
   route('GET', '/DistributorName/GetAllDistributorNames', () => MockDB.getAll('distributors'));
   route('GET', '/InstrumentType/GetInstrumentTypes', () => MockDB.getAll('instrumentTypes'));
+  route('GET', '/ParentGroups/GetAll', () => [
+    {key:1,code:'CAM',name:'Camera & Video',sortOrder:1,badge:'C'},
+    {key:2,code:'CART',name:'EndoCarts',sortOrder:2,badge:'E'},
+    {key:3,code:'FLEX',name:'Flexible Endoscopes',sortOrder:3,badge:'F'},
+    {key:4,code:'INST',name:'Instruments',sortOrder:4,badge:'I'},
+    {key:5,code:'RIGID',name:'Rigid Scopes',sortOrder:5,badge:'R'},
+    {key:6,code:'SALE',name:'Product Sales',sortOrder:6,badge:'S'},
+    {key:7,code:'SITE',name:'Site Service',sortOrder:7,badge:'V'}
+  ]);
+  route('GET', '/InstrumentGroups/GetAll', () => [
+    {key:1,code:'ARTH',name:'Arthroscopy',parentCode:'INST',sortOrder:1},
+    {key:2,code:'BONE',name:'Bone & Orthopedic',parentCode:'INST',sortOrder:2},
+    {key:3,code:'CLMP',name:'Clamps & Hemostats',parentCode:'INST',sortOrder:3},
+    {key:4,code:'CNTR',name:'Containers & Trays',parentCode:'INST',sortOrder:4},
+    {key:5,code:'CURE',name:'Curettes & Elevators',parentCode:'INST',sortOrder:5},
+    {key:6,code:'DENT',name:'Dental',parentCode:'INST',sortOrder:6},
+    {key:7,code:'ELEC',name:'Electrosurgical',parentCode:'INST',sortOrder:7},
+    {key:8,code:'FORC',name:'Forceps & Graspers',parentCode:'INST',sortOrder:8},
+    {key:9,code:'LAP',name:'Laparoscopic',parentCode:'INST',sortOrder:9},
+    {key:10,code:'MICR',name:'Microsurgical',parentCode:'INST',sortOrder:10},
+    {key:11,code:'NEED',name:'Needle Holders & Drivers',parentCode:'INST',sortOrder:11},
+    {key:12,code:'OPHT',name:'Ophthalmic',parentCode:'INST',sortOrder:12},
+    {key:13,code:'PWR',name:'Power Tools',parentCode:'INST',sortOrder:13},
+    {key:14,code:'RETR',name:'Retractors & Speculums',parentCode:'INST',sortOrder:14},
+    {key:15,code:'RONG',name:'Rongeurs & Punches',parentCode:'INST',sortOrder:15},
+    {key:16,code:'SCIS',name:'Scissors',parentCode:'INST',sortOrder:16},
+    {key:17,code:'SPEC',name:'Specialty & Misc',parentCode:'INST',sortOrder:17}
+  ]);
 
   // ── Admin Reference Data (CRUD) ──────────────────────
   // Companies

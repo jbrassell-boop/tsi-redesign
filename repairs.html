@@ -2306,56 +2306,198 @@ function buildRequisitionPdf(d) {
   const doc = E.createPDF();
   const form = WORKFLOW_FORMS.find(f => f.id === 'requisition');
   const r = d.r;
-  let y = E.addTSIHeader(doc, 'Requisition for Approval', form.formNum);
+  const m = E.PAGE.margin;
+  const rightX = E.PAGE.w - m;
 
-  y = E.addKeyValueGrid(doc, [
-    ['To', d.clientName], ['W.O. #', d.wo],
-    ['Attn', r.sShipAttention || '—'], ['PO #', r.sPurchaseOrder || '—'],
-    ['Ship To', (r.sShipName1 || '') + ', ' + (r.sShipCity || '') + ' ' + (r.sShipState || '')],
-    ['Model', d.model]
-  ], y);
+  // ── Header: "Service Estimate" (matches HTML form) ──
+  let y = m;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(E.COLORS.navy);
+  doc.text(E.COMPANY.name, m, y + 14);
 
-  y = E.addSectionLabel(doc, 'Customer Complaint', y);
-  y = E.addParagraph(doc, d.complaint, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(E.COLORS.steel);
+  doc.text(E.COMPANY.tagline, m, y + 26);
+  doc.text(E.COMPANY.fullAddr + '  |  ' + E.COMPANY.phone, m, y + 36);
 
-  // Items table — exclude blind items
-  const reqItems = d.visibleItems;
-  const rows = reqItems.map(i => [i.desc, i.amount, i.approved === 'Y' ? 'Y' : 'N']);
-  y = E.addTable(doc, ['Problem / Description', 'Amount', 'Approved'], rows, y, {
-    columnStyles: { 1: { halign: 'right', cellWidth: 60 }, 2: { halign: 'center', cellWidth: 50 } }
+  // Right side: Service Estimate title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(E.COLORS.navy);
+  doc.text('Service Estimate', rightX, y + 14, { align: 'right' });
+
+  const reqDate = r.dtReqSent ? E.fmtDate(r.dtReqSent) : E.fmtDate(new Date());
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(E.COLORS.steel);
+  doc.text('W.O. # ' + (r.sWorkOrderNumber || '—') + '   •   ' + reqDate, rightX, y + 26, { align: 'right' });
+
+  if (form.formNum && form.formNum !== '—') {
+    doc.setFontSize(8);
+    doc.text('Form ' + form.formNum, rightX, y + 36, { align: 'right' });
+  }
+
+  y += 44;
+  doc.setDrawColor(E.COLORS.navy);
+  doc.setLineWidth(1.5);
+  doc.line(m, y, rightX, y);
+  y += 12;
+
+  // ── Bill To / Ship To / Equipment (3-column) ──
+  const billDept = _departments.find(dept => dept.lDepartmentKey == r.lDepartmentKey) || {};
+  const billName = billDept.sBillName1 || r.sShipName1 || d.clientName || '—';
+
+  const addrY = y;
+  // Bill To
+  y = E.addAddressBlock(doc, 'BILL TO:', {
+    name:  billName,
+    attn:  billDept.sBillName2 || '',
+    addr1: billDept.sBillAddr1 || billDept.sMailAddr1 || '',
+    addr2: billDept.sBillAddr2 || '',
+    city:  billDept.sBillCity  || billDept.sMailCity || '',
+    state: billDept.sBillState || billDept.sMailState || '',
+    zip:   billDept.sBillZip   || billDept.sMailZip || ''
+  }, m, addrY);
+
+  // Ship To
+  const shipY = E.addAddressBlock(doc, 'SHIP TO:', {
+    name:  r.sShipName1 || '—',
+    attn:  r.sShipName2 || '',
+    addr1: r.sShipAddr1 || '',
+    addr2: r.sShipAddr2 || '',
+    city:  r.sShipCity  || '',
+    state: r.sShipState || '',
+    zip:   r.sShipZip   || ''
+  }, m + 190, addrY);
+
+  // Equipment info (right column)
+  const eqX = m + 380;
+  let eqY = addrY;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(E.COLORS.navy);
+  doc.text('EQUIPMENT:', eqX, eqY);
+  eqY += 12;
+
+  const equipFields = [
+    ['Mfr', r.sManufacturer || '—'],
+    ['Model', r.sScopeTypeDesc || d.model || '—'],
+    ['Serial #', r.sSerialNumber || '—'],
+    ['P.O. #', r.sPurchaseOrder || r.sPONumber || '—'],
+    ['Terms', (() => { const pt = _paymentTerms.find(x => x.lPaymentTermsKey == r.lPaymentTermsKey); return pt ? (pt.sPaymentTerms || pt.sTermsDesc) : 'Net 30'; })()]
+  ];
+  doc.setFontSize(8);
+  equipFields.forEach(([lbl, val]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(E.COLORS.steel);
+    doc.text(lbl, eqX, eqY);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(E.COLORS.black);
+    doc.text(String(val), eqX + 48, eqY);
+    eqY += 11;
   });
 
-  // Totals
-  const totalAmount = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
-  const shipping = r.dblAmtShipping || 0;
-  y = E.checkPageBreak(doc, y, 30);
-  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(E.COLORS.black);
-  doc.text('Sub Total: ' + E.fmtCurrency(totalAmount), E.PAGE.w - E.PAGE.margin - 180, y);
-  doc.text('Shipping: ' + E.fmtCurrency(shipping), E.PAGE.w - E.PAGE.margin - 90, y);
-  y += 13;
-  doc.setFontSize(10); doc.setTextColor(E.COLORS.navy);
-  doc.text('Repair Total: ' + E.fmtCurrency(totalAmount + shipping), E.PAGE.w - E.PAGE.margin - 90, y, { align: 'right' });
-  y += 16;
+  y = Math.max(y, shipY, eqY) + 6;
 
-  // Disclaimer
-  y = E.addParagraph(doc, '* This estimate is based on our initial inspections. As the scope is disassembled further there may be additional repair items identified that may require an adjustment to this estimate.', y, { fontSize: 8, color: E.COLORS.steel });
+  // ── Customer Reported Issue ──
+  y = E.addSectionLabel(doc, 'Customer Reported Issue', y);
+  y = E.addParagraph(doc, d.complaint || 'No complaint description provided.', y);
 
-  // Non-contract cost
-  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.black);
-  doc.text('Non-Contract Cost: ' + E.fmtCurrency(r.mMaxCharge || 0), E.PAGE.margin, y);
-  y += 18;
+  // Diagnosis line (primary failure, repair level, damage assessment)
+  const reason = _repairReasons.find(x => x.lRepairReasonKey == r.lRepairReasonKey);
+  const level = _levels.find(x => x.lRepairLevelKey == r.lRepairLevelKey);
+  const hasUA = d.visibleItems.some(i => i.uanwt === 'UA');
+  const hasNWT = d.visibleItems.some(i => i.uanwt === 'N' || i.uanwt === 'NWT');
+  if (reason || level || hasUA || hasNWT) {
+    doc.setFontSize(8);
+    let dx = m;
+    if (reason) {
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(E.COLORS.steel);
+      doc.text('Primary Failure:', dx, y);
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(E.COLORS.black);
+      doc.text(reason.sRepairReason, dx + 72, y);
+      dx += 190;
+    }
+    if (level) {
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(E.COLORS.steel);
+      doc.text('Classification:', dx, y);
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(E.COLORS.black);
+      doc.text(level.sRepairLevel, dx + 65, y);
+      dx += 160;
+    }
+    if (hasUA || hasNWT) {
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(E.COLORS.steel);
+      doc.text('Damage:', dx, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(hasUA ? '#B91C1C' : '#166534');
+      doc.text(hasUA ? 'Avoidable Damage' : 'Normal Wear & Tear', dx + 40, y);
+    }
+    y += 14;
+  }
 
-  // Signature block
+  // ── Scope of Repair table ──
+  y = E.addSectionLabel(doc, 'Scope of Repair', y);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(E.COLORS.steel);
+  doc.text('Based on our diagnostic inspection, we recommend the following repairs:', m, y);
+  y += 12;
+
+  const reqItems = d.visibleItems;
+  const rows = reqItems.map(i => {
+    const name = (i.desc || '').replace(/^!+/, '').trim();
+    const tag = i.uanwt === 'UA' ? 'Avoidable' : (i.uanwt === 'N' || i.uanwt === 'NWT') ? 'Normal Wear' : '';
+    return [name, tag, i.comments || ''];
+  });
+
+  y = E.addTable(doc, ['Repair', 'Assessment', 'Notes'], rows, y, {
+    columnStyles: {
+      0: { fontStyle: 'bold', cellWidth: 220 },
+      1: { halign: 'center', cellWidth: 80, fontSize: 7 },
+      2: { fontSize: 7, fontStyle: 'italic', textColor: E.COLORS.steel }
+    }
+  });
+
+  // ── Totals ──
+  const itemSum = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
+  const subTotal = parseFloat(r.dblAmtRepair) || itemSum;
+  const shipping = parseFloat(r.dblAmtShipping) || 0;
+  const tax = parseFloat(r.dblAmtTax) || 0;
+
+  y = E.addTotalsBlock(doc, {
+    subtotal:   subTotal,
+    shipping:   shipping,
+    taxes:      [{ name: '', amt: tax }],
+    grandTotal: subTotal + shipping + tax
+  }, y);
+
+  // ── Disclaimer ──
+  y = E.checkPageBreak(doc, y, 40);
+  y = E.addParagraph(doc, 'This estimate is based on our initial inspection. As the scope is disassembled further, additional repair items may be identified that could require an adjustment to this estimate. We will contact you before proceeding with any work beyond the scope of this estimate.', y, { fontSize: 8, color: E.COLORS.steel });
+
+  // ── Approval & Footer ──
+  y = E.checkPageBreak(doc, y, 60);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(E.COLORS.black);
+  doc.text('To approve, log in to your TSI Customer Portal or contact us:', m, y);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(E.COLORS.navy);
+  doc.text('ops-tsi@totalscopeinc.com  •  800-471-2255', m, y + 12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(E.COLORS.steel);
+  doc.text('Prepared by: ' + d.repName, m, y + 24);
+  y += 38;
+
+  // Signature lines
   y = E.addSignatureBlock(doc, [
-    'Customer Approval',
+    'Signature (optional)',
     'Date',
-    'Customer Printed Name',
-    'Reviewed By: ' + d.repName
+    'Printed Name / Title'
   ], y);
-
-  // ISO line
-  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(E.COLORS.steel);
-  doc.text('An ISO Certified Company meeting the Medical Device Standards of ISO 13485', E.PAGE.w / 2, y + 8, { align: 'center' });
 
   E.savePDF(doc, pdfFileName('requisition'));
 }

@@ -49,6 +49,21 @@ function buildMap(arr, keyField) {
   return m;
 }
 
+// ── Parent group / instrument group helpers (mirrors js/parent-groups.js) ──
+const _TYPE_TO_PARENT = { F: 'FLEX', R: 'RIGID', C: 'CAM', I: 'INST' };
+const _SCOPE_CAT_OVERRIDE = { 'Cart': 'CART', 'EndoCart Part': 'CART', 'Flushing Pump': 'CART' };
+const _INST_GROUP_MAP = {
+  'Electrode': 'ELEC', 'Driver': 'NEED', 'Miscellaneous': 'SPEC',
+  'Flushing Pump': 'SPEC'
+};
+function _parentGroupFromType(sInstrumentType, sScopeTypeCategory) {
+  if (_SCOPE_CAT_OVERRIDE[sScopeTypeCategory]) return _SCOPE_CAT_OVERRIDE[sScopeTypeCategory];
+  return _TYPE_TO_PARENT[sInstrumentType] || 'INST';
+}
+function _instGroupFromCat(sScopeTypeCategory) {
+  return _INST_GROUP_MAP[sScopeTypeCategory] || 'SPEC';
+}
+
 const svcLocMap = buildMap(seed.serviceLocations, 'lServiceLocationKey');
 const mfrMap = buildMap(seed.manufacturers, 'lManufacturerKey');
 const scopeCatMap = buildMap(seed.scopeCategories, 'lScopeCategoryKey');
@@ -99,8 +114,12 @@ if (seed.scopeTypes) {
     st.sScopeCategory = lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '';
     st.sScopeTypeCategory = lk(scopeTypeCatMap, st.lScopeTypeCatKey, 'sScopeTypeCategory') || '';
     st.sRigidOrFlexible = lk(scopeTypeCatMap, st.lScopeTypeCatKey, 'sInstrumentType') || '';
+
+    // Compute parent group + instrument group (3-tier hierarchy)
+    st.sParentGroup = _parentGroupFromType(st.sRigidOrFlexible, st.sScopeTypeCategory);
+    st.sInstrumentGroup = (st.sParentGroup === 'INST') ? _instGroupFromCat(st.sScopeTypeCategory) : '';
   });
-  console.log('  scopeTypes: +sManufacturerName, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible');
+  console.log('  scopeTypes: +sManufacturerName, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible, +sParentGroup, +sInstrumentGroup');
 }
 
 // --- Enrich clients ---
@@ -155,10 +174,12 @@ if (seed.scopes) {
     s.sScopeCategory = st ? (lk(scopeCatMap, st.lScopeCategoryKey, 'sScopeCategory') || '') : '';
     s.sScopeTypeCategory = st ? st.sScopeTypeCategory : '';
     s.sRigidOrFlexible = st ? st.sRigidOrFlexible : '';
+    s.sParentGroup = st ? st.sParentGroup : '';
+    s.sInstrumentGroup = st ? st.sInstrumentGroup : '';
     s.sDepartmentName = dept ? dept.sDepartmentName : '';
     s.sClientName1 = client ? client.sClientName1 : '';
   });
-  console.log('  scopes: +sScopeTypeDesc, +sManufacturer, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible, +sDepartmentName, +sClientName1');
+  console.log('  scopes: +sScopeTypeDesc, +sManufacturer, +sScopeCategory, +sScopeTypeCategory, +sRigidOrFlexible, +sParentGroup, +sInstrumentGroup, +sDepartmentName, +sClientName1');
 }
 
 // --- Build invoice-by-repair lookup for status derivation ---

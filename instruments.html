@@ -8,6 +8,15 @@
   <style>
     .page-body{overflow:hidden;display:flex;flex-direction:column}
 
+    /* ── Parent / Instrument Group filter bars ── */
+    .ic-group-bar{display:flex;flex-wrap:wrap;gap:2px;padding:6px 12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#C0D8ED,#DCEAF5)}
+    .ic-group-bar .seg-btn{border-radius:var(--radius-sm);border:1px solid transparent;padding:4px 10px;font-size:10.5px}
+    .ic-group-bar .seg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .ic-group-bar .seg-btn:not(.active){background:rgba(255,255,255,.6);color:var(--navy)}
+    .ic-group-bar .seg-btn:not(.active):hover{background:rgba(255,255,255,.9)}
+    .ic-sub-bar{background:linear-gradient(180deg,#DCEAF5,#EBF2F9);padding:4px 12px}
+    .ic-sub-bar .seg-btn.seg-sm{padding:3px 8px;font-size:9.5px}
+
     /* ── Catalog filter controls ── */
     .sel{height:26px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);background:var(--card);cursor:pointer;outline:none;transition:border-color .15s}
     .sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
@@ -797,6 +806,13 @@
            PANE 3 — INSTRUMENT CATALOG
       ════════════════════════════════════════════════════════ -->
       <div class="page-pane" id="ppane-catalog">
+        <!-- Parent Group filter bar (built dynamically by ic_buildParentBar) -->
+        <div class="ic-group-bar" id="ic_parentBar"></div>
+        <!-- Instrument Group sub-filter (only visible when parent = INST) -->
+        <div class="ic-group-bar ic-sub-bar" id="ic_instGroupBar" style="display:none">
+          <button class="seg-btn seg-sm active" onclick="ic_setInstGroup(null, this)">All Instruments</button>
+        </div>
+
         <!-- Stat strip -->
         <div class="stat-strip">
           <div class="stat-chip">
@@ -852,6 +868,8 @@
               <div><div class="ic-detail-lbl">Model</div><div class="ic-detail-val" id="ic_dModel">—</div></div>
               <div><div class="ic-detail-lbl">Status</div><div class="ic-detail-val" id="ic_dStatus">—</div></div>
               <div><div class="ic-detail-lbl">Repairs Needed</div><div class="ic-detail-val" id="ic_dRepairs">—</div></div>
+              <div><div class="ic-detail-lbl">Parent Group</div><div class="ic-detail-val" id="ic_dParentGroup">—</div></div>
+              <div><div class="ic-detail-lbl">Instrument Group</div><div class="ic-detail-val" id="ic_dInstGroup">—</div></div>
               <div><div class="ic-detail-lbl">Scope Type Key</div><div class="ic-detail-val" id="ic_dScopeKey">—</div></div>
               <div><div class="ic-detail-lbl">Used (365d)</div><div class="ic-detail-val" id="ic_dUsedCount">—</div></div>
             </div>
@@ -1177,6 +1195,7 @@ if(API && API.UI) API.UI.hideSkeleton('skInstruments');
   }, 200);
 })();
 </script>
+<script src="js/parent-groups.js"></script>
 <script src="js/instrument-catalog-data.js"></script>
 <script src="js/instrument-catalog-tab.js"></script>
 <script>

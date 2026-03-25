@@ -2,15 +2,19 @@
    Part of instruments.html — 3-column cascade: Category → Manufacturer/Models → Detail
    All functions/variables prefixed with ic_ to avoid namespace collisions.
    Entry point: ic_init() — called lazily when tab first clicked.
-   Depends on: js/instrument-catalog-data.js (IC_DATA, IC_CATEGORIES, IC_MANUFACTURERS)
+   Depends on: js/parent-groups.js, js/instrument-catalog-data.js (IC_DATA, IC_CATEGORIES, IC_MANUFACTURERS)
 */
 
-var ic_allItems    = [];
-var ic_byCat       = {};   // category → [items]
-var ic_activeCat   = null;
-var ic_mfrSearch   = '';
-var ic_selectedKey = null;
-var ic_inited      = false;
+var ic_allItems       = [];
+var ic_byCat          = {};   // category → [items]
+var ic_catParent      = {};   // category → parent group code
+var ic_catInstGroup   = {};   // category → instrument group code (only for INST parent)
+var ic_activeCat      = null;
+var ic_mfrSearch      = '';
+var ic_selectedKey    = null;
+var ic_inited         = false;
+var ic_activeParent   = null;  // null = All
+var ic_activeInstGrp  = null;  // null = All Instruments
 
 var IC = {KEY:0, CAT:1, CODE:2, REPAIRS:3, STATUS:4, MFR_KEY:5, MFR:6, MDL_KEY:7, MDL:8, MAX:9, HPG:10, VIZ:11, SS:12, USED:13};
 
@@ -44,8 +48,124 @@ function ic_init() {
     ic_byCat[item.category].push(item);
   });
 
+  // Classify each category → parent group + instrument group
+  if (typeof getFullHierarchy === 'function') {
+    IC_CATEGORIES.forEach(function(cat) {
+      // All IC_CATEGORIES items are instrument-type (I) by definition
+      var h = getFullHierarchy('I', cat);
+      ic_catParent[cat] = h.parentCode;
+      if (h.groupCode) ic_catInstGroup[cat] = h.groupCode;
+    });
+  }
+
+  // Build filter bars dynamically (only show groups with items)
+  ic_buildParentBar();
+  ic_buildInstGroupBar();
+
   ic_renderCategoryList();
   ic_updateStats();
+}
+
+// ─── Build parent group bar dynamically (only groups with items) ───
+function ic_buildParentBar() {
+  var bar = document.getElementById('ic_parentBar');
+  if (!bar || typeof PARENT_GROUPS === 'undefined') return;
+
+  // Count items per parent group
+  var pgCounts = {};
+  var total = 0;
+  IC_CATEGORIES.forEach(function(cat) {
+    var p = ic_catParent[cat] || 'INST';
+    var cnt = ic_byCat[cat] ? ic_byCat[cat].length : 0;
+    pgCounts[p] = (pgCounts[p] || 0) + cnt;
+    total += cnt;
+  });
+
+  var html = '<button class="seg-btn active" onclick="ic_setParent(null, this)">All <span style="font-size:9px;opacity:.6">(' + total.toLocaleString() + ')</span></button>';
+  PARENT_GROUPS.forEach(function(g) {
+    var cnt = pgCounts[g.code] || 0;
+    if (cnt === 0) return; // Hide empty groups
+    html += '<button class="seg-btn" onclick="ic_setParent(\'' + g.code + '\', this)">' +
+      g.name + ' <span style="font-size:9px;opacity:.6">(' + cnt.toLocaleString() + ')</span></button>';
+  });
+  bar.innerHTML = html;
+}
+
+// ─── Build instrument group pills dynamically ───
+function ic_buildInstGroupBar() {
+  var bar = document.getElementById('ic_instGroupBar');
+  if (!bar || typeof INSTRUMENT_GROUPS === 'undefined') return;
+
+  // Count items per instrument group
+  var grpCounts = {};
+  IC_CATEGORIES.forEach(function(cat) {
+    var grp = ic_catInstGroup[cat];
+    if (!grp) return;
+    var count = ic_byCat[cat] ? ic_byCat[cat].length : 0;
+    grpCounts[grp] = (grpCounts[grp] || 0) + count;
+  });
+
+  var html = '<button class="seg-btn seg-sm active" onclick="ic_setInstGroup(null, this)">All</button>';
+  INSTRUMENT_GROUPS.forEach(function(g) {
+    var cnt = grpCounts[g.code] || 0;
+    html += '<button class="seg-btn seg-sm" onclick="ic_setInstGroup(\'' + g.code + '\', this)">' +
+      g.name + ' <span style="font-size:9px;opacity:.6">(' + cnt + ')</span></button>';
+  });
+  bar.innerHTML = html;
+}
+
+// ─── Parent Group Filter ───
+function ic_setParent(code, el) {
+  ic_activeParent = code;
+  ic_activeInstGrp = null;
+  ic_activeCat = null;
+
+  // Highlight active button
+  document.querySelectorAll('#ic_parentBar .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+
+  // Show/hide instrument group sub-bar
+  var subBar = document.getElementById('ic_instGroupBar');
+  if (subBar) {
+    subBar.style.display = (code === 'INST') ? '' : 'none';
+    // Reset sub-bar active state
+    subBar.querySelectorAll('.seg-btn').forEach(function(b, i) { b.classList.toggle('active', i === 0); });
+  }
+
+  // Clear search, re-render
+  var searchEl = document.getElementById('ic_catSearch');
+  if (searchEl) searchEl.value = '';
+  ic_renderCategoryList();
+  ic_updateStats();
+
+  // Clear col 2 + 3
+  ic_clearMfrArea();
+  ic_closeDetail();
+}
+
+// ─── Instrument Group Sub-Filter ───
+function ic_setInstGroup(code, el) {
+  ic_activeInstGrp = code;
+  ic_activeCat = null;
+
+  var bar = document.getElementById('ic_instGroupBar');
+  if (bar) bar.querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+
+  var searchEl = document.getElementById('ic_catSearch');
+  if (searchEl) searchEl.value = '';
+  ic_renderCategoryList();
+  ic_updateStats();
+
+  ic_clearMfrArea();
+  ic_closeDetail();
+}
+
+function ic_clearMfrArea() {
+  var area = document.getElementById('ic_mfrModelArea');
+  if (area) area.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:11px">Select a category to see manufacturers &amp; models</div>';
+  var head = document.getElementById('ic_mfrHead');
+  if (head) head.textContent = 'Select a category';
 }
 
 // ─── Category List (Col 1) ───
@@ -55,6 +175,17 @@ function ic_renderCategoryList(filter) {
   var search = (filter || '').toLowerCase();
 
   var cats = IC_CATEGORIES.filter(function(c) {
+    // Parent group filter
+    if (ic_activeParent) {
+      var catPar = ic_catParent[c] || 'INST';
+      if (catPar !== ic_activeParent) return false;
+    }
+    // Instrument group sub-filter
+    if (ic_activeInstGrp) {
+      var catGrp = ic_catInstGroup[c] || 'SPEC';
+      if (catGrp !== ic_activeInstGrp) return false;
+    }
+
     if (!search) return true;
     // Match category name
     if (c.toLowerCase().indexOf(search) !== -1) return true;
@@ -215,15 +346,38 @@ function ic_selectModel(scopeTypeKey, modelKey, el) {
   document.getElementById('ic_dSsMax').textContent = ic_fmtCharge(item.ssMax);
   document.getElementById('ic_dUsedCount').textContent = item.usedCount || 0;
   document.getElementById('ic_dScopeKey').textContent = item.scopeTypeKey || '—';
+
+  // Show parent group + instrument group in detail
+  var h = (typeof getFullHierarchy === 'function') ? getFullHierarchy('I', item.category) : null;
+  var pgEl = document.getElementById('ic_dParentGroup');
+  var igEl = document.getElementById('ic_dInstGroup');
+  if (pgEl) pgEl.textContent = h ? h.parentName : '—';
+  if (igEl) igEl.textContent = h ? (h.groupName || '—') : '—';
 }
 
 // ─── Stats ───
 function ic_updateStats() {
-  var total = ic_allItems.length;
+  // Filtered items based on active parent + inst group
+  var filtered = ic_allItems;
+  if (ic_activeParent || ic_activeInstGrp) {
+    filtered = ic_allItems.filter(function(it) {
+      if (ic_activeParent) {
+        var p = ic_catParent[it.category] || 'INST';
+        if (p !== ic_activeParent) return false;
+      }
+      if (ic_activeInstGrp) {
+        var g = ic_catInstGroup[it.category] || 'SPEC';
+        if (g !== ic_activeInstGrp) return false;
+      }
+      return true;
+    });
+  }
+
+  var total = filtered.length;
   var cats = {};
   var mfrs = {};
   var totalUsed = 0;
-  ic_allItems.forEach(function(it) {
+  filtered.forEach(function(it) {
     cats[it.category] = true;
     if (it.manufacturer) mfrs[it.manufacturer] = true;
     totalUsed += (it.usedCount || 0);
@@ -236,7 +390,7 @@ function ic_updateStats() {
   if (el('ic_ssUsed'))   el('ic_ssUsed').textContent = totalUsed.toLocaleString();
 
   var tabCount = document.getElementById('ic_tabCount');
-  if (tabCount) tabCount.textContent = total.toLocaleString();
+  if (tabCount) tabCount.textContent = ic_allItems.length.toLocaleString();
 }
 
 // ─── Helpers ───
