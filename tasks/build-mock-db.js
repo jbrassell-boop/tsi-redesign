@@ -53,8 +53,31 @@ function buildMap(arr, keyField) {
 const _TYPE_TO_PARENT = { F: 'FLEX', R: 'RIGID', C: 'CAM', I: 'INST' };
 const _SCOPE_CAT_OVERRIDE = { 'Cart': 'CART', 'EndoCart Part': 'CART', 'Flushing Pump': 'CART' };
 const _INST_GROUP_MAP = {
-  'Electrode': 'ELEC', 'Driver': 'NEED', 'Miscellaneous': 'SPEC',
-  'Flushing Pump': 'SPEC'
+  // Mirrors key entries from js/parent-groups.js CATEGORY_GROUP_MAP
+  'Arthroscopy Grasper': 'ARTH', 'Shaver': 'ARTH',
+  'Awls': 'BONE', 'Bone Tamp': 'BONE', 'File': 'BONE', 'Mallet': 'BONE',
+  'Osteotome': 'BONE', 'Rasp': 'BONE', 'Reamers': 'BONE',
+  'Clamp': 'CLMP', 'Holder/Clamp': 'CLMP', 'Skin Hook': 'CLMP',
+  'Containers/Trays': 'CNTR', 'Tray': 'CNTR', 'Pans/Genesis': 'CNTR',
+  'Curette': 'CURE', 'Elevator': 'CURE',
+  'Dental': 'DENT',
+  'Bipolar': 'ELEC', 'Electrode': 'ELEC', 'Insulation': 'ELEC',
+  'Kleppinger': 'ELEC', 'Monopolar Cable': 'ELEC',
+  'Forceps': 'FORC', 'Graspers': 'FORC', 'Thumb Forceps': 'FORC',
+  'Biopsy Forceps': 'FORC', 'Tissue Grasper': 'FORC',
+  'Cannula': 'LAP', 'Clip Applier': 'LAP', 'Laparoscopic': 'LAP',
+  'Trocar': 'LAP', 'Verres Needle': 'LAP',
+  'Micro Instruments': 'MICR', 'Micro Knife': 'MICR',
+  'Driver': 'NEED', 'Needle': 'NEED', 'Needle Holder': 'NEED',
+  'Wire Cutter': 'NEED', 'Guide Wire': 'NEED',
+  'Opthalmic Instruments': 'OPHT', 'Phaco Handpiece': 'OPHT',
+  'Handpiece': 'PWR', 'Oscillating Saw': 'PWR', 'Reciprocating Saw': 'PWR',
+  'Rotary Drill': 'PWR', 'Sagittal Saw': 'PWR', 'Dermatome': 'PWR',
+  'Retractors / Speculum': 'RETR', 'Speculum': 'RETR', 'Mouth Gag': 'RETR',
+  'Bookwalter': 'RETR', 'Greenberg': 'RETR',
+  'Rongeur': 'RONG', 'Punch': 'RONG', 'Pin Cutter': 'RONG',
+  'Scissors': 'SCIS', 'Suture Cutter': 'SCIS',
+  'Miscellaneous': 'SPEC', 'Flushing Pump': 'SPEC'
 };
 function _parentGroupFromType(sInstrumentType, sScopeTypeCategory) {
   if (_SCOPE_CAT_OVERRIDE[sScopeTypeCategory]) return _SCOPE_CAT_OVERRIDE[sScopeTypeCategory];

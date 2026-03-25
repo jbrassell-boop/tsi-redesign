@@ -531,6 +531,21 @@ const MockAPI = (() => {
     {key:17,code:'SPEC',name:'Specialty & Misc',parentCode:'INST',sortOrder:17}
   ]);
 
+  // ── Repair Types & Levels (from parent-groups.js) ────
+  route('GET', '/RepairTypes/GetByGroup', (params) => {
+    var pc = params.parentCode || 'INST';
+    var gc = params.groupCode || '';
+    if (typeof getRepairTypes === 'function') return getRepairTypes(pc, gc);
+    return [];
+  });
+
+  route('GET', '/RepairLevels/GetByParent', (params) => {
+    var pc = params.parentCode || 'FLEX';
+    var it = params.instrumentType || '';
+    if (typeof getRepairLevels === 'function') return getRepairLevels(pc, it);
+    return [];
+  });
+
   // ── Admin Reference Data (CRUD) ──────────────────────
   // Companies
   route('GET', '/Company/GetAllCompanies', () => MockDB.getAll('companies'));
