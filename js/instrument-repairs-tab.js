@@ -736,12 +736,32 @@ function ir_aiFilterCodes(q) {
            (c.sDescription || '').toLowerCase().includes(filter) ||
            (c.sCategory || '').toLowerCase().includes(filter);
   }).slice(0, 40);
-  if (!matches.length) {
+
+  // Prepend catalog model matches when user types a model-like term
+  var catalogHtml = '';
+  if (filter.length >= 2 && typeof ic_findByModel === 'function') {
+    var catMatches = ic_findByModel(filter).slice(0, 8);
+    if (catMatches.length) {
+      catalogHtml = '<div style="padding:3px 10px;font-size:9px;font-weight:700;color:var(--navy);background:var(--neutral-50);border-bottom:1px solid var(--border);letter-spacing:.04em;text-transform:uppercase">From Catalog</div>' +
+        catMatches.map(function(it) {
+          var isSel = ir_aiSelectedCode && ir_aiSelectedCode._scopeTypeKey === it.scopeTypeKey;
+          var selStyle = isSel ? 'background:var(--primary-light);border-left:2px solid var(--navy);' : '';
+          return '<div style="padding:5px 10px;font-size:10.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;' + selStyle + '" onclick="ir_aiPickCatalogItem(' + it.scopeTypeKey + ')">' +
+            '<span style="font-family:monospace;font-weight:700;color:var(--blue);min-width:60px">' + ir_esc(it.itemCode) + '</span>' +
+            '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + ir_esc(it.model) + '</span>' +
+            '<span style="font-size:9px;color:var(--muted)">' + ir_esc(it.manufacturer) + '</span>' +
+            '<span style="font-size:10px;font-weight:600;min-width:50px;text-align:right">' + (it.maxCharge ? fmtCur(it.maxCharge) : '--') + '</span>' +
+            '</div>';
+        }).join('');
+    }
+  }
+
+  if (!matches.length && !catalogHtml) {
     el.innerHTML = '<div style="padding:8px 10px;font-size:10px;color:var(--muted)">No codes found</div>';
     return;
   }
-  el.innerHTML = matches.map(function(c) {
-    var selStyle = (ir_aiSelectedCode && ir_aiSelectedCode.sCode === c.sCode) ? 'background:var(--primary-light);border-left:2px solid var(--navy);' : '';
+  el.innerHTML = catalogHtml + matches.map(function(c) {
+    var selStyle = (ir_aiSelectedCode && ir_aiSelectedCode.sCode === c.sCode && !ir_aiSelectedCode._scopeTypeKey) ? 'background:var(--primary-light);border-left:2px solid var(--navy);' : '';
     return '<div style="padding:5px 10px;font-size:10.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;' + selStyle + '" onclick="ir_aiPickCode(\'' + ir_esc(c.sCode) + '\')">' +
       '<span style="font-family:monospace;font-weight:700;color:var(--blue);min-width:60px">' + ir_esc(c.sCode) + '</span>' +
       '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + ir_esc(c.sDescription || '') + '</span>' +
@@ -749,6 +769,46 @@ function ir_aiFilterCodes(q) {
       '<span style="font-size:10px;font-weight:600;min-width:50px;text-align:right">' + ((c.nBaseRate || c.dMaxCharge) ? fmtCur(c.nBaseRate || c.dMaxCharge) : '--') + '</span>' +
       '</div>';
   }).join('');
+}
+
+// Pick a catalog item from the model search results — auto-fills mfr + model fields
+function ir_aiPickCatalogItem(scopeTypeKey) {
+  if (typeof ic_allItems === 'undefined') return;
+  var it = ic_allItems.find(function(x) { return x.scopeTypeKey === scopeTypeKey; });
+  if (!it) return;
+
+  ir_aiSelectedCode = { sCode: it.itemCode, sDescription: it.model, sCategory: it.category, dMaxCharge: it.maxCharge, _scopeTypeKey: it.scopeTypeKey };
+
+  // Auto-fill manufacturer: use dropdown if known, else custom input
+  var knownMfrs = ['gSource', 'V. Mueller', 'Storz', 'Miltex', 'Generic'];
+  var mfrSel = document.getElementById('ir_aiMfr');
+  var mfrCustomEl = document.getElementById('ir_aiMfrCustom');
+  if (mfrSel && mfrCustomEl) {
+    if (knownMfrs.indexOf(it.manufacturer) !== -1) {
+      mfrSel.value = it.manufacturer;
+      mfrSel.style.display = '';
+      mfrCustomEl.style.display = 'none';
+    } else {
+      mfrSel.style.display = 'none';
+      mfrCustomEl.style.display = '';
+      mfrCustomEl.value = it.manufacturer;
+    }
+  }
+
+  // Auto-fill model
+  var modelEl = document.getElementById('ir_aiModel');
+  if (modelEl) modelEl.value = it.model;
+
+  // Update selected display
+  var selEl = document.getElementById('ir_aiCodeSelected');
+  if (selEl) selEl.innerHTML =
+    '<span style="font-weight:700;color:var(--navy)">' + ir_esc(it.itemCode) + '</span>' +
+    ' &mdash; ' + ir_esc(it.model) +
+    ' <span style="color:var(--muted)">(' + ir_esc(it.category) + ') &bull; ' + ir_esc(it.manufacturer) + '</span>';
+
+  // Re-render code list to show highlight
+  var searchEl = document.getElementById('ir_aiCodeSearch');
+  ir_aiFilterCodes(searchEl ? searchEl.value : '');
 }
 
 function ir_aiPickCode(code) {
@@ -1054,7 +1114,10 @@ function ir_wizRenderSummary() {
 function ir_wizCreate() {
   if (!ir_wizClient || !ir_wizDept) return;
   var now = new Date();
-  var num = 'IR-2026-0' + String(ir_nextOrderNum++).padStart(2,'0');
+  var yy  = String(now.getFullYear()).slice(-2);
+  var doy = Math.ceil((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  var prefix = (ir_wizDept && ir_wizDept.lServiceLocationKey === 2) ? 'SR' : 'NR';
+  var num = prefix + yy + String(doy).padStart(3,'0') + String(ir_nextOrderNum++).padStart(4,'0');
   var newR = {
     id:          Date.now(),
     orderNum:    num,

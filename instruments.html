@@ -22,8 +22,14 @@
     .sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
     .search-inp{height:28px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 10px;font-size:11px;font-family:inherit;outline:none;background:var(--card);transition:border-color .15s;width:100%}
     .search-inp:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
-    /* Catalog 3-column layout */
+    /* Catalog 4-column layout */
     .ic-col-head{background:var(--neutral-50);padding:8px 12px;font-size:11px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--border)}
+    .ic-grp-row{padding:7px 10px 7px 12px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:background .1s;color:var(--text)}
+    .ic-grp-row:hover{background:var(--bg)}
+    .ic-grp-row.active{background:var(--primary-light);font-weight:600;color:var(--navy);border-left:3px solid var(--navy);padding-left:9px}
+    .ic-grp-count{font-size:9.5px;color:var(--muted);font-weight:400;margin-left:4px}
+    .ic-gs-row{display:grid;grid-template-columns:minmax(100px,1.5fr) 1fr 1fr 1fr auto;gap:0 10px;padding:6px 12px;cursor:pointer;border-bottom:1px solid var(--border);align-items:center;font-size:10.5px}
+    .ic-gs-row:hover{background:var(--bg)}
     .ic-cat-item{padding:6px 12px;font-size:11px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:background .1s}
     .ic-cat-item:hover{background:var(--bg)}
     .ic-cat-item.active{background:var(--primary-light);font-weight:600;color:var(--navy);border-left:2px solid var(--navy);padding-left:10px}
@@ -806,13 +812,6 @@
            PANE 3 — INSTRUMENT CATALOG
       ════════════════════════════════════════════════════════ -->
       <div class="page-pane" id="ppane-catalog">
-        <!-- Parent Group filter bar (built dynamically by ic_buildParentBar) -->
-        <div class="ic-group-bar" id="ic_parentBar"></div>
-        <!-- Instrument Group sub-filter (only visible when parent = INST) -->
-        <div class="ic-group-bar ic-sub-bar" id="ic_instGroupBar" style="display:none">
-          <button class="seg-btn seg-sm active" onclick="ic_setInstGroup(null, this)">All Instruments</button>
-        </div>
-
         <!-- Stat strip -->
         <div class="stat-strip">
           <div class="stat-chip">
@@ -833,11 +832,26 @@
           </div>
         </div>
 
-        <!-- 2-column cascade + overlay detail -->
+        <!-- Global model/code/manufacturer search -->
+        <div style="padding:6px 12px;border-bottom:1px solid var(--border);position:relative">
+          <input class="search-inp" id="ic_globalSearch" placeholder="&#128269; Search by model number, item code, or manufacturer..."
+            oninput="ic_onGlobalSearch(this.value)"
+            onblur="setTimeout(function(){var r=document.getElementById('ic_globalResults');if(r)r.style.display='none'},200)"
+            style="width:100%;font-size:11px;height:26px"/>
+          <div id="ic_globalResults" style="display:none;position:absolute;left:12px;right:12px;top:calc(100% - 2px);z-index:20;background:var(--card);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);box-shadow:var(--shadow-card);max-height:300px;overflow-y:auto"></div>
+        </div>
+
+        <!-- 3-column cascade + overlay detail -->
         <div class="ic-cascade" style="display:flex;flex:1;overflow:hidden">
 
+          <!-- COL 0: Instrument Group list -->
+          <div style="width:160px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column">
+            <div class="ic-col-head">Groups</div>
+            <div id="ic_instGroupBar" style="flex:1;overflow-y:auto"></div>
+          </div>
+
           <!-- COL 1: Category list -->
-          <div style="width:200px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column">
+          <div style="width:190px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column">
             <div class="ic-col-head">Categories <span id="ic_catCount" style="font-weight:400;color:var(--muted)"></span></div>
             <div style="padding:4px 6px;border-bottom:1px solid var(--border)">
               <input class="search-inp" id="ic_catSearch" placeholder="Filter categories..." oninput="ic_filterCategories()" style="height:24px;font-size:10px"/>

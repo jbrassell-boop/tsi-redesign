@@ -51,15 +51,25 @@ function ic_init() {
   // Classify each category → parent group + instrument group
   if (typeof getFullHierarchy === 'function') {
     IC_CATEGORIES.forEach(function(cat) {
-      // All IC_CATEGORIES items are instrument-type (I) by definition
       var h = getFullHierarchy('I', cat);
       ic_catParent[cat] = h.parentCode;
       if (h.groupCode) ic_catInstGroup[cat] = h.groupCode;
     });
   }
 
-  // Build filter bars dynamically (only show groups with items)
-  ic_buildParentBar();
+  // Instrument catalog shows instruments only — drop CAM, CART, SITE items
+  ic_allItems = ic_allItems.filter(function(item) {
+    return (ic_catParent[item.category] || 'INST') === 'INST';
+  });
+  ic_byCat = {};
+  ic_allItems.forEach(function(item) {
+    if (!ic_byCat[item.category]) ic_byCat[item.category] = [];
+    ic_byCat[item.category].push(item);
+  });
+
+  // Parent bar not needed — catalog is instruments only
+  var bar = document.getElementById('ic_parentBar');
+  if (bar) bar.style.display = 'none';
   ic_buildInstGroupBar();
 
   ic_renderCategoryList();
@@ -91,25 +101,27 @@ function ic_buildParentBar() {
   bar.innerHTML = html;
 }
 
-// ─── Build instrument group pills dynamically ───
+// ─── Build instrument group sidebar list ───
 function ic_buildInstGroupBar() {
   var bar = document.getElementById('ic_instGroupBar');
   if (!bar || typeof INSTRUMENT_GROUPS === 'undefined') return;
 
   // Count items per instrument group
   var grpCounts = {};
+  var total = 0;
   IC_CATEGORIES.forEach(function(cat) {
     var grp = ic_catInstGroup[cat];
-    if (!grp) return;
     var count = ic_byCat[cat] ? ic_byCat[cat].length : 0;
+    total += count;
+    if (!grp) return;
     grpCounts[grp] = (grpCounts[grp] || 0) + count;
   });
 
-  var html = '<button class="seg-btn seg-sm active" onclick="ic_setInstGroup(null, this)">All</button>';
+  var html = '<div class="ic-grp-row active" onclick="ic_setInstGroup(null, this)">All Groups<span class="ic-grp-count">' + total.toLocaleString() + '</span></div>';
   INSTRUMENT_GROUPS.forEach(function(g) {
     var cnt = grpCounts[g.code] || 0;
-    html += '<button class="seg-btn seg-sm" onclick="ic_setInstGroup(\'' + g.code + '\', this)">' +
-      g.name + ' <span style="font-size:9px;opacity:.6">(' + cnt + ')</span></button>';
+    html += '<div class="ic-grp-row" onclick="ic_setInstGroup(\'' + g.code + '\', this)">' +
+      g.name + '<span class="ic-grp-count">' + cnt + '</span></div>';
   });
   bar.innerHTML = html;
 }
@@ -149,7 +161,7 @@ function ic_setInstGroup(code, el) {
   ic_activeCat = null;
 
   var bar = document.getElementById('ic_instGroupBar');
-  if (bar) bar.querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (bar) bar.querySelectorAll('.ic-grp-row').forEach(function(b) { b.classList.remove('active'); });
   if (el) el.classList.add('active');
 
   var searchEl = document.getElementById('ic_catSearch');
@@ -314,6 +326,12 @@ function ic_toggleMfr(el) {
 
 function ic_filterMfrModels() {
   ic_mfrSearch = (document.getElementById('ic_mfrSearch').value || '');
+  if (!ic_activeCat && ic_mfrSearch.trim().length >= 2) {
+    var head = document.getElementById('ic_mfrHead');
+    if (head) head.textContent = 'Search Results';
+    ic_renderGlobalInline(ic_findByModel(ic_mfrSearch));
+    return;
+  }
   ic_renderMfrModels();
 }
 
@@ -391,6 +409,142 @@ function ic_updateStats() {
 
   var tabCount = document.getElementById('ic_tabCount');
   if (tabCount) tabCount.textContent = ic_allItems.length.toLocaleString();
+}
+
+// ─── Model Number Reverse Lookup ─────────────────────────────────────────────
+
+// Search across all items by model, itemCode, or manufacturer
+function ic_findByModel(term) {
+  var t = (term || '').toLowerCase().trim();
+  if (t.length < 2) return [];
+  return ic_allItems.filter(function(it) {
+    return (it.model        && it.model.toLowerCase().includes(t)) ||
+           (it.itemCode     && it.itemCode.toLowerCase().includes(t)) ||
+           (it.manufacturer && it.manufacturer.toLowerCase().includes(t));
+  }).slice(0, 50);
+}
+
+// Navigate the cascade to a specific item by scopeTypeKey + modelKey
+function ic_navigateToKey(scopeTypeKey, modelKey) {
+  var mk = (modelKey === undefined || modelKey === null) ? 0 : modelKey;
+  var item = ic_allItems.find(function(x) {
+    return x.scopeTypeKey === scopeTypeKey && (x.modelKey || 0) === mk;
+  });
+  // Fallback: match scopeTypeKey only
+  if (!item) item = ic_allItems.find(function(x) { return x.scopeTypeKey === scopeTypeKey; });
+  ic_navigateTo(item);
+}
+
+// Drive the cascade: Group → Category → Manufacturer/Model → Detail
+function ic_navigateTo(item) {
+  if (!item) return;
+
+  // 1. Activate the right instrument group row
+  var groupCode = ic_catInstGroup[item.category] || null;
+  ic_activeInstGrp = groupCode;
+  var bar = document.getElementById('ic_instGroupBar');
+  if (bar) {
+    bar.querySelectorAll('.ic-grp-row').forEach(function(row) {
+      var onclick = row.getAttribute('onclick') || '';
+      var isMatch = groupCode ? onclick.indexOf("'" + groupCode + "'") !== -1 : onclick.indexOf('null') !== -1;
+      row.classList.toggle('active', isMatch);
+    });
+  }
+
+  // 2. Clear search, set active category, re-render category list
+  var catSearchEl = document.getElementById('ic_catSearch');
+  if (catSearchEl) catSearchEl.value = '';
+  ic_activeCat = item.category;
+  ic_renderCategoryList();
+
+  setTimeout(function() {
+    var active = document.querySelector('.ic-cat-item.active');
+    if (active) active.scrollIntoView({block: 'nearest'});
+  }, 50);
+
+  // 3. Show this category's models, pre-filter to the model name
+  document.getElementById('ic_mfrHead').textContent = item.category + ' \u2014 Manufacturers & Models';
+  var mfrSearchEl = document.getElementById('ic_mfrSearch');
+  if (mfrSearchEl) { mfrSearchEl.value = item.model; ic_mfrSearch = item.model; }
+  ic_renderMfrModels();
+
+  // Close global search dropdown
+  var gsResults = document.getElementById('ic_globalResults');
+  if (gsResults) gsResults.style.display = 'none';
+  var gsInput = document.getElementById('ic_globalSearch');
+  if (gsInput) gsInput.value = '';
+
+  // 4. Select model + open detail panel
+  setTimeout(function() {
+    ic_selectModel(item.scopeTypeKey, item.modelKey || 0, null);
+  }, 80);
+
+  ic_updateStats();
+}
+
+// Global search bar handler (debounced 150ms)
+var ic_globalSearchTimer = null;
+function ic_onGlobalSearch(term) {
+  clearTimeout(ic_globalSearchTimer);
+  var wrap = document.getElementById('ic_globalResults');
+  if (!wrap) return;
+  if ((term || '').trim().length < 2) { wrap.style.display = 'none'; return; }
+  ic_globalSearchTimer = setTimeout(function() {
+    ic_renderGlobalResults(ic_findByModel(term));
+  }, 150);
+}
+
+function ic_renderGlobalResults(items) {
+  var wrap = document.getElementById('ic_globalResults');
+  if (!wrap) return;
+  if (!items.length) {
+    wrap.innerHTML = '<div style="padding:10px 12px;font-size:10.5px;color:var(--muted)">No matches found</div>';
+    wrap.style.display = '';
+    return;
+  }
+  wrap.innerHTML = items.map(function(it) {
+    var grpName = 'Specialty & Misc';
+    if (typeof INSTRUMENT_GROUPS !== 'undefined') {
+      var gc = ic_catInstGroup[it.category];
+      var g = gc ? INSTRUMENT_GROUPS.find(function(x) { return x.code === gc; }) : null;
+      if (g) grpName = g.name;
+    }
+    return '<div class="ic-gs-row" onclick="ic_navigateToKey(' + it.scopeTypeKey + ',' + (it.modelKey || 0) + ')">' +
+      '<span style="font-weight:700;color:var(--navy)">' + ic_esc(it.model || it.itemCode) + '</span>' +
+      '<span>' + ic_esc(it.manufacturer) + '</span>' +
+      '<span style="color:var(--muted)">' + ic_esc(it.category) + '</span>' +
+      '<span style="color:var(--muted);opacity:.75">' + ic_esc(grpName) + '</span>' +
+      '<span style="font-weight:600;text-align:right">' + ic_fmtCharge(it.maxCharge) + '</span>' +
+      '</div>';
+  }).join('');
+  wrap.style.display = '';
+}
+
+// Col-2 inline results when no category is selected
+function ic_renderGlobalInline(items) {
+  var area = document.getElementById('ic_mfrModelArea');
+  if (!area) return;
+  if (!items.length) {
+    area.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:11px">No matches found</div>';
+    return;
+  }
+  var catMap = {}, catOrder = [];
+  items.forEach(function(it) {
+    if (!catMap[it.category]) { catMap[it.category] = []; catOrder.push(it.category); }
+    catMap[it.category].push(it);
+  });
+  var html = '';
+  catOrder.forEach(function(cat) {
+    html += '<div style="padding:4px 12px 3px;font-size:9.5px;font-weight:700;color:var(--navy);background:var(--neutral-50);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em">' + ic_esc(cat) + '</div>';
+    catMap[cat].forEach(function(it) {
+      html += '<div class="ic-model-row" style="padding-left:16px" onclick="ic_navigateToKey(' + it.scopeTypeKey + ',' + (it.modelKey || 0) + ')">' +
+        '<span class="ic-model-name">' + ic_esc(it.model || it.itemCode) + '</span>' +
+        '<span style="font-size:9px;color:var(--muted)">' + ic_esc(it.manufacturer) + '</span>' +
+        '<span class="ic-model-charge">' + ic_fmtCharge(it.maxCharge) + '</span>' +
+        '</div>';
+    });
+  });
+  area.innerHTML = html;
 }
 
 // ─── Helpers ───
