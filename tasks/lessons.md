@@ -10,6 +10,11 @@
 - 3-part leak test: Manual, Wet (submersion), Electronic (pressure decay).
 - Don't cite AAMI ST91 on customer documents — use it to inform design, not as a footer citation.
 
+## PDF Generation (learned 2026-03-25)
+- **HTML preview and PDF must use identical item filtering.** The requisition HTML drawer was filtering ZZ-codes, discount adjustments, and sorting D/I first — but the PDF builder skipped all of that. Always copy filter logic.
+- **jsPDF doc.text() has NO clipping.** Long text overflows into adjacent columns. Always use `doc.splitTextToSize(text, maxWidth)` for address blocks and multi-column layouts.
+- **addAddressBlock now requires maxW param** for column-constrained layouts (3-column requisition). Invoice uses 2-column (270pt each) which was fine, but 3-column (180pt each) overflowed.
+
 ## Receiving Workflow (learned 2026-03-24)
 - **Portal data is a starting point, NOT source of truth.** Customers frequently submit wrong model/SN. Physical scope in hand is always truth.
 - **Receiving = WO creation.** No separate EOD barcode scan step needed. WO creation IS the receiving event with timestamp.
