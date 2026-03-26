@@ -1733,6 +1733,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
     <div class="field" style="margin-bottom:10px"><label>Follow-up Notes</label><textarea id="defectNotes" rows="3" style="resize:vertical" oninput="markDirty()"></textarea></div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-danger" style="flex:1" onclick="logDefect()">Log Defect (QA Hold)</button>
+      <button class="btn btn-navy" onclick="generateForm('defect')">Generate PDF</button>
     </div>
   </div>
 </div>
@@ -2245,6 +2246,8 @@ function generateFormPDF(formId) {
       case 'invoice':     buildInvoicePdf(d); break;
       case 'packing':     buildPackingPdf(d); break;
       case 'finalqc':     buildFinalQCPdf(d); break;
+      case 'fortyDay':    buildFortyDayPdf(d); break;
+      case 'defect':      buildDefectPdf(d); break;
       default: console.warn('No PDF builder for form:', formId);
     }
   } catch (e) {
@@ -2817,6 +2820,181 @@ function buildFinalQCPdf(d) {
   ], y);
 
   E.savePDF(doc, pdfFileName('finalqc'));
+}
+
+// ── 40-Day Warranty Evaluation (OM06-2) ─────────────────────────
+function buildFortyDayPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  const r = d.r;
+  let y = E.addTSIHeader(doc, 'Recent Repair — 40-Day Warranty Evaluation', 'OM06-2');
+
+  // Repair identification grid
+  y = E.addKeyValueGrid(doc, [
+    ['Client',            d.clientName],           ['Department',  d.deptName],
+    ['Model',             d.model],                ['Serial #',    d.serial],
+    ['Current W.O. #',    d.wo],                   ['Date',        E.fmtDate(new Date())],
+    ['Prior W.O. #',      document.getElementById('fd-priorWO')?.textContent?.trim() || '—'],
+    ['Days Since Last In', document.getElementById('fd-daysSince')?.textContent?.trim() || '—']
+  ], y);
+
+  // Customer complaint
+  y = E.addSectionLabel(doc, 'Customer Complaint', y);
+  y = E.addParagraph(doc, d.complaint, y);
+
+  // Section 1: Technician evaluation
+  y = E.addSectionLabel(doc, 'Section 1 — Technician Evaluation', y);
+  const causeVal = document.querySelector('input[name="fortyDayCause"]:checked')?.value || '';
+  const causeLabel = causeVal === 'yes' ? 'Yes — result of improper care/handling by customer'
+                   : causeVal === 'no'  ? 'No — not due to customer handling'
+                   : causeVal === 'unknown' ? 'Cannot determine — further inspection needed'
+                   : '(not selected)';
+
+  y = E.addCheckboxRows(doc, [
+    { label: 'Is the complaint a result of improper care or handling by the customer?', checked: false }
+  ], y, 1);
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(E.COLORS.navy);
+  doc.text('Answer: ' + causeLabel, E.PAGE.margin + 8, y);
+  y += 16;
+
+  const techNotes = document.getElementById('fd-techNotes')?.value?.trim() || '';
+  if (techNotes) {
+    y = E.addKeyValueGrid(doc, [['Technician Notes', techNotes]], y);
+  }
+
+  // Section 2: Lab Manager failure codes
+  y = E.checkPageBreak(doc, y, 80);
+  y = E.addSectionLabel(doc, 'Section 2 — Lab Manager Failure Code Determination', y);
+
+  const FAILURE_CODES = [
+    { id: 'fc1', label: 'Result of improper care and handling', nc: false },
+    { id: 'fc2', label: 'Part failure unrelated to previous repairs', nc: false },
+    { id: 'fc3', label: 'Cosmetic issue unrelated to previous repairs', nc: false },
+    { id: 'fc4', label: 'Improper repair technique (NONCONFORMANCE)', nc: true },
+    { id: 'fc5', label: 'Failure during previous final inspection (NONCONFORMANCE)', nc: true },
+    { id: 'fc6', label: 'Failure related to previous repairs', nc: false },
+    { id: 'fc7', label: 'Unable to duplicate customer complaint', nc: false },
+    { id: 'fc8', label: 'No repairs were performed previously', nc: false },
+    { id: 'fc9', label: 'Other', nc: false }
+  ];
+
+  const codeItems = FAILURE_CODES.map((fc, i) => ({
+    label: (i + 1) + '. ' + fc.label,
+    checked: document.getElementById(fc.id)?.checked || false
+  }));
+  y = E.addCheckboxRows(doc, codeItems, y, 1);
+
+  // NC alert if codes 4 or 5 checked
+  const nc4 = document.getElementById('fc4')?.checked;
+  const nc5 = document.getElementById('fc5')?.checked;
+  if (nc4 || nc5) {
+    y = E.checkPageBreak(doc, y, 24);
+    doc.setFillColor('#FEE2E2'); doc.setDrawColor('#FECACA');
+    doc.roundedRect(E.PAGE.margin, y, E.PAGE.contentW, 20, 3, 3, 'FD');
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor('#991B1B');
+    doc.text('⚠  Nonconformance write-up required — failure code ' + [nc4 && '4', nc5 && '5'].filter(Boolean).join(' and ') + ' selected.', E.PAGE.margin + 8, y + 13);
+    y += 28;
+  }
+
+  const labNotes = document.getElementById('fd-labNotes')?.value?.trim() || '';
+  if (labNotes) {
+    y = E.addKeyValueGrid(doc, [['Lab Manager Notes', labNotes]], y);
+  }
+
+  // Signature block
+  const labMgrEl = document.getElementById('fd-labManager');
+  const labMgrName = labMgrEl?.options[labMgrEl.selectedIndex]?.text || '';
+  const evalDate = document.getElementById('fd-evalDate')?.value || '';
+  y = E.checkPageBreak(doc, y, 60);
+  y = E.addSignatureBlock(doc, [
+    'Lab Manager: ' + (labMgrName || '________________'),
+    'Date Evaluated: ' + (evalDate || '________________')
+  ], y);
+
+  E.savePDF(doc, pdfFileName('fortyDay'));
+}
+
+// ── Defect Tracking (OM07-8) ─────────────────────────────────────
+function buildDefectPdf(d) {
+  const E = TSIExport;
+  const doc = E.createPDF();
+  let y = E.addTSIHeader(doc, 'Defect Tracking', 'OM07-8');
+
+  y = E.addKeyValueGrid(doc, [
+    ['Client',     d.clientName], ['W.O. #',   d.wo],
+    ['Department', d.deptName],   ['Serial #', d.serial],
+    ['Model',      d.model],      ['Date',     E.fmtDate(new Date())]
+  ], y);
+
+  // Defect history from the table
+  y = E.addSectionLabel(doc, 'Defect History', y);
+  const rows = [];
+  const trs = document.querySelectorAll('#defectsBody tr');
+  trs.forEach(tr => {
+    const cells = tr.querySelectorAll('td');
+    if (cells.length >= 4) {
+      rows.push([
+        cells[0]?.textContent?.trim() || '',
+        cells[1]?.textContent?.trim() || '',
+        cells[2]?.textContent?.trim() || '',
+        cells[3]?.textContent?.trim() || ''
+      ]);
+    }
+  });
+
+  if (rows.length && rows[0][0] !== '') {
+    y = E.addTable(doc, ['Date / Time', 'Reason', 'Technician', 'Status'], rows, y);
+  } else {
+    y = E.addParagraph(doc, 'No defects recorded for this work order.', y, { color: E.COLORS.steel });
+  }
+
+  // Current defect entry (if partially filled)
+  const defDate   = document.getElementById('defectDate')?.value || '';
+  const defReason = document.getElementById('defectReason')?.value || '';
+  const defTech   = document.getElementById('defectTech');
+  const defTechName = defTech?.options[defTech.selectedIndex]?.text || '';
+  const defNotes  = document.getElementById('defectNotes')?.value?.trim() || '';
+
+  if (defDate || defReason || defNotes) {
+    y = E.checkPageBreak(doc, y, 60);
+    y = E.addSectionLabel(doc, 'Current Entry (Pending Log)', y);
+    y = E.addKeyValueGrid(doc, [
+      ['Date',      defDate],
+      ['Reason',    defReason],
+      ['Technician', defTechName]
+    ], y);
+  }
+
+  // Failed tests
+  const FAILED_TESTS = [
+    { id: 'defLeakTest',        label: 'Leak Test' },
+    { id: 'defControlButtons',  label: 'Control Buttons' },
+    { id: 'defImage',           label: 'Image' },
+    { id: 'defVideoFunctions',  label: 'Video Functions' },
+    { id: 'defAngulation',      label: 'Angulation' },
+    { id: 'defVariableFunction',label: 'Variable Function' },
+    { id: 'defOther',           label: 'Other' }
+  ];
+  const failedTests = FAILED_TESTS.filter(t => document.getElementById(t.id)?.checked);
+  if (failedTests.length) {
+    y = E.checkPageBreak(doc, y, 40);
+    y = E.addSectionLabel(doc, 'Failed Tests', y);
+    y = E.addCheckboxRows(doc, failedTests.map(t => ({ label: t.label, checked: true })), y, 3);
+  }
+
+  if (defNotes) {
+    y = E.addKeyValueGrid(doc, [['Follow-up Notes', defNotes]], y);
+  }
+
+  // Signature block
+  y = E.checkPageBreak(doc, y, 60);
+  y = E.addSignatureBlock(doc, [
+    'Recording Tech: ________________',
+    'QC Tech: ________________',
+    'Date: ________________'
+  ], y);
+
+  E.savePDF(doc, pdfFileName('defect'));
 }
 
 function setSelectVal_safe(id, val) {
