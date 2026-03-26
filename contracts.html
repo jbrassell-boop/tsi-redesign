@@ -602,7 +602,7 @@
               <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
               <div class="divider"></div>
               <button class="btn btn-navy">Initialize Renewal</button>
-              <button class="btn btn-outline">Create Renewal Doc</button>
+              <button class="btn btn-outline" onclick="openGenerateCSAModal()">Create Renewal Doc</button>
               <button class="btn btn-navy">Finalize Renewal</button>
             </div>
             <div class="two-col">
@@ -1302,6 +1302,10 @@ async function selectContract(el, contractKey) {
     // Show/hide expired banner
     const banner = document.getElementById('expiredBanner');
     if (banner) banner.classList.toggle('show', status === 'Expired');
+
+    // Show Generate CSA button only for Pending contracts
+    const csaBtn = document.getElementById('btnGenerateCSA');
+    if (csaBtn) csaBtn.style.display = status === 'Pending' ? '' : 'none';
 
     // Breadcrumb
     var bcClient = c.sClientName || c.sCompanyName || '';
