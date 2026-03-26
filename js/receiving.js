@@ -158,15 +158,6 @@
       ' style="width:100%;height:30px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 8px;font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;box-sizing:border-box;margin-top:2px">',
       '</div></div>',
 
-      // Condition toggles
-      '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">',
-      '<span style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase;line-height:24px;margin-right:4px">Condition:</span>',
-      '<button class="rc-cond-btn" onclick="rcToggleCond(\'insertionTube\',this)" data-cond="insertionTube">Insertion Tube</button>',
-      '<button class="rc-cond-btn" onclick="rcToggleCond(\'lightGuide\',this)" data-cond="lightGuide">Light Guide</button>',
-      '<button class="rc-cond-btn" onclick="rcToggleCond(\'distalTip\',this)" data-cond="distalTip">Distal Tip</button>',
-      '<button class="rc-cond-btn" onclick="rcToggleCond(\'forcepsChannel\',this)" data-cond="forcepsChannel">Forceps Channel</button>',
-      '</div>',
-
       // Notes
       '<div>',
       '<label class="rc-lbl">Notes</label>',
@@ -216,9 +207,7 @@
       '.rc-tab-num{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#CBD5E1;color:#fff;border-radius:50%;font-size:9px;margin-right:5px}',
       '.rc-tab-num-active{background:var(--navy)}',
       '.rc-lbl{font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}',
-      '.rc-cond-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid #DDE3EE;background:#fff;color:#6B7280;font-family:inherit}',
-      '.rc-cond-btn.rc-pass{background:#F0FDF4;border-color:#BBF7D0;color:#16A34A}',
-      '.rc-cond-btn.rc-fail{background:#FEF2F2;border-color:#FECACA;color:#DC2626}',
+      /* condition buttons removed — D&I handles this */
       '.rc-arrival-card{background:#fff;border:1.5px solid #DDE3EE;border-radius:6px;padding:10px 14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}',
       '.rc-arrival-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(46,117,182,.12)}',
       '.rc-arrival-card.rc-overdue{border-left:3px solid #DC2626}',
@@ -285,7 +274,7 @@
       clientKey: null, clientName: '', deptKey: null, deptName: '',
       scopeTypeKey: null, modelDesc: '', serial: '', scopeKey: null,
       complaint: '', poNumber: '', trackingIn: '', notes: '',
-      isKnown: false, conditions: {}
+      isKnown: false
     };
   }
 
@@ -399,6 +388,13 @@
       _form.clientName = _cName(clientMatch);
     }
 
+    // Pre-fill department from portal submission
+    if (_selectedArrival.lDepartmentKey) {
+      _form.deptKey = _selectedArrival.lDepartmentKey;
+      var deptMatch = _depts.find(function(d) { return d.lDepartmentKey === _selectedArrival.lDepartmentKey; });
+      _form.deptName = deptMatch ? (deptMatch.psDepartmentName || deptMatch.sDepartmentName || '') : (_selectedArrival.sDepartmentName || '');
+    }
+
     // Try to match model to scope type
     var modelLower = (_form.modelDesc || '').toLowerCase();
     var typeMatch = _scopeTypes.find(function(t) {
@@ -472,12 +468,6 @@
 
     // Notes
     document.getElementById('rcNotes').value = _form.notes;
-
-    // Reset condition buttons
-    document.querySelectorAll('.rc-cond-btn').forEach(function(btn) {
-      btn.className = 'rc-cond-btn';
-    });
-    _form.conditions = {};
 
     // Reset known badge + corrections
     document.getElementById('rcKnownBadge').style.display = 'none';
@@ -620,19 +610,7 @@
     _updateIntakeValidation();
   };
 
-  window.rcToggleCond = function(condKey, btn) {
-    var conds = _form.conditions;
-    if (conds[condKey] === 'fail') {
-      conds[condKey] = 'pass';
-      btn.className = 'rc-cond-btn rc-pass';
-    } else if (conds[condKey] === 'pass') {
-      delete conds[condKey];
-      btn.className = 'rc-cond-btn';
-    } else {
-      conds[condKey] = 'fail';
-      btn.className = 'rc-cond-btn rc-fail';
-    }
-  };
+  /* rcToggleCond removed — condition assessment moved to D&I */
 
   function _checkCorrections() {
     if (!_selectedArrival) return;
@@ -707,15 +685,6 @@
       ['Notes', _esc(_form.notes || '—')]
     ];
 
-    // Conditions
-    var condParts = Object.keys(_form.conditions).map(function(k) {
-      var v = _form.conditions[k];
-      return '<span style="font-size:9px;padding:1px 5px;border-radius:3px;' +
-        (v === 'fail' ? 'background:#FEF2F2;color:#DC2626' : 'background:#F0FDF4;color:#16A34A') + '">' +
-        k + ': ' + v.toUpperCase() + '</span>';
-    }).join(' ');
-    if (condParts) rows.push(['Condition', condParts]);
-
     document.getElementById('rcConfTable').innerHTML =
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
       rows.map(function(r) {
@@ -773,10 +742,7 @@
       sNotes: _form.complaint + (_form.notes ? '\n' + _form.notes : ''),
       sPONumber: _form.poNumber,
       lServiceLocationKey: svcKey,
-      sInsInsertionTubePF: _form.conditions.insertionTube === 'pass' ? 'P' : (_form.conditions.insertionTube === 'fail' ? 'F' : ''),
-      sInsLightGuidePF: _form.conditions.lightGuide === 'pass' ? 'P' : (_form.conditions.lightGuide === 'fail' ? 'F' : ''),
-      sInsDistalTipPF: _form.conditions.distalTip === 'pass' ? 'P' : (_form.conditions.distalTip === 'fail' ? 'F' : ''),
-      sInsForcepChannelPF: _form.conditions.forcepsChannel === 'pass' ? 'P' : (_form.conditions.forcepsChannel === 'fail' ? 'F' : ''),
+      /* condition P/F fields removed — assessed during D&I */
       sTimeReceived: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       bFromPortal: !!_selectedArrival
     };
