@@ -285,6 +285,15 @@ function main() {
   seed.pricingCategories = sqlQuery(`SELECT * FROM tblPricingCategory FOR JSON PATH`);
   log('pricingCategories', seed);
 
+  seed.pricingDetails = sqlQuery(`
+    SELECT pd.lPricingDetailKey, pd.lPricingCategoryKey, pd.lRepairItemKey,
+           pd.dblRepairPrice, pd.sProblemID
+    FROM tblPricingDetail pd
+      JOIN tblRepairItem ri ON ri.lRepairItemKey = pd.lRepairItemKey
+    WHERE ri.bActive = 1 AND pd.dblRepairPrice > 0
+    FOR JSON PATH`);
+  log('pricingDetails', seed);
+
   seed.salesReps = sqlQuery(`SELECT * FROM tblSalesRep FOR JSON PATH`);
   log('salesReps', seed);
 

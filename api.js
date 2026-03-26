@@ -452,6 +452,10 @@ const API = (() => {
   // ── Lookups / Reference ───────────────────────────────
   async function getAllSalesReps() { return get('/SalesRepNames/GetAllSalesRepNames'); }
   async function getAllPricingCategories(opts) { return get('/PricingCategory/GetAllPricingCategories' + (opts ? '?pbDefaultFirst=' + (opts.defaultFirst||false) + '&pbActiveOnly=' + (opts.activeOnly||false) : '')); }
+  async function getPricingDetails(opts) { return get('/pricing/details' + (opts ? '?' + new URLSearchParams(opts) : '')); }
+  async function getPricingForItem(repairItemKey) { return get('/pricing/details/' + repairItemKey); }
+  async function getPricingByCategory(categoryKey) { return get('/pricing/by-category/' + categoryKey); }
+  async function validatePrice(repairItemKey, pricingCategoryKey) { return get('/pricing/validate?repairItemKey=' + repairItemKey + '&pricingCategoryKey=' + pricingCategoryKey); }
   async function getAllPaymentTerms() { return get('/PaymentTerms/GetAllPaymentTerms'); }
   async function getAllCreditLimits() { return get('/CreditLimit/GetAllCreditLimits'); }
   async function getAllDistributors() { return get('/DistributorName/GetAllDistributorNames'); }
@@ -712,7 +716,8 @@ const API = (() => {
     getFlagsByOwner, addFlag, deleteFlag,
 
     // Lookups / Reference
-    getAllSalesReps, getAllPricingCategories, getAllPaymentTerms,
+    getAllSalesReps, getAllPricingCategories, getPricingDetails, getPricingForItem,
+    getPricingByCategory, validatePrice, getAllPaymentTerms,
     getAllCreditLimits, getAllDistributors,
     getInstrumentTypes,
 

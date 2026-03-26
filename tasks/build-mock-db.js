@@ -349,6 +349,15 @@ if (seed.repairDetails) {
   console.log('  repairDetails: +sItemDescription, +sTSICode, +sRigidOrFlexible, +sPartOrLabor, +sTechInits, +sTech2Inits');
 }
 
+// --- Enrich pricingDetails (tier prices per repair item) ---
+if (seed.pricingDetails) {
+  seed.pricingDetails.forEach(pd => {
+    pd.sItemDescription = lk(repairItemMap, pd.lRepairItemKey, 'sItemDescription') || '';
+    pd.sPricingDescription = lk(pricingMap, pd.lPricingCategoryKey, 'sPricingDescription') || '';
+  });
+  console.log('  pricingDetails: +sItemDescription, +sPricingDescription (' + seed.pricingDetails.length + ' rows)');
+}
+
 // --- Enrich contracts ---
 if (seed.contracts) {
   seed.contracts.forEach(c => {
@@ -453,7 +462,7 @@ const SEED_ORDER = [
   'amendRepairReasons', 'amendRepairTypes', 'companies', 'contractTypes',
   'deliveryMethods', 'distributors', 'employees', 'flagLocations',
   'flagTypes', 'holidays', 'instrumentManufacturers', 'instrumentModels',
-  'manufacturers', 'packageTypes', 'paymentTerms', 'pricingCategories',
+  'manufacturers', 'packageTypes', 'paymentTerms', 'pricingCategories', 'pricingDetails',
   'repairItems', 'repairLevels', 'repairReasons', 'repairStatuses',
   'salesReps', 'salesTax', 'scopeCategories', 'scopeTypeCategories',
   'servicePlanTerms', 'serviceLocations', 'shippingCarriers', 'staffTypes',
@@ -504,6 +513,7 @@ const TABLE_LIMITS = {
   'maxCharges': 2000,             // 28K → 2K
   'pointsOps': 1000,              // 44K → 1K
   'pointsTech': 1000,             // 36K → 1K
+  'pricingDetails': 10000,          // 27K → 10K (active items only)
   'premierList': 500,
   'repairDetails': 3000,          // 92K → 3K
   'repairInventory': 2000,        // 30K → 2K

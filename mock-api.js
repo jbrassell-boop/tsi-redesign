@@ -498,6 +498,30 @@ const MockAPI = (() => {
   // ── Lookups / Reference ───────────────────────────────
   route('GET', '/SalesRepNames/GetAllSalesRepNames', () => MockDB.getAll('salesReps'));
   route('GET', '/PricingCategory/GetAllPricingCategories', () => MockDB.getAll('pricingCategories'));
+
+  // ── Pricing Details (tier prices per repair item) ───────
+  route('GET', '/pricing/details', (params) => {
+    let rows = MockDB.getAll('pricingDetails') || [];
+    if (params.type) rows = rows.filter(r => r.sRigidOrFlexible === params.type);
+    if (params.categoryKey) rows = rows.filter(r => r.lPricingCategoryKey === parseInt(params.categoryKey));
+    return rows;
+  });
+  route('GET', '/pricing/details/:repairItemKey', (params) => {
+    const key = parseInt(params.repairItemKey);
+    return (MockDB.getAll('pricingDetails') || []).filter(r => r.lRepairItemKey === key);
+  });
+  route('GET', '/pricing/by-category/:categoryKey', (params) => {
+    const key = parseInt(params.categoryKey);
+    return (MockDB.getAll('pricingDetails') || []).filter(r => r.lPricingCategoryKey === key);
+  });
+  route('GET', '/pricing/validate', (params) => {
+    const itemKey = parseInt(params.repairItemKey);
+    const catKey = parseInt(params.pricingCategoryKey);
+    const row = (MockDB.getAll('pricingDetails') || []).find(r => r.lRepairItemKey === itemKey && r.lPricingCategoryKey === catKey);
+    if (!row) return { error: 'No pricing found for this item/tier combination' };
+    return { expected: row.dblRepairPrice, tier: row.sPricingDescription, item: row.sItemDescription };
+  });
+
   route('GET', '/PaymentTerms/GetAllPaymentTerms', () => MockDB.getAll('paymentTerms'));
   route('GET', '/CreditLimit/GetAllCreditLimits', () => MockDB.getAll('creditLimits'));
   route('GET', '/DistributorName/GetAllDistributorNames', () => MockDB.getAll('distributors'));
