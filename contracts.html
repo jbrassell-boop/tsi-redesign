@@ -601,15 +601,15 @@
               <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Extract</button>
               <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
               <div class="divider"></div>
-              <button class="btn btn-navy">Initialize Renewal</button>
+              <button class="btn btn-navy" id="btnInitRenewal" onclick="initiateRenewal()">Initialize Renewal</button>
               <button class="btn btn-outline" onclick="openGenerateCSAModal()">Create Renewal Doc</button>
-              <button class="btn btn-navy">Finalize Renewal</button>
             </div>
+            <div id="renewalInitStatus" style="display:none;padding:8px 0;font-size:12px;color:var(--muted)"></div>
             <div class="two-col">
               <div class="col-l">
                 <div class="panel">
-                  <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between"><span>Renewal Scopes</span><span style="font-weight:500;font-size:9px;color:var(--muted)" id="renewalScopeCount">16 scopes</span></div>
-                  <div class="panel-body"><p class="empty-state" style="padding:20px">Click "Initialize Renewal" to populate renewal scopes from current contract.</p></div>
+                  <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between"><span>Renewal Scopes</span><span style="font-weight:500;font-size:9px;color:var(--muted)" id="renewalScopeCount"></span></div>
+                  <div class="panel-body" id="renewalScopesBody"><p class="empty-state" style="padding:20px">Click "Initialize Renewal" to copy current contract scopes into a new proposal.</p></div>
                 </div>
               </div>
               <div class="col-r">
@@ -1111,6 +1111,64 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
       <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Pending Proposal Modal -->
+<div class="modal-overlay" id="newPendingModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box lg">
+    <div class="modal-header">
+      <h3>New Contract Proposal</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg g2">
+        <div class="ff"><label>Client <span class="req">*</span></label>
+          <select class="inp" id="npClientKey" onchange="onNewPendingClientChange(this)">
+            <option value="">-- Select Client --</option>
+          </select>
+        </div>
+        <div class="ff"><label>Contract Type <span class="req">*</span></label>
+          <select class="inp" id="npContractTypeKey">
+            <option value="">-- Select Type --</option>
+          </select>
+        </div>
+        <div class="ff"><label>Sales Representative</label>
+          <select class="inp" id="npSalesRepKey">
+            <option value="">-- Select Rep --</option>
+          </select>
+        </div>
+        <div class="ff"><label>Term (Months)</label>
+          <input class="inp" type="number" id="npTermMonths" value="12" min="1" max="60"/>
+        </div>
+        <div class="ff span2"><label>Proposal Name</label>
+          <input class="inp" id="npProposalName" placeholder="Auto-generated from client + type"/>
+        </div>
+        <div class="ff"><label>Billing Name</label>
+          <input class="inp" id="npBillName1" placeholder="Billing contact / organization"/>
+        </div>
+        <div class="ff"><label>Address</label>
+          <input class="inp" id="npAddr1" placeholder="123 Main St"/>
+        </div>
+        <div class="ff"><label>City</label>
+          <input class="inp" id="npCity"/>
+        </div>
+        <div class="ff"><label>State</label>
+          <input class="inp" id="npState" maxlength="2" style="text-transform:uppercase"/>
+        </div>
+        <div class="ff"><label>Zip</label>
+          <input class="inp" id="npZip"/>
+        </div>
+        <div class="ff"><label>Phone</label>
+          <input class="inp" id="npPhone" placeholder="(xxx) xxx-xxxx"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span id="npStatus" style="font-size:12px;color:var(--muted)"></span>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" id="btnCreatePending" onclick="createPendingProposal()">Create Proposal</button>
     </div>
   </div>
 </div>
@@ -2187,6 +2245,181 @@ function openPendingGenerateCSA() {
   if (dateInput && !dateInput.value) dateInput.value = today;
   updateCSAExpiry();
   document.getElementById('generateCSAModal').classList.add('open');
+}
+
+// ── Initialize Renewal ────────────────────────────────
+let renewalPendingKey = null;
+
+async function initiateRenewal() {
+  if (!selectedContractKey) return;
+  const btn = document.getElementById('btnInitRenewal');
+  const statusEl = document.getElementById('renewalInitStatus');
+  const scopesBody = document.getElementById('renewalScopesBody');
+  const countEl = document.getElementById('renewalScopeCount');
+
+  btn.disabled = true;
+  btn.textContent = 'Initializing...';
+  statusEl.style.display = '';
+  statusEl.textContent = 'Creating renewal proposal...';
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/Contract/InitializeRenewal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ plContractKey: selectedContractKey })
+    });
+    if (!resp.ok) throw new Error((await resp.json()).error || 'Server error');
+    const result = await resp.json();
+    renewalPendingKey = result.lPendingContractKey;
+
+    statusEl.innerHTML = '✓ Renewal proposal created — ' +
+      '<a href="#" style="color:var(--blue)" onclick="switchModule(\'pending\',null);selectPendingProposal(' + renewalPendingKey + ')">View in Pending Contracts</a>';
+
+    // Load scopes into the Renewal Scopes panel
+    const scopeResp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + renewalPendingKey);
+    const scopes = await scopeResp.json();
+    countEl.textContent = scopes.length + ' scopes';
+
+    scopesBody.innerHTML = scopes.length
+      ? '<table><thead><tr><th>#</th><th>Dept</th><th>Model</th><th>Serial #</th><th style="text-align:right">Proposed Cost</th></tr></thead><tbody>' +
+        scopes.map((s, i) =>
+          '<tr><td style="color:var(--muted)">' + (i+1) + '</td>' +
+          '<td>' + esc(s.sDepartmentName || '—') + '</td>' +
+          '<td>' + esc(s.sScopeTypeDesc || '—') + '</td>' +
+          '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
+          '<td style="text-align:right">' + (s.nCost ? fmtMoney(s.nCost) : '—') + '</td></tr>'
+        ).join('') +
+        '</tbody></table>'
+      : '<p class="empty-state" style="padding:20px">No scopes on this contract.</p>';
+
+    btn.textContent = 'Re-Initialize';
+  } catch (e) {
+    statusEl.textContent = 'Error: ' + e.message;
+    btn.textContent = 'Initialize Renewal';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── New Pending Proposal ──────────────────────────────
+let npClients = [];
+
+async function openNewPendingModal() {
+  const modal = document.getElementById('newPendingModal');
+  document.getElementById('npStatus').textContent = '';
+  document.getElementById('npProposalName').value = '';
+  document.getElementById('npTermMonths').value = '12';
+  document.getElementById('npBillName1').value = '';
+  document.getElementById('npAddr1').value = '';
+  document.getElementById('npCity').value = '';
+  document.getElementById('npState').value = '';
+  document.getElementById('npZip').value = '';
+  document.getElementById('npPhone').value = '';
+
+  // Populate dropdowns from server
+  try {
+    const [clientsResp, repsResp] = await Promise.all([
+      fetch('http://localhost:4000/api/Client/GetAllClientsList', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ Pagination: { PageNumber:1, PageSize:500 } })
+      }),
+      fetch('http://localhost:4000/api/SalesRepNames/GetAllSalesRepNames')
+    ]);
+
+    const clientData = await clientsResp.json();
+    npClients = Array.isArray(clientData) ? clientData : (clientData.list || []);
+    const reps = await repsResp.json();
+
+    const clientSel = document.getElementById('npClientKey');
+    clientSel.innerHTML = '<option value="">-- Select Client --</option>' +
+      npClients.map(c => '<option value="' + c.lClientKey + '">' + esc(c.sClientName1) + '</option>').join('');
+
+    const repSel = document.getElementById('npSalesRepKey');
+    repSel.innerHTML = '<option value="">-- Select Rep --</option>' +
+      reps.map(r => '<option value="' + r.lSalesRepKey + '">' + esc(r.sSalesRepName) + '</option>').join('');
+
+    const typeSel = document.getElementById('npContractTypeKey');
+    typeSel.innerHTML = '<option value="">-- Select Type --</option>' +
+      contractTypes.map(t => '<option value="' + t.lContractTypeKey + '">' + esc(t.sContractTypeName || t.sContractType) + '</option>').join('');
+  } catch (e) {
+    console.warn('[NewPending] Lookup load failed:', e.message);
+  }
+
+  modal.classList.add('open');
+}
+
+function onNewPendingClientChange(sel) {
+  const client = npClients.find(c => c.lClientKey == sel.value);
+  if (!client) return;
+  // Auto-build name when client changes (if name field is empty or was auto-set)
+  updateNpName();
+  // Pre-fill address from client data
+  document.getElementById('npAddr1').value = client.sMailAddr1 || '';
+  document.getElementById('npCity').value = client.sMailCity || '';
+  document.getElementById('npState').value = client.sMailState || '';
+  document.getElementById('npZip').value = client.sMailZip || '';
+  document.getElementById('npPhone').value = client.sPhoneVoice || '';
+  document.getElementById('npBillName1').value = client.sClientName1 || '';
+}
+
+function updateNpName() {
+  const clientSel = document.getElementById('npClientKey');
+  const typeSel = document.getElementById('npContractTypeKey');
+  const client = npClients.find(c => c.lClientKey == clientSel.value);
+  const typeName = typeSel.options[typeSel.selectedIndex]?.text || '';
+  if (client && typeName) {
+    const today = new Date();
+    const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' + String(today.getDate()).padStart(2,'0') + '/' + today.getFullYear();
+    document.getElementById('npProposalName').value = 'Pending Contract: ' + client.sClientName1 + ' - ' + typeName + ' ' + dateStr;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('npContractTypeKey')?.addEventListener('change', updateNpName);
+});
+
+async function createPendingProposal() {
+  const clientKey = document.getElementById('npClientKey').value;
+  const typeKey = document.getElementById('npContractTypeKey').value;
+  if (!clientKey) { document.getElementById('npStatus').textContent = 'Select a client.'; return; }
+
+  const btn = document.getElementById('btnCreatePending');
+  const status = document.getElementById('npStatus');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  status.textContent = '';
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/CreatePendingContract', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        sPendingContractName1: document.getElementById('npProposalName').value,
+        lClientKey: parseInt(clientKey),
+        lContractTypeKey: parseInt(typeKey) || null,
+        lSalesRepKey: parseInt(document.getElementById('npSalesRepKey').value) || null,
+        lTermMonths: parseInt(document.getElementById('npTermMonths').value) || 12,
+        sPendingContractBillName1: document.getElementById('npBillName1').value,
+        sPendingContractAddr1: document.getElementById('npAddr1').value,
+        sPendingContractCity: document.getElementById('npCity').value,
+        sPendingContractState: document.getElementById('npState').value,
+        sPendingContractZip: document.getElementById('npZip').value,
+        sPendingContractPhoneVoice: document.getElementById('npPhone').value
+      })
+    });
+    if (!resp.ok) throw new Error((await resp.json()).error || 'Server error');
+    const result = await resp.json();
+
+    // Close modal, reload list, select new proposal
+    document.getElementById('newPendingModal').classList.remove('open');
+    await loadPendingContracts();
+    selectPendingProposal(result.lPendingContractKey);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Proposal';
+  }
 }
 
 // ── Load Lookup Dropdowns ─────────────────────────────
