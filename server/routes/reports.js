@@ -73,90 +73,67 @@ router.get('/reports/ffs-approval-time', async (req, res, next) => {
 // ───────────────────────────────────────────────────────
 //  EndoCart Quote Conversion Rate
 //  GET /api/reports/endocart-approval?startDate=2025-01-01&endDate=2026-03-26
-//  Every K work order = a quote (approved, expired, or denied all count)
-//  CRITICAL: "Quote Denied" repair item = false approval — WO gets dtAprRecvd
-//  set just to close it out, but the quote was actually denied.
-//  True approval = dtAprRecvd set AND no "Quote Denied" line item.
+//  Uses vwQuoteOutcome view for clean Approved/Denied/Expired/Pending status
 //  EndoCarts identified by WO prefix SK (South — NK doesn't exist in data)
 // ───────────────────────────────────────────────────────
-const DENIED_CTE = `
-  ;WITH deniedWOs AS (
-    SELECT DISTINCT rit.lRepairKey
-    FROM tblRepairItemTran rit
-      JOIN tblRepairItem ri ON rit.lRepairItemKey = ri.lRepairItemKey
-    WHERE ri.sItemDescription LIKE '%Quote Denied%'
-  )`;
-
 router.get('/reports/endocart-approval', async (req, res, next) => {
   try {
     const startDate = req.query.startDate || '2025-01-01';
     const endDate = req.query.endDate || null;
 
-    // Overall conversion rate — exclude "Quote Denied" false approvals
+    // Overall conversion rate
     const summary = await db.query(`
-      ${DENIED_CTE}
       SELECT
-        COUNT(*)                                                                    AS totalQuotes,
-        SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1 ELSE 0 END)                                                       AS approved,
-        SUM(CASE WHEN dw.lRepairKey IS NOT NULL THEN 1 ELSE 0 END)                 AS denied,
-        COUNT(*)
-          - SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL THEN 1 ELSE 0 END)
-          - SUM(CASE WHEN dw.lRepairKey IS NOT NULL THEN 1 ELSE 0 END)             AS expired,
-        CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1.0 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))       AS conversionPct,
-        AVG(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN DATEDIFF(DAY, r.dtReqSent, r.dtAprRecvd) END)                       AS avgDaysToApprove
-      FROM tblRepair r
-        LEFT JOIN deniedWOs dw ON r.lRepairKey = dw.lRepairKey
-      WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtDateIn >= @startDate
-        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
+        COUNT(*)                                                            AS totalQuotes,
+        SUM(CASE WHEN sQuoteOutcome = 'Approved' THEN 1 ELSE 0 END)        AS approved,
+        SUM(CASE WHEN sQuoteOutcome = 'Denied'   THEN 1 ELSE 0 END)        AS denied,
+        SUM(CASE WHEN sQuoteOutcome = 'Expired'  THEN 1 ELSE 0 END)        AS expired,
+        SUM(CASE WHEN sQuoteOutcome = 'Pending'  THEN 1 ELSE 0 END)        AS pending,
+        CAST(SUM(CASE WHEN sQuoteOutcome = 'Approved' THEN 1.0 ELSE 0 END)
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))                     AS conversionPct,
+        AVG(CASE WHEN sQuoteOutcome = 'Approved' THEN nDaysToApprove END)   AS avgDaysToApprove
+      FROM vwQuoteOutcome
+      WHERE LEFT(sWorkOrderNumber, 2) = 'SK'
+        AND dtDateIn >= @startDate
+        AND (@endDate IS NULL OR dtDateIn <= @endDate)
     `, { startDate, endDate });
 
     // By year
     const byYear = await db.query(`
-      ${DENIED_CTE}
       SELECT
-        YEAR(r.dtDateIn)                                                            AS year,
-        COUNT(*)                                                                    AS totalQuotes,
-        SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1 ELSE 0 END)                                                       AS approved,
-        SUM(CASE WHEN dw.lRepairKey IS NOT NULL THEN 1 ELSE 0 END)                 AS denied,
-        COUNT(*)
-          - SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL THEN 1 ELSE 0 END)
-          - SUM(CASE WHEN dw.lRepairKey IS NOT NULL THEN 1 ELSE 0 END)             AS expired,
-        CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1.0 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))       AS conversionPct,
-        AVG(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN DATEDIFF(DAY, r.dtReqSent, r.dtAprRecvd) END)                       AS avgDaysToApprove
-      FROM tblRepair r
-        LEFT JOIN deniedWOs dw ON r.lRepairKey = dw.lRepairKey
-      WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtDateIn >= @startDate
-        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
-      GROUP BY YEAR(r.dtDateIn)
-      ORDER BY YEAR(r.dtDateIn) DESC
+        YEAR(dtDateIn)                                                      AS year,
+        COUNT(*)                                                            AS totalQuotes,
+        SUM(CASE WHEN sQuoteOutcome = 'Approved' THEN 1 ELSE 0 END)        AS approved,
+        SUM(CASE WHEN sQuoteOutcome = 'Denied'   THEN 1 ELSE 0 END)        AS denied,
+        SUM(CASE WHEN sQuoteOutcome = 'Expired'  THEN 1 ELSE 0 END)        AS expired,
+        SUM(CASE WHEN sQuoteOutcome = 'Pending'  THEN 1 ELSE 0 END)        AS pending,
+        CAST(SUM(CASE WHEN sQuoteOutcome = 'Approved' THEN 1.0 ELSE 0 END)
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))                     AS conversionPct,
+        AVG(CASE WHEN sQuoteOutcome = 'Approved' THEN nDaysToApprove END)   AS avgDaysToApprove
+      FROM vwQuoteOutcome
+      WHERE LEFT(sWorkOrderNumber, 2) = 'SK'
+        AND dtDateIn >= @startDate
+        AND (@endDate IS NULL OR dtDateIn <= @endDate)
+      GROUP BY YEAR(dtDateIn)
+      ORDER BY YEAR(dtDateIn) DESC
     `, { startDate, endDate });
 
     // By client (top 15)
     const byClient = await db.query(`
-      ${DENIED_CTE}
       SELECT TOP 15
-        c.sClientName1                                                              AS clientName,
-        COUNT(*)                                                                    AS totalQuotes,
-        SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1 ELSE 0 END)                                                       AS approved,
-        SUM(CASE WHEN dw.lRepairKey IS NOT NULL THEN 1 ELSE 0 END)                 AS denied,
-        CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL AND dw.lRepairKey IS NULL
-          THEN 1.0 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))       AS conversionPct
-      FROM tblRepair r
-        LEFT JOIN deniedWOs dw ON r.lRepairKey = dw.lRepairKey
-        LEFT JOIN tblDepartment d ON r.lDepartmentKey = d.lDepartmentKey
+        c.sClientName1                                                      AS clientName,
+        COUNT(*)                                                            AS totalQuotes,
+        SUM(CASE WHEN v.sQuoteOutcome = 'Approved' THEN 1 ELSE 0 END)      AS approved,
+        SUM(CASE WHEN v.sQuoteOutcome = 'Denied'   THEN 1 ELSE 0 END)      AS denied,
+        SUM(CASE WHEN v.sQuoteOutcome = 'Expired'  THEN 1 ELSE 0 END)      AS expired,
+        CAST(SUM(CASE WHEN v.sQuoteOutcome = 'Approved' THEN 1.0 ELSE 0 END)
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))                     AS conversionPct
+      FROM vwQuoteOutcome v
+        LEFT JOIN tblDepartment d ON v.lDepartmentKey = d.lDepartmentKey
         LEFT JOIN tblClient c ON d.lClientKey = c.lClientKey
-      WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtDateIn >= @startDate
-        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
+      WHERE LEFT(v.sWorkOrderNumber, 2) = 'SK'
+        AND v.dtDateIn >= @startDate
+        AND (@endDate IS NULL OR v.dtDateIn <= @endDate)
       GROUP BY c.sClientName1
       ORDER BY COUNT(*) DESC
     `, { startDate, endDate });
