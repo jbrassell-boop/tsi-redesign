@@ -71,9 +71,11 @@ router.get('/reports/ffs-approval-time', async (req, res, next) => {
 });
 
 // ───────────────────────────────────────────────────────
-//  EndoCart Quote Approval Rate
+//  EndoCart Quote Conversion Rate
 //  GET /api/reports/endocart-approval?startDate=2025-01-01&endDate=2026-03-26
-//  EndoCarts identified by WO prefix SK (South only — NK doesn't exist in data)
+//  Every K work order = a quote (approved, expired, or declined all count)
+//  Conversion = approved / total quotes
+//  EndoCarts identified by WO prefix SK (South — NK doesn't exist in data)
 //  Repair → Department → Client join (no direct client FK on tblRepair)
 // ───────────────────────────────────────────────────────
 router.get('/reports/endocart-approval', async (req, res, next) => {
@@ -81,59 +83,56 @@ router.get('/reports/endocart-approval', async (req, res, next) => {
     const startDate = req.query.startDate || '2025-01-01';
     const endDate = req.query.endDate || null;
 
-    // Overall approval rate
+    // Overall conversion rate — every SK WO is a quote
     const summary = await db.query(`
       SELECT
-        COUNT(*)                                                    AS totalQuoted,
+        COUNT(*)                                                    AS totalQuotes,
         SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END)  AS approved,
-        SUM(CASE WHEN r.dtAprRecvd IS NULL THEN 1 ELSE 0 END)      AS pending,
+        COUNT(*) - SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END) AS notConverted,
         CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1.0 ELSE 0 END)
-          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS approvalPct,
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS conversionPct,
         AVG(CASE WHEN r.dtAprRecvd IS NOT NULL
           THEN DATEDIFF(DAY, r.dtReqSent, r.dtAprRecvd) END)       AS avgDaysToApprove
       FROM tblRepair r
       WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtReqSent IS NOT NULL
-        AND r.dtReqSent >= @startDate
-        AND (@endDate IS NULL OR r.dtReqSent <= @endDate)
+        AND r.dtDateIn >= @startDate
+        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
     `, { startDate, endDate });
 
     // By year
     const byYear = await db.query(`
       SELECT
-        YEAR(r.dtReqSent)                                           AS quoteYear,
-        COUNT(*)                                                    AS totalQuoted,
+        YEAR(r.dtDateIn)                                       AS year,
+        COUNT(*)                                                    AS totalQuotes,
         SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END)  AS approved,
-        SUM(CASE WHEN r.dtAprRecvd IS NULL THEN 1 ELSE 0 END)      AS pending,
+        COUNT(*) - SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END) AS notConverted,
         CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1.0 ELSE 0 END)
-          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS approvalPct,
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS conversionPct,
         AVG(CASE WHEN r.dtAprRecvd IS NOT NULL
           THEN DATEDIFF(DAY, r.dtReqSent, r.dtAprRecvd) END)       AS avgDaysToApprove
       FROM tblRepair r
       WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtReqSent IS NOT NULL
-        AND r.dtReqSent >= @startDate
-        AND (@endDate IS NULL OR r.dtReqSent <= @endDate)
-      GROUP BY YEAR(r.dtReqSent)
-      ORDER BY YEAR(r.dtReqSent) DESC
+        AND r.dtDateIn >= @startDate
+        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
+      GROUP BY YEAR(r.dtDateIn)
+      ORDER BY YEAR(r.dtDateIn) DESC
     `, { startDate, endDate });
 
     // By client (top 15)
     const byClient = await db.query(`
       SELECT TOP 15
         c.sClientName1                                              AS clientName,
-        COUNT(*)                                                    AS totalQuoted,
+        COUNT(*)                                                    AS totalQuotes,
         SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END)  AS approved,
-        SUM(CASE WHEN r.dtAprRecvd IS NULL THEN 1 ELSE 0 END)      AS pending,
+        COUNT(*) - SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1 ELSE 0 END) AS notConverted,
         CAST(SUM(CASE WHEN r.dtAprRecvd IS NOT NULL THEN 1.0 ELSE 0 END)
-          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS approvalPct
+          / NULLIF(COUNT(*), 0) * 100 AS DECIMAL(5,1))             AS conversionPct
       FROM tblRepair r
         LEFT JOIN tblDepartment d ON r.lDepartmentKey = d.lDepartmentKey
         LEFT JOIN tblClient c ON d.lClientKey = c.lClientKey
       WHERE LEFT(r.sWorkOrderNumber, 2) = 'SK'
-        AND r.dtReqSent IS NOT NULL
-        AND r.dtReqSent >= @startDate
-        AND (@endDate IS NULL OR r.dtReqSent <= @endDate)
+        AND r.dtDateIn >= @startDate
+        AND (@endDate IS NULL OR r.dtDateIn <= @endDate)
       GROUP BY c.sClientName1
       ORDER BY COUNT(*) DESC
     `, { startDate, endDate });
