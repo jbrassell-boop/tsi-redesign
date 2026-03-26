@@ -397,7 +397,10 @@
 
     // Try to match model to scope type
     var modelLower = (_form.modelDesc || '').toLowerCase();
-    var typeMatch = _scopeTypes.find(function(t) {
+    var typeMatch = _scopeTypes.filter(function(t) {
+      var rf = (t.sRigidOrFlexible || '').toUpperCase();
+      return rf === 'R' || rf === 'F' || rf === 'C';
+    }).find(function(t) {
       var desc = (t.sScopeTypeDesc || t.psScopeTypeDesc || '').toLowerCase();
       return desc === modelLower || desc.includes(modelLower) || modelLower.includes(desc);
     });
@@ -449,10 +452,13 @@
     // Populate dept dropdown
     _populateDeptDropdown();
 
-    // Model dropdown
+    // Model dropdown — scopes only (R=Rigid, F=Flexible, C=Camera), sorted alpha
+    var scopeModels = _scopeTypes
+      .filter(function(t) { var rf = (t.sRigidOrFlexible || '').toUpperCase(); return rf === 'R' || rf === 'F' || rf === 'C'; })
+      .sort(function(a, b) { return (a.sScopeTypeDesc || '').localeCompare(b.sScopeTypeDesc || ''); });
     var modelSel = document.getElementById('rcModel');
     modelSel.innerHTML = '<option value="">— Select —</option>' +
-      _scopeTypes.map(function(t) {
+      scopeModels.map(function(t) {
         var desc = t.sScopeTypeDesc || t.psScopeTypeDesc || '';
         var sel = (_form.scopeTypeKey && t.lScopeTypeKey === _form.scopeTypeKey) ? ' selected' : '';
         return '<option value="' + (t.lScopeTypeKey || '') + '"' + sel + '>' + _esc(desc) + '</option>';
