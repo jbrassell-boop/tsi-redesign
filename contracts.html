@@ -945,27 +945,86 @@
     </div>
 
     <!-- ═══════════ MODULE: PENDING CONTRACTS ═══════════ -->
-    <div class="module-view" id="mv-pending">
-      <div class="toolbar">
-        <button class="btn btn-navy" onclick="document.getElementById('newContractModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Contract</button>
-        <div class="divider"></div>
-        <div class="toggle-row" style="padding:0"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Expired Contracts</span></div>
+    <div class="module-view" id="mv-pending" style="flex-direction:row;padding:0;overflow:hidden">
+
+      <!-- Left: proposal list -->
+      <div style="width:400px;min-width:320px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#fafcff">
+        <div class="toolbar" style="flex-shrink:0">
+          <button class="btn btn-navy" onclick="openNewPendingModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Proposal</button>
+          <div class="divider"></div>
+          <span id="pendingCountLabel" style="font-size:12px;color:var(--muted)">Loading...</span>
+        </div>
+        <div style="flex:1;overflow-y:auto">
+          <table id="pendingListTable" style="width:100%">
+            <thead><tr><th>Proposal Name</th><th>Client</th><th>Created</th><th style="text-align:right">Total</th></tr></thead>
+            <tbody id="pendingListBody">
+              <tr><td colspan="4" class="empty-state">Loading proposals...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:16px 20px">
-        <div class="panel">
-          <div class="panel-head"><span>Pending Contracts (3)</span></div>
-          <div class="panel-body" style="padding:0">
-            <table>
-              <thead><tr><th>Contract Type</th><th>Contract Name</th><th>Client</th><th>Sales Rep</th><th>Created</th><th>Status</th></tr></thead>
-              <tbody id="pendingContractsBody">
-                <tr><td>Fuse</td><td>Regional Medical - Full Service 2026</td><td>Regional Medical Center</td><td>R. Thompson</td><td>03/02/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
-                <tr><td>CPO</td><td>St. Mary's Hospital - Capitated</td><td>St. Mary's Hospital</td><td>J. Miller</td><td>02/28/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
-                <tr><td>Shared Risk</td><td>Valley Health - Shared Risk Pilot</td><td>Valley Health System</td><td>S. Chen</td><td>02/15/2026</td><td><span class="li-badge b-pending">PENDING</span></td></tr>
-              </tbody>
-            </table>
+
+      <!-- Right: proposal detail -->
+      <div id="pendingDetailPanel" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div id="pendingDetailEmpty" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px">
+          Select a proposal to view details
+        </div>
+        <div id="pendingDetailContent" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+          <!-- Header -->
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--navy)" id="pdName">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">
+                <span id="pdClient">—</span> &nbsp;·&nbsp;
+                <span id="pdRep">—</span> &nbsp;·&nbsp;
+                Created <span id="pdCreated">—</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button class="btn btn-outline" id="btnPendingGenCSA" onclick="openPendingGenerateCSA()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Generate CSA
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary strip -->
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0">
+            <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border)">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Contract Type</div>
+              <div style="font-size:13px;font-weight:500;margin-top:2px" id="pdType">—</div>
+            </div>
+            <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border)">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Term</div>
+              <div style="font-size:13px;font-weight:500;margin-top:2px" id="pdTerm">—</div>
+            </div>
+            <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border)">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Scope Count</div>
+              <div style="font-size:13px;font-weight:500;margin-top:2px" id="pdScopeCount">—</div>
+            </div>
+            <div style="flex:1;padding:10px 16px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Proposed Total</div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy);margin-top:2px" id="pdTotal">—</div>
+            </div>
+          </div>
+
+          <!-- Scopes table -->
+          <div style="flex:1;overflow-y:auto;padding:16px 20px">
+            <div class="panel">
+              <div class="panel-head"><span>Proposed Scopes</span></div>
+              <div class="panel-body" style="padding:0">
+                <table id="pendingScopesTable">
+                  <thead><tr><th>#</th><th>Facility</th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Cost</th></tr></thead>
+                  <tbody id="pendingScopesBody">
+                    <tr><td colspan="6" class="empty-state">No scopes</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
 
   </div><!-- /main -->
@@ -1140,6 +1199,12 @@ function getDemoPendingContracts() {
 }
 
 // ── Utility ───────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtMoney(v) { return fmtCurrencyFull(v); }
+
 function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d);
@@ -2029,31 +2094,99 @@ function switchModule(id, el) {
 }
 
 // ── Pending Contracts ─────────────────────────────────
+let selectedPendingKey = null;
+let pendingProposals = [];
+
 async function loadPendingContracts() {
-  const tbody = document.querySelector('#mv-pending tbody');
+  const tbody = document.getElementById('pendingListBody');
+  const countEl = document.getElementById('pendingCountLabel');
   if (!tbody) return;
   try {
-    const data = await API.getPendingContracts({
-      Pagination: { PageNumber: 1, PageSize: 200 },
-      Filters: {}
+    const resp = await fetch('http://localhost:4000/api/PendingContract/GetAllPendingContracts', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
     });
-    const pending = Array.isArray(data) ? data : (data && data.list) ? data.list : [];
-    const countEl = document.querySelector('#mv-pending .panel-head span');
-    if (countEl) countEl.textContent = 'Pending Contracts (' + pending.length + ')';
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    pendingProposals = Array.isArray(data) ? data : (data.list || []);
+    if (countEl) countEl.textContent = pendingProposals.length + ' proposal' + (pendingProposals.length !== 1 ? 's' : '');
 
-    tbody.innerHTML = pending.map(p =>
-      '<tr>' +
-        '<td>' + (p.sContractType || '—') + '</td>' +
-        '<td>' + (p.sContractName || p.sPendingContractName || p.sContractName1 || '—') + '</td>' +
-        '<td>' + (p.sClientName1 || p.sClientName || p.sClientName1 || '—') + '</td>' +
-        '<td>' + (p.sSalesRepName || '—') + '</td>' +
-        '<td>' + fmtDate(p.dtCreated || p.dtDateCreated) + '</td>' +
-        '<td><span class="li-badge b-pending">PENDING</span></td>' +
+    tbody.innerHTML = pendingProposals.length ? pendingProposals.map(p =>
+      '<tr style="cursor:pointer" onclick="selectPendingProposal(' + p.lPendingContractKey + ')">' +
+        '<td><strong>' + esc(p.sPendingContractName1 || '(Unnamed)') + '</strong></td>' +
+        '<td>' + esc(p.sClientName1 || '—') + '</td>' +
+        '<td>' + fmtDate(p.dtCreationDate) + '</td>' +
+        '<td style="text-align:right">' + fmtMoney(p.dblAmtTotal) + '</td>' +
       '</tr>'
-    ).join('') || '<tr><td colspan="6" class="empty-state">No pending contracts</td></tr>';
+    ).join('') : '<tr><td colspan="4" class="empty-state">No proposals found</td></tr>';
   } catch (err) {
-    console.warn('[Contracts] Pending contracts load failed:', err.message);
+    console.warn('[Pending] Load failed:', err.message);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Connect to local server to view proposals</td></tr>';
+    if (countEl) countEl.textContent = 'Server offline';
   }
+}
+
+async function selectPendingProposal(key) {
+  selectedPendingKey = key;
+
+  // Highlight row
+  document.querySelectorAll('#pendingListBody tr').forEach(r => r.classList.remove('selected'));
+  const rows = document.querySelectorAll('#pendingListBody tr');
+  const proposal = pendingProposals.find(p => p.lPendingContractKey === key);
+  if (proposal) {
+    const idx = pendingProposals.indexOf(proposal);
+    if (rows[idx]) rows[idx].classList.add('selected');
+  }
+
+  // Show detail panel
+  document.getElementById('pendingDetailEmpty').style.display = 'none';
+  const content = document.getElementById('pendingDetailContent');
+  content.style.display = 'flex';
+
+  // Populate header fields from list data
+  if (proposal) {
+    document.getElementById('pdName').textContent = proposal.sPendingContractName1 || '(Unnamed)';
+    document.getElementById('pdClient').textContent = proposal.sClientName1 || '—';
+    document.getElementById('pdRep').textContent = proposal.sSalesRepName || '—';
+    document.getElementById('pdCreated').textContent = fmtDate(proposal.dtCreationDate);
+    document.getElementById('pdType').textContent = proposal.sContractTypeName || '—';
+    document.getElementById('pdTerm').textContent = proposal.lTermMonths ? proposal.lTermMonths + ' months' : '—';
+    document.getElementById('pdScopeCount').textContent = (proposal.scopeCount || 0).toString();
+    document.getElementById('pdTotal').textContent = fmtMoney(proposal.dblAmtTotal);
+  }
+
+  // Load scopes
+  const scopeBody = document.getElementById('pendingScopesBody');
+  scopeBody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading scopes...</td></tr>';
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + key);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const scopes = await resp.json();
+    scopeBody.innerHTML = scopes.length ? scopes.map((s, i) =>
+      '<tr>' +
+        '<td style="color:var(--muted)">' + (i+1) + '</td>' +
+        '<td>' + esc(s.sClientName1 || '—') + '</td>' +
+        '<td>' + esc(s.sDepartmentName || '—') + '</td>' +
+        '<td>' + esc(s.sScopeTypeDesc || '—') + '</td>' +
+        '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
+        '<td style="text-align:right">' + (s.nCost ? fmtMoney(s.nCost) : '—') + '</td>' +
+      '</tr>'
+    ).join('') : '<tr><td colspan="6" class="empty-state">No scopes on this proposal</td></tr>';
+  } catch (err) {
+    scopeBody.innerHTML = '<tr><td colspan="6" class="empty-state">Failed to load scopes</td></tr>';
+  }
+}
+
+function openPendingGenerateCSA() {
+  if (!selectedPendingKey) return;
+  // Reuse the CSA modal but mark it as pending mode
+  document.getElementById('generateCSAModal').dataset.pendingKey = selectedPendingKey;
+  document.getElementById('generateCSAModal').dataset.contractKey = '';
+  // Default today's date
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('csaQuoteDate');
+  if (dateInput && !dateInput.value) dateInput.value = today;
+  updateCSAExpiry();
+  document.getElementById('generateCSAModal').classList.add('open');
 }
 
 // ── Load Lookup Dropdowns ─────────────────────────────
@@ -2419,12 +2552,16 @@ function updateBreadcrumb(items) {
 
 // ── CSA Generation ─────────────────────────────────────────────────────────
 function openGenerateCSAModal() {
+  const modal = document.getElementById('generateCSAModal');
+  // Called from active contract context
+  modal.dataset.contractKey = selectedContractKey || '';
+  modal.dataset.pendingKey = '';
   // Default quote date to today
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('csaQuoteDate').value = today;
   updateCSAExpiry();
   document.getElementById('csaGenStatus').textContent = '';
-  document.getElementById('generateCSAModal').classList.add('open');
+  modal.classList.add('open');
 }
 
 function updateCSAExpiry() {
@@ -2441,8 +2578,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function generateCSADoc() {
-  const contractKey = selectedContractKey;
-  if (!contractKey) {
+  const modal = document.getElementById('generateCSAModal');
+  const contractKey = modal.dataset.contractKey || selectedContractKey;
+  const pendingKey = modal.dataset.pendingKey;
+
+  if (!contractKey && !pendingKey) {
     document.getElementById('csaGenStatus').textContent = 'No contract selected.';
     return;
   }
@@ -2456,15 +2596,15 @@ async function generateCSADoc() {
   btn.textContent = 'Generating...';
   status.textContent = 'Building document...';
 
+  const body = { sContractType: contractType, sQuoteDate: quoteDate };
+  if (pendingKey) body.plPendingContractKey = pendingKey;
+  else body.plContractKey = contractKey;
+
   try {
     const resp = await fetch('http://localhost:4000/api/Contract/GenerateCSA', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        plContractKey: contractKey,
-        sContractType: contractType,
-        sQuoteDate: quoteDate
-      })
+      body: JSON.stringify(body)
     });
 
     if (!resp.ok) {

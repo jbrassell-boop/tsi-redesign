@@ -45,6 +45,7 @@ app.use('/api', require('./routes/departments'));
 app.use('/api', require('./routes/scopes'));
 app.use('/api', require('./routes/contracts'));
 app.use('/api', require('./routes/generate-csa'));
+app.use('/api', require('./routes/pending-contracts'));
 app.use('/api/pricing', require('./routes/pricing'));
 
 // 404 for unmatched API routes

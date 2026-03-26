@@ -1,5 +1,7 @@
 // ═══════════════════════════════════════════════════════
 //  generate-csa.js — Generate filled CSA Word document
+//  Supports both active contracts (plContractKey) and
+//  pending proposals (plPendingContractKey)
 // ═══════════════════════════════════════════════════════
 const express = require('express');
 const router = express.Router();
@@ -13,70 +15,129 @@ const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
 const FILL_SCRIPT = path.join(__dirname, '..', 'scripts', 'fill-csa.py');
 
 // POST /Contract/GenerateCSA
-// Body: { plContractKey, sContractType ("Performance"|"Preferred"), sQuoteDate }
+// Body: { plContractKey, plPendingContractKey, sContractType ("Performance"|"Preferred"), sQuoteDate }
 router.post('/Contract/GenerateCSA', async (req, res, next) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsi-csa-'));
   try {
-    const { plContractKey, sContractType, sQuoteDate } = req.body || {};
-    if (!plContractKey) return res.status(400).json({ error: 'Missing plContractKey' });
+    const { plContractKey, plPendingContractKey, sContractType, sQuoteDate } = req.body || {};
+
+    if (!plContractKey && !plPendingContractKey) {
+      return res.status(400).json({ error: 'Missing plContractKey or plPendingContractKey' });
+    }
 
     const contractType = (sContractType || 'Performance').trim();
     if (!['Performance', 'Preferred'].includes(contractType)) {
       return res.status(400).json({ error: 'sContractType must be Performance or Preferred' });
     }
 
-    // ── 1. Query contract master ───────────────────────────────────────
-    const contract = await db.queryOne(`
-      SELECT
-        con.lContractKey, con.sContractNumber,
-        con.dtDateEffective, con.dtDateTermination,
-        con.dblAmtTotal,
-        con.sContractBillName1, con.sContractBillName2,
-        con.sContractAddr1, con.sContractCity, con.sContractState, con.sContractZip,
-        con.sContractPhoneVoice, con.sBillEmail,
-        ISNULL(c.sClientName1,'') AS sClientName1,
-        LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName
-      FROM tblContract con
-        LEFT JOIN tblClient c ON c.lClientKey = con.lClientKey
-        LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = con.lSalesRepKey
-      WHERE con.lContractKey = @contractKey`,
-      { contractKey: parseInt(plContractKey) }
-    );
+    let contract, scopes;
 
-    if (!contract) return res.status(404).json({ error: 'Contract not found' });
+    if (plPendingContractKey) {
+      // ── Pending proposal ────────────────────────────────────────────────
+      const key = parseInt(plPendingContractKey);
 
-    // ── 2. Query scopes ────────────────────────────────────────────────
-    const scopes = await db.query(`
-      SELECT
-        ISNULL(c.sClientName1,'') AS facility,
-        ISNULL(d.sDepartmentName,'') AS department,
-        ISNULL(st.sScopeTypeDesc,'') AS model,
-        ISNULL(s.sSerialNumber,'') AS serial
-      FROM tblContractScope cs
-        LEFT JOIN tblScope s ON s.lScopeKey = cs.lScopeKey
-        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
-        LEFT JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
-        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
-      WHERE cs.lContractKey = @contractKey
-      ORDER BY d.sDepartmentName, st.sScopeTypeDesc, s.sSerialNumber`,
-      { contractKey: parseInt(plContractKey) }
-    );
+      contract = await db.queryOne(`
+        SELECT
+          pc.lPendingContractKey,
+          pc.sPendingContractName1 AS sContractNumber,
+          pc.lTermMonths,
+          pc.dtCreationDate AS dtDateEffective,
+          NULL AS dtDateTermination,
+          (SELECT ISNULL(SUM(pcs.nCost),0) FROM tblPendingContractScope pcs
+            WHERE pcs.lPendingContractKey = pc.lPendingContractKey) AS dblAmtTotal,
+          pc.sPendingContractBillName1 AS sContractBillName1,
+          pc.sPendingContractBillName2 AS sContractBillName2,
+          pc.sPendingContractAddr1 AS sContractAddr1,
+          pc.sPendingContractCity AS sContractCity,
+          pc.sPendingContractState AS sContractState,
+          pc.sPendingContractZip AS sContractZip,
+          pc.sPendingContractPhoneVoice AS sContractPhoneVoice,
+          NULL AS sBillEmail,
+          ISNULL(c.sClientName1,'') AS sClientName1,
+          LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName
+        FROM tblPendingContract pc
+          LEFT JOIN tblClient c ON c.lClientKey = pc.lClientKey
+          LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = pc.lSalesRepKey
+        WHERE pc.lPendingContractKey = @key AND pc.Delete_Datetime IS NULL`,
+        { key }
+      );
 
-    // ── 3. Compute dates & financials ──────────────────────────────────
+      if (!contract) return res.status(404).json({ error: 'Pending contract not found' });
+
+      scopes = await db.query(`
+        SELECT
+          ISNULL(c.sClientName1,'') AS facility,
+          ISNULL(d.sDepartmentName,'') AS department,
+          ISNULL(st.sScopeTypeDesc,'') AS model,
+          ISNULL(s.sSerialNumber,'') AS serial
+        FROM tblPendingContractScope pcs
+          LEFT JOIN tblScope s ON s.lScopeKey = pcs.lScopeKey
+          LEFT JOIN tblScopeType st ON st.lScopeTypeKey = ISNULL(pcs.lScopeTypeKey, s.lScopeTypeKey)
+          LEFT JOIN tblDepartment d ON d.lDepartmentKey = ISNULL(pcs.lDepartmentKey, s.lDepartmentKey)
+          LEFT JOIN tblClient c ON c.lClientKey = ISNULL(pcs.lClientKey, d.lClientKey)
+        WHERE pcs.lPendingContractKey = @key
+        ORDER BY facility, department, model, serial`,
+        { key }
+      );
+
+    } else {
+      // ── Active contract ──────────────────────────────────────────────────
+      contract = await db.queryOne(`
+        SELECT
+          con.lContractKey, con.sContractNumber,
+          con.dtDateEffective, con.dtDateTermination,
+          con.dblAmtTotal,
+          con.sContractBillName1, con.sContractBillName2,
+          con.sContractAddr1, con.sContractCity, con.sContractState, con.sContractZip,
+          con.sContractPhoneVoice, con.sBillEmail,
+          ISNULL(c.sClientName1,'') AS sClientName1,
+          LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName
+        FROM tblContract con
+          LEFT JOIN tblClient c ON c.lClientKey = con.lClientKey
+          LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = con.lSalesRepKey
+        WHERE con.lContractKey = @contractKey`,
+        { contractKey: parseInt(plContractKey) }
+      );
+
+      if (!contract) return res.status(404).json({ error: 'Contract not found' });
+
+      scopes = await db.query(`
+        SELECT
+          ISNULL(c.sClientName1,'') AS facility,
+          ISNULL(d.sDepartmentName,'') AS department,
+          ISNULL(st.sScopeTypeDesc,'') AS model,
+          ISNULL(s.sSerialNumber,'') AS serial
+        FROM tblContractScope cs
+          LEFT JOIN tblScope s ON s.lScopeKey = cs.lScopeKey
+          LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+          LEFT JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
+          LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+        WHERE cs.lContractKey = @contractKey
+        ORDER BY d.sDepartmentName, st.sScopeTypeDesc, s.sSerialNumber`,
+        { contractKey: parseInt(plContractKey) }
+      );
+    }
+
+    // ── Compute dates & financials ──────────────────────────────────────
     const effDate = contract.dtDateEffective ? new Date(contract.dtDateEffective) : new Date();
-    const termDate = contract.dtDateTermination ? new Date(contract.dtDateTermination) : new Date();
+
+    // For pending contracts use lTermMonths directly; for active use date diff
+    let termMonths;
+    if (plPendingContractKey && contract.lTermMonths) {
+      termMonths = parseInt(contract.lTermMonths) || 12;
+    } else {
+      const termDate = contract.dtDateTermination ? new Date(contract.dtDateTermination) : new Date();
+      termMonths = Math.round(
+        (termDate.getFullYear() - effDate.getFullYear()) * 12 +
+        (termDate.getMonth() - effDate.getMonth())
+      ) || 12;
+    }
 
     const monthNames = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
     const startMonth = monthNames[effDate.getMonth()];
     const startDay = String(effDate.getDate());
     const startYear = String(effDate.getFullYear());
-
-    // Term in whole months
-    const termMonths = Math.round(
-      (termDate.getFullYear() - effDate.getFullYear()) * 12 +
-      (termDate.getMonth() - effDate.getMonth())
-    ) || 12;
 
     const annualAmt = parseFloat(contract.dblAmtTotal) || 0;
     const monthlyAmt = termMonths > 0 ? annualAmt / termMonths : annualAmt / 12;
@@ -92,7 +153,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
 
     const fmtDate = (d) => `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`;
 
-    // ── 4. Build address lines ─────────────────────────────────────────
+    // ── Build address lines ─────────────────────────────────────────────
     const billName1 = contract.sContractBillName1 || contract.sClientName1 || '';
     const addr1 = contract.sContractAddr1 || '';
     const cityStateZip = [
@@ -101,7 +162,6 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
       contract.sContractZip
     ].filter(Boolean).join(', ');
 
-    // Short form for cover page
     const clientAddressShort = [addr1, cityStateZip].filter(Boolean).join(', ');
 
     const data = {
@@ -126,7 +186,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
       scopes:            scopes || [],
     };
 
-    // ── 5. Write data JSON to temp file ────────────────────────────────
+    // ── Write data JSON to temp file ────────────────────────────────────
     const dataPath = path.join(tmp, 'data.json');
     const outPath = path.join(tmp, 'output.docx');
     const templateFile = contractType === 'Preferred'
@@ -136,7 +196,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
 
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf8');
 
-    // ── 6. Run Python fill script ──────────────────────────────────────
+    // ── Run Python fill script ──────────────────────────────────────────
     execSync(`python "${FILL_SCRIPT}" "${templatePath}" "${dataPath}" "${outPath}"`, {
       timeout: 30000,
       stdio: ['ignore', 'pipe', 'pipe']
@@ -146,7 +206,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
       return res.status(500).json({ error: 'Document generation failed' });
     }
 
-    // ── 7. Stream .docx back ───────────────────────────────────────────
+    // ── Stream .docx back ───────────────────────────────────────────────
     const safeName = (contract.sClientName1 || 'Client').replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '_');
     const filename = `TSI_CSA_${contractType}_${safeName}.docx`;
 
@@ -158,7 +218,6 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
   } catch (e) {
     next(e);
   } finally {
-    // Clean up temp dir
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
   }
 });
