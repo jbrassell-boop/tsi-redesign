@@ -522,6 +522,32 @@ const MockAPI = (() => {
     return { expected: row.dblRepairPrice, tier: row.sPricingDescription, item: row.sItemDescription };
   });
 
+  // ── Pricing CRUD ───────────────────────────────────────
+  route('GET', '/pricing/categories', () => {
+    const cats = MockDB.getAll('pricingCategories') || [];
+    const details = MockDB.getAll('pricingDetails') || [];
+    const clients = MockDB.getAll('clients') || [];
+    return cats.map(pc => ({
+      ...pc,
+      itemCount: details.filter(d => d.lPricingCategoryKey === pc.lPricingCategoryKey).length,
+      clientCount: clients.filter(c => c.lPricingCategoryKey === pc.lPricingCategoryKey && c.bActive !== false).length,
+      dtLastUpdate: null
+    }));
+  });
+  route('POST', '/pricing/categories', (params, body) => {
+    return { lPricingCategoryKey: 999, success: true };
+  });
+  route('PUT', '/pricing/categories/:key', (params, body) => {
+    return { success: true };
+  });
+  route('PUT', '/pricing/detail', (params, body) => {
+    return { success: true };
+  });
+  route('POST', '/pricing/import', (params, body) => {
+    const items = body.items || [];
+    return { success: true, updated: items.length, inserted: 0, total: items.length };
+  });
+
   route('GET', '/PaymentTerms/GetAllPaymentTerms', () => MockDB.getAll('paymentTerms'));
   route('GET', '/CreditLimit/GetAllCreditLimits', () => MockDB.getAll('creditLimits'));
   route('GET', '/DistributorName/GetAllDistributorNames', () => MockDB.getAll('distributors'));

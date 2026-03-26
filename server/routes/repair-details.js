@@ -33,10 +33,25 @@ router.get('/Detail/GetAllRepairDetailsList', async (req, res, next) => {
 });
 
 // POST /Detail/AddRepairDetail — Add a line item to a repair
-// Removed non-existent columns: sTechInits, bAmended
+// Auto-lookups tier price if dblRepairPrice is 0 or missing
 router.post('/Detail/AddRepairDetail', async (req, res, next) => {
   try {
     const b = req.body || {};
+    const repairKey = b.plRepairKey || b.lRepairKey || 0;
+    const itemKey = b.plRepairItemKey || b.lRepairItemKey || 0;
+    let price = parseFloat(b.pdblRepairPrice || b.dblRepairPrice) || 0;
+
+    // Server-side price fallback: if no price provided, lookup from repair's pricing tier
+    if (!price && repairKey && itemKey) {
+      const tierPrice = await db.queryOne(`
+        SELECT pd.dblRepairPrice
+        FROM tblPricingDetail pd
+          JOIN tblRepair r ON r.lPricingCategoryKey = pd.lPricingCategoryKey
+        WHERE r.lRepairKey = @repairKey AND pd.lRepairItemKey = @itemKey
+          AND pd.dblRepairPrice > 0`, { repairKey, itemKey });
+      if (tierPrice) price = tierPrice.dblRepairPrice;
+    }
+
     const result = await db.query(`
       INSERT INTO tblRepairItemTran (lRepairKey, lRepairItemKey, dblRepairPrice,
         sApproved, sFixType, sUAorNWT, sInitials, sComments, sPrimaryRepair)
@@ -44,9 +59,9 @@ router.post('/Detail/AddRepairDetail', async (req, res, next) => {
         @approved, @fixType, @uanwt, @inits, @comments, @primary);
       SELECT SCOPE_IDENTITY() AS lRepairItemTranKey`,
       {
-        repairKey: b.plRepairKey || b.lRepairKey || 0,
-        itemKey: b.plRepairItemKey || b.lRepairItemKey || 0,
-        price: b.pdblRepairPrice || b.dblRepairPrice || 0,
+        repairKey,
+        itemKey,
+        price,
         approved: b.psApproved || b.sApproved || 'N',
         fixType: b.psFixType || b.sFixType || '',
         uanwt: b.psUAorNWT || b.sUAorNWT || '',
@@ -55,7 +70,7 @@ router.post('/Detail/AddRepairDetail', async (req, res, next) => {
         primary: b.psPrimaryRepair || b.sPrimaryRepair || ''
       });
     const newKey = result[0] ? result[0].lRepairItemTranKey : 0;
-    res.json({ lRepairItemTranKey: newKey, success: true });
+    res.json({ lRepairItemTranKey: newKey, success: true, dblRepairPrice: price });
   } catch (e) { next(e); }
 });
 

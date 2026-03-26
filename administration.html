@@ -258,14 +258,14 @@
         <div class="toolbar">
           <input class="search-input" id="pricingSearch" placeholder="Search pricing lists..." oninput="filterPricing()"/>
           <div style="flex:1"></div>
+          <button class="btn btn-sm btn-primary" onclick="addPricingCategory()">+ New Pricing List</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th style="width:200px">List Name</th>
-                <th style="width:100px">Type</th>
-                <th style="width:100px">Client Count</th>
+                <th style="width:250px">List Name</th>
+                <th style="width:100px">Clients</th>
                 <th style="width:80px">Items</th>
                 <th style="width:130px">Last Updated</th>
                 <th style="width:80px">Status</th>
@@ -996,16 +996,7 @@
     {id:6,name:'Read Only',desc:'View-only access to all modules. No create, edit, or delete capabilities.',members:2,perms:{Repairs:[1,0,0,0],Clients:[1,0,0,0],Financial:[1,0,0,0],Inventory:[1,0,0,0],Reports:[1,0,0,0],Admin:[1,0,0,0]}}
   ];
 
-  var PRICING = [
-    {id:1,name:'Standard Repair Pricing',type:'Standard',clients:18,items:245,updated:'2026-03-10',status:'Active'},
-    {id:2,name:'Volume Discount Tier A',type:'Volume',clients:5,items:245,updated:'2026-03-08',status:'Active'},
-    {id:3,name:'Volume Discount Tier B',type:'Volume',clients:3,items:245,updated:'2026-03-08',status:'Active'},
-    {id:4,name:'HCA Healthcare Contract',type:'Contract',clients:1,items:180,updated:'2026-02-28',status:'Active'},
-    {id:5,name:'Ascension Health Contract',type:'Contract',clients:1,items:195,updated:'2026-02-15',status:'Active'},
-    {id:6,name:'Standard Product Sale',type:'Standard',clients:24,items:312,updated:'2026-03-12',status:'Active'},
-    {id:7,name:'Instrument Repair Pricing',type:'Standard',clients:12,items:88,updated:'2026-03-05',status:'Active'},
-    {id:8,name:'Q2 2026 Promo Pricing',type:'Volume',clients:0,items:150,updated:'2026-03-14',status:'Draft'}
-  ];
+  var PRICING = []; // loaded from API
 
   var AUDIT = [
     {ts:'2026-03-15 09:14:22',user:'Joseph Brassell',action:'Login',module:'Authentication',desc:'User logged in successfully',ip:'192.168.1.105'},
@@ -1339,36 +1330,137 @@
     return '<span class="badge '+(s==='Active'?'b-active':'b-draft')+'">'+s+'</span>';
   }
 
+  var _pricingItems = []; // cached item prices for open drawer
+
+  async function loadPricingFromAPI(){
+    try {
+      PRICING = await API.getPricingCategories();
+      if(!Array.isArray(PRICING)) PRICING = [];
+      renderPricing(PRICING);
+    } catch(e){ console.warn('[Admin] Pricing load:', e.message); }
+  }
+
   function renderPricing(list){
     var tb=document.getElementById('pricingTbody');
     if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No pricing lists found</td></tr>';return;}
-    tb.innerHTML=list.map(function(p){return '<tr onclick="openPricingDrawer('+p.id+')"><td style="font-weight:600">'+p.name+'</td><td>'+typeBadge(p.type)+'</td><td>'+p.clients+'</td><td>'+p.items+'</td><td>'+p.updated+'</td><td>'+pricingStatusBadge(p.status)+'</td></tr>';}).join('');
+    tb.innerHTML=list.map(function(p){
+      var name = (p.sPricingDescription||p.name||'').trim();
+      var status = p.bActive !== false ? 'Active' : 'Inactive';
+      var updated = p.dtLastUpdate ? new Date(p.dtLastUpdate).toLocaleDateString() : '—';
+      return '<tr onclick="openPricingDrawer('+p.lPricingCategoryKey+')">'+
+        '<td style="font-weight:600">'+name+'</td>'+
+        '<td>'+(p.clientCount||0)+'</td>'+
+        '<td>'+(p.itemCount||0)+'</td>'+
+        '<td>'+updated+'</td>'+
+        '<td>'+pricingStatusBadge(status)+'</td></tr>';
+    }).join('');
     document.getElementById('pricingCount').textContent=list.length+' pricing list'+(list.length!==1?'s':'');
   }
 
   window.filterPricing = function(){
     var q=document.getElementById('pricingSearch').value.toLowerCase();
-    renderPricing(PRICING.filter(function(p){return !q || p.name.toLowerCase().indexOf(q)!==-1 || p.type.toLowerCase().indexOf(q)!==-1;}));
+    renderPricing(PRICING.filter(function(p){
+      var name=(p.sPricingDescription||p.name||'').toLowerCase();
+      return !q || name.indexOf(q)!==-1;
+    }));
   };
 
-  window.openPricingDrawer = function(id){
-    var item = PRICING.find(function(p){return p.id===id;});
+  window.addPricingCategory = async function(){
+    var name = prompt('New pricing list name:');
+    if(!name || !name.trim()) return;
+    try {
+      await API.addPricingCategory({sPricingDescription: name.trim()});
+      await loadPricingFromAPI();
+    } catch(e){ alert('Error: '+e.message); }
+  };
+
+  window.openPricingDrawer = async function(key){
+    var item = PRICING.find(function(p){return p.lPricingCategoryKey===key;});
     if(!item) return;
-    document.getElementById('drawerPricingName').textContent = item.name;
-    document.getElementById('drawerPricingSub').textContent = item.type+' pricing \u2014 '+item.status;
+    var name = (item.sPricingDescription||'').trim();
+    document.getElementById('drawerPricingName').textContent = name;
+    document.getElementById('drawerPricingSub').textContent = (item.itemCount||0)+' items \u2014 '+(item.clientCount||0)+' clients';
+
+    // Header section
     var html = '<div class="section-card"><div class="section-head">Pricing List Details</div><div class="section-body">';
-    html += '<div class="field"><label>List Name</label><input type="text" value="'+item.name+'"/></div>';
-    html += '<div class="g2"><div class="field"><label>Type</label><select>';
-    ['Standard','Contract','Volume'].forEach(function(t){html+='<option'+(item.type===t?' selected':'')+'>'+t+'</option>';});
-    html += '</select></div><div class="field"><label>Status</label><select>';
-    ['Active','Draft'].forEach(function(s){html+='<option'+(item.status===s?' selected':'')+'>'+s+'</option>';});
+    html += '<div class="g2"><div class="field"><label>List Name</label><input type="text" id="pricingEditName" value="'+name+'"/></div>';
+    html += '<div class="field"><label>Status</label><select id="pricingEditActive">';
+    html += '<option value="1"'+(item.bActive!==false?' selected':'')+'>Active</option>';
+    html += '<option value="0"'+(item.bActive===false?' selected':'')+'>Inactive</option>';
     html += '</select></div></div>';
-    html += '<div class="g2"><div class="field"><label>Assigned Clients</label><input type="text" value="'+item.clients+'" readonly/></div>';
-    html += '<div class="field"><label>Line Items</label><input type="text" value="'+item.items+'" readonly/></div></div>';
-    html += '<div class="field"><label>Last Updated</label><input type="text" value="'+item.updated+'" readonly/></div>';
+    html += '<div style="margin-top:8px"><button class="btn btn-sm btn-primary" onclick="savePricingCategory('+key+')">Save Changes</button></div>';
     html += '</div></div>';
+
+    // Item prices section
+    html += '<div class="section-card"><div class="section-head">Item Prices';
+    html += '<div style="float:right"><input class="search-input" id="pricingItemSearch" placeholder="Search items..." oninput="filterPricingItems()" style="width:200px;font-size:12px;padding:4px 8px"/>';
+    html += ' <button class="btn btn-sm" onclick="exportPricingCSV('+key+')" style="margin-left:4px">Export CSV</button></div></div>';
+    html += '<div class="section-body" style="padding:0"><div style="max-height:500px;overflow-y:auto">';
+    html += '<table style="width:100%"><thead><tr><th>Description</th><th style="width:80px">Type</th><th style="width:120px;text-align:right">Price</th></tr></thead>';
+    html += '<tbody id="pricingItemsTbody"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">Loading...</td></tr></tbody></table>';
+    html += '</div></div></div>';
+
     document.getElementById('drawerPricingBody').innerHTML = html;
     openDrawer('pricingDrawer');
+
+    // Load item prices
+    try {
+      _pricingItems = await API.getPricingByCategory(key);
+      if(!Array.isArray(_pricingItems)) _pricingItems = [];
+      renderPricingItems(_pricingItems, key);
+    } catch(e){ document.getElementById('pricingItemsTbody').innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--danger)">'+e.message+'</td></tr>'; }
+  };
+
+  function renderPricingItems(items, catKey){
+    var tb = document.getElementById('pricingItemsTbody');
+    if(!items.length){tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">No items with pricing</td></tr>';return;}
+    var typeLabel = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
+    tb.innerHTML = items.map(function(it){
+      return '<tr>'+
+        '<td style="font-size:12px">'+((it.sItemDescription||'').trim())+'</td>'+
+        '<td style="font-size:12px">'+(typeLabel[it.sRigidOrFlexible]||it.sRigidOrFlexible||'')+'</td>'+
+        '<td style="text-align:right"><input type="number" step="0.01" value="'+(it.dblRepairPrice||0).toFixed(2)+'" '+
+          'style="width:100px;text-align:right;font-family:var(--mono);font-size:12px;padding:2px 6px" '+
+          'onchange="updateItemPrice('+catKey+','+it.lRepairItemKey+',this.value)"/></td></tr>';
+    }).join('');
+  }
+
+  window.filterPricingItems = function(){
+    var q = (document.getElementById('pricingItemSearch').value||'').toLowerCase();
+    var filtered = _pricingItems.filter(function(it){ return !q || (it.sItemDescription||'').toLowerCase().indexOf(q)!==-1; });
+    var catKey = PRICING.find(function(p){return (p.sPricingDescription||'').trim()===document.getElementById('drawerPricingName').textContent;});
+    renderPricingItems(filtered, catKey ? catKey.lPricingCategoryKey : 0);
+  };
+
+  window.savePricingCategory = async function(key){
+    try {
+      var name = document.getElementById('pricingEditName').value.trim();
+      var active = document.getElementById('pricingEditActive').value === '1';
+      await API.updatePricingCategory(key, {sPricingDescription: name, bActive: active});
+      await loadPricingFromAPI();
+      document.getElementById('drawerPricingName').textContent = name;
+    } catch(e){ alert('Error: '+e.message); }
+  };
+
+  window.updateItemPrice = async function(catKey, itemKey, price){
+    try {
+      await API.updatePricingDetail({lPricingCategoryKey: catKey, lRepairItemKey: itemKey, dblRepairPrice: parseFloat(price)||0});
+    } catch(e){ alert('Error: '+e.message); }
+  };
+
+  window.exportPricingCSV = async function(catKey){
+    var items = _pricingItems.length ? _pricingItems : await API.getPricingByCategory(catKey);
+    if(!Array.isArray(items)||!items.length){ alert('No items to export'); return; }
+    var csv = 'RepairItemKey,Description,RepairType,Price\n';
+    items.forEach(function(it){
+      csv += it.lRepairItemKey+',"'+(it.sItemDescription||'').replace(/"/g,'""')+'",'+(it.sRigidOrFlexible||'')+','+(it.dblRepairPrice||0)+'\n';
+    });
+    var blob = new Blob([csv], {type:'text/csv'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var cat = PRICING.find(function(p){return p.lPricingCategoryKey===catKey;});
+    a.download = (cat ? (cat.sPricingDescription||'pricing').trim().replace(/\s+/g,'-') : 'pricing')+'.csv';
+    a.click();
   };
 
   /* ==============================
@@ -2162,7 +2254,7 @@
   if(API && API.UI) API.UI.showSkeleton('skAdmin', 5);
   renderUsers(USERS);
   renderSecurityGroups();
-  renderPricing(PRICING);
+  loadPricingFromAPI();
   renderSettings();
   renderAudit(AUDIT);
   renderDeliveryMethods(DELIVERY_METHODS);

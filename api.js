@@ -250,6 +250,10 @@ const API = (() => {
     return request('POST', endpoint, body);
   }
 
+  function put(endpoint, body) {
+    return request('PUT', endpoint, body);
+  }
+
   function del(endpoint) {
     return request('DELETE', endpoint);
   }
@@ -456,6 +460,11 @@ const API = (() => {
   async function getPricingForItem(repairItemKey) { return get('/pricing/details/' + repairItemKey); }
   async function getPricingByCategory(categoryKey) { return get('/pricing/by-category/' + categoryKey); }
   async function validatePrice(repairItemKey, pricingCategoryKey) { return get('/pricing/validate?repairItemKey=' + repairItemKey + '&pricingCategoryKey=' + pricingCategoryKey); }
+  async function getPricingCategories() { return get('/pricing/categories'); }
+  async function addPricingCategory(data) { return post('/pricing/categories', data); }
+  async function updatePricingCategory(key, data) { return put('/pricing/categories/' + key, data); }
+  async function updatePricingDetail(data) { return put('/pricing/detail', data); }
+  async function importPricing(data) { return post('/pricing/import', data); }
   async function getAllPaymentTerms() { return get('/PaymentTerms/GetAllPaymentTerms'); }
   async function getAllCreditLimits() { return get('/CreditLimit/GetAllCreditLimits'); }
   async function getAllDistributors() { return get('/DistributorName/GetAllDistributorNames'); }
@@ -716,8 +725,10 @@ const API = (() => {
     getFlagsByOwner, addFlag, deleteFlag,
 
     // Lookups / Reference
-    getAllSalesReps, getAllPricingCategories, getPricingDetails, getPricingForItem,
-    getPricingByCategory, validatePrice, getAllPaymentTerms,
+    getAllSalesReps, getAllPricingCategories, getPricingCategories,
+    getPricingDetails, getPricingForItem, getPricingByCategory, validatePrice,
+    addPricingCategory, updatePricingCategory, updatePricingDetail, importPricing,
+    getAllPaymentTerms,
     getAllCreditLimits, getAllDistributors,
     getInstrumentTypes,
 
