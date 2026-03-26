@@ -170,6 +170,20 @@ router.delete('/PendingContract/RemoveScopeFromProposal', async (req, res, next)
   } catch (e) { next(e); }
 });
 
+// POST /PendingContract/UpdateScopeCost
+router.post('/PendingContract/UpdateScopeCost', async (req, res, next) => {
+  try {
+    const { lPendingContractScopeKey, nCost } = req.body || {};
+    if (!lPendingContractScopeKey) return res.status(400).json({ error: 'lPendingContractScopeKey required' });
+    const cost = parseFloat(nCost) || 0;
+    await db.query(
+      'UPDATE tblPendingContractScope SET nCost = @cost, nUnitCost = @cost WHERE lPendingContractScopeKey = @k',
+      { cost, k: parseInt(lPendingContractScopeKey) }
+    );
+    res.json({ success: true, nCost: cost });
+  } catch (e) { next(e); }
+});
+
 // POST /PendingContract/CreatePendingContract — New empty proposal
 router.post('/PendingContract/CreatePendingContract', async (req, res, next) => {
   try {
@@ -315,16 +329,19 @@ router.post('/Contract/InitializeRenewal', async (req, res, next) => {
     );
     const pendingKey = parseInt(result[0].lPendingContractKey);
 
-    // Copy scopes from tblContractScope, pricing from tblScopeTypeContractCostsImport
+    // Copy scopes from tblContractScope — distribute existing contract total evenly
     const scopes = await db.query(`
       SELECT cs.lScopeKey, s.lScopeTypeKey, s.lDepartmentKey,
-        d.lClientKey AS scopeClientKey,
-        ISNULL(ci.nContractCost, 0) AS nContractCost
+        d.lClientKey AS scopeClientKey
       FROM tblContractScope cs
         LEFT JOIN tblScope s ON s.lScopeKey = cs.lScopeKey
         LEFT JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
-        LEFT JOIN tblScopeTypeContractCostsImport ci ON ci.lScopeTypeKey = s.lScopeTypeKey
       WHERE cs.lContractKey = @k`, { k: contractKey });
+
+    const annualTotal = parseFloat(con.dblAmtTotal) || 0;
+    const perScopeCost = scopes.length > 0
+      ? Math.round((annualTotal / scopes.length) * 100) / 100
+      : 0;
 
     for (const s of scopes) {
       await db.query(`
@@ -341,7 +358,7 @@ router.post('/Contract/InitializeRenewal', async (req, res, next) => {
           pendingKey,
           scopeKey: s.lScopeKey,
           scopeTypeKey: s.lScopeTypeKey || null,
-          cost: parseFloat(s.nContractCost) || 0,
+          cost: perScopeCost,
           clientKey: s.scopeClientKey || con.lClientKey,
           deptKey: s.lDepartmentKey || null
         }
