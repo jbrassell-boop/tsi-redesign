@@ -4101,14 +4101,17 @@ function populateSelect(id, items, valKey, textKey, blank) {
 
 // Grouped status dropdown — uses sPhaseGroup for <optgroup> sections
 // isCartRepair: show Cart / Build statuses only for EndoCart repairs
+// bIsLegacy entries are excluded from dropdown (lookup only)
 function populateStatusSelect(isCartRepair) {
   const sel = document.getElementById('hRepairStatus');
   if (!sel) return;
   sel.innerHTML = '<option value="">—</option>';
-  const groups = ['Intake', 'Approval', 'In Repair', 'Shipping'];
+  const groups = ['Intake', 'Approval', 'In Repair', 'Shipping', 'On Hold'];
   if (isCartRepair) groups.push('Cart / Build');
-  // Sort statuses by lRepairStatusSortOrder within each group
-  const sorted = _statuses.slice().sort((a, b) => (a.lRepairStatusSortOrder || 99) - (b.lRepairStatusSortOrder || 99));
+  // Sort by lRepairStatusSortOrder; exclude legacy entries
+  const sorted = _statuses.slice()
+    .filter(function(s) { return !s.bIsLegacy; })
+    .sort(function(a, b) { return (a.lRepairStatusSortOrder || 99) - (b.lRepairStatusSortOrder || 99); });
   groups.forEach(function(grp) {
     const items = sorted.filter(function(s) { return s.sPhaseGroup === grp; });
     if (!items.length) return;
@@ -4122,7 +4125,7 @@ function populateStatusSelect(isCartRepair) {
     });
     sel.appendChild(og);
   });
-  // Fallback: any status without a sPhaseGroup (legacy/ungrouped)
+  // Fallback: any active status without a sPhaseGroup
   const ungrouped = sorted.filter(function(s) { return !s.sPhaseGroup && !s.bIsCartStatus; });
   if (ungrouped.length) {
     const og = document.createElement('optgroup');
@@ -6704,10 +6707,13 @@ function resolveStatusName(r) {
 
 function statusPillStyle(s) {
   if (!s) return 'background:#F3F4F6;color:#4B5563';
-  if (/ship|scheduled/i.test(s))                                      return 'background:#DCFCE7;color:#166534';
-  if (/in repair|drying|build|semi.?rigid|special rigid|parts hold/i.test(s)) return 'background:#DBEAFE;color:#1E40AF';
-  if (/approv|waiting/i.test(s))                                      return 'background:#FEF3C7;color:#92400E';
-  if (/inspection|outsourced|more info|evaluation/i.test(s))          return 'background:#EDE9FE;color:#6D28D9';
+  if (/ship|scheduled/i.test(s))                                               return 'background:#DCFCE7;color:#166534';
+  if (/in repair|drying|build|semi.?rigid|special rigid|parts hold/i.test(s))  return 'background:#DBEAFE;color:#1E40AF';
+  if (/declined/i.test(s))                                                      return 'background:#FEE2E2;color:#991B1B';
+  if (/on hold/i.test(s))                                                       return 'background:#F3F4F6;color:#374151';
+  if (/approv|waiting|follow.?up/i.test(s))                                     return 'background:#FEF3C7;color:#92400E';
+  if (/40.day|warranty/i.test(s))                                               return 'background:#FDF4FF;color:#7E22CE';
+  if (/inspection|outsourced|more info|evaluation/i.test(s))                    return 'background:#EDE9FE;color:#6D28D9';
   return 'background:#F3F4F6;color:#4B5563';
 }
 
@@ -7765,7 +7771,10 @@ function renderScopeHistory(currentKey) {
     if (s === 'Completed' || s === 'Shipped') return 'background:#DCFCE7;color:#166534';
     if (/ship|scheduled/i.test(s)) return 'background:#DCFCE7;color:#166534';
     if (/in repair|semi.?rigid|special rigid|parts hold|build/i.test(s)) return 'background:#DBEAFE;color:#1E40AF';
-    if (/approv|waiting/i.test(s)) return 'background:#FEF3C7;color:#92400E';
+    if (/declined/i.test(s)) return 'background:#FEE2E2;color:#991B1B';
+    if (/on hold/i.test(s)) return 'background:#F3F4F6;color:#374151';
+    if (/40.day|warranty/i.test(s)) return 'background:#FDF4FF;color:#7E22CE';
+    if (/approv|waiting|follow.?up/i.test(s)) return 'background:#FEF3C7;color:#92400E';
     return 'background:#F3F4F6;color:#4B5563';
   }
 
