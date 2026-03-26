@@ -256,6 +256,7 @@
             </div>
             <div class="dh-actions">
               <button class="btn btn-outline" title="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="btn btn-outline" id="btnGenerateCSA" onclick="openGenerateCSAModal()" title="Generate CSA Document"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Generate CSA</button>
               <button class="btn btn-navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg> Save</button>
             </div>
           </div>
@@ -1051,6 +1052,40 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
       <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generate CSA Modal -->
+<div class="modal-overlay" id="generateCSAModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box sm">
+    <div class="modal-header">
+      <h3>Generate Customer Service Agreement</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg g2">
+        <div class="ff" style="grid-column:1/-1">
+          <label>Agreement Type <span class="req">*</span></label>
+          <select class="inp" id="csaContractType">
+            <option value="Performance">Performance Service Agreement</option>
+            <option value="Preferred">Preferred Service Agreement</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Quote Date <span class="req">*</span></label>
+          <input class="inp" type="date" id="csaQuoteDate"/>
+        </div>
+        <div class="ff">
+          <label>Quote Expiration</label>
+          <input class="inp" type="date" id="csaQuoteExpDate" readonly style="background:var(--bg2);color:var(--muted)"/>
+        </div>
+      </div>
+      <p id="csaGenStatus" style="margin-top:8px;font-size:11px;color:var(--muted)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" id="btnCSADownload" onclick="generateCSADoc()">Generate &amp; Download</button>
     </div>
   </div>
 </div>
@@ -2376,6 +2411,83 @@ function updateBreadcrumb(items) {
   }
   el.innerHTML = html;
   el.style.display = 'flex';
+}
+
+// ── CSA Generation ─────────────────────────────────────────────────────────
+function openGenerateCSAModal() {
+  // Default quote date to today
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('csaQuoteDate').value = today;
+  updateCSAExpiry();
+  document.getElementById('csaGenStatus').textContent = '';
+  document.getElementById('generateCSAModal').classList.add('open');
+}
+
+function updateCSAExpiry() {
+  const qd = document.getElementById('csaQuoteDate').value;
+  if (!qd) return;
+  const exp = new Date(qd);
+  exp.setDate(exp.getDate() + 90);
+  document.getElementById('csaQuoteExpDate').value = exp.toISOString().slice(0, 10);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const qdInput = document.getElementById('csaQuoteDate');
+  if (qdInput) qdInput.addEventListener('change', updateCSAExpiry);
+});
+
+async function generateCSADoc() {
+  const contractKey = selectedContractKey;
+  if (!contractKey) {
+    document.getElementById('csaGenStatus').textContent = 'No contract selected.';
+    return;
+  }
+
+  const contractType = document.getElementById('csaContractType').value;
+  const quoteDate = document.getElementById('csaQuoteDate').value;
+
+  const btn = document.getElementById('btnCSADownload');
+  const status = document.getElementById('csaGenStatus');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  status.textContent = 'Building document...';
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/Contract/GenerateCSA', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plContractKey: contractKey,
+        sContractType: contractType,
+        sQuoteDate: quoteDate
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Server error ' + resp.status);
+    }
+
+    // Trigger download
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const cd = resp.headers.get('Content-Disposition') || '';
+    const fnMatch = cd.match(/filename="([^"]+)"/);
+    a.download = fnMatch ? fnMatch[1] : 'TSI_CSA.docx';
+    a.href = url;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    status.textContent = 'Document downloaded.';
+    setTimeout(() => document.getElementById('generateCSAModal').classList.remove('open'), 1200);
+
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generate & Download';
+  }
 }
 </script>
 <script src="js/new-order-wizard.js"></script>
