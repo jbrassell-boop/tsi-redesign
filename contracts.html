@@ -1125,22 +1125,54 @@
       <h3>Add Scopes to Proposal</h3>
       <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
     </div>
-    <div class="modal-body" style="padding:12px 16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <input class="inp" id="addScopeSearch" placeholder="Search by serial, model, department..." style="flex:1"/>
-        <label style="font-size:12px;display:flex;align-items:center;gap:4px;white-space:nowrap">
-          <input type="checkbox" onchange="selectAllAddScopes(this)"/> Select all
-        </label>
+    <div class="modal-body" style="padding:0">
+      <!-- Tabs -->
+      <div style="display:flex;border-bottom:1px solid var(--border);padding:0 16px">
+        <div class="tab active" id="addScopeTab1" onclick="switchAddScopeTab(1)" style="padding:8px 16px;cursor:pointer;font-size:13px">Existing Instruments</div>
+        <div class="tab" id="addScopeTab2" onclick="switchAddScopeTab(2)" style="padding:8px 16px;cursor:pointer;font-size:13px">New Instrument</div>
       </div>
-      <div style="max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:4px">
-        <table style="width:100%">
-          <thead style="position:sticky;top:0;background:#f5f7fa">
-            <tr><th style="width:32px"></th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Contract Cost</th></tr>
-          </thead>
-          <tbody id="addScopeListBody">
-            <tr><td colspan="5" class="empty-state">Loading...</td></tr>
-          </tbody>
-        </table>
+
+      <!-- Tab 1: Existing -->
+      <div id="addScopePane1" style="padding:12px 16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <input class="inp" id="addScopeSearch" placeholder="Search by serial, model, department..." style="flex:1"/>
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px;white-space:nowrap">
+            <input type="checkbox" onchange="selectAllAddScopes(this)"/> Select all
+          </label>
+        </div>
+        <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:4px">
+          <table style="width:100%">
+            <thead style="position:sticky;top:0;background:#f5f7fa">
+              <tr><th style="width:32px"></th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Contract Cost</th></tr>
+            </thead>
+            <tbody id="addScopeListBody">
+              <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: New Instrument -->
+      <div id="addScopePane2" style="display:none;padding:16px">
+        <div class="fg g2">
+          <div class="ff"><label>Department <span class="req">*</span></label>
+            <select class="inp" id="nsDepKey" onchange="onNsDeptChange(this)">
+              <option value="">-- Select Department --</option>
+            </select>
+          </div>
+          <div class="ff"><label>Scope Type / Model <span class="req">*</span></label>
+            <select class="inp" id="nsScopeTypeKey" onchange="onNsScopeTypeChange(this)">
+              <option value="">-- Select Model --</option>
+            </select>
+          </div>
+          <div class="ff"><label>Serial Number <span class="req">*</span></label>
+            <input class="inp" id="nsSerial" placeholder="e.g. 2601234"/>
+          </div>
+          <div class="ff"><label>Contract Cost</label>
+            <input class="inp" type="number" id="nsCost" min="0" step="0.01" placeholder="0.00"/>
+          </div>
+        </div>
+        <div id="nsStatus" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2371,7 +2403,12 @@ async function openAddScopeModal() {
   document.getElementById('addScopeSearch').value = '';
   document.getElementById('addScopeStatus').textContent = '';
   document.getElementById('addScopeListBody').innerHTML = '<tr><td colspan="5" class="empty-state">Loading...</td></tr>';
+  // Reset to tab 1
+  switchAddScopeTab(1);
   modal.classList.add('open');
+
+  // Load new scope dropdowns in parallel
+  loadNewScopeDropdowns();
 
   try {
     const resp = await fetch('http://localhost:4000/api/PendingContract/GetAvailableScopesForProposal?plPendingContractKey=' + selectedPendingKey);
@@ -2413,6 +2450,98 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAddScopeList(filtered);
   });
 });
+
+function switchAddScopeTab(n) {
+  document.getElementById('addScopeTab1').classList.toggle('active', n === 1);
+  document.getElementById('addScopeTab2').classList.toggle('active', n === 2);
+  document.getElementById('addScopePane1').style.display = n === 1 ? '' : 'none';
+  document.getElementById('addScopePane2').style.display = n === 2 ? '' : 'none';
+  const btn = document.getElementById('btnConfirmAddScopes');
+  btn.textContent = n === 1 ? 'Add Selected' : 'Add New Scope';
+  btn.onclick = n === 1 ? confirmAddScopes : confirmAddNewScope;
+}
+
+let nsScopeTypes = [];
+
+async function loadNewScopeDropdowns() {
+  const proposal = pendingProposals.find(p => p.lPendingContractKey === selectedPendingKey);
+  if (!proposal) return;
+
+  // Departments for this client
+  try {
+    const [deptResp, typeResp] = await Promise.all([
+      fetch('http://localhost:4000/api/PendingContract/GetClientDepartments?lClientKey=' + proposal.lClientKey),
+      fetch('http://localhost:4000/api/Scopes/GetAllScopeType')
+    ]);
+    const depts = await deptResp.json();
+    nsScopeTypes = await typeResp.json();
+
+    const deptSel = document.getElementById('nsDepKey');
+    deptSel.innerHTML = '<option value="">-- Select Department --</option>' +
+      depts.map(d => '<option value="' + d.lDepartmentKey + '">' + esc(d.sDepartmentName) + '</option>').join('');
+
+    const typeSel = document.getElementById('nsScopeTypeKey');
+    typeSel.innerHTML = '<option value="">-- Select Model --</option>' +
+      nsScopeTypes.map(t => '<option value="' + t.lScopeTypeKey + '">' + esc(t.sScopeTypeDesc || t.sDesc || '') + '</option>').join('');
+  } catch (e) {
+    console.warn('[NewScope] Dropdown load failed:', e.message);
+  }
+}
+
+function onNsDeptChange() { /* reserved for future dept-scoped filtering */ }
+
+function onNsScopeTypeChange(sel) {
+  // Auto-fill cost from available scopes data (model contract cost)
+  const typeKey = parseInt(sel.value);
+  const match = availableScopes.find(s => s.lScopeTypeKey === typeKey);
+  if (match && match.nContractCost) {
+    document.getElementById('nsCost').value = parseFloat(match.nContractCost).toFixed(2);
+  }
+}
+
+async function confirmAddNewScope() {
+  const deptKey = document.getElementById('nsDepKey').value;
+  const typeKey = document.getElementById('nsScopeTypeKey').value;
+  const serial = document.getElementById('nsSerial').value.trim();
+  const cost = document.getElementById('nsCost').value;
+  const status = document.getElementById('nsStatus');
+
+  if (!deptKey) { status.textContent = 'Select a department.'; return; }
+  if (!typeKey) { status.textContent = 'Select a scope type / model.'; return; }
+  if (!serial) { status.textContent = 'Serial number is required.'; return; }
+
+  const btn = document.getElementById('btnConfirmAddScopes');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  status.textContent = '';
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/AddNewScopeToProposal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        lPendingContractKey: selectedPendingKey,
+        lScopeTypeKey: parseInt(typeKey),
+        lDepartmentKey: parseInt(deptKey),
+        sSerialNumber: serial,
+        nCost: parseFloat(cost) || 0
+      })
+    });
+    const result = await resp.json();
+    if (!resp.ok) throw new Error(result.error || 'Server error');
+    document.getElementById('addScopeModal').classList.remove('open');
+    await reloadPendingScopes();
+    // Reset form
+    document.getElementById('nsSerial').value = '';
+    document.getElementById('nsCost').value = '';
+    document.getElementById('nsStatus').textContent = '';
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add New Scope';
+  }
+}
 
 function selectAllAddScopes(cb) {
   document.querySelectorAll('.add-scope-cb').forEach(el => el.checked = cb.checked);

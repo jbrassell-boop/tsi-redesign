@@ -170,6 +170,82 @@ router.delete('/PendingContract/RemoveScopeFromProposal', async (req, res, next)
   } catch (e) { next(e); }
 });
 
+// GET /PendingContract/GetClientDepartments — departments for a client (for new scope form)
+router.get('/PendingContract/GetClientDepartments', async (req, res, next) => {
+  try {
+    const clientKey = parseInt(req.query.lClientKey) || 0;
+    if (!clientKey) return res.status(400).json({ error: 'lClientKey required' });
+    const rows = await db.query(`
+      SELECT lDepartmentKey, sDepartmentName
+      FROM tblDepartment
+      WHERE lClientKey = @k
+      ORDER BY sDepartmentName`, { k: clientKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /PendingContract/AddNewScopeToProposal
+// Creates a new tblScope record and adds it to the proposal
+router.post('/PendingContract/AddNewScopeToProposal', async (req, res, next) => {
+  try {
+    const { lPendingContractKey, lScopeTypeKey, lDepartmentKey, sSerialNumber, nCost } = req.body || {};
+    if (!lPendingContractKey || !lScopeTypeKey || !lDepartmentKey) {
+      return res.status(400).json({ error: 'lPendingContractKey, lScopeTypeKey, lDepartmentKey required' });
+    }
+
+    // Check if serial already exists
+    if (sSerialNumber) {
+      const existing = await db.queryOne(
+        'SELECT lScopeKey FROM tblScope WHERE sSerialNumber = @sn',
+        { sn: sSerialNumber.trim() }
+      );
+      if (existing) {
+        return res.status(409).json({ error: 'Serial number ' + sSerialNumber + ' already exists in system (key ' + existing.lScopeKey + ')' });
+      }
+    }
+
+    // Create new scope
+    const scopeResult = await db.query(`
+      INSERT INTO tblScope (lScopeTypeKey, lDepartmentKey, sSerialNumber)
+      VALUES (@typeKey, @deptKey, @serial);
+      SELECT SCOPE_IDENTITY() AS lScopeKey`,
+      {
+        typeKey: parseInt(lScopeTypeKey),
+        deptKey: parseInt(lDepartmentKey),
+        serial: sSerialNumber ? sSerialNumber.trim() : ''
+      }
+    );
+    const newScopeKey = parseInt(scopeResult[0].lScopeKey);
+
+    // Get client key for the scope record
+    const dept = await db.queryOne('SELECT lClientKey FROM tblDepartment WHERE lDepartmentKey = @k', { k: parseInt(lDepartmentKey) });
+
+    // Add to proposal
+    const cost = parseFloat(nCost) || 0;
+    await db.query(`
+      INSERT INTO tblPendingContractScope (
+        lPendingContractKey, lScopeKey, lScopeTypeKey,
+        nCost, nUnitCost, lQuantity,
+        lClientKey, lDepartmentKey
+      ) VALUES (
+        @pendingKey, @scopeKey, @typeKey,
+        @cost, @cost, 1,
+        @clientKey, @deptKey
+      )`,
+      {
+        pendingKey: parseInt(lPendingContractKey),
+        scopeKey: newScopeKey,
+        typeKey: parseInt(lScopeTypeKey),
+        cost,
+        clientKey: dept ? dept.lClientKey : null,
+        deptKey: parseInt(lDepartmentKey)
+      }
+    );
+
+    res.json({ lScopeKey: newScopeKey, success: true });
+  } catch (e) { next(e); }
+});
+
 // POST /PendingContract/UpdateScopeCost
 router.post('/PendingContract/UpdateScopeCost', async (req, res, next) => {
   try {
