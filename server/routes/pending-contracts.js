@@ -86,6 +86,90 @@ router.get('/PendingContract/GetPendingContractScopes', async (req, res, next) =
   } catch (e) { next(e); }
 });
 
+// GET /PendingContract/GetAvailableScopesForProposal
+// Returns all scopes under the client that are NOT already on this proposal
+router.get('/PendingContract/GetAvailableScopesForProposal', async (req, res, next) => {
+  try {
+    const pendingKey = parseInt(req.query.plPendingContractKey) || 0;
+    if (!pendingKey) return res.status(400).json({ error: 'plPendingContractKey required' });
+
+    // Get the client key from the pending contract
+    const pc = await db.queryOne(
+      'SELECT lClientKey FROM tblPendingContract WHERE lPendingContractKey = @k AND Delete_Datetime IS NULL',
+      { k: pendingKey }
+    );
+    if (!pc) return res.status(404).json({ error: 'Proposal not found' });
+
+    const rows = await db.query(`
+      SELECT
+        s.lScopeKey,
+        ISNULL(s.sSerialNumber,'') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc,'') AS sScopeTypeDesc,
+        ISNULL(m.sManufacturer,'') AS sManufacturer,
+        ISNULL(d.sDepartmentName,'') AS sDepartmentName,
+        d.lDepartmentKey,
+        s.lScopeTypeKey,
+        ISNULL(ci.nContractCost, 0) AS nContractCost
+      FROM tblScope s
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
+        LEFT JOIN tblScopeTypeContractCostsImport ci ON ci.lScopeTypeKey = s.lScopeTypeKey
+      WHERE d.lClientKey = @clientKey
+        AND s.lScopeKey NOT IN (
+          SELECT lScopeKey FROM tblPendingContractScope
+          WHERE lPendingContractKey = @pendingKey AND lScopeKey IS NOT NULL
+        )
+      ORDER BY d.sDepartmentName, st.sScopeTypeDesc, s.sSerialNumber`,
+      { clientKey: pc.lClientKey, pendingKey }
+    );
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /PendingContract/AddScopesToProposal
+// Body: { lPendingContractKey, scopes: [{ lScopeKey, lScopeTypeKey, lDepartmentKey, lClientKey, nCost }] }
+router.post('/PendingContract/AddScopesToProposal', async (req, res, next) => {
+  try {
+    const { lPendingContractKey, scopes } = req.body || {};
+    if (!lPendingContractKey || !Array.isArray(scopes) || !scopes.length) {
+      return res.status(400).json({ error: 'lPendingContractKey and scopes[] required' });
+    }
+    for (const s of scopes) {
+      await db.query(`
+        INSERT INTO tblPendingContractScope (
+          lPendingContractKey, lScopeKey, lScopeTypeKey,
+          nCost, nUnitCost, lQuantity,
+          lClientKey, lDepartmentKey
+        ) VALUES (
+          @pendingKey, @scopeKey, @scopeTypeKey,
+          @cost, @cost, 1,
+          @clientKey, @deptKey
+        )`,
+        {
+          pendingKey: parseInt(lPendingContractKey),
+          scopeKey: s.lScopeKey || null,
+          scopeTypeKey: s.lScopeTypeKey || null,
+          cost: parseFloat(s.nCost) || 0,
+          clientKey: s.lClientKey || null,
+          deptKey: s.lDepartmentKey || null
+        }
+      );
+    }
+    res.json({ added: scopes.length, success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /PendingContract/RemoveScopeFromProposal
+router.delete('/PendingContract/RemoveScopeFromProposal', async (req, res, next) => {
+  try {
+    const key = parseInt(req.query.lPendingContractScopeKey) || 0;
+    if (!key) return res.status(400).json({ error: 'lPendingContractScopeKey required' });
+    await db.query('DELETE FROM tblPendingContractScope WHERE lPendingContractScopeKey = @k', { k: key });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 // POST /PendingContract/CreatePendingContract — New empty proposal
 router.post('/PendingContract/CreatePendingContract', async (req, res, next) => {
   try {

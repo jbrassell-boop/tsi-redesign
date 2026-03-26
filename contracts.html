@@ -1011,12 +1011,15 @@
           <!-- Scopes table -->
           <div style="flex:1;overflow-y:auto;padding:16px 20px">
             <div class="panel">
-              <div class="panel-head"><span>Proposed Scopes</span></div>
+              <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between">
+                <span>Proposed Scopes</span>
+                <button class="btn btn-navy" style="padding:3px 10px;font-size:11px" onclick="openAddScopeModal()">+ Add Scope</button>
+              </div>
               <div class="panel-body" style="padding:0">
                 <table id="pendingScopesTable">
-                  <thead><tr><th>#</th><th>Facility</th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Cost</th></tr></thead>
+                  <thead><tr><th>#</th><th>Facility</th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Cost</th><th style="width:28px"></th></tr></thead>
                   <tbody id="pendingScopesBody">
-                    <tr><td colspan="6" class="empty-state">No scopes</td></tr>
+                    <tr><td colspan="7" class="empty-state">No scopes</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1111,6 +1114,39 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
       <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Scope to Proposal Modal -->
+<div class="modal-overlay" id="addScopeModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box lg" style="max-width:760px">
+    <div class="modal-header">
+      <h3>Add Scopes to Proposal</h3>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:12px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <input class="inp" id="addScopeSearch" placeholder="Search by serial, model, department..." style="flex:1"/>
+        <label style="font-size:12px;display:flex;align-items:center;gap:4px;white-space:nowrap">
+          <input type="checkbox" onchange="selectAllAddScopes(this)"/> Select all
+        </label>
+      </div>
+      <div style="max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:4px">
+        <table style="width:100%">
+          <thead style="position:sticky;top:0;background:#f5f7fa">
+            <tr><th style="width:32px"></th><th>Department</th><th>Model</th><th>Serial #</th><th style="text-align:right">Contract Cost</th></tr>
+          </thead>
+          <tbody id="addScopeListBody">
+            <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span id="addScopeStatus" style="font-size:12px;color:var(--muted)"></span>
+      <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
+      <button class="btn-save" id="btnConfirmAddScopes" onclick="confirmAddScopes()">Add Selected</button>
     </div>
   </div>
 </div>
@@ -2214,23 +2250,14 @@ async function selectPendingProposal(key) {
 
   // Load scopes
   const scopeBody = document.getElementById('pendingScopesBody');
-  scopeBody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading scopes...</td></tr>';
+  scopeBody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading scopes...</td></tr>';
   try {
     const resp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + key);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const scopes = await resp.json();
-    scopeBody.innerHTML = scopes.length ? scopes.map((s, i) =>
-      '<tr>' +
-        '<td style="color:var(--muted)">' + (i+1) + '</td>' +
-        '<td>' + esc(s.sClientName1 || '—') + '</td>' +
-        '<td>' + esc(s.sDepartmentName || '—') + '</td>' +
-        '<td>' + esc(s.sScopeTypeDesc || '—') + '</td>' +
-        '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
-        '<td style="text-align:right">' + (s.nCost ? fmtMoney(s.nCost) : '—') + '</td>' +
-      '</tr>'
-    ).join('') : '<tr><td colspan="6" class="empty-state">No scopes on this proposal</td></tr>';
+    renderPendingScopes(scopes);
   } catch (err) {
-    scopeBody.innerHTML = '<tr><td colspan="6" class="empty-state">Failed to load scopes</td></tr>';
+    scopeBody.innerHTML = '<tr><td colspan="7" class="empty-state">Failed to load scopes</td></tr>';
   }
 }
 
@@ -2245,6 +2272,149 @@ function openPendingGenerateCSA() {
   if (dateInput && !dateInput.value) dateInput.value = today;
   updateCSAExpiry();
   document.getElementById('generateCSAModal').classList.add('open');
+}
+
+// ── Pending Scopes Render + Management ───────────────
+function renderPendingScopes(scopes) {
+  const scopeBody = document.getElementById('pendingScopesBody');
+  const countEl = document.getElementById('pdScopeCount');
+  if (countEl) countEl.textContent = scopes.length;
+  scopeBody.innerHTML = scopes.length ? scopes.map((s, i) =>
+    '<tr>' +
+      '<td style="color:var(--muted)">' + (i+1) + '</td>' +
+      '<td>' + esc(s.sClientName1 || '—') + '</td>' +
+      '<td>' + esc(s.sDepartmentName || '—') + '</td>' +
+      '<td>' + esc(s.sScopeTypeDesc || '—') + '</td>' +
+      '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
+      '<td style="text-align:right">' + (s.nCost ? fmtMoney(s.nCost) : '—') + '</td>' +
+      '<td style="text-align:center"><button onclick="removePendingScope(' + s.lPendingContractScopeKey + ',this)" ' +
+        'style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px" ' +
+        'title="Remove scope">×</button></td>' +
+    '</tr>'
+  ).join('') : '<tr><td colspan="7" class="empty-state">No scopes on this proposal. Click "+ Add Scope" to begin.</td></tr>';
+}
+
+async function removePendingScope(scopeKey, btn) {
+  if (!confirm('Remove this scope from the proposal?')) return;
+  btn.disabled = true;
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/RemoveScopeFromProposal?lPendingContractScopeKey=' + scopeKey, { method: 'DELETE' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    // Reload scopes and refresh totals
+    await reloadPendingScopes();
+  } catch (e) {
+    alert('Remove failed: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+async function reloadPendingScopes() {
+  if (!selectedPendingKey) return;
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + selectedPendingKey);
+    const scopes = await resp.json();
+    renderPendingScopes(scopes);
+    // Refresh total from new scope list
+    const total = scopes.reduce((sum, s) => sum + (parseFloat(s.nCost) || 0), 0);
+    const totalEl = document.getElementById('pdTotal');
+    if (totalEl) totalEl.textContent = fmtMoney(total);
+    // Also refresh the list row total
+    const proposal = pendingProposals.find(p => p.lPendingContractKey === selectedPendingKey);
+    if (proposal) {
+      proposal.scopeCount = scopes.length;
+      proposal.dblAmtTotal = total;
+    }
+  } catch (e) { console.warn('[Pending] Reload scopes failed:', e.message); }
+}
+
+// ── Add Scope Modal ───────────────────────────────────
+let availableScopes = [];
+
+async function openAddScopeModal() {
+  if (!selectedPendingKey) return;
+  const modal = document.getElementById('addScopeModal');
+  document.getElementById('addScopeSearch').value = '';
+  document.getElementById('addScopeStatus').textContent = '';
+  document.getElementById('addScopeListBody').innerHTML = '<tr><td colspan="5" class="empty-state">Loading...</td></tr>';
+  modal.classList.add('open');
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/GetAvailableScopesForProposal?plPendingContractKey=' + selectedPendingKey);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    availableScopes = await resp.json();
+    renderAddScopeList(availableScopes);
+  } catch (e) {
+    document.getElementById('addScopeListBody').innerHTML = '<tr><td colspan="5" class="empty-state">Failed to load: ' + esc(e.message) + '</td></tr>';
+  }
+}
+
+function renderAddScopeList(list) {
+  const tbody = document.getElementById('addScopeListBody');
+  tbody.innerHTML = list.length ? list.map(s =>
+    '<tr>' +
+      '<td><input type="checkbox" class="add-scope-cb" data-key="' + s.lScopeKey + '" ' +
+        'data-type="' + (s.lScopeTypeKey||'') + '" ' +
+        'data-dept="' + (s.lDepartmentKey||'') + '" ' +
+        'data-client="' + (s.lClientKey||'') + '" ' +
+        'data-cost="' + (s.nContractCost||0) + '"/></td>' +
+      '<td>' + esc(s.sDepartmentName || '—') + '</td>' +
+      '<td>' + esc(s.sScopeTypeDesc || '—') + '</td>' +
+      '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
+      '<td style="text-align:right">' + (s.nContractCost ? fmtMoney(s.nContractCost) : '—') + '</td>' +
+    '</tr>'
+  ).join('') : '<tr><td colspan="5" class="empty-state">All client scopes are already on this proposal</td></tr>';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchBox = document.getElementById('addScopeSearch');
+  if (searchBox) searchBox.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const filtered = q ? availableScopes.filter(s =>
+      (s.sSerialNumber||'').toLowerCase().includes(q) ||
+      (s.sScopeTypeDesc||'').toLowerCase().includes(q) ||
+      (s.sDepartmentName||'').toLowerCase().includes(q) ||
+      (s.sManufacturer||'').toLowerCase().includes(q)
+    ) : availableScopes;
+    renderAddScopeList(filtered);
+  });
+});
+
+function selectAllAddScopes(cb) {
+  document.querySelectorAll('.add-scope-cb').forEach(el => el.checked = cb.checked);
+}
+
+async function confirmAddScopes() {
+  const checked = [...document.querySelectorAll('.add-scope-cb:checked')];
+  if (!checked.length) { document.getElementById('addScopeStatus').textContent = 'Select at least one scope.'; return; }
+
+  const btn = document.getElementById('btnConfirmAddScopes');
+  const status = document.getElementById('addScopeStatus');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+
+  const scopes = checked.map(cb => ({
+    lScopeKey: parseInt(cb.dataset.key),
+    lScopeTypeKey: parseInt(cb.dataset.type) || null,
+    lDepartmentKey: parseInt(cb.dataset.dept) || null,
+    lClientKey: parseInt(cb.dataset.client) || null,
+    nCost: parseFloat(cb.dataset.cost) || 0
+  }));
+
+  try {
+    const resp = await fetch('http://localhost:4000/api/PendingContract/AddScopesToProposal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ lPendingContractKey: selectedPendingKey, scopes })
+    });
+    if (!resp.ok) throw new Error((await resp.json()).error || 'Server error');
+    document.getElementById('addScopeModal').classList.remove('open');
+    await reloadPendingScopes();
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Selected';
+  }
 }
 
 // ── Initialize Renewal ────────────────────────────────
