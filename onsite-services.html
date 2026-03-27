@@ -68,7 +68,7 @@
     .ctx-item.danger:hover{background:#FEF2F2}
 
     /* ── Slide-Out Drawer ── */
-    .visit-drawer{position:fixed;right:0;top:64px;bottom:0;width:440px;background:var(--card);border-left:1.5px solid var(--border-dk);z-index:var(--z-dropdown);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .visit-drawer{position:fixed;right:0;top:64px;bottom:0;width:600px;background:var(--card);border-left:1.5px solid var(--border-dk);z-index:var(--z-dropdown);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
     .visit-drawer.open{transform:translateX(0);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.12)}
     .drawer-head{padding:14px 18px;background:var(--primary-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .drawer-head .dh-info{min-width:0}
@@ -138,6 +138,67 @@
     .fin-row.total{border-top:2px solid var(--border-dk);padding-top:8px;margin-top:4px;font-weight:800;font-size:12.5px;color:var(--navy)}
     .fin-label{color:var(--label)}
     .fin-val{font-weight:600}
+
+    /* ── Tray Picker (inline 3-option card) ── */
+    .tray-picker{background:var(--neutral-50);border:1.5px solid var(--border-dk);border-radius:8px;padding:10px;margin-bottom:10px;display:none;flex-direction:column;gap:8px}
+    .tray-picker.open{display:flex}
+    .tray-picker-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .tray-picker-opts{display:flex;gap:8px}
+    .tray-picker-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border:1.5px solid var(--border-dk);border-radius:6px;background:var(--card);cursor:pointer;transition:all .15s;text-align:center}
+    .tray-picker-opt:hover{border-color:var(--navy);background:var(--primary-light);transform:translateY(-1px);box-shadow:0 2px 8px rgba(var(--primary-rgb),.1)}
+    .tray-picker-opt svg{width:20px;height:20px;stroke:var(--navy);fill:none;stroke-width:1.5}
+    .tray-picker-opt .tpo-label{font-size:11px;font-weight:700;color:var(--navy)}
+    .tray-picker-opt .tpo-desc{font-size:9.5px;color:var(--muted);line-height:1.3}
+    .tray-picker-sub{padding:8px 0 0;display:none;flex-direction:column;gap:6px}
+    .tray-picker-sub.open{display:flex}
+    .tray-picker-sub select,.tray-picker-sub input{height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit;outline:none;width:100%;box-sizing:border-box}
+    .tray-picker-sub select:focus,.tray-picker-sub input:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .tray-picker-actions{display:flex;gap:6px;justify-content:flex-end}
+
+    /* ── Editable Instrument Grid ── */
+    .instr-grid{width:100%;border-collapse:collapse;font-size:10.5px}
+    .instr-grid th{background:var(--neutral-50);padding:4px 5px;font-size:8.5px;font-weight:700;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.03em;text-align:center;border-bottom:1px solid var(--neutral-200);white-space:nowrap}
+    .instr-grid th:first-child{text-align:left;padding-left:8px}
+    .instr-grid td{padding:3px 4px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+    .instr-grid td:first-child{text-align:left;padding-left:8px}
+    .instr-grid tbody tr:hover td{background:var(--primary-light)}
+    .instr-grid input[type="number"]{width:48px;height:22px;border:1px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:10.5px;font-family:inherit;text-align:center;outline:none;-moz-appearance:textfield}
+    .instr-grid input[type="number"]::-webkit-inner-spin-button,.instr-grid input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .instr-grid input[type="number"]:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .instr-grid .ig-price{width:62px;text-align:right;padding-right:6px}
+    .instr-grid .ig-calc{font-weight:700;color:var(--navy);text-align:right;padding-right:8px;white-space:nowrap}
+    .instr-grid .ig-del{width:24px;height:22px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;border-radius:3px;transition:all .1s}
+    .instr-grid .ig-del:hover{background:#FEF2F2;color:var(--red)}
+    .instr-grid select{height:22px;border:1px solid var(--border-dk);border-radius:3px;padding:0 4px;font-size:10px;font-family:inherit;outline:none;max-width:110px}
+    .instr-grid select:focus{border-color:var(--navy)}
+    .ig-add-row{display:flex;align-items:center;gap:4px;padding:6px 8px;font-size:10.5px;color:var(--blue);cursor:pointer;font-weight:600;transition:color .1s}
+    .ig-add-row:hover{color:var(--navy)}
+    .ig-add-row svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+    /* ── Visit-Level KPI Strip ── */
+    .visit-kpi-strip{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 4px;border-top:1.5px solid var(--border-dk);margin-top:8px}
+    .visit-kpi-chip{flex:1;min-width:80px;padding:6px 8px;background:var(--neutral-50);border:1px solid var(--border-dk);border-radius:5px;text-align:center}
+    .visit-kpi-chip .vk-val{font-size:13px;font-weight:800;color:var(--navy)}
+    .visit-kpi-chip .vk-lbl{font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:1px}
+    .visit-kpi-chip .vk-pct{font-size:9px;font-weight:700;color:var(--amber);margin-top:1px}
+    .visit-kpi-chip.vk-money .vk-val{color:var(--green)}
+
+    /* ── Tray Header Editable Name ── */
+    .tray-name-input{border:1px solid transparent;background:transparent;font-size:11.5px;font-weight:600;color:var(--navy);font-family:inherit;padding:1px 4px;border-radius:3px;outline:none;max-width:200px}
+    .tray-name-input:hover{border-color:var(--border-dk);background:var(--card)}
+    .tray-name-input:focus{border-color:var(--navy);background:var(--card);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
+    .tray-header .tray-delete{width:22px;height:22px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;border-radius:3px;transition:all .1s;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .tray-header .tray-delete:hover{background:#FEF2F2;color:var(--red)}
+    .tray-type-badge{font-size:8.5px;padding:1px 6px;border-radius:8px;font-weight:600;white-space:nowrap}
+    .tray-type-badge.ttb-saved{background:#E3ECF8;color:var(--blue)}
+    .tray-type-badge.ttb-new{background:#E8F5E9;color:#2E7D32}
+    .tray-type-badge.ttb-bin{background:#FFF3E0;color:#E65100}
+
+    /* ── Workflow Buttons ── */
+    .btn-submit{height:28px;padding:0 16px;border:none;border-radius:14px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#2E7D32;color:#fff;transition:all .15s}
+    .btn-submit:hover{background:#1B5E20;box-shadow:0 2px 6px rgba(46,125,50,.3)}
+    .btn-invoice{height:28px;padding:0 16px;border:none;border-radius:14px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--blue);color:#fff;transition:all .15s}
+    .btn-invoice:hover{background:#1565C0;box-shadow:0 2px 6px rgba(25,118,210,.3)}
   </style>
 </head>
 <body>
@@ -300,12 +361,16 @@
         </div>
         <div class="g3">
           <div class="field"><label>Visit Date</label><input id="fVisitDate" readonly/></div>
-          <div class="field"><label>Start Time</label><input id="fStartTime" readonly/></div>
-          <div class="field"><label>End Time</label><input id="fEndTime" readonly/></div>
+          <div class="field"><label>Start Time</label><input type="time" id="fStartTime" oninput="markDirty()"/></div>
+          <div class="field"><label>End Time</label><input type="time" id="fEndTime" oninput="markDirty()"/></div>
         </div>
         <div class="g2">
-          <div class="field"><label>PO #</label><input id="fPO" readonly/></div>
+          <div class="field"><label>PO #</label><input id="fPO" oninput="markDirty()"/></div>
           <div class="field"><label>Location</label><input id="fLocation" readonly/></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Truck #</label><input id="fTruckNum" oninput="markDirty()" placeholder="V-000"/></div>
+          <div class="field"><label>Price Class</label><select id="fPriceClass" onchange="markDirty()"><option value="">—</option><option>Standard</option><option>Premium</option><option>Economy</option><option>Contract</option></select></div>
         </div>
       </div>
     </div>
@@ -386,6 +451,7 @@
 
   <div class="drawer-footer">
     <span id="drawerSaveStatus" style="font-size:10.5px;color:var(--muted)"></span>
+    <div id="drawerWorkflow"></div>
   </div>
 </div>
 
@@ -430,6 +496,19 @@
           <input id="mPO" placeholder="Optional" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit"/>
         </div>
       </div>
+      <div class="g2">
+        <div class="field"><label>Truck #</label>
+          <input id="mTruckNum" placeholder="V-000" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit"/>
+        </div>
+        <div class="field"><label>Price Class</label>
+          <select id="mPriceClass" style="height:30px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:inherit">
+            <option value="Standard">Standard</option>
+            <option value="Premium">Premium</option>
+            <option value="Economy">Economy</option>
+            <option value="Contract">Contract</option>
+          </select>
+        </div>
+      </div>
       <div class="field"><label>Notes</label>
         <textarea id="mNotes" placeholder="Visit notes..." style="height:60px;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;font-size:11px;font-family:inherit;resize:none;width:100%;box-sizing:border-box"></textarea>
       </div>
@@ -464,95 +543,107 @@ let _searchTimer = null, _saveTimer = null;
 // ── Demo Data ───────────────────────────────────────────
 function getDemoVisits() {
   return [
-    { key:5001, invoiceNum:'INV-4022', clientName:'Northside Hospital', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-02-18', startTime:'08:00', endTime:'15:30', status:'Invoiced', location:'Upper Chichester', po:'PO-88412', submittedDate:'2026-02-19', notes:'Full quarterly service visit. 3 trays processed, all instruments in good condition. Minor repair on CF-H190.',
+    { key:5001, invoiceNum:'INV-4022', clientName:'Northside Hospital', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-02-18', startTime:'08:00', endTime:'15:30', status:'Invoiced', location:'Upper Chichester', po:'PO-88412', submittedDate:'2026-02-19', truckNum:'V-104', priceClass:'Standard',
+      notes:'Full quarterly service visit. 3 trays processed, all instruments in good condition. Minor repair on CF-H190.',
       trays:[
-        { name:'Tray A - GI Flexible', items:[
+        { name:'Tray A - GI Flexible', trayType:'saved', items:[
           {type:'Gastroscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:125},
           {type:'Colonoscope',total:3,repaired:2,sentTSI:1,ber:0,unitPrice:150},
           {type:'Duodenoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:200}
         ]},
-        { name:'Tray B - Bronchoscopes', items:[
+        { name:'Tray B - Bronchoscopes', trayType:'saved', items:[
           {type:'Bronchoscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:175},
           {type:'ENT Scope',total:2,repaired:1,sentTSI:0,ber:1,unitPrice:100}
         ]}
       ],
       expenses:[{desc:'Mileage (142 mi)',category:'Travel',amount:79.52},{desc:'Parking Garage',category:'Travel',amount:18.00}]
     },
-    { key:5002, invoiceNum:'INV-4025', clientName:'Metro Health Hospital', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-02-24', startTime:'07:30', endTime:'14:00', status:'Submitted', location:'Upper Chichester', po:'PO-MH-2026-118', submittedDate:'2026-02-25', notes:'Semi-annual audit. 2 trays inspected. Found 1 BER colonoscope.',
+    { key:5002, invoiceNum:'INV-4025', clientName:'Metro Health Hospital', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-02-24', startTime:'07:30', endTime:'14:00', status:'Submitted', location:'Upper Chichester', po:'PO-MH-2026-118', submittedDate:'2026-02-25', truckNum:'V-107', priceClass:'Standard',
+      notes:'Semi-annual audit. 2 trays inspected. Found 1 BER colonoscope.',
       trays:[
-        { name:'Tray 1 - Upper GI', items:[
+        { name:'Tray 1 - Upper GI', trayType:'saved', items:[
           {type:'Gastroscope',total:5,repaired:4,sentTSI:1,ber:0,unitPrice:125},
           {type:'Duodenoscope',total:1,repaired:1,sentTSI:0,ber:0,unitPrice:200}
         ]},
-        { name:'Tray 2 - Lower GI', items:[
+        { name:'Tray 2 - Lower GI', trayType:'saved', items:[
           {type:'Colonoscope',total:4,repaired:3,sentTSI:0,ber:1,unitPrice:150}
         ]}
       ],
       expenses:[{desc:'Hotel (1 night)',category:'Lodging',amount:149.00},{desc:'Mileage (88 mi)',category:'Travel',amount:49.28}]
     },
-    { key:5003, invoiceNum:'INV-4031', clientName:'Memorial Hermann', deptName:'Surgical Suite', techName:'James Wilson', visitDate:'2026-03-01', startTime:'09:00', endTime:'16:00', status:'Invoiced', location:'Nashville', po:'MH-REQ-4031', submittedDate:'2026-03-02', notes:'Annual instrument service. High volume - 3 full trays. Client requested expedited turnaround on BER items.',
+    { key:5003, invoiceNum:'INV-4031', clientName:'Memorial Hermann', deptName:'Surgical Suite', techName:'James Wilson', visitDate:'2026-03-01', startTime:'09:00', endTime:'16:00', status:'Invoiced', location:'Nashville', po:'MH-REQ-4031', submittedDate:'2026-03-02', truckNum:'V-112', priceClass:'Premium',
+      notes:'Annual instrument service. High volume - 3 full trays. Client requested expedited turnaround on BER items.',
       trays:[
-        { name:'Tray A - Rigid Scopes', items:[
+        { name:'Tray A - Rigid Scopes', trayType:'saved', items:[
           {type:'Arthroscope',total:6,repaired:5,sentTSI:1,ber:0,unitPrice:175},
           {type:'Laparoscope',total:4,repaired:4,sentTSI:0,ber:0,unitPrice:200}
         ]},
-        { name:'Tray B - Cameras', items:[
+        { name:'Tray B - Cameras', trayType:'new', items:[
           {type:'Camera Head',total:3,repaired:2,sentTSI:0,ber:1,unitPrice:350},
           {type:'Light Cable',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:85}
         ]},
-        { name:'Tray C - Instruments', items:[
+        { name:'Tray C - Instruments', trayType:'saved', items:[
           {type:'Grasper',total:8,repaired:7,sentTSI:1,ber:0,unitPrice:65},
           {type:'Scissors',total:6,repaired:6,sentTSI:0,ber:0,unitPrice:55}
         ]}
       ],
       expenses:[{desc:'Flight (round trip)',category:'Travel',amount:385.00},{desc:'Hotel (2 nights)',category:'Lodging',amount:298.00},{desc:'Rental Car',category:'Travel',amount:89.00},{desc:'Meals',category:'Meals',amount:62.50}]
     },
-    { key:5004, invoiceNum:'INV-4038', clientName:'HCA West Kendall', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-03-05', startTime:'08:30', endTime:'12:00', status:'Submitted', location:'Upper Chichester', po:'', submittedDate:'2026-03-06', notes:'Routine quarterly check. Small tray, all items in good condition.',
+    { key:5004, invoiceNum:'INV-4038', clientName:'HCA West Kendall', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2026-03-05', startTime:'08:30', endTime:'12:00', status:'Submitted', location:'Upper Chichester', po:'', submittedDate:'2026-03-06', truckNum:'V-104', priceClass:'Contract',
+      notes:'Routine quarterly check. Small tray, all items in good condition.',
       trays:[
-        { name:'Tray 1 - Flex Endoscopes', items:[
+        { name:'Tray 1 - Flex Endoscopes', trayType:'saved', items:[
           {type:'Gastroscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:125},
           {type:'Colonoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:150}
         ]}
       ],
       expenses:[{desc:'Mileage (65 mi)',category:'Travel',amount:36.40}]
     },
-    { key:5005, invoiceNum:'INV-4041', clientName:'Piedmont Healthcare', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-07', startTime:'07:00', endTime:'15:00', status:'Draft', location:'Nashville', po:'PH-PO-9921', submittedDate:null, notes:'Visit in progress. Tech still entering tray data.',
+    { key:5005, invoiceNum:'INV-4041', clientName:'Piedmont Healthcare', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-07', startTime:'07:00', endTime:'15:00', status:'Draft', location:'Nashville', po:'PH-PO-9921', submittedDate:null, truckNum:'V-107', priceClass:'Standard',
+      notes:'Visit in progress. Tech still entering tray data.',
       trays:[
-        { name:'Tray A - Upper Endo', items:[
+        { name:'Tray A - Upper Endo', trayType:'saved', items:[
           {type:'Gastroscope',total:4,repaired:2,sentTSI:0,ber:0,unitPrice:125},
           {type:'Duodenoscope',total:2,repaired:1,sentTSI:0,ber:0,unitPrice:200}
         ]},
-        { name:'Tray B - Lower Endo', items:[
+        { name:'Tray B - Lower Endo', trayType:'saved', items:[
           {type:'Colonoscope',total:5,repaired:3,sentTSI:1,ber:0,unitPrice:150}
+        ]},
+        { name:'Repair Bin', trayType:'repair-bin', items:[
+          {type:'Light Cable',total:1,repaired:1,sentTSI:0,ber:0,unitPrice:85},
+          {type:'Grasper',total:2,repaired:1,sentTSI:0,ber:1,unitPrice:65}
         ]}
       ],
       expenses:[]
     },
-    { key:5006, invoiceNum:'INV-4044', clientName:'Northside Hospital', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-08', startTime:'10:00', endTime:'14:30', status:'Draft', location:'Upper Chichester', po:'NH-PO-2026-304', submittedDate:null, notes:'Bronchoscope service visit.',
+    { key:5006, invoiceNum:'INV-4044', clientName:'Northside Hospital', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-08', startTime:'10:00', endTime:'14:30', status:'Draft', location:'Upper Chichester', po:'NH-PO-2026-304', submittedDate:null, truckNum:'V-112', priceClass:'Standard',
+      notes:'Bronchoscope service visit.',
       trays:[
-        { name:'Tray 1 - Bronchoscopes', items:[
+        { name:'Tray 1 - Bronchoscopes', trayType:'saved', items:[
           {type:'Bronchoscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:175},
           {type:'ENT Scope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:100}
         ]}
       ],
       expenses:[{desc:'Mileage (32 mi)',category:'Travel',amount:17.92}]
     },
-    { key:5007, invoiceNum:'INV-3998', clientName:'Metro Health Hospital', deptName:'Urology', techName:'Mike Rivera', visitDate:'2026-01-15', startTime:'08:00', endTime:'13:00', status:'Invoiced', location:'Upper Chichester', po:'MH-URO-115', submittedDate:'2026-01-16', notes:'Cystoscopy instrument service. All items passed inspection.',
+    { key:5007, invoiceNum:'INV-3998', clientName:'Metro Health Hospital', deptName:'Urology', techName:'Mike Rivera', visitDate:'2026-01-15', startTime:'08:00', endTime:'13:00', status:'Invoiced', location:'Upper Chichester', po:'MH-URO-115', submittedDate:'2026-01-16', truckNum:'V-104', priceClass:'Standard',
+      notes:'Cystoscopy instrument service. All items passed inspection.',
       trays:[
-        { name:'Tray 1 - Cystoscopes', items:[
+        { name:'Tray 1 - Cystoscopes', trayType:'saved', items:[
           {type:'Cystoscope',total:3,repaired:3,sentTSI:0,ber:0,unitPrice:200},
           {type:'Resectoscope',total:2,repaired:2,sentTSI:0,ber:0,unitPrice:225}
         ]}
       ],
       expenses:[{desc:'Mileage (88 mi)',category:'Travel',amount:49.28}]
     },
-    { key:5008, invoiceNum:'INV-3985', clientName:'Memorial Hermann', deptName:'OR Suite', techName:'James Wilson', visitDate:'2026-01-08', startTime:'07:00', endTime:'16:30', status:'Invoiced', location:'Nashville', po:'MH-REQ-3985', submittedDate:'2026-01-09', notes:'Full OR instrument processing. Large volume day.',
+    { key:5008, invoiceNum:'INV-3985', clientName:'Memorial Hermann', deptName:'OR Suite', techName:'James Wilson', visitDate:'2026-01-08', startTime:'07:00', endTime:'16:30', status:'Invoiced', location:'Nashville', po:'MH-REQ-3985', submittedDate:'2026-01-09', truckNum:'V-112', priceClass:'Premium',
+      notes:'Full OR instrument processing. Large volume day.',
       trays:[
-        { name:'Tray A - Rigid Scopes', items:[
+        { name:'Tray A - Rigid Scopes', trayType:'saved', items:[
           {type:'Arthroscope',total:8,repaired:7,sentTSI:1,ber:0,unitPrice:175},
           {type:'Laparoscope',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:200}
         ]},
-        { name:'Tray B - Instruments', items:[
+        { name:'Tray B - Instruments', trayType:'saved', items:[
           {type:'Grasper',total:10,repaired:9,sentTSI:1,ber:0,unitPrice:65},
           {type:'Scissors',total:8,repaired:8,sentTSI:0,ber:0,unitPrice:55},
           {type:'Trocar',total:6,repaired:6,sentTSI:0,ber:0,unitPrice:95}
@@ -560,39 +651,50 @@ function getDemoVisits() {
       ],
       expenses:[{desc:'Flight',category:'Travel',amount:342.00},{desc:'Hotel (2 nights)',category:'Lodging',amount:310.00},{desc:'Rental Car',category:'Travel',amount:95.00}]
     },
-    { key:5009, invoiceNum:'INV-4050', clientName:'HCA West Kendall', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-10', startTime:'08:00', endTime:'14:00', status:'Draft', location:'Upper Chichester', po:'HCA-WK-0310', submittedDate:null, notes:'Scheduled quarterly flexible endoscope service.',
+    { key:5009, invoiceNum:'INV-4050', clientName:'HCA West Kendall', deptName:'GI Lab', techName:'Sarah Chen', visitDate:'2026-03-10', startTime:'08:00', endTime:'14:00', status:'Draft', location:'Upper Chichester', po:'HCA-WK-0310', submittedDate:null, truckNum:'V-107', priceClass:'Contract',
+      notes:'Scheduled quarterly flexible endoscope service.',
       trays:[
-        { name:'Tray 1 - Flex Endoscopes', items:[
+        { name:'Tray 1 - Flex Endoscopes', trayType:'saved', items:[
           {type:'Gastroscope',total:6,repaired:4,sentTSI:1,ber:1,unitPrice:125},
           {type:'Colonoscope',total:4,repaired:3,sentTSI:1,ber:0,unitPrice:150}
+        ]},
+        { name:'Repair Bin', trayType:'repair-bin', items:[
+          {type:'Camera Head',total:1,repaired:0,sentTSI:1,ber:0,unitPrice:350},
+          {type:'Trocar',total:3,repaired:2,sentTSI:0,ber:1,unitPrice:95}
         ]}
       ],
       expenses:[]
     },
-    { key:5010, invoiceNum:'INV-3950', clientName:'Piedmont Healthcare', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2025-12-15', startTime:'09:00', endTime:'14:00', status:'Void', location:'Nashville', po:'', submittedDate:'2025-12-16', notes:'Visit voided - client rescheduled to January.',
+    { key:5010, invoiceNum:'INV-3950', clientName:'Piedmont Healthcare', deptName:'Endoscopy', techName:'Mike Rivera', visitDate:'2025-12-15', startTime:'09:00', endTime:'14:00', status:'Void', location:'Nashville', po:'', submittedDate:'2025-12-16', truckNum:'V-104', priceClass:'Standard',
+      notes:'Visit voided - client rescheduled to January.',
       trays:[
-        { name:'Tray A - Endoscopes', items:[
+        { name:'Tray A - Endoscopes', trayType:'saved', items:[
           {type:'Gastroscope',total:3,repaired:0,sentTSI:0,ber:0,unitPrice:125},
           {type:'Colonoscope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:150}
         ]}
       ],
       expenses:[]
     },
-    { key:5011, invoiceNum:'INV-4055', clientName:'Northside Hospital', deptName:'Endoscopy', techName:'Sarah Chen', visitDate:'2026-03-11', startTime:'07:30', endTime:'', status:'Draft', location:'Upper Chichester', po:'NH-PO-2026-311', submittedDate:null, notes:'Today visit - in progress.',
+    { key:5011, invoiceNum:'INV-4055', clientName:'Northside Hospital', deptName:'Endoscopy', techName:'Sarah Chen', visitDate:'2026-03-11', startTime:'07:30', endTime:'', status:'Draft', location:'Upper Chichester', po:'NH-PO-2026-311', submittedDate:null, truckNum:'V-107', priceClass:'Standard',
+      notes:'Today visit - in progress.',
       trays:[
-        { name:'Tray 1 - GI Scopes', items:[
+        { name:'Tray 1 - GI Scopes', trayType:'saved', items:[
           {type:'Gastroscope',total:5,repaired:2,sentTSI:0,ber:0,unitPrice:125},
           {type:'Colonoscope',total:3,repaired:1,sentTSI:0,ber:0,unitPrice:150}
         ]},
-        { name:'Tray 2 - ERCP', items:[
+        { name:'Tray 2 - ERCP', trayType:'new', items:[
           {type:'Duodenoscope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:200}
+        ]},
+        { name:'Repair Bin', trayType:'repair-bin', items:[
+          {type:'Scissors',total:1,repaired:1,sentTSI:0,ber:0,unitPrice:55}
         ]}
       ],
       expenses:[]
     },
-    { key:5012, invoiceNum:'INV-4060', clientName:'Metro Health Hospital', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-09', startTime:'08:00', endTime:'12:30', status:'Submitted', location:'Upper Chichester', po:'MH-PULM-309', submittedDate:'2026-03-10', notes:'Bronchoscope maintenance visit. All units serviceable.',
+    { key:5012, invoiceNum:'INV-4060', clientName:'Metro Health Hospital', deptName:'Pulmonology', techName:'James Wilson', visitDate:'2026-03-09', startTime:'08:00', endTime:'12:30', status:'Submitted', location:'Upper Chichester', po:'MH-PULM-309', submittedDate:'2026-03-10', truckNum:'V-112', priceClass:'Standard',
+      notes:'Bronchoscope maintenance visit. All units serviceable.',
       trays:[
-        { name:'Tray 1 - Bronchoscopes', items:[
+        { name:'Tray 1 - Bronchoscopes', trayType:'saved', items:[
           {type:'Bronchoscope',total:5,repaired:5,sentTSI:0,ber:0,unitPrice:175}
         ]}
       ],
@@ -1022,10 +1124,24 @@ function openDrawer(key) {
   document.getElementById('fTech').value = visit.techName;
   document.getElementById('fStatusBadge').innerHTML = '<span class="badge ' + statusBadgeClass(visit.status) + '">' + visit.status + '</span>';
   document.getElementById('fVisitDate').value = fmtDate(visit.visitDate);
-  document.getElementById('fStartTime').value = visit.startTime || '\u2014';
-  document.getElementById('fEndTime').value = visit.endTime || '\u2014';
-  document.getElementById('fPO').value = visit.po || '\u2014';
+  document.getElementById('fStartTime').value = visit.startTime || '';
+  document.getElementById('fEndTime').value = visit.endTime || '';
+  document.getElementById('fPO').value = visit.po || '';
   document.getElementById('fLocation').value = visit.location || '\u2014';
+  document.getElementById('fTruckNum').value = visit.truckNum || '';
+  document.getElementById('fPriceClass').value = visit.priceClass || '';
+
+  // Editability: only Void locks down
+  var isVoid = visit.status === 'Void';
+  ['fStartTime','fEndTime','fPO','fTruckNum'].forEach(function(id) {
+    document.getElementById(id).readOnly = isVoid;
+    document.getElementById(id).style.background = isVoid ? 'var(--neutral-50)' : '';
+  });
+  document.getElementById('fPriceClass').disabled = isVoid;
+  document.getElementById('fSalesRep').disabled = isVoid;
+  document.getElementById('fPaymentTerms').disabled = isVoid;
+  document.getElementById('fNotes').readOnly = isVoid;
+  document.getElementById('fNotes').style.background = isVoid ? 'var(--neutral-50)' : '';
 
   // Settings & Payment
   var repDD = document.getElementById('fSalesRep');
@@ -1064,17 +1180,29 @@ function openDrawer(key) {
     '<div class="fin-row"><span class="fin-label">Tax</span><span class="fin-val">' + fmtMoney(0) + '</span></div>' +
     '<div class="fin-row total"><span class="fin-label">Grand Total</span><span class="fin-val">' + fmtMoney(grandTotal) + '</span></div>';
 
+  // Workflow buttons
+  var wfEl = document.getElementById('drawerWorkflow');
+  if (visit.status === 'Draft') {
+    wfEl.innerHTML = '<button class="btn-submit" onclick="submitVisit()">Submit</button>';
+  } else if (visit.status === 'Submitted') {
+    wfEl.innerHTML = '<button class="btn-invoice" onclick="markVisitInvoiced()">Mark Invoiced</button>';
+  } else {
+    wfEl.innerHTML = '<span class="badge ' + statusBadgeClass(visit.status) + '" style="font-size:10px">' + visit.status + '</span>';
+  }
+
   // Trays tab
   renderTraysTab(visit);
 
   // Expenses tab
   renderExpensesTab(visit);
 
-  // Reset to overview tab
+  // Default tab: Draft visits open on Trays (flow state), others on Overview
+  var defaultTabIdx = visit.status === 'Draft' ? 1 : 0;
+  var defaultPaneId = defaultTabIdx === 1 ? 'dpane-trays' : 'dpane-overview';
   document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.dtab')[0].classList.add('active');
+  document.querySelectorAll('.dtab')[defaultTabIdx].classList.add('active');
   document.querySelectorAll('.dpane').forEach(p => p.classList.remove('active'));
-  document.getElementById('dpane-overview').classList.add('active');
+  document.getElementById(defaultPaneId).classList.add('active');
 
   // Open
   document.getElementById('visitDrawer').classList.add('open');
@@ -1101,35 +1229,154 @@ function switchTab(tab, el) {
   document.getElementById('dpane-' + tab).classList.add('active');
 }
 
+// ── Instrument Types & Saved Tray Templates ──────────
+var INSTRUMENT_TYPES = [
+  {type:'Arthroscope',price:175},
+  {type:'Bronchoscope',price:175},
+  {type:'Camera Head',price:350},
+  {type:'Colonoscope',price:150},
+  {type:'Cystoscope',price:200},
+  {type:'Duodenoscope',price:200},
+  {type:'ENT Scope',price:100},
+  {type:'Gastroscope',price:125},
+  {type:'Grasper',price:65},
+  {type:'Laparoscope',price:200},
+  {type:'Light Cable',price:85},
+  {type:'Resectoscope',price:225},
+  {type:'Scissors',price:55},
+  {type:'Trocar',price:95}
+];
+var SAVED_TRAY_TEMPLATES = [
+  { name:'GI Flexible Standard', items:[
+    {type:'Gastroscope',total:4,repaired:0,sentTSI:0,ber:0,unitPrice:125},
+    {type:'Colonoscope',total:3,repaired:0,sentTSI:0,ber:0,unitPrice:150},
+    {type:'Duodenoscope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:200}
+  ]},
+  { name:'Bronchoscopy Standard', items:[
+    {type:'Bronchoscope',total:4,repaired:0,sentTSI:0,ber:0,unitPrice:175},
+    {type:'ENT Scope',total:2,repaired:0,sentTSI:0,ber:0,unitPrice:100}
+  ]},
+  { name:'Rigid Scope Tray', items:[
+    {type:'Arthroscope',total:6,repaired:0,sentTSI:0,ber:0,unitPrice:175},
+    {type:'Laparoscope',total:4,repaired:0,sentTSI:0,ber:0,unitPrice:200}
+  ]},
+  { name:'Camera & Light', items:[
+    {type:'Camera Head',total:3,repaired:0,sentTSI:0,ber:0,unitPrice:350},
+    {type:'Light Cable',total:5,repaired:0,sentTSI:0,ber:0,unitPrice:85}
+  ]}
+];
+
+function getDefaultPrice(type) {
+  var m = INSTRUMENT_TYPES.find(function(t){return t.type===type;});
+  return m ? m.price : 0;
+}
+
 function renderTraysTab(visit) {
   var pane = document.getElementById('dpane-trays');
   var trays = visit.trays || [];
-  if (!trays.length) {
-    pane.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">No trays recorded</div>';
-    return;
-  }
+  var isVoid = visit.status === 'Void';
   var overallTotal = 0;
   var html = '';
+
+  // Header bar with + Add Tray
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+  html += '<span style="font-size:11px;font-weight:700;color:var(--navy)">' + trays.length + ' Tray' + (trays.length!==1?'s':'') + '</span>';
+  if (!isVoid) {
+    html += '<button class="btn btn-navy" onclick="showTrayPicker()" style="height:26px;padding:0 12px;font-size:11px;font-weight:700">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Tray</button>';
+  }
+  html += '</div>';
+
+  // Tray picker (hidden by default)
+  html += '<div class="tray-picker" id="trayPicker">';
+  html += '<div class="tray-picker-title">Choose tray type</div>';
+  html += '<div class="tray-picker-opts">';
+  html += '<div class="tray-picker-opt" onclick="showSavedTrayPanel()"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><div class="tpo-label">Saved Tray</div><div class="tpo-desc">Load a reusable template</div></div>';
+  html += '<div class="tray-picker-opt" onclick="showNewTrayPanel()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><div class="tpo-label">New Tray</div><div class="tpo-desc">Build from scratch</div></div>';
+  html += '<div class="tray-picker-opt" onclick="addRepairBin()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div class="tpo-label">Repair Bin</div><div class="tpo-desc">Ad-hoc one-offs</div></div>';
+  html += '</div>';
+  // Sub-panel: Saved Tray
+  html += '<div class="tray-picker-sub" id="tpSaved">';
+  html += '<select id="tpSavedSelect" style="height:30px"><option value="">-- Select Template --</option>';
+  SAVED_TRAY_TEMPLATES.forEach(function(t,i){ html += '<option value="'+i+'">'+t.name+'</option>'; });
+  html += '</select>';
+  html += '<div class="tray-picker-actions"><button class="btn btn-outline" onclick="hideTrayPicker()" style="height:26px;padding:0 10px;font-size:10px">Cancel</button><button class="btn btn-navy" onclick="confirmSavedTray()" style="height:26px;padding:0 10px;font-size:10px">Add</button></div>';
+  html += '</div>';
+  // Sub-panel: New Tray
+  html += '<div class="tray-picker-sub" id="tpNew">';
+  html += '<input id="tpNewName" placeholder="Tray name (e.g. Tray A - GI Flex)"/>';
+  html += '<div class="tray-picker-actions"><button class="btn btn-outline" onclick="hideTrayPicker()" style="height:26px;padding:0 10px;font-size:10px">Cancel</button><button class="btn btn-navy" onclick="confirmNewTray()" style="height:26px;padding:0 10px;font-size:10px">Create</button></div>';
+  html += '</div>';
+  html += '</div>';
+
+  // Tray accordions
   trays.forEach(function(tray, ti) {
     var trayTotal = calcTrayTotal(tray);
     overallTotal += trayTotal;
     var itemCount = (tray.items||[]).reduce(function(s,it){return s+(it.total||0);},0);
+    var badge = '';
+    if (tray.trayType === 'saved') badge = '<span class="tray-type-badge ttb-saved">Saved</span>';
+    else if (tray.trayType === 'new') badge = '<span class="tray-type-badge ttb-new">New</span>';
+    else if (tray.trayType === 'repair-bin') badge = '<span class="tray-type-badge ttb-bin">Bin</span>';
+
     html += '<div class="tray-row">';
-    html += '<div class="tray-header" onclick="toggleTray(this)">';
-    html += '<span>' + tray.name + '</span>';
-    html += '<span class="tray-meta"><span>' + itemCount + ' instruments</span><span style="font-weight:700;color:var(--navy)">' + fmtMoney(trayTotal) + '</span><span class="tray-chevron">\u25B6</span></span>';
-    html += '</div>';
-    html += '<div class="tray-body">';
-    html += '<table class="mini-table"><thead><tr><th>Type</th><th style="text-align:center">Total</th><th style="text-align:center">Repaired</th><th style="text-align:center">Sent TSI</th><th style="text-align:center">BER</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th></tr></thead><tbody>';
-    (tray.items||[]).forEach(function(it) {
-      var lineTotal = (it.repaired||0) * (it.unitPrice||0);
-      html += '<tr><td>' + it.type + '</td><td style="text-align:center">' + it.total + '</td><td style="text-align:center">' + it.repaired + '</td><td style="text-align:center">' + it.sentTSI + '</td><td style="text-align:center">' + (it.ber||0) + '</td><td style="text-align:right">' + fmtMoney(it.unitPrice) + '</td><td style="text-align:right;font-weight:600">' + fmtMoney(lineTotal) + '</td></tr>';
-    });
-    html += '</tbody></table>';
+    html += '<div class="tray-header expanded" onclick="toggleTray(this)">';
+    html += '<span style="display:flex;align-items:center;gap:6px;min-width:0">';
+    if (!isVoid) {
+      html += '<input class="tray-name-input" value="' + (tray.name||'').replace(/"/g,'&quot;') + '" onclick="event.stopPropagation()" onchange="updateTrayName('+ti+',this.value)" title="Edit tray name"/>';
+    } else {
+      html += '<span style="font-weight:600">' + tray.name + '</span>';
+    }
+    html += badge + '</span>';
+    html += '<span class="tray-meta">';
+    html += '<span>' + itemCount + ' instr</span>';
+    html += '<span style="font-weight:700;color:var(--navy)">' + fmtMoney(trayTotal) + '</span>';
+    if (!isVoid) html += '<button class="tray-delete" onclick="event.stopPropagation();deleteTray('+ti+')" title="Remove tray">&times;</button>';
+    html += '<span class="tray-chevron">\u25B6</span>';
+    html += '</span></div>';
+    html += '<div class="tray-body open">';
+
+    if (!isVoid) {
+      // Editable instrument grid
+      html += '<table class="instr-grid"><thead><tr>';
+      html += '<th style="width:110px">Type</th><th style="width:46px">Total</th><th style="width:46px">Repaired</th><th style="width:46px">Sent TSI</th><th style="width:40px">BER</th><th style="width:62px">Unit $</th><th style="width:68px;text-align:right">Line Total</th><th style="width:28px"></th>';
+      html += '</tr></thead><tbody>';
+      (tray.items||[]).forEach(function(it, ii) {
+        var lineTotal = (it.repaired||0) * (it.unitPrice||0);
+        html += '<tr>';
+        html += '<td><select onchange="updateInstrument('+ti+','+ii+',\'type\',this.value);autoFillPrice('+ti+','+ii+',this.value)">';
+        html += '<option value="">--</option>';
+        INSTRUMENT_TYPES.forEach(function(t){ html += '<option value="'+t.type+'"'+(t.type===it.type?' selected':'')+'>'+t.type+'</option>'; });
+        html += '</select></td>';
+        html += '<td><input type="number" min="0" value="'+(it.total||0)+'" onchange="updateInstrument('+ti+','+ii+',\'total\',+this.value)"/></td>';
+        html += '<td><input type="number" min="0" value="'+(it.repaired||0)+'" onchange="updateInstrument('+ti+','+ii+',\'repaired\',+this.value)"/></td>';
+        html += '<td><input type="number" min="0" value="'+(it.sentTSI||0)+'" onchange="updateInstrument('+ti+','+ii+',\'sentTSI\',+this.value)"/></td>';
+        html += '<td><input type="number" min="0" value="'+(it.ber||0)+'" onchange="updateInstrument('+ti+','+ii+',\'ber\',+this.value)"/></td>';
+        html += '<td><input type="number" min="0" step="0.01" class="ig-price" value="'+(it.unitPrice||0)+'" onchange="updateInstrument('+ti+','+ii+',\'unitPrice\',+this.value)"/></td>';
+        html += '<td class="ig-calc">' + fmtMoney(lineTotal) + '</td>';
+        html += '<td><button class="ig-del" onclick="deleteInstrument('+ti+','+ii+')" title="Remove">&times;</button></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      html += '<div class="ig-add-row" onclick="addInstrumentRow('+ti+')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Instrument</div>';
+    } else {
+      // Read-only for Void
+      html += '<table class="mini-table"><thead><tr><th>Type</th><th style="text-align:center">Total</th><th style="text-align:center">Repaired</th><th style="text-align:center">Sent TSI</th><th style="text-align:center">BER</th><th style="text-align:right">Unit $</th><th style="text-align:right">Line Total</th></tr></thead><tbody>';
+      (tray.items||[]).forEach(function(it) {
+        var lineTotal = (it.repaired||0) * (it.unitPrice||0);
+        html += '<tr><td>'+it.type+'</td><td style="text-align:center">'+it.total+'</td><td style="text-align:center">'+it.repaired+'</td><td style="text-align:center">'+it.sentTSI+'</td><td style="text-align:center">'+(it.ber||0)+'</td><td style="text-align:right">'+fmtMoney(it.unitPrice)+'</td><td style="text-align:right;font-weight:600">'+fmtMoney(lineTotal)+'</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
     html += '<div class="tray-footer">Tray Subtotal: ' + fmtMoney(trayTotal) + '</div>';
     html += '</div></div>';
   });
+
   html += '<div class="tray-total-row">Total Tray Services: ' + fmtMoney(overallTotal) + '</div>';
+
+  // Visit-level KPI strip
+  html += renderVisitKPIStrip(visit);
+
   pane.innerHTML = html;
 }
 
@@ -1137,6 +1384,175 @@ function toggleTray(header) {
   header.classList.toggle('expanded');
   var body = header.nextElementSibling;
   body.classList.toggle('open');
+}
+
+// ── Visit KPI Strip ──────────────────────────────────
+function renderVisitKPIStrip(visit) {
+  var trays = visit.trays || [];
+  var totalInstr=0, totalRepaired=0, totalBER=0, totalSent=0, repairCost=0;
+  trays.forEach(function(t) {
+    (t.items||[]).forEach(function(it) {
+      totalInstr += (it.total||0);
+      totalRepaired += (it.repaired||0);
+      totalBER += (it.ber||0);
+      totalSent += (it.sentTSI||0);
+      repairCost += (it.repaired||0) * (it.unitPrice||0);
+    });
+  });
+  var berRate = totalInstr > 0 ? ((totalBER / totalInstr) * 100).toFixed(1) : '0.0';
+  var sentRate = totalInstr > 0 ? ((totalSent / totalInstr) * 100).toFixed(1) : '0.0';
+  var html = '<div class="visit-kpi-strip">';
+  html += '<div class="visit-kpi-chip"><div class="vk-val">'+totalInstr+'</div><div class="vk-lbl">Total Instr</div></div>';
+  html += '<div class="visit-kpi-chip"><div class="vk-val">'+totalRepaired+'</div><div class="vk-lbl">Repaired</div></div>';
+  html += '<div class="visit-kpi-chip"><div class="vk-val">'+totalBER+'</div><div class="vk-lbl">BER</div><div class="vk-pct">'+berRate+'%</div></div>';
+  html += '<div class="visit-kpi-chip"><div class="vk-val">'+totalSent+'</div><div class="vk-lbl">Sent Offsite</div><div class="vk-pct">'+sentRate+'%</div></div>';
+  html += '<div class="visit-kpi-chip vk-money"><div class="vk-val">'+fmtMoney(repairCost)+'</div><div class="vk-lbl">Billed</div></div>';
+  html += '<div class="visit-kpi-chip vk-money"><div class="vk-val">'+fmtMoney(repairCost)+'</div><div class="vk-lbl">Value Delivered</div></div>';
+  html += '</div>';
+  return html;
+}
+
+// ── Tray CRUD ────────────────────────────────────────
+function _getActiveVisit() {
+  if (!selectedVisitKey) return null;
+  return allVisits.find(function(v){return v.key===selectedVisitKey;});
+}
+
+function updateInstrument(trayIdx, itemIdx, field, value) {
+  var visit = _getActiveVisit(); if (!visit) return;
+  var tray = (visit.trays||[])[trayIdx]; if (!tray) return;
+  var item = (tray.items||[])[itemIdx]; if (!item) return;
+  item[field] = value;
+  markDirty();
+  renderTraysTab(visit);
+  // Also update financial summary in overview
+  updateFinancialSummary(visit);
+}
+
+function autoFillPrice(trayIdx, itemIdx, type) {
+  var visit = _getActiveVisit(); if (!visit) return;
+  var tray = (visit.trays||[])[trayIdx]; if (!tray) return;
+  var item = (tray.items||[])[itemIdx]; if (!item) return;
+  // Only auto-fill if current price is 0 or empty
+  if (!item.unitPrice) {
+    item.unitPrice = getDefaultPrice(type);
+    renderTraysTab(visit);
+    updateFinancialSummary(visit);
+  }
+}
+
+function addInstrumentRow(trayIdx) {
+  var visit = _getActiveVisit(); if (!visit) return;
+  var tray = (visit.trays||[])[trayIdx]; if (!tray) return;
+  if (!tray.items) tray.items = [];
+  tray.items.push({type:'',total:0,repaired:0,sentTSI:0,ber:0,unitPrice:0});
+  markDirty();
+  renderTraysTab(visit);
+}
+
+function deleteInstrument(trayIdx, itemIdx) {
+  var visit = _getActiveVisit(); if (!visit) return;
+  var tray = (visit.trays||[])[trayIdx]; if (!tray || !tray.items) return;
+  tray.items.splice(itemIdx, 1);
+  markDirty();
+  renderTraysTab(visit);
+  updateFinancialSummary(visit);
+}
+
+function deleteTray(trayIdx) {
+  var visit = _getActiveVisit(); if (!visit || !visit.trays) return;
+  visit.trays.splice(trayIdx, 1);
+  markDirty();
+  renderTraysTab(visit);
+  updateFinancialSummary(visit);
+}
+
+function updateTrayName(trayIdx, name) {
+  var visit = _getActiveVisit(); if (!visit) return;
+  var tray = (visit.trays||[])[trayIdx]; if (!tray) return;
+  tray.name = name;
+  markDirty();
+}
+
+function updateFinancialSummary(visit) {
+  var trayTotal = calcVisitTraysTotal(visit);
+  var expTotal = calcExpensesTotal(visit);
+  var grandTotal = trayTotal + expTotal;
+  var el = document.getElementById('fFinancials');
+  if (el) {
+    el.innerHTML =
+      '<div class="fin-row"><span class="fin-label">Tray Services</span><span class="fin-val">' + fmtMoney(trayTotal) + '</span></div>' +
+      '<div class="fin-row"><span class="fin-label">Expenses</span><span class="fin-val">' + fmtMoney(expTotal) + '</span></div>' +
+      '<div class="fin-row"><span class="fin-label">Tax</span><span class="fin-val">' + fmtMoney(0) + '</span></div>' +
+      '<div class="fin-row total"><span class="fin-label">Grand Total</span><span class="fin-val">' + fmtMoney(grandTotal) + '</span></div>';
+  }
+  // Also update the main table row totals
+  runPipeline();
+}
+
+// ── Tray Picker ──────────────────────────────────────
+function showTrayPicker() {
+  var el = document.getElementById('trayPicker');
+  if (el) { el.classList.add('open'); hideTraySubPanels(); }
+}
+function hideTrayPicker() {
+  var el = document.getElementById('trayPicker');
+  if (el) { el.classList.remove('open'); hideTraySubPanels(); }
+}
+function hideTraySubPanels() {
+  var s = document.getElementById('tpSaved'); if (s) s.classList.remove('open');
+  var n = document.getElementById('tpNew'); if (n) n.classList.remove('open');
+}
+
+function showSavedTrayPanel() {
+  hideTraySubPanels();
+  var el = document.getElementById('tpSaved'); if (el) el.classList.add('open');
+}
+function showNewTrayPanel() {
+  hideTraySubPanels();
+  var el = document.getElementById('tpNew'); if (el) { el.classList.add('open'); setTimeout(function(){ var inp = document.getElementById('tpNewName'); if(inp) inp.focus(); },50); }
+}
+
+function confirmSavedTray() {
+  var sel = document.getElementById('tpSavedSelect');
+  var idx = sel ? parseInt(sel.value) : -1;
+  if (isNaN(idx) || idx < 0 || !SAVED_TRAY_TEMPLATES[idx]) { alert('Select a template first.'); return; }
+  var visit = _getActiveVisit(); if (!visit) return;
+  if (!visit.trays) visit.trays = [];
+  var tmpl = SAVED_TRAY_TEMPLATES[idx];
+  visit.trays.push({
+    name: tmpl.name,
+    trayType: 'saved',
+    items: tmpl.items.map(function(it){ return {type:it.type,total:it.total,repaired:0,sentTSI:0,ber:0,unitPrice:it.unitPrice}; })
+  });
+  markDirty();
+  hideTrayPicker();
+  renderTraysTab(visit);
+  updateFinancialSummary(visit);
+}
+
+function confirmNewTray() {
+  var inp = document.getElementById('tpNewName');
+  var name = inp ? inp.value.trim() : '';
+  if (!name) { alert('Enter a tray name.'); return; }
+  var visit = _getActiveVisit(); if (!visit) return;
+  if (!visit.trays) visit.trays = [];
+  visit.trays.push({ name:name, trayType:'new', items:[] });
+  markDirty();
+  hideTrayPicker();
+  if (inp) inp.value = '';
+  renderTraysTab(visit);
+}
+
+function addRepairBin() {
+  var visit = _getActiveVisit(); if (!visit) return;
+  if (!visit.trays) visit.trays = [];
+  var existing = visit.trays.find(function(t){return t.trayType==='repair-bin';});
+  if (existing) { alert('A Repair Bin already exists for this visit.'); hideTrayPicker(); return; }
+  visit.trays.push({ name:'Repair Bin', trayType:'repair-bin', items:[] });
+  markDirty();
+  hideTrayPicker();
+  renderTraysTab(visit);
 }
 
 function renderExpensesTab(visit) {
@@ -1208,6 +1624,11 @@ function autoSave() {
   // Save ALL editable fields
   visit.salesRep = document.getElementById('fSalesRep').value;
   visit.paymentTerms = document.getElementById('fPaymentTerms').value;
+  visit.startTime = document.getElementById('fStartTime').value;
+  visit.endTime = document.getElementById('fEndTime').value;
+  visit.po = document.getElementById('fPO').value;
+  visit.truckNum = document.getElementById('fTruckNum').value;
+  visit.priceClass = document.getElementById('fPriceClass').value;
   // Save bill-to address
   var billName = document.getElementById('fBillName1').value.trim();
   var billAddr = document.getElementById('fBillAddr1').value.trim();
@@ -1237,6 +1658,22 @@ function autoSave() {
   runPipeline();
 }
 
+// ── Workflow Actions ─────────────────────────────────
+function submitVisit() {
+  var visit = _getActiveVisit(); if (!visit) return;
+  visit.status = 'Submitted';
+  visit.submittedDate = new Date().toISOString().split('T')[0];
+  runPipeline();
+  openDrawer(visit.key);
+}
+
+function markVisitInvoiced() {
+  var visit = _getActiveVisit(); if (!visit) return;
+  visit.status = 'Invoiced';
+  runPipeline();
+  openDrawer(visit.key);
+}
+
 // ── Add Modal ───────────────────────────────────────────
 function openAddModal() {
   document.getElementById('addModal').classList.add('open');
@@ -1257,16 +1694,20 @@ function submitAddVisit() {
     visitDate: date, startTime:'08:00', endTime:'', status:'Draft',
     location: document.getElementById('mLocation').value,
     po: document.getElementById('mPO').value,
+    truckNum: document.getElementById('mTruckNum').value,
+    priceClass: document.getElementById('mPriceClass').value,
     submittedDate: null, notes: document.getElementById('mNotes').value,
     trays:[], expenses:[]
   });
   closeAddModal();
   runPipeline();
+  openDrawer(nextKey);
   // Clear form
   document.getElementById('mClient').value = '';
   document.getElementById('mDept').innerHTML = '<option value="">-- Select Department --</option>';
   document.getElementById('mTech').value = '';
   document.getElementById('mPO').value = '';
+  document.getElementById('mTruckNum').value = '';
   document.getElementById('mNotes').value = '';
 }
 
