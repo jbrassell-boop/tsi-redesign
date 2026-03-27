@@ -693,6 +693,7 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                 <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
                 <span class="ref-item"><b>Days Since Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
                 <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span class="ctx-help">?<span class="ctx-help-tip">40-day warranty from ship date. Returns within 40 days trigger warranty repair at no charge.</span></span> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
+                <span class="ref-item" id="ncpBadgeItem" style="display:none;cursor:pointer" onclick="openNCPDrawer()" title="Non-Conforming Product record — click to view"><b>NCP</b> <span id="ncpBadge" class="ref-val">—</span></span>
                 <span class="ref-item"><b>TAT</b> <span class="ctx-help">?<span class="ctx-help-tip">Calendar days from received to shipped. Target is under 5 business days for standard repairs.</span></span> <span class="ref-val" id="hTAT">—</span></span>
                 <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
               </div>
@@ -1727,6 +1728,71 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
   </div>
 </div>
 
+<!-- NCP DRAWER — Non-Conforming Product OM23-1 -->
+<div class="qc-drawer" id="drawer-ncp">
+  <div class="qc-drawer-head" style="background:#991B1B">
+    <span style="font-size:13px;font-weight:700;color:#fff">Non-Conforming Product</span><span style="font-size:9px;opacity:.7;margin-left:6px;color:#fff">OM23-1</span>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="qc-drawer-body">
+    <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">NCP History</div>
+    <table class="items" style="margin-bottom:12px">
+      <thead><tr><th>NCP #</th><th>Date</th><th>Disposition</th><th>Status</th><th style="width:60px"></th></tr></thead>
+      <tbody id="ncpBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No NCPs recorded</td></tr></tbody>
+    </table>
+    <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Record Non-Conformance</div>
+    <div style="background:#F8F9FA;border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
+      <span><b>WO#:</b> <span id="ncpWO">—</span></span>
+      <span><b>Date:</b> <span id="ncpDate">—</span></span>
+      <span><b>Client:</b> <span id="ncpClient">—</span></span>
+      <span><b>Model:</b> <span id="ncpModel">—</span></span>
+      <span><b>Serial#:</b> <span id="ncpSerial">—</span></span>
+      <span><b>Triggered By:</b> <span id="ncpTrigger">—</span></span>
+    </div>
+    <div class="field" style="margin-bottom:8px"><label>Reason for Non-Conformance <span style="color:#DC2626">*</span></label><textarea id="ncpReason" rows="3" style="width:100%;resize:vertical;font-size:11px" oninput="markDirty()"></textarea></div>
+    <div class="field" style="margin-bottom:8px"><label>Investigation</label><textarea id="ncpInvestigation" rows="3" style="width:100%;resize:vertical;font-size:11px" oninput="markDirty()"></textarea></div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:8px">
+      <div class="field">
+        <label>Corrective Action Required</label>
+        <div style="display:flex;gap:12px;align-items:center;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpCA" id="ncpCAYes" value="Y" onchange="markDirty()"/> Yes</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpCA" id="ncpCANo" value="N" onchange="markDirty()" checked/> No</label>
+        </div>
+      </div>
+      <div class="field"><label>CAR/PAR No.</label><input type="text" id="ncpCARNum" placeholder="—" style="font-size:11px" onchange="markDirty()"/></div>
+      <div class="field">
+        <label>Vendor Complaint Required</label>
+        <div style="display:flex;gap:12px;align-items:center;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpVC" id="ncpVCYes" value="Y" onchange="markDirty()"/> Yes</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpVC" id="ncpVCNo" value="N" onchange="markDirty()" checked/> No</label>
+        </div>
+      </div>
+      <div class="field"><label>VC No.</label><input type="text" id="ncpVCNum" placeholder="—" style="font-size:11px" onchange="markDirty()"/></div>
+    </div>
+    <div class="field" style="margin-bottom:8px">
+      <label>Disposition</label>
+      <div style="display:flex;gap:16px;align-items:center;padding-top:4px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpDisp" id="ncpDispRework" value="REWORK" onchange="markDirty()"/> Rework</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpDisp" id="ncpDispUseAsIs" value="USE-AS-IS" onchange="markDirty()"/> Use-As-Is</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpDisp" id="ncpDispRTV" value="RTV" onchange="markDirty()"/> RTV</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400"><input type="radio" name="ncpDisp" id="ncpDispScrap" value="SCRAP" onchange="markDirty()"/> Scrap</label>
+      </div>
+    </div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:8px">
+      <div class="field"><label>Disposition Approved By</label><select id="ncpDispBy" style="font-size:11px" onchange="markDirty()"><option value="">— Select —</option></select></div>
+      <div class="field"><label>Disposition Date</label><input type="date" id="ncpDispDate" style="font-size:11px" onchange="markDirty()"/></div>
+    </div>
+    <div class="field" style="margin-bottom:8px"><label>QA Review Comments</label><textarea id="ncpQAComments" rows="2" style="width:100%;resize:vertical;font-size:11px" oninput="markDirty()"></textarea></div>
+    <div class="form-grid g2" style="gap:6px 10px;margin-bottom:10px">
+      <div class="field"><label>QA Review By</label><select id="ncpQABy" style="font-size:11px" onchange="markDirty()"><option value="">— Select —</option></select></div>
+      <div class="field"><label>QA Review Date</label><input type="date" id="ncpQADate" style="font-size:11px" onchange="markDirty()"/></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-danger" style="flex:1" onclick="saveNCP()">Save NCP</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADD INVENTORY DRAWER (per repair item) -->
 <div class="qc-drawer" id="drawer-addInv" style="width:640px;right:-660px">
   <div class="qc-drawer-head">
@@ -1846,7 +1912,10 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
 
     <!-- Nonconformance alert (hidden by default) -->
     <div id="fd-ncAlert" style="display:none;padding:8px 10px;background:#FEE2E2;border:1px solid #FECACA;border-radius:4px;margin-bottom:10px;font-size:11px;color:#991B1B;font-weight:600">
-      Nonconformance write-up required — failure code 4 or 5 selected.
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span>&#9888; Nonconformance write-up required — failure code 4 or 5 selected.</span>
+        <button onclick="openNCPDrawer()" style="background:#991B1B;color:#fff;border:none;padding:3px 10px;border-radius:3px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Create NCP &rarr;</button>
+      </div>
     </div>
 
     <div class="field" style="margin-bottom:14px"><label>Lab Manager Notes</label><textarea id="fd-labNotes" rows="3" style="width:100%;font-size:11px;resize:vertical" onchange="markDirty()"></textarea></div>
@@ -4913,6 +4982,7 @@ function populateDetail(d) {
 
   // ── COMMENTS TAB ──
   populateComments(d);
+  loadNCPs();
 
   // ── SMART ALERTS ──
   if (typeof SmartAlerts !== 'undefined') {
@@ -6842,6 +6912,161 @@ function serializeDefects() {
   markDirty();
 }
 
+// ── NCP (Non-Conforming Product OM23-1) ──────────────────
+var _ncps = [];
+
+function loadNCPs() {
+  _ncps = [];
+  if (!_currentRepair) return;
+  var raw = _currentRepair.mCommentsISO || '';
+  var m = raw.match(/\[NCP\]([\s\S]*?)\[\/NCP\]/);
+  if (m) { try { _ncps = JSON.parse(m[1]); } catch(e) {} }
+  renderNCPs();
+}
+
+function renderNCPs() {
+  var tbody = document.getElementById('ncpBody');
+  if (!tbody) return;
+  if (!_ncps.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No NCPs recorded</td></tr>';
+    updateNCPBadge();
+    return;
+  }
+  tbody.innerHTML = _ncps.map(function(n, i) {
+    var statusBadge = n.status === 'Closed'
+      ? '<span style="background:#D1FAE5;color:#065F46;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Closed</span>'
+      : '<span style="background:#FEE2E2;color:#991B1B;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Open</span>';
+    var closeBtn = n.status === 'Open'
+      ? '<button onclick="closeNCP(' + i + ', this)" style="font-size:9px;padding:2px 6px;border:1px solid #ccc;border-radius:3px;cursor:pointer;background:#fff">Close</button>'
+      : '';
+    return '<tr><td style="font-size:10px;font-weight:600">' + n.ncpNum + '</td><td style="font-size:10px">' + (n.date||'') + '</td><td style="font-size:10px">' + (n.disposition||'—') + '</td><td>' + statusBadge + '</td><td>' + closeBtn + '</td></tr>';
+  }).join('');
+  updateNCPBadge();
+}
+
+function updateNCPBadge() {
+  var item = document.getElementById('ncpBadgeItem');
+  var badge = document.getElementById('ncpBadge');
+  if (!item || !badge) return;
+  if (!_ncps.length) { item.style.display = 'none'; return; }
+  item.style.display = '';
+  var openCount = _ncps.filter(function(n){ return n.status === 'Open'; }).length;
+  if (openCount) {
+    badge.textContent = 'Open';
+    badge.style.color = '#DC2626';
+    badge.style.fontWeight = '700';
+  } else {
+    badge.textContent = 'Closed';
+    badge.style.color = '#059669';
+    badge.style.fontWeight = '600';
+  }
+}
+
+function openNCPDrawer() {
+  var r = _currentRepair || {};
+  // Determine trigger codes from 40-day form checkboxes if open
+  var codes = [];
+  var fc4el = document.getElementById('fc4');
+  var fc5el = document.getElementById('fc5');
+  if (fc4el && fc4el.checked) codes.push(4);
+  if (fc5el && fc5el.checked) codes.push(5);
+  // Pre-fill context
+  document.getElementById('ncpWO').textContent = r.sWorkOrderNumber || r.sWONumber || r.lWOKey || '—';
+  document.getElementById('ncpDate').textContent = new Date().toLocaleDateString();
+  document.getElementById('ncpClient').textContent = r.sClientName1 || r.sClientName || '—';
+  document.getElementById('ncpModel').textContent = r.sScopeTypeDesc || r.sModel || r.sScopeModel || '—';
+  document.getElementById('ncpSerial').textContent = r.sSerialNumber || r.sSerial || '—';
+  var triggerLabels = [];
+  if (codes.indexOf(4) >= 0) triggerLabels.push('Code 4: Improper repair technique');
+  if (codes.indexOf(5) >= 0) triggerLabels.push('Code 5: Failure during previous final inspection');
+  document.getElementById('ncpTrigger').textContent = triggerLabels.length ? triggerLabels.join(', ') : '—';
+  // Date defaults
+  var today = new Date().toISOString().slice(0,10);
+  document.getElementById('ncpDispDate').value = today;
+  document.getElementById('ncpQADate').value = today;
+  // Populate user dropdowns
+  var users = _techs || [];
+  ['ncpDispBy','ncpQABy'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Select —</option>';
+    users.forEach(function(u) {
+      var key = u.lTechnicianKey || u.lUserKey;
+      var name = u.sTechName || u.sUserName || '';
+      sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+    });
+  });
+  loadNCPs();
+  closeDrawer();
+  document.getElementById('drawer-ncp').classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('open');
+}
+
+function saveNCP() {
+  var reason = (document.getElementById('ncpReason').value || '').trim();
+  if (!reason) { showToast('Reason for Non-Conformance is required'); return; }
+  var r = _currentRepair || {};
+  var woNum = r.sWorkOrderNumber || r.sWONumber || r.lWOKey || 'UNK';
+  var ncpNum = 'NCP-' + woNum + '-' + (_ncps.length + 1);
+  var disp = document.querySelector('input[name="ncpDisp"]:checked');
+  _ncps.push({
+    ncpNum: ncpNum,
+    repairKey: r.lRepairKey || null,
+    woNum: woNum,
+    date: new Date().toISOString().slice(0,10),
+    reason: reason,
+    investigation: (document.getElementById('ncpInvestigation').value || '').trim(),
+    caRequired: document.getElementById('ncpCAYes').checked,
+    carParNum: (document.getElementById('ncpCARNum').value || '').trim(),
+    vcRequired: document.getElementById('ncpVCYes').checked,
+    vcNum: (document.getElementById('ncpVCNum').value || '').trim(),
+    disposition: disp ? disp.value : '',
+    dispositionBy: document.getElementById('ncpDispBy').value,
+    dispositionDate: document.getElementById('ncpDispDate').value,
+    qaComments: (document.getElementById('ncpQAComments').value || '').trim(),
+    qaReviewBy: document.getElementById('ncpQABy').value,
+    qaReviewDate: document.getElementById('ncpQADate').value,
+    status: 'Open',
+    createdBy: (API.getUser() || {}).sUserName || 'demo',
+    createdAt: new Date().toISOString()
+  });
+  serializeNCPs();
+  renderNCPs();
+  // Clear form
+  document.getElementById('ncpReason').value = '';
+  document.getElementById('ncpInvestigation').value = '';
+  document.getElementById('ncpCARNum').value = '';
+  document.getElementById('ncpVCNum').value = '';
+  document.getElementById('ncpQAComments').value = '';
+  document.getElementById('ncpCANo').checked = true;
+  document.getElementById('ncpVCNo').checked = true;
+  document.querySelectorAll('input[name="ncpDisp"]').forEach(function(r){ r.checked = false; });
+  showToast('NCP recorded — ' + ncpNum);
+}
+
+function closeNCP(idx, btn) {
+  if (!btn._confirmed) {
+    var orig = btn.textContent;
+    btn.textContent = 'Sure?';
+    btn._confirmed = true;
+    setTimeout(function(){ if(btn) { btn.textContent = orig; btn._confirmed = false; } }, 3000);
+    return;
+  }
+  _ncps[idx].status = 'Closed';
+  _ncps[idx].closedAt = new Date().toISOString();
+  serializeNCPs();
+  renderNCPs();
+  showToast('NCP closed');
+}
+
+function serializeNCPs() {
+  if (!_currentRepair) return;
+  var raw = (_currentRepair.mCommentsISO || '').replace(/\[NCP\][\s\S]*?\[\/NCP\]\n?/, '');
+  if (_ncps.length) raw += '\n[NCP]' + JSON.stringify(_ncps) + '[/NCP]';
+  _currentRepair.mCommentsISO = raw;
+  markDirty();
+}
+
 // ── Inline Validation ──────────────────────────────────
 function validateRequired(formContainer) {
   var valid = true;
@@ -7866,6 +8091,7 @@ function openDrawer(id) {
   if (id === 'amend') { loadAmendments(); }
   if (id === 'defects') { loadDefects(); populateDrawerTechDropdowns(); }
   if (id === 'fortyDay') { populateFortyDayForm(); }
+  if (id === 'ncp') { openNCPDrawer(); return; }
   if (id === 'qc') { populateDrawerTechDropdowns(); }
   document.getElementById('drawer-' + id).classList.add('open');
   document.getElementById('drawerBackdrop').classList.add('open');
