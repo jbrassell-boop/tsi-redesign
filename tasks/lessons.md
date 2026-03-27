@@ -57,6 +57,11 @@
 - Test results on Final Inspection: use category summaries with professional verbiage, not 19 individual rows.
 - Print button should NOT trigger generateForm/PDF side effect — just print.
 
+## Type Coercion Bugs (learned 2026-03-27)
+- **Select dropdown `.value` is always a string.** When comparing against numeric DB fields (`lRepairStatusID`), always `Number(statusId)` first.
+- `"3" === 3` is `false` — strict equality kills the lookup, falls to wrong fallback.
+- Pattern: any function that takes a status/ID from a DOM element must coerce to Number at the top.
+
 ## Code Style: Alphabetical Lists
 - **Rule:** All array/list literals containing string values (table names, field names, config keys) must be sorted alphabetically.
 - **Why:** Joseph's preference for consistency and readability.
