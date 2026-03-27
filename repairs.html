@@ -76,11 +76,6 @@
     .qc-pf input[type="radio"]{margin:0;accent-color:var(--navy)}
 
     /* P/F INSPECTION GRID */
-    .insp-details{margin:6px 0;border:1px solid var(--border);border-radius:6px;background:var(--card);overflow:hidden}
-    .insp-details summary{font-size:10.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;padding:7px 14px;background:var(--neutral-50);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
-    .insp-details summary::before{content:'▸';font-size:10px;transition:transform .15s}
-    .insp-details[open] summary::before{transform:rotate(90deg)}
-    .insp-details .insp-body{padding:10px 14px}
     .pf-cat{font-size:7.5px;font-weight:800;color:var(--steel);text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;background:var(--neutral-50);line-height:1.2}
     .pf-grid{display:grid;grid-template-columns:1fr 34px 1fr 34px;gap:0}
     .pf-item{display:contents}
@@ -107,6 +102,21 @@
     .insp-row .field{margin:0}
     .insp-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;margin-top:8px}
     .insp-checks label{font-size:10px;display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:500}
+    /* INSPECTION TWO-PANEL COCKPIT */
+    .insp-two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .insp-panel{border:1px solid var(--border);border-radius:6px;background:var(--card);overflow:hidden;min-width:0}
+    .insp-panel-hd{font-size:10px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;background:var(--neutral-50);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+    .insp-panel-hd em{font-style:normal;font-size:9px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+    /* SCOPE CONFIG STRIP */
+    .insp-type-strip{background:var(--neutral-50);border:1px solid var(--border);border-radius:6px;padding:6px 12px;margin-bottom:6px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .insp-strip-lbl{font-size:8px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;padding-right:8px;border-right:1px solid var(--border)}
+    .insp-strip-field{display:flex;align-items:center;gap:4px}
+    .insp-strip-field label{font-size:9px;font-weight:600;color:var(--steel);white-space:nowrap}
+    .insp-strip-field input{height:20px;width:70px;font-size:10px;border:1px solid var(--border);border-radius:3px;padding:0 4px;background:#fff}
+    .insp-strip-pf{display:flex;align-items:center;gap:3px}
+    .insp-strip-pf label{font-size:10px;font-weight:600;color:var(--steel);cursor:pointer;display:flex;align-items:center;gap:2px}
+    .insp-strip-check{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--text);cursor:pointer;white-space:nowrap}
+    .insp-strip-divider{width:1px;height:18px;background:var(--border);flex-shrink:0}
 
     /* TABS */
     .tabs{display:flex;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);flex-shrink:0;padding:0 10px}
@@ -658,7 +668,10 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                 <span class="ref-item"><b>Client</b> <span id="hClient" class="ref-val">—</span></span>
                 <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
                 <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:130px" onchange="markDirty()"/></span>
+                <span class="ref-item"><label style="font-size:9px;display:flex;align-items:center;gap:3px;cursor:pointer;font-weight:700;color:var(--muted)"><input type="checkbox" id="fPORequired" style="width:auto;height:auto" onchange="markDirty()"/> PO Req</label></span>
+                <span class="ref-item"><b>Cust Ref#</b> <input id="fCustomerRef" class="ref-input" style="width:110px" placeholder="CMMS WO#" onchange="markDirty()"/></span>
                 <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
+                <span class="ref-item"><b>Source</b> <select id="fRepairSource" class="ref-input" style="width:auto;min-width:70px" onchange="markDirty()"><option value="">—</option><option>Email</option><option>Phone</option><option>Portal</option><option>Van Service</option><option>Walk-in</option></select></span>
                 <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:auto;min-width:120px;max-width:280px" onchange="updateStatusBadge(this.value); markDirty()"></select></span>
               </div>
               <div class="ref-group">
@@ -809,7 +822,8 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
                     <div class="field" style="margin:0"><label>Bill To</label><select id="fBillTo" onchange="markDirty()"><option value="C">Customer</option><option value="D">Distributor</option></select></div>
                     <div class="field" style="margin:0"><label>Distributor</label><select id="fDistributor" onchange="markDirty()"></select></div>
-                    <div class="field" style="margin:0;grid-column:span 2"><label>Bill Email</label><input id="fBillEmail" type="email" placeholder="billing@customer.com" oninput="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Bill Email</label><input id="fBillEmail" type="email" placeholder="billing@customer.com" oninput="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Billing Type</label><select id="fBillingType" onchange="markDirty()"><option value="">—</option><option>Email Only</option><option>Mail</option><option>Fax</option></select></div>
                     <div class="field" style="margin:0"><label>Requisition</label><input id="fRequisition" onchange="markDirty()"/></div>
                     <div class="field" style="margin:0"><label>Approval Name</label><input id="fApprName" onchange="markDirty()"/></div>
                   </div>
@@ -1307,78 +1321,53 @@ table.rl-table tbody tr.rl-active td{background:#C8D8F0;font-weight:600}
 
           <div class="tab-pane" id="pane-inspections">
 
-            <!-- ═══ INCOMING INSPECTION (D&I) ═══ -->
-            <details class="insp-details" id="incomingInspection" open>
-              <summary>Incoming Inspection (D&amp;I)</summary>
-              <div class="insp-body" id="incomingInspBody"></div>
-            </details>
+            <!-- ═══ SCOPE CONFIG STRIP (flex / rigid only — camera has no static fields) ═══ -->
+            <div id="scopeTypeDetails" class="insp-type-strip" style="display:none">
 
-            <!-- ═══ POST-REPAIR VERIFICATION ═══ -->
-            <details class="insp-details" id="postRepairVerification" open>
-              <summary>Post-Repair Verification</summary>
-              <div class="insp-body" id="postRepairInspBody"></div>
-            </details>
-
-            <!-- SCOPE-TYPE DETAILS -->
-            <details class="section-card" style="margin-top:6px" id="scopeTypeDetails" open>
-              <summary class="section-head" style="cursor:pointer;list-style:none;user-select:none">
-                Scope-Type Details
-                <svg style="width:14px;height:14px;margin-left:auto;transition:transform .15s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </summary>
-              <div class="section-body" style="padding:10px 14px">
-
-                <!-- Flexible Scopes -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Flexible Scopes</div>
-                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
-                  <div class="field">
-                    <label>Bending Rubber P/F</label>
-                    <div class="qc-pf" style="margin-top:2px">
-                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="P" onchange="markDirty()" style="accent-color:var(--navy)"/> P</label>
-                      <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="fBendingRubberPF" value="F" onchange="markDirty()" style="accent-color:var(--navy)"/> F</label>
-                    </div>
+              <!-- Flexible -->
+              <div id="flexScopeSection" style="display:none">
+                <span class="insp-strip-lbl">Flex Config</span>
+                <div class="insp-strip-field">
+                  <label>BR&nbsp;P/F</label>
+                  <div class="insp-strip-pf">
+                    <label><input type="radio" name="fBendingRubberPF" value="P" onchange="markDirty()" style="accent-color:var(--navy)"/> P</label>
+                    <label><input type="radio" name="fBendingRubberPF" value="F" onchange="markDirty()" style="accent-color:var(--navy)"/> F</label>
                   </div>
-                  <div class="field"><label>Incoming Epoxy Size</label><input type="number" id="fFlexIncomingEpoxy" step="0.01" onchange="markDirty()"/></div>
-                  <div class="field"><label>Max Epoxy Size</label><input type="number" id="fFlexMaxEpoxy" step="0.01" onchange="markDirty()"/></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRAgeing" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Aging</span></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRMold" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Mold</span></div>
-                  <div class="field" style="flex-direction:row;align-items:center;gap:6px;padding-top:12px"><input type="checkbox" id="fBRCut" style="accent-color:var(--navy)" onchange="markDirty()"/><span style="font-size:10px;font-weight:600">BR Cut</span></div>
                 </div>
-
-                <!-- Rigid Scopes -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Rigid Scopes</div>
-                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 12px;margin-bottom:12px">
-                  <div class="field"><label>Eyepiece Type</label><input id="fRgdEyeCup" onchange="markDirty()"/></div>
-                  <div class="field"><label>Fiber Type</label><input id="fRgdFiber" onchange="markDirty()"/></div>
-                  <div class="field"><label>Tube Type</label><input id="fRgdTube" onchange="markDirty()"/></div>
-                  <div class="field"><label>Vision Type</label><input id="fRgdVision" onchange="markDirty()"/></div>
-                </div>
-
-                <!-- Camera/Video -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Camera / Video</div>
-                <div class="qc-check-grid" style="margin-bottom:12px">
-                  <div class="qc-row"><span class="qc-label">Camera Cable</span><div class="qc-pf"><label><input type="radio" name="fCamCable" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCable" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Cable Connector</span><div class="qc-pf"><label><input type="radio" name="fCamCableConn" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamCableConn" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCamLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Control Buttons</span><div class="qc-pf"><label><input type="radio" name="fCamControlBtns" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamControlBtns" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Focus</span><div class="qc-pf"><label><input type="radio" name="fCamFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocus" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Video Appearance</span><div class="qc-pf"><label><input type="radio" name="fCamVideoAppear" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamVideoAppear" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera White Balance</span><div class="qc-pf"><label><input type="radio" name="fCamWhiteBal" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamWhiteBal" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCamFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Camera Soak Cap Assembly</span><div class="qc-pf"><label><input type="radio" name="fCamSoakCap" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCamSoakCap" value="F" onchange="markDirty()"/> F</label></div></div>
-                </div>
-
-                <!-- Coupler -->
-                <div style="font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Coupler</div>
-                <div class="qc-check-grid">
-                  <div class="qc-row"><span class="qc-label">Coupler Focus</span><div class="qc-pf"><label><input type="radio" name="fCplFocus" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocus" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Focus Mechanism</span><div class="qc-pf"><label><input type="radio" name="fCplFocusMech" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFocusMech" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Fog</span><div class="qc-pf"><label><input type="radio" name="fCplFog" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplFog" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Leak</span><div class="qc-pf"><label><input type="radio" name="fCplLeak" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLeak" value="F" onchange="markDirty()"/> F</label></div></div>
-                  <div class="qc-row"><span class="qc-label">Coupler Lens Cleaned</span><div class="qc-pf"><label><input type="radio" name="fCplLensCleaned" value="P" onchange="markDirty()"/> P</label><label><input type="radio" name="fCplLensCleaned" value="F" onchange="markDirty()"/> F</label></div></div>
-                </div>
-
+                <div class="insp-strip-divider"></div>
+                <div class="insp-strip-field"><label>Epoxy In</label><input type="number" id="fFlexIncomingEpoxy" step="0.01" onchange="markDirty()"/></div>
+                <div class="insp-strip-field"><label>Max Epoxy</label><input type="number" id="fFlexMaxEpoxy" step="0.01" onchange="markDirty()"/></div>
+                <div class="insp-strip-divider"></div>
+                <label class="insp-strip-check"><input type="checkbox" id="fBRAgeing" style="accent-color:var(--navy)" onchange="markDirty()"/> BR Aging</label>
+                <label class="insp-strip-check"><input type="checkbox" id="fBRMold" style="accent-color:var(--navy)" onchange="markDirty()"/> BR Mold</label>
+                <label class="insp-strip-check"><input type="checkbox" id="fBRCut" style="accent-color:var(--navy)" onchange="markDirty()"/> BR Cut</label>
               </div>
-            </details>
+
+              <!-- Rigid -->
+              <div id="rigidScopeSection" style="display:none">
+                <span class="insp-strip-lbl">Rigid Config</span>
+                <div class="insp-strip-field"><label>Eyepiece</label><input id="fRgdEyeCup" style="width:80px" onchange="markDirty()"/></div>
+                <div class="insp-strip-field"><label>Fiber</label><input id="fRgdFiber" style="width:80px" onchange="markDirty()"/></div>
+                <div class="insp-strip-field"><label>Tube</label><input id="fRgdTube" style="width:80px" onchange="markDirty()"/></div>
+                <div class="insp-strip-field"><label>Vision</label><input id="fRgdVision" style="width:80px" onchange="markDirty()"/></div>
+              </div>
+
+            </div><!-- /scopeTypeDetails -->
+
+            <!-- ═══ SIDE-BY-SIDE INSPECTION PANELS ═══ -->
+            <div class="insp-two-col">
+
+              <div class="insp-panel">
+                <div class="insp-panel-hd">Incoming Inspection <em>D&amp;I</em></div>
+                <div id="incomingInspBody"></div>
+              </div>
+
+              <div class="insp-panel">
+                <div class="insp-panel-hd">Post-Repair Verification</div>
+                <div id="postRepairInspBody"></div>
+              </div>
+
+            </div><!-- /insp-two-col -->
 
           </div><!-- /pane-inspections -->
 
@@ -2057,10 +2046,13 @@ let _generatedForms = {};
 let _wfToastTimer = null;
 
 function getPhaseForStatus(statusId) {
-  if (statusId <= 1) return 1;   // Received → D&I available (print for incoming inspection)
-  if (statusId === 2) return 2;   // Evaluation → Req available
-  if (statusId >= 3 && statusId <= 5) return 3; // WfA / In Repair / QC → Inspect, Pick List, Amend, Defect
-  return 4;                       // Ready to Ship / Shipped / Closed → Invoice, Packing, Final QC
+  // Data-driven phase lookup using sPhaseGroup from repairStatuses table.
+  // No more hardcoded ID ranges — new statuses Just Work™.
+  const PHASE_MAP = { 'Intake':1, 'Approval':2, 'In Repair':3, 'Shipping':4, 'Cart / Build':4, 'On Hold':2 };
+  const allStatuses = (typeof MockDB !== 'undefined' && MockDB.all) ? MockDB.all('repairStatuses') : _repairStatuses || [];
+  const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === statusId);
+  if (!status) return statusId <= 1 ? 1 : 4; // safe fallback
+  return PHASE_MAP[status.sPhaseGroup] || 1;
 }
 
 function updateWorkflowForms(statusId) {
@@ -4087,9 +4079,28 @@ function fmtMoney(v) { const n = parseFloat(v); return isNaN(n) ? '$0.00' : '$' 
 function getStatusName(id) { const s = _statuses.find(x => x.lRepairStatusID === id); return s ? s.sRepairStatus : ''; }
 
 function updateStatusBadge(statusId) {
-  const name = getStatusName(Number(statusId)) || statusId;
+  const sid = Number(statusId);
+  // PO Required enforcement: block Shipping-phase statuses when PO is missing
+  const poReq = document.getElementById('fPORequired');
+  const poVal = (document.getElementById('hPO').value || '').trim();
+  if (poReq && poReq.checked && !poVal) {
+    const allSt = (typeof MockDB !== 'undefined' && MockDB.all) ? MockDB.all('repairStatuses') : _statuses || [];
+    const target = allSt.find(s => s.lRepairStatusID === sid);
+    if (target && target.sPhaseGroup === 'Shipping') {
+      // Redirect to "Approved - Awaiting PO" (ID 28)
+      const sel = document.getElementById('hRepairStatus');
+      if (sel) sel.value = '28';
+      showWorkflowToast('PO # required before shipping. Status set to Approved - Awaiting PO.');
+      updateWorkflowForms(28);
+      const chip = document.getElementById('ssStatus');
+      if (chip) chip.querySelector('.ss-val').textContent = 'Approved - Awaiting PO';
+      return;
+    }
+  }
+  const name = getStatusName(sid) || statusId;
   const chip = document.getElementById('ssStatus');
   if (chip) chip.querySelector('.ss-val').textContent = name || '—';
+  updateWorkflowForms(sid);
 }
 
 function populateSelect(id, items, valKey, textKey, blank) {
@@ -4246,6 +4257,19 @@ function renderFlags(flags) {
   ).join('');
 }
 
+function addRepeatVisitFlag(days) {
+  const bar = document.getElementById('flagsBar');
+  if (!bar) return;
+  if (bar.querySelector('.flag-repeat')) return; // already added
+  bar.style.display = 'flex';
+  const chip = document.createElement('span');
+  chip.className = 'flag-chip flag-repeat';
+  chip.style.cssText = 'background:#FEF2F2;color:#B91C1C;border-color:#FECACA;font-weight:700';
+  chip.textContent = 'REPEAT VISIT \u2014 ' + days + ' days since last repair';
+  // Insert after the FLAGS label
+  bar.appendChild(chip);
+}
+
 // ── SCOPE TIMELINE helpers ──
 function loadRepairByKey(key) { loadRepair(key); }
 
@@ -4302,8 +4326,11 @@ function populateDetail(d) {
   document.getElementById('hClient').textContent = d.sShipName1 || d.sBillName1 || d.sClientName1 || (_clients.find(c => c.lClientKey == d.lClientKey) || {}).sClientName1 || '—';
   document.getElementById('hDept').textContent = d.sShipName2 || d.sDepartmentName || (_departments.find(x => x.lDepartmentKey == d.lDepartmentKey) || {}).sDepartmentName || '—';
   document.getElementById('hPO').value = d.sPurchaseOrder || d.sPONumber || '';
+  document.getElementById('fPORequired').checked = !!d.bPORequired;
+  document.getElementById('fCustomerRef').value = d.sCustomerRefNumber || '';
   document.getElementById('hWO').textContent = d.sWorkOrderNumber || '—';
   document.getElementById('hRack').value = d.sRackPosition || '';
+  setSelectVal('fRepairSource', d.sRepairSource || '');
   setSelectVal('hRepairLevel', d.lRepairLevelKey);
   setSelectVal('hRepairStatus', d.lRepairStatusID);
 
@@ -4339,6 +4366,7 @@ function populateDetail(d) {
           var curIn = new Date(d.dtDateIn);
           var gap = Math.round((curIn - prevOut) / 86400000);
           document.getElementById('hDaysLastIn').textContent = gap + 'd';
+          if (gap < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:#DC2626;font-weight:700'; addRepeatVisitFlag(gap); }
           var el40 = document.getElementById('hWithin40');
           if (gap <= 40) { el40.textContent = 'YES'; el40.style.color = '#DC2626'; el40.style.fontWeight = '700'; }
           else { el40.textContent = 'No'; el40.style.color = ''; el40.style.fontWeight = ''; }
@@ -4346,7 +4374,9 @@ function populateDetail(d) {
       }).catch(function() {});
     } catch(e) {}
   } else {
-    document.getElementById('hDaysLastIn').textContent = daysLastIn || '—';
+    document.getElementById('hDaysLastIn').textContent = daysLastIn ? daysLastIn + 'd' : '—';
+    if (daysLastIn && daysLastIn < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:#DC2626;font-weight:700'; addRepeatVisitFlag(daysLastIn); }
+    else { document.getElementById('hDaysLastIn').style.cssText = ''; }
   }
   document.getElementById('hWithin40').textContent = daysLastIn && daysLastIn <= 40 ? 'YES' : '—';
 
@@ -4377,6 +4407,13 @@ function populateDetail(d) {
   const scopeType = d.sRigidOrFlexible || 'R';
   document.getElementById('incomingInspBody').innerHTML = renderInspectionContent(scopeType, 'in');
   document.getElementById('postRepairInspBody').innerHTML = renderInspectionContent(scopeType, 'out');
+
+  // Show config strip only for F/R (Camera has no static config fields)
+  // Use display:contents so strip children participate in the parent flex row
+  const isF = scopeType === 'F', isR = scopeType === 'R';
+  document.getElementById('flexScopeSection').style.display = isF ? 'contents' : 'none';
+  document.getElementById('rigidScopeSection').style.display = isR ? 'contents' : 'none';
+  document.getElementById('scopeTypeDetails').style.display = (isF || isR) ? '' : 'none';
 
   // Populate dynamically-created dropdowns after inspection HTML is built
   populateSelect('fPSLevelOut', _safetyLevels, 'lPatientSafetyLevelKey', 'sPatientSafetyLevelDesc', false);
@@ -4550,6 +4587,7 @@ function populateDetail(d) {
   document.getElementById('fBillState').value = d.sBillState || '';
   document.getElementById('fBillZip').value = d.sBillZip || '';
   document.getElementById('fBillEmail').value = d.sBillEmail || '';
+  setSelectVal('fBillingType', d.sBillingType || '');
   // Ship To address fields
   document.getElementById('fShipName1').value = d.sShipName1 || '';
   document.getElementById('fShipAddr1').value = d.sShipAddr1 || '';
@@ -5371,6 +5409,10 @@ function buildRepairPayload() {
     // Logistics
     psRackPosition: document.getElementById('hRack').value || '',
     psPurchaseOrder: document.getElementById('hPO').value || '',
+    pbPORequired: document.getElementById('fPORequired').checked,
+    psCustomerRefNumber: document.getElementById('fCustomerRef').value || '',
+    psRepairSource: getSelectVal('fRepairSource') || '',
+    psBillingType: getSelectVal('fBillingType') || '',
     psShipTrackingNumberIn: document.getElementById('fTrackIn').value || '',
     psShipTrackingNumber: document.getElementById('fTrackOut').value || '',
     psShipTrackingNumberVendor: document.getElementById('fOutTracking').value || '',
@@ -5878,6 +5920,10 @@ function syncFormToRepair() {
   d.sBRJigSize = document.getElementById('fBRJig').value || '';
   d.sRackPosition = document.getElementById('hRack').value || '';
   d.sPurchaseOrder = document.getElementById('hPO').value || '';
+  d.bPORequired = document.getElementById('fPORequired').checked;
+  d.sCustomerRefNumber = document.getElementById('fCustomerRef').value || '';
+  d.sRepairSource = getSelectVal('fRepairSource') || '';
+  d.sBillingType = getSelectVal('fBillingType') || '';
   d.sShipTrackingNumberIn = document.getElementById('fTrackIn').value || '';
   d.sShipTrackingNumber = document.getElementById('fTrackOut').value || '';
   d.sShipTrackingNumberVendor = document.getElementById('fOutTracking').value || '';
