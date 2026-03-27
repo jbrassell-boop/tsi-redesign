@@ -2048,10 +2048,11 @@ let _wfToastTimer = null;
 function getPhaseForStatus(statusId) {
   // Data-driven phase lookup using sPhaseGroup from repairStatuses table.
   // No more hardcoded ID ranges — new statuses Just Work™.
+  const sid = Number(statusId);
   const PHASE_MAP = { 'Intake':1, 'Approval':2, 'In Repair':3, 'Shipping':4, 'Cart / Build':4, 'On Hold':2 };
   const allStatuses = (typeof MockDB !== 'undefined' && MockDB.all) ? MockDB.all('repairStatuses') : _repairStatuses || [];
-  const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === statusId);
-  if (!status) return statusId <= 1 ? 1 : 4; // safe fallback
+  const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === sid);
+  if (!status) return sid <= 1 ? 1 : 4; // safe fallback
   return PHASE_MAP[status.sPhaseGroup] || 1;
 }
 
@@ -2438,11 +2439,30 @@ function buildRequisitionPdf(d) {
   // ── Scope of Repair table ──
   y = E.addSectionLabel(doc, 'Scope of Repair', y);
 
+  // Scope type detection
+  const scopeType = (r.sRigidOrFlexible || '').charAt(0).toUpperCase();
+  const isFlexible = scopeType === 'F';
+  const isRigid = scopeType === 'R' || scopeType === 'C';
+  const isInstrument = scopeType === 'I' || !scopeType;
+  const isContract = !!(r.lContractKey);
+
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(E.COLORS.steel);
   doc.text('Based on our diagnostic inspection, we recommend the following repairs:', m, y);
   y += 12;
+
+  // Contract banner
+  if (isContract) {
+    y = E.checkPageBreak(doc, y, 20);
+    doc.setFillColor('#EFF6FF');
+    doc.rect(m, y - 8, E.PAGE.contentW, 16, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor('#1D4ED8');
+    doc.text('Covered Under Service Agreement', E.PAGE.w / 2, y + 1, { align: 'center' });
+    y += 16;
+  }
 
   // Filter: hide blind/internal items and discount adjustments — keep Diagnostic Inspection
   // Sort: Diagnostic Inspection first, rest alphabetical (matches HTML preview)
@@ -2452,32 +2472,122 @@ function buildRequisitionPdf(d) {
   const otherItems = allItems.filter(i => !(i.desc || '').toLowerCase().includes('diagnostic inspection'))
     .sort((a, b) => (a.desc || '').localeCompare(b.desc || ''));
   const reqItems = [...diItems, ...otherItems];
-  const rows = reqItems.map(i => {
-    const name = (i.desc || '').replace(/^!+/, '').trim();
-    const tag = i.uanwt === 'UA' ? 'Avoidable' : (i.uanwt === 'N' || i.uanwt === 'NWT') ? 'Normal Wear' : '';
-    return [name, tag, i.comments || ''];
-  });
 
-  y = E.addTable(doc, ['Repair', 'Assessment', 'Notes'], rows, y, {
-    columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 220 },
-      1: { halign: 'center', cellWidth: 80, fontSize: 7 },
-      2: { fontSize: 7, fontStyle: 'italic', textColor: E.COLORS.steel }
+  // Helper: parse currency amount from item
+  const itemAmt = i => parseFloat((i.amount || '0').toString().replace(/[^0-9.-]/g, '')) || 0;
+  const fmtCur = v => '$' + v.toFixed(2);
+
+  if (isFlexible) {
+    // Flexible: Repair / Description / Approved
+    const rows = reqItems.map(i => {
+      const name = (i.desc || '').replace(/^!+/, '').trim();
+      const approved = i.approved === 'Y' ? 'Y' : i.approved === 'N' ? 'N' : '—';
+      return [name, i.comments || '', approved];
+    });
+    y = E.addTable(doc, ['Repair', 'Description', 'Approved'], rows, y, {
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 200 },
+        1: { fontSize: 7, fontStyle: 'italic', textColor: E.COLORS.steel },
+        2: { halign: 'center', cellWidth: 55, fontSize: 8 }
+      }
+    });
+    // Angulation specs
+    if (r.sAngInUp || r.sAngInDown || r.sAngInRight || r.sAngInLeft) {
+      y = E.checkPageBreak(doc, y, 30);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(E.COLORS.navy);
+      doc.text('Angulation:', m, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(E.COLORS.black);
+      doc.text('Up ' + (r.sAngInUp || 'N/A') + '\u00B0 / Down ' + (r.sAngInDown || 'N/A') + '\u00B0 / Right ' + (r.sAngInRight || 'N/A') + '\u00B0 / Left ' + (r.sAngInLeft || 'N/A') + '\u00B0', m + 55, y);
+      y += 11;
+      doc.setTextColor(E.COLORS.steel);
+      doc.text('Should Be: Up 210\u00B0 / Down 180\u00B0 / Right 160\u00B0 / Left 160\u00B0', m + 55, y);
+      y += 11;
     }
-  });
+    // Broken fibers
+    if (r.nBrokenFibers !== undefined && r.nBrokenFibers !== null) {
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(E.COLORS.navy);
+      doc.text('Broken Fibers:', m, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(E.COLORS.black);
+      doc.text(String(r.nBrokenFibers || 'N/A'), m + 70, y);
+      y += 12;
+    }
+  } else if (isRigid) {
+    // Rigid/Camera: Repair / Description / Cost / Approved — with !! and ! grouping
+    const rows = reqItems.map(i => {
+      const raw = (i.desc || '');
+      const isPackage = raw.startsWith('!!');
+      const isIncluded = raw.startsWith('!') && !raw.startsWith('!!');
+      const name = raw.replace(/^!+/, '').trim();
+      const displayName = isIncluded ? '    ' + name : name;
+      const cost = isContract ? '$0.00' : isIncluded ? 'Included' : fmtCur(itemAmt(i));
+      const approved = i.approved === 'Y' ? 'Y' : i.approved === 'N' ? 'N' : '—';
+      return { cells: [displayName, i.comments || '', cost, approved], bold: isPackage };
+    });
+    const tableRows = rows.map(r => r.cells);
+    y = E.addTable(doc, ['Repair', 'Description', 'Cost', 'Approved'], tableRows, y, {
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 170 },
+        1: { fontSize: 7, fontStyle: 'italic', textColor: E.COLORS.steel },
+        2: { halign: 'right', cellWidth: 60 },
+        3: { halign: 'center', cellWidth: 50, fontSize: 8 }
+      }
+    });
+  } else {
+    // Instrument (I or empty): Qty / Description / Rate / Amount / Approved
+    const rows = reqItems.map(i => {
+      const name = (i.desc || '').replace(/^!+/, '').trim();
+      const qty = parseInt(i.qty) || 1;
+      const amt = isContract ? 0 : itemAmt(i);
+      const rate = qty > 0 ? amt / qty : amt;
+      const approved = i.approved === 'Y' ? 'Y' : i.approved === 'N' ? 'N' : '—';
+      return [String(qty), name, isContract ? '$0.00' : fmtCur(rate), isContract ? '$0.00' : fmtCur(amt), approved];
+    });
+    y = E.addTable(doc, ['Qty', 'Description', 'Rate', 'Amount', 'Approved'], rows, y, {
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 35 },
+        1: { fontStyle: 'bold', cellWidth: 170 },
+        2: { halign: 'right', cellWidth: 60 },
+        3: { halign: 'right', cellWidth: 60 },
+        4: { halign: 'center', cellWidth: 50, fontSize: 8 }
+      }
+    });
+  }
 
   // ── Totals ──
-  const itemSum = reqItems.reduce((sum, i) => sum + (parseFloat(i.amount?.replace(/[^0-9.-]/g, '')) || 0), 0);
+  const itemSum = reqItems.reduce((sum, i) => sum + (parseFloat((i.amount || '0').toString().replace(/[^0-9.-]/g, '')) || 0), 0);
   const subTotal = parseFloat(r.dblAmtRepair) || itemSum;
   const shipping = parseFloat(r.dblAmtShipping) || 0;
   const tax = parseFloat(r.dblAmtTax) || 0;
+  const actualTotal = subTotal + shipping + tax;
 
-  y = E.addTotalsBlock(doc, {
-    subtotal:   subTotal,
-    shipping:   shipping,
-    taxes:      [{ name: '', amt: tax }],
-    grandTotal: subTotal + shipping + tax
-  }, y);
+  if (isContract) {
+    y = E.addTotalsBlock(doc, {
+      subtotal:   0,
+      shipping:   0,
+      taxes:      [{ name: '', amt: 0 }],
+      grandTotal: 0
+    }, y);
+    // Show what it would have cost
+    y = E.checkPageBreak(doc, y, 16);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(E.COLORS.steel);
+    doc.text('Non-Contract Cost: ' + fmtCur(actualTotal), E.PAGE.w - m, y, { align: 'right' });
+    y += 14;
+  } else {
+    y = E.addTotalsBlock(doc, {
+      subtotal:   subTotal,
+      shipping:   shipping,
+      taxes:      [{ name: '', amt: tax }],
+      grandTotal: actualTotal
+    }, y);
+  }
 
   // ── Disclaimer ──
   y = E.checkPageBreak(doc, y, 40);
@@ -3241,6 +3351,13 @@ function populateFormDrawer(formId) {
     const pt = _paymentTerms.find(x => x.lPaymentTermsKey == r.lPaymentTermsKey);
     const payTerms = pt ? (pt.sPaymentTerms || pt.sTermsDesc) : 'Net 30';
 
+    // Scope type detection
+    const scopeType = (r.sRigidOrFlexible || '').charAt(0).toUpperCase();
+    const isFlexible = scopeType === 'F';
+    const isRigid = scopeType === 'R' || scopeType === 'C';
+    const isInstrument = scopeType === 'I' || !scopeType;
+    const isContract = !!(r.lContractKey);
+
     // Filter: hide blind/internal items and discount adjustments — but keep Diagnostic Inspection
     // Diagnostic Inspection always first, rest sorted alphabetically
     const filteredItems = reqItems
@@ -3248,6 +3365,9 @@ function populateFormDrawer(formId) {
     const diItems = filteredItems.filter(i => (i.desc || '').toLowerCase().includes('diagnostic inspection'));
     const otherItems = filteredItems.filter(i => !(i.desc || '').toLowerCase().includes('diagnostic inspection')).sort((a, b) => (a.desc || '').localeCompare(b.desc || ''));
     const visibleItems = [...diItems, ...otherItems];
+
+    // Helper: parse currency amount from item
+    const itemAmt = i => parseFloat((i.amount || '0').toString().replace(/[^0-9.-]/g, '')) || 0;
 
     // Bill-to: resolve from department record (has sBillName1, sBillAddr1, etc.)
     const billDept = _departments.find(d => d.lDepartmentKey == r.lDepartmentKey) || {};
@@ -3331,16 +3451,55 @@ function populateFormDrawer(formId) {
       <div class="wf-est-section">
         <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Scope of Repair</div>
         <div style="font-size:10px;color:#5A6F8A;margin-bottom:10px">Based on our diagnostic inspection, we recommend the following repairs:</div>
-        <table class="wf-est-repairs-tbl">
-          <thead><tr><th>Repair</th><th style="width:80px;text-align:center">Assessment</th><th>Notes</th></tr></thead>
-          <tbody>${visibleItems.map(i => {
-            const name = (i.desc || '').replace(/^!+/, '').trim();
-            const tag = i.uanwt === 'UA' ? '<span class="est-tag est-tag-ua">Avoidable</span>'
-              : i.uanwt === 'N' || i.uanwt === 'NWT' ? '<span class="est-tag est-tag-nw">Normal Wear</span>'
-              : '';
-            return '<tr><td><b>' + name + '</b></td><td style="text-align:center">' + tag + '</td><td style="font-size:9px;color:#5A6F8A;font-style:italic">' + (i.comments || '') + '</td></tr>';
-          }).join('') || '<tr><td colspan="3" style="color:#8896AA;text-align:center">No repair items identified</td></tr>'}</tbody>
-        </table>
+        ${isContract ? '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:6px 12px;margin-bottom:10px;text-align:center;font-weight:700;color:#1D4ED8;font-size:11px">Covered Under Service Agreement</div>' : ''}
+        ${(() => {
+          if (isFlexible) {
+            // Flexible: Repair / Description / Approved
+            const tblRows = visibleItems.map(i => {
+              const name = (i.desc || '').replace(/^!+/, '').trim();
+              const approved = i.approved === 'Y' ? '\u2611 Y' : i.approved === 'N' ? '\u2610 N' : '\u2610';
+              return '<tr><td><b>' + name + '</b></td><td style="font-size:9px;color:#5A6F8A;font-style:italic">' + (i.comments || '') + '</td><td style="text-align:center;font-size:10px">' + approved + '</td></tr>';
+            }).join('') || '<tr><td colspan="3" style="color:#8896AA;text-align:center">No repair items identified</td></tr>';
+            let html = '<table class="wf-est-repairs-tbl"><thead><tr><th>Repair</th><th>Description</th><th style="width:65px;text-align:center">Approved</th></tr></thead><tbody>' + tblRows + '</tbody></table>';
+            // Angulation specs
+            if (r.sAngInUp || r.sAngInDown || r.sAngInRight || r.sAngInLeft) {
+              html += '<div style="margin-top:8px;font-size:10px;line-height:1.6">';
+              html += '<div><b style="color:#00257A">Angulation:</b> Up ' + (r.sAngInUp || 'N/A') + '\u00B0 / Down ' + (r.sAngInDown || 'N/A') + '\u00B0 / Right ' + (r.sAngInRight || 'N/A') + '\u00B0 / Left ' + (r.sAngInLeft || 'N/A') + '\u00B0</div>';
+              html += '<div style="color:#5A6F8A">Should Be: Up 210\u00B0 / Down 180\u00B0 / Right 160\u00B0 / Left 160\u00B0</div>';
+              html += '</div>';
+            }
+            // Broken fibers
+            if (r.nBrokenFibers !== undefined && r.nBrokenFibers !== null) {
+              html += '<div style="margin-top:4px;font-size:10px"><b style="color:#00257A">Number of broken fibers:</b> ' + (r.nBrokenFibers || 'N/A') + '</div>';
+            }
+            return html;
+          } else if (isRigid) {
+            // Rigid/Camera: Repair / Description / Cost / Approved with !! and ! grouping
+            const tblRows = visibleItems.map(i => {
+              const raw = (i.desc || '');
+              const isPkg = raw.startsWith('!!');
+              const isInc = raw.startsWith('!') && !raw.startsWith('!!');
+              const name = raw.replace(/^!+/, '').trim();
+              const displayName = isInc ? '<span style="padding-left:16px">' + name + '</span>' : (isPkg ? '<b style="color:#00257A">' + name + '</b>' : '<b>' + name + '</b>');
+              const cost = isContract ? '$0.00' : isInc ? '<span style="color:#5A6F8A;font-style:italic">Included</span>' : fmt$(itemAmt(i));
+              const approved = i.approved === 'Y' ? '\u2611 Y' : i.approved === 'N' ? '\u2610 N' : '\u2610';
+              const bgStyle = isPkg ? ' style="background:#F0F4FA"' : '';
+              return '<tr' + bgStyle + '><td>' + displayName + '</td><td style="font-size:9px;color:#5A6F8A;font-style:italic">' + (i.comments || '') + '</td><td style="text-align:right;font-size:10px;white-space:nowrap">' + cost + '</td><td style="text-align:center;font-size:10px">' + approved + '</td></tr>';
+            }).join('') || '<tr><td colspan="4" style="color:#8896AA;text-align:center">No repair items identified</td></tr>';
+            return '<table class="wf-est-repairs-tbl"><thead><tr><th>Repair</th><th>Description</th><th style="width:70px;text-align:right">Cost</th><th style="width:65px;text-align:center">Approved</th></tr></thead><tbody>' + tblRows + '</tbody></table>';
+          } else {
+            // Instrument (I or empty): Qty / Description / Rate / Amount / Approved
+            const tblRows = visibleItems.map(i => {
+              const name = (i.desc || '').replace(/^!+/, '').trim();
+              const qty = parseInt(i.qty) || 1;
+              const amt = isContract ? 0 : itemAmt(i);
+              const rate = qty > 0 ? amt / qty : amt;
+              const approved = i.approved === 'Y' ? '\u2611 Y' : i.approved === 'N' ? '\u2610 N' : '\u2610';
+              return '<tr><td style="text-align:center">' + qty + '</td><td><b>' + name + '</b></td><td style="text-align:right">' + (isContract ? '$0.00' : fmt$(rate)) + '</td><td style="text-align:right">' + (isContract ? '$0.00' : fmt$(amt)) + '</td><td style="text-align:center;font-size:10px">' + approved + '</td></tr>';
+            }).join('') || '<tr><td colspan="5" style="color:#8896AA;text-align:center">No repair items identified</td></tr>';
+            return '<table class="wf-est-repairs-tbl"><thead><tr><th style="width:40px;text-align:center">Qty</th><th>Description</th><th style="width:70px;text-align:right">Rate</th><th style="width:70px;text-align:right">Amount</th><th style="width:65px;text-align:center">Approved</th></tr></thead><tbody>' + tblRows + '</tbody></table>';
+          }
+        })()}
       </div>
 
       <!-- ESTIMATE TOTAL -->
@@ -3349,10 +3508,17 @@ function populateFormDrawer(formId) {
           <div></div>
           <div style="text-align:right">
             <div class="wf-est-totals-grid" style="padding:0">
+              ${isContract ? `
+              <span class="est-total-label">Repair</span><span class="est-total-val">$0.00</span>
+              <span class="est-total-label">Sales Tax</span><span class="est-total-val">$0.00</span>
+              <span class="est-grand-label">Estimate Total</span><span class="est-grand-val">$0.00</span>
+              <span class="est-total-label" style="font-style:italic;color:#5A6F8A">Non-Contract Cost</span><span class="est-total-val" style="font-style:italic;color:#5A6F8A">${fmt$(subTotal + shipping + tax)}</span>
+              ` : `
               ${shipping > 0 ? '<span class="est-total-label">Repair</span><span class="est-total-val">' + fmt$(subTotal) + '</span>' : ''}
               ${shipping > 0 ? '<span class="est-total-label">Shipping</span><span class="est-total-val">' + fmt$(shipping) + '</span>' : ''}
               <span class="est-total-label">Sales Tax</span><span class="est-total-val">${fmt$(tax)}</span>
               <span class="est-grand-label">Estimate Total</span><span class="est-grand-val">${fmt$(subTotal + shipping + tax)}</span>
+              `}
             </div>
           </div>
         </div>
