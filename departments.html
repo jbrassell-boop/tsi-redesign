@@ -187,7 +187,7 @@
           <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v3M8 11.5v3M14.5 8h-3M4.5 8h-3"/></svg></div>
           <div class="s-data"><div class="s-val s-blue" id="ss-scopes">16</div><div class="s-lbl">SCOPES</div></div>
         </div>
-        <div class="stat-chip" id="contractChip" style="background:#FFFBEB;">
+        <div class="stat-chip" id="contractChip" style="background:#FFFBEB">
           <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
           <div class="s-data"><div class="s-val s-amber" id="ss-contract" style="font-size:12px;font-weight:600">Contract expires 11/14/2026</div></div>
         </div>
@@ -1061,10 +1061,10 @@ function openContactModal(mode){
     b.style.display = 'inline-block';
     if(live){
       b.textContent = 'Live Data';
-      b.style.background = '#F0FDF4'; b.style.color = '#16A34A'; b.style.border = '1px solid #BBF7D0';
+      b.style.background = '#F0FDF4'; b.style.color = 'var(--success)'; b.style.border = '1px solid #BBF7D0';
     } else {
       b.textContent = 'Demo Data';
-      b.style.background = '#FFFBEB'; b.style.color = '#F59E0B'; b.style.border = '1px solid #F59E0B';
+      b.style.background = '#FFFBEB'; b.style.color = 'var(--warning)'; b.style.border = '1px solid var(--warning)';
     }
   }
 
@@ -1614,7 +1614,7 @@ function openContactModal(mode){
         const b = this;
         if(b.dataset.confirming) return;
         const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
-        b.textContent = 'Sure?'; b.style.background = '#B71234'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        b.textContent = 'Sure?'; b.style.background = 'var(--danger)'; b.style.color = '#fff'; b.dataset.confirming = '1';
         const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
         b.addEventListener('click', async function confirmHandler(e2){
           e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
@@ -1764,7 +1764,7 @@ function openContactModal(mode){
           const origBg = b.style.background;
           const origColor = b.style.color;
           b.textContent = 'Sure?';
-          b.style.background = '#B71234';
+          b.style.background = 'var(--danger)';
           b.style.color = '#fff';
           b.dataset.confirming = '1';
           const timer = setTimeout(() => {
@@ -1833,7 +1833,7 @@ function openContactModal(mode){
         const b = this;
         if(b.dataset.confirming) return;
         const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
-        b.textContent = 'Sure?'; b.style.background = '#B71234'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        b.textContent = 'Sure?'; b.style.background = 'var(--danger)'; b.style.color = '#fff'; b.dataset.confirming = '1';
         const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
         b.addEventListener('click', async function confirmHandler(e2){
           e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
@@ -1891,7 +1891,7 @@ function openContactModal(mode){
         const b = this;
         if(b.dataset.confirming) return;
         const origText = b.textContent, origBg = b.style.background, origColor = b.style.color;
-        b.textContent = 'Sure?'; b.style.background = '#B71234'; b.style.color = '#fff'; b.dataset.confirming = '1';
+        b.textContent = 'Sure?'; b.style.background = 'var(--danger)'; b.style.color = '#fff'; b.dataset.confirming = '1';
         const timer = setTimeout(() => { b.textContent = origText; b.style.background = origBg; b.style.color = origColor; delete b.dataset.confirming; }, 3000);
         b.addEventListener('click', async function confirmHandler(e2){
           e2.stopPropagation(); clearTimeout(timer); b.removeEventListener('click', confirmHandler); delete b.dataset.confirming;
@@ -2112,13 +2112,13 @@ function openContactModal(mode){
     if(deactBtn.dataset.confirming) return;
     const origHTML = deactBtn.innerHTML;
     deactBtn.textContent = 'Sure?';
-    deactBtn.style.background = '#B71234';
+    deactBtn.style.background = 'var(--danger)';
     deactBtn.style.color = '#fff';
     deactBtn.dataset.confirming = '1';
     const timer = setTimeout(() => {
       deactBtn.innerHTML = origHTML;
       deactBtn.style.background = '';
-      deactBtn.style.color = '#F59E0B';
+      deactBtn.style.color = 'var(--warning)';
       delete deactBtn.dataset.confirming;
     }, 3000);
     deactBtn.addEventListener('click', function confirmHandler(e2){
@@ -2128,7 +2128,7 @@ function openContactModal(mode){
       delete deactBtn.dataset.confirming;
       deactBtn.innerHTML = origHTML;
       deactBtn.style.background = '';
-      deactBtn.style.color = '#F59E0B';
+      deactBtn.style.color = 'var(--warning)';
       const el = $('fActive');
       if(el){ el.checked = false; $('fActiveLabel').textContent = 'No'; $('fActiveLabel').style.color = 'var(--red)'; }
       deptDirty();

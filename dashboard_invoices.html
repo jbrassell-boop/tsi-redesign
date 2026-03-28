@@ -29,7 +29,7 @@
   .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0}
   .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
   .b-pending{background:#FEF3C7;color:#92400E}
-  .b-finalized{background:#F0FDF4;color:#16A34A}
+  .b-finalized{background:#F0FDF4;color:var(--success)}
   .b-paid{background:#EFF6FF;color:#1D4ED8}
   .b-cpo{background:#F3E8FF;color:#7C3AED}
   .amt{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px}
@@ -37,8 +37,7 @@
   /* Drawer */
   .inv-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:9998;display:none}
   .inv-backdrop.open{display:block}
-  .inv-drawer{position:fixed;top:0;right:-620px;width:600px;height:100%;background:#fff;box-shadow:-8px 0 32px rgba(0,0,0,.12);z-index:9999;transition:right .25s ease;display:flex;flex-direction:column}
-  .inv-drawer.open{right:0}
+  .drawer{top:0;height:100%;bottom:auto;z-index:var(--z-modal);border-left:none;transition:transform .25s ease}
   .inv-head{padding:14px 18px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
   .inv-body{flex:1;overflow-y:auto;padding:16px 18px}
   .inv-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
@@ -89,7 +88,7 @@
 
 <!-- Invoice Drawer -->
 <div class="inv-backdrop" id="invBackdrop" onclick="invCloseDrawer()"></div>
-<div class="inv-drawer" id="invDrawer">
+<div class="drawer" id="invDrawer">
   <div class="inv-head">
     <span id="invDrawerTitle" style="font-size:14px;font-weight:600">Invoice</span>
     <button onclick="invCloseDrawer()" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center">&times;</button>
@@ -97,7 +96,7 @@
   <div class="inv-body" id="invDrawerBody"></div>
   <div class="inv-foot">
     <button onclick="invPrint()" style="flex:1;height:34px;border:1.5px solid var(--border);border-radius:6px;background:#fff;color:var(--navy);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Print / PDF</button>
-    <button id="invMarkPaidBtn" onclick="invMarkPaid()" style="flex:1;height:34px;border:none;border-radius:6px;background:#16A34A;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Mark Paid</button>
+    <button id="invMarkPaidBtn" onclick="invMarkPaid()" style="flex:1;height:34px;border:none;border-radius:6px;background:var(--success);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Mark Paid</button>
   </div>
 </div>
 
