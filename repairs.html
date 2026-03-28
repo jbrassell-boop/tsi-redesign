@@ -2119,7 +2119,7 @@ function getPhaseForStatus(statusId) {
   // No more hardcoded ID ranges — new statuses Just Work™.
   const sid = Number(statusId);
   const PHASE_MAP = { 'Intake':1, 'Approval':2, 'In Repair':3, 'Shipping':4, 'Cart / Build':4, 'On Hold':2 };
-  const allStatuses = (typeof MockDB !== 'undefined' && MockDB.all) ? MockDB.all('repairStatuses') : _repairStatuses || [];
+  const allStatuses = (typeof MockDB !== 'undefined' && MockDB.getAll) ? MockDB.getAll('repairStatuses') : _statuses || [];
   const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === sid);
   if (!status) return sid <= 1 ? 1 : 4; // safe fallback
   return PHASE_MAP[status.sPhaseGroup] || 1;
@@ -4319,7 +4319,7 @@ function updateStatusBadge(statusId) {
   const poReq = document.getElementById('fPORequired');
   const poVal = (document.getElementById('hPO').value || '').trim();
   if (poReq && poReq.checked && !poVal) {
-    const allSt = (typeof MockDB !== 'undefined' && MockDB.all) ? MockDB.all('repairStatuses') : _statuses || [];
+    const allSt = (typeof MockDB !== 'undefined' && MockDB.getAll) ? MockDB.getAll('repairStatuses') : _statuses || [];
     const target = allSt.find(s => s.lRepairStatusID === sid);
     if (target && target.sPhaseGroup === 'Shipping') {
       // Redirect to "Approved - Awaiting PO" (ID 28)
