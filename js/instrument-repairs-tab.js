@@ -894,7 +894,7 @@ function ir_markDirty() {
 
 function ir_autoSave() { if (ir_isDirty) ir_saveRepair(true); }
 
-function ir_saveRepair(silent) {
+async function ir_saveRepair(silent) {
   var r = ir_currentRepair;
   if (!r) return;
   r.status        = document.getElementById('ir_refStatus').value;
@@ -922,8 +922,13 @@ function ir_saveRepair(silent) {
   document.getElementById('ir_ssStatus').innerHTML = ir_statusBadge(r.status);
   ir_updateItemsChip();
 
-  // Persist via API
-  try { API.updateInstrumentRepair(r); } catch(e) { /* silent fail for demo */ }
+  // Persist via API — only clear dirty flag and show Saved on success
+  try {
+    await API.updateInstrumentRepair(r);
+  } catch(e) {
+    ir_setSaveStatus('dirty', 'Save failed');
+    return;
+  }
 
   ir_isDirty = false;
   ir_setSaveStatus('saved', 'Saved');

@@ -563,11 +563,11 @@
           <!-- TAB: NOTES -->
           <div class="tab-content" id="tab-notes">
             <div class="panel">
-              <div class="panel-head"><span>Contract Notes (3)</span><button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addNoteModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note</button></div>
+              <div class="panel-head"><span id="notesHeadCount">Contract Notes (3)</span><button class="btn btn-navy" style="height:22px;font-size:10px" onclick="document.getElementById('addNoteModal').classList.add('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Note</button></div>
               <div class="panel-body" style="padding:0">
                 <table>
                   <thead><tr><th>Date</th><th>Author</th><th>Note</th></tr></thead>
-                  <tbody>
+                  <tbody id="notesTbody">
                     <tr><td style="white-space:nowrap">03/05/2026</td><td>J. Brassell</td><td>Renewal discussion scheduled with procurement for 03/20.</td></tr>
                     <tr><td style="white-space:nowrap">01/15/2026</td><td>J. Miller</td><td>Client requested adding 3 new scopes to contract. Pending amendment.</td></tr>
                     <tr><td style="white-space:nowrap">11/20/2025</td><td>J. Brassell</td><td>Initial contract setup complete. All 16 scopes verified and added.</td></tr>
@@ -815,7 +815,7 @@
               <div class="panel-body" style="padding:0">
                 <table>
                   <thead><tr><th>Effective Date</th><th>End Date</th><th>Sales Rep</th><th>Rate</th></tr></thead>
-                  <tbody>
+                  <tbody id="commissionsTbody">
                     <tr><td>11/14/2025</td><td>11/14/2026</td><td>J. Miller</td><td style="font-weight:700;color:var(--navy)">8.5%</td></tr>
                   </tbody>
                 </table>
@@ -1095,11 +1095,11 @@
       <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="ff"><label>Note <span class="req">*</span></label><textarea class="inp" style="height:100px" placeholder="Enter note..."></textarea></div>
+      <div class="ff"><label>Note <span class="req">*</span></label><textarea id="noteText" class="inp" style="height:100px" placeholder="Enter note..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save Note</button>
+      <button class="btn-save" onclick="saveNote()">Save Note</button>
     </div>
   </div>
 </div>
@@ -1113,17 +1113,17 @@
     </div>
     <div class="modal-body">
       <div class="fg g2">
-        <div class="ff"><label>Effective Date <span class="req">*</span></label><input class="inp" type="date"/></div>
-        <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date"/></div>
+        <div class="ff"><label>Effective Date <span class="req">*</span></label><input id="commEffDate" class="inp" type="date"/></div>
+        <div class="ff"><label>End Date <span class="req">*</span></label><input id="commEndDate" class="inp" type="date"/></div>
         <div class="ff"><label>Sales Rep <span class="req">*</span></label>
-          <select class="inp"><option>-- Select --</option><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
+          <select id="commSalesRep" class="inp"><option>-- Select --</option><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
         </div>
-        <div class="ff"><label>Commission Rate (%)</label><input class="inp" type="number" placeholder="0.0" step="0.5"/></div>
+        <div class="ff"><label>Commission Rate (%)</label><input id="commRate" class="inp" type="number" placeholder="0.0" step="0.5"/></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="this.closest('.modal-overlay').classList.remove('open')">Save</button>
+      <button class="btn-save" onclick="saveCommission()">Save</button>
     </div>
   </div>
 </div>
@@ -1307,6 +1307,72 @@ let contractTypes = [];       // Lookup: contract types
 let servicePlanTerms = [];    // Lookup: service plan terms
 let contractClients = [];     // Lookup: clients for dropdown
 let currentStatusFilter = 'all';
+let contractNotes = [
+  { date: '03/05/2026', author: 'J. Brassell', text: 'Renewal discussion scheduled with procurement for 03/20.' },
+  { date: '01/15/2026', author: 'J. Miller',   text: 'Client requested adding 3 new scopes to contract. Pending amendment.' },
+  { date: '11/20/2025', author: 'J. Brassell', text: 'Initial contract setup complete. All 16 scopes verified and added.' }
+];
+let contractCommissions = [
+  { effDate: '11/14/2025', endDate: '11/14/2026', rep: 'J. Miller', rate: '8.5' }
+];
+
+function renderNotes() {
+  var tbody = document.getElementById('notesTbody');
+  if (!tbody) return;
+  tbody.innerHTML = contractNotes.map(function(n) {
+    return '<tr><td style="white-space:nowrap">' + n.date + '</td><td>' + n.author + '</td><td>' + n.text + '</td></tr>';
+  }).join('');
+  var head = document.getElementById('notesHeadCount');
+  if (head) head.textContent = 'Contract Notes (' + contractNotes.length + ')';
+}
+
+function saveNote() {
+  var text = (document.getElementById('noteText') || {}).value || '';
+  if (!text.trim()) {
+    if (window.TSI && TSI.toast) TSI.toast.error('Required', 'Please enter a note.');
+    return;
+  }
+  var now = new Date();
+  var dateStr = (now.getMonth()+1).toString().padStart(2,'0') + '/' + now.getDate().toString().padStart(2,'0') + '/' + now.getFullYear();
+  var user = (window.TSI && TSI.user && TSI.user()) ? TSI.user() : null;
+  var author = user ? ((user.sFirstName || '')[0] + '. ' + (user.sLastName || '')).trim() : 'Staff';
+  contractNotes.unshift({ date: dateStr, author: author || 'Staff', text: text.trim() });
+  renderNotes();
+  document.getElementById('noteText').value = '';
+  document.getElementById('addNoteModal').classList.remove('open');
+  if (window.TSI && TSI.toast) TSI.toast.success('Note Saved', 'Note added to contract.');
+}
+
+function renderCommissions() {
+  var tbody = document.getElementById('commissionsTbody');
+  if (!tbody) return;
+  tbody.innerHTML = contractCommissions.map(function(c) {
+    return '<tr><td>' + c.effDate + '</td><td>' + c.endDate + '</td><td>' + c.rep + '</td><td style="font-weight:700;color:var(--navy)">' + c.rate + '%</td></tr>';
+  }).join('');
+}
+
+function saveCommission() {
+  var effDate = (document.getElementById('commEffDate') || {}).value || '';
+  var endDate = (document.getElementById('commEndDate') || {}).value || '';
+  var rep     = (document.getElementById('commSalesRep') || {}).value || '';
+  var rate    = (document.getElementById('commRate') || {}).value || '';
+  if (!effDate || !endDate || !rep || rep === '-- Select --' || !rate) {
+    if (window.TSI && TSI.toast) TSI.toast.error('Required Fields', 'Please fill in all commission fields.');
+    return;
+  }
+  function fmtDate(d) {
+    var parts = d.split('-');
+    return parts[1] + '/' + parts[2] + '/' + parts[0];
+  }
+  contractCommissions.unshift({ effDate: fmtDate(effDate), endDate: fmtDate(endDate), rep: rep, rate: rate });
+  renderCommissions();
+  document.getElementById('commEffDate').value = '';
+  document.getElementById('commEndDate').value = '';
+  document.getElementById('commSalesRep').selectedIndex = 0;
+  document.getElementById('commRate').value = '';
+  document.getElementById('addCommissionModal').classList.remove('open');
+  if (window.TSI && TSI.toast) TSI.toast.success('Rate Saved', 'Commission rate added.');
+}
 
 // ── Demo Data (fallback) ──────────────────────────────
 function getDemoContracts() {

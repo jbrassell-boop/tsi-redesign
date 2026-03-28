@@ -187,7 +187,7 @@ router.get('/DepartmentReportingGroups/GetAllDepartmentGPOList', async (req, res
         g.ContractIDNumber, g.dtStartDate, g.dtEndDate,
         g.RebatePercentage, g.sBillingFrequency, g.bInactive
       FROM tblDepartment d
-        LEFT JOIN tblGPOs g ON g.bInactive = 0
+        LEFT JOIN tblGPOs g ON g.ContractIDNumber = d.sGPID AND g.bInactive = 0
       WHERE d.lDepartmentKey = @deptKey AND d.sGPID IS NOT NULL AND d.sGPID <> ''
       ORDER BY g.dtStartDate DESC`, { deptKey });
     res.json(rows);

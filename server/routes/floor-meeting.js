@@ -336,8 +336,12 @@ router.get('/floor-meeting/delays', async (req, res, next) => {
 // ───────────────────────────────────────────────────────
 router.post('/floor-meeting/generate-pptx', async (req, res, next) => {
   try {
-    const date = req.body.date || new Date().toISOString().split('T')[0];
-    const location = req.body.location || 'north';
+    const rawDate = req.body.date || '';
+    const rawLocation = req.body.location || '';
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+      ? rawDate
+      : new Date().toISOString().split('T')[0];
+    const location = ['north', 'south'].includes(rawLocation) ? rawLocation : 'north';
     const scriptPath = path.join(__dirname, '../../tasks/floor-meeting/generate.py');
 
     const cmd = `python "${scriptPath}" --date ${date} --location ${location}`;

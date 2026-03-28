@@ -1084,7 +1084,12 @@ function confirmDeleteByKey(key) {
 }
 
 async function deleteModel(key) {
-  try { await API.deleteScopeTypes(key); } catch(e) { /* demo */ }
+  try {
+    await API.deleteScopeTypes(key);
+  } catch(e) {
+    if (window.TSI && TSI.toast) TSI.toast.error('Delete Failed', 'Could not delete model. Please try again.');
+    return;
+  }
   allModels = allModels.filter(m => m.lScopeTypeKey !== key);
   if (selectedModelKey === key) closeDrawer();
   runPipeline();

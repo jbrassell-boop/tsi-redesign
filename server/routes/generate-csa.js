@@ -34,7 +34,8 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
 
     if (plPendingContractKey) {
       // ── Pending proposal ────────────────────────────────────────────────
-      const key = parseInt(plPendingContractKey);
+      const key = parseInt(plPendingContractKey) || 0;
+      if (!key) return res.status(400).json({ error: 'Invalid plPendingContractKey' });
 
       contract = await db.queryOne(`
         SELECT
@@ -96,7 +97,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
           LEFT JOIN tblClient c ON c.lClientKey = con.lClientKey
           LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = con.lSalesRepKey
         WHERE con.lContractKey = @contractKey`,
-        { contractKey: parseInt(plContractKey) }
+        { contractKey: parseInt(plContractKey) || 0 }
       );
 
       if (!contract) return res.status(404).json({ error: 'Contract not found' });
@@ -114,7 +115,7 @@ router.post('/Contract/GenerateCSA', async (req, res, next) => {
           LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
         WHERE cs.lContractKey = @contractKey
         ORDER BY d.sDepartmentName, st.sScopeTypeDesc, s.sSerialNumber`,
-        { contractKey: parseInt(plContractKey) }
+        { contractKey: parseInt(plContractKey) || 0 }
       );
     }
 
