@@ -58,9 +58,16 @@
     .modal-box{width:780px}
 
     /* ── MASTER-DETAIL SPLIT ── */
-    .split-layout{display:flex;flex:1;overflow:hidden}
-    .split-left{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .split-left-head{background:var(--neutral-50);padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);border-bottom:1px solid var(--border)}
+    .split-layout{display:flex;flex:1;overflow:hidden;position:relative}
+    .split-left{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease;position:relative}
+    .split-left.collapsed{width:0;border-right:none}
+    .split-left.collapsed .split-left-search,.split-left.collapsed .split-left-list,.split-left.collapsed .split-left-footer,.split-left.collapsed .split-left-head,.split-left.collapsed [id^="sk"]{display:none}
+    .split-expand-btn{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:48px;background:var(--navy);color:#fff;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:13px;align-items:center;justify-content:center;z-index:10;transition:background .15s}
+    .split-expand-btn:hover{background:var(--primary)}
+    .split-expand-btn.visible{display:flex}
+    .split-left-head{background:var(--neutral-50);padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .split-collapse-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border-dk);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:11px;transition:all .12s;flex-shrink:0}
+    .split-collapse-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
     .split-left-search{padding:4px 8px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
     .split-left-search .row{display:flex;gap:4px;align-items:center}
     .search-inp{flex:1;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
@@ -268,10 +275,13 @@
       </div>
 
       <!-- ══════════ INVENTORY TAB ══════════ -->
-      <div id="itab-inventory" class="tab-content show">
+      <div id="itab-inventory" class="tab-content show" style="position:relative">
         <!-- LEFT PANEL: Item List -->
-        <div class="split-left">
-          <div class="split-left-head">Inventory Items</div>
+        <div class="split-left" id="invSplitLeft">
+          <div class="split-left-head">
+            <span>Inventory Items</span>
+            <button class="split-collapse-btn" onclick="toggleInvSplit('itab-inventory')" title="Collapse panel">&#8249;</button>
+          </div>
           <div class="split-left-search">
             <input class="search-inp" placeholder="Search items..."/>
             <div class="row">
@@ -323,7 +333,8 @@
         </div>
 
         <!-- RIGHT PANEL: Redesigned compact layout -->
-        <div class="split-right" style="gap:0;padding:0;background:#fff">
+        <div class="split-right" style="gap:0;padding:0;background:#fff;position:relative">
+          <button class="split-expand-btn" onclick="toggleInvSplit('itab-inventory')" title="Show inventory list">&#8250;</button>
 
           <!-- ITEM HEADER BAR — collapsed to single dense strip -->
           <div class="item-header-bar">
@@ -547,10 +558,13 @@
       <!-- ══════════ PURCHASE ORDERS TAB ══════════ -->
       <div id="itab-po" class="tab-content">
         <div class="split-layout">
-          
+
           <!-- LEFT PANEL: PO List -->
           <div class="split-left">
-            <div class="split-left-head">Purchase Orders</div>
+            <div class="split-left-head">
+              <span>Purchase Orders</span>
+              <button class="split-collapse-btn" onclick="toggleInvSplit('itab-po')" title="Collapse panel">&#8249;</button>
+            </div>
             <div class="split-left-search">
               <select class="inp" style="height:24px;font-size:10.5px;font-weight:600;margin-bottom:2px" id="poSupplier">
                 <option value="">-- All Suppliers --</option>
@@ -621,8 +635,9 @@
           </div>
 
           <!-- RIGHT PANEL: PO Details -->
-          <div class="split-right" style="gap:0;padding:0;background:#fff">
-            
+          <div class="split-right" style="gap:0;padding:0;background:#fff;position:relative">
+            <button class="split-expand-btn" onclick="toggleInvSplit('itab-po')" title="Show PO list">&#8250;</button>
+
             <!-- HIGH DENSITY PO HEADER (.fg grid) -->
             <div class="po-header-bar" style="padding:0">
               <div class="panel-head">
@@ -774,7 +789,10 @@
           
           <!-- LEFT PANEL: PO Selection List -->
           <div class="split-left">
-            <div class="split-left-head">Receive Inventory</div>
+            <div class="split-left-head">
+              <span>Receive Inventory</span>
+              <button class="split-collapse-btn" onclick="toggleInvSplit('itab-receive')" title="Collapse panel">&#8249;</button>
+            </div>
             <div class="split-left-search">
               <select class="inp" style="height:24px;font-size:10.5px;font-weight:600;margin-bottom:2px" id="recvSupplier">
                 <option value="">-- All Suppliers --</option>
@@ -821,7 +839,8 @@
           </div>
 
           <!-- RIGHT PANEL: Receive Content -->
-          <div class="split-right" style="gap:0;padding:0;background:#fff">
+          <div class="split-right" style="gap:0;padding:0;background:#fff;position:relative">
+            <button class="split-expand-btn" onclick="toggleInvSplit('itab-receive')" title="Show receive list">&#8250;</button>
 
             <!-- HIGH DENSITY RECV HEADER -->
             <div class="po-header-bar" style="padding:0">
@@ -2700,6 +2719,17 @@ document.querySelectorAll('#itab-receive .split-left-list .po-card').forEach(car
     });
   });
 })();
+
+// ── Left panel collapse/expand ────────────────────────
+function toggleInvSplit(tabId) {
+  const tab = document.getElementById(tabId);
+  if (!tab) return;
+  const left = tab.querySelector('.split-left');
+  const btn = tab.querySelector('.split-expand-btn');
+  if (!left) return;
+  left.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('visible', left.classList.contains('collapsed'));
+}
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/receiving.js"></script>

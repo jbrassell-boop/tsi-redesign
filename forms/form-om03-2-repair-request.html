@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Repair Request Form — OM03-2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:10px}
+
+    .form-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+    .form-header img{height:44px}
+    .form-title-block{text-align:right}
+    .form-title{font-size:15px;font-weight:800;color:#1B3A5C}
+    .form-number{font-size:10px;color:#666;margin-top:2px}
+
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px}
+
+    .fields-grid{display:grid;gap:6px 14px;margin-top:6px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:1fr 1fr 1fr}
+    .g4{grid-template-columns:2fr 1fr 1fr 1fr}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .field-row.span3{grid-column:span 3}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:17px;font-size:11px;padding:1px 2px}
+    .fv.tall{min-height:36px}
+
+    /* Checkbox options */
+    .check-group{display:flex;flex-direction:column;gap:6px;margin-top:6px;padding:8px 12px;background:#F9FAFB;border:1px solid #eee;border-radius:3px}
+    .check-item{display:flex;align-items:flex-start;gap:10px;font-size:11px;line-height:1.4}
+    .check-box{width:14px;height:14px;border:1.5px solid #999;border-radius:2px;flex-shrink:0;margin-top:1px}
+    .check-label{flex:1}
+    .check-sub{font-size:9.5px;color:#666;margin-top:1px}
+
+    /* Quote preference */
+    .radio-group{display:flex;gap:24px;margin-top:4px}
+    .radio-item{display:flex;align-items:center;gap:6px;font-size:11px}
+    .radio-circle{width:14px;height:14px;border:1.5px solid #999;border-radius:50%;flex-shrink:0}
+
+    /* Pickup section */
+    .pickup-options{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px}
+    .pickup-opt{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border:1px solid #ddd;border-radius:3px;flex:1;min-width:120px}
+    .pickup-circle{width:14px;height:14px;border:1.5px solid #999;border-radius:50%;flex-shrink:0}
+
+    /* Return address footer */
+    .return-footer{margin-top:auto;padding:10px 14px;background:#F0F6FF;border:1.5px solid #2E75B6;border-radius:4px}
+    .return-title{font-size:9px;font-weight:700;text-transform:uppercase;color:#1B3A5C;letter-spacing:.06em;margin-bottom:4px}
+    .return-text{font-size:11px;color:#1B3A5C;font-weight:600;line-height:1.6}
+
+    .form-footer{padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page">
+
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Repair Request Form</div>
+      <div class="form-number">OM03-2</div>
+    </div>
+  </div>
+
+  <!-- Facility Information -->
+  <div class="section-bar">Facility Information</div>
+  <div class="fields-grid g2" style="margin-top:6px">
+    <div class="field-row span2"><span class="fl">Facility / Hospital Name</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row span2"><span class="fl">Department</span><div class="fv" id="f-dept"></div></div>
+    <div class="field-row span2"><span class="fl">Address</span><div class="fv" id="f-addr"></div></div>
+    <div class="field-row"><span class="fl">City</span><div class="fv" id="f-city"></div></div>
+    <div class="field-row" style="display:grid;grid-template-columns:80px 1fr;gap:0 10px">
+      <div class="field-row"><span class="fl">State</span><div class="fv"></div></div>
+      <div class="field-row"><span class="fl">Zip</span><div class="fv"></div></div>
+    </div>
+    <div class="field-row"><span class="fl">Contact Name</span><div class="fv" id="f-contact"></div></div>
+    <div class="field-row"><span class="fl">Phone / Extension</span><div class="fv" id="f-phone"></div></div>
+    <div class="field-row"><span class="fl">Email</span><div class="fv" id="f-email"></div></div>
+    <div class="field-row"><span class="fl">PO Number</span><div class="fv" id="f-po"></div></div>
+  </div>
+
+  <!-- Equipment Information -->
+  <div class="section-bar" style="margin-top:8px">Equipment Information</div>
+  <div class="fields-grid g3" style="margin-top:6px">
+    <div class="field-row span2"><span class="fl">Scope / Equipment Model</span><div class="fv" id="f-model"></div></div>
+    <div class="field-row"><span class="fl">Manufacturer</span><div class="fv" id="f-mfr"></div></div>
+    <div class="field-row"><span class="fl">Serial Number</span><div class="fv" id="f-serial"></div></div>
+    <div class="field-row"><span class="fl">Lot / Catalog #</span><div class="fv"></div></div>
+    <div class="field-row"><span class="fl">Last Repair WO#</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row span3"><span class="fl">Complaint / Reason for Repair</span><div class="fv tall" id="f-complaint"></div></div>
+  </div>
+
+  <!-- Checkboxes -->
+  <div class="section-bar" style="margin-top:8px">Additional Information</div>
+  <div class="check-group">
+    <div class="check-item">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>Failure During Case / Patient Involvement</strong>
+        <div class="check-sub">Scope failed while in use on a patient. Incident report may be required.</div>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>Equipment Has Been Cleaned and Disinfected</strong>
+        <div class="check-sub">I confirm this equipment has been properly cleaned and high-level disinfected prior to shipment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Preference -->
+  <div class="section-bar" style="margin-top:8px">Quote / Approval Preference</div>
+  <div class="radio-group" style="margin-top:6px">
+    <div class="radio-item"><div class="radio-circle"></div> Repair without quote (PO on file)</div>
+    <div class="radio-item"><div class="radio-circle"></div> Send written quote first</div>
+    <div class="radio-item"><div class="radio-circle"></div> Call before proceeding</div>
+  </div>
+  <div style="margin-top:6px;font-size:9.5px;color:#666">Quote contact (if different from above): <span style="display:inline-block;width:220px;border-bottom:1px solid #999;margin-left:4px">&nbsp;</span></div>
+
+  <!-- Pickup Method -->
+  <div class="section-bar" style="margin-top:8px">Return / Pickup Method</div>
+  <div class="pickup-options">
+    <div class="pickup-opt"><div class="pickup-circle"></div> TSI Will Pick Up</div>
+    <div class="pickup-opt"><div class="pickup-circle"></div> FedEx (TSI Account)</div>
+    <div class="pickup-opt"><div class="pickup-circle"></div> UPS (TSI Account)</div>
+    <div class="pickup-opt"><div class="pickup-circle"></div> Customer Arranges</div>
+  </div>
+
+  <!-- Return Address Footer -->
+  <div class="return-footer">
+    <div class="return-title">Return Address — Ship Equipment To:</div>
+    <div class="return-text">
+      Technical Services Inc. (TSI)<br/>
+      17 Creek Pkwy, Upper Chichester, PA 19061<br/>
+      Attn: Receiving / Repair Department<br/>
+      Phone: (610) 485-3838
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM03-2</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      fill('f-client', r.sClientName || r.sFacility || r.sClient);
+      fill('f-dept', r.sDepartment || r.sDept);
+      fill('f-addr', r.sAddr1 || r.sAddress);
+      fill('f-city', r.sCity);
+      fill('f-contact', r.sContact || r.sContactName);
+      fill('f-phone', r.sPhone || r.sPhoneNumber);
+      fill('f-email', r.sEmail);
+      fill('f-po', r.sPONumber || r.sPO);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      fill('f-mfr', r.sManufacturer || r.sMfr);
+      fill('f-serial', r.sSerial || r.sSerialNo || r.sSerialNumber);
+      fill('f-wo', r.sWONumber || r.sWorkOrder || wo);
+      fill('f-complaint', r.sComplaint || r.sReasonForRepair || r.sNotes);
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>

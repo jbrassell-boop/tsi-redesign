@@ -7,10 +7,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    .page-body{display:flex;flex-direction:column;overflow-y:auto}
-    .briefing-kpis{margin-bottom:0}
-    .queue-cards{margin-top:0}
-    .attention-empty{padding:12px 8px;font-size:11px;color:var(--muted);font-style:italic}
+    .page-body{display:flex;flex-direction:column;overflow-y:auto;padding:0}
+    /* ── Floor Meeting Layout ── */
+    .fm-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;gap:12px}
+    .fm-title{font-size:18px;font-weight:700;color:var(--navy)}
+    .fm-date-row{display:flex;align-items:center;gap:10px}
+    .fm-date-input{padding:5px 8px;border:1px solid var(--neutral-300);border-radius:6px;font-size:13px;font-family:inherit}
+    .fm-btn{padding:7px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+    .fm-btn-primary{background:var(--navy);color:#fff}.fm-btn-primary:hover{background:#0f2d6b}
+    .fm-btn-secondary{background:var(--neutral-100);color:var(--neutral-700);border:1px solid var(--neutral-300)}.fm-btn-secondary:hover{background:var(--neutral-200)}
+    .fm-btn:disabled{opacity:.5;cursor:not-allowed}
+    .fm-toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s}
+    .fm-toast.show{opacity:1}
+    .fm-toast-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+    .fm-toast-err{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+    /* ── Sections ── */
+    .fm-sections{padding:0 20px 20px;display:flex;flex-direction:column;gap:16px}
+    .fm-section{background:#fff;border-radius:8px;border:1px solid var(--neutral-200);overflow:hidden}
+    .fm-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);padding:10px 14px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200)}
+    /* ── Tables ── */
+    .fm-table{width:100%;border-collapse:collapse;font-size:12px}
+    .fm-table th{background:linear-gradient(180deg,#A8C8E0,#C0D8ED);color:var(--navy);font-weight:600;text-align:left;padding:7px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+    .fm-table td{padding:6px 10px;border-bottom:1px solid var(--neutral-100);color:var(--neutral-800)}
+    .fm-table tr:last-child td{border-bottom:none}
+    .fm-table .num{text-align:center;font-variant-numeric:tabular-nums}
+    .fm-table .totals td{font-weight:700;border-top:2px solid var(--neutral-300);background:var(--neutral-50)}
+    .fm-table .gap-pos{color:#2e7d32;font-weight:600}
+    .fm-table .gap-neg{color:#c62828;font-weight:600}
+    /* KPI pills in commitments */
+    .fm-kpi-row{display:flex;gap:10px;padding:10px 14px}
+    .fm-kpi-pill{flex:1;text-align:center;padding:8px;border-radius:6px;background:var(--neutral-50);border:1px solid var(--neutral-200)}
+    .fm-kpi-pill .val{font-size:20px;font-weight:800;color:var(--navy)}
+    .fm-kpi-pill .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+    .fm-kpi-pill .goal{font-size:10px;color:var(--muted)}
+    .fm-kpi-pill.ok .val{color:#2e7d32}
+    .fm-kpi-pill.warn .val{color:#e65100}
+    .fm-kpi-pill.bad .val{color:#c62828}
+    /* ── No-data state ── */
+    .fm-nodata{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px}
+    .fm-nodata button{margin-top:10px}
+    /* Two-col layout for smaller tables */
+    .fm-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.fm-two-col{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -18,35 +56,87 @@
   <nav class="sidebar"></nav>
   <div class="main">
     <header class="topbar"></header>
-
-    <!-- DASHBOARD SUBNAV — rendered by shell.js -->
     <div id="dashSubnav" class="subnav" style="display:flex;gap:0;padding:0 14px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);margin:0;flex-shrink:0"></div>
 
-    <div class="page-body" style="padding:0">
-
-      <!-- BIG KPI CARDS -->
-      <div class="briefing-kpis" id="kpiCards">
-        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">Throughput</div><div class="kpi-big-sub">shipped this month</div></div>
-        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">In-House</div><div class="kpi-big-sub">currently in process</div></div>
-        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">On-Time %</div><div class="kpi-big-sub">within SLA target</div></div>
-        <div class="kpi-big-card"><div class="kpi-big-val">—</div><div class="kpi-big-lbl">Avg TAT</div><div class="kpi-big-sub">days turnaround</div></div>
+    <div class="page-body">
+      <!-- Header -->
+      <div class="fm-header">
+        <div class="fm-title" id="fmTitle">North Floor Meeting</div>
+        <div class="fm-date-row">
+          <select class="fm-date-input" id="fmLocation" onchange="loadFloorMeeting()">
+            <option value="north">North</option>
+            <option value="south">South</option>
+          </select>
+          <input type="date" class="fm-date-input" id="fmDate"/>
+          <button class="fm-btn fm-btn-secondary" onclick="loadFloorMeeting()">Refresh</button>
+          <button class="fm-btn fm-btn-primary" id="fmGenBtn" onclick="generatePptx()">Generate PPTX</button>
+        </div>
       </div>
 
-      <!-- NEEDS ATTENTION -->
-      <div class="attention-section" id="attentionSection">
-        <div class="attention-header">NEEDS ATTENTION</div>
-        <div id="attentionList"></div>
+      <!-- No-data fallback (shown when not in local mode) -->
+      <div class="fm-nodata" id="fmNoData" style="display:none">
+        Floor meeting data requires SQL Server connection.<br>
+        <button class="fm-btn fm-btn-primary" onclick="API.UI.toggleLocalMode()">Switch to SQL Server Mode</button>
       </div>
 
-      <!-- YOUR QUEUES -->
-      <div class="attention-section">
-        <div class="attention-header">YOUR QUEUES</div>
-      </div>
-      <div class="queue-cards" id="queueCards"></div>
+      <!-- Sections -->
+      <div class="fm-sections" id="fmSections">
 
+        <!-- Overall Flow -->
+        <div class="fm-section">
+          <div class="fm-section-title">Overall Flow — Previous Work Day</div>
+          <table class="fm-table" id="tblFlow">
+            <thead><tr><th>Type</th><th class="num">IN (Arrived)</th><th class="num">Closed Out</th><th class="num">Missed</th><th class="num">Net</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Missed Commitments -->
+        <div class="fm-section">
+          <div class="fm-section-title">Missed Commitments — Yesterday</div>
+          <div class="fm-kpi-row" id="kpiPills"></div>
+          <table class="fm-table" id="tblMissed">
+            <thead><tr><th>Type</th><th>Scope Type</th><th>Serial Number</th><th>WO#</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Production + Instruments side by side -->
+        <div class="fm-two-col">
+          <!-- In-House Production Plan -->
+          <div class="fm-section">
+            <div class="fm-section-title">In-House Production Plan</div>
+            <table class="fm-table" id="tblProd">
+              <thead><tr><th>Type</th><th>Level</th><th class="num">Open</th><th class="num">Bench</th><th class="num">Wk Out</th><th class="num">Goal</th><th class="num">Gap</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <!-- Instruments Plan -->
+          <div class="fm-section">
+            <div class="fm-section-title">Instruments Plan</div>
+            <table class="fm-table" id="tblInst">
+              <thead><tr><th>Channel</th><th class="num">Open</th><th class="num">Expected</th><th class="num">Waiting</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Delay Tracking -->
+        <div class="fm-section">
+          <div class="fm-section-title">Delay Tracking</div>
+          <table class="fm-table" id="tblDelay">
+            <thead><tr><th>Category</th><th>Customer</th><th>WO#</th><th>Model</th><th>SN#</th><th>Days</th><th>Status / Due Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
+
+<div class="fm-toast" id="fmToast"></div>
 
 <script src="mock-db.js"></script>
 <script src="mock-api.js"></script>
@@ -54,150 +144,196 @@
 <script src="shell.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
-//  MORNING BRIEFING — Live KPIs from MockDB
+//  FLOOR MEETING — Live SQL Data
 // ═══════════════════════════════════════════════════════
+var LOCAL_API = 'http://localhost:4000/api';
 
-function loadBriefing() {
-  if (typeof MockDB === 'undefined') return;
-
-  var repairs = MockDB.getAll('repairs') || [];
-  var loaners = MockDB.getAll('loanerTrans') || [];
-  var flags   = MockDB.getAll('flags') || [];
-  var tasks   = MockDB.getAll('tasks') || [];
-  var emailQ  = MockDB.getAll('emailQueue') || [];
-  var shipQ   = MockDB.getAll('shippingQueue') || [];
-  var invSizes= MockDB.getAll('inventorySizes') || [];
-  var invoices= MockDB.getAll('invoices') || [];
-
-  var now = new Date();
-  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  // ── KPI 1: Throughput (shipped this month) ──────────
-  var shipped = repairs.filter(function(r) {
-    return r.dtDateOut && new Date(r.dtDateOut) >= monthStart;
-  });
-  var throughput = shipped.length;
-
-  // ── KPI 2: In-House (received but not shipped) ─────
-  var inHouse = repairs.filter(function(r) {
-    return r.dtDateIn && !r.dtDateOut;
-  }).length;
-
-  // ── KPI 3: On-Time % (shipped within 10 biz days) ──
-  var onTimeCount = 0;
-  shipped.forEach(function(r) {
-    if (!r.dtDateIn) return;
-    var days = bizDays(new Date(r.dtDateIn), new Date(r.dtDateOut));
-    if (days <= 10) onTimeCount++;
-  });
-  var onTimePct = shipped.length ? Math.round((onTimeCount / shipped.length) * 100) : 0;
-
-  // ── KPI 4: Avg TAT (calendar days for shipped) ─────
-  var totalDays = 0;
-  var tatCount = 0;
-  shipped.forEach(function(r) {
-    if (!r.dtDateIn) return;
-    var d = Math.round((new Date(r.dtDateOut) - new Date(r.dtDateIn)) / 86400000);
-    totalDays += d;
-    tatCount++;
-  });
-  var avgTat = tatCount ? (totalDays / tatCount).toFixed(1) : '—';
-
-  // Render KPI cards
-  var cards = document.querySelectorAll('#kpiCards .kpi-big-val');
-  cards[0].textContent = throughput;
-  cards[1].textContent = inHouse;
-  cards[2].textContent = onTimePct + '%';
-  cards[3].textContent = avgTat;
-
-  // ── NEEDS ATTENTION ─────────────────────────────────
-  var items = [];
-
-  // Aging repairs (in-house > 10 days)
-  repairs.filter(function(r) { return r.dtDateIn && !r.dtDateOut; }).forEach(function(r) {
-    var days = Math.round((now - new Date(r.dtDateIn)) / 86400000);
-    if (days > 10) {
-      var wo = r.sWorkOrderNumber || r.psWorkOrderNumber || '?';
-      var client = r.sClientName1 || '';
-      items.push({ severity: 'danger', msg: 'WO# ' + wo + ' aging ' + days + ' days \u2014 ' + client, meta: 'SLA breach', sort: days });
-    }
-  });
-
-  // Overdue loaners
-  loaners.filter(function(l) { return l.dtDueDate && !l.dtReturnDate && new Date(l.dtDueDate) < now; }).forEach(function(l) {
-    var dueStr = l.dtDueDate ? l.dtDueDate.slice(0, 10) : '';
-    items.push({ severity: 'warning', msg: 'Loaner overdue \u2014 ' + (l.sScopeTypeDesc || l.sScopeType || 'Scope'), meta: 'due ' + dueStr, sort: 50 });
-  });
-
-  // Unresolved flags > 3 days
-  flags.filter(function(f) { return !f.bResolved && f.dtCreated && (now - new Date(f.dtCreated)) / 86400000 > 3; }).forEach(function(f) {
-    var days = Math.round((now - new Date(f.dtCreated)) / 86400000);
-    items.push({ severity: 'info', msg: f.sFlagDesc || 'Unresolved flag', meta: days + ' days open', sort: days });
-  });
-
-  // Sort by severity then age, cap at 15
-  var sevOrder = { danger: 0, warning: 1, info: 2 };
-  items.sort(function(a, b) { return (sevOrder[a.severity] || 9) - (sevOrder[b.severity] || 9) || b.sort - a.sort; });
-  items = items.slice(0, 15);
-
-  var listEl = document.getElementById('attentionList');
-  if (items.length === 0) {
-    listEl.innerHTML = '<div class="attention-empty">All clear \u2014 no items need attention</div>';
-  } else {
-    var html = '';
-    items.forEach(function(it) {
-      html += '<div class="attention-item">'
-            + '<span class="attention-dot attention-dot-' + it.severity + '"></span>'
-            + '<span class="attention-msg">' + esc(it.msg) + '</span>'
-            + '<span class="attention-meta">' + esc(it.meta) + '</span>'
-            + '</div>';
-    });
-    listEl.innerHTML = html;
-  }
-
-  // ── YOUR QUEUES ─────────────────────────────────────
-  var lowStock = invSizes.filter(function(s) {
-    return (s.nLevelCurrent || 0) < (s.nReorderPoint || 0) && (s.nReorderPoint || 0) > 0;
-  }).length;
-
-  var queues = [
-    { label: 'Tasks',                count: tasks.length,     href: 'dashboard_tasks.html' },
-    { label: 'Emails',               count: emailQ.length,    href: 'dashboard_emails.html' },
-    { label: 'Shipping',             count: shipQ.length,     href: 'dashboard_shipping.html' },
-    { label: 'Inventory Low Stock',  count: lowStock,         href: 'dashboard_inventory.html' },
-    { label: 'Flags',                count: flags.length,     href: 'dashboard_flags.html' },
-    { label: 'Invoices Outstanding', count: invoices.length,  href: 'dashboard_invoices.html' }
-  ];
-
-  var qHtml = '';
-  queues.forEach(function(q) {
-    qHtml += '<div class="queue-card" onclick="location.href=\'' + q.href + '\'">'
-           + '<span class="queue-card-count">' + q.count + '</span>'
-           + '<span class="queue-card-label">' + q.label + '</span>'
-           + '</div>';
-  });
-  document.getElementById('queueCards').innerHTML = qHtml;
-
-  API.UI.updateDemoBadge('live');
+function isLocalMode() {
+  return localStorage.getItem('tsi_api_mode') === 'local';
 }
 
-// ── Business-day calculator ───────────────────────────
-function bizDays(start, end) {
-  var count = 0;
-  var cur = new Date(start);
-  while (cur < end) {
-    cur.setDate(cur.getDate() + 1);
-    var dow = cur.getDay();
-    if (dow !== 0 && dow !== 6) count++;
-  }
-  return count;
+function fmFetch(endpoint) {
+  return fetch(LOCAL_API + endpoint).then(function(r) {
+    if (!r.ok) throw new Error('API error: ' + r.status);
+    return r.json();
+  });
 }
 
-// ── HTML escape ───────────────────────────────────────
 function esc(s) {
   var d = document.createElement('div');
-  d.appendChild(document.createTextNode(s));
+  d.appendChild(document.createTextNode(s || ''));
   return d.innerHTML;
+}
+
+function formatDate(dateStr) {
+  var d = new Date(dateStr + 'T12:00:00');
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var day = d.getDate();
+  var suffix = [1,21,31].indexOf(day) >= 0 ? 'st' : [2,22].indexOf(day) >= 0 ? 'nd' : [3,23].indexOf(day) >= 0 ? 'rd' : 'th';
+  return months[d.getMonth()] + ' ' + day + suffix + ', ' + d.getFullYear();
+}
+
+function showToast(msg, ok) {
+  var el = document.getElementById('fmToast');
+  el.textContent = msg;
+  el.className = 'fm-toast show ' + (ok ? 'fm-toast-ok' : 'fm-toast-err');
+  setTimeout(function() { el.className = 'fm-toast'; }, 3000);
+}
+
+// ── Load all sections ──────────────────────────────────
+function getLocation() {
+  return document.getElementById('fmLocation').value || 'north';
+}
+
+function getLocationLabel() {
+  return getLocation() === 'south' ? 'South' : 'North';
+}
+
+function loadFloorMeeting() {
+  var dateInput = document.getElementById('fmDate');
+  var date = dateInput.value || new Date().toISOString().split('T')[0];
+  dateInput.value = date;
+  var loc = getLocation();
+
+  document.getElementById('fmTitle').textContent = getLocationLabel() + ' Floor Meeting — ' + formatDate(date);
+
+  // Check if Express is reachable
+  fetch(LOCAL_API + '/health').then(function(r) { return r.json(); }).then(function() {
+    document.getElementById('fmNoData').style.display = 'none';
+    document.getElementById('fmSections').style.display = '';
+
+    loadFlow(date, loc);
+    loadCommitments(date, loc);
+    loadProduction(date, loc);
+    loadInstruments(loc);
+    loadDelays(loc);
+  }).catch(function() {
+    document.getElementById('fmNoData').style.display = '';
+    document.getElementById('fmSections').style.display = 'none';
+  });
+}
+
+// ── Section: Overall Flow ──────────────────────────────
+function loadFlow(date, loc) {
+  fmFetch('/floor-meeting/flow?date=' + date + '&location=' + loc).then(function(data) {
+    var tb = document.querySelector('#tblFlow tbody');
+    var html = '';
+    var totR = 0, totC = 0, totM = 0, totN = 0;
+    data.rows.forEach(function(r) {
+      totR += r.received; totC += r.closed; totM += r.missed; totN += r.net;
+      html += '<tr><td>' + esc(r.type) + '</td><td class="num">' + r.received + '</td><td class="num">' + r.closed + '</td><td class="num">' + r.missed + '</td><td class="num">' + r.net + '</td></tr>';
+    });
+    html += '<tr class="totals"><td></td><td class="num">' + totR + '</td><td class="num">' + totC + '</td><td class="num">' + totM + '</td><td class="num">' + totN + '</td></tr>';
+    tb.innerHTML = html;
+  });
+}
+
+// ── Section: Missed Commitments ────────────────────────
+function loadCommitments(date, loc) {
+  fmFetch('/floor-meeting/commitments?date=' + date + '&location=' + loc).then(function(data) {
+    var k = data.kpis;
+    var pills = [
+      { lbl: 'Defects', val: k.defects, goal: '<2', ok: k.defects < 2 },
+      { lbl: 'Inspection', val: 'Pass', goal: '2pm', ok: true },
+      { lbl: 'Loaner Fill', val: k.loanerPct + '%', goal: '75%', ok: k.loanerPct >= 75 },
+      { lbl: 'Delivery', val: k.deliveryPct + '%', goal: '92%', ok: k.deliveryPct >= 92 }
+    ];
+    var ph = '';
+    pills.forEach(function(p) {
+      var cls = p.ok ? 'ok' : (p.lbl === 'Defects' && k.defects >= 2 ? 'bad' : 'warn');
+      ph += '<div class="fm-kpi-pill ' + cls + '"><div class="val">' + p.val + '</div><div class="lbl">' + p.lbl + '</div><div class="goal">Goal: ' + p.goal + '</div></div>';
+    });
+    document.getElementById('kpiPills').innerHTML = ph;
+
+    var tb = document.querySelector('#tblMissed tbody');
+    if (!data.missedDetails || data.missedDetails.length === 0) {
+      tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px">No missed commitments</td></tr>';
+    } else {
+      var mh = '';
+      data.missedDetails.forEach(function(d) {
+        mh += '<tr><td>' + esc(d.category) + '</td><td>' + esc(d.scopeType) + '</td><td>' + esc(d.serialNumber) + '</td><td>' + esc(d.wo) + '</td></tr>';
+      });
+      tb.innerHTML = mh;
+    }
+  });
+}
+
+// ── Section: Production Plan ───────────────────────────
+function loadProduction(date, loc) {
+  fmFetch('/floor-meeting/production?date=' + date + '&location=' + loc).then(function(data) {
+    var tb = document.querySelector('#tblProd tbody');
+    var html = '';
+    var tOpen = 0, tBench = 0, tOut = 0, tGoal = 0, tGap = 0;
+    data.rows.forEach(function(r) {
+      tOpen += r.woOpen; tBench += r.onBench; tOut += r.weeklyOut; tGoal += r.goal; tGap += r.gap;
+      var gapCls = r.gap > 0 ? 'gap-pos' : r.gap < 0 ? 'gap-neg' : '';
+      html += '<tr><td>' + esc(r.scopeType) + '</td><td>' + esc(r.level) + '</td>'
+            + '<td class="num">' + r.woOpen + '</td><td class="num">' + r.onBench + '</td>'
+            + '<td class="num">' + r.weeklyOut + '</td><td class="num">' + r.goal + '</td>'
+            + '<td class="num ' + gapCls + '">' + r.gap + '</td></tr>';
+    });
+    var tGapCls = tGap > 0 ? 'gap-pos' : tGap < 0 ? 'gap-neg' : '';
+    html += '<tr class="totals"><td></td><td></td><td class="num">' + tOpen + '</td><td class="num">' + tBench + '</td><td class="num">' + tOut + '</td><td class="num">' + tGoal + '</td><td class="num ' + tGapCls + '">' + tGap + '</td></tr>';
+    tb.innerHTML = html;
+  });
+}
+
+// ── Section: Instruments Plan ──────────────────────────
+function loadInstruments(loc) {
+  fmFetch('/floor-meeting/instruments?location=' + loc).then(function(data) {
+    var tb = document.querySelector('#tblInst tbody');
+    var html = '';
+    data.rows.forEach(function(r) {
+      html += '<tr><td>' + esc(r.channel) + '</td><td class="num">' + r.woOpen + '</td><td class="num">' + r.expectedSoon + '</td><td class="num">' + r.waitingQuotes + '</td></tr>';
+    });
+    tb.innerHTML = html;
+  });
+}
+
+// ── Section: Delay Tracking ────────────────────────────
+function loadDelays(loc) {
+  fmFetch('/floor-meeting/delays?location=' + loc).then(function(data) {
+    var tb = document.querySelector('#tblDelay tbody');
+    if (!data.rows || data.rows.length === 0) {
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px">No delays</td></tr>';
+      return;
+    }
+    var html = '';
+    data.rows.forEach(function(r) {
+      html += '<tr><td>' + esc(r.category) + '</td><td>' + esc(r.customer) + '</td><td>' + esc(r.wo) + '</td><td>' + esc(r.model) + '</td><td>' + esc(r.sn) + '</td><td class="num">' + (r.daysOpen || '') + '</td><td></td></tr>';
+    });
+    tb.innerHTML = html;
+  });
+}
+
+// ── Generate PPTX ──────────────────────────────────────
+function generatePptx() {
+  var btn = document.getElementById('fmGenBtn');
+  var date = document.getElementById('fmDate').value || new Date().toISOString().split('T')[0];
+  var loc = getLocation();
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  fetch(LOCAL_API + '/floor-meeting/generate-pptx', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date: date, location: loc })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showToast(getLocationLabel() + ' Floor Meeting PPTX saved to Desktop', true);
+    } else {
+      showToast('Error: ' + (data.error || 'Unknown'), false);
+    }
+  })
+  .catch(function(e) {
+    showToast('Failed: ' + e.message, false);
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = 'Generate PPTX';
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -205,7 +341,15 @@ function esc(s) {
 // ═══════════════════════════════════════════════════════
 (function init() {
   API.UI.init();
-  loadBriefing();
+  // Default to today
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('fmDate').value = today;
+  // Sync location with topbar Service Location if Nashville is selected
+  var svcLoc = document.querySelector('.topbar select');
+  if (svcLoc && svcLoc.value === 'Nashville') {
+    document.getElementById('fmLocation').value = 'south';
+  }
+  loadFloorMeeting();
 })();
 </script>
 <script src="js/new-order-wizard.js"></script>

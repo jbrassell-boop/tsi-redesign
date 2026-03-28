@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Blank Inspection — Flexible Endoscope — OM07-3</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:8px;page-break-after:always}
+    .page:last-child{page-break-after:auto}
+
+    .form-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+    .form-header img{height:44px}
+    .form-title-block{text-align:right}
+    .form-title{font-size:15px;font-weight:800;color:#1B3A5C}
+    .form-subtitle{font-size:11px;font-weight:600;color:#2E75B6;margin-top:1px}
+    .form-number{font-size:10px;color:#666;margin-top:2px}
+
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px}
+
+    .header-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 12px;padding:6px 0 2px}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:17px;font-size:11px;padding:1px 2px}
+
+    /* Repair items table */
+    .repair-table{width:100%;border-collapse:collapse;margin-top:4px;font-size:10px}
+    .repair-table th{background:#2E75B6;color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;padding:4px 8px;text-align:left;letter-spacing:.03em;border-right:1px solid rgba(255,255,255,.2)}
+    .repair-table th.center{text-align:center}
+    .repair-table td{padding:4px 8px;border-bottom:1px solid #e8e8e8;vertical-align:middle;border-right:1px solid #eee}
+    .repair-table td:last-child{border-right:none}
+    .repair-table tr:nth-child(even) td{background:#F9FAFB}
+    .cb-box{width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block;flex-shrink:0;vertical-align:middle}
+    .cost-field{border-bottom:1px solid #aaa;min-width:60px;display:inline-block;height:14px;vertical-align:middle}
+    .sig-mini{border-bottom:1px solid #aaa;min-width:100px;display:inline-block;height:14px;vertical-align:middle}
+
+    /* P/F inspection table */
+    .pf-table{width:100%;border-collapse:collapse;margin-top:4px;font-size:10px}
+    .pf-table th{background:#2E75B6;color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;padding:3px 8px;text-align:left;letter-spacing:.03em;border-right:1px solid rgba(255,255,255,.2)}
+    .pf-table th.center{text-align:center;width:40px}
+    .pf-table td{padding:3px 8px;border-bottom:1px solid #e8e8e8;vertical-align:middle;border-right:1px solid #eee}
+    .pf-table td:last-child{border-right:none}
+    .pf-table tr:nth-child(even) td{background:#F9FAFB}
+    .pf-table .cat-row td{background:#E8F0FE;font-size:8px;font-weight:700;text-transform:uppercase;color:#1B3A5C;letter-spacing:.04em;padding:3px 8px}
+    .pf-btn{display:inline-block;width:24px;height:15px;border:1px solid #aaa;border-radius:2px;text-align:center;line-height:15px;font-size:8px;font-weight:700;margin:0 1px}
+    .pf-p{border-color:#16A34A;color:#16A34A}
+    .pf-f{border-color:#B71234;color:#B71234}
+    .pf-na{border-color:#aaa;color:#666}
+    .pf-cell{text-align:center}
+
+    /* Angulation spec cells */
+    .ang-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px 10px;padding:4px 0}
+    .ang-item{display:flex;flex-direction:column;gap:1px}
+
+    /* Footer QC block */
+    .qc-block{display:grid;grid-template-columns:repeat(5,1fr);gap:6px 10px;padding:6px 0;border:1px solid #ddd;border-radius:3px;padding:8px 10px;background:#F9FAFB;margin-top:6px}
+    .qc-item{display:flex;flex-direction:column;gap:2px}
+
+    /* Accessories checklist */
+    .acc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;padding:5px 0}
+    .acc-item{display:flex;align-items:center;gap:5px;font-size:10px}
+
+    .cb-item{display:flex;align-items:center;gap:5px;font-size:10.5px}
+    .cb-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+
+    .text-field{border:1px solid #ccc;border-radius:3px;min-height:28px;padding:3px 6px;font-size:10.5px;width:100%}
+
+    .sig-block{display:flex;gap:16px;margin-top:6px}
+    .sig-field{flex:1;display:flex;flex-direction:column;gap:2px}
+    .sig-line{border-bottom:1px solid #999;min-height:26px}
+    .sig-label{font-size:8.5px;color:#555;font-weight:600;margin-top:2px}
+
+    .form-footer{margin-top:auto;padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888}
+    .page-num{font-size:8px;color:#aaa;text-align:right;margin-top:4px}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .print-btn button:hover{background:#1B3A5C}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto;gap:6px}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+
+<!-- PAGE 1 — Items Found / Approved + Comments -->
+<div class="page">
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Blank Inspection Report</div>
+      <div class="form-subtitle">Flexible Endoscope</div>
+      <div class="form-number">OM07-3 &nbsp;|&nbsp; Page 1 of 3</div>
+    </div>
+  </div>
+
+  <div class="section-bar">Scope Information</div>
+  <div class="header-fields">
+    <div class="field-row span2"><span class="fl">Client / Facility</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date"></div></div>
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial"></div></div>
+    <div class="field-row span2"><span class="fl">Scope Model</span><div class="fv" id="f-model"></div></div>
+    <div class="field-row"><span class="fl">Rack #</span><div class="fv"></div></div>
+    <div class="field-row span2"><span class="fl">Complaint</span><div class="fv" id="f-complaint" style="min-height:24px"></div></div>
+    <div class="field-row"><span class="fl">Cust. Expected Delivery</span><div class="fv"></div></div>
+  </div>
+
+  <div class="section-bar">Items Found to be in Need of Repair</div>
+  <table class="repair-table">
+    <thead>
+      <tr>
+        <th style="width:22px"></th>
+        <th>Item</th>
+        <th class="center" style="width:80px">Est. Cost</th>
+        <th class="center" style="width:60px">Approved</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="cb-box"></span></td><td>Pressure Test / Leak Test</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Angulation Repair (U/D/R/L)</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Bending Rubber Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Distal Tip Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Insertion Tube Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Universal Cord Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Light Guide Connector Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Control Body Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>A/W Channel Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Suction / Forcep Channel Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Image Bundle Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Light Bundle Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Elevator / Forcep Raiser Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>IT Tensioner Adjustment</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Eyepiece Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Video Component Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Control Knob / Switch Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Other: _________________________</td><td style="text-align:center"><span class="cost-field"></span></td><td style="text-align:center"><span class="cb-box"></span></td></tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;justify-content:flex-end;margin-top:4px;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-end">
+      <span class="fl">Subtotal Estimate</span>
+      <div style="border-bottom:1px solid #999;min-width:100px;height:17px"></div>
+    </div>
+  </div>
+
+  <div class="section-bar">Comments / Additional Notes</div>
+  <div class="text-field" style="min-height:36px"></div>
+
+  <div class="sig-block">
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Technician / Estimator</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Customer Authorization</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM07-3 &nbsp;|&nbsp; Page 1</span>
+  </div>
+</div>
+
+<!-- PAGE 2 — Items Approved and Repaired -->
+<div class="page">
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Blank Inspection Report</div>
+      <div class="form-subtitle">Flexible Endoscope — Items Approved &amp; Repaired</div>
+      <div class="form-number">OM07-3 &nbsp;|&nbsp; Page 2 of 3</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 12px;padding:4px 0 6px">
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo-p2"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial-p2"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date-p2"></div></div>
+  </div>
+
+  <div class="section-bar">Items Approved and Repaired</div>
+  <table class="repair-table">
+    <thead>
+      <tr>
+        <th style="width:22px"></th>
+        <th>Item Repaired</th>
+        <th class="center" style="width:80px">Actual Cost</th>
+        <th>Repaired By (Initials)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="cb-box"></span></td><td>Pressure Test / Leak Test</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Angulation Repair (U/D/R/L)</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Bending Rubber Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Distal Tip Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Insertion Tube Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Universal Cord Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Light Guide Connector Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Control Body Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>A/W Channel Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Suction / Forcep Channel Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Image Bundle Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Light Bundle Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Elevator / Forcep Raiser Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>IT Tensioner Adjustment</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Eyepiece Repair / Replacement</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Video Component Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Control Knob / Switch Repair</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+      <tr><td><span class="cb-box"></span></td><td>Other: _________________________</td><td style="text-align:center"><span class="cost-field"></span></td><td><span class="sig-mini"></span></td></tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;justify-content:flex-end;margin-top:4px;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-end">
+      <span class="fl">Total Repair Cost</span>
+      <div style="border-bottom:2px solid #2E75B6;min-width:100px;height:17px;font-weight:700"></div>
+    </div>
+  </div>
+
+  <div class="section-bar">Additional Repair Notes</div>
+  <div class="text-field" style="min-height:48px"></div>
+
+  <div class="sig-block" style="margin-top:10px">
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Lead Technician / Signature</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM07-3 &nbsp;|&nbsp; Page 2</span>
+  </div>
+</div>
+
+<!-- PAGE 3 — Final Inspection -->
+<div class="page">
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Blank Inspection Report</div>
+      <div class="form-subtitle">Flexible Endoscope — Final Inspection</div>
+      <div class="form-number">OM07-3 &nbsp;|&nbsp; Page 3 of 3</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 12px;padding:4px 0 6px">
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo-p3"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial-p3"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date-p3"></div></div>
+  </div>
+
+  <div class="section-bar">Final Inspection Checklist — 24-Point</div>
+  <table class="pf-table">
+    <thead>
+      <tr>
+        <th style="width:46%">Item</th>
+        <th class="center">Y</th>
+        <th class="center">N</th>
+        <th class="center">N/A</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="cat-row"><td colspan="5">Leak &amp; Pressure</td></tr>
+      <tr><td>1. Pressure Test (pass)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Water &amp; Channels</td></tr>
+      <tr><td>2. Auxiliary Water Function</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>3. A/W Flow — Air</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>4. A/W Flow — Water</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>5. Forcep Channel</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>6. Suction Channel</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>7. Elevator / Forcep Raiser</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Control Body &amp; Switches</td></tr>
+      <tr><td>8. Control Body Condition</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>9. Control Switches Function</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Angulation</td></tr>
+      <tr><td>10. Angulation — Up (factory: 180°)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>11. Angulation — Down (factory: 180°)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>12. Angulation — Right (factory: 160°)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>13. Angulation — Left (factory: 160°)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>14. Angulation Tightness</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>15. Angulation Orientation</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>16. Angulation Knobs</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Insertion Tube, Cord &amp; Connector</td></tr>
+      <tr><td>17. IT Tensioner</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>18. Insertion Tube Condition</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>19. Universal Cord Condition</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>20. Light Guide Connector</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>21. Bending Rubber (max epoxy 13.64)</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Optics &amp; Image</td></tr>
+      <tr><td>22. Distal Tip Condition</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>23. Eyepiece Condition</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>24. Light Bundle Transmission</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr class="cat-row"><td colspan="5">Video Image</td></tr>
+      <tr><td>25. Video Image Quality</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>26. Video Features / Functions</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>27. Image Bundle — Broken Fibers</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+      <tr><td>28. Image Bundle — Half Tones</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Scope Includes accessories -->
+  <div class="section-bar">Scope Includes</div>
+  <div class="acc-grid">
+    <div class="acc-item"><span class="cb-box"></span> Scope Only</div>
+    <div class="acc-item"><span class="cb-box"></span> Light Cable</div>
+    <div class="acc-item"><span class="cb-box"></span> Soak Cap</div>
+    <div class="acc-item"><span class="cb-box"></span> Elevator Cap</div>
+    <div class="acc-item"><span class="cb-box"></span> Suction Valve</div>
+    <div class="acc-item"><span class="cb-box"></span> A/W Valve</div>
+    <div class="acc-item"><span class="cb-box"></span> Biopsy Cap</div>
+    <div class="acc-item"><span class="cb-box"></span> Storage Case</div>
+    <div class="acc-item"><span class="cb-box"></span> Other: ___________</div>
+  </div>
+
+  <!-- QC Footer Block -->
+  <div class="section-bar">QC Sign-Off</div>
+  <div class="qc-block">
+    <div class="qc-item">
+      <span class="fl">Scope Usable</span>
+      <div class="cb-row" style="padding:2px 0">
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="cb-box"></span> Y</span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="cb-box"></span> N</span>
+      </div>
+    </div>
+    <div class="qc-item">
+      <span class="fl">Rework Required</span>
+      <div class="cb-row" style="padding:2px 0">
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="cb-box"></span> Y</span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="cb-box"></span> N</span>
+      </div>
+    </div>
+    <div class="qc-item">
+      <span class="fl">Alcohol Wipe</span>
+      <div class="cb-row" style="padding:2px 0">
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="cb-box"></span> Done</span>
+      </div>
+    </div>
+    <div class="qc-item"><span class="fl">Responsible Tech</span><div style="border-bottom:1px solid #999;min-height:18px;margin-top:2px"></div></div>
+    <div class="qc-item"><span class="fl">QC Initials</span><div style="border-bottom:1px solid #999;min-height:18px;margin-top:2px"></div></div>
+    <div class="qc-item" style="grid-column:span 2"><span class="fl">Test Equipment Used</span><div style="border-bottom:1px solid #999;min-height:18px;margin-top:2px"></div></div>
+    <div class="qc-item">
+      <span class="fl">Commercial QC</span>
+      <div class="cb-row" style="padding:2px 0">
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="pf-btn pf-p" style="width:20px;height:13px;line-height:13px;font-size:8px">P</span></span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><span class="pf-btn pf-f" style="width:20px;height:13px;line-height:13px;font-size:8px">F</span></span>
+      </div>
+    </div>
+    <div class="qc-item"><span class="fl">Inspected By</span><div style="border-bottom:1px solid #999;min-height:18px;margin-top:2px"></div></div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM07-3 &nbsp;|&nbsp; Page 3</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
+  function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+
+  fill('f-date', today()); fill('f-date-p2', today()); fill('f-date-p3', today());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      var woNum = r.sWONumber || r.sWorkOrder || wo;
+      var serial = r.sSerial || r.sSerialNo || r.sSerialNumber;
+      var dateStr = (r.dRepairDate || r.dDateIn) ? new Date(r.dRepairDate||r.dDateIn).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : today();
+      fill('f-client', r.sClientName || r.sFacility || r.sClient);
+      fill('f-wo', woNum); fill('f-wo-p2', woNum); fill('f-wo-p3', woNum);
+      fill('f-serial', serial); fill('f-serial-p2', serial); fill('f-serial-p3', serial);
+      fill('f-date', dateStr); fill('f-date-p2', dateStr); fill('f-date-p3', dateStr);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      fill('f-complaint', r.sComplaint || r.sReasonForRepair || r.sNotes);
+    })
+    .catch(function(){});
+})();
+</script>
+
+</body>
+</html>

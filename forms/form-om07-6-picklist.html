@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Inventory Pick List — OM07-6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:8px}
+
+    .form-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+    .form-header img{height:44px}
+    .form-title-block{text-align:right}
+    .form-title{font-size:15px;font-weight:800;color:#1B3A5C}
+    .form-subtitle{font-size:11px;font-weight:600;color:#2E75B6;margin-top:1px}
+    .form-number{font-size:10px;color:#666;margin-top:2px}
+
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px}
+
+    .header-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 12px;padding:6px 0 2px}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:17px;font-size:11px;padding:1px 2px}
+
+    /* Pick list table */
+    .pick-table{width:100%;border-collapse:collapse;margin-top:2px;font-size:10px}
+    .pick-table th{background:#2E75B6;color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;padding:4px 8px;text-align:left;letter-spacing:.03em;border-right:1px solid rgba(255,255,255,.2)}
+    .pick-table th.center{text-align:center}
+    .pick-table td{padding:4px 8px;border-bottom:1px solid #e8e8e8;vertical-align:middle;border-right:1px solid #eee}
+    .pick-table td:last-child{border-right:none}
+    .pick-table tr:nth-child(even) td{background:#F9FAFB}
+
+    /* Group header rows */
+    .group-row td{background:#1B3A5C;color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 8px}
+
+    /* Sub-action row (indented repair action) */
+    .action-row td{background:#E8F0FE;font-size:8.5px;font-weight:700;color:#1B3A5C;padding:3px 8px 3px 16px;border-bottom:1px solid #ddd}
+
+    /* Additional inventory row */
+    .add-row td{background:#FFF8E1;font-size:9px;font-style:italic;color:#666;padding:3px 8px 3px 16px;border-bottom:1px solid #e8e8e8}
+    .add-row td:first-child{color:#92400E;font-weight:600;font-style:normal}
+
+    /* Qty field */
+    .qty-cell{text-align:center;min-width:48px}
+    .lot-cell{min-width:80px}
+    .size-cell{min-width:80px}
+
+    /* Free text block */
+    .text-block{border:1px solid #ddd;border-radius:3px;padding:6px 8px;min-height:48px;margin-top:3px;background:#fff;font-size:10.5px;width:100%}
+
+    /* Barcode footer */
+    .barcode-footer{margin-top:auto;border:1px dashed #ccc;border-radius:3px;padding:10px;display:flex;align-items:center;justify-content:space-between;background:#F9FAFB}
+    .barcode-placeholder{width:180px;height:44px;background:#eee;border:1px solid #ccc;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#aaa;letter-spacing:.05em;text-transform:uppercase}
+    .barcode-fields{display:flex;gap:16px}
+    .barcode-field{display:flex;flex-direction:column;gap:1px}
+
+    .form-footer{padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888;margin-top:6px}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .print-btn button:hover{background:#1B3A5C}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto;gap:6px}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page">
+
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Inventory Pick List</div>
+      <div class="form-subtitle">Repair Parts &amp; Inventory</div>
+      <div class="form-number">OM07-6</div>
+    </div>
+  </div>
+
+  <div class="section-bar">Repair Information</div>
+  <div class="header-fields">
+    <div class="field-row span2"><span class="fl">Client / Facility</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date"></div></div>
+    <div class="field-row span2"><span class="fl">Scope Type / Model</span><div class="fv" id="f-model"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial"></div></div>
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row"><span class="fl">Technician</span><div class="fv" id="f-tech"></div></div>
+  </div>
+
+  <div class="section-bar">Parts &amp; Inventory</div>
+  <table class="pick-table">
+    <thead>
+      <tr>
+        <th style="width:36%">Inventory Item</th>
+        <th class="center size-cell">Inventory Size</th>
+        <th class="center lot-cell">Lot Number</th>
+        <th class="center qty-cell">Qty</th>
+        <th class="center" style="width:60px">Picked</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Group: Bending Rubber -->
+      <tr class="group-row"><td colspan="5">Bending Rubber Replacement</td></tr>
+      <tr class="action-row"><td colspan="5">Bending Rubber — Proximal</td></tr>
+      <tr><td style="padding-left:20px">Bending Rubber, Proximal</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="action-row"><td colspan="5">Bending Rubber — Distal</td></tr>
+      <tr><td style="padding-left:20px">Bending Rubber, Distal</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Epoxy — Bending Rubber (max 13.64)</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+      <!-- Group: Insertion Tube -->
+      <tr class="group-row"><td colspan="5">Insertion Tube Repair</td></tr>
+      <tr class="action-row"><td colspan="5">Insertion Tube Components</td></tr>
+      <tr><td style="padding-left:20px">Insertion Tube, Complete</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Insertion Tube Covering</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Coil Pipe</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+      <!-- Group: Angulation -->
+      <tr class="group-row"><td colspan="5">Angulation Repair</td></tr>
+      <tr class="action-row"><td colspan="5">Angulation Wires &amp; Hardware</td></tr>
+      <tr><td style="padding-left:20px">Angulation Wire (U/D)</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Angulation Wire (R/L)</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Angulation Knob</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Drum / Pulley Assembly</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+      <!-- Group: Optics / Image Bundle -->
+      <tr class="group-row"><td colspan="5">Optics / Image Bundle Repair</td></tr>
+      <tr class="action-row"><td colspan="5">Image &amp; Light Bundle</td></tr>
+      <tr><td style="padding-left:20px">Image Bundle</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Light Bundle</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Objective Lens</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Distal End Cap</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+      <!-- Group: Channels -->
+      <tr class="group-row"><td colspan="5">Channel Repair (A/W, Suction, Forcep)</td></tr>
+      <tr class="action-row"><td colspan="5">Channel Components</td></tr>
+      <tr><td style="padding-left:20px">A/W Channel Tube</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Suction / Biopsy Channel Tube</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Biopsy Inlet Seal</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">A/W Button Assembly</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Suction Button Assembly</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+      <!-- Group: Seals / O-Rings -->
+      <tr class="group-row"><td colspan="5">Seals &amp; O-Rings</td></tr>
+      <tr class="action-row"><td colspan="5">Sealing Components</td></tr>
+      <tr><td style="padding-left:20px">O-Ring Set</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Pressure Test Cap / Plug</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr><td style="padding-left:20px">Leak Test Adaptor</td><td class="center"></td><td class="center"></td><td class="center"></td><td class="center"><span style="width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block"></span></td></tr>
+      <tr class="add-row"><td>Additional Inventory:</td><td></td><td></td><td></td><td></td></tr>
+
+    </tbody>
+  </table>
+
+  <!-- Additional Repair Items -->
+  <div class="section-bar">Additional Repair Items / Notes</div>
+  <div class="text-block"></div>
+
+  <!-- Signature -->
+  <div style="display:flex;gap:16px;margin-top:8px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+      <div style="border-bottom:1px solid #999;min-height:26px"></div>
+      <div style="font-size:8.5px;color:#555;font-weight:600;margin-top:2px">Technician / Signature</div>
+    </div>
+    <div style="max-width:130px;display:flex;flex-direction:column;gap:2px">
+      <div style="border-bottom:1px solid #999;min-height:26px"></div>
+      <div style="font-size:8.5px;color:#555;font-weight:600;margin-top:2px">Date</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+      <div style="border-bottom:1px solid #999;min-height:26px"></div>
+      <div style="font-size:8.5px;color:#555;font-weight:600;margin-top:2px">Inventory Verified By</div>
+    </div>
+    <div style="max-width:130px;display:flex;flex-direction:column;gap:2px">
+      <div style="border-bottom:1px solid #999;min-height:26px"></div>
+      <div style="font-size:8.5px;color:#555;font-weight:600;margin-top:2px">Date</div>
+    </div>
+  </div>
+
+  <!-- Barcode Footer -->
+  <div class="barcode-footer">
+    <div class="barcode-placeholder">[ WO Barcode ]</div>
+    <div class="barcode-fields">
+      <div class="barcode-field">
+        <span style="font-size:8px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em">Work Order #</span>
+        <div style="border-bottom:1px solid #999;min-width:120px;min-height:16px"></div>
+      </div>
+      <div class="barcode-field">
+        <span style="font-size:8px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em">Serial #</span>
+        <div style="border-bottom:1px solid #999;min-width:100px;min-height:16px"></div>
+      </div>
+      <div class="barcode-field">
+        <span style="font-size:8px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em">Date</span>
+        <div style="border-bottom:1px solid #999;min-width:80px;min-height:16px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM07-6</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
+  function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+
+  fill('f-date', today());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      fill('f-client', r.sClientName || r.sFacility || r.sClient);
+      fill('f-wo', r.sWONumber || r.sWorkOrder || wo);
+      fill('f-serial', r.sSerial || r.sSerialNo || r.sSerialNumber);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      fill('f-tech', r.sTechName || r.sRepairTech || r.sTechnician);
+      if(r.dRepairDate || r.dDateIn) fill('f-date', new Date(r.dRepairDate||r.dDateIn).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>

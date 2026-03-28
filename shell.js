@@ -245,9 +245,24 @@
   if (sidebar) sidebar.innerHTML = buildSidebar();
   if (topbar)  topbar.innerHTML  = buildTopbar();
 
-  // Auto-render dashboard subnav if placeholder exists
-  var dashSubnav = document.getElementById('dashSubnav');
-  if (dashSubnav) renderDashboardSubnav();
+  // Auto-render dashboard subnav for ALL dashboard pages — always right after topbar
+  var currentFile = location.pathname.split('/').pop() || 'index.html';
+  var isDashPage = currentFile.indexOf('dashboard') === 0;
+  if (isDashPage) {
+    // Remove any existing dashSubnav (may be in the wrong spot)
+    var existing = document.getElementById('dashSubnav');
+    if (existing) existing.remove();
+
+    // Create and inject right after topbar
+    var dashSubnav = document.createElement('div');
+    dashSubnav.id = 'dashSubnav';
+    dashSubnav.className = 'subnav';
+    dashSubnav.style.cssText = 'display:flex;gap:0;padding:0 14px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);margin:0;flex-shrink:0';
+    if (topbar && topbar.nextSibling) {
+      topbar.parentNode.insertBefore(dashSubnav, topbar.nextSibling);
+    }
+    renderDashboardSubnav();
+  }
 
   // Close Orders menu on outside click
   document.addEventListener('click', function (e) {

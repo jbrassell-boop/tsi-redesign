@@ -62,6 +62,11 @@
 - `"3" === 3` is `false` — strict equality kills the lookup, falls to wrong fallback.
 - Pattern: any function that takes a status/ID from a DOM element must coerce to Number at the top.
 
+## Floor Meeting — "On Bench" Definition (learned 2026-03-27)
+- **"On Bench" means a technician is assigned** (`lTechnicianKey > 0`), NOT that the repair is in a specific status.
+- A repair can be in-process status (8/9/11) but not yet have a tech assigned, and vice versa.
+- Use `ISNULL(r.lTechnicianKey, 0) > 0` for the On Bench count.
+
 ## Code Style: Alphabetical Lists
 - **Rule:** All array/list literals containing string values (table names, field names, config keys) must be sorted alphabetically.
 - **Why:** Joseph's preference for consistency and readability.

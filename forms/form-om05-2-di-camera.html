@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>D&amp;I Inspection — Camera System — OM05-2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:8px}
+
+    .form-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+    .form-header img{height:44px}
+    .form-title-block{text-align:right}
+    .form-title{font-size:15px;font-weight:800;color:#1B3A5C}
+    .form-subtitle{font-size:11px;font-weight:600;color:#2E75B6;margin-top:1px}
+    .form-number{font-size:10px;color:#666;margin-top:2px}
+
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px}
+
+    .header-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 12px;padding:6px 0 2px}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:17px;font-size:11px;padding:1px 2px}
+
+    .cb-row{display:flex;gap:14px;align-items:center;padding:4px 0;flex-wrap:wrap}
+    .cb-item{display:flex;align-items:center;gap:5px;font-size:10.5px}
+    .cb-box{width:12px;height:12px;border:1px solid #999;border-radius:2px;display:inline-block;flex-shrink:0}
+
+    /* P/F/NA table */
+    .pf-table{width:100%;border-collapse:collapse;margin-top:4px}
+    .pf-table th{background:#2E75B6;color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;padding:4px 8px;text-align:left;letter-spacing:.04em;border-right:1px solid rgba(255,255,255,.2)}
+    .pf-table th.center{text-align:center;width:44px}
+    .pf-table td{padding:4px 8px;font-size:10.5px;border-bottom:1px solid #ddd;vertical-align:middle;border-right:1px solid #eee}
+    .pf-table td:last-child{border-right:none}
+    .pf-table tr:nth-child(even) td{background:#F9FAFB}
+    .pf-table .section-row td{background:#E8F0FE;font-size:8.5px;font-weight:700;text-transform:uppercase;color:#1B3A5C;letter-spacing:.04em;padding:4px 8px}
+    .pf-btn{display:inline-block;width:26px;height:16px;border:1px solid #aaa;border-radius:2px;text-align:center;line-height:16px;font-size:9px;font-weight:700;margin:0 1px}
+    .pf-p{border-color:#16A34A;color:#16A34A}
+    .pf-f{border-color:#B71234;color:#B71234}
+    .pf-na{border-color:#aaa;color:#666}
+    .pf-cell{text-align:center}
+
+    .text-field{border:1px solid #ccc;border-radius:3px;min-height:32px;padding:3px 6px;margin-top:3px;font-size:10.5px;width:100%}
+
+    .sig-block{display:flex;gap:20px;margin-top:8px}
+    .sig-field{flex:1;display:flex;flex-direction:column;gap:2px}
+    .sig-line{border-bottom:1px solid #999;min-height:28px}
+    .sig-label{font-size:8.5px;color:#555;font-weight:600;margin-top:2px}
+
+    .form-footer{margin-top:auto;padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .print-btn button:hover{background:#1B3A5C}
+
+    .warning-note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:3px;padding:4px 8px;font-size:9px;color:#92400E;font-weight:600}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page">
+
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">D&amp;I Inspection Report</div>
+      <div class="form-subtitle">Camera System</div>
+      <div class="form-number">OM05-2</div>
+    </div>
+  </div>
+
+  <!-- Header Fields -->
+  <div class="section-bar">Camera Information</div>
+  <div class="header-fields">
+    <div class="field-row span2"><span class="fl">Client / Facility</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row"><span class="fl">Customer Type</span>
+      <div style="display:flex;gap:10px;align-items:center;padding-top:3px">
+        <span class="cb-item"><span class="cb-box"></span>CAP</span>
+        <span class="cb-item"><span class="cb-box"></span>FFS</span>
+      </div>
+    </div>
+    <div class="field-row span2"><span class="fl">Camera Type / Model</span><div class="fv" id="f-model"></div></div>
+    <div class="field-row"><span class="fl">Complaint</span><div class="fv" id="f-complaint" style="min-height:28px"></div></div>
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date"></div></div>
+    <div class="field-row"><span class="fl">Rack #</span><div class="fv"></div></div>
+    <div class="field-row"><span class="fl">Inspected By</span><div class="fv"></div></div>
+  </div>
+
+  <!-- Accessories -->
+  <div class="section-bar">Accessories Received</div>
+  <div class="cb-row" style="padding:5px 0">
+    <span class="cb-item"><span class="cb-box"></span>Camera Head</span>
+    <span class="cb-item"><span class="cb-box"></span>Coupler</span>
+    <span class="cb-item"><span class="cb-box"></span>Soak Cap</span>
+    <span class="cb-item"><span class="cb-box"></span>Edge Card Protector</span>
+  </div>
+
+  <!-- Item Received Condition -->
+  <div class="section-bar">Item Received Condition</div>
+  <div class="cb-row" style="padding:5px 0">
+    <span style="font-size:9px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em;margin-right:4px">Received:</span>
+    <span class="cb-item"><span class="cb-box"></span>Clean</span>
+    <span class="cb-item"><span class="cb-box"></span>Unclean</span>
+    <span class="warning-note" style="margin-left:8px">If Unclean — follow OM-22 decontamination protocol before proceeding</span>
+  </div>
+
+  <!-- Camera Inspection — 10 Y/N/NA -->
+  <div class="section-bar">Camera Inspection</div>
+  <table class="pf-table">
+    <thead>
+      <tr>
+        <th>Test Item</th>
+        <th class="center">Y</th>
+        <th class="center">N</th>
+        <th class="center">N/A</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Leak Test</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>2. Focus Test</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>3. Fog Test</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>4. White Balance</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>5. Control Buttons</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>6. Cable Connector</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>7. Video Image</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>8. Edge Card Protector</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>9. Focus Mechanism</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>10. Scope Retaining Mechanism</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Coupler Inspection — 4 conditional -->
+  <div class="section-bar">Coupler Inspection <span style="font-weight:400;text-transform:none;font-size:8.5px;opacity:.85">(complete if coupler received)</span></div>
+  <table class="pf-table">
+    <thead>
+      <tr>
+        <th>Test Item</th>
+        <th class="center">Y</th>
+        <th class="center">N</th>
+        <th class="center">N/A</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Image Quality</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>2. Soak Cap Assembly</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>3. Leak Test</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+      <tr><td>4. Pass Test</td><td class="pf-cell"><span class="pf-btn pf-p">Y</span></td><td class="pf-cell"><span class="pf-btn pf-f">N</span></td><td class="pf-cell"><span class="pf-btn pf-na">N/A</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Items in Need of Repair -->
+  <div class="section-bar">Items in Need of Repair</div>
+  <div class="text-field" style="min-height:36px"></div>
+
+  <!-- Comments -->
+  <div class="section-bar">Comments</div>
+  <div class="text-field" style="min-height:28px"></div>
+
+  <div class="sig-block">
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Inspected By / Signature</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Reviewed By / Signature</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM05-2</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
+  function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+
+  fill('f-date', today());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      fill('f-client', r.sClientName || r.sFacility || r.sClient);
+      fill('f-wo', r.sWONumber || r.sWorkOrder || wo);
+      fill('f-serial', r.sSerial || r.sSerialNo || r.sSerialNumber);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      fill('f-complaint', r.sComplaint || r.sReasonForRepair || r.sNotes);
+      if(r.dRepairDate || r.dDateIn) fill('f-date', new Date(r.dRepairDate||r.dDateIn).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>

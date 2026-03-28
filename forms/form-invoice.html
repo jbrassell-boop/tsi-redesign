@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Invoice — TSI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:10px}
+
+    /* #10 window envelope layout — Bill To top-left, positioned for window viewing */
+    .envelope-zone{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+    .bill-to-block{width:3.2in;min-height:1in;padding:8px 0;display:flex;flex-direction:column;gap:2px}
+    .bt-label{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#999;letter-spacing:.06em;margin-bottom:4px}
+    .bt-name{font-size:12px;font-weight:800;color:#111}
+    .bt-addr{font-size:11px;color:#333;line-height:1.5}
+    .bt-blank{border-bottom:1px solid #ccc;min-height:14px;font-size:11px;line-height:1.5}
+
+    /* TSI header block */
+    .tsi-header{text-align:right}
+    .tsi-header img{height:44px;display:block;margin-left:auto;margin-bottom:6px}
+    .tsi-addr{font-size:9px;color:#666;line-height:1.5;text-align:right}
+
+    /* Invoice meta strip */
+    .meta-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2E75B6;border:2px solid #2E75B6;border-radius:4px;overflow:hidden;margin-top:4px}
+    .meta-cell{background:#fff;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
+    .meta-cell:first-child{background:#F0F6FF}
+    .ml{font-size:8px;font-weight:700;text-transform:uppercase;color:#2E75B6;letter-spacing:.06em}
+    .mv{font-size:12px;font-weight:700;color:#111}
+
+    /* Fields row */
+    .fields-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 12px;margin-top:6px}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:17px;font-size:11px;padding:1px 2px}
+
+    /* Line items */
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;margin-top:8px}
+    table{width:100%;border-collapse:collapse;margin-top:2px}
+    thead th{background:#1B3A5C;color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;padding:5px 8px;text-align:left;letter-spacing:.04em}
+    thead th.right{text-align:right}
+    tbody td{padding:5px 8px;font-size:10.5px;border-bottom:1px solid #ddd;vertical-align:middle}
+    tbody tr:nth-child(even) td{background:#F9FAFB}
+    .num{text-align:right}
+
+    /* Totals */
+    .totals{display:flex;justify-content:flex-end;margin-top:6px}
+    .totals-table{width:260px;border-collapse:collapse}
+    .totals-table td{padding:4px 8px;font-size:10.5px;border-bottom:1px solid #eee}
+    .totals-table td:first-child{color:#555;font-weight:600;text-align:right;width:140px}
+    .totals-table td.num{text-align:right;font-weight:700}
+    .totals-table tr.total-row td{font-size:13px;font-weight:800;border-top:2px solid #2E75B6;background:#F0F6FF}
+
+    /* Remittance footer */
+    .remittance{margin-top:12px;padding:10px 14px;background:#F9FAFB;border:1px solid #ddd;border-radius:3px}
+    .remittance-title{font-size:9px;font-weight:700;text-transform:uppercase;color:#2E75B6;letter-spacing:.06em;margin-bottom:6px;border-bottom:1px solid #ccc;padding-bottom:4px}
+    .remittance-body{display:flex;gap:24px;font-size:10.5px;color:#333}
+    .rem-col{flex:1}
+    .rem-lbl{font-size:8.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+    .cut-line{border-top:1.5px dashed #bbb;margin-top:14px;padding-top:4px;font-size:8px;color:#999;text-align:center;letter-spacing:.08em;text-transform:uppercase}
+
+    .form-footer{margin-top:auto;padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page">
+
+  <!-- Envelope Window Zone -->
+  <div class="envelope-zone">
+    <!-- Bill To — positioned for #10 window envelope -->
+    <div class="bill-to-block">
+      <div class="bt-label">Bill To</div>
+      <div class="bt-name" id="f-bill-name"></div>
+      <div class="bt-blank" id="f-bill-addr"></div>
+      <div class="bt-blank" id="f-bill-csz"></div>
+      <div class="bt-blank" id="f-bill-phone"></div>
+    </div>
+
+    <!-- TSI Header -->
+    <div class="tsi-header">
+      <img src="../logo-color.jpg" alt="TSI Logo"/>
+      <div class="tsi-addr">
+        Technical Services Inc.<br/>
+        17 Creek Pkwy, Upper Chichester PA 19061<br/>
+        Phone: (610) 485-3838 &nbsp;|&nbsp; Fax: (610) 485-3839<br/>
+        Federal Tax ID: XX-XXXXXXX
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoice Meta -->
+  <div class="meta-strip">
+    <div class="meta-cell"><span class="ml">Invoice #</span><span class="mv" id="f-invoice-num"></span></div>
+    <div class="meta-cell"><span class="ml">Invoice Date</span><span class="mv" id="f-invoice-date"></span></div>
+    <div class="meta-cell"><span class="ml">Due Date</span><span class="mv" id="f-due-date"></span></div>
+    <div class="meta-cell"><span class="ml">Terms</span><span class="mv">Net 30</span></div>
+  </div>
+
+  <!-- Reference Fields -->
+  <div class="fields-row">
+    <div class="field-row"><span class="fl">Work Order #</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row"><span class="fl">PO #</span><div class="fv" id="f-po"></div></div>
+    <div class="field-row"><span class="fl">Serial #</span><div class="fv" id="f-serial"></div></div>
+    <div class="field-row"><span class="fl">Service Date</span><div class="fv" id="f-date"></div></div>
+    <div class="field-row span2"><span class="fl">Client / Account</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row span2"><span class="fl">Equipment / Scope Model</span><div class="fv" id="f-model"></div></div>
+  </div>
+
+  <!-- Line Items -->
+  <div class="section-bar">Services &amp; Items</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:55%">Description</th>
+        <th class="right" style="width:50px">Qty</th>
+        <th class="right" style="width:80px">Unit Price</th>
+        <th class="right" style="width:80px">Amount</th>
+      </tr>
+    </thead>
+    <tbody id="line-items-body">
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+      <tr><td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Totals -->
+  <div class="totals">
+    <table class="totals-table">
+      <tr><td>Subtotal</td><td class="num" id="f-subtotal">$</td></tr>
+      <tr><td>Shipping</td><td class="num">$</td></tr>
+      <tr><td>Tax</td><td class="num">$</td></tr>
+      <tr class="total-row"><td>Amount Due</td><td class="num" id="f-total">$</td></tr>
+    </table>
+  </div>
+
+  <!-- Notes -->
+  <div style="margin-top:8px;font-size:9.5px;color:#555;border-top:1px solid #eee;padding-top:6px">
+    <strong>Notes:</strong> Payment due within 30 days of invoice date. Please include invoice number on your remittance. Make checks payable to Technical Services Inc. ACH/Wire transfer available upon request.
+  </div>
+
+  <!-- Remittance Stub -->
+  <div class="remittance">
+    <div class="remittance-title">Remittance — Please Return With Payment</div>
+    <div class="remittance-body">
+      <div class="rem-col">
+        <div class="rem-lbl">Invoice #</div>
+        <div style="border-bottom:1px solid #ccc;min-height:16px"></div>
+      </div>
+      <div class="rem-col">
+        <div class="rem-lbl">Amount Enclosed</div>
+        <div style="border-bottom:1px solid #ccc;min-height:16px"></div>
+      </div>
+      <div class="rem-col" style="flex:2">
+        <div class="rem-lbl">Account / PO Reference</div>
+        <div style="border-bottom:1px solid #ccc;min-height:16px"></div>
+      </div>
+    </div>
+    <div class="cut-line">✂ &nbsp; Detach and return with payment &nbsp; ✂</div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061</span>
+    <span>Page 1 of 1</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val!=null) el.textContent=val; }
+  function fmt(n){ return '$'+parseFloat(n||0).toFixed(2); }
+  function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+  function due30(){ var d=new Date(); d.setDate(d.getDate()+30); return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+
+  fill('f-invoice-date', today());
+  fill('f-due-date', due30());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      var clientName = r.sClientName || r.sFacility || r.sClient || '';
+      var addr = r.sAddr1 || r.sAddress || '';
+      var city = r.sCity || ''; var state = r.sState || ''; var zip = r.sZip || '';
+      var csz = [city, state].filter(Boolean).join(', ') + (zip ? ' '+zip : '');
+      var phone = r.sPhone || r.sPhoneNumber || '';
+      fill('f-bill-name', clientName);
+      fill('f-bill-addr', addr);
+      fill('f-bill-csz', csz);
+      fill('f-bill-phone', phone);
+      fill('f-invoice-num', r.sInvoiceNumber || r.sInvoiceNo || wo);
+      fill('f-wo', r.sWONumber || r.sWorkOrder || wo);
+      fill('f-po', r.sPONumber || r.sPO);
+      fill('f-serial', r.sSerial || r.sSerialNo || r.sSerialNumber);
+      fill('f-client', clientName);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      if(r.dRepairDate || r.dDateIn) fill('f-date', new Date(r.dRepairDate||r.dDateIn).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+      if(r.dDateOut) {
+        var inv = new Date(r.dDateOut);
+        fill('f-invoice-date', inv.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+        var due = new Date(inv); due.setDate(due.getDate()+30);
+        fill('f-due-date', due.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+      }
+    })
+    .catch(function(){});
+
+  fetch(base+'/repair-details/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      var items = Array.isArray(d) ? d : (d && d.items ? d.items : null);
+      if(!items || !items.length) return;
+      var tbody = document.getElementById('line-items-body');
+      tbody.innerHTML = '';
+      var subtotal = 0;
+      items.forEach(function(item, i){
+        var qty = item.nQty || item.iQty || 1;
+        var price = parseFloat(item.nPrice || item.dPrice || item.nUnitPrice || 0);
+        var amount = qty * price;
+        subtotal += amount;
+        var tr = document.createElement('tr');
+        if(i%2===1) tr.style.background='#F9FAFB';
+        tr.innerHTML = '<td style="height:20px">'+(item.sDescription||item.sRepairItem||item.sItem||'')+'</td>'+
+          '<td class="num">'+(qty||'')+'</td>'+
+          '<td class="num">'+(price?fmt(price):'')+'</td>'+
+          '<td class="num">'+(amount?fmt(amount):'')+'</td>';
+        tbody.appendChild(tr);
+      });
+      while(tbody.rows.length < 6){
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td style="height:20px"></td><td class="num"></td><td class="num"></td><td class="num"></td>';
+        tbody.appendChild(tr);
+      }
+      if(subtotal) {
+        fill('f-subtotal', fmt(subtotal));
+        fill('f-total', fmt(subtotal));
+      }
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Non-Conforming Product — OM23-1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:20px}
+    .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;display:flex;flex-direction:column;gap:10px}
+
+    .form-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+    .form-header img{height:44px}
+    .form-title-block{text-align:right}
+    .form-title{font-size:15px;font-weight:800;color:#1B3A5C}
+    .form-subtitle{font-size:11px;font-weight:600;color:#2E75B6;margin-top:1px}
+    .form-number{font-size:10px;color:#666;margin-top:2px}
+
+    /* NCP header stripe */
+    .ncp-stripe{background:#B71234;color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:5px 10px;text-align:center;border-radius:3px}
+
+    .section-bar{background:#2E75B6;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px}
+
+    .header-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 12px;padding:6px 0 2px}
+    .field-row{display:flex;flex-direction:column;gap:1px}
+    .field-row.span2{grid-column:span 2}
+    .fl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em}
+    .fv{border-bottom:1px solid #999;min-height:18px;font-size:11px;padding:1px 2px}
+
+    .text-field{border:1px solid #ccc;border-radius:3px;min-height:52px;padding:4px 8px;font-size:10.5px;width:100%;margin-top:3px}
+
+    /* Yes/No + field inline */
+    .yn-row{display:flex;align-items:center;gap:16px;padding:6px 0;flex-wrap:wrap}
+    .yn-item{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600}
+    .cb-box{width:14px;height:14px;border:1.5px solid #999;border-radius:2px;display:inline-block;flex-shrink:0}
+    .yn-field-group{display:flex;align-items:flex-end;gap:6px;margin-left:10px}
+    .yn-field-label{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.04em;white-space:nowrap}
+    .yn-field{border-bottom:1px solid #999;min-width:120px;min-height:17px;display:inline-block}
+
+    /* Disposition */
+    .disp-row{display:flex;gap:0;border:1.5px solid #2E75B6;border-radius:4px;overflow:hidden;margin-top:6px}
+    .disp-option{flex:1;padding:8px 10px;border-right:1.5px solid #2E75B6;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .disp-option:last-child{border-right:none}
+    .disp-circle{width:16px;height:16px;border:1.5px solid #999;border-radius:50%;flex-shrink:0}
+
+    /* Review panel */
+    .review-panel{border:1px solid #ddd;border-radius:4px;overflow:hidden}
+    .review-head{background:#F9FAFB;border-bottom:1px solid #ddd;padding:5px 10px;font-size:9px;font-weight:700;text-transform:uppercase;color:#1B3A5C;letter-spacing:.05em}
+    .review-body{padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+
+    .sig-block{display:flex;gap:20px}
+    .sig-field{flex:1;display:flex;flex-direction:column;gap:2px}
+    .sig-line{border-bottom:1px solid #999;min-height:28px}
+    .sig-label{font-size:8.5px;color:#555;font-weight:600;margin-top:2px}
+
+    .form-footer{margin-top:auto;padding-top:8px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#888}
+
+    .print-btn{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .print-btn button:hover{background:#1B3A5C}
+
+    @media print{
+      body{padding:0}
+      .page{padding:0.4in;width:auto}
+      .print-btn{display:none}
+      @page{size:letter;margin:0}
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page">
+
+  <div class="form-header">
+    <img src="../logo-color.jpg" alt="TSI Logo"/>
+    <div class="form-title-block">
+      <div class="form-title">Non-Conforming Product</div>
+      <div class="form-subtitle">Quality Non-Conformance Report</div>
+      <div class="form-number">OM23-1</div>
+    </div>
+  </div>
+
+  <div class="ncp-stripe">Non-Conforming Product Report (NCP)</div>
+
+  <div class="section-bar">Identification</div>
+  <div class="header-fields">
+    <div class="field-row"><span class="fl">NCP #</span><div class="fv"></div></div>
+    <div class="field-row"><span class="fl">Date</span><div class="fv" id="f-date"></div></div>
+    <div class="field-row"><span class="fl">Work Order # / Lot No.</span><div class="fv" id="f-wo"></div></div>
+    <div class="field-row span2"><span class="fl">Customer / Vendor</span><div class="fv" id="f-client"></div></div>
+    <div class="field-row"><span class="fl">Model No.</span><div class="fv" id="f-model"></div></div>
+    <div class="field-row span2"><span class="fl">Product Serial No.</span><div class="fv" id="f-serial"></div></div>
+  </div>
+
+  <!-- Reason for Non-Conformance -->
+  <div class="section-bar">Reason for Non-Conformance</div>
+  <div class="text-field" style="min-height:64px"></div>
+
+  <!-- Investigation -->
+  <div class="section-bar">Investigation</div>
+  <div class="text-field" style="min-height:64px"></div>
+
+  <!-- Corrective Action -->
+  <div class="review-panel">
+    <div class="review-head">Corrective Action</div>
+    <div class="review-body">
+      <div class="yn-row">
+        <span style="font-size:9.5px;font-weight:700;color:#555">Corrective Action Required:</span>
+        <div class="yn-item"><div class="cb-box"></div> Yes</div>
+        <div class="yn-item"><div class="cb-box"></div> No</div>
+        <div class="yn-field-group">
+          <span class="yn-field-label">CAR / PAR No.:</span>
+          <div class="yn-field"></div>
+        </div>
+      </div>
+      <div class="yn-row">
+        <span style="font-size:9.5px;font-weight:700;color:#555">Vendor Complaint Required:</span>
+        <div class="yn-item"><div class="cb-box"></div> Yes</div>
+        <div class="yn-item"><div class="cb-box"></div> No</div>
+        <div class="yn-field-group">
+          <span class="yn-field-label">VC No.:</span>
+          <div class="yn-field"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disposition -->
+  <div class="section-bar">Disposition</div>
+  <div class="disp-row">
+    <div class="disp-option"><div class="disp-circle"></div> Rework</div>
+    <div class="disp-option"><div class="disp-circle"></div> Use-As-Is</div>
+    <div class="disp-option"><div class="disp-circle"></div> RTV</div>
+    <div class="disp-option"><div class="disp-circle"></div> Scrap</div>
+  </div>
+  <div class="sig-block" style="margin-top:8px">
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Approved By / Signature</div>
+    </div>
+    <div class="sig-field" style="max-width:130px">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+  </div>
+
+  <!-- QA Review -->
+  <div class="review-panel">
+    <div class="review-head">QA Review</div>
+    <div class="review-body">
+      <div>
+        <span class="fl">QA Review Comments</span>
+        <div class="text-field" style="min-height:48px"></div>
+      </div>
+      <div class="sig-block" style="margin-top:6px">
+        <div class="sig-field">
+          <div class="sig-line"></div>
+          <div class="sig-label">QA Review By / Signature</div>
+        </div>
+        <div class="sig-field" style="max-width:130px">
+          <div class="sig-line"></div>
+          <div class="sig-label">Date</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <span>ISO 13485 Certified</span>
+    <span>Technical Services Inc. &nbsp;|&nbsp; 17 Creek Pkwy, Upper Chichester PA 19061 &nbsp;|&nbsp; (610) 485-3838</span>
+    <span>OM23-1</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var LOCAL_URL = 'http://localhost:4000/api';
+  var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
+  function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
+  function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
+  function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+
+  fill('f-date', today());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  var base = isLocal() ? LOCAL_URL : CLOUD_URL;
+  fetch(base+'/repairs/'+encodeURIComponent(wo))
+    .then(function(r){ return r.json(); })
+    .then(function(env){
+      var d = env.data || env;
+      if(d && d.responseData && typeof d.responseData==='string') d = JSON.parse(d.responseData).data || JSON.parse(d.responseData);
+      if(!d) return;
+      var r = d.repair || d[0] || d;
+      fill('f-client', r.sClientName || r.sFacility || r.sClient);
+      fill('f-wo', r.sWONumber || r.sWorkOrder || wo);
+      fill('f-model', r.sModel || r.sScopeModel || r.sEquipmentModel);
+      fill('f-serial', r.sSerial || r.sSerialNo || r.sSerialNumber);
+      if(r.dRepairDate || r.dDateIn) fill('f-date', new Date(r.dRepairDate||r.dDateIn).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}));
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>

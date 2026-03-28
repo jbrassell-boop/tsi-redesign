@@ -42,9 +42,16 @@
     .del-btn:hover{background:#FEE2E2}
 
     /* MASTER-DETAIL SPLIT */
-    .split-layout{display:flex;flex:1;overflow:hidden}
-    .split-left{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .split-layout{display:flex;flex:1;overflow:hidden;position:relative}
+    .split-left{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease}
+    .split-left.collapsed{width:0;border-right:none}
+    .split-left.collapsed .split-left-search,.split-left.collapsed .split-left-list,.split-left.collapsed .split-left-footer,.split-left.collapsed .split-left-head,.split-left.collapsed #skSuppliers,.split-left.collapsed #emptySuppliers{display:none}
+    .split-expand-btn{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:48px;background:var(--navy);color:#fff;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:13px;align-items:center;justify-content:center;z-index:10;transition:background .15s}
+    .split-expand-btn:hover{background:var(--primary)}
+    .split-expand-btn.visible{display:flex}
     .split-left-head{background:var(--neutral-50);padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .split-collapse-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border-dk);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:11px;transition:all .12s;flex-shrink:0}
+    .split-collapse-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
     .split-left-search{padding:4px 8px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
     .split-left-search .row{display:flex;gap:3px;align-items:center}
     .search-inp{flex:1;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
@@ -184,7 +191,10 @@
       <div class="split-left">
         <div class="split-left-head">
           <span>Suppliers</span>
-          <span style="font-size:9px;font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none" id="listCount">0 records</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:9px;font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none" id="listCount">0 records</span>
+            <button class="split-collapse-btn" onclick="toggleSplitLeft()" title="Collapse panel">&#8249;</button>
+          </div>
         </div>
         <div class="split-left-search">
           <div class="row">
@@ -220,7 +230,8 @@
       </div>
 
       <!-- RIGHT PANEL — Supplier Detail -->
-      <div class="split-right" id="detailPanel">
+      <div class="split-right" id="detailPanel" style="position:relative">
+        <button class="split-expand-btn" onclick="toggleSplitLeft()" title="Show supplier list">&#8250;</button>
         <!-- Detail Header -->
         <div class="detail-header" id="detailHeader">
           <span class="supp-title" id="detailName">Select a supplier</span>
@@ -1513,6 +1524,14 @@ document.addEventListener('keydown', function(e) {
 API.UI.init();
 if(API && API.UI) API.UI.showSkeleton('skSuppliers', 5);
 reloadSuppliers().then(function() { if(API && API.UI) API.UI.hideSkeleton('skSuppliers'); });
+
+// ── Left panel collapse/expand ────────────────────────
+function toggleSplitLeft() {
+  const panel = document.querySelector('.split-left');
+  const btn = document.querySelector('.split-expand-btn');
+  panel.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('visible', panel.classList.contains('collapsed'));
+}
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/receiving.js"></script>
