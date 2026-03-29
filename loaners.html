@@ -1080,13 +1080,13 @@ async function saveLoaner() {
     await loadTaskLoaners();
   } catch (e) {
     console.warn('[TSI Loaners] Save failed:', e.message);
-    // In mock/demo mode the API might still succeed — reload either way
-    closeDrawer();
-    await loadTaskLoaners();
-  } finally {
+    showToast('Save failed: ' + e.message, 'error');
     btn.disabled = false;
     btn.textContent = 'Save';
+    return;
   }
+  btn.disabled = false;
+  btn.textContent = 'Save';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1137,6 +1137,16 @@ async function deleteLoaner(key) {
 function openDrawer(id) {
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById(id).classList.add('open');
+}
+
+function showToast(msg, type) {
+  let t = document.getElementById('loanerToast');
+  if (!t) { t = document.createElement('div'); t.id = 'loanerToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:8px 20px;border-radius:6px;font-size:12px;font-family:inherit;z-index:var(--z-toast);box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
+  t.style.background = (type === 'error') ? 'var(--danger)' : 'var(--navy)';
+  t.style.color = '#fff';
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid); t._tid = setTimeout(() => { t.style.opacity = '0'; }, 4000);
 }
 
 function closeDrawer() {

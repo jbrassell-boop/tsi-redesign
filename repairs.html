@@ -66,7 +66,7 @@
     .flag-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:500;background:var(--warning-bg,var(--neutral-100));color:var(--warning-text,var(--amber));border:1px solid var(--warning)}
 
     /* QC INSPECTION DRAWER */
-    .qc-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:var(--z-modal)}
+    .qc-backdrop{display:none;position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);backdrop-filter:blur(2px);z-index:var(--z-modal)}
     .qc-backdrop.open{display:block}
     .drawer{position:fixed;top:64px;right:0;width:600px;height:calc(100vh - 64px);background:var(--card);z-index:var(--z-modal);box-shadow:none;transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;transform:translateX(100%)}
     .drawer.open{transform:translateX(0);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.15)}
@@ -222,7 +222,7 @@
     .drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:var(--primary-light);color:var(--blue)}
 
     /* ITEM PICKER OVERLAY */
-    .picker-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:var(--z-cmd);align-items:center;justify-content:center}
+    .picker-overlay{display:none;position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);backdrop-filter:blur(2px);z-index:var(--z-cmd);align-items:center;justify-content:center}
     .picker-overlay.open{display:flex}
     .picker-panel{background:var(--card);border-radius:8px;box-shadow:var(--shadow-modal);width:560px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden}
     .picker-header{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg)}
@@ -2536,7 +2536,7 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
 </div>
 
 <!-- ADD INVENTORY DRAWER (per repair item) -->
-<div class="drawer" id="drawer-addInv" style="width:600px;right:-620px">
+<div class="drawer" id="drawer-addInv" style="width:600px">
   <div class="qc-drawer-head">
     <span style="font-size:13px;font-weight:700;color:#fff">Add Inventory</span>
     <button style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;height:26px;padding:0 10px;font-size:10px;margin-left:auto;border-radius:4px;cursor:pointer;font-family:inherit" onclick="closeDrawer()">&times; Close</button>
@@ -4563,7 +4563,7 @@ function populateFormDrawer(formId) {
       var desc = lvl.sPatientSafetyLevelDesc || lvl.sPatientSafetyLevel || '';
       if (desc.includes('PS1') || desc.includes('Level 1') || desc.includes('Low')) return { bg: '#F0FDF4', fg: '#166534' };
       if (desc.includes('PS2') || desc.includes('Level 2') || desc.includes('Moderate')) return { bg: '#FFFBEB', fg: '#92400E' };
-      return { bg: '#FEF2F2', fg: '#B91C1C' };
+      return { bg: '#FEF2F2', fg: 'var(--danger)' };
     };
     const psInC = psColor(psIn), psOutC = psColor(psOut);
 
@@ -5385,7 +5385,7 @@ function addRepeatVisitFlag(days) {
   bar.style.display = 'flex';
   const chip = document.createElement('span');
   chip.className = 'flag-chip flag-repeat';
-  chip.style.cssText = 'background:#FEF2F2;color:#B91C1C;border-color:#FECACA;font-weight:700';
+  chip.style.cssText = 'background:var(--danger-light);color:var(--danger);border-color:var(--danger-border);font-weight:700';
   chip.textContent = 'REPEAT VISIT \u2014 ' + days + ' days since last repair';
   // Insert after the FLAGS label
   bar.appendChild(chip);
@@ -5522,9 +5522,9 @@ function populateDetail(d) {
           var curIn = new Date(d.dtDateIn);
           var gap = Math.round((curIn - prevOut) / 86400000);
           document.getElementById('hDaysLastIn').textContent = gap + 'd';
-          if (gap < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:#DC2626;font-weight:700'; addRepeatVisitFlag(gap); }
+          if (gap < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:var(--danger);font-weight:700'; addRepeatVisitFlag(gap); }
           var el40 = document.getElementById('hWithin40');
-          if (gap <= 40) { el40.textContent = 'YES'; el40.style.color = '#DC2626'; el40.style.fontWeight = '700'; }
+          if (gap <= 40) { el40.textContent = 'YES'; el40.style.color = 'var(--danger)'; el40.style.fontWeight = '700'; }
           else { el40.textContent = 'No'; el40.style.color = ''; el40.style.fontWeight = ''; }
         }
       }
@@ -5539,7 +5539,7 @@ function populateDetail(d) {
     } catch(e) {}
   } else {
     document.getElementById('hDaysLastIn').textContent = daysLastIn ? daysLastIn + 'd' : '—';
-    if (daysLastIn && daysLastIn < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:#DC2626;font-weight:700'; addRepeatVisitFlag(daysLastIn); }
+    if (daysLastIn && daysLastIn < 30) { document.getElementById('hDaysLastIn').style.cssText = 'color:var(--danger);font-weight:700'; addRepeatVisitFlag(daysLastIn); }
     else { document.getElementById('hDaysLastIn').style.cssText = ''; }
   }
   document.getElementById('hWithin40').textContent = daysLastIn && daysLastIn <= 40 ? 'YES' : '—';
@@ -6515,6 +6515,7 @@ async function autoSave() {
     console.warn('[TSI Repairs] Autosave failed:', e.message);
     updateSaveStatus('error');
     _dirty = true;
+    showToast('Autosave failed — changes not saved', 'error');
   }
 }
 
@@ -7342,9 +7343,9 @@ function renderSlips() {
   }
   tbody.innerHTML = _updateSlips.map((s, i) => {
     const techName = _techs.find(t => t.lTechnicianKey == s.techKey);
-    const sel = i === _selectedSlipIdx ? 'background:#EDF2FF;' : '';
+    const sel = i === _selectedSlipIdx ? 'background:var(--primary-light);' : '';
     const status = s.status || 'Open';
-    const statusColor = status === 'Complete' ? 'background:#E6F4EA;color:#1B7A3D' : 'background:#FFF3E0;color:#B8860B';
+    const statusColor = status === 'Complete' ? 'background:#E6F4EA;color:var(--success)' : 'background:#FFF3E0;color:var(--warning)';
     return '<tr style="' + sel + 'cursor:pointer" onclick="selectSlip(' + i + ')">'
       + '<td>US-' + (i+1) + '</td>'
       + '<td>' + esc(s.date || '') + '</td>'
@@ -7402,7 +7403,7 @@ function showSlipDetail(idx) {
   const statusEl = document.getElementById('slipDetailStatus');
   const isComplete = s.status === 'Complete';
   statusEl.textContent = s.status || 'Open';
-  statusEl.style.cssText = 'font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + (isComplete ? 'background:#E6F4EA;color:#1B7A3D' : 'background:#FFF3E0;color:#B8860B');
+  statusEl.style.cssText = 'font-size:9px;font-weight:600;padding:2px 8px;border-radius:9px;' + (isComplete ? 'background:#E6F4EA;color:var(--success)' : 'background:#FFF3E0;color:var(--warning)');
   // Fill fields
   document.getElementById('slipDate').value = s.date || '';
   setSelectVal_safe('slipTech2', s.tech2Key || '');
@@ -7531,7 +7532,7 @@ function renderAmendments() {
   }
   tbody.innerHTML = all.map((a, i) => {
     const isActive = a.status === 'Open';
-    const statusColor = isActive ? 'background:#FFF3E0;color:#B8860B' : 'background:#E6F4EA;color:#1B7A3D';
+    const statusColor = isActive ? 'background:#FFF3E0;color:var(--warning)' : 'background:#E6F4EA;color:var(--success)';
     const itemCount = (a.items || []).length;
     return '<tr' + (isActive ? ' style="background:#FFFBF0"' : '') + '>'
       + '<td>A-' + (i+1) + '</td>'
@@ -7885,8 +7886,8 @@ function renderNCPs() {
   }
   tbody.innerHTML = _ncps.map(function(n, i) {
     var statusBadge = n.status === 'Closed'
-      ? '<span style="background:#D1FAE5;color:#065F46;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Closed</span>'
-      : '<span style="background:#FEE2E2;color:#991B1B;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Open</span>';
+      ? '<span style="background:#D1FAE5;color:var(--success);padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Closed</span>'
+      : '<span style="background:#FEE2E2;color:var(--danger);padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">Open</span>';
     var closeBtn = n.status === 'Open'
       ? '<button onclick="closeNCP(' + i + ', this)" style="font-size:9px;padding:2px 6px;border:1px solid #ccc;border-radius:3px;cursor:pointer;background:#fff">Close</button>'
       : '';
@@ -7904,11 +7905,11 @@ function updateNCPBadge() {
   var openCount = _ncps.filter(function(n){ return n.status === 'Open'; }).length;
   if (openCount) {
     badge.textContent = 'Open';
-    badge.style.color = '#DC2626';
+    badge.style.color = 'var(--danger)';
     badge.style.fontWeight = '700';
   } else {
     badge.textContent = 'Closed';
-    badge.style.color = '#059669';
+    badge.style.color = 'var(--success)';
     badge.style.fontWeight = '600';
   }
 }
@@ -8097,15 +8098,15 @@ function resolveStatusName(r) {
 }
 
 function statusPillStyle(s) {
-  if (!s) return 'background:#F3F4F6;color:#4B5563';
-  if (/ship|scheduled/i.test(s))                                               return 'background:#DCFCE7;color:#166534';
-  if (/in repair|drying|build|semi.?rigid|special rigid|parts hold/i.test(s))  return 'background:#DBEAFE;color:#1E40AF';
-  if (/declined/i.test(s))                                                      return 'background:#FEE2E2;color:#991B1B';
-  if (/on hold/i.test(s))                                                       return 'background:#F3F4F6;color:#374151';
-  if (/approv|waiting|follow.?up/i.test(s))                                     return 'background:#FEF3C7;color:#92400E';
+  if (!s) return 'background:var(--neutral-100);color:var(--neutral-500)';
+  if (/ship|scheduled/i.test(s))                                               return 'background:#DCFCE7;color:var(--success)';
+  if (/in repair|drying|build|semi.?rigid|special rigid|parts hold/i.test(s))  return 'background:#DBEAFE;color:var(--primary)';
+  if (/declined/i.test(s))                                                      return 'background:#FEE2E2;color:var(--danger)';
+  if (/on hold/i.test(s))                                                       return 'background:var(--neutral-100);color:var(--neutral-500)';
+  if (/approv|waiting|follow.?up/i.test(s))                                     return 'background:#FEF3C7;color:var(--warning)';
   if (/40.day|warranty/i.test(s))                                               return 'background:#FDF4FF;color:#7E22CE';
   if (/inspection|outsourced|more info|evaluation/i.test(s))                    return 'background:#EDE9FE;color:var(--qs-shipping)';
-  return 'background:#F3F4F6;color:#4B5563';
+  return 'background:var(--neutral-100);color:var(--neutral-500)';
 }
 
 async function loadRepairList() {
@@ -9099,7 +9100,7 @@ function populateFortyDayForm() {
         var gap = Math.round((new Date(d.dtDateIn) - new Date(prevRepairs[0].dtDateOut)) / 86400000);
         var el = document.getElementById('fd-daysSince');
         el.textContent = gap + 'd';
-        if (gap <= 40) { el.style.color = '#DC2626'; el.style.fontWeight = '700'; }
+        if (gap <= 40) { el.style.color = 'var(--danger)'; el.style.fontWeight = '700'; }
       }
     }).catch(function() {});
   }
@@ -9164,16 +9165,16 @@ function renderScopeHistory(currentKey) {
   const sn = document.getElementById('hSerial').textContent;
 
   function statusColor(s) {
-    if (s === 'Invoiced') return 'background:#F5F5F5;color:#616161';
-    if (s === 'Draft Invoice') return 'background:#FFF8E1;color:#F57F17';
-    if (s === 'Completed' || s === 'Shipped') return 'background:#DCFCE7;color:#166534';
-    if (/ship|scheduled/i.test(s)) return 'background:#DCFCE7;color:#166534';
-    if (/in repair|semi.?rigid|special rigid|parts hold|build/i.test(s)) return 'background:#DBEAFE;color:#1E40AF';
-    if (/declined/i.test(s)) return 'background:#FEE2E2;color:#991B1B';
-    if (/on hold/i.test(s)) return 'background:#F3F4F6;color:#374151';
+    if (s === 'Invoiced') return 'background:var(--neutral-100);color:var(--muted)';
+    if (s === 'Draft Invoice') return 'background:#FFF8E1;color:var(--warning)';
+    if (s === 'Completed' || s === 'Shipped') return 'background:#DCFCE7;color:var(--success)';
+    if (/ship|scheduled/i.test(s)) return 'background:#DCFCE7;color:var(--success)';
+    if (/in repair|semi.?rigid|special rigid|parts hold|build/i.test(s)) return 'background:#DBEAFE;color:var(--primary)';
+    if (/declined/i.test(s)) return 'background:#FEE2E2;color:var(--danger)';
+    if (/on hold/i.test(s)) return 'background:var(--neutral-100);color:var(--neutral-500)';
     if (/40.day|warranty/i.test(s)) return 'background:#FDF4FF;color:#7E22CE';
-    if (/approv|waiting|follow.?up/i.test(s)) return 'background:#FEF3C7;color:#92400E';
-    return 'background:#F3F4F6;color:#4B5563';
+    if (/approv|waiting|follow.?up/i.test(s)) return 'background:#FEF3C7;color:var(--warning)';
+    return 'background:var(--neutral-100);color:var(--neutral-500)';
   }
 
   panel.innerHTML =
