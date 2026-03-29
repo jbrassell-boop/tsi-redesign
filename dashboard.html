@@ -207,6 +207,8 @@
     .kpi-hero-trend.up{color:var(--success)}
     .kpi-hero-trend.down{color:var(--danger)}
     .kpi-hero-trend.flat{color:var(--neutral-500)}
+    .kpi-loading{color:var(--muted);font-size:13px;font-weight:500;animation:kpi-pulse 1.5s infinite}
+    @keyframes kpi-pulse{0%,100%{opacity:1}50%{opacity:.4}}
   </style>
 </head>
 <body>
@@ -282,7 +284,11 @@
         </div>
         <div class="stat-chip alert">
           <div class="s-icon si-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
-          <div class="s-data"><div class="s-val s-red">6</div><div class="s-lbl">Overdue / On Hold</div></div>
+          <div class="s-data"><div class="s-val s-red">4</div><div class="s-lbl">Overdue</div></div>
+        </div>
+        <div class="stat-chip warn">
+          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="5" y1="3" x2="5" y2="13"/><line x1="11" y1="3" x2="11" y2="13"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber">2</div><div class="s-lbl">On Hold</div></div>
         </div>
         <div class="stat-chip">
           <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></div>
@@ -1702,6 +1708,12 @@ function changeServiceLocation() {
 //  KPI HERO ROW — prominent top-level metrics
 // ═══════════════════════════════════════════════════════
 async function populateKpiHero() {
+  // ── Set loading state on all 4 cards ──
+  ['kpiOpenRepairs','kpiAvgTat','kpiMonthRepairs','kpiRevenueMtd'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '<span class="kpi-loading">Loading\u2026</span>';
+  });
+
   // ── KPI 1: Open Repairs — from SCOPES (same data the stat strip uses) ──
   var stats = calcStats();
   var openCount = stats.inHouse;
@@ -1714,7 +1726,14 @@ async function populateKpiHero() {
     repairs = await API.getRepairList() || [];
     invoices = await API.getAllInvoices() || [];
     gpStaging = invoices; // GP staging IS invoices in the real DB
-  } catch(e) { console.warn('[dashboard] KPI data load:', e.message); }
+  } catch(e) {
+    console.warn('[dashboard] KPI data load:', e.message);
+    ['kpiOpenRepairs','kpiAvgTat','kpiMonthRepairs','kpiRevenueMtd'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.textContent = 'N/A'; el.title = 'Data temporarily unavailable'; }
+    });
+    return;
+  }
 
   var now = new Date();
   var thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -1762,9 +1781,9 @@ async function populateKpiHero() {
 
   // ── Render values ──
   document.getElementById('kpiOpenRepairs').textContent = openCount.toLocaleString();
-  document.getElementById('kpiAvgTat').textContent = avgTat ? avgTat.toFixed(1) + 'd' : '\u2014';
+  document.getElementById('kpiAvgTat').textContent = tatDays.length ? avgTat.toFixed(1) + 'd' : '0d';
   document.getElementById('kpiMonthRepairs').textContent = thisMonthRepairs.toLocaleString();
-  document.getElementById('kpiRevenueMtd').textContent = revMtd ? '$' + Math.round(revMtd).toLocaleString() : '\u2014';
+  document.getElementById('kpiRevenueMtd').textContent = '$' + Math.round(revMtd).toLocaleString();
 
   // ── Render trends ──
   function setTrend(id, current, previous) {
