@@ -98,7 +98,7 @@
           <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">REVENUE FLOW</span>
           <span id="wfLegendInv" style="font-size:10px;color:var(--navy);font-weight:600"></span>
           <span id="wfLegendPaid" style="font-size:10px;color:var(--green);font-weight:600"></span>
-          <span id="wfLegendOut" style="font-size:10px;color:#92400E;font-weight:600"></span>
+          <span id="wfLegendOut" style="font-size:10px;color:var(--warning);font-weight:600"></span>
           <span id="wfLegendRisk" style="font-size:10px;color:var(--red);font-weight:600"></span>
         </div>
         <div class="waterfall-bar" id="waterfallBar" style="margin:0 0 6px"></div>
@@ -582,7 +582,7 @@
       const disc = Number(r.dblDiscount || 0);
       const terms = r.sPaymentTerms || '—';
       const glAcct = r.sGLAccountNumber || '—';
-      return '<tr' + (isOverdue ? ' style="background:#FEF9F9"' : '') + '>' +
+      return '<tr' + (isOverdue ? ' class="attention"' : '') + '>' +
         '<td style="color:var(--blue);font-weight:600">' + esc(r.sInvoiceNumber || r.sTranNumber) + '</td>' +
         '<td>' + esc(r.sClientName1 || r.sClientName) + '</td>' +
         '<td style="text-align:right;font-weight:700;color:' + amtColor(st) + '">' + fmt$(r.dblTranAmount) + '</td>' +
@@ -844,7 +844,7 @@
 
     // Build detail modal
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(var(--primary-rgb),.3);z-index:var(--z-modal);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)';
     overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
 
     var amt = Number(inv.dblTranAmount || 0);
@@ -852,7 +852,7 @@
     var disc = Number(inv.dblDiscount || 0);
     var total = amt + tax - disc;
 
-    var html = '<div style="background:#fff;border-radius:12px;width:520px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.25)">';
+    var html = '<div style="background:#fff;border-radius:var(--radius-xl);width:520px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-modal)">';
     html += '<div style="background:var(--navy);color:#fff;padding:16px 20px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center">';
     html += '<div style="font-weight:700;font-size:15px">Invoice Detail</div>';
     html += '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer">×</button></div>';

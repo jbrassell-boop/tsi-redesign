@@ -101,20 +101,17 @@
     .activity-meta{font-size:9.5px;color:var(--muted);margin-top:3px}
 
     /* ADD MODAL */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:var(--z-modal);align-items:center;justify-content:center}
-    .modal-overlay.open{display:flex}
-    .modal-box{background:var(--card);border-radius:8px;box-shadow:var(--shadow-modal);width:560px;max-width:96vw;display:flex;flex-direction:column;max-height:90vh}
+    .modal-overlay{display:flex;position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);z-index:var(--z-modal);align-items:center;justify-content:center;backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal-box{background:var(--card);border-radius:8px;box-shadow:var(--shadow-modal);width:560px;max-width:96vw;display:flex;flex-direction:column;max-height:90vh;transform:translateY(15px);opacity:0;transition:transform 0.2s,opacity 0.2s}
+    .modal-overlay.open .modal-box{transform:translateY(0);opacity:1}
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#ECF4F5;border-bottom:1px solid var(--border);border-radius:8px 8px 0 0;flex-shrink:0}
     .modal-header h3{font-size:13px;font-weight:700;color:var(--navy);margin:0}
     .modal-close{width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;line-height:1;transition:all .1s}
     .modal-close:hover{background:var(--bg);color:var(--navy)}
     .modal-body{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
     .modal-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--neutral-50);border-radius:0 0 8px 8px;flex-shrink:0}
-    .btn-cancel{height:30px;padding:0 14px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);background:var(--card);font-size:11.5px;font-weight:600;color:var(--label);cursor:pointer;font-family:inherit;transition:all .12s}
-    .btn-cancel:hover{border-color:var(--navy);color:var(--navy)}
-    .btn-save{height:30px;padding:0 16px;border:none;border-radius:var(--radius-sm);background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:background .12s}
-    .btn-save:hover{background:var(--steel)}
-    .btn-save:disabled{opacity:.5;cursor:not-allowed}
+    .btn.btn-sm:disabled{opacity:.5;cursor:not-allowed}
     .req{color:var(--red)}
 
     /* SORT ARROWS */
@@ -168,12 +165,12 @@
       <!-- STATUS STRIP -->
       <div class="status-strip">
         <div class="ss-chip"><span class="ss-label">Total</span><span class="ss-val" id="statTotal">0</span></div>
-        <div class="ss-chip" style="background:#DBEAFE;border-color:#BFDBFE"><span class="ss-label">Pending</span><span class="ss-val" style="color:#1D4ED8" id="statOpen">0</span></div>
-        <div class="ss-chip" style="background:#FEF3C7;border-color:#FDE68A"><span class="ss-label">In Progress</span><span class="ss-val" style="color:#92400E" id="statInProgress">0</span></div>
-        <div class="ss-chip" style="background:#FFF7ED;border-color:#FED7AA"><span class="ss-label">Awaiting</span><span class="ss-val" style="color:#9A3412" id="statAwaiting">0</span></div>
-        <div class="ss-chip" style="background:#DCFCE7;border-color:#BBF7D0"><span class="ss-label">Completed</span><span class="ss-val" style="color:#166534" id="statDone">0</span></div>
-        <div class="ss-chip" style="background:#EDE9FE;border-color:#DDD6FE"><span class="ss-label">Review</span><span class="ss-val" style="color:#6D28D9" id="statReview">0</span></div>
-        <div class="ss-chip" style="background:#FEE2E2;border-color:#FECACA"><span class="ss-label">Urgent</span><span class="ss-val" style="color:#B91C1C" id="statHighPri">0</span></div>
+        <div class="ss-chip ss-info"><span class="ss-label">Pending</span><span class="ss-val" id="statOpen">0</span></div>
+        <div class="ss-chip ss-warn"><span class="ss-label">In Progress</span><span class="ss-val" id="statInProgress">0</span></div>
+        <div class="ss-chip ss-warn"><span class="ss-label">Awaiting</span><span class="ss-val" id="statAwaiting">0</span></div>
+        <div class="ss-chip ss-active"><span class="ss-label">Completed</span><span class="ss-val" id="statDone">0</span></div>
+        <div class="ss-chip ss-neutral"><span class="ss-label">Review</span><span class="ss-val" id="statReview">0</span></div>
+        <div class="ss-chip ss-danger"><span class="ss-label">Urgent</span><span class="ss-val" id="statHighPri">0</span></div>
       </div>
 
       <!-- SPLIT LAYOUT -->
@@ -344,8 +341,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
-      <button class="btn-save" id="mSaveBtn" onclick="submitAddItem()">
+      <button class="btn btn-sm btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-sm btn-navy" id="mSaveBtn" onclick="submitAddItem()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
         Add Item
       </button>

@@ -105,9 +105,10 @@
     .empty-state .empty-sub{font-size:11px}
 
     /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);z-index:var(--z-cmd);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
-    .modal-overlay.open{display:flex}
-    .modal{background:var(--card);border-radius:12px;width:700px;max-height:90vh;overflow:hidden;box-shadow:var(--shadow-modal)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);z-index:var(--z-cmd);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal{background:var(--card);border-radius:12px;width:700px;max-height:90vh;overflow:hidden;box-shadow:var(--shadow-modal);transform:translateY(15px);opacity:0;transition:transform 0.2s,opacity 0.2s}
+    .modal-overlay.open .modal{transform:translateY(0);opacity:1}
     .modal-header{padding:14px 20px;background:var(--primary-dark);color:#fff;display:flex;align-items:center;justify-content:space-between}
     .modal-title{font-size:14px;font-weight:700}
     .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
@@ -422,7 +423,7 @@
         <table class="mini-table">
           <thead><tr><th>Item</th><th>SKU</th><th style="text-align:center;width:52px">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Line Total</th><th style="width:28px"></th></tr></thead>
           <tbody id="drawerItemsBody"></tbody>
-          <tfoot><tr style="font-weight:700;background:#F0F4FA"><td colspan="5" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerItemsTotal">$0.00</td></tr></tfoot>
+          <tfoot><tr style="font-weight:700;background:var(--neutral-50)"><td colspan="5" style="padding:5px 8px;text-align:right">Subtotal</td><td style="padding:5px 8px;text-align:right" id="drawerItemsTotal">$0.00</td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -1342,13 +1343,13 @@ function generateQuote(saleKey) {
     return '<tr>'
       +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB">'+(i+1)+'</td>'
       +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB">'+item.name+'</td>'
-      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;color:#6B7280">'+item.sku+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;color:var(--muted)">'+item.sku+'</td>'
       +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:center">'+item.qty+'</td>'
       +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:right">'+fmtMoney(item.unitPrice)+'</td>'
       +'<td style="padding:7px 10px;border-bottom:1px solid #E5E7EB;text-align:right;font-weight:700">'+fmtMoney(lt)+'</td>'
       +'</tr>';
   }).join('');
-  if (!itemRows) itemRows = '<tr><td colspan="6" style="padding:14px;text-align:center;color:#9CA3AF">No line items</td></tr>';
+  if (!itemRows) itemRows = '<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--neutral-500)">No line items</td></tr>';
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>'
     +'<title>Quote '+sale.invoiceNum+'</title>'
@@ -1372,7 +1373,7 @@ function generateQuote(saleKey) {
     +'.bill-name{font-size:14px;font-weight:800;color:#00257A}'
     +'.bill-dept{font-size:11px;color:#6B7280;margin-top:2px}'
     +'table.items{width:100%;border-collapse:collapse;margin-bottom:20px}'
-    +'table.items th{background:#F0F4FA;color:#00257A;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:left;border-bottom:1.5px solid #00257A}'
+    +'table.items th{background:var(--neutral-50);color:var(--primary-dark);padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:left;border-bottom:1.5px solid var(--primary-dark)}'
     +'table.items th:nth-child(4){text-align:center}'
     +'table.items th:nth-child(5),table.items th:nth-child(6){text-align:right}'
     +'table.items tr:nth-child(even) td{background:var(--neutral-50)}'
@@ -1393,10 +1394,10 @@ function generateQuote(saleKey) {
     +'<div style="display:flex;gap:16px;margin-bottom:20px">'
       +'<div class="bill-box" style="flex:1">'
         +'<div class="bill-title">Bill To<\/div>'
-        +'<div style="white-space:pre-line;font-size:12px;color:#374151;line-height:1.5">'+sale.billToAddr+'<\/div>'
+        +'<div style="white-space:pre-line;font-size:12px;color:var(--text);line-height:1.5">'+sale.billToAddr+'<\/div>'
       +'<\/div>'
       +(sale.shipToAddr && sale.shipToAddr !== sale.billToAddr
-        ? '<div class="bill-box" style="flex:1"><div class="bill-title">Ship To<\/div><div style="white-space:pre-line;font-size:12px;color:#374151;line-height:1.5">'+sale.shipToAddr+'<\/div><\/div>'
+        ? '<div class="bill-box" style="flex:1"><div class="bill-title">Ship To<\/div><div style="white-space:pre-line;font-size:12px;color:var(--text);line-height:1.5">'+sale.shipToAddr+'<\/div><\/div>'
         : '')
     +'<\/div>'
     +'<div class="meta-row">'

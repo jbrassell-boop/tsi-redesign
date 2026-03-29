@@ -187,8 +187,7 @@
     .btn-navy:hover{background:var(--primary-dark)}
 
     .mf-right{display:flex;gap:10px;flex-shrink:0}
-    .btn-cancel{height:36px;padding:0 18px;border-radius:var(--radius-lg);border:1px solid var(--neutral-200);background:var(--card);color:var(--neutral-700);font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--ease)}
-    .btn-cancel:hover{background:var(--neutral-50);border-color:var(--primary);color:var(--primary)}
+
     .btn-outline{height:36px;padding:0 24px;border-radius:var(--radius-lg);border:1px solid var(--neutral-200);background:var(--primary-light);color:var(--primary);font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--ease);display:flex;align-items:center;gap:6px}
     .btn-outline:hover{background:#D4E4FE;border-color:var(--primary)}
     .btn-navy-lg{height:36px;padding:0 24px;border-radius:var(--radius-lg);border:none;background:var(--primary);color:#fff;font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--ease);display:flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(var(--primary-rgb),.15)}
@@ -458,7 +457,7 @@
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
-        <button class="btn-cancel" onclick="closeQuickEdit()">Cancel</button>
+        <button class="btn btn-outline" onclick="closeQuickEdit()">Cancel</button>
         <button class="btn-outline" onclick="saveQuickEdit()">Save</button>
       </div>
     </div>
@@ -554,7 +553,7 @@
         <button class="btn-navy" onclick="submitNewWorkspace()">Start Workspace <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-left:4px"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
       <div class="mf-right" id="primaryActionRow">
-        <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-outline" onclick="closeCreateModal()">Cancel</button>
         <button class="btn-outline" id="btnOpenRecord" style="opacity:0.5;pointer-events:none" onclick="openSelectedRecord()">Open Selected</button>
         <button class="btn-navy-lg" onclick="revealNewOrderForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create New</button>
       </div>
@@ -571,12 +570,12 @@
       <button class="modal-close" onclick="closeInputModal(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div style="padding:20px 24px">
-      <label id="inputModalLabel" style="font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px"></label>
-      <input type="text" id="inputModalValue" style="width:100%;height:34px;border:1.5px solid #C8D6E5;border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box" />
+      <label id="inputModalLabel" style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px"></label>
+      <input type="text" id="inputModalValue" style="width:100%;height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box" />
       <p id="inputModalConfirmText" style="font-size:13px;color:#1A202C;display:none;margin:0"></p>
     </div>
     <div style="padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:#F8FAFC;border-radius:0 0 12px 12px">
-      <button class="btn-cancel" onclick="closeInputModal(null)" style="height:30px;padding:0 14px;border:1.5px solid #C8D6E5;border-radius:5px;background:#fff;font-size:11.5px;font-weight:600;color:#64748B;cursor:pointer;font-family:inherit">Cancel</button>
+      <button class="btn btn-sm btn-outline" onclick="closeInputModal(null)">Cancel</button>
       <button id="inputModalOk" class="btn-navy" style="height:30px;padding:0 16px" onclick="closeInputModal('ok')">OK</button>
     </div>
   </div>
@@ -1413,7 +1412,7 @@ function generateTechSheets() {
     h2 .wo-count{font-weight:400;color:#8896AA;font-size:11px}
     table{width:100%;border-collapse:collapse;margin-bottom:4px}
     th,td{padding:6px 10px;border:1px solid #DDE3EE;text-align:left;font-size:11px}
-    th{background:#ECF4F5;color:#1A365D;font-weight:600;font-size:10px;text-transform:uppercase}
+    th{background:var(--neutral-50);color:var(--primary-dark);font-weight:600;font-size:10px;text-transform:uppercase}
     .note-row td{background:#FAFBFD;font-size:10.5px;color:#4A5568;border-top:none;padding:4px 10px}
     .sig-line{margin-top:40px;display:flex;gap:60px}
     .sig-block{flex:1;border-top:1px solid #333;padding-top:6px;font-size:10px;color:#8896AA}
@@ -1538,7 +1537,7 @@ function runGlobalSearch() {
       return `<tr data-client="${esc(s.client)}" data-dept="${esc(s.dept)}" data-wo="${esc(s.wo)}" onclick="selectRow(this, this.dataset.client, this.dataset.dept, this.dataset.wo)">
         <td style="font-weight:600">${esc(s.client)}</td>
         <td>${esc(s.dept)}</td>
-        <td style="color:#1A365D;font-weight:600">${esc(s.wo)}</td>
+        <td style="color:var(--primary-dark);font-weight:600">${esc(s.wo)}</td>
         <td>${esc(s.dateIn)}</td>
         <td>${esc(s.type)}</td>
         <td style="font-family:monospace">${esc(s.serial)}</td>

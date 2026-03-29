@@ -13,7 +13,7 @@
     .client-select{height:30px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 10px;font-size:12.5px;font-family:inherit;color:var(--navy);font-weight:600;background:var(--card);cursor:pointer;outline:none;min-width:260px;transition:border-color .15s}
     .client-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.09)}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--steel)}
-    .status-pill{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:3px 12px;font-size:11.5px;font-weight:700;color:var(--green)}
+    .status-pill{background:var(--primary-light);border:1px solid var(--border-dk);border-radius:var(--radius-pill);padding:3px 12px;font-size:11.5px;font-weight:700;color:var(--green)}
 
   </style>
 </head>
@@ -45,13 +45,13 @@
         <!-- Overflow menu (Deactivate + Delete) -->
         <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
           <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:#6b7c93;border-color:#d0d6dd">&#x22EF;</button>
-          <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #d0d6dd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:200px;padding:6px 0;font-size:13px">
-            <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#b8860b" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
+          <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:var(--z-dropdown);min-width:200px;padding:6px 0;font-size:13px">
+            <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--warning)" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
               Deactivate Client
             </button>
             <div style="height:1px;background:#e8eaed;margin:4px 12px"></div>
-            <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:#c53030" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
+            <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--red)" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
               Delete Client
             </button>
@@ -329,7 +329,7 @@
               <div class="toggle-row">
                 <div style="display:flex;align-items:center;gap:8px" class="toggle-label">
                   Open Credit Memo
-                  <span id="cm-balance-badge" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer" onclick="openCreditMemo()"></span>
+                  <span id="cm-balance-badge" class="b-active" style="display:none;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer" onclick="openCreditMemo()"></span>
                 </div>
                 <label class="toggle"><input id="ci-credit-memo" type="checkbox" onchange="onCreditMemoToggle(this)"/><span class="toggle-slider"></span></label>
               </div>
@@ -355,7 +355,7 @@
               </div>
               <div class="toggle-row">
                 <div class="toggle-label" style="display:flex;align-items:center;gap:8px">Bad Debt Risk
-                  <span id="bad-debt-badge" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:var(--red);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">At Risk</span>
+                  <span id="bad-debt-badge" class="b-fail" style="display:none;font-size:10px;font-weight:700;padding:2px 7px">At Risk</span>
                 </div>
                 <label class="toggle"><input id="ci-bad-debt" type="checkbox"/><span class="toggle-slider"></span></label>
               </div>
@@ -869,8 +869,8 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('addClientModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="saveNewClient()">Save Client</button>
+      <button class="btn btn-outline" onclick="document.getElementById('addClientModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-navy" onclick="saveNewClient()">Save Client</button>
     </div>
   </div>
 </div>
@@ -884,7 +884,7 @@
     </div>
 
     <!-- Total Banner -->
-    <div style="background:#F0FDF4;border-bottom:1px solid #BBF7D0;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+    <div style="background:var(--success-light);border-bottom:1px solid var(--success-border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px">Total Available Credit</div>
         <div id="cm-balance-display" style="font-size:26px;font-weight:900;color:var(--green);margin-top:2px">$0.00</div>
@@ -929,7 +929,7 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('creditMemoModal').classList.remove('open')">Close</button>
+      <button class="btn btn-outline" onclick="document.getElementById('creditMemoModal').classList.remove('open')">Close</button>
     </div>
   </div>
 </div>
@@ -945,8 +945,8 @@
       <p style="font-size:12px;color:var(--text);line-height:1.6">Mark <strong id="deactivate-client-name"></strong> as <strong style="color:var(--red)">Inactive</strong>? The record stays in the system — no data is lost. You can reactivate it at any time by toggling Active back on.</p>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('deactivateModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" style="background:var(--red)" onclick="doDeactivate()">Yes, Deactivate</button>
+      <button class="btn btn-outline" onclick="document.getElementById('deactivateModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" onclick="doDeactivate()">Yes, Deactivate</button>
     </div>
   </div>
 </div>
@@ -962,8 +962,8 @@
       <p style="font-size:12px;color:var(--text);line-height:1.6">Permanently delete <strong>this client</strong> and all associated data? This cannot be reversed. Consider <strong>deactivating</strong> instead if you may need this record later.</p>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('deleteClientModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" style="background:var(--red)" onclick="doDeleteClient()">Yes, Delete</button>
+      <button class="btn btn-outline" onclick="document.getElementById('deleteClientModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" onclick="doDeleteClient()">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -1008,8 +1008,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('contactModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="saveContact()">Save Contact</button>
+      <button class="btn btn-outline" onclick="document.getElementById('contactModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-navy" onclick="saveContact()">Save Contact</button>
     </div>
   </div>
 </div>
@@ -1064,8 +1064,8 @@
 
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('flagModal').classList.remove('open')">Cancel</button>
-      <button class="btn-save" onclick="saveFlagMock()">Save Flag</button>
+      <button class="btn btn-outline" onclick="document.getElementById('flagModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-navy" onclick="saveFlagMock()">Save Flag</button>
     </div>
   </div>
 </div>
@@ -1533,7 +1533,7 @@ async function saveFlagMock() {
     <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${text}</td>
     <td style="padding:9px 14px">
       <button onclick="this.closest('tr').remove();if(!document.querySelector('#flags-tbody tr')){const r=document.createElement('tr');r.id='flags-empty-row';r.innerHTML='<td colspan=\\'4\\' style=\\'text-align:center;padding:40px;color:var(--muted)\\'><div style=\\'font-size:32px;margin-bottom:10px;opacity:.3\\'>🚩</div>No flags on record — click <strong>+ Add</strong> to create one</td>';document.getElementById('flags-tbody').appendChild(r)}"
-        style="background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Remove</button>
+        class="btn btn-danger btn-sm">Remove</button>
     </td>`;
   tbody.appendChild(tr);
 
@@ -1578,7 +1578,7 @@ function renderFlagsFromAPI(flags) {
       <td style="padding:9px 14px;font-size:12.5px">${locations}</td>
       <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${f.sFlag || ''}</td>
       <td style="padding:9px 14px">
-        <button onclick="deleteFlagAPI(this,${f.lFlagKey})" style="background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Remove</button>
+        <button onclick="deleteFlagAPI(this,${f.lFlagKey})" class="btn btn-danger btn-sm">Remove</button>
       </td>
     </tr>`;
   }).join('');
@@ -1839,7 +1839,7 @@ async function lookupZipAdd(zip) {
 function showToast(msg, type) {
   const t = document.createElement('div');
   const bg = type === 'error' ? 'var(--red)' : 'var(--green)';
-  t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:99999;background:${bg};color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .4s`;
+  t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:var(--z-toast);background:${bg};color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .4s`;
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2800);
