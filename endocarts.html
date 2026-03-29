@@ -1407,8 +1407,8 @@ async function init() {
   if (!API.requireAuth()) return;
   var isLiveLoad = false;
   try {
-    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
-    var rawQuotes = await API.getEndoCartQuotes(svcKey);
+    // EndoCarts are company-wide — load all service locations (0 = no filter)
+    var rawQuotes = await API.getEndoCartQuotes(0);
     var quotesList = Array.isArray(rawQuotes) ? rawQuotes : (rawQuotes && rawQuotes.data ? rawQuotes.data : []);
     allQuotes = quotesList.map(function(r) {
       return {
