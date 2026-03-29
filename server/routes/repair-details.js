@@ -165,4 +165,65 @@ router.post('/RepairInventory/AddRepairInventory', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /RepairItems/AddRepairItems — Add repair catalog item
+router.post('/RepairItems/AddRepairItems', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    if (!b.sItemDescription) return res.status(400).json({ error: 'sItemDescription required' });
+    const result = await db.query(`
+      INSERT INTO tblRepairItem (sItemDescription, sRigidOrFlexible,
+        sPartOrLabor, sMajorRepair, nUnitCost, bActive, dtCreateDate)
+      VALUES (@desc, @type, @partOrLabor, @major, @cost, 1, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lRepairItemKey`,
+      {
+        desc: b.sItemDescription,
+        type: b.sRigidOrFlexible || null,
+        partOrLabor: b.sPartOrLabor || 'L',
+        major: b.sMajorRepair || 'N',
+        cost: parseFloat(b.nUnitCost || b.dblRepairPrice) || 0
+      });
+    const newKey = result[0] ? result[0].lRepairItemKey : 0;
+    res.json({ lRepairItemKey: newKey, success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /RepairItems/UpdateRepairItems — Update repair catalog item
+router.post('/RepairItems/UpdateRepairItems', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const itemKey = b.lRepairItemKey || 0;
+    if (!itemKey) return res.status(400).json({ error: 'lRepairItemKey required' });
+    await db.query(`
+      UPDATE tblRepairItem SET
+        sItemDescription = ISNULL(@desc, sItemDescription),
+        sRigidOrFlexible = ISNULL(@type, sRigidOrFlexible),
+        sPartOrLabor = ISNULL(@partOrLabor, sPartOrLabor),
+        sMajorRepair = ISNULL(@major, sMajorRepair),
+        nUnitCost = ISNULL(@cost, nUnitCost),
+        bActive = ISNULL(@active, bActive),
+        dtLastUpdate = GETDATE()
+      WHERE lRepairItemKey = @itemKey`,
+      {
+        itemKey,
+        desc: b.sItemDescription || null,
+        type: b.sRigidOrFlexible || null,
+        partOrLabor: b.sPartOrLabor || null,
+        major: b.sMajorRepair || null,
+        cost: b.nUnitCost != null ? parseFloat(b.nUnitCost) : (b.dblRepairPrice != null ? parseFloat(b.dblRepairPrice) : null),
+        active: b.bActive != null ? b.bActive : null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /RepairItems/DeleteRepairItems — Delete repair catalog item
+router.delete('/RepairItems/DeleteRepairItems', async (req, res, next) => {
+  try {
+    const itemKey = parseInt(req.query.lRepairItemKey) || 0;
+    if (!itemKey) return res.status(400).json({ error: 'lRepairItemKey required' });
+    await db.query('DELETE FROM tblRepairItem WHERE lRepairItemKey = @itemKey', { itemKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

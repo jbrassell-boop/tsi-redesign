@@ -196,21 +196,18 @@ function mapEmail(r) {
 // ── Load data ──
 async function loadEmails() {
   try {
-    // FUTURE: needs Express endpoints for email queue (tblEmailQueue / tblEmailTemplate)
-    throw new Error('Email endpoints not yet available');
-
-    const rawEmails = Array.isArray(emailData) ? emailData : [];
-    _emailTypes = Array.isArray(typeData) ? typeData : [];
-
-    if (rawEmails.length > 0) {
-      EMAILS = rawEmails.map(mapEmail);
-      API.UI.updateDemoBadge('live');
-    } else {
-      throw new Error('Empty email list');
-    }
+    const [emailData, typeData] = await Promise.all([
+      API.getEmails(),
+      API.getEmailTypes()
+    ]);
+    const rawEmails = Array.isArray(emailData) ? emailData : (emailData && emailData.data ? emailData.data : []);
+    _emailTypes = Array.isArray(typeData) ? typeData : (typeData && typeData.data ? typeData.data : []);
+    EMAILS = rawEmails.map(mapEmail);
+    API.UI.updateDemoBadge('api');
   } catch (e) {
-    console.warn('[TSI Emails] Mock unavailable:', e.message);
+    console.warn('[TSI Emails] API unavailable:', e.message);
     EMAILS = [];
+    _emailTypes = [];
     API.UI.updateDemoBadge('demo');
   }
 

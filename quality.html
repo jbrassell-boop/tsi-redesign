@@ -372,47 +372,32 @@ function showDataBadge(live) {
 showDataBadge(false);
 
 // ══════════════════════════════════════════════════════════
-// DEMO DATA
-// ══════════════════════════════════════════════════════════
+// ── Live data arrays (populated async on init) ──
+var DEMO_INSPECTIONS = []; // No API endpoint yet — shows empty state
+var DEMO_NCR = [];         // Populated from tblISOComplaint via getQualityComplaints()
+var DEMO_CAPA = [];        // No API endpoint yet — shows empty state
+var DEMO_REWORK = [];      // No API endpoint yet — shows empty state
 
-var DEMO_INSPECTIONS = [
-  { wo:'NR26006821', serial:'SN-FL2291', client:'Northside Hospital', dept:'Endoscopy Center', inspector:'M. Rivera', date:'2026-03-14', result:'Pass', score:97 },
-  { wo:'NR26006819', serial:'SN-RG0847', client:'Metro Health Hospital', dept:'GI Lab', inspector:'J. Chen', date:'2026-03-14', result:'Pass', score:95 },
-  { wo:'NR26006815', serial:'SN-FL2288', client:'Memorial Hermann', dept:'Bronchoscopy Suite', inspector:'M. Rivera', date:'2026-03-13', result:'Conditional', score:82 },
-  { wo:'NR26006812', serial:'SN-CM1104', client:'Orlando Health', dept:'Surgical Endoscopy', inspector:'K. Patel', date:'2026-03-13', result:'Pass', score:99 },
-  { wo:'NR26006808', serial:'SN-FL2285', client:'Tampa General Hospital', dept:'Endoscopy Center', inspector:'J. Chen', date:'2026-03-12', result:'Fail', score:58 },
-  { wo:'NR26006805', serial:'SN-RG0842', client:'Coastal Surgical Center', dept:'GI Lab', inspector:'K. Patel', date:'2026-03-12', result:'Pass', score:93 },
-  { wo:'NR26006801', serial:'SN-FL2280', client:'St. Joseph Medical Center', dept:'Pulmonology', inspector:'M. Rivera', date:'2026-03-11', result:'Conditional', score:79 },
-  { wo:'NR26006798', serial:'SN-CM1098', client:'HealthSpring Medical', dept:'Endoscopy Suite', inspector:'J. Chen', date:'2026-03-11', result:'Pass', score:96 }
-];
-
-var DEMO_NCR = [
-  { ncr:'NCR-0312', wo:'NR26006808', desc:'Light guide bundle degradation \u2014 output below 60% threshold', category:'Functional', severity:'Major', status:'Open', date:'2026-03-12' },
-  { ncr:'NCR-0311', wo:'NR26006815', desc:'Insertion tube surface scratches exceeding cosmetic tolerance', category:'Cosmetic', severity:'Minor', status:'Under Review', date:'2026-03-13' },
-  { ncr:'NCR-0310', wo:'NR26006801', desc:'Bending section angulation range reduced by 15 degrees', category:'Functional', severity:'Major', status:'Open', date:'2026-03-11' },
-  { ncr:'NCR-0309', wo:'NR26006792', desc:'Biopsy channel valve assembly leak detected at 250mmHg', category:'Safety', severity:'Critical', status:'Under Review', date:'2026-03-10' },
-  { ncr:'NCR-0308', wo:'NR26006788', desc:'Distal end cap micro-crack identified during inspection', category:'Safety', severity:'Critical', status:'Closed', date:'2026-03-09' },
-  { ncr:'NCR-0307', wo:'NR26006785', desc:'Image sensor dust contamination \u2014 3 dark spots visible', category:'Functional', severity:'Minor', status:'Closed', date:'2026-03-08' },
-  { ncr:'NCR-0306', wo:'NR26006780', desc:'Control body grip rubber peeling at seam junction', category:'Cosmetic', severity:'Minor', status:'Closed', date:'2026-03-07' }
-];
-
-var DEMO_CAPA = [
-  { capa:'CAPA-0085', ncrRef:'NCR-0309', type:'Corrective', desc:'Replace biopsy channel valve assembly; update incoming inspection checklist for valve integrity', owner:'K. Patel', due:'2026-03-20', status:'In Progress' },
-  { capa:'CAPA-0084', ncrRef:'NCR-0308', type:'Preventive', desc:'Implement mandatory distal cap magnification check during pre-wash inspection phase', owner:'M. Rivera', due:'2026-03-18', status:'Completed' },
-  { capa:'CAPA-0083', ncrRef:'NCR-0312', type:'Corrective', desc:'Fiber bundle replacement and light output calibration; root cause analysis for accelerated degradation', owner:'J. Chen', due:'2026-03-25', status:'Open' },
-  { capa:'CAPA-0082', ncrRef:'NCR-0310', type:'Corrective', desc:'Bending section cable tension adjustment and angulation verification', owner:'K. Patel', due:'2026-03-15', status:'Overdue' },
-  { capa:'CAPA-0081', ncrRef:'NCR-0307', type:'Preventive', desc:'Add sensor cleaning step to standard repair protocol; update SOP-QC-014', owner:'M. Rivera', due:'2026-03-12', status:'Completed' },
-  { capa:'CAPA-0080', ncrRef:'NCR-0306', type:'Preventive', desc:'Source alternative grip rubber material with improved adhesion properties', owner:'J. Chen', due:'2026-04-01', status:'Open' }
-];
-
-var DEMO_REWORK = [
-  { rw:'RW-0147', wo:'NR26006808', serial:'SN-FL2285', reason:'Failed QC \u2014 light guide output below threshold', tech:'D. Martinez', origComplete:'2026-03-11', due:'2026-03-16', status:'In Progress' },
-  { rw:'RW-0146', wo:'NR26006801', serial:'SN-FL2280', reason:'Conditional \u2014 bending section angulation out of spec', tech:'R. Thompson', origComplete:'2026-03-10', due:'2026-03-15', status:'Pending' },
-  { rw:'RW-0145', wo:'NR26006792', serial:'SN-RG0835', reason:'Failed QC \u2014 biopsy channel leak detected', tech:'D. Martinez', origComplete:'2026-03-09', due:'2026-03-14', status:'In Progress' },
-  { rw:'RW-0144', wo:'NR26006785', serial:'SN-FL2275', reason:'Conditional \u2014 image sensor contamination', tech:'A. Kim', origComplete:'2026-03-07', due:'2026-03-12', status:'Complete' },
-  { rw:'RW-0143', wo:'NR26006778', serial:'SN-CM1090', reason:'Failed QC \u2014 white balance calibration drift', tech:'R. Thompson', origComplete:'2026-03-05', due:'2026-03-10', status:'Complete' },
-  { rw:'RW-0142', wo:'NR26006771', serial:'SN-FL2268', reason:'Conditional \u2014 suction channel flow rate below minimum', tech:'A. Kim', origComplete:'2026-03-03', due:'2026-03-08', status:'Complete' }
-];
+// Normalize tblISOComplaint row → NCR shape
+function mapComplaint(r) {
+  var status = 'Open';
+  if (r.dtFnlDispDate) status = 'Closed';
+  else if (r.dtEvalDate) status = 'Under Review';
+  var dateStr = (r.dtDateReceived || '').substring(0, 10);
+  return {
+    ncr: 'ISO-' + String(r.lISOComplaintKey || '').padStart(4, '0'),
+    wo: r.sWorkOrderNumber || '',
+    desc: r.sISONonConformance || r.mComplaint || '',
+    category: r.sISOComplaint || 'Quality',
+    severity: 'Minor',
+    status: status,
+    date: dateStr,
+    client: r.sClientName1 || '',
+    dept: r.sDepartmentName || '',
+    serial: r.sSerialNumber || '',
+    _raw: r
+  };
+}
 
 // ══════════════════════════════════════════════════════════
 // STATE
@@ -920,10 +905,27 @@ function runQualityReport(idx) {
 // ══════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════
-_tabInited.inspections = true;
-if(API && API.UI) API.UI.showSkeleton('skQuality', 5);
-renderInspections();
-if(API && API.UI) API.UI.hideSkeleton('skQuality');
+async function init() {
+  if (API && API.UI) API.UI.showSkeleton('skQuality', 5);
+  try {
+    var raw = await API.getQualityComplaints();
+    var list = Array.isArray(raw) ? raw : (raw && raw.data ? raw.data : []);
+    DEMO_NCR = list.map(mapComplaint);
+    // Update NCR count in stat strip (re-use kpiConditional for open count)
+    var open = DEMO_NCR.filter(function(r){ return r.status === 'Open'; }).length;
+    var el = document.querySelector('#kpiConditional .s-val');
+    if (el) el.textContent = open;
+    API.UI.updateDemoBadge('api');
+  } catch(e) {
+    console.warn('[TSI Quality] API unavailable:', e.message);
+    DEMO_NCR = [];
+    API.UI.updateDemoBadge('demo');
+  }
+  _tabInited.inspections = true;
+  renderInspections();
+  if (API && API.UI) API.UI.hideSkeleton('skQuality');
+}
+init();
 
 </script>
 <script src="js/smart-alerts.js"></script>

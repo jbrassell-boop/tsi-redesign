@@ -2245,28 +2245,100 @@
      INIT
      ============================== */
 
-  if(API && API.UI) API.UI.showSkeleton('skAdmin', 5);
-  renderUsers(USERS);
-  renderSecurityGroups();
-  loadPricingFromAPI();
-  renderSettings();
-  renderAudit(AUDIT);
-  renderDeliveryMethods(DELIVERY_METHODS);
-  renderPaymentTerms(PAY_TERMS);
-  renderScopeCats(SCOPE_CATS);
-  renderDistributors(DISTRIBUTORS_DATA);
-  renderCompanies(COMPANIES);
-  renderCreditLimits(CREDIT_LIMITS);
-  renderReasons(REPAIR_REASONS);
-  renderRstatuses(REPAIR_STATUSES);
-  renderRgroups(REPORTING_GROUPS);
-  renderStddepts(STD_DEPARTMENTS);
-  renderCleanSys(CLEANING_SYSTEMS);
-  renderCountries(COUNTRIES);
-  renderHolidays(HOLIDAYS);
-  renderBonusPools(BONUS_POOLS.filter(function(b){return b.type==='tech';}));
-  renderSalesTax(SALES_TAX);
-  if(API && API.UI) API.UI.hideSkeleton('skAdmin');
+  async function init() {
+    if (API && API.UI) API.UI.showSkeleton('skAdmin', 5);
+
+    // Load users from API
+    try {
+      var rawUsers = await API.getUserList();
+      var userList = Array.isArray(rawUsers) ? rawUsers : (rawUsers && rawUsers.data ? rawUsers.data : []);
+      if (userList.length) {
+        USERS = userList.map(function(u) {
+          return {
+            id: u.lUserKey || u.id || 0,
+            name: u.sUserFullName || u.name || u.sUserName || '',
+            email: u.sEmailAddress || u.email || '',
+            role: u.sUserName || 'User',
+            location: u.bNashvilleAccess ? 'Nashville' : 'Upper Chichester',
+            lastLogin: u.dtLastLogin ? new Date(u.dtLastLogin).toLocaleString() : '\u2014',
+            status: u.bActive !== false && u.bActive !== 0 ? 'Active' : 'Inactive'
+          };
+        });
+      }
+    } catch(e) { console.warn('[Admin] Users load:', e.message); }
+
+    // Load delivery methods from API
+    try {
+      var rawDM = await API.getDeliveryMethods();
+      var dmList = Array.isArray(rawDM) ? rawDM : (rawDM && rawDM.data ? rawDM.data : []);
+      if (dmList.length) {
+        DELIVERY_METHODS = dmList.map(function(d) {
+          return {
+            id: d.lDeliveryMethodKey || d.id || 0,
+            name: d.sDeliveryDesc || d.sDeliveryMethodDesc || d.name || '',
+            cost: parseFloat(d.dblAmtShipping || d.cost || 0),
+            defaultRepair: !!(d.defaultRepair),
+            active: true
+          };
+        });
+      }
+    } catch(e) { console.warn('[Admin] Delivery methods load:', e.message); }
+
+    // Load repair reasons from API
+    try {
+      var rawRR = await API.getRepairReasons();
+      var rrList = Array.isArray(rawRR) ? rawRR : (rawRR && rawRR.data ? rawRR.data : []);
+      if (rrList.length) {
+        REPAIR_REASONS = rrList.map(function(r) {
+          return {
+            id: r.lRepairReasonKey || r.id || 0,
+            reason: r.sRepairReason || r.sRepairReasonDesc || r.reason || '',
+            category: r.category || 'Normal Wear & Tear',
+            active: r.bActive !== false && r.bActive !== 0
+          };
+        });
+      }
+    } catch(e) { console.warn('[Admin] Repair reasons load:', e.message); }
+
+    // Load repair statuses from API
+    try {
+      var rawRS = await API.getRepairStatuses();
+      var rsList = Array.isArray(rawRS) ? rawRS : (rawRS && rawRS.data ? rawRS.data : []);
+      if (rsList.length) {
+        REPAIR_STATUSES = rsList.map(function(s) {
+          return {
+            id: s.lRepairStatusID || s.id || 0,
+            name: s.sRepairStatus || s.name || '',
+            ordinal: s.lRepairStatusSortOrder || s.ordinal || 0,
+            active: true
+          };
+        });
+      }
+    } catch(e) { console.warn('[Admin] Repair statuses load:', e.message); }
+
+    renderUsers(USERS);
+    renderSecurityGroups();
+    loadPricingFromAPI();
+    renderSettings();
+    renderAudit(AUDIT);
+    renderDeliveryMethods(DELIVERY_METHODS);
+    renderPaymentTerms(PAY_TERMS);
+    renderScopeCats(SCOPE_CATS);
+    renderDistributors(DISTRIBUTORS_DATA);
+    renderCompanies(COMPANIES);
+    renderCreditLimits(CREDIT_LIMITS);
+    renderReasons(REPAIR_REASONS);
+    renderRstatuses(REPAIR_STATUSES);
+    renderRgroups(REPORTING_GROUPS);
+    renderStddepts(STD_DEPARTMENTS);
+    renderCleanSys(CLEANING_SYSTEMS);
+    renderCountries(COUNTRIES);
+    renderHolidays(HOLIDAYS);
+    renderBonusPools(BONUS_POOLS.filter(function(b){return b.type==='tech';}));
+    renderSalesTax(SALES_TAX);
+    if (API && API.UI) API.UI.hideSkeleton('skAdmin');
+  }
+  init();
 
 })();
 </script>

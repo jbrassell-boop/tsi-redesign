@@ -763,56 +763,12 @@ if (!API.requireAuth()) throw new Error('redirect');
 //  Suppliers — API-wired with demo fallback
 // ═══════════════════════════════════════════════════════
 
-let _liveMode = false;
 let _allSuppliers = [];       // full list from API
 let _filteredSuppliers = [];  // after filter/search
 let _currentSupplier = null;  // selected supplier detail
 let _currentPage = 1;
 let _poPage = 1;
 const PO_PAGE_SIZE = 10;
-
-// ── Demo Data ────────────────────────────────────────
-const DEMO_SUPPLIERS = [
-  { lSupplierKey: 1, sSupplierName1: '1-800-ENDOSCOPE', sCity: 'Philadelphia', sState: 'PA', sAddress1: '100 Main St', sZip: '19194', sPhone: '+1 (800) 363-6726', bActive: true, bPartsVendor: true, bRepairVendor: false, bAcquisitionVendor: false, bCartsVendor: false, sGPVendorId: '1-800-ENDO00002', dblMinimumOrder: 59.00 },
-  { lSupplierKey: 2, sSupplierName1: '1-800-ENDOSCOPE', sCity: 'Nashville', sState: 'TN', sAddress1: '200 Broadway', sZip: '37201', sPhone: '+1 (800) 363-6726', bActive: true, bPartsVendor: false, bRepairVendor: true, bAcquisitionVendor: false, bCartsVendor: false, sGPVendorId: '1-800-ENDO00003' },
-  { lSupplierKey: 3, sSupplierName1: 'AA Medical Store', sCity: 'Los Angeles', sState: 'CA', bActive: true, bPartsVendor: true, bRepairVendor: false },
-  { lSupplierKey: 4, sSupplierName1: 'AA Medical Store', sCity: 'San Diego', sState: 'CA', bActive: true, bPartsVendor: false, bAcquisitionVendor: true },
-  { lSupplierKey: 5, sSupplierName1: 'Adtec Medical', sCity: 'Rancho Cucamonga', sState: 'CA', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 6, sSupplierName1: 'Aesculap', sCity: 'Center Valley', sState: 'PA', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 7, sSupplierName1: 'Aesculap', sCity: 'Tuttlingen', sState: 'DE', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 8, sSupplierName1: 'Amazon', sCity: 'Seattle', sState: 'WA', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 9, sSupplierName1: 'Amazon Business', sCity: 'Seattle', sState: 'WA', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 10, sSupplierName1: 'Amazon Medical Equipment LLC', sCity: 'Miami', sState: 'FL', bActive: true, bPartsVendor: true, bAcquisitionVendor: true },
-  { lSupplierKey: 11, sSupplierName1: 'Applied Fiberoptics', sCity: 'Southbridge', sState: 'MA', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 12, sSupplierName1: 'B. Braun Medical', sCity: 'Bethlehem', sState: 'PA', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 13, sSupplierName1: 'ConMed Corporation', sCity: 'Utica', sState: 'NY', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 14, sSupplierName1: 'Fujifilm Medical Systems', sCity: 'Wayne', sState: 'NJ', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 15, sSupplierName1: 'Halyard Health', sCity: 'Alpharetta', sState: 'GA', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 16, sSupplierName1: 'Karl Storz Endoscopy', sCity: 'El Segundo', sState: 'CA', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 17, sSupplierName1: 'Machida Endoscope', sCity: 'Orangeburg', sState: 'NY', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 18, sSupplierName1: 'Medline Industries', sCity: 'Mundelein', sState: 'IL', bActive: true, bPartsVendor: true },
-  { lSupplierKey: 19, sSupplierName1: 'Olympus Corporation', sCity: 'Center Valley', sState: 'PA', bActive: true, bPartsVendor: true, bRepairVendor: true },
-  { lSupplierKey: 20, sSupplierName1: 'Pentax Medical', sCity: 'Montvale', sState: 'NJ', bActive: true, bPartsVendor: true, bRepairVendor: true }
-];
-
-const DEMO_POS = [
-  { sPONumber: 'NPI250611', dtPODate: '2026-03-05', dblAmount: 1245.00, sStatus: 'Open', sType: 'Parts' },
-  { sPONumber: 'NPI250598', dtPODate: '2026-02-28', dblAmount: 890.50, sStatus: 'Open', sType: 'Parts' },
-  { sPONumber: 'NPI250412', dtPODate: '2026-02-15', dblAmount: 2380.00, sStatus: 'Open', sType: 'Parts' },
-  { sPONumber: 'NPI250205', dtPODate: '2026-01-30', dblAmount: 675.00, sStatus: 'Open', sType: 'Parts' },
-  { sPONumber: 'NPI249870', dtPODate: '2026-01-12', dblAmount: 15120.00, sStatus: 'Open', sType: 'Parts' },
-  { sPONumber: 'TS2408075', dtPODate: '2024-08-15', dblAmount: 0.00, sStatus: 'Closed', sType: 'Parts' },
-  { sPONumber: 'TS2406030', dtPODate: '2024-06-30', dblAmount: 3450.00, sStatus: 'Closed', sType: 'Parts' },
-  { sPONumber: 'TS2405110', dtPODate: '2024-05-11', dblAmount: 1820.00, sStatus: 'Closed', sType: 'Parts' },
-  { sPONumber: 'TS2404008', dtPODate: '2024-04-08', dblAmount: 0.00, sStatus: 'Closed', sType: 'Parts' },
-  { sPONumber: 'TS2401220', dtPODate: '2024-01-22', dblAmount: 4950.00, sStatus: 'Closed', sType: 'Parts' }
-];
-
-const DEMO_DOCS = [
-  { lDocumentKey: 1, sDocumentName: 'W-9 Tax Form 2025', dtUploaded: '2025-12-15', sDocumentType: 'Paperwork' },
-  { lDocumentKey: 2, sDocumentName: 'Certificate of Insurance', dtUploaded: '2025-10-03', sDocumentType: 'Paperwork' },
-  { lDocumentKey: 3, sDocumentName: 'Vendor Agreement - Signed', dtUploaded: '2024-06-20', sDocumentType: 'Paperwork' }
-];
 
 // ── UI Helpers ────────────────────────────────────────
 
@@ -967,15 +923,13 @@ async function selectSupplierByKey(key, el) {
   if (el) el.classList.add('selected');
 
   try {
-    if (_liveMode) {
-      const detail = await API.getSupplierById(key);
-      if (detail) {
-        // API may return single object or array
-        _currentSupplier = Array.isArray(detail) ? detail[0] : detail;
-        populateDetail(_currentSupplier);
-        loadSupplierTabs(key);
-        return;
-      }
+    const detail = await API.getSupplierById(key);
+    if (detail) {
+      // API may return single object or array
+      _currentSupplier = Array.isArray(detail) ? detail[0] : detail;
+      populateDetail(_currentSupplier);
+      loadSupplierTabs(key);
+      return;
     }
   } catch (e) {
     console.warn('[TSI Suppliers] Detail load failed:', e.message);
@@ -1099,20 +1053,16 @@ async function loadSupplierTabs(key) {
 async function loadRecentPOs(supplierKey) {
   let pos = [];
   try {
-    if (_liveMode) {
-      const data = await API.getSupplierRecentPOs({
-        Pagination: { PageNumber: 1, PageSize: 500 },
-        Filters: { plSupplierKey: supplierKey }
-      });
-      if (data && Array.isArray(data)) pos = data;
-      else if (data && data.list) pos = data.list;
-      else if (data) pos = [data];
-    }
+    const data = await API.getSupplierRecentPOs({
+      Pagination: { PageNumber: 1, PageSize: 500 },
+      Filters: { plSupplierKey: supplierKey }
+    });
+    if (data && Array.isArray(data)) pos = data;
+    else if (data && data.list) pos = data.list;
+    else if (data) pos = [data];
   } catch (e) {
     console.warn('[TSI Suppliers] PO load failed:', e.message);
   }
-
-  if (pos.length === 0 && !_liveMode) pos = DEMO_POS;
 
   // Update PO tab count
   const poTab = document.querySelectorAll('.tab')[1];
@@ -1178,16 +1128,14 @@ function poNextPage() {
 async function loadInventorySupplied(supplierKey) {
   let supplied = [], available = [];
   try {
-    if (_liveMode) {
-      const [s, a] = await Promise.all([
-        API.getSuppliedItemAndSize({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: { plSupplierKey: supplierKey } }),
-        API.getAvailableSuppliedItemAndSize({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: { plSupplierKey: supplierKey } })
-      ]);
-      if (Array.isArray(s)) supplied = s;
-      else if (s && s.list) supplied = s.list;
-      if (Array.isArray(a)) available = a;
-      else if (a && a.list) available = a.list;
-    }
+    const [s, a] = await Promise.all([
+      API.getSuppliedItemAndSize({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: { plSupplierKey: supplierKey } }),
+      API.getAvailableSuppliedItemAndSize({ Pagination: { PageNumber: 1, PageSize: 500 }, Filters: { plSupplierKey: supplierKey } })
+    ]);
+    if (Array.isArray(s)) supplied = s;
+    else if (s && s.list) supplied = s.list;
+    if (Array.isArray(a)) available = a;
+    else if (a && a.list) available = a.list;
   } catch (e) {
     console.warn('[TSI Suppliers] Inventory supplied load failed:', e.message);
   }
@@ -1246,16 +1194,12 @@ function renderTransferPanel(containerId, items) {
 async function loadDocuments(supplierKey) {
   let docs = [];
   try {
-    if (_liveMode) {
-      const data = await API.getDocuments(supplierKey);
-      if (Array.isArray(data)) docs = data;
-      else if (data) docs = [data];
-    }
+    const data = await API.getDocuments(supplierKey);
+    if (Array.isArray(data)) docs = data;
+    else if (data) docs = [data];
   } catch (e) {
     console.warn('[TSI Suppliers] Documents load failed:', e.message);
   }
-
-  if (docs.length === 0 && !_liveMode) docs = DEMO_DOCS;
 
   // Update tab count
   const docTab = document.querySelectorAll('.tab')[3];
@@ -1291,7 +1235,7 @@ async function loadDocuments(supplierKey) {
 
 async function viewDoc(key) {
   try {
-    if (_liveMode && key) await API.downloadDocument(key);
+    if (key) await API.downloadDocument(key);
   } catch (e) { console.warn('Doc view failed:', e.message); }
 }
 
@@ -1304,7 +1248,7 @@ async function deleteDoc(btn, key) {
   }
   btn._confirming = false; btn.title = btn._origTitle; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
   try {
-    if (_liveMode && key) {
+    if (key) {
       await API.deleteDocument(key);
       if (_currentSupplier) loadDocuments(_currentSupplier.lSupplierKey);
     }
@@ -1318,13 +1262,9 @@ async function saveSupplier() {
   data.lSupplierKey = _currentSupplier.lSupplierKey;
 
   try {
-    if (_liveMode) {
-      await API.updateSupplier(data);
-      alert('Supplier saved successfully');
-      reloadSuppliers();
-    } else {
-      alert('Demo mode — save simulated');
-    }
+    await API.updateSupplier(data);
+    alert('Supplier saved successfully');
+    reloadSuppliers();
   } catch (e) {
     alert('Save failed: ' + e.message);
   }
@@ -1371,15 +1311,10 @@ async function addNewSupplier() {
   if (!data.psSupplierName1) { alert('Supplier name is required'); return; }
 
   try {
-    if (_liveMode) {
-      await API.addSupplier(data);
-      modal.classList.remove('open');
-      alert('Supplier added successfully');
-      reloadSuppliers();
-    } else {
-      modal.classList.remove('open');
-      alert('Demo mode — add simulated');
-    }
+    await API.addSupplier(data);
+    modal.classList.remove('open');
+    alert('Supplier added successfully');
+    reloadSuppliers();
   } catch (e) {
     alert('Add failed: ' + e.message);
   }
@@ -1397,14 +1332,10 @@ async function executeDeleteSupplier() {
   document.getElementById('deleteSupplierModal').classList.remove('open');
 
   try {
-    if (_liveMode) {
-      await API.deleteSupplier(_currentSupplier.lSupplierKey);
-      alert('Supplier deleted');
-      _currentSupplier = null;
-      reloadSuppliers();
-    } else {
-      alert('Demo mode — delete simulated');
-    }
+    await API.deleteSupplier(_currentSupplier.lSupplierKey);
+    alert('Supplier deleted');
+    _currentSupplier = null;
+    reloadSuppliers();
   } catch (e) {
     alert('Delete failed: ' + e.message);
   }
@@ -1483,18 +1414,13 @@ function normalizeSupplier(s) {
 async function reloadSuppliers() {
   try {
     const data = await API.getSuppliers();
-    if (data && Array.isArray(data) && data.length > 0) {
-      _liveMode = true;
-      API.UI.updateDemoBadge('api');
-      _allSuppliers = data.map(normalizeSupplier);
-    } else {
-      throw new Error('Empty response');
-    }
+    const list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+    _allSuppliers = list.map(normalizeSupplier);
+    API.UI.updateDemoBadge('api');
   } catch (e) {
-    console.warn('[TSI Suppliers] API unavailable, using demo data:', e.message);
-    _liveMode = false;
+    console.warn('[TSI Suppliers] API unavailable:', e.message);
+    _allSuppliers = [];
     API.UI.updateDemoBadge('demo');
-    _allSuppliers = DEMO_SUPPLIERS;
   }
 
   updateStats(_allSuppliers);

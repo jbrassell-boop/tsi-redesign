@@ -204,4 +204,173 @@ router.post('/Contract/GetAllContractScopes', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Contract/GetAllContractServicePlanTerms — Payment terms for contract service plans
+router.get('/Contract/GetAllContractServicePlanTerms', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT lPaymentTermsKey, sTermsDesc, nIncrementDays AS lDueDays
+      FROM tblPaymentTerms ORDER BY sTermsDesc`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetContractDepartments — Departments on a contract
+// Note: GetContractDepartmentsList already exists but uses different path pattern
+router.get('/Contract/GetContractDepartments', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const rows = await db.query(`
+      SELECT cd.lContractDepartmentKey, cd.lContractKey, cd.lDepartmentKey,
+        cd.dtContractDepartmentEffectiveDate, cd.dtContractDepartmentEndDate,
+        cd.bNonBillable, cd.bCalcCostFromScopes, cd.sPONumber,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(c.sClientName1, '') AS sClientName1
+      FROM tblContractDepartments cd
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = cd.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      WHERE cd.lContractKey = @contractKey
+      ORDER BY d.sDepartmentName`, { contractKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetContractDepartmentsAvailable — Departments NOT on a contract for a client
+router.get('/Contract/GetContractDepartmentsAvailable', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    const clientKey = parseInt(req.query.lClientKey) || 0;
+    if (!contractKey || !clientKey) {
+      return res.status(400).json({ error: 'lContractKey and lClientKey required' });
+    }
+    const rows = await db.query(`
+      SELECT d.lDepartmentKey, d.sDepartmentName, d.lServiceLocationKey
+      FROM tblDepartment d
+      WHERE d.lClientKey = @clientKey
+        AND d.lDepartmentKey NOT IN (
+          SELECT lDepartmentKey FROM tblContractDepartments
+          WHERE lContractKey = @contractKey
+        )
+      ORDER BY d.sDepartmentName`, { contractKey, clientKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetContractAmendmentsList — Amendments for a contract
+router.get('/Contract/GetContractAmendmentsList', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const rows = await db.query(`
+      SELECT ca.lContractAmendmentKey, ca.lContractKey,
+        ca.dtContractAmendmentDate, ca.lContractAmendmentStatusKey,
+        ca.nPreviousInvoiceAmount, ca.nNewInvoiceAmount,
+        ca.nPreviousContractTotal, ca.nNewContractTotal,
+        ca.lRemainingMonths, ca.nNewRemainingBalance, ca.dtFirstBillDate,
+        ISNULL(cas.sContractAmendmentStatus, '') AS sContractAmendmentStatus
+      FROM tblContractAmendments ca
+        LEFT JOIN tblContractAmendmentStatuses cas
+          ON cas.lContractAmendmentStatusKey = ca.lContractAmendmentStatusKey
+      WHERE ca.lContractKey = @contractKey
+      ORDER BY ca.dtContractAmendmentDate DESC`, { contractKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetAllContractCoverageCounts — Scope counts by instrument type
+router.get('/Contract/GetAllContractCoverageCounts', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const rows = await db.query(`
+      SELECT
+        ISNULL(st.sRigidOrFlexible, 'I') AS sRigidOrFlexible,
+        COUNT(*) AS nCount
+      FROM tblContractScope cs
+        LEFT JOIN tblScope s ON s.lScopeKey = cs.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+      WHERE cs.lContractKey = @contractKey
+      GROUP BY ISNULL(st.sRigidOrFlexible, 'I')`, { contractKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetContractReportCardDetails — Computed performance stats for a contract
+router.get('/Contract/GetContractReportCardDetails', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const row = await db.queryOne(`
+      SELECT
+        COUNT(*) AS nTotalRepairs,
+        SUM(CASE WHEN r.dtDateOut IS NOT NULL THEN 1 ELSE 0 END) AS nCompleted,
+        AVG(CASE WHEN r.dtDateOut IS NOT NULL AND r.dtDateIn IS NOT NULL
+          THEN DATEDIFF(day, r.dtDateIn, r.dtDateOut) ELSE NULL END) AS nAvgTATDays,
+        SUM(r.dblAmtRepair) AS dblTotalCharges,
+        MAX(r.dtDateIn) AS dtLastRepairIn
+      FROM tblRepair r
+      WHERE r.lContractKey = @contractKey`, { contractKey });
+    res.json(row || {});
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetContractExpenseBreakdown — Repair item expense breakdown for contract
+router.get('/Contract/GetContractExpenseBreakdown', async (req, res, next) => {
+  try {
+    const contractKey = parseInt(req.query.lContractKey) || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const rows = await db.query(`
+      SELECT
+        ri.sItemDescription,
+        ri.sPartOrLabor,
+        COUNT(*) AS nUsageCount,
+        SUM(rit.dblRepairPrice) AS dblTotalCost
+      FROM tblRepairItemTran rit
+        INNER JOIN tblRepair r ON r.lRepairKey = rit.lRepairKey
+        LEFT JOIN tblRepairItem ri ON ri.lRepairItemKey = rit.lRepairItemKey
+      WHERE r.lContractKey = @contractKey
+      GROUP BY ri.sItemDescription, ri.sPartOrLabor
+      ORDER BY dblTotalCost DESC`, { contractKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /Contract/GetAllContractInvoice — Invoices linked to a contract (via repair)
+router.post('/Contract/GetAllContractInvoice', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const contractKey = b.lContractKey || 0;
+    if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
+    const rows = await db.query(`
+      SELECT TOP 200
+        gp.GPInvoiceStagingID, gp.lInvoiceKey, gp.sTranNumber,
+        gp.dtTranDate, gp.TotalAmountDue, gp.dblTranAmount,
+        gp.bProcessed, gp.dtPostedDate,
+        inv.lRepairKey, r.sWorkOrderNumber,
+        ISNULL(c.sClientName1, '') AS sClientName1
+      FROM tblGP_InvoiceStaging gp
+        LEFT JOIN tblInvoice inv ON inv.lInvoiceKey = gp.lInvoiceKey
+        LEFT JOIN tblRepair r ON r.lRepairKey = inv.lRepairKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = inv.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      WHERE r.lContractKey = @contractKey
+      ORDER BY gp.dtTranDate DESC`, { contractKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /Contract/GetAllContractClient — Clients that have at least one active contract
+router.get('/Contract/GetAllContractClient', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT DISTINCT c.lClientKey, c.sClientName1, c.sClientName2,
+        c.sMailCity, c.sMailState, c.bActive
+      FROM tblClient c
+        INNER JOIN tblContract con ON con.lClientKey = c.lClientKey
+      WHERE c.bActive = 1
+      ORDER BY c.sClientName1`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

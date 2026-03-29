@@ -199,6 +199,33 @@ router.get('/ParentGroups/GetAll', (req, res) => {
   ]);
 });
 
+// Instrument Types (distinct sRigidOrFlexible values from tblScopeType)
+router.get('/InstrumentType/GetInstrumentTypes', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT DISTINCT sRigidOrFlexible AS type
+      FROM tblScopeType
+      WHERE bActive = 1 AND sRigidOrFlexible IS NOT NULL
+      ORDER BY sRigidOrFlexible`);
+    // Map to labeled objects
+    const labelMap = { R: 'Rigid', F: 'Flexible', C: 'Camera', I: 'Instrument' };
+    const result = rows
+      .filter(r => r.type && labelMap[r.type])
+      .map(r => ({ type: r.type, label: labelMap[r.type] || r.type }));
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
+// All Technicians (full list including inactive — for admin use)
+router.get('/Technicians/GetAllTechnicians', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT lTechnicianKey, sTechInits, sTechName, bIsActive, lServiceLocationKey
+      FROM tblTechnicians ORDER BY sTechName`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
 // Instrument Groups (static — sub-groups within INST parent)
 router.get('/InstrumentGroups/GetAll', (req, res) => {
   res.json([

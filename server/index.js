@@ -53,6 +53,20 @@ app.use('/api', require('./routes/invoices'));
 app.use('/api', require('./routes/supplier-pos'));
 app.use('/api', require('./routes/analytics'));
 app.use('/api', require('./routes/tasks'));
+app.use('/api', require('./routes/suppliers'));
+app.use('/api', require('./routes/flags'));
+app.use('/api', require('./routes/scope-models'));
+app.use('/api', require('./routes/sub-groups'));
+app.use('/api', require('./routes/max-charges'));
+app.use('/api', require('./routes/financials'));
+app.use('/api', require('./routes/documents'));
+app.use('/api', require('./routes/inventory'));
+app.use('/api', require('./routes/loaners'));
+app.use('/api', require('./routes/emails'));
+app.use('/api', require('./routes/quality'));
+app.use('/api', require('./routes/acquisitions'));
+app.use('/api', require('./routes/product-sales'));
+app.use('/api', require('./routes/users'));
 
 // 404 for unmatched API routes
 app.use('/api', (req, res) => {

@@ -250,4 +250,71 @@ router.get('/Contacts/GetAllContacts', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /Contacts/AddContacts — Insert new contact + junction record
+// tblContacts has no lClientKey/lDepartmentKey directly; linked via tblContactTran
+router.post('/Contacts/AddContacts', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    if (!b.sContactLast && !b.sContactFirst) {
+      return res.status(400).json({ error: 'sContactFirst or sContactLast required' });
+    }
+    // Insert contact record
+    const result = await db.query(`
+      INSERT INTO tblContacts (sContactLast, sContactFirst,
+        sContactPhoneVoice, sContactPhoneFAX, sContactEMail, bActive, dtCreateDate)
+      VALUES (@last, @first, @phone, @fax, @email, 1, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lContactKey`,
+      {
+        last: b.sContactLast || '',
+        first: b.sContactFirst || '',
+        phone: b.sContactPhoneVoice || b.sContactPhone || '',
+        fax: b.sContactPhoneFAX || b.sContactFax || '',
+        email: b.sContactEMail || b.sContactEmail || ''
+      });
+    const newKey = result[0] ? result[0].lContactKey : 0;
+    if (!newKey) return res.status(500).json({ error: 'Insert failed' });
+
+    // Insert junction record linking contact to client or department
+    const junctionParams = {
+      contactKey: newKey,
+      clientKey: b.lClientKey || null,
+      deptKey: b.lDepartmentKey || null
+    };
+    await db.query(`
+      INSERT INTO tblContactTran (lContactKey, lClientKey, lDepartmentKey, dtCreateDate)
+      VALUES (@contactKey, @clientKey, @deptKey, GETDATE())`, junctionParams);
+
+    res.json({ lContactKey: newKey, success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /Contacts/UpdateContacts — Update contact record
+router.post('/Contacts/UpdateContacts', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const contactKey = b.lContactKey || 0;
+    if (!contactKey) return res.status(400).json({ error: 'lContactKey required' });
+    await db.query(`
+      UPDATE tblContacts SET
+        sContactLast = ISNULL(@last, sContactLast),
+        sContactFirst = ISNULL(@first, sContactFirst),
+        sContactPhoneVoice = ISNULL(@phone, sContactPhoneVoice),
+        sContactPhoneFAX = ISNULL(@fax, sContactPhoneFAX),
+        sContactEMail = ISNULL(@email, sContactEMail),
+        bActive = ISNULL(@active, bActive),
+        dtLastUpdate = GETDATE()
+      WHERE lContactKey = @contactKey`,
+      {
+        contactKey,
+        last: b.sContactLast || null,
+        first: b.sContactFirst || null,
+        phone: b.sContactPhoneVoice || b.sContactPhone || null,
+        fax: b.sContactPhoneFAX || b.sContactFax || null,
+        email: b.sContactEMail || b.sContactEmail || null,
+        active: b.bActive != null ? b.bActive : null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

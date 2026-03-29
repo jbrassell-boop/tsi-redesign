@@ -1618,28 +1618,6 @@ async function selectContract(el, contractKey) {
     SmartAlerts.render('#alertsBar', SmartAlerts.evaluate('contract', c));
   }
 
-  // Contract Health Score
-  var healthPanel = document.getElementById('healthPanel');
-  // FUTURE: needs Express endpoint for contract health KPI aggregation
-  if (false && healthPanel) {
-    Promise.resolve(null).then(function(h) {
-      if (!h) { healthPanel.style.display = 'none'; return; }
-      healthPanel.style.display = '';
-      document.getElementById('healthScore').textContent = h.score;
-      var gradeEl = document.getElementById('healthGrade');
-      gradeEl.textContent = 'Grade ' + h.grade;
-      gradeEl.className = 'health-grade health-grade-' + h.grade.toLowerCase();
-      document.getElementById('hfExpense').style.width = Math.max(0, 100 - Math.min(h.factors.expenseMultiplier * 50, 100)) + '%';
-      document.getElementById('hfExpenseVal').textContent = h.factors.expenseMultiplier.toFixed(1) + 'x';
-      document.getElementById('hfAvoid').style.width = Math.round(h.factors.avoidableDamage * 100) + '%';
-      document.getElementById('hfAvoidVal').textContent = Math.round(h.factors.avoidableDamage * 100) + '%';
-      document.getElementById('hfUtil').style.width = Math.round(h.factors.utilization * 100) + '%';
-      document.getElementById('hfUtilVal').textContent = Math.round(h.factors.utilization * 100) + '%';
-      document.getElementById('hfExpiry').style.width = Math.min(100, Math.max(0, h.factors.daysToExpiry / 3.65)) + '%';
-      document.getElementById('hfExpiryVal').textContent = h.factors.daysToExpiry + 'd';
-    });
-  }
-
   // Activity audit trail
   renderContractAuditTrail(c);
 }

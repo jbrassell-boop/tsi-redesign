@@ -115,4 +115,88 @@ router.get('/Invoice/GetInvoicesByRepair/:repairKey', async (req, res, next) => 
   } catch (e) { next(e); }
 });
 
+// GET /Invoice/GetReadyToInvoice — Repairs that are shipped but not yet invoiced
+// Shipped = status 8 in tblRepair (lRepairStatusID values map to tblRepairStatuses)
+// "Scope Out (Invoice)" is status 2 in tblRepairStatuses
+router.get('/Invoice/GetReadyToInvoice', async (req, res, next) => {
+  try {
+    const svcKey = parseInt(req.query.svcKey || req.query.plServiceLocationKey) || 0;
+    const rows = await db.query(`
+      SELECT r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtShipDate,
+        r.lRepairStatusID, r.lDepartmentKey, r.lScopeKey,
+        r.dblAmtRepair, r.dblAmtShipping, r.lServiceLocationKey,
+        rs.sRepairStatus,
+        ISNULL(s.sSerialNumber,'') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc,'') AS sScopeTypeDesc,
+        ISNULL(d.sDepartmentName,'') AS sDepartmentName,
+        ISNULL(c.sClientName1,'') AS sClientName1
+      FROM tblRepair r
+        LEFT JOIN tblRepairStatuses rs ON rs.lRepairStatusID = r.lRepairStatusID
+        LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      WHERE r.lRepairStatusID = 8
+        AND r.lRepairKey NOT IN (
+          SELECT DISTINCT inv.lRepairKey FROM tblInvoice inv
+          WHERE inv.lRepairKey IS NOT NULL
+        )
+        AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
+      ORDER BY r.dtShipDate`, { svcKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /Invoice/GenerateInvoices — Create invoice staging records for repair keys
+// Inserts into tblGP_InvoiceStaging for each repair
+router.post('/Invoice/GenerateInvoices', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const repairKeys = Array.isArray(b.repairKeys) ? b.repairKeys : [];
+    if (!repairKeys.length) return res.status(400).json({ error: 'repairKeys[] required' });
+
+    let generated = 0;
+    for (const key of repairKeys) {
+      const repairKey = parseInt(key) || 0;
+      if (!repairKey) continue;
+
+      // Get repair details needed for invoice staging
+      const repair = await db.queryOne(`
+        SELECT r.lRepairKey, r.sWorkOrderNumber, r.dblAmtRepair, r.dblAmtShipping,
+          r.lServiceLocationKey, r.lSalesRepKey, r.lDepartmentKey,
+          d.lClientKey, d.sShipName1
+        FROM tblRepair r
+          LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+        WHERE r.lRepairKey = @repairKey`, { repairKey });
+
+      if (!repair) continue;
+
+      const total = parseFloat(repair.dblAmtRepair || 0) + parseFloat(repair.dblAmtShipping || 0);
+      const tranNumber = repair.sWorkOrderNumber || String(repairKey);
+      const dbKey = repair.lServiceLocationKey || 1;
+
+      await db.query(`
+        INSERT INTO tblGP_InvoiceStaging (
+          lInvoiceKey, sTranNumber, dtTranDate, sBatchNumber,
+          TotalAmountDue, dblTranAmount, dblShippingAmount,
+          GPID_SalesRep, bProcessed, lDatabaseKey
+        ) VALUES (
+          @repairKey, @tranNumber, GETDATE(), 'TSI-BATCH',
+          @total, @amount, @shipping,
+          '', 0, @dbKey
+        )`,
+        {
+          repairKey,
+          tranNumber,
+          total,
+          amount: parseFloat(repair.dblAmtRepair || 0),
+          shipping: parseFloat(repair.dblAmtShipping || 0),
+          dbKey
+        });
+      generated++;
+    }
+    res.json({ generated, success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

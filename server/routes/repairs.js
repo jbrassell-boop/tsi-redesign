@@ -208,4 +208,87 @@ router.post('/Dashboard/GetDashboardScopeDataList', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Repair/GetReadyToShip — Repairs at "Scheduled to Ship" status
+// lRepairStatusID 10 = "Scheduled to Ship", 12 = "Scheduled to Ship Tomorrow", 13 = "Shipping Today or Tomorrow"
+router.get('/Repair/GetReadyToShip', async (req, res, next) => {
+  try {
+    const svcKey = parseInt(req.query.svcKey || req.query.plServiceLocationKey) || 0;
+    const rows = await db.query(`${REPAIR_SELECT}
+      WHERE r.lRepairStatusID IN (10, 12, 13)
+        AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
+      ORDER BY r.dtDateIn DESC`, { svcKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /Repair/BatchShip — Bulk update repair statuses to shipped (status 18)
+// Also inserts status transition records
+router.post('/Repair/BatchShip', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const repairKeys = Array.isArray(b.repairKeys) ? b.repairKeys : [];
+    if (!repairKeys.length) return res.status(400).json({ error: 'repairKeys[] required' });
+
+    let shipped = 0;
+    for (const key of repairKeys) {
+      const repairKey = parseInt(key) || 0;
+      if (!repairKey) continue;
+      await db.query(`
+        UPDATE tblRepair SET lRepairStatusID = 8, dtShipDate = GETDATE(), dtLastUpdate = GETDATE()
+        WHERE lRepairKey = @repairKey`, { repairKey });
+      await db.query(`
+        INSERT INTO tblStatusTran (lRepairKey, lStatusKey, sStatusDesc, dtCompleteDate, dtCreateDate)
+        VALUES (@repairKey, 18, 'Shipped', GETDATE(), GETDATE())`, { repairKey });
+      shipped++;
+    }
+    res.json({ shipped, success: true });
+  } catch (e) { next(e); }
+});
+
+// GET /InstrumentRepair/GetAll — Instrument repairs (sRigidOrFlexible = 'I' or null via scope type)
+router.get('/InstrumentRepair/GetAll', async (req, res, next) => {
+  try {
+    const svcKey = parseInt(req.query.svcKey || req.query.plServiceLocationKey) || 0;
+    const rows = await db.query(`${REPAIR_SELECT}
+      WHERE st.sRigidOrFlexible = 'I'
+        AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
+      ORDER BY r.dtDateIn DESC
+      OFFSET 0 ROWS FETCH NEXT 500 ROWS ONLY`, { svcKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /InstrumentRepair/GetByKey — Single instrument repair
+router.get('/InstrumentRepair/GetByKey', async (req, res, next) => {
+  try {
+    const repairKey = parseInt(req.query.lRepairKey || req.query.plRepairKey) || 0;
+    if (!repairKey) return res.status(400).json({ error: 'lRepairKey required' });
+    const row = await db.queryOne(`${REPAIR_SELECT}
+      WHERE r.lRepairKey = @repairKey AND st.sRigidOrFlexible = 'I'`, { repairKey });
+    res.json(row || null);
+  } catch (e) { next(e); }
+});
+
+// POST /Repair/FlagForRevisedQuote — Flag a repair as needing a revised quote
+// tblRepair has no bReviseQuote column. Uses bHotList=1 + [REVISED QUOTE] ISO comment tag.
+router.post('/Repair/FlagForRevisedQuote', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const repairKey = b.lRepairKey || b.plRepairKey || 0;
+    if (!repairKey) return res.status(400).json({ error: 'lRepairKey required' });
+    await db.query(`
+      UPDATE tblRepair SET
+        bHotList = 1,
+        mCommentsISO = CASE
+          WHEN mCommentsISO IS NULL THEN '[REVISED QUOTE]'
+          WHEN CHARINDEX('[REVISED QUOTE]', ISNULL(CAST(mCommentsISO AS nvarchar(MAX)),'')) = 0
+            THEN CAST(mCommentsISO AS nvarchar(MAX)) + ' [REVISED QUOTE]'
+          ELSE mCommentsISO
+        END,
+        dtLastUpdate = GETDATE()
+      WHERE lRepairKey = @repairKey`, { repairKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

@@ -248,15 +248,15 @@ var REPORTS = [
 ];
 
 var CATEGORIES = ['Repair Reports','Financial Reports','Contract Reports','Inventory Reports','Client Reports','Sales Reports','GPO Reports','Quality Reports','Operations Reports'];
-var DEMO_CLIENTS = ['All Clients','Memorial Health System','St. Joseph Medical Center','Valley Regional Hospital','Lakeside Surgery Center','Northwest Endoscopy Clinic'];
+var CLIENT_LIST = ['All Clients'];
 var SALES_REPS = ['All Reps','Joe Repso','Brian Kenney','Susan Oravits','Deanna Craven','Timothy Reilly','Alfred Zieniatz','House Account'];
 var LEADERBOARD_TYPES = ['Summary','Net New Customers','Work Orders'];
-var DEMO_TECHS = ['All Techs','Mike Chen','David Rodriguez','James Wilson','Tom Harris','Kevin Wright'];
+var TECH_LIST = ['All Techs'];
 var INST_TYPES = ['All Types','Flexible','Rigid','Camera','Instrument'];
 var REPAIR_STATUSES = ['Open','Closed','All'];
 var DATE_RANGE_FIELDS = ['Date In','Date Out','Invoice Date','Completion Date'];
 var REPORT_CARD_TYPES = ['Monthly Breakdown: No Serial Number','Monthly Breakdown: With Serial Number','Total Counts By Serial Number','Loaner Requests'];
-var DEMO_CONTRACTS = ['All Contracts','Performance Agreement','Preferred Agreement','Pay-Per-Repair'];
+var CONTRACT_TYPES = ['All Contracts'];
 var RISK_SUMMARY_BY = ['Department','Client','Sales Rep'];
 
 // ── Favorites (localStorage) ──────────────────────────────
@@ -393,8 +393,8 @@ function renderReports() {
       var paramOpen = openParamId === r.id;
 
       var clientOpts = '';
-      for (var di = 0; di < DEMO_CLIENTS.length; di++) {
-        clientOpts += '<option>' + DEMO_CLIENTS[di] + '</option>';
+      for (var di = 0; di < CLIENT_LIST.length; di++) {
+        clientOpts += '<option>' + CLIENT_LIST[di] + '</option>';
       }
       var repOpts = '';
       for (var ri2 = 0; ri2 < SALES_REPS.length; ri2++) {
@@ -405,8 +405,8 @@ function renderReports() {
         lbOpts += '<option>' + LEADERBOARD_TYPES[li] + '</option>';
       }
       var techOpts = '';
-      for (var ti = 0; ti < DEMO_TECHS.length; ti++) {
-        techOpts += '<option>' + DEMO_TECHS[ti] + '</option>';
+      for (var ti = 0; ti < TECH_LIST.length; ti++) {
+        techOpts += '<option>' + TECH_LIST[ti] + '</option>';
       }
       var instOpts = '';
       for (var ii = 0; ii < INST_TYPES.length; ii++) {
@@ -467,7 +467,7 @@ function renderReports() {
         paramRows += '<div class="param-row"><span class="param-label">Repair Items</span><input type="text" class="param-input" style="width:160px" value="*" title="Wildcard * for all items"/></div>';
       } else if (p === 'client-report-card') {
         var rcOpts = ''; for (var rci = 0; rci < REPORT_CARD_TYPES.length; rci++) rcOpts += '<option>' + REPORT_CARD_TYPES[rci] + '</option>';
-        var ctOpts = ''; for (var cti = 0; cti < DEMO_CONTRACTS.length; cti++) ctOpts += '<option>' + DEMO_CONTRACTS[cti] + '</option>';
+        var ctOpts = ''; for (var cti = 0; cti < CONTRACT_TYPES.length; cti++) ctOpts += '<option>' + CONTRACT_TYPES[cti] + '</option>';
         paramRows += '<div class="param-row"><span class="param-label">Client</span><select class="param-select">' + clientOpts + '</select></div>';
         paramRows += '<div class="param-row"><span class="param-label">Department</span><select class="param-select"><option>All Departments</option></select></div>';
         paramRows += '<div class="param-row"><span class="param-label">Contract</span><select class="param-select">' + ctOpts + '</select></div>';
@@ -540,9 +540,39 @@ function renderReports() {
 }
 
 // ── Init ──────────────────────────────────────────────────
-document.getElementById('kpiAvailable').textContent = REPORTS.length;
-updateFavCount();
-renderReports();
+async function init() {
+  document.getElementById('kpiAvailable').textContent = REPORTS.length;
+  updateFavCount();
+
+  // Load live lookups, fall back to defaults silently
+  try {
+    const clients = await API.getAllClients();
+    const list = Array.isArray(clients) ? clients : (clients.data || []);
+    if (list.length) {
+      CLIENT_LIST = ['All Clients'].concat(list.map(c => c.sClientName || c.sName || c.ClientName || '').filter(Boolean));
+    }
+  } catch(e) { /* keep defaults */ }
+
+  try {
+    const techs = await API.getAllTechs();
+    const list = Array.isArray(techs) ? techs : (techs.data || []);
+    if (list.length) {
+      TECH_LIST = ['All Techs'].concat(list.map(t => t.sTechName || t.sName || t.TechName || '').filter(Boolean));
+    }
+  } catch(e) { /* keep defaults */ }
+
+  try {
+    const types = await API.getContractTypes();
+    const list = Array.isArray(types) ? types : (types.data || []);
+    if (list.length) {
+      CONTRACT_TYPES = ['All Contracts'].concat(list.map(t => t.sContractType || t.sName || t.ContractType || '').filter(Boolean));
+    }
+  } catch(e) { /* keep defaults */ }
+
+  renderReports();
+}
+
+init();
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/receiving.js"></script>

@@ -211,10 +211,6 @@
           <div class="s-icon si-purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="4" width="12" height="9" rx="1.5"/><circle cx="8" cy="8.5" r="2.5"/><path d="M5.5 4L6.5 2h3l1 2"/></svg></div>
           <div class="s-data"><div class="s-val s-purple" id="kpiCameraVal">0</div><div class="s-lbl">Camera</div></div>
         </div>
-        <div class="stat-chip" id="kpiInstrument" onclick="chipFilter('instrument')">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10.3 2.5a4 4 0 0 0-4.8 5.2L2 11.2V14h2.8l3.5-3.5a4 4 0 0 0 5.2-4.8L11.3 7.9 9.1 5.7z"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber" id="kpiInstrumentVal">0</div><div class="s-lbl">Instrument</div></div>
-        </div>
       </div>
 
       <!-- TOOLBAR -->
@@ -230,7 +226,6 @@
           <button class="seg-btn" data-val="F" onclick="setSegFilter('type','F',this)">Flexible</button>
           <button class="seg-btn" data-val="R" onclick="setSegFilter('type','R',this)">Rigid</button>
           <button class="seg-btn" data-val="C" onclick="setSegFilter('type','C',this)">Camera</button>
-          <button class="seg-btn" data-val="I" onclick="setSegFilter('type','I',this)">Instrument</button>
         </div>
         <div class="filter-sep"></div>
         <span class="filter-label">Status</span>
@@ -662,7 +657,7 @@ async function init() {
 async function loadModels() {
   document.getElementById('modelsTbody').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Loading models…</td></tr>';
   try {
-    const raw = await API.getScopeModels({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{} });
+    const raw = await API.getScopeModels({ Pagination:{ PageNumber:1, PageSize:500 }, Filters:{ scopesOnly: 1 } });
     let list = Array.isArray(raw) ? raw : (raw.data || []);
     if (!list.length) throw new Error('empty');
     // Normalize fields
@@ -678,6 +673,11 @@ async function loadModels() {
       // Trim whitespace from manufacturer and category names
       if (m.sManufacturerName) m.sManufacturerName = m.sManufacturerName.trim();
       if (m.sCategory) m.sCategory = m.sCategory.trim();
+    });
+    // Filter to scopes only (R/F/C) — exclude instruments (I) and uncategorized
+    list = list.filter(m => {
+      const t = (m.sRigidOrFlexible || '').trim();
+      return t === 'F' || t === 'R' || t === 'C';
     });
     allModels = list;
     isLive = true;
@@ -783,13 +783,12 @@ function renderTable() {
 
 function updateKPIs() {
   const total = allModels.length;
-  let active=0, inactive=0, flex=0, rigid=0, camera=0, instrument=0;
+  let active=0, inactive=0, flex=0, rigid=0, camera=0;
   allModels.forEach(m => {
     if (m.bActive === false) inactive++; else active++;
     if (m.sRigidOrFlexible === 'F') flex++;
     else if (m.sRigidOrFlexible === 'R') rigid++;
     else if (m.sRigidOrFlexible === 'C') camera++;
-    else if (m.sRigidOrFlexible === 'I') instrument++;
   });
   document.getElementById('kpiTotalVal').textContent = total;
   document.getElementById('kpiActiveVal').textContent = active;
@@ -797,7 +796,6 @@ function updateKPIs() {
   document.getElementById('kpiFlexVal').textContent = flex;
   document.getElementById('kpiRigidVal').textContent = rigid;
   document.getElementById('kpiCameraVal').textContent = camera;
-  document.getElementById('kpiInstrumentVal').textContent = instrument;
   // Clear active chip highlights
   document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active-chip'));
   if (filters.status === 'active') document.getElementById('kpiActive').classList.add('active-chip');
@@ -805,7 +803,6 @@ function updateKPIs() {
   else if (filters.type === 'F') document.getElementById('kpiFlex').classList.add('active-chip');
   else if (filters.type === 'R') document.getElementById('kpiRigid').classList.add('active-chip');
   else if (filters.type === 'C') document.getElementById('kpiCamera').classList.add('active-chip');
-  else if (filters.type === 'I') document.getElementById('kpiInstrument').classList.add('active-chip');
 }
 
 function updatePagination() {
@@ -866,9 +863,9 @@ function debounceSearch() {
 }
 
 function chipFilter(chip) {
-  // Type chips: flex, rigid, camera, instrument
-  if (chip === 'flex' || chip === 'rigid' || chip === 'camera' || chip === 'instrument') {
-    const typeVal = {flex:'F', rigid:'R', camera:'C', instrument:'I'}[chip];
+  // Type chips: flex, rigid, camera
+  if (chip === 'flex' || chip === 'rigid' || chip === 'camera') {
+    const typeVal = {flex:'F', rigid:'R', camera:'C'}[chip];
     if (filters.type === typeVal) { filters.type = ''; } else { filters.type = typeVal; filters.status = ''; }
     // Sync type seg
     document.querySelectorAll('#segType .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === filters.type));

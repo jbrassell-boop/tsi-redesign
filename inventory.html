@@ -2141,29 +2141,9 @@ async function selectApiItem(key, name) {
     console.warn('[TSI Inventory] Failed to load sizes:', e);
   }
 
-  // Demand Forecast
-  // FUTURE: needs Express endpoint for inventory demand forecast
+  // Demand Forecast panel hidden until endpoint is available
   var forecastPanel = document.getElementById('forecastPanel');
-  if (forecastPanel && false) {
-    try {
-      var fc = await Promise.resolve(null);
-      if (!fc) { forecastPanel.style.display = 'none'; return; }
-      forecastPanel.style.display = '';
-      var daysEl = document.getElementById('fcDays');
-      daysEl.textContent = fc.daysRemaining > 365 ? '365+' : fc.daysRemaining;
-      daysEl.style.color = fc.daysRemaining < 14 ? 'var(--red)' : fc.daysRemaining < 30 ? 'var(--amber)' : 'var(--navy)';
-      document.getElementById('fcDaily').textContent = fc.avgDailyConsumption + '/day';
-      document.getElementById('fcDate').textContent = fc.projectedReorderDate;
-      document.getElementById('fcStock').textContent = fc.totalStock + ' units';
-      var pct = Math.min(100, Math.round((fc.daysRemaining / 90) * 100));
-      document.getElementById('fcStockFill').style.width = pct + '%';
-      document.getElementById('fcStockFill').style.background = pct < 15 ? 'var(--red)' : pct < 33 ? 'var(--amber)' : 'var(--green)';
-      document.getElementById('fcStockLabel').textContent = fc.daysRemaining < 14 ? 'Reorder soon!' : fc.daysRemaining < 30 ? 'Getting low' : 'Healthy stock level';
-    } catch (e) {
-      forecastPanel.style.display = 'none';
-      console.warn('[TSI Inventory] Failed to load demand forecast:', e);
-    }
-  }
+  if (forecastPanel) forecastPanel.style.display = 'none';
 }
 
 function renderApiSizes(sizes, parentItem) {

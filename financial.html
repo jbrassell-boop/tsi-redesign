@@ -320,36 +320,8 @@
   }
 
   // ── Demo data sets ──────────────────────────────────────
+  // At Risk and Trending have no API endpoints yet — local reference data only
   const DEMO = {
-    outstanding: [
-      { sTranNumber:'INV-2026-0284', sClientName1:'88th Medical Group', dblTranAmount:2840, dblTaxAmount:212.14, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-25', dtDueDate:'2026-03-25', sStatus:'Unpaid', lInvoiceKey:284 },
-      { sTranNumber:'INV-2026-0271', sClientName1:'Tift Regional Medical Center', dblTranAmount:5120, dblTaxAmount:383.22, dblDiscount:256, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-18', dtDueDate:'2026-03-18', sStatus:'Unpaid', lInvoiceKey:271 },
-      { sTranNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblTranAmount:3650, dblTaxAmount:273.06, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-02-10', dtDueDate:'2026-03-10', sStatus:'Partial', lInvoiceKey:258 },
-      { sTranNumber:'INV-2026-0241', sClientName1:'West Side GI Center', dblTranAmount:9300, dblTaxAmount:695.82, dblDiscount:465, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-01-31', dtDueDate:'2026-03-01', sStatus:'Overdue', lInvoiceKey:241 },
-      { sTranNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblTranAmount:4480, dblTaxAmount:335.30, dblDiscount:0, sPaymentTerms:'Net 30', sGLAccountNumber:'4000', dtTranDate:'2026-01-22', dtDueDate:'2026-02-21', sStatus:'Paid', lInvoiceKey:229 },
-      { sTranNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblTranAmount:2100, dblTaxAmount:157.08, dblDiscount:105, sPaymentTerms:'Net 30', sGLAccountNumber:'4100', dtTranDate:'2026-01-15', dtDueDate:'2026-02-14', sStatus:'Paid', lInvoiceKey:215 },
-      { sTranNumber:'INV-2026-0198', sClientName1:'Shreveport Endoscopy Center', dblTranAmount:1750, dblTaxAmount:130.90, dblDiscount:0, sPaymentTerms:'Net 45', sGLAccountNumber:'4000', dtTranDate:'2026-01-08', dtDueDate:'2026-02-07', sStatus:'Overdue', lInvoiceKey:198 }
-    ],
-    drafts: [
-      { sTranNumber:'DRF-2026-0050', sClientName1:'88th Medical Group', dblTranAmount:1200, dtCreatedDate:'2026-03-05', sDeliveryMethod:'Email', sGreatPlainsID:'GP-88MED-001', sStatus:'Draft', lInvoiceKey:50 },
-      { sTranNumber:'DRF-2026-0049', sClientName1:'Nashville General Hospital', dblTranAmount:3400, dtCreatedDate:'2026-03-02', sDeliveryMethod:'Print', sGreatPlainsID:'GP-NASH-014', sStatus:'Draft', lInvoiceKey:49 }
-    ],
-    hold: [
-      { sClientName1:'West Side GI Center', sDepartmentName:'Endoscopy', dtOnHoldDate:'2026-02-15', sReason:'Past due > 60 days', lClientKey:41 },
-      { sClientName1:'Shreveport Endoscopy Center', sDepartmentName:'GI Lab', dtOnHoldDate:'2026-01-20', sReason:'Billing dispute', lClientKey:55 }
-    ],
-    payments: [
-      { sTranNumber:'INV-2026-0229', sClientName1:'Northside Hospital', dblTranAmount:4480, dtPaymentDate:'2026-02-20', sPaymentMethod:'ACH', lInvoicePaymentID:10 },
-      { sTranNumber:'INV-2026-0215', sClientName1:'Metro Health Hospital', dblTranAmount:2100, dtPaymentDate:'2026-02-13', sPaymentMethod:'Check', lInvoicePaymentID:11 },
-      { sTranNumber:'INV-2026-0258', sClientName1:'Nashville General Hospital', dblTranAmount:2000, dtPaymentDate:'2026-03-01', sPaymentMethod:'ACH', lInvoicePaymentID:12 }
-    ],
-    gl: [
-      { sAccountNumber:'1000', sAccountName:'Cash', sType:'Asset', sDescription:'Operating cash account', lGLAccountKey:1 },
-      { sAccountNumber:'1200', sAccountName:'Accounts Receivable', sType:'Asset', sDescription:'Trade receivables', lGLAccountKey:2 },
-      { sAccountNumber:'4000', sAccountName:'Repair Revenue', sType:'Revenue', sDescription:'Income from repair services', lGLAccountKey:3 },
-      { sAccountNumber:'4100', sAccountName:'Product Sales Revenue', sType:'Revenue', sDescription:'Income from product sales', lGLAccountKey:4 },
-      { sAccountNumber:'5000', sAccountName:'Cost of Goods Sold', sType:'Expense', sDescription:'Parts and materials', lGLAccountKey:5 }
-    ],
     atrisk: [
       { sName:'Endoscopy Dept – West Side GI', dblRevenue:18200, dblExpenses:19800, dblMargin:-8.79, nInvoices:12, sRisk:'High Risk', expenses:{ outsource:6200, gpo:3100, inventory:4500, commissions:1800, shipping:1200, labor:3000 } },
       { sName:'GI Lab – Shreveport Endoscopy', dblRevenue:9400, dblExpenses:10100, dblMargin:-7.45, nInvoices:6, sRisk:'High Risk', expenses:{ outsource:3200, gpo:1500, inventory:2400, commissions:900, shipping:600, labor:1500 } },
@@ -421,13 +393,10 @@
       API.UI.updateDemoBadge('api');
       if (tab === 'outstanding') updateFinancialKPIs(rows);
     } catch (e) {
-      console.warn('[TSI Financial] API unavailable, using demo data:', e.message);
-      rows = DEMO[tab] || [];
+      console.warn('[TSI Financial] API unavailable:', e.message);
+      rows = [];
       isLive = false;
       API.UI.updateDemoBadge('demo');
-      // For atrisk/trending, use dedicated renderers
-      if (tab === 'atrisk') { renderAtRisk(); return; }
-      if (tab === 'trending') { renderTrending(); return; }
     }
 
     populateClientFilter();
@@ -436,7 +405,7 @@
 
   // ── Update financial KPI chips ──────────────────────────
   async function updateFinancialKPIs(liveOutstanding) {
-    const inv = liveOutstanding || DEMO.outstanding;
+    const inv = liveOutstanding || [];
     const open = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s !== 'paid' && s !== 'current'; });
     const overdue = inv.filter(r => { const s = (r.sStatus || '').toLowerCase(); return s.includes('overdue') || s.includes('past'); });
 
@@ -454,21 +423,19 @@
 
     // Load drafts, hold, payments counts independently
     const pg = { Pagination: { PageNumber: 1, PageSize: 200 }, Filters: {} };
-    let draftsCount, holdCount, totalPaid;
+    let draftsCount = 0, holdCount = 0, totalPaid = 0;
     try {
       const [draftsRaw, holdRaw, paymentsRaw] = await Promise.all([
         API.getDraftInvoices(pg).catch(() => null),
         API.getClientsOnHold(pg).catch(() => null),
         API.getInvoicePayments(pg).catch(() => null)
       ]);
-      draftsCount = draftsRaw ? unwrap(draftsRaw).length : DEMO.drafts.length;
-      holdCount = holdRaw ? unwrap(holdRaw).length : DEMO.hold.length;
-      const payments = paymentsRaw ? unwrap(paymentsRaw) : DEMO.payments;
+      draftsCount = draftsRaw ? unwrap(draftsRaw).length : 0;
+      holdCount = holdRaw ? unwrap(holdRaw).length : 0;
+      const payments = paymentsRaw ? unwrap(paymentsRaw) : [];
       totalPaid = payments.reduce((s, r) => s + Number(r.dblTranAmount || r.dblPaymentAmount || r.dblAmount || 0), 0);
     } catch (e) {
-      draftsCount = DEMO.drafts.length;
-      holdCount = DEMO.hold.length;
-      totalPaid = DEMO.payments.reduce((s, r) => s + Number(r.dblTranAmount || r.dblPaymentAmount || r.dblAmount || 0), 0);
+      console.warn('[TSI Financial] KPI secondary loads failed:', e.message);
     }
     document.getElementById('kpiDrafts').textContent = String(draftsCount);
     document.getElementById('kpiHold').textContent = String(holdCount);
@@ -945,29 +912,6 @@
   API.UI.init();
   if(API && API.UI) API.UI.showSkeleton('skFinancial', 5);
   updateFinancialKPIs();
-
-  // FUTURE: needs Express endpoint for financial health waterfall
-  if (false) {
-    Promise.resolve(null).then(function(h) {
-      if (!h) return;
-      var wrap = document.getElementById('waterfallWrap');
-      if (!wrap) return;
-      wrap.style.display = '';
-      var total = h.totalInvoiced || 1;
-      var paidPct = Math.round((h.totalPaid / total) * 100);
-      var outPct = Math.round((h.outstanding / total) * 100);
-      var riskPct = Math.round((h.atRisk / total) * 100);
-      var bar = document.getElementById('waterfallBar');
-      bar.innerHTML = '<div class="waterfall-seg wf-paid" style="width:' + paidPct + '%" title="Paid">Paid</div>'
-        + '<div class="waterfall-seg wf-outstanding" style="width:' + Math.max(outPct - riskPct, 1) + '%" title="Outstanding">Outstanding</div>'
-        + '<div class="waterfall-seg wf-atrisk" style="width:' + Math.max(riskPct, 0) + '%" title="At Risk">' + (riskPct > 5 ? 'At Risk' : '') + '</div>';
-      var fmt = function(n) { return '$' + Math.round(n).toLocaleString(); };
-      document.getElementById('wfLegendInv').textContent = 'Invoiced: ' + fmt(h.totalInvoiced);
-      document.getElementById('wfLegendPaid').textContent = 'Paid: ' + fmt(h.totalPaid);
-      document.getElementById('wfLegendOut').textContent = 'Outstanding: ' + fmt(h.outstanding);
-      document.getElementById('wfLegendRisk').textContent = 'At Risk: ' + fmt(h.atRisk);
-    });
-  }
 
   loadTab('outstanding').then(function() { if(API && API.UI) API.UI.hideSkeleton('skFinancial'); });
 

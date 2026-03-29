@@ -517,6 +517,27 @@ const API = (() => {
   async function deletePendingArrival(key) { return del('/PendingArrival/DeletePendingArrival?plPendingArrivalKey=' + key); }
   async function receivePendingArrival(data) { return post('/PendingArrival/ReceiveArrival', data); }
 
+  // ── Emails ────────────────────────────────────────────
+  async function getEmails(ownerKey) { return get('/Email/GetAll' + (ownerKey ? '?lOwnerKey=' + ownerKey : '')); }
+  async function getEmailTypes() { return get('/Email/GetTypes'); }
+  async function getEmailAttachments(emailKey) { return get('/Email/GetAttachments?lEmailKey=' + emailKey); }
+
+  // ── Quality / ISO Complaints ─────────────────────────
+  async function getQualityComplaints() { return get('/Quality/GetAll'); }
+  async function getQualityComplaintByKey(key) { return get('/Quality/GetByKey?key=' + key); }
+
+  // ── Loaner Instruments ───────────────────────────────
+  async function getLoanerTrans(deptKey, openOnly) { return get('/Loaner/GetAll?lDepartmentKey=' + (deptKey||0) + (openOnly ? '&openOnly=1' : '')); }
+  async function getLoanersByRepair(repairKey) { return get('/Loaner/GetByRepair?lRepairKey=' + repairKey); }
+  async function addLoanerTran(data) { return post('/Loaner/Add', data); }
+  async function updateLoanerTran(data) { return post('/Loaner/Update', data); }
+
+  // ── Product Sale Details ─────────────────────────────
+  async function getProductSaleDetails(key) { return get('/ProductSales/GetDetails?lProductSaleKey=' + key); }
+
+  // ── User Management ──────────────────────────────────
+  async function getUserList() { return get('/UserManagement/GetAll'); }
+
   // ── Instrument Codes + Repairs (7) ───────────────────
   async function getInstrumentCodes() { return get('/InstrumentCode/GetAll'); }
   async function searchInstrumentCodes(query) { return get('/InstrumentCode/Search?psQuery=' + encodeURIComponent(query)); }
@@ -639,8 +660,20 @@ const API = (() => {
     getAllCreditLimits, getAllDistributors,
     getInstrumentTypes,
 
+    // Emails
+    getEmails, getEmailTypes, getEmailAttachments,
+
+    // Quality
+    getQualityComplaints, getQualityComplaintByKey,
+
+    // Loaner Instruments
+    getLoanerTrans, getLoanersByRepair, addLoanerTran, updateLoanerTran,
+
+    // Product Sale Details
+    getProductSaleDetails,
+
     // User Management
-    updateUser,
+    getUserList, updateUser,
 
     // Dev Todo
     getDevTodoList, addDevTodoItem, updateDevTodoStatus, getDevTodoDetails,

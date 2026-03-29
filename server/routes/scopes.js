@@ -118,4 +118,58 @@ router.get('/ScopeType/GetDepartmentScopeTypesList', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /ScopeType/GetAvailableDepartmentScopeTypesList — Scope types NOT yet in dept
+router.get('/ScopeType/GetAvailableDepartmentScopeTypesList', async (req, res, next) => {
+  try {
+    const deptKey = parseInt(req.query.lDepartmentKey) || 0;
+    if (!deptKey) return res.status(400).json({ error: 'lDepartmentKey required' });
+    const rows = await db.query(`
+      SELECT st.lScopeTypeKey, st.sScopeTypeDesc, st.sRigidOrFlexible,
+        ISNULL(m.sManufacturer, '') AS sManufacturerName,
+        ISNULL(stc.sScopeTypeCategory, '') AS sScopeTypeCategory
+      FROM tblScopeType st
+        LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
+        LEFT JOIN tblScopeTypeCategories stc ON stc.lScopeTypeCategoryKey = st.lScopeTypeCatKey
+      WHERE st.bActive = 1
+        AND st.lScopeTypeKey NOT IN (
+          SELECT lScopeTypeKey FROM tblDepartmentScopeTypes WHERE lDepartmentKey = @deptKey
+        )
+      ORDER BY st.sScopeTypeDesc`, { deptKey });
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /ScopeType/AddDepartmentScopeTypes — Link scope type to department
+router.post('/ScopeType/AddDepartmentScopeTypes', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const deptKey = parseInt(b.lDepartmentKey) || 0;
+    const scopeTypeKey = parseInt(b.lScopeTypeKey) || 0;
+    if (!deptKey || !scopeTypeKey) {
+      return res.status(400).json({ error: 'lDepartmentKey and lScopeTypeKey required' });
+    }
+    const result = await db.query(`
+      INSERT INTO tblDepartmentScopeTypes (lDepartmentKey, lScopeTypeKey, sGLAcct)
+      VALUES (@deptKey, @scopeTypeKey, @glAcct);
+      SELECT SCOPE_IDENTITY() AS lDepartmentScopeTypeKey`,
+      { deptKey, scopeTypeKey, glAcct: b.sGLAcct || null });
+    const newKey = result[0] ? result[0].lDepartmentScopeTypeKey : 0;
+    res.json({ lDepartmentScopeTypeKey: newKey, success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /ScopeType/DeleteDepartmentScopeTypes — Remove scope type from department
+router.delete('/ScopeType/DeleteDepartmentScopeTypes', async (req, res, next) => {
+  try {
+    const deptScopeTypeKey = parseInt(req.query.lDepartmentScopeTypeKey) || 0;
+    if (!deptScopeTypeKey) {
+      return res.status(400).json({ error: 'lDepartmentScopeTypeKey required' });
+    }
+    await db.query(
+      'DELETE FROM tblDepartmentScopeTypes WHERE lDepartmentScopeTypeKey = @key',
+      { key: deptScopeTypeKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;
