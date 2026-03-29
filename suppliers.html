@@ -12,8 +12,8 @@
     /* FILTER BAR */
     .filter-bar{display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);flex-wrap:wrap}
     .sel-bar-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-    .btn-green{background:#F0FDF4;border:1.5px solid #BBF7D0;color:var(--green);font-weight:600}
-    .btn-green:hover{background:#DCFCE7}
+    .btn-green{background:var(--success-bg,#F0FDF4);border:1.5px solid var(--success-border,#BBF7D0);color:var(--green);font-weight:600}
+    .btn-green:hover{background:var(--success-bg-hover,#DCFCE7)}
     .sel{height:26px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);background:var(--card);cursor:pointer;outline:none;transition:border-color .15s;max-width:260px}
     .sel:focus{border-color:var(--navy);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.08)}
 
@@ -37,9 +37,9 @@
     tbody tr:hover{cursor:default}
     .b-yes{background:var(--primary-light);color:var(--blue);font-size:9.5px;padding:1px 6px}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel)}
-    .mono-chip{font-family:monospace;font-size:10.5px;font-weight:600;color:var(--blue);background:var(--primary-light);padding:1px 5px;border-radius:var(--radius-sm);border:1px solid #BFDBFE;letter-spacing:.04em}
-    .del-btn{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
-    .del-btn:hover{background:#FEE2E2}
+    .mono-chip{font-family:monospace;font-size:10.5px;font-weight:600;color:var(--blue);background:var(--primary-light);padding:1px 5px;border-radius:var(--radius-sm);border:1px solid var(--border-dk);letter-spacing:.04em}
+    .del-btn{background:var(--danger-bg,#FEF2F2);border:1px solid var(--danger-border,#FECACA);color:var(--red);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;transition:all .12s}
+    .del-btn:hover{background:var(--danger-bg-hover,#FEE2E2)}
 
     /* MASTER-DETAIL SPLIT */
     .split-layout{display:flex;flex:1;overflow:hidden;position:relative}
@@ -176,7 +176,7 @@
 
     <!-- STATUS STRIP -->
     <div class="status-strip" id="statusStrip">
-      <div class="ss-chip" style="background:#F8FAFF"><span class="ss-label">Total</span> <span class="ss-val" id="statTotal">0</span></div>
+      <div class="ss-chip" style="background:var(--bg)"><span class="ss-label">Total</span> <span class="ss-val" id="statTotal">0</span></div>
       <div class="ss-chip" style="background:#F0FDF4;border-color:#BBF7D0"><span class="ss-label">Active</span> <span class="ss-val" style="color:var(--green)" id="statActive">0</span></div>
       <div class="ss-chip" style="background:#FEF2F2;border-color:#FECACA"><span class="ss-label">Inactive</span> <span class="ss-val" style="color:var(--red)" id="statInactive">0</span></div>
       <div class="ss-chip" style="background:var(--primary-light);border-color:#BFDBFE"><span class="ss-label">Parts</span> <span class="ss-val" style="color:var(--blue)" id="statParts">0</span></div>
@@ -481,7 +481,7 @@
           <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
             <!-- PO Summary Strip -->
             <div class="status-strip" style="gap:8px" id="poSummaryStrip">
-              <div class="ss-chip" style="background:#F8FAFF"><span class="ss-label">Total POs</span> <span class="ss-val" id="poStatTotal">0</span></div>
+              <div class="ss-chip" style="background:var(--bg)"><span class="ss-label">Total POs</span> <span class="ss-val" id="poStatTotal">0</span></div>
               <div class="ss-chip" style="background:#F0FDF4;border-color:#BBF7D0"><span class="ss-label">Open</span> <span class="ss-val" style="color:var(--green)" id="poStatOpen">0</span></div>
               <div class="ss-chip" style="background:#FEF2F2;border-color:#FECACA"><span class="ss-label">Closed</span> <span class="ss-val" style="color:var(--muted)" id="poStatClosed">0</span></div>
               <div class="ss-chip" style="background:var(--primary-light);border-color:#BFDBFE"><span class="ss-label">Total Value</span> <span class="ss-val" style="color:var(--navy);font-weight:700" id="poStatValue">$0.00</span></div>
@@ -1250,7 +1250,7 @@ async function viewDoc(key) {
 async function deleteDoc(btn, key) {
   if (!btn._confirming) {
     btn._confirming = true; btn._origTitle = btn.title; btn.title = 'Click again to confirm';
-    btn.style.background = '#dc3545'; btn.style.color = '#fff'; btn.style.borderColor = '#dc3545';
+    btn.style.background = 'var(--red)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--red)';
     setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.title = btn._origTitle; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; } }, 3000);
     return;
   }

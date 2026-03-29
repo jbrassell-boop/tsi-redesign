@@ -44,13 +44,13 @@
         </div>
         <!-- Overflow menu (Deactivate + Delete) -->
         <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
-          <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:#6b7c93;border-color:#d0d6dd">&#x22EF;</button>
+          <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:var(--muted);border-color:var(--border)">&#x22EF;</button>
           <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:var(--z-dropdown);min-width:200px;padding:6px 0;font-size:13px">
             <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--warning)" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
               Deactivate Client
             </button>
-            <div style="height:1px;background:#e8eaed;margin:4px 12px"></div>
+            <div style="height:1px;background:var(--border);margin:4px 12px"></div>
             <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--red)" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
               Delete Client
@@ -888,7 +888,7 @@
     <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
 
       <!-- New CM Form (hidden by default) -->
-      <div id="cm-new-form" style="display:none;background:#F7F9FC;border:1.5px solid var(--border-dk);border-radius:8px;padding:14px 16px">
+      <div id="cm-new-form" style="display:none;background:var(--neutral-50);border:1.5px solid var(--border-dk);border-radius:8px;padding:14px 16px">
         <div style="font-size:10px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">New Credit Memo</div>
         <div class="fg g2" style="gap:8px 12px">
           <div class="ff">
@@ -908,7 +908,7 @@
           </div>
         </div>
         <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
-          <button onclick="document.getElementById('cm-new-form').style.display='none'" style="height:28px;padding:0 14px;border-radius:6px;border:1.5px solid var(--border-dk);background:#fff;color:var(--label);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+          <button onclick="document.getElementById('cm-new-form').style.display='none'" style="height:28px;padding:0 14px;border-radius:6px;border:1.5px solid var(--border-dk);background:var(--card);color:var(--label);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
           <button onclick="addCreditMemo()" style="height:28px;padding:0 14px;border-radius:6px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Save Memo</button>
         </div>
       </div>
@@ -1512,7 +1512,7 @@ async function saveFlagMock() {
   if(emptyRow) emptyRow.remove();
 
   const rowCount = tbody.querySelectorAll('tr').length;
-  const bg = rowCount % 2 === 0 ? '' : 'background:#f9fbff';
+  const bg = rowCount % 2 === 0 ? '' : 'background:var(--row-alt)';
   const tr = document.createElement('tr');
   tr.style.cssText = bg;
   tr.innerHTML = `
@@ -1571,7 +1571,7 @@ function renderFlagsFromAPI(flags) {
     return;
   }
   tbody.innerHTML = flags.map((f, i) => {
-    const bg = i % 2 !== 0 ? ' style="background:#f9fbff"' : '';
+    const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
     const instrTypes = f.sInstrumentTypes || '<span style="color:var(--muted)">All</span>';
     const locations = f.sLocations || '<span style="color:var(--muted)">\u2014</span>';
     return `<tr${bg} data-flag-key="${f.lFlagKey}">
@@ -1758,7 +1758,7 @@ function renderCreditMemos(c) {
             <span style="color:var(--red);font-weight:600">−$${a.amount.toFixed(2)}</span>
           </div>`).join('')}
         </div>` : '';
-    return `<div style="border:1px solid var(--border-dk);border-radius:8px;padding:12px 16px;background:#fff;${m.status==='Closed'?'opacity:.65':''}">
+    return `<div style="border:1px solid var(--border-dk);border-radius:8px;padding:12px 16px;background:var(--card);${m.status==='Closed'?'opacity:.65':''}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:12px;font-weight:800;color:var(--navy)">${m.id}</span>
