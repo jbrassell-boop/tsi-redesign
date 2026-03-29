@@ -395,17 +395,28 @@ function ic_updateStats() {
   var cats = {};
   var mfrs = {};
   var totalUsed = 0;
+  // Deduplicate by scopeTypeKey before summing usedCount — each scope type appears
+  // once per manufacturer/model row in IC_DATA, so summing naively inflates the total
+  // (e.g. a scope type with 54 repairs appearing in 800k rows → 44 million).
+  var seenScopeTypes = {};
   filtered.forEach(function(it) {
     cats[it.category] = true;
     if (it.manufacturer) mfrs[it.manufacturer] = true;
-    totalUsed += (it.usedCount || 0);
+    if (it.scopeTypeKey && !seenScopeTypes[it.scopeTypeKey]) {
+      seenScopeTypes[it.scopeTypeKey] = true;
+      totalUsed += (it.usedCount || 0);
+    } else if (!it.scopeTypeKey) {
+      totalUsed += (it.usedCount || 0);
+    }
   });
+  // Sanity cap: if still unreasonably large, display N/A
+  var usedDisplay = totalUsed > 999999 ? 'N/A' : totalUsed.toLocaleString();
 
   var el = function(id) { return document.getElementById(id); };
   if (el('ic_ssTotal'))  el('ic_ssTotal').textContent = total.toLocaleString();
   if (el('ic_ssCats'))   el('ic_ssCats').textContent = Object.keys(cats).length;
   if (el('ic_ssMfrs'))   el('ic_ssMfrs').textContent = Object.keys(mfrs).length;
-  if (el('ic_ssUsed'))   el('ic_ssUsed').textContent = totalUsed.toLocaleString();
+  if (el('ic_ssUsed'))   el('ic_ssUsed').textContent = usedDisplay;
 
   var tabCount = document.getElementById('ic_tabCount');
   if (tabCount) tabCount.textContent = ic_allItems.length.toLocaleString();

@@ -1180,8 +1180,15 @@ function showDeptTab(name,el){
   const tab=document.getElementById('dtab-'+name);
   if(tab) tab.style.display=(name==='main'||name==='addresses')?'flex':'block';
   el.classList.add('active');
-  // Lazy-load technicians on first open
+  // Lazy-load technicians on first open; show loading state while fetching
   if(name==='technicians' && typeof loadDeptTechnicians==='function' && window._currentDeptKey){
+    const grid = document.getElementById('techCardsGrid');
+    if(grid && grid.children.length === 0){
+      grid.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">' +
+        '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>' +
+        'Loading technicians...</div>';
+    }
     loadDeptTechnicians(window._currentDeptKey);
   }
 }
@@ -1360,6 +1367,8 @@ function openContactModal(mode){
 
   /* ── Load departments for selected client ──────────── */
   async function loadDepartments(clientKey, selectKey){
+    const countEl = document.getElementById('deptListCount');
+    if(countEl) countEl.textContent = '(...)';
     try {
       allDepartments = await API.getAllDepartments(1);
       if(!Array.isArray(allDepartments)) allDepartments = [];
@@ -1998,10 +2007,17 @@ function openContactModal(mode){
     } catch(e){ console.warn('[Dept] Contracts tab:', e.message); }
   }
 
+  function _withDeptTimeout(promise, ms){
+    return Promise.race([
+      promise,
+      new Promise(function(_,reject){ setTimeout(function(){ reject(new Error('Request timed out')); }, ms); })
+    ]);
+  }
+
   /* ── Technicians tab ─────────────────────────────────── */
   async function loadDeptTechnicians(deptKey){
     try {
-      const repairs = await API.getRepairList(null, deptKey);
+      const repairs = await _withDeptTimeout(API.getRepairList(null, deptKey), 10000);
       const grid = document.getElementById('techCardsGrid');
       if(!grid) return;
       if(!repairs || repairs.length === 0) return;
@@ -2045,7 +2061,13 @@ function openContactModal(mode){
           '</div>';
         grid.appendChild(card);
       });
-    } catch(e){ console.warn('[Dept] Technicians tab:', e.message); }
+    } catch(e){
+      console.warn('[Dept] Technicians tab:', e.message);
+      const grid = document.getElementById('techCardsGrid');
+      if(grid && grid.querySelector('svg[style*="spin"]')){
+        grid.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:11px">Could not load technician data — try reloading the page.</div>';
+      }
+    }
   }
 
   /* ── GPOs tab ───────────────────────────────────────── */

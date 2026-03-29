@@ -303,14 +303,14 @@
                   <div class="panel-head">Contract Information</div>
                   <div class="panel-body">
                     <div class="fg g2">
-                      <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" id="ctName" value="" required/><div class="ff-error">Contract name is required</div></div>
+                      <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" id="ctName" value="" required/><div class="ff-error" style="display:none">Contract name is required</div></div>
                       <div class="ff"><label>Contract Type <span class="ctx-help">?<span class="ctx-help-tip">CPO/Capitated = fixed monthly fee covers all repairs. Shared Risk = base fee + per-repair charges. Fuse = bundled service program.</span></span> <span class="req">*</span></label>
                         <select class="inp" id="ctType" onchange="onContractTypeChange()">
                           <option>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option>
                         </select>
                       </div>
                       <div class="ff" id="ffMonthlyAllowance" style="display:none"><label>Monthly Allowance</label><input class="inp" id="ctMonthlyAllowance" type="number" min="0" step="0.01" placeholder="0.00"/></div>
-                      <div class="ff"><label>Client <span class="req">*</span></label><input class="inp" id="ctClient" value="" required/><div class="ff-error">Client is required</div></div>
+                      <div class="ff"><label>Client <span class="req">*</span></label><input class="inp" id="ctClient" value="" required/><div class="ff-error" style="display:none">Client is required</div></div>
                       <div class="ff"><label>Sales Representative <span class="req">*</span></label>
                         <select class="inp" id="ctSalesRep"><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
                       </div>
@@ -360,8 +360,8 @@
                   <div class="panel-head">Term &amp; Financials</div>
                   <div class="panel-body">
                     <div class="fg g2">
-                      <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" id="ctStartDate" type="date" value="" required/><div class="ff-error">Start date is required</div></div>
-                      <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" id="ctEndDate" type="date" value="" required/><div class="ff-error">End date is required</div></div>
+                      <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" id="ctStartDate" type="date" value="" required/><div class="ff-error" style="display:none">Start date is required</div></div>
+                      <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" id="ctEndDate" type="date" value="" required/><div class="ff-error" style="display:none">End date is required</div></div>
                       <div class="ff"><label>Contract Total</label><input class="inp" id="ctTotal" value="" style="font-weight:700"/></div>
                       <div class="ff"><label>Annual Value</label><input class="inp" id="ctAnnualValue" value="" style="font-weight:700;color:var(--green)"/></div>
                       <div class="ff"><label>Monthly Fee</label><input class="inp" id="ctMonthlyFee" type="number" min="0" step="0.01" placeholder="0.00"/></div>
@@ -1053,22 +1053,22 @@
     </div>
     <div class="modal-body">
       <div class="fg g2" style="margin-bottom:12px">
-        <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" placeholder="Enter contract name..." required/><div class="ff-error">Contract name is required</div></div>
+        <div class="ff span2"><label>Contract Name <span class="req">*</span></label><input class="inp" placeholder="Enter contract name..." required/><div class="ff-error" style="display:none">Contract name is required</div></div>
         <div class="ff"><label>Contract Type <span class="req">*</span></label>
           <select class="inp" required><option value="">-- Select --</option><option>CPO</option><option>Fuse</option><option>Capitated Service</option><option>Airway</option><option>Cart</option><option>Rental</option><option>Shared Risk</option></select>
-          <div class="ff-error">Contract type is required</div>
+          <div class="ff-error" style="display:none">Contract type is required</div>
         </div>
         <div class="ff"><label>Client <span class="req">*</span></label>
           <select class="inp" required><option value="">-- Select Client --</option><option>88th Medical Group</option><option>Halifax Medical</option><option>Wills Eye</option><option>Tift Regional</option><option>Regional Medical Center</option><option>St. Mary's Hospital</option></select>
-          <div class="ff-error">Client is required</div>
+          <div class="ff-error" style="display:none">Client is required</div>
         </div>
         <div class="ff"><label>Sales Representative <span class="req">*</span></label>
           <select class="inp" required><option value="">-- Select --</option><option>J. Miller</option><option>R. Thompson</option><option>S. Chen</option><option>K. Davis</option></select>
-          <div class="ff-error">Sales rep is required</div>
+          <div class="ff-error" style="display:none">Sales rep is required</div>
         </div>
         <div class="ff"><label>Purchase Order #</label><input class="inp" placeholder="PO-XXXX-XXXX"/></div>
-        <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" type="date" required/><div class="ff-error">Start date is required</div></div>
-        <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date" required/><div class="ff-error">End date is required</div></div>
+        <div class="ff"><label>Start Date <span class="req">*</span></label><input class="inp" type="date" required/><div class="ff-error" style="display:none">Start date is required</div></div>
+        <div class="ff"><label>End Date <span class="req">*</span></label><input class="inp" type="date" required/><div class="ff-error" style="display:none">End date is required</div></div>
         <div class="ff"><label>Invoice Frequency</label>
           <select class="inp"><option>None</option><option>Monthly</option><option>Quarterly</option><option>Annual</option><option>Once</option></select>
         </div>
@@ -1459,9 +1459,14 @@ function validateRequired(formContainer) {
   var fields = formContainer.querySelectorAll('.inp[required]');
   fields.forEach(function(f) {
     var val = (f.value || '').trim();
+    var errEl = f.nextElementSibling && f.nextElementSibling.classList.contains('ff-error') ? f.nextElementSibling : null;
     if (!val) {
       f.classList.add('error');
+      if (errEl) errEl.style.display = 'block';
       valid = false;
+    } else {
+      f.classList.remove('error');
+      if (errEl) errEl.style.display = 'none';
     }
   });
   if (!valid && window.TSI && TSI.toast) {
@@ -1470,10 +1475,18 @@ function validateRequired(formContainer) {
   return valid;
 }
 document.addEventListener('input', function(e) {
-  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+  if (e.target.classList.contains('error')) {
+    e.target.classList.remove('error');
+    var errEl = e.target.nextElementSibling;
+    if (errEl && errEl.classList.contains('ff-error')) errEl.style.display = 'none';
+  }
 });
 document.addEventListener('change', function(e) {
-  if (e.target.classList.contains('error')) e.target.classList.remove('error');
+  if (e.target.classList.contains('error')) {
+    e.target.classList.remove('error');
+    var errEl = e.target.nextElementSibling;
+    if (errEl && errEl.classList.contains('ff-error')) errEl.style.display = 'none';
+  }
 });
 
 // ── Data Source Badge ─────────────────────────────────

@@ -232,6 +232,11 @@
       <!-- RIGHT PANEL — Supplier Detail -->
       <div class="split-right" id="detailPanel" style="position:relative">
         <button class="split-expand-btn" onclick="toggleSplitLeft()" title="Show supplier list">&#8250;</button>
+        <!-- No-selection empty state -->
+        <div id="detailEmptyState" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);z-index:10;pointer-events:none">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.2;margin-bottom:8px;color:var(--muted)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          <p style="font-size:13px;color:var(--muted);font-weight:500;margin:0">Select a supplier from the list to view details</p>
+        </div>
         <!-- Detail Header -->
         <div class="detail-header" id="detailHeader">
           <span class="supp-title" id="detailName">Select a supplier</span>
@@ -946,6 +951,9 @@ async function selectSupplierByKey(key, el) {
 
 // ── Populate Detail Panel ────────────────────────────
 function populateDetail(s) {
+  // Hide empty state overlay
+  const es = document.getElementById('detailEmptyState');
+  if (es) es.style.display = 'none';
   // Header
   document.getElementById('detailName').textContent = s.sSupplierName1 || '';
   document.getElementById('detailCity').textContent = [s.sCity, s.sState].filter(Boolean).join(', ');

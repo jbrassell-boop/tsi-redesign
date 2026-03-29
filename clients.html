@@ -1532,10 +1532,19 @@ async function saveFlagMock() {
   showToast('Flag added.', 'success');
 }
 
+function _withTabTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('Request timed out after ' + (ms/1000) + 's')); }, ms);
+    })
+  ]);
+}
+
 async function loadFlagsFromAPI(clientKey) {
   try {
     // flagTypeKey=1 = client-level flags; scoped to this client via plOwnerKey
-    const raw = await API.getFlagsByOwner(clientKey, 1);
+    const raw = await _withTabTimeout(API.getFlagsByOwner(clientKey, 1), 10000);
     // Deduplicate by lFlagKey
     const seen = new Set();
     _currentFlags = (Array.isArray(raw) ? raw : []).filter(f => {
@@ -1548,6 +1557,10 @@ async function loadFlagsFromAPI(clientKey) {
     if (countEl) countEl.textContent = _currentFlags.length;
   } catch (e) {
     console.warn('[TSI Clients] Flag API failed:', e.message);
+    const tbody = document.getElementById('flags-tbody');
+    if (tbody && tbody.querySelector('td[colspan="99"]')) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-size:11px">Could not load flags — try reloading the page.</td></tr>';
+    }
   }
 }
 
@@ -1616,7 +1629,7 @@ function renderContacts(c) {
 
 async function loadContactsFromAPI(clientKey) {
   try {
-    const contacts = await API.getContactsByClient(clientKey);
+    const contacts = await _withTabTimeout(API.getContactsByClient(clientKey), 10000);
     const list = Array.isArray(contacts) ? contacts : [];
     _currentContacts = list;
     renderContactsFromAPI(list);
@@ -1625,6 +1638,10 @@ async function loadContactsFromAPI(clientKey) {
     if (countEl) countEl.textContent = list.length;
   } catch (e) {
     console.warn('[TSI Clients] Contact API failed:', e.message);
+    const tbody = document.getElementById('contacts-tbody');
+    if (tbody && tbody.querySelector('td[colspan="99"]')) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--muted);font-size:11px">Could not load contacts — try reloading the page.</td></tr>';
+    }
   }
 }
 
@@ -2128,6 +2145,18 @@ function showTab(name, el) {
   tab.style.display = (name === 'main') ? 'flex' : 'block';
   el.classList.add('active');
   if (name === 'reportcard') initReportCard();
+  // Show loading indicator for data tabs if content is still pending
+  var LOADING_TABS = ['flags','contacts','activity','departments'];
+  if (LOADING_TABS.indexOf(name) !== -1) {
+    var tbody = tab.querySelector('tbody');
+    if (tbody && tbody.children.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="99" style="padding:24px;text-align:center;color:var(--muted);font-size:11px">' +
+        '<span style="display:inline-flex;align-items:center;gap:6px">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">' +
+        '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>' +
+        'Loading...</span></td></tr>';
+    }
+  }
 }
 
 function filterClients(val) {

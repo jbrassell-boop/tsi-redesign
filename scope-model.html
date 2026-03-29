@@ -53,6 +53,7 @@
     .flag-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
     .flag-yes{background:var(--red)}
     .flag-no{background:#BBF7D0;border:1px solid #81C784}
+    .flag-unknown{background:var(--neutral-200)}
 
     /* Table Footer */
     .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--neutral-50);border-top:1.5px solid var(--border-dk);flex-shrink:0;font-size:11px;color:var(--muted)}
@@ -772,7 +773,7 @@ function renderTable() {
       <td style="text-align:center">${m.linkedParts||0}</td>
       <td style="text-align:center"><span class="${tatClass}">${tatStr}</span></td>
       <td style="text-align:right">${fmtCurrency(m.contractCost)}</td>
-      <td style="text-align:center"><span class="flag-dot ${m.flagCount > 0 ? 'flag-yes' : 'flag-no'}"></span></td>
+      <td style="text-align:center"><span class="flag-dot ${m.flagCount == null ? 'flag-unknown' : m.flagCount > 0 ? 'flag-yes' : 'flag-no'}" title="${m.flagCount == null ? 'Flag status unknown' : m.flagCount > 0 ? 'Has active flags' : 'No flags'}"></span></td>
     </tr>`;
   }).join('');
   const total = filteredModels.length;
