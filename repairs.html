@@ -3823,20 +3823,13 @@ async function jumpToWO(wo) {
   wo = (wo || '').trim().toUpperCase();
   if (!wo) return;
   try {
-    const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
-    const allRepairs = await API.getRepairList(svcKey);
-    const arr = Array.isArray(allRepairs) ? allRepairs : [];
-    const match = arr.find(r => (r.sWorkOrderNumber || '').toUpperCase() === wo);
-    if (match) {
+    // Direct DB lookup — no scanning the full list
+    const woResult = await API.getRepairByWO(wo);
+    const match = Array.isArray(woResult) ? woResult[0] : woResult;
+    if (match && match.lRepairKey) {
       await loadRepair(match.lRepairKey);
     } else {
-      // Try partial match (e.g. user typed "26072001" without prefix)
-      const partial = arr.find(r => (r.sWorkOrderNumber || '').toUpperCase().includes(wo));
-      if (partial) {
-        await loadRepair(partial.lRepairKey);
-      } else {
-        alert('Work order "' + wo + '" not found.');
-      }
+      alert('Work order "' + wo + '" not found.');
     }
   } catch (e) {
     console.error('[TSI Repairs] Jump to WO failed:', e);
@@ -3929,20 +3922,19 @@ async function initPage() {
     if (requestedKey) {
       await loadRepair(parseInt(requestedKey));
     } else if (requestedWO) {
-      // Look up repair by work order number (from dashboard links)
+      // Direct WO# lookup — no scanning the full list
       try {
-        const allRepairs = await API.getRepairList(svcKey);
-        const arr = Array.isArray(allRepairs) ? allRepairs : [];
-        const match = arr.find(r => (r.sWorkOrderNumber || '') === requestedWO);
-        if (match) {
-          await loadRepair(match.lRepairKey);
+        const woResult = await API.getRepairByWO(requestedWO);
+        const woMatch = Array.isArray(woResult) ? woResult[0] : woResult;
+        if (woMatch && woMatch.lRepairKey) {
+          await loadRepair(woMatch.lRepairKey);
         } else {
-          console.warn('[TSI Repairs] WO not found:', requestedWO, '— loading most recent');
-          arr.sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
-          if (arr.length) await loadRepair(arr[0].lRepairKey);
+          console.warn('[TSI Repairs] WO not found via direct lookup:', requestedWO);
+          alert('Work order "' + requestedWO + '" not found.');
         }
       } catch (e) {
         console.error('[TSI Repairs] Error looking up WO:', requestedWO, e);
+        alert('Error looking up work order "' + requestedWO + '".');
       }
     } else {
       const action = params.get('action');

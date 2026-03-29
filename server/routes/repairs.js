@@ -94,6 +94,17 @@ router.get('/Repair/GetAllrepairsBylRepairKey', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Repair/GetByWorkOrder — Direct WO# lookup (no scanning full list)
+router.get('/Repair/GetByWorkOrder', async (req, res, next) => {
+  try {
+    const wo = req.query.wo || req.query.sWorkOrderNumber || '';
+    if (!wo) return res.status(400).json({ error: 'wo parameter required' });
+    const row = await db.queryOne(`${REPAIR_SELECT}
+      WHERE r.sWorkOrderNumber = @wo`, { wo });
+    res.json(row ? [row] : []);
+  } catch (e) { next(e); }
+});
+
 // POST /Repair/GetAllRepairList — Paginated repair list
 router.post('/Repair/GetAllRepairList', async (req, res, next) => {
   try {

@@ -284,6 +284,7 @@ const API = (() => {
   // ── Repair (13) ──────────────────────────────────────
   async function getRepairList(svcKey, deptKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=' + (deptKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairDetail(repairKey, svcKey) { return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
+  async function getRepairByWO(wo) { return get('/Repair/GetByWorkOrder?wo=' + encodeURIComponent(wo)); }
   async function getRepairReasons() { return get('/Repair/GetAllRepairReasons?plRepairReasonKey=0'); }
   async function getDeliveryMethods() { return get('/Repair/GetAllDeliveryMethods'); }
   async function getAllTechs() { return get('/Repair/GetAllTechs'); }
@@ -606,7 +607,7 @@ const API = (() => {
     getModelMaxCharges, addModelMaxCharge, updateModelMaxCharge, deleteModelMaxCharge,
 
     // Repairs
-    getRepairList, getRepairDetail,
+    getRepairList, getRepairDetail, getRepairByWO,
     getRepairReasons, getDeliveryMethods, getAllTechs,
     getPatientSafetyLevels,
     addRepair, updateRepair, deleteRepair,
