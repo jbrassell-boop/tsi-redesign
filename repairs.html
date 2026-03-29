@@ -3985,18 +3985,8 @@ async function initPage() {
         } else {
           nwoRevealCreate();
         }
-      } else {
-        try {
-          const recentList = await API.getRepairList(svcKey);
-          const arr = Array.isArray(recentList) ? recentList : [];
-          arr.sort((a, b) => (b.dtDateIn || '').localeCompare(a.dtDateIn || ''));
-          if (arr.length) {
-            await loadRepair(arr[0].lRepairKey);
-          }
-        } catch (e2) {
-          console.warn('[TSI Repairs] Could not load recent repair:', e2.message);
-        }
       }
+    // No ?wo= or ?key= — stay on idle screen (user navigates here from Dashboard/Work Orders)
     }
   } catch (e) {
     console.warn('[TSI Repairs] API error:', e.message);
