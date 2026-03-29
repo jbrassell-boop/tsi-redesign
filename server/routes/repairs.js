@@ -269,6 +269,213 @@ router.get('/InstrumentRepair/GetByKey', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ── Instrument Repair CRUD ──────────────────────────────
+
+// POST /InstrumentRepair/Add — Create new instrument repair WO
+router.post('/InstrumentRepair/Add', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const result = await db.query(`
+      INSERT INTO tblRepair (lDepartmentKey, lScopeKey, sWorkOrderNumber, dtDateIn, dtDateDue,
+        lRepairStatusID, lServiceLocationKey, sPurchaseOrder, sComplaintDesc, dtLastUpdate)
+      VALUES (@deptKey, 0, @wo, GETDATE(), @dateDue,
+        1, @svcKey, @po, @notes, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lRepairKey`,
+      {
+        deptKey: b.lDepartmentKey || 0,
+        wo: b.sWorkOrderNumber || '',
+        dateDue: b.dtDateDue || null,
+        svcKey: b.lServiceLocationKey || 1,
+        po: b.sPurchaseOrder || '',
+        notes: b.sComplaintDesc || ''
+      });
+    const newKey = result[0] ? result[0].lRepairKey : 0;
+    res.json({ success: true, lRepairKey: newKey, sWorkOrderNumber: b.sWorkOrderNumber || '' });
+  } catch (e) { next(e); }
+});
+
+// POST /InstrumentRepair/Update — Update instrument repair WO
+router.post('/InstrumentRepair/Update', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const repairKey = b.lRepairKey || 0;
+    if (!repairKey) return res.status(400).json({ success: false, error: 'lRepairKey required' });
+
+    // Store QC data as [QC_DATA]{...} block appended to mCommentsISO
+    let qcBlock = null;
+    if (b.qcData) {
+      const json = typeof b.qcData === 'string' ? b.qcData : JSON.stringify(b.qcData);
+      qcBlock = `[QC_DATA]${json}`;
+    }
+
+    await db.query(`
+      UPDATE tblRepair SET
+        lRepairStatusID = ISNULL(@statusId, lRepairStatusID),
+        dtDateIn        = ISNULL(@dateIn,   dtDateIn),
+        dtDateDue       = ISNULL(@dateDue,  dtDateDue),
+        dtDateOut       = ISNULL(@dateOut,  dtDateOut),
+        sPurchaseOrder  = ISNULL(@po,       sPurchaseOrder),
+        sComplaintDesc  = ISNULL(@notes,    sComplaintDesc),
+        sRackPosition   = ISNULL(@rack,     sRackPosition),
+        mCommentsISO    = CASE
+                            WHEN @qcBlock IS NOT NULL THEN
+                              CASE WHEN mCommentsISO IS NULL THEN @qcBlock
+                                   ELSE CAST(mCommentsISO AS nvarchar(MAX)) + CHAR(10) + @qcBlock
+                              END
+                            ELSE mCommentsISO
+                          END,
+        dtLastUpdate    = GETDATE()
+      WHERE lRepairKey = @repairKey`,
+      {
+        repairKey,
+        statusId: b.lRepairStatusID != null ? b.lRepairStatusID : null,
+        dateIn:   b.dtDateIn   || null,
+        dateDue:  b.dtDateDue  || null,
+        dateOut:  b.dtDateOut  || null,
+        po:       b.sPurchaseOrder   || null,
+        notes:    b.sComplaintDesc   || null,
+        rack:     b.sRackPosition    || null,
+        qcBlock
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /InstrumentRepair/Delete — Delete instrument repair and related records
+router.delete('/InstrumentRepair/Delete', async (req, res, next) => {
+  try {
+    const repairKey = parseInt(req.query.lRepairKey || req.query.plRepairKey) || 0;
+    if (!repairKey) return res.status(400).json({ success: false, error: 'lRepairKey required' });
+    await db.query('DELETE FROM tblRepairItemTran WHERE lRepairKey = @repairKey', { repairKey });
+    await db.query('DELETE FROM tblStatusTran WHERE lRepairKey = @repairKey', { repairKey });
+    await db.query('DELETE FROM tblRepair WHERE lRepairKey = @repairKey', { repairKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// ── Instrument Repair Item CRUD ─────────────────────────
+
+// POST /InstrumentRepair/AddItem — Add a line item to an instrument repair
+router.post('/InstrumentRepair/AddItem', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const repairKey = b.lRepairKey || 0;
+    if (!repairKey) return res.status(400).json({ success: false, error: 'lRepairKey required' });
+    const itemKey = b.lRepairItemKey || 0;
+    const price = parseFloat(b.nUnitCost || b.dblRepairPrice) || 0;
+
+    const result = await db.query(`
+      INSERT INTO tblRepairItemTran (lRepairKey, lRepairItemKey, dblRepairPrice,
+        sApproved, sInitials, sComments, sPrimaryRepair)
+      VALUES (@repairKey, @itemKey, @price,
+        'N', @inits, @comments, '');
+      SELECT SCOPE_IDENTITY() AS lRepairItemTranKey`,
+      {
+        repairKey,
+        itemKey,
+        price,
+        inits:    b.sInitials || '',
+        comments: b.sComments || ''
+      });
+    const newKey = result[0] ? result[0].lRepairItemTranKey : 0;
+    res.json({ success: true, lRepairItemTranKey: newKey });
+  } catch (e) { next(e); }
+});
+
+// POST /InstrumentRepair/UpdateItem — Update a line item on an instrument repair
+router.post('/InstrumentRepair/UpdateItem', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const tranKey = b.lRepairItemTranKey || 0;
+    if (!tranKey) return res.status(400).json({ success: false, error: 'lRepairItemTranKey required' });
+    await db.query(`
+      UPDATE tblRepairItemTran SET
+        dblRepairPrice = ISNULL(@price,    dblRepairPrice),
+        sComments      = ISNULL(@comments, sComments),
+        sInitials      = ISNULL(@inits,    sInitials),
+        sApproved      = ISNULL(@approved, sApproved)
+      WHERE lRepairItemTranKey = @tranKey`,
+      {
+        tranKey,
+        price:    b.nUnitCost != null ? parseFloat(b.nUnitCost) : (b.dblRepairPrice != null ? parseFloat(b.dblRepairPrice) : null),
+        comments: b.sComments  || null,
+        inits:    b.sInitials  || null,
+        approved: b.sApproved  || null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /InstrumentRepair/DeleteItem — Remove a line item from an instrument repair
+router.delete('/InstrumentRepair/DeleteItem', async (req, res, next) => {
+  try {
+    const tranKey = parseInt(req.query.lRepairItemTranKey) || 0;
+    if (!tranKey) return res.status(400).json({ success: false, error: 'lRepairItemTranKey required' });
+    await db.query('DELETE FROM tblRepairItemTran WHERE lRepairItemTranKey = @tranKey', { tranKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /InstrumentRepair/BatchUpdateItems — Bulk-update line items (e.g. assign tech, approve all)
+router.post('/InstrumentRepair/BatchUpdateItems', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const keys = Array.isArray(b.lRepairItemTranKeys) ? b.lRepairItemTranKeys : [];
+    const updates = b.updates || {};
+    if (!keys.length) return res.status(400).json({ success: false, error: 'lRepairItemTranKeys[] required' });
+
+    const setParts = [];
+    const params = {};
+    if (updates.sInitials  != null) { setParts.push('sInitials = @inits');    params.inits    = updates.sInitials; }
+    if (updates.sApproved  != null) { setParts.push('sApproved = @approved'); params.approved = updates.sApproved; }
+    if (updates.sComments  != null) { setParts.push('sComments = @comments'); params.comments = updates.sComments; }
+    if (updates.nUnitCost  != null) { setParts.push('dblRepairPrice = @price'); params.price  = parseFloat(updates.nUnitCost); }
+    if (!setParts.length) return res.status(400).json({ success: false, error: 'No updatable fields in updates{}' });
+
+    // Build parameterized IN list
+    const inParams = keys.map((k, i) => { params[`k${i}`] = parseInt(k) || 0; return `@k${i}`; }).join(',');
+    await db.query(
+      `UPDATE tblRepairItemTran SET ${setParts.join(', ')} WHERE lRepairItemTranKey IN (${inParams})`,
+      params
+    );
+    res.json({ success: true, updated: keys.length });
+  } catch (e) { next(e); }
+});
+
+// ── Instrument Code Catalog ─────────────────────────────
+
+// GET /InstrumentCode/GetAll — All active instrument repair codes
+// tblRepairItem.sRigidOrFlexible: 'I' = instrument, NULL/'' = general
+router.get('/InstrumentCode/GetAll', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT lRepairItemKey, sItemDescription, nUnitCost, sRigidOrFlexible,
+        sMajorRepair, sProductID, sTSICode
+      FROM tblRepairItem
+      WHERE bActive = 1
+        AND (sRigidOrFlexible = 'I' OR sRigidOrFlexible IS NULL OR sRigidOrFlexible = '')
+      ORDER BY sItemDescription`, {});
+    res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+});
+
+// GET /InstrumentCode/Search — Search instrument repair codes by description or product ID
+router.get('/InstrumentCode/Search', async (req, res, next) => {
+  try {
+    const query = req.query.psQuery || '';
+    if (!query) return res.json({ success: true, data: [] });
+    const rows = await db.query(`
+      SELECT TOP 50 lRepairItemKey, sItemDescription, nUnitCost, sRigidOrFlexible,
+        sMajorRepair, sProductID, sTSICode
+      FROM tblRepairItem
+      WHERE bActive = 1
+        AND (sRigidOrFlexible = 'I' OR sRigidOrFlexible IS NULL OR sRigidOrFlexible = '')
+        AND (sItemDescription LIKE '%' + @q + '%' OR sProductID LIKE '%' + @q + '%')
+      ORDER BY sItemDescription`, { q: query });
+    res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+});
+
 // POST /Repair/FlagForRevisedQuote — Flag a repair as needing a revised quote
 // tblRepair has no bReviseQuote column. Uses bHotList=1 + [REVISED QUOTE] ISO comment tag.
 router.post('/Repair/FlagForRevisedQuote', async (req, res, next) => {

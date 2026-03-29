@@ -90,18 +90,42 @@ async function ir_initPage() {
   var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
   try {
     var data = await API.getInstrumentRepairs(svcKey);
-    ir_allRepairs = (Array.isArray(data) ? data : (data.data || [])).map(function(r) { return JSON.parse(JSON.stringify(r)); });
+    var raw = Array.isArray(data) ? data : (data.data || data.dataSource || []);
+    ir_allRepairs = raw.map(function(r) {
+      return {
+        lRepairKey:      r.lRepairKey,
+        lInstrRepairKey: r.lRepairKey,
+        id:              r.lRepairKey,
+        orderNum:        r.sWorkOrderNumber || '',
+        status:          r.sRepairStatus || 'Received',
+        clientKey:       r.lClientKey,
+        clientName:      r.sShipName1 || r.sClientName1 || r.sBillName1 || '',
+        deptKey:         r.lDepartmentKey,
+        deptName:        r.sDepartmentName || r.sShipName2 || '',
+        dateReceived:    r.dtDateIn ? r.dtDateIn.split('T')[0] : '',
+        dateDue:         r.dtDateDue ? r.dtDateDue.split('T')[0] : '',
+        dateCompleted:   r.dtDateOut ? r.dtDateOut.split('T')[0] : null,
+        poNumber:        r.sPurchaseOrder || r.sPONumber || '',
+        quoteRef:        r.sCustomerRefNumber || '',
+        techAssigned:    r.sTechName || '',
+        notes:           r.sComplaintDesc || '',
+        rackNumber:      r.sRackPosition || '',
+        claimedCount:    null,
+        cleanOnReceipt:  false,
+        shipContainer:   false,
+        items:           [],
+        comments:        [],
+        history:         [],
+        techQC:          {},
+        commercialQC:    {}
+      };
+    });
   } catch(e) { ir_allRepairs = []; }
   // Also load instrument codes for the picker
   try {
     var codes = await API.getInstrumentCodes();
     ir_instrCodes = Array.isArray(codes) ? codes : (codes.data || []);
   } catch(e) { ir_instrCodes = []; }
-  ir_allRepairs.forEach(function(r) {
-    if (!r.comments) r.comments = [];
-    if (!r.history) r.history = [];
-    if (!r.items) r.items = [];
-  });
   ir_applyFilters();
   ir_renderListPanel();
   if (ir_filtered.length) ir_selectRepair(ir_filtered[0].id || ir_filtered[0].lInstrRepairKey);
@@ -212,7 +236,7 @@ function ir_toggleListPanel() {
 }
 
 // ─── Selection ────────────────────────────────────────────────────────────────
-function ir_selectRepair(id) {
+async function ir_selectRepair(id) {
   var r = ir_allRepairs.find(function(x){ return (x.lInstrRepairKey || x.id) === id; });
   if (!r) return;
   // Save any pending changes from previously selected repair
@@ -228,6 +252,36 @@ function ir_selectRepair(id) {
   // Hide empty state
   var emptyEl = document.getElementById('emptyInstruments');
   if (emptyEl) emptyEl.style.display = 'none';
+  // Load items from API if not already loaded
+  if (r.lRepairKey && (!r._itemsLoaded)) {
+    try {
+      var itemData = await API.getRepairItems(r.lRepairKey);
+      var rawItems = Array.isArray(itemData) ? itemData : (itemData && (itemData.dataSource || itemData.data) ? (itemData.dataSource || itemData.data) : []);
+      r.items = rawItems.map(function(ri) {
+        return {
+          lRepairItemTranKey: ri.lRepairItemTranKey,
+          instrCode:          ri.sTSICode || ri.sRepairCode || '',
+          mfr:                ri.sManufacturer || '',
+          model:              ri.sModel || '',
+          serial:             ri.sSerialNumber || 'N/A',
+          description:        ri.sItemDescription || ri.sDescription || '',
+          category:           ri.sCategory || 'Uncategorized',
+          sCategory:          ri.sCategory || 'Uncategorized',
+          repairLevel:        ri.nRepairLevel || null,
+          amount:             parseFloat(ri.dblRepairPrice || ri.nUnitCost || 0),
+          status:             ri.sApproved === 'Y' ? 'Complete' : 'Received',
+          outsource:          false,
+          outsourceVendor:    '',
+          outsourceCost:      0,
+          techNote:           ri.sComments || '',
+          repairsNeeded:      [],
+          ber:                false,
+          sTechInits:         ri.sInitials || ri.sTechInits || ''
+        };
+      });
+      r._itemsLoaded = true;
+    } catch(e) { console.warn('[IR] Items load failed:', e.message); }
+  }
   // Populate everything
   ir_populateDetail();
   ir_renderListPanel();
@@ -424,7 +478,7 @@ function ir_renderItemsTab() {
       var repairsStr = rn.join(', ') || '—';
       html += '<tr style="' + berBorder + '" data-idx="' + idx + '">' +
         '<td><span style="font-family:monospace;font-size:10.5px;color:var(--blue)">' + ir_esc(item.instrCode) + '</span>' +
-          (isBer ? ' <span style="font-size:8px;color:var(--red);font-weight:700">BER</span>' : '') + '</td>' +
+          ' <span style="font-size:8px;color:' + (isBer ? 'var(--red)' : 'var(--neutral-300,#d1d5db)') + ';font-weight:700;cursor:pointer" onclick="event.stopPropagation();ir_toggleBer(' + idx + ')" title="Toggle BER">' + (isBer ? 'BER' : 'BER') + '</span></td>' +
         '<td class="ir-editable" data-field="mfr" data-idx="' + idx + '" onclick="ir_inlineEdit(this)" title="Click to edit">' +
           '<span style="font-size:10.5px;font-weight:600;color:var(--navy)">' + ir_esc(item.mfr || '—') + '</span></td>' +
         '<td class="ir-editable" data-field="model" data-idx="' + idx + '" onclick="ir_inlineEdit(this)" title="Click to edit">' +
@@ -437,7 +491,7 @@ function ir_renderItemsTab() {
         '<td style="text-align:center"><span class="ir-lvl-badge">' + lvlLabel + '</span></td>' +
         '<td style="' + amtStyle + '">' + (item.amount > 0 ? fmtCur(item.amount) : '<span style="color:var(--muted)">&mdash;</span>') + '</td>' +
         '<td>' + (item.outsource ? '<span class="ir-out-dot" title="Outsourced to: ' + ir_esc(item.outsourceVendor||'TBD') + '">&#x21A5;</span>' : '') + '</td>' +
-        '<td>' + ir_itemStatusBadge(item.status) + '</td>' +
+        '<td style="cursor:pointer" onclick="ir_cycleItemStatus(' + idx + ')" title="Click to cycle status">' + ir_itemStatusBadge(item.status) + '</td>' +
         '<td><button class="del-btn" onclick="ir_removeItem(' + idx + ')" title="Remove">&#x2715;</button></td>' +
         '</tr>';
     });
@@ -821,7 +875,7 @@ function ir_aiPickCode(code) {
   ir_aiFilterCodes(searchEl ? searchEl.value : '');
 }
 
-function ir_saveAddItem(keepOpen) {
+async function ir_saveAddItem(keepOpen) {
   var r = ir_currentRepair;
   if (!r) return;
   var isBer = document.getElementById('ir_aiBer').checked;
@@ -841,7 +895,7 @@ function ir_saveAddItem(keepOpen) {
 
   for (var q = 0; q < qty; q++) {
     var newId = r.items.length ? Math.max.apply(null, r.items.map(function(i){ return i.id || 0; })) + 1 : 1;
-    r.items.push({
+    var newItem = {
       id: newId,
       instrCode: baseCode,
       mfr: mfr,
@@ -860,7 +914,21 @@ function ir_saveAddItem(keepOpen) {
       repairsNeeded: repairChips,
       ber: isBer,
       berFindings: isBer ? document.getElementById('ir_aiBerFindings').value : ''
-    });
+    };
+    r.items.push(newItem);
+    try {
+      var itemResult = await API.post('/InstrumentRepair/AddItem', {
+        plRepairKey:    r.lRepairKey || r.lInstrRepairKey,
+        plRepairItemKey: ir_aiSelectedCode ? ir_aiSelectedCode.lRepairItemKey : null,
+        psComments:     document.getElementById('ir_aiNotes').value,
+        pnUnitCost:     baseAmt,
+        psInitials:     '',
+        plQuantity:     1
+      });
+      if (itemResult && itemResult.lRepairItemTranKey) {
+        newItem.lRepairItemTranKey = itemResult.lRepairItemTranKey;
+      }
+    } catch(e) { console.warn('[IR] AddItem failed:', e.message); }
   }
 
   ir_aiAddedCount += qty;
@@ -877,9 +945,15 @@ function ir_saveAddItem(keepOpen) {
   }
 }
 
-function ir_removeItem(idx) {
+async function ir_removeItem(idx) {
   var r = ir_currentRepair;
   if (!r) return;
+  var item = r.items[idx];
+  if (item && item.lRepairItemTranKey) {
+    try {
+      await API.del('/InstrumentRepair/DeleteItem?plRepairItemTranKey=' + item.lRepairItemTranKey);
+    } catch(e) { console.warn('[IR] DeleteItem failed:', e.message); }
+  }
   r.items.splice(idx, 1);
   ir_markDirty(); ir_renderItemsTab(); ir_renderOutsourceTab(); ir_renderFinancialsTab(); ir_updateRefStrip();
 }
@@ -924,7 +998,19 @@ async function ir_saveRepair(silent) {
 
   // Persist via API — only clear dirty flag and show Saved on success
   try {
-    await API.updateInstrumentRepair(r);
+    var statusIdMap = { 'Received': 1, 'In Progress': 3, 'Complete': 6, 'Invoiced': 8, 'On Hold': 5, 'Outsourced': 4 };
+    var payload = {
+      plRepairKey:      r.lRepairKey || r.lInstrRepairKey,
+      plRepairStatusID: statusIdMap[r.status] || 1,
+      pdtDateIn:        r.dateReceived,
+      pdtDateDue:       r.dateDue,
+      pdtDateOut:       r.dateCompleted || null,
+      psPurchaseOrder:  r.poNumber,
+      psNotes:          r.notes,
+      psRackPosition:   r.rackNumber,
+      psQCData:         JSON.stringify({ techQC: r.techQC || {}, commercialQC: r.commercialQC || {} })
+    };
+    await API.updateInstrumentRepair(payload);
   } catch(e) {
     ir_setSaveStatus('dirty', 'Save failed');
     return;
@@ -975,6 +1061,10 @@ function ir_deleteRepair(btn) {
   if (!btn) return;
   if (btn.dataset.confirming) {
     var rKey = r.lInstrRepairKey || r.id;
+    var repairKey = r.lRepairKey || rKey;
+    if (repairKey) {
+      API.deleteInstrumentRepair(repairKey).catch(function(e) { console.warn('[IR] Delete failed:', e.message); });
+    }
     ir_allRepairs = ir_allRepairs.filter(function(x){ return (x.lInstrRepairKey || x.id) !== rKey; });
     ir_deselectRepair(); ir_applyFilters(); ir_updateKPIs();
     return;
@@ -1116,7 +1206,7 @@ function ir_wizRenderSummary() {
   document.getElementById('ir_wDateDue').value   = due.toISOString().split('T')[0];
 }
 
-function ir_wizCreate() {
+async function ir_wizCreate() {
   if (!ir_wizClient || !ir_wizDept) return;
   var now = new Date();
   var yy  = String(now.getFullYear()).slice(-2);
@@ -1124,28 +1214,87 @@ function ir_wizCreate() {
   var prefix = (ir_wizDept && ir_wizDept.lServiceLocationKey === 2) ? 'SR' : 'NR';
   var num = prefix + yy + String(doy).padStart(3,'0') + String(ir_nextOrderNum++).padStart(4,'0');
   var newR = {
-    id:          Date.now(),
-    orderNum:    num,
-    status:      'Received',
-    clientKey:   ir_wizClient.lClientKey,
-    clientName:  ir_wizClient.sClientName1,
-    deptKey:     ir_wizDept.lDepartmentKey,
-    deptName:    ir_wizDept.sDepartmentName,
+    id:           Date.now(),
+    lRepairKey:   null,
+    lInstrRepairKey: null,
+    orderNum:     num,
+    status:       'Received',
+    clientKey:    ir_wizClient.lClientKey,
+    clientName:   ir_wizClient.sClientName1 || ir_wizClient.psClientName1 || '',
+    deptKey:      ir_wizDept.lDepartmentKey,
+    deptName:     ir_wizDept.sDepartmentName || ir_wizDept.psDepartmentName || '',
     dateReceived: now.toISOString().split('T')[0],
     dateDue:      document.getElementById('ir_wDateDue').value,
-    dateCompleted:null,
+    dateCompleted: null,
     poNumber:     document.getElementById('ir_wPoNumber').value,
     quoteRef:     document.getElementById('ir_wQuoteRef').value,
     techAssigned: '',
     notes:        document.getElementById('ir_wClaimedDesc').value ? 'Customer says: ' + document.getElementById('ir_wClaimedDesc').value : '',
+    rackNumber:   '',
+    claimedCount: null,
+    cleanOnReceipt: false,
+    shipContainer:  false,
     items:        [],
     comments:     [],
-    history:      [{ts: now.toISOString(), action: 'Order created', from: null, to: 'Received'}]
+    history:      [{ts: now.toISOString(), action: 'Order created', from: null, to: 'Received'}],
+    techQC:       {},
+    commercialQC: {},
+    _itemsLoaded: true
   };
+  try {
+    var result = await API.addInstrumentRepair({
+      plClientKey:         ir_wizClient.lClientKey,
+      plDepartmentKey:     ir_wizDept.lDepartmentKey,
+      plServiceLocationKey: ir_wizDept.lServiceLocationKey || parseInt(localStorage.getItem('tsi_svcLocation') || '1'),
+      psWorkOrderNumber:   num,
+      pdtDateIn:           now.toISOString().split('T')[0],
+      pdtDateDue:          document.getElementById('ir_wDateDue').value,
+      psPurchaseOrder:     document.getElementById('ir_wPoNumber').value,
+      psNotes:             document.getElementById('ir_wClaimedDesc').value ? 'Customer says: ' + document.getElementById('ir_wClaimedDesc').value : ''
+    });
+    var returnedKey = (result && (result.lRepairKey || (result.data && result.data.lRepairKey))) || null;
+    if (returnedKey) {
+      newR.lRepairKey = returnedKey;
+      newR.lInstrRepairKey = returnedKey;
+      newR.id = returnedKey;
+    }
+  } catch(e) {
+    console.warn('[IR] Create failed:', e.message);
+  }
   ir_allRepairs.unshift(newR);
   ir_closeWiz();
   ir_applyFilters(); ir_updateKPIs();
   setTimeout(function(){ ir_selectRepair(newR.id); }, 100);
+}
+
+// ─── Item Status Cycle & BER Toggle ──────────────────────────────────────────
+function ir_cycleItemStatus(idx) {
+  var r = ir_currentRepair;
+  if (!r || !r.items[idx]) return;
+  var item = r.items[idx];
+  var cycle = ['Received', 'In Progress', 'Complete'];
+  var curIdx = cycle.indexOf(item.status);
+  item.status = cycle[(curIdx + 1) % cycle.length];
+  ir_markDirty();
+  ir_renderItemsTab();
+  ir_renderOutsourceTab();
+  ir_renderFinancialsTab();
+}
+
+function ir_toggleBer(idx) {
+  var r = ir_currentRepair;
+  if (!r || !r.items[idx]) return;
+  var item = r.items[idx];
+  item.ber = !item.ber;
+  if (item.ber) {
+    item._origAmount = item.amount;
+    item.amount = 0;
+  } else {
+    item.amount = item._origAmount || 0;
+  }
+  ir_markDirty();
+  ir_renderItemsTab();
+  ir_renderFinancialsTab();
 }
 
 // ─── QC Tab ────────────────────────────────────────────────────────────────────
@@ -1408,3 +1557,7 @@ ir_populateDetail = function() {
   var techEl = document.getElementById('ir_ssTech');
   if (techEl) techEl.value = r.techAssigned || '';
 };
+
+// ─── Window exports (called from HTML onclick handlers) ──────────────────────
+window.ir_cycleItemStatus = ir_cycleItemStatus;
+window.ir_toggleBer       = ir_toggleBer;
