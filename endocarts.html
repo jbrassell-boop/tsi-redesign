@@ -911,31 +911,43 @@ function ctxAction(action) {
   document.getElementById('ctxMenu').style.display = 'none';
   var quote = allQuotes.find(function(q) { return q.lQuoteKey === ctxKey; });
   if (!quote) return;
+  var statusMap = { 'Draft': 1, 'Quoted': 2, 'Approved': 3, 'Billed': 6, 'Cancelled': 9 };
+  function persistStatus(q, newStatus) {
+    q.status = newStatus;
+    if (q.lRepairKey) {
+      API.updateEndoCartQuote({ lRepairKey: q.lRepairKey, lRepairStatusID: statusMap[newStatus] || 1 })
+        .catch(function(e) { console.warn('[EndoCarts] Status update failed:', e.message); });
+    }
+  }
+
   switch(action) {
     case 'view': openDrawer(ctxKey); break;
     case 'edit': openDrawer(ctxKey); break;
     case 'toQuoted':
-      quote.status = 'Quoted';
       quote.dateQuoted = new Date().toISOString().slice(0,10);
+      persistStatus(quote, 'Quoted');
       runPipeline();
       if (selectedQuoteKey === ctxKey) populateDrawer(quote);
       break;
     case 'approve':
-      quote.status = 'Approved';
+      persistStatus(quote, 'Approved');
       runPipeline();
       if (selectedQuoteKey === ctxKey) populateDrawer(quote);
       break;
     case 'bill':
-      quote.status = 'Billed';
+      persistStatus(quote, 'Billed');
       runPipeline();
       if (selectedQuoteKey === ctxKey) populateDrawer(quote);
       break;
     case 'cancel':
-      quote.status = 'Cancelled';
+      persistStatus(quote, 'Cancelled');
       runPipeline();
       if (selectedQuoteKey === ctxKey) populateDrawer(quote);
       break;
     case 'delete':
+      if (quote.lRepairKey) {
+        API.deleteEndoCartQuote(quote.lRepairKey).catch(function(e) { console.warn('[EndoCarts] Delete failed:', e.message); });
+      }
       allQuotes = allQuotes.filter(function(q) { return q.lQuoteKey !== ctxKey; });
       if (selectedQuoteKey === ctxKey) closeDrawer();
       runPipeline();
@@ -944,10 +956,28 @@ function ctxAction(action) {
 }
 
 /* ─── DRAWER ─── */
-function openDrawer(key) {
+async function openDrawer(key) {
   selectedQuoteKey = key;
   var quote = allQuotes.find(function(q) { return q.lQuoteKey === key; });
   if (!quote) return;
+  if (quote.lRepairKey && !quote._itemsLoaded) {
+    try {
+      var itemData = await API.getEndoCartItems(quote.lRepairKey);
+      var rawItems = Array.isArray(itemData) ? itemData : (itemData && itemData.data ? itemData.data : []);
+      quote.items = rawItems.map(function(ri) {
+        return {
+          lRepairItemTranKey: ri.lRepairItemTranKey,
+          partNum: ri.sProductID || '',
+          desc: ri.sItemDescription || '',
+          qty: 1,
+          unitCost: parseFloat(ri.dblRepairPrice) || parseFloat(ri.nCatalogPrice) || 0
+        };
+      });
+      quote.itemCount = quote.items.length;
+      quote.total = quote.items.reduce(function(s,i) { return s + i.qty * i.unitCost; }, 0);
+      quote._itemsLoaded = true;
+    } catch(e) { console.warn('[EndoCarts] Items load failed:', e.message); }
+  }
   populateDrawer(quote);
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
@@ -1119,6 +1149,14 @@ function saveNotes() {
   }
   quote.notes = document.getElementById('fNotes').value;
   isDirty = false;
+  if (quote.lRepairKey) {
+    API.updateEndoCartQuote({
+      lRepairKey: quote.lRepairKey,
+      sComplaintDesc: quote.notes,
+      dblAmtRepair: quote.total,
+      dblAmtShipping: quote.shipCost
+    }).catch(function(e) { console.warn('[EndoCarts] Save failed:', e.message); });
+  }
   setTimeout(function() {
     var now = new Date();
     document.getElementById('drawerSaveStatus').textContent = 'Saved at ' + now.toLocaleTimeString();
@@ -1168,7 +1206,7 @@ function populateModalDepts() {
   }
 }
 
-function createQuote() {
+async function createQuote() {
   var clientKey = parseInt(document.getElementById('mClient').value);
   var client = clientData.find(function(c) { return c.key === clientKey; });
   if (!client) { alert('Please select a client.'); return; }
@@ -1203,10 +1241,40 @@ function createQuote() {
     itemCount: items.length,
     total: total
   };
+
+  try {
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+    var prefix = svcKey === 2 ? 'SK' : 'NK';
+    var now = new Date();
+    var yy = String(now.getFullYear()).slice(-2);
+    var doy = Math.ceil((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    var woNum = prefix + yy + String(doy).padStart(3,'0') + String(Math.floor(Math.random()*9000+1000));
+
+    var result = await API.addEndoCartQuote({
+      lDepartmentKey: parseInt(document.getElementById('mDept').value) || 0,
+      sWorkOrderNumber: woNum,
+      dtDateIn: now.toISOString().split('T')[0],
+      sPurchaseOrder: '',
+      sComplaintDesc: document.getElementById('mNotes').value || '',
+      lSalesRepKey: 0,
+      lServiceLocationKey: svcKey
+    });
+    newQuote.lRepairKey = result.lRepairKey;
+    newQuote.lQuoteKey = result.lRepairKey;
+    newQuote.quoteNum = result.sWorkOrderNumber || woNum;
+
+    if (items.length && result.lRepairKey) {
+      await API.bulkAddEndoCartItems({
+        lRepairKey: result.lRepairKey,
+        items: items.map(function(i) { return { lRepairItemKey: 0, dblRepairPrice: i.unitCost * i.qty, sComments: i.desc }; })
+      });
+    }
+  } catch(e) { console.warn('[EndoCarts] Create failed:', e.message); }
+
   allQuotes.unshift(newQuote);
   closeNewQuoteModal();
   runPipeline();
-  openDrawer(nextKey);
+  openDrawer(newQuote.lQuoteKey);
 }
 
 /* ─── SUB-TAB SWITCHING ─── */
@@ -1323,34 +1391,83 @@ function showDataBadge(live) {
   badge.style.fontWeight = '600';
 }
 
+/* ─── STATUS MAPPING ─── */
+function mapCartStatus(statusId, statusName) {
+  var id = parseInt(statusId) || 0;
+  if (id <= 1) return 'Draft';
+  if (id === 2 || /waiting.*inspection/i.test(statusName)) return 'Quoted';
+  if (id >= 3 && id <= 5) return 'Approved';
+  if (id >= 6 && id <= 8) return 'Billed';
+  if (id === 9 || /cancel|decline/i.test(statusName)) return 'Cancelled';
+  return statusName || 'Draft';
+}
+
 /* ─── INIT ─── */
 async function init() {
   if (!API.requireAuth()) return;
-  try { throw new Error('no-api'); } catch(e) {
+  var isLiveLoad = false;
+  try {
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '1');
+    var rawQuotes = await API.getEndoCartQuotes(svcKey);
+    var quotesList = Array.isArray(rawQuotes) ? rawQuotes : (rawQuotes && rawQuotes.data ? rawQuotes.data : []);
+    allQuotes = quotesList.map(function(r) {
+      return {
+        lQuoteKey: r.lRepairKey,
+        lRepairKey: r.lRepairKey,
+        quoteNum: r.sWorkOrderNumber || '',
+        clientKey: r.lDepartmentKey,
+        clientName: r.sClientName || r.sShipName1 || '',
+        deptName: r.sDepartmentName || '',
+        deptKey: r.lDepartmentKey,
+        cartModel: '',
+        salesRep: r.sSalesRepName || '',
+        lSalesRepKey: r.lSalesRepKey,
+        dateCreated: r.dtDateIn ? r.dtDateIn.split('T')[0] : '',
+        dateQuoted: r.dtDateOut ? r.dtDateOut.split('T')[0] : '',
+        status: mapCartStatus(r.lRepairStatusID, r.sRepairStatus),
+        notes: r.sComplaintDesc || '',
+        items: [],
+        itemCount: 0,
+        total: parseFloat(r.dblAmtRepair) || 0,
+        shipCost: parseFloat(r.dblAmtShipping) || 0,
+        discount: 0,
+        shipAddress: { name1: r.sClientName || '', addr1: r.sShipAddr1 || '', city: r.sShipCity || '', state: r.sShipState || '', zip: r.sShipZip || '' },
+        billAddress: { name1: r.sClientName || '', addr1: r.sBillAddr1 || '', city: r.sBillCity || '', state: r.sBillState || '', zip: r.sBillZip || '' },
+        paymentTerms: '',
+        pricingCat: ''
+      };
+    });
+    isLiveLoad = true;
+    isLive = true;
+  } catch(e) {
+    console.warn('[EndoCarts] API unavailable, using demo data:', e.message);
     allQuotes = getDemoQuotes();
-    allCatalog = getDemoCatalog();
-    allModels = getDemoModels();
     isLive = false;
   }
-  // Seed address + payment data onto demo quotes
-  var demoAddresses = {
-    1: { ship:{name1:'Northside Hospital',name2:'Endoscopy Suite',attn:'Dr. Sarah Mitchell',addr1:'1800 Orleans St',addr2:'Blalock Building, 4th Floor',city:'Baltimore',state:'MD',zip:'21287'}, bill:{name1:'Northside Health System',name2:'Accounts Payable',addr1:'733 N Broadway',addr2:'',city:'Baltimore',state:'MD',zip:'21205',email:'ap@northsidehosp.org'}, paymentTerms:'Net 30', pricingCat:'Contract' },
-    2: { ship:{name1:'Metro Health Hospital',name2:'Surgery Department',attn:'Lisa Chang, RN',addr1:'9500 Euclid Ave',addr2:'A-Building, 2nd Floor',city:'Cleveland',state:'OH',zip:'44195'}, bill:{name1:'Metro Health Foundation',name2:'Purchasing',addr1:'9500 Euclid Ave',addr2:'Mail Code JJN3-01',city:'Cleveland',state:'OH',zip:'44195',email:'purchasing@metrohealthhosp.org'}, paymentTerms:'Net 45', pricingCat:'GPO' },
-    3: { ship:{name1:'Memorial Hermann',name2:'Pulmonology',attn:'James Peters, MD',addr1:'200 First St SW',addr2:'Mary Brigh Building',city:'Rochester',state:'MN',zip:'55905'}, bill:{name1:'Memorial Hermann',name2:'Finance - AP',addr1:'200 First St SW',addr2:'Siebens Building, 10th Floor',city:'Rochester',state:'MN',zip:'55905',email:'ap@memorialhermann.org'}, paymentTerms:'Net 30', pricingCat:'Standard' },
-    4: { ship:{name1:'HCA Florida West Kendall',name2:'Endoscopy Center',attn:'Maria Gonzalez',addr1:'9555 SW 162nd Ave',addr2:'',city:'Miami',state:'FL',zip:'33196'}, bill:{name1:'HCA Healthcare',name2:'Accounts Payable',addr1:'One Park Plaza',addr2:'',city:'Nashville',state:'TN',zip:'37203',email:'ap@hcahealthcare.com'}, paymentTerms:'Net 60', pricingCat:'GPO' },
-    5: { ship:{name1:'Piedmont Healthcare',name2:'Bronchoscopy Lab',attn:'Dr. Alan Park',addr1:'8700 Beverly Blvd',addr2:'South Tower, Suite 6732',city:'Los Angeles',state:'CA',zip:'90048'}, bill:{name1:'Piedmont Health System',name2:'Procurement',addr1:'8700 Beverly Blvd',addr2:'Plaza Level',city:'Los Angeles',state:'CA',zip:'90048',email:'procurement@piedmonthc.org'}, paymentTerms:'Net 30', pricingCat:'Contract' }
-  };
-  allQuotes.forEach(function(q) {
-    q.itemCount = q.items.length;
-    q.total = q.items.reduce(function(s,i){ return s + i.qty * i.unitCost; }, 0);
-    var addr = demoAddresses[q.clientKey];
-    if (addr) {
-      q.shipAddress = addr.ship;
-      q.billAddress = addr.bill;
-      q.paymentTerms = addr.paymentTerms;
-      q.pricingCat = addr.pricingCat;
-    }
-  });
+  // Keep catalog and models as hardcoded (no DB catalog for cart components)
+  allCatalog = getDemoCatalog();
+  allModels = getDemoModels();
+  // Seed address + payment data onto demo quotes only
+  if (!isLive) {
+    var demoAddresses = {
+      1: { ship:{name1:'Northside Hospital',name2:'Endoscopy Suite',attn:'Dr. Sarah Mitchell',addr1:'1800 Orleans St',addr2:'Blalock Building, 4th Floor',city:'Baltimore',state:'MD',zip:'21287'}, bill:{name1:'Northside Health System',name2:'Accounts Payable',addr1:'733 N Broadway',addr2:'',city:'Baltimore',state:'MD',zip:'21205',email:'ap@northsidehosp.org'}, paymentTerms:'Net 30', pricingCat:'Contract' },
+      2: { ship:{name1:'Metro Health Hospital',name2:'Surgery Department',attn:'Lisa Chang, RN',addr1:'9500 Euclid Ave',addr2:'A-Building, 2nd Floor',city:'Cleveland',state:'OH',zip:'44195'}, bill:{name1:'Metro Health Foundation',name2:'Purchasing',addr1:'9500 Euclid Ave',addr2:'Mail Code JJN3-01',city:'Cleveland',state:'OH',zip:'44195',email:'purchasing@metrohealthhosp.org'}, paymentTerms:'Net 45', pricingCat:'GPO' },
+      3: { ship:{name1:'Memorial Hermann',name2:'Pulmonology',attn:'James Peters, MD',addr1:'200 First St SW',addr2:'Mary Brigh Building',city:'Rochester',state:'MN',zip:'55905'}, bill:{name1:'Memorial Hermann',name2:'Finance - AP',addr1:'200 First St SW',addr2:'Siebens Building, 10th Floor',city:'Rochester',state:'MN',zip:'55905',email:'ap@memorialhermann.org'}, paymentTerms:'Net 30', pricingCat:'Standard' },
+      4: { ship:{name1:'HCA Florida West Kendall',name2:'Endoscopy Center',attn:'Maria Gonzalez',addr1:'9555 SW 162nd Ave',addr2:'',city:'Miami',state:'FL',zip:'33196'}, bill:{name1:'HCA Healthcare',name2:'Accounts Payable',addr1:'One Park Plaza',addr2:'',city:'Nashville',state:'TN',zip:'37203',email:'ap@hcahealthcare.com'}, paymentTerms:'Net 60', pricingCat:'GPO' },
+      5: { ship:{name1:'Piedmont Healthcare',name2:'Bronchoscopy Lab',attn:'Dr. Alan Park',addr1:'8700 Beverly Blvd',addr2:'South Tower, Suite 6732',city:'Los Angeles',state:'CA',zip:'90048'}, bill:{name1:'Piedmont Health System',name2:'Procurement',addr1:'8700 Beverly Blvd',addr2:'Plaza Level',city:'Los Angeles',state:'CA',zip:'90048',email:'procurement@piedmonthc.org'}, paymentTerms:'Net 30', pricingCat:'Contract' }
+    };
+    allQuotes.forEach(function(q) {
+      q.itemCount = q.items.length;
+      q.total = q.items.reduce(function(s,i){ return s + i.qty * i.unitCost; }, 0);
+      var addr = demoAddresses[q.clientKey];
+      if (addr) {
+        q.shipAddress = addr.ship;
+        q.billAddress = addr.bill;
+        q.paymentTerms = addr.paymentTerms;
+        q.pricingCat = addr.pricingCat;
+      }
+    });
+  }
   // Populate reps dropdown
   var reps = [], seen = {};
   allQuotes.forEach(function(q) { if (!seen[q.salesRep]) { seen[q.salesRep]=true; reps.push(q.salesRep); } });

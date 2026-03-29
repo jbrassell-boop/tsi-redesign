@@ -539,6 +539,18 @@ const API = (() => {
   // ── User Management ──────────────────────────────────
   async function getUserList() { return get('/UserManagement/GetAll'); }
 
+  // ── EndoCarts (10) ────────────────────────────────────
+  async function getEndoCartQuotes(svcKey) { return get('/EndoCart/GetAll' + (svcKey ? '?plServiceLocationKey=' + svcKey : '')); }
+  async function getEndoCartByKey(key) { return get('/EndoCart/GetByKey/' + key); }
+  async function addEndoCartQuote(data) { return post('/EndoCart/Add', data); }
+  async function updateEndoCartQuote(data) { return post('/EndoCart/Update', data); }
+  async function deleteEndoCartQuote(key) { return del('/EndoCart/Delete?lRepairKey=' + key); }
+  async function getEndoCartItems(repairKey) { return get('/EndoCart/GetItems/' + repairKey); }
+  async function addEndoCartItem(data) { return post('/EndoCart/AddItem', data); }
+  async function updateEndoCartItem(data) { return post('/EndoCart/UpdateItem', data); }
+  async function deleteEndoCartItem(key) { return del('/EndoCart/DeleteItem?lRepairItemTranKey=' + key); }
+  async function bulkAddEndoCartItems(data) { return post('/EndoCart/BulkAddItems', data); }
+
   // ── Instrument Codes + Repairs (7) ───────────────────
   async function getInstrumentCodes() { return get('/InstrumentCode/GetAll'); }
   async function searchInstrumentCodes(query) { return get('/InstrumentCode/Search?psQuery=' + encodeURIComponent(query)); }
@@ -706,6 +718,12 @@ const API = (() => {
     getInstrumentCodes, searchInstrumentCodes,
     getInstrumentRepairs, getInstrumentRepairByKey,
     addInstrumentRepair, updateInstrumentRepair, deleteInstrumentRepair,
+
+    // EndoCarts
+    getEndoCartQuotes, getEndoCartByKey,
+    addEndoCartQuote, updateEndoCartQuote, deleteEndoCartQuote,
+    getEndoCartItems, addEndoCartItem, updateEndoCartItem, deleteEndoCartItem,
+    bulkAddEndoCartItems,
 
     // Config
     BASE_URL,
