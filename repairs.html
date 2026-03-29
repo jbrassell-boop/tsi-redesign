@@ -502,7 +502,7 @@ table.rl-table{width:100%;border-collapse:collapse}
 table.rl-table th{background:var(--neutral-50);font-size:9px;font-weight:700;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;text-align:left;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:1}
 table.rl-table td{padding:4px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
 table.rl-table tbody tr:hover td{background:var(--primary-light)}
-table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
+table.rl-table tbody tr.rl-active td{background:var(--primary-light);font-weight:600}
 
 /* QUEUE PANEL */
 .split-left{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--card);transition:width .2s ease;overflow:hidden}
@@ -518,7 +518,7 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
 .queue-rows{flex:1;overflow-y:auto;overflow-x:hidden}
 .q-row{padding:9px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
 .q-row:hover{background:var(--primary-light)}
-.q-row.active{background:#BFDBFE;border-left:3px solid var(--primary)}
+.q-row.active{background:var(--primary-light);border-left:3px solid var(--primary)}
 .q-row.overdue{border-left:3px solid var(--danger)}
 .q-row.flagged .q-flag-icon{display:inline}
 .q-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
@@ -2653,7 +2653,7 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
     </div>
 
     <!-- Nonconformance alert (hidden by default) -->
-    <div id="fd-ncAlert" style="display:none;padding:8px 10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:4px;margin-bottom:10px;font-size:11px;color:var(--danger);font-weight:600">
+    <div id="fd-ncAlert" style="display:none;padding:8px 10px;background:var(--danger-light);border:1px solid var(--danger-border);border-radius:4px;margin-bottom:10px;font-size:11px;color:var(--danger);font-weight:600">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <span>&#9888; Nonconformance write-up required — failure code 4 or 5 selected.</span>
         <button onclick="openNCPDrawer()" style="background:var(--danger);color:var(--card);border:none;padding:3px 10px;border-radius:3px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Create NCP &rarr;</button>
@@ -4281,7 +4281,7 @@ function populateFormDrawer(formId) {
           return '<div style="display:flex;gap:20px;margin-top:10px;font-size:11px">' +
             (reason ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Primary Failure</span><span style="font-weight:600;color:#1A202C">' + reason.sRepairReason + '</span></div>' : '') +
             (level ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Repair Classification</span><span style="font-weight:600;color:#1A202C">' + level.sRepairLevel + '</span></div>' : '') +
-            (damageClass ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Damage Assessment</span><span style="font-weight:600;color:' + (hasUA ? '#B91C1C' : '#166534') + '">' + damageClass + '</span></div>' : '') +
+            (damageClass ? '<div><span class="wf-est-label" style="margin-bottom:2px;display:block">Damage Assessment</span><span style="font-weight:600;color:' + (hasUA ? 'var(--danger)' : 'var(--success)') + '">' + damageClass + '</span></div>' : '') +
           '</div>';
         })()}
       </div>
@@ -4814,9 +4814,9 @@ function checkAngSpec(input, specVal) {
   if (isNaN(measured)) { input.style.borderColor = ''; input.style.background = ''; return; }
   var threshold = specVal * 0.9; // 10% tolerance
   if (measured >= threshold) {
-    input.style.borderColor = 'var(--success)'; input.style.background = '#F0FDF4';
+    input.style.borderColor = 'var(--success)'; input.style.background = 'var(--success-light)';
   } else {
-    input.style.borderColor = 'var(--danger)'; input.style.background = '#FEF2F2';
+    input.style.borderColor = 'var(--danger)'; input.style.background = 'var(--danger-light)';
   }
 }
 
@@ -5113,8 +5113,8 @@ function updateStatusBadge(statusId) {
     sgcBadge.textContent = name || '—';
     const sl = (name || '').toLowerCase();
     if (/ship|complete|invoic/i.test(sl)) { sgcBadge.style.background='var(--primary-light)';sgcBadge.style.color='var(--navy)';sgcBadge.style.borderColor='var(--border-dk)'; }
-    else if (/in repair|drying/i.test(sl)) { sgcBadge.style.background='#F0FDF4';sgcBadge.style.color='var(--success)';sgcBadge.style.borderColor='#BBF7D0'; }
-    else if (/approv|wait|quoted/i.test(sl)) { sgcBadge.style.background='#FFFBEB';sgcBadge.style.color='var(--amber)';sgcBadge.style.borderColor='#FDE68A'; }
+    else if (/in repair|drying/i.test(sl)) { sgcBadge.style.background='var(--success-light)';sgcBadge.style.color='var(--success)';sgcBadge.style.borderColor='var(--success-border)'; }
+    else if (/approv|wait|quoted/i.test(sl)) { sgcBadge.style.background='var(--warning-light)';sgcBadge.style.color='var(--amber)';sgcBadge.style.borderColor='var(--warning-border)'; }
     else if (/qc/i.test(sl)) { sgcBadge.style.background='var(--primary-light)';sgcBadge.style.color='var(--primary)';sgcBadge.style.borderColor='var(--border-dk)'; }
     else { sgcBadge.style.background='var(--neutral-100)';sgcBadge.style.color='var(--neutral-500)';sgcBadge.style.borderColor='var(--neutral-200)'; }
   }
@@ -5484,8 +5484,8 @@ function populateDetail(d) {
     sgcStatusBadge.textContent = sn;
     const sl = sn.toLowerCase();
     if (/ship|complete|invoic/i.test(sl)) { sgcStatusBadge.style.background = 'var(--primary-light)'; sgcStatusBadge.style.color = 'var(--navy)'; sgcStatusBadge.style.borderColor = 'var(--border-dk)'; }
-    else if (/repair|drying/i.test(sl)) { sgcStatusBadge.style.background = '#F0FDF4'; sgcStatusBadge.style.color = 'var(--success)'; sgcStatusBadge.style.borderColor = '#BBF7D0'; }
-    else if (/approv|wait|quoted/i.test(sl)) { sgcStatusBadge.style.background = '#FFFBEB'; sgcStatusBadge.style.color = 'var(--amber)'; sgcStatusBadge.style.borderColor = '#FDE68A'; }
+    else if (/repair|drying/i.test(sl)) { sgcStatusBadge.style.background = 'var(--success-light)'; sgcStatusBadge.style.color = 'var(--success)'; sgcStatusBadge.style.borderColor = 'var(--success-border)'; }
+    else if (/approv|wait|quoted/i.test(sl)) { sgcStatusBadge.style.background = 'var(--warning-light)'; sgcStatusBadge.style.color = 'var(--amber)'; sgcStatusBadge.style.borderColor = 'var(--warning-border)'; }
     else if (/qc/i.test(sl)) { sgcStatusBadge.style.background = 'var(--primary-light)'; sgcStatusBadge.style.color = 'var(--primary)'; sgcStatusBadge.style.borderColor = 'var(--border-dk)'; }
     else { sgcStatusBadge.style.background = 'var(--neutral-100)'; sgcStatusBadge.style.color = 'var(--neutral-500)'; sgcStatusBadge.style.borderColor = 'var(--neutral-200)'; }
   }
@@ -7287,7 +7287,7 @@ async function confirmDeleteRepair(btn) {
   const wo = _currentRepair.sWorkOrderNumber || _currentRepair.lRepairKey;
   if (btn && !btn._confirming) {
     btn._confirming = true; btn._origText = btn.innerHTML; btn._origBg = btn.style.background;
-    btn.innerHTML = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+    btn.innerHTML = 'Sure?'; btn.style.background = 'var(--danger)'; btn.style.color = '#fff';
     setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.innerHTML = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
     return;
   }
@@ -7439,7 +7439,7 @@ function markSlipComplete() {
 function removeSlip(btn, idx) {
   if (!btn._confirming) {
     btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
-    btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff'; btn.style.borderColor = '#dc3545';
+    btn.textContent = 'Sure?'; btn.style.background = 'var(--danger)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--danger)';
     setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; btn.style.borderColor = ''; } }, 3000);
     return;
   }
@@ -7687,7 +7687,7 @@ function closeAmendment(btn) {
     // Inline "Sure?" confirm for discard
     if (btn && !btn._confirming) {
       btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
-      btn.textContent = 'Sure? Discard'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+      btn.textContent = 'Sure? Discard'; btn.style.background = 'var(--danger)'; btn.style.color = '#fff';
       setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
       return;
     }
@@ -7723,7 +7723,7 @@ function _showResetApprovalModal() {
     + '<p style="margin:0 0 18px;font-size:12.5px;color:#555;line-height:1.5">This will revert to the quoting stage. A new Requisition will be needed.</p>'
     + '<div style="display:flex;gap:8px;justify-content:flex-end">'
     + '<button id="resetApprNo" class="btn btn-outline" style="font-size:11px;padding:5px 14px">Keep Date</button>'
-    + '<button id="resetApprYes" class="btn btn-navy" style="font-size:11px;padding:5px 14px;background:#dc3545;border-color:#dc3545">Reset Date</button>'
+    + '<button id="resetApprYes" class="btn btn-navy" style="font-size:11px;padding:5px 14px;background:var(--danger);border-color:var(--danger)">Reset Date</button>'
     + '</div></div>';
   document.body.appendChild(overlay);
   document.getElementById('resetApprNo').onclick = function() { overlay.style.display = 'none'; };

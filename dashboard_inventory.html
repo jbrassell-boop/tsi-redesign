@@ -6,7 +6,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    :root{--hover:var(--primary-light)}
+    :root{--hover:var(--primary-light);--stat-alert-bg:#FEF9F9;--stat-warn-bg:#FFFDF7;--b-critical-bg:#FFEBEE;--b-critical-text:#C62828;--b-critical-border:#EF9A9A;--b-low-bg:#FFF3E0;--b-low-text:#E65100;--b-low-border:#FFCC80;--b-ok-bg:#E8F5E9;--b-ok-text:#2E7D32;--b-ok-border:#81C784}
 
     .page-body{display:flex;flex-direction:column;overflow:hidden}
 
@@ -15,8 +15,8 @@
     .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
     .stat-chip:hover{background:var(--bg)}
     .stat-chip.active{background:var(--primary-light);box-shadow:inset 0 -2px 0 var(--navy)}
-    .stat-chip.alert{background:#FEF9F9}
-    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip.alert{background:var(--stat-alert-bg)}
+    .stat-chip.warn{background:var(--stat-warn-bg)}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:var(--radius-md)}
     .stat-chip .s-val{font-size:16px}
     .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.04em}
@@ -43,9 +43,9 @@
 
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap}
-    .b-critical{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A}
-    .b-low{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
-    .b-ok{background:#E8F5E9;color:#2E7D32;border:1px solid #81C784}
+    .b-critical{background:var(--b-critical-bg);color:var(--b-critical-text);border:1px solid var(--b-critical-border)}
+    .b-low{background:var(--b-low-bg);color:var(--b-low-text);border:1px solid var(--b-low-border)}
+    .b-ok{background:var(--b-ok-bg);color:var(--b-ok-text);border:1px solid var(--b-ok-border)}
 
     /* FOOTER */
     .table-footer{background:var(--card);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -275,7 +275,7 @@ function renderTable(items) {
     const max = item.nLevelMaximum || 0;
     const status = item._status;
     const curStyle = status === 'Critical' ? 'font-weight:600;color:var(--red)' :
-                     status === 'Low' ? 'font-weight:600;color:#E65100' : '';
+                     status === 'Low' ? 'font-weight:600;color:var(--b-low-text)' : '';
     return '<tr>' +
       '<td style="font-weight:600;font-family:monospace;font-size:11px">' + item.lInventoryKey + '</td>' +
       '<td>' + esc(item.sItemDescription || '') + '</td>' +

@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="styles.css"/>
   <style>
     /* Dashboard-specific vars */
-    :root{--hover:var(--primary-light)}
+    :root{--hover:var(--primary-light);--stat-alert-bg:#FEF9F9;--stat-warn-bg:#FFFDF7;--highlight-match-bg:#FEFCE8}
 
     /* Dashboard: New Order menu */
     #newOrderMenu.open{display:block!important}
 
     /* Dashboard: auto-save indicator */
-    .save-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:#A7F3D0;opacity:0.8;font-weight:500;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);animation:pulse-save 4s infinite}
+    .save-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--success);opacity:0.8;font-weight:500;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);animation:pulse-save 4s infinite}
     @keyframes pulse-save{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}
     .save-indicator svg{width:12px;height:12px}
 
@@ -25,8 +25,8 @@
     .stat-chip{flex:1;padding:10px 16px;cursor:pointer;transition:background .1s}
     .stat-chip:hover{background:var(--neutral-50)}
     .stat-chip.active-chip{outline:2px solid var(--primary);outline-offset:-2px;background:var(--primary-light)}
-    .stat-chip.alert{background:#FEF9F9}
-    .stat-chip.warn{background:#FFFDF7}
+    .stat-chip.alert{background:var(--stat-alert-bg)}
+    .stat-chip.warn{background:var(--stat-warn-bg)}
     .stat-chip .s-icon{width:28px;height:28px;border-radius:var(--radius-md)}
     .stat-chip .s-val{font-size:16px}
     .stat-chip .s-lbl{font-size:10px;font-weight:600;letter-spacing:.04em}
@@ -85,7 +85,7 @@
     .row-detail .d-note:hover{background:var(--primary-light);color:var(--neutral-700)}
     .row-detail .note-edit{width:100%;border:1px solid var(--primary);border-radius:var(--radius-sm);padding:3px 6px;font-size:10px;font-family:inherit;font-style:italic;color:var(--text);outline:none;box-shadow:0 0 0 3px rgba(var(--primary-rgb),.1)}
     /* Hot badge */
-    .hot-flag{background:#FEE2E2;color:var(--danger);font-size:9px;font-weight:700;padding:1px 5px;border-radius:var(--radius-sm);margin-left:4px}
+    .hot-flag{background:var(--danger-hover);color:var(--danger);font-size:9px;font-weight:700;padding:1px 5px;border-radius:var(--radius-sm);margin-left:4px}
 
     /* Days-In heat */
     .days-crit{color:var(--danger);font-weight:700}
@@ -118,7 +118,7 @@
     .ctx-item:hover{background:var(--neutral-50);color:var(--primary)}
     .ctx-item svg{width:14px;height:14px;opacity:.5}
     .ctx-sep{height:1px;background:var(--neutral-200);margin:3px 0}
-    .ctx-item.danger:hover{background:#FEF2F2;color:var(--danger)}
+    .ctx-item.danger:hover{background:var(--danger-light);color:var(--danger)}
 
     /* MODAL OVERLAY (Global Search & Create) */
     .modal-overlay{position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);z-index:var(--z-cmd);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px)}
@@ -177,19 +177,19 @@
     .cp-item-name{font-size:var(--text-sm);font-weight:600;color:var(--primary)}
     .cp-item-detail{font-size:11px;color:var(--neutral-500);margin-top:1px;display:flex;gap:8px}
     .cp-item-detail span{display:inline-flex;align-items:center;gap:3px}
-    .cp-selected{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--radius-md);padding:6px 12px;display:none;align-items:center;gap:10px}
+    .cp-selected{background:var(--success-light);border:1px solid var(--success-border);border-radius:var(--radius-md);padding:6px 12px;display:none;align-items:center;gap:10px}
     .cp-selected.show{display:flex}
     .cp-sel-name{font-size:var(--text-sm);font-weight:700;color:var(--primary)}
     .cp-sel-detail{font-size:11px;color:var(--neutral-500)}
     .cp-sel-clear{background:none;border:none;cursor:pointer;color:var(--neutral-500);font-size:14px;margin-left:auto;padding:2px 4px;border-radius:var(--radius-sm);transition:all .1s}
-    .cp-sel-clear:hover{color:var(--danger);background:#FEF2F2}
+    .cp-sel-clear:hover{color:var(--danger);background:var(--danger-light)}
     .dept-picker{width:220px}
     .btn-navy:hover{background:var(--primary-dark)}
 
     .mf-right{display:flex;gap:10px;flex-shrink:0}
 
     .btn-outline{height:36px;padding:0 24px;border-radius:var(--radius-lg);border:1px solid var(--neutral-200);background:var(--primary-light);color:var(--primary);font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--ease);display:flex;align-items:center;gap:6px}
-    .btn-outline:hover{background:#D4E4FE;border-color:var(--primary)}
+    .btn-outline:hover{background:var(--primary-light);border-color:var(--primary)}
     .btn-navy-lg{height:36px;padding:0 24px;border-radius:var(--radius-lg);border:none;background:var(--primary);color:#fff;font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--ease);display:flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(var(--primary-rgb),.15)}
     .btn-navy-lg:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 8px rgba(var(--primary-rgb),.2)}
 
@@ -572,9 +572,9 @@
     <div style="padding:20px 24px">
       <label id="inputModalLabel" style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px"></label>
       <input type="text" id="inputModalValue" style="width:100%;height:34px;border:1.5px solid var(--border-dk);border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box" />
-      <p id="inputModalConfirmText" style="font-size:13px;color:#1A202C;display:none;margin:0"></p>
+      <p id="inputModalConfirmText" style="font-size:13px;color:var(--text);display:none;margin:0"></p>
     </div>
-    <div style="padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:#F8FAFC;border-radius:0 0 12px 12px">
+    <div style="padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--neutral-50);border-radius:0 0 12px 12px">
       <button class="btn btn-sm btn-outline" onclick="closeInputModal(null)">Cancel</button>
       <button id="inputModalOk" class="btn-navy" style="height:30px;padding:0 16px" onclick="closeInputModal('ok')">OK</button>
     </div>
@@ -973,7 +973,7 @@ function renderRow(s) {
       <td style="text-align:right;${s.approved?'font-weight:600;color:var(--navy)':''}">${fmt$(s.approved)}</td>
       <td style="font-weight:600;color:var(--navy)">${s.tech||'<span style="color:var(--muted);font-weight:400">—</span>'}</td>
     </tr>
-    <tr class="row-detail"><td colspan="12"><span class="d-note" data-wo="${s.wo}" title="${s.notes ? (s.notes).replace(/"/g,'&quot;') : 'Click to add note'}">${s.notes ? truncate(s.notes, 140) : '<span style="color:#CDD5E0">+ add note</span>'}</span></td></tr>`;
+    <tr class="row-detail"><td colspan="12"><span class="d-note" data-wo="${s.wo}" title="${s.notes ? (s.notes).replace(/"/g,'&quot;') : 'Click to add note'}">${s.notes ? truncate(s.notes, 140) : '<span style="color:var(--neutral-200)">+ add note</span>'}</span></td></tr>`;
 }
 
 function renderTable() {
@@ -1623,7 +1623,7 @@ function highlightMatch(text, query) {
   if (!query) return text;
   const idx = text.toLowerCase().indexOf(query);
   if (idx < 0) return text;
-  return text.slice(0, idx) + '<strong style="background:#FEFCE8;padding:0 1px">' + text.slice(idx, idx+query.length) + '</strong>' + text.slice(idx+query.length);
+  return text.slice(0, idx) + '<strong style="background:var(--highlight-match-bg);padding:0 1px">' + text.slice(idx, idx+query.length) + '</strong>' + text.slice(idx+query.length);
 }
 
 function pickClient(idx) {
