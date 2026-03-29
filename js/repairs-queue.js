@@ -911,7 +911,8 @@ function updateTabBadges(repairData) {
   if (!d) return;
 
   // LINE ITEMS badge — count of unapproved items (sApproved !== 'Y')
-  const unapproved = _repairItems.filter(function(item) {
+  const items = (typeof _repairItems !== 'undefined' ? _repairItems : window._repairItems) || [];
+  const unapproved = items.filter(function(item) {
     return item.sApproved !== 'Y' && !item.bDeclined;
   }).length;
   setTabBadge('lineitems', unapproved);

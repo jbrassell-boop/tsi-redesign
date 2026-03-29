@@ -2664,6 +2664,14 @@ document.addEventListener('click', function(e) {
 
 const DEBUG = false; // Set true during local dev to enable hot-path console.log
 
+// ── QUEUE PANEL VARIABLES (must be before initPage which may call loadRepairList) ──
+let _queueAllRepairs = [];
+let _queueFilter = 'all';
+let _queueSearch = '';
+let _dragSrcKey = null;
+let _dragDropInited = false;
+var _repairItems = []; // shared across modules (repairs-items.js, repairs-queue.js)
+
 // XSS-safe HTML escape for user-supplied data inserted into innerHTML
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
@@ -4205,15 +4213,7 @@ initPage().then(() => {
 });
 initItemContextMenu();
 
-// ── QUEUE PANEL FUNCTIONS ──────────────────────────────────────
-let _queueAllRepairs = [];
-let _queueFilter = 'all';
-let _queueSearch = '';
-
-// ── DRAG-AND-DROP QUEUE REORDER ──────────────────────────────
-let _dragSrcKey = null;
-
-let _dragDropInited = false;
+// (Queue variables moved before initPage — see top of inline script block)
 // Arrow key navigation and enhanced keyboard shortcuts
 document.addEventListener('keydown', function(e) {
   // Ctrl+S / Cmd+S — save current repair
