@@ -456,7 +456,7 @@
         <div class="tbl-card">
           <div class="tbl-card-head">
             <span class="tbl-card-title">Departments</span>
-            <a href="departments.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500">Managed from the Departments module →</a>
+            <a id="deptModuleLink" href="departments.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500">Managed from the Departments module →</a>
           </div>
           <table>
             <thead>
@@ -467,16 +467,6 @@
               </tr>
             </thead>
             <tbody id="departments-tbody">
-              <tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'3502',name:'88th Medical Group'}));window.location='departments.html?clientKey=3502'">
-                <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">Biomedical Engineering</td>
-                <td>Upper Chichester</td>
-                <td><span class="badge b-active">Active</span></td>
-              </tr>
-              <tr onclick="sessionStorage.setItem('deptNavClient',JSON.stringify({key:'3502',name:'88th Medical Group'}));window.location='departments.html?clientKey=3502'">
-                <td style="color:var(--blue);font-weight:600;text-decoration:underline;cursor:pointer">Endoscopy Unit</td>
-                <td>Upper Chichester</td>
-                <td><span class="badge b-active">Active</span></td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -1681,6 +1671,8 @@ function openEditContactAPI(contactKey) {
 function renderDepartments(c) {
   const container = document.getElementById('departments-tbody');
   if (!container) return;
+  const moduleLink = document.getElementById('deptModuleLink');
+  if (moduleLink && c.id) moduleLink.href = 'departments.html?clientKey=' + c.id;
   const depts = c.departments || [];
   if (depts.length === 0) {
     container.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--muted)">No departments assigned to this client.</td></tr>';

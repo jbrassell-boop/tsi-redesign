@@ -71,3 +71,8 @@
 - **Rule:** All array/list literals containing string values (table names, field names, config keys) must be sorted alphabetically.
 - **Why:** Joseph's preference for consistency and readability.
 - **Scope:** Applies to SEED_ORDER arrays, table registration arrays, TABLE_LIMITS keys, KEEP_FIELDS sets, and any similar string collections.
+
+## Lesson: Static audit misses visual hierarchy conflicts
+**Date:** 2026-03-28
+**Pattern:** Grep-based audits catch class/token violations but not semantic UI conflicts — e.g. two `.btn-navy` primaries in the same toolbar, or a duplicate save button that's technically valid HTML/CSS but visually wrong.
+**Rule:** After any audit pass, do a visual sweep of the 5 highest-traffic pages. Check: (1) only one `.btn-navy` per toolbar, (2) no duplicate save affordances on the same screen, (3) save placement matches autosave vs explicit-save intent.

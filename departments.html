@@ -97,6 +97,45 @@
     .file-drop-text{font-size:11.5px;color:var(--muted);margin-bottom:3px}
     .file-drop-formats{font-size:10px;color:var(--border-dk)}
 
+    /* Override page-body for split layout */
+    .page-body{overflow:hidden;display:flex;flex-direction:column}
+
+    /* ── Split layout — dept list + detail ── */
+    .dept-split{display:flex;flex:1;overflow:hidden;min-height:0}
+    .dept-list-panel{width:280px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--card);overflow:hidden;transition:width .2s ease;position:relative}
+    .dept-list-panel.collapsed{width:0;border-right:none}
+    .dept-list-panel.collapsed .dlp-head,.dept-list-panel.collapsed .dlp-search,.dept-list-panel.collapsed .dlp-scroll,.dept-list-panel.collapsed .dlp-footer{display:none}
+    .dlp-head{background:var(--neutral-50);padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .dlp-search{padding:6px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .dlp-scroll{flex:1;overflow-y:auto}
+    .dlp-footer{padding:4px 10px;border-top:1px solid var(--border);background:var(--neutral-50);font-size:10px;color:var(--muted);flex-shrink:0}
+    .dlp-expand-btn{display:none;position:absolute;right:-20px;top:50%;transform:translateY(-50%);z-index:10;width:20px;height:48px;background:var(--navy);color:#fff;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:14px;padding:0;box-shadow:2px 0 8px rgba(0,0,0,.12)}
+    .dept-list-panel.collapsed .dlp-expand-btn{display:flex;align-items:center;justify-content:center}
+    .dlp-collapse-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border-dk);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:11px;transition:all .12s;flex-shrink:0}
+    .dlp-collapse-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .dept-item{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+    .dept-item:hover{background:var(--primary-light)}
+    .dept-item.selected{background:#FEF3C7;border-left:2px solid #F59E0B;padding-left:10px}
+    .di-name{font-size:12px;font-weight:700;color:var(--primary);line-height:1.3}
+    .di-type{display:inline-flex;padding:1px 6px;border-radius:8px;font-size:9.5px;font-weight:700;background:var(--neutral-100);color:var(--muted);border:1px solid var(--border);margin-top:2px}
+    .di-client{font-size:10.5px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .di-meta{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+    .di-scopes{font-size:10px;background:var(--primary-light);border:1px solid var(--border-dk);color:var(--blue);padding:1px 6px;border-radius:8px;font-weight:700}
+    .dept-detail-panel{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+
+    /* ── Model distribution chips (Scopes tab) ── */
+    .model-dist-strip{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;background:var(--neutral-50);border-bottom:1px solid var(--border);align-items:center}
+    .model-dist-chip{padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--border-dk);color:var(--navy);cursor:pointer;transition:all .12s;white-space:nowrap}
+    .model-dist-chip:hover{background:var(--primary-light);border-color:var(--primary)}
+    .model-dist-chip.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+
+    /* ── Repair/contract tab tables ── */
+    .tab-kpi-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;background:var(--card)}
+    .tab-kpi-chip{flex:1;padding:8px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+    .tab-kpi-chip:last-child{border-right:none}
+    .tab-kpi-val{font-size:16px;font-weight:800}
+    .tab-kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+
   </style>
 </head>
 <body>
@@ -196,14 +235,36 @@
       </div>
       <div class="alerts-bar" id="alertsBar"></div>
 
-      <!-- BREADCRUMB -->
-      <div class="breadcrumb" id="breadcrumb" style="display:none"></div>
+      <!-- SPLIT LAYOUT -->
+      <div class="dept-split">
+
+      <!-- LEFT PANEL: department list -->
+      <div class="dept-list-panel" id="deptListPanel">
+        <div class="dlp-head">
+          <span>Departments <span id="deptListCount" style="font-weight:500;color:var(--muted)">(0)</span></span>
+          <button class="dlp-collapse-btn" id="deptListCollapseBtn" title="Collapse list" onclick="toggleDeptListPanel()">&#x276E;</button>
+        </div>
+        <div class="dlp-search">
+          <input class="inp-search" id="deptListSearch" placeholder="Search departments..." style="width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:var(--radius-sm);padding:0 10px 0 28px;font-size:11px;outline:none;font-family:inherit;background:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896AA' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E\") 8px center no-repeat var(--card)"/>
+        </div>
+        <div class="dlp-scroll" id="deptListScroll">
+          <div class="empty-state" style="padding:20px 12px;font-size:11px">Select a client to see departments</div>
+        </div>
+        <div class="dlp-footer" id="deptListFooter"></div>
+        <button class="dlp-expand-btn" id="deptListExpandBtn" title="Expand list" onclick="toggleDeptListPanel()">&#x276F;</button>
+      </div>
+
+      <!-- DETAIL PANEL (existing content) -->
+      <div class="dept-detail-panel">
 
       <!-- TABS with count badges -->
       <div class="tab-bar">
         <div class="tab active" onclick="showDeptTab('main',this)">Main</div>
         <div class="tab" onclick="showDeptTab('addresses',this)">Addresses</div>
         <div class="tab" onclick="showDeptTab('scopes',this)">Scopes<span class="tab-count">16</span></div>
+        <div class="tab" onclick="showDeptTab('repairs',this)">Repairs<span class="tab-count" id="repairTabCount" style="display:none">0</span></div>
+        <div class="tab" onclick="showDeptTab('contracts',this)">Contracts<span class="tab-count" id="contractTabCount" style="display:none">0</span></div>
+        <div class="tab" onclick="showDeptTab('technicians',this)">Technicians</div>
         <div class="tab" onclick="showDeptTab('gpos',this)">GPO's</div>
         <div class="tab" onclick="showDeptTab('scopetypes',this)">Scope Types<span class="tab-count">3</span></div>
         <div class="tab" onclick="showDeptTab('subgroups',this)">Sub Groups<span class="tab-count">5</span></div>
@@ -468,6 +529,12 @@
 
       <!-- ══ SCOPES TAB ══ -->
       <div id="dtab-scopes" class="tab-content show-block" style="display:none">
+        <!-- Model distribution strip -->
+        <div class="model-dist-strip" id="modelDistStrip" style="display:none">
+          <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Filter:</span>
+          <div id="modelDistChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <button class="model-dist-chip" id="modelDistClearBtn" style="display:none;border-color:var(--primary);color:var(--primary)" onclick="clearModelFilter()">Clear</button>
+        </div>
         <div class="tbl-card">
           <div class="tbl-head">
             <span class="tbl-title">Scopes</span>
@@ -675,6 +742,93 @@
         </div>
       </div>
 
+      <!-- ══ REPAIRS TAB ══ -->
+      <div id="dtab-repairs" class="tab-content show-block" style="display:none">
+        <!-- Repair KPI strip -->
+        <div class="tab-kpi-strip" id="repairKpiStrip">
+          <div class="tab-kpi-chip">
+            <div class="tab-kpi-val s-blue" id="rkpi-open">—</div>
+            <div class="tab-kpi-lbl">Open</div>
+          </div>
+          <div class="tab-kpi-chip">
+            <div class="tab-kpi-val s-amber" id="rkpi-inprogress">—</div>
+            <div class="tab-kpi-lbl">In Progress</div>
+          </div>
+          <div class="tab-kpi-chip">
+            <div class="tab-kpi-val s-green" id="rkpi-completed30">—</div>
+            <div class="tab-kpi-lbl">Completed (30d)</div>
+          </div>
+          <div class="tab-kpi-chip">
+            <div class="tab-kpi-val s-navy" id="rkpi-avgtat">—</div>
+            <div class="tab-kpi-lbl">Avg TAT (days)</div>
+          </div>
+        </div>
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>WO #</th>
+                <th>Scope</th>
+                <th>Status</th>
+                <th>Received</th>
+                <th>Completed</th>
+                <th>Tech</th>
+                <th style="text-align:right">Cost</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRepairs">
+              <tr><td colspan="7" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:.2;margin-bottom:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div>No repairs on record for this department</div>
+              </td></tr>
+            </tbody>
+          </table>
+          <div class="table-footer" id="repairsFooter" style="display:none">
+            <span id="repairsCount" style="font-size:11px;color:var(--muted)"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CONTRACTS TAB ══ -->
+      <div id="dtab-contracts" class="tab-content show-block" style="display:none">
+        <div class="tbl-card">
+          <div class="tbl-head">
+            <span class="tbl-title">Contracts</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Contract #</th>
+                <th>Type</th>
+                <th>Tier</th>
+                <th style="text-align:right">Annual Value</th>
+                <th>Term</th>
+                <th>Status</th>
+                <th>Scopes Covered</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDeptContracts">
+              <tr><td colspan="7" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:.2;margin-bottom:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div>No contracts found for this client</div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ TECHNICIANS TAB ══ -->
+      <div id="dtab-technicians" class="tab-content show-block" style="display:none">
+        <div id="techCardsGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0">
+          <div class="empty-state" style="grid-column:span 3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:.2;margin-bottom:6px"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <div>No technician data available</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.dept-detail-panel -->
+    </div><!-- /.dept-split -->
     </div>
   </div>
 </div>
@@ -1018,9 +1172,9 @@ document.addEventListener('change', function(e) {
   if (e.target.classList.contains('error')) e.target.classList.remove('error');
 });
 
-/* ── Tab switching (preserved) ────────────────────────── */
+/* ── Tab switching ────────────────────────── */
 function showDeptTab(name,el){
-  ['main','addresses','scopes','gpos','scopetypes','subgroups','contacts','documents','maxcharges'].forEach(t=>{
+  ['main','addresses','scopes','repairs','contracts','technicians','gpos','scopetypes','subgroups','contacts','documents','maxcharges'].forEach(t=>{
     const el2=document.getElementById('dtab-'+t);
     if(el2)el2.style.display='none';
   });
@@ -1028,6 +1182,16 @@ function showDeptTab(name,el){
   const tab=document.getElementById('dtab-'+name);
   if(tab) tab.style.display=(name==='main'||name==='addresses')?'flex':'block';
   el.classList.add('active');
+  // Lazy-load technicians on first open
+  if(name==='technicians' && typeof loadDeptTechnicians==='function' && window._currentDeptKey){
+    loadDeptTechnicians(window._currentDeptKey);
+  }
+}
+
+/* ── Left panel collapse/expand ─────────────────────── */
+function toggleDeptListPanel(){
+  const panel = document.getElementById('deptListPanel');
+  if(panel) panel.classList.toggle('collapsed');
 }
 
 /* ── Contact modal (preserved) ────────────────────────── */
@@ -1217,6 +1381,8 @@ function openContactModal(mode){
         o.textContent = d.sDepartmentName || ('Dept #'+d.lDepartmentKey);
         sel.appendChild(o);
       });
+      // Render left panel list
+      renderDeptList(depts);
       // Select requested dept (from URL param), or fall back to first
       const target = selectKey && depts.find(d => d.lDepartmentKey == selectKey);
       const pick = target ? target : (depts.length > 0 ? depts[0] : null);
@@ -1230,9 +1396,77 @@ function openContactModal(mode){
     }
   }
 
+  /* ── Render left panel department list ─────────────── */
+  function renderDeptList(depts){
+    const scroll = document.getElementById('deptListScroll');
+    const footer = document.getElementById('deptListFooter');
+    const countEl = document.getElementById('deptListCount');
+    if(!scroll) return;
+    if(countEl) countEl.textContent = '('+depts.length+')';
+    if(footer) footer.textContent = depts.length + ' department' + (depts.length!==1?'s':'');
+    if(depts.length === 0){
+      scroll.innerHTML = '<div class="empty-state" style="padding:20px 12px;font-size:11px">No departments found</div>';
+      return;
+    }
+    const deptTypeLabel = {GI:'GI Lab',OR:'OR',SPD:'SPD',Endoscopy:'Endoscopy','Cath Lab':'Cath Lab',Large:'Large Facility',Medium:'Medium Facility',Small:'Small Facility'};
+    scroll.innerHTML = '';
+    depts.forEach(d=>{
+      const key = d.lDepartmentKey;
+      const name = d.sDepartmentName || ('Dept #'+key);
+      const clientName = (allClients.find(c=>c.lClientKey==d.lClientKey)||{}).sClientName1 || '';
+      const dtype = d.sDepartmentType || d.sType || '';
+      const typeLabel = deptTypeLabel[dtype] || dtype || '';
+      const scopeCount = d.scopeCount || 0;
+      const isActive = d.bActive !== false;
+
+      const item = document.createElement('div');
+      item.className = 'dept-item' + (key == currentDeptKey ? ' selected' : '');
+      item.dataset.deptKey = key;
+      item.innerHTML =
+        '<div class="di-name">'+(isActive?'':' <span style="font-size:9px;color:var(--muted);font-weight:500">(inactive)</span>')+name+'</div>'+
+        '<div class="di-meta">'+
+          (typeLabel ? '<span class="di-type">'+typeLabel+'</span>' : '<span></span>')+
+          (scopeCount > 0 ? '<span class="di-scopes">'+scopeCount+' scopes</span>' : '')+
+        '</div>'+
+        (clientName ? '<div class="di-client">'+clientName+'</div>' : '');
+      item.addEventListener('click', async function(){
+        scroll.querySelectorAll('.dept-item').forEach(el=>el.classList.remove('selected'));
+        item.classList.add('selected');
+        const sel = document.getElementById('selDept');
+        if(sel) sel.value = key;
+        await loadDepartmentDetail(key);
+      });
+      scroll.appendChild(item);
+    });
+  }
+
+  /* Update selected state in left panel */
+  function syncDeptListSelection(deptKey){
+    const scroll = document.getElementById('deptListScroll');
+    if(!scroll) return;
+    scroll.querySelectorAll('.dept-item').forEach(el=>{
+      el.classList.toggle('selected', el.dataset.deptKey == deptKey);
+    });
+  }
+
+  /* Search filter for left panel */
+  (function wireDeptListSearch(){
+    const inp = document.getElementById('deptListSearch');
+    if(!inp) return;
+    inp.addEventListener('input', function(){
+      const q = this.value.toLowerCase();
+      const scroll = document.getElementById('deptListScroll');
+      if(!scroll) return;
+      scroll.querySelectorAll('.dept-item').forEach(el=>{
+        el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  })();
+
   /* ── Load full department detail ────────────────────── */
   async function loadDepartmentDetail(deptKey){
     currentDeptKey = deptKey;
+    window._currentDeptKey = deptKey;
     _curDeptName = '';
     $('deptIdBadge').textContent = '#' + deptKey;
 
@@ -1244,6 +1478,9 @@ function openContactModal(mode){
       showDemoBadge();
     }
 
+    // Sync left panel selection
+    syncDeptListSelection(deptKey);
+
     // Load sub-tabs in parallel (non-blocking)
     loadScopes(deptKey);
     loadGPOs(deptKey);
@@ -1252,6 +1489,8 @@ function openContactModal(mode){
     loadContacts(deptKey);
     loadDocuments(deptKey);
     loadMaxCharges(deptKey);
+    loadDeptRepairs(deptKey);
+    loadDeptContracts(deptKey);
   }
 
   /* ── Populate Main tab form from API data ──────────── */
@@ -1540,32 +1779,282 @@ function openContactModal(mode){
   window.closeScopeDrawer = closeScopeDrawer;
   window.onScopeTypeChange = onScopeTypeChange;
   window.submitNewScope = submitNewScope;
+  window.viewScopeDetail = function(scopeKey) {
+    var scopes = window._allScopesCache || [];
+    var s = scopes.find(function(x){ return x.lScopeKey == scopeKey; });
+    if (!s) return;
+    // Reuse the scope drawer in view mode — populate fields read-only
+    document.getElementById('scopeDrawer').classList.add('open');
+    document.getElementById('scopeOverlay').classList.add('open');
+    document.getElementById('scopeDrawerSub').textContent = (s.sSerialNumber||'') + ' — ' + (s.sScopeTypeDesc||s.sModelDescription||'');
+    document.getElementById('asType').value = s.sInstrumentType || '';
+    document.getElementById('asSN').value = s.sSerialNumber || '';
+    document.getElementById('asUPC').value = s.sUPCNumber || '';
+    document.getElementById('asLocation').value = s.sLocation || '';
+    document.getElementById('asLoaner').checked = !!s.bLoaner;
+    document.getElementById('asInactive').checked = !!s.bInactive;
+    document.getElementById('asComments').value = s.sComments || '';
+    onScopeTypeChange();
+  };
 
   /* ═══ TAB DATA LOADERS ═══════════════════════════════ */
 
   /* ── Scopes tab ─────────────────────────────────────── */
+  let _allScopes = [];
+  let _activeModelFilter = null;
+
   async function loadScopes(deptKey){
     try {
       const scopes = await API.getAllScopes(deptKey);
       if(!Array.isArray(scopes)) return;
+      _allScopes = scopes;
+      window._allScopesCache = scopes;
+      _activeModelFilter = null;
       setTabCount('scopes', scopes.length);
       const ssScopes = document.getElementById('ss-scopes');
       if (ssScopes) ssScopes.textContent = scopes.length;
-      const tbody = $('tbodyScopes');
+      $('scopesSummary').textContent = scopes.length + ' instruments';
+      renderScopesTable(scopes);
+      buildModelDistStrip(scopes);
+    } catch(e){ console.warn('[Dept] Scopes:', e.message); }
+  }
+
+  function renderScopesTable(scopes){
+    const tbody = $('tbodyScopes');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    if(scopes.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div>No scopes found</div></td></tr>';
+      return;
+    }
+    scopes.forEach(s=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+(s.sScopeTypeDesc||s.sModelDescription||'')+'</td>'+
+        '<td style="color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline" onclick="viewScopeDetail('+s.lScopeKey+')">'+(s.sSerialNumber||'')+'</td>'+
+        '<td>'+(s.sInstrumentType||'')+'</td>'+
+        '<td style="color:var(--muted)">'+(s.lAvgDailyUses||'N/A')+'</td>'+
+        '<td>'+(s.sContractName ? '<span style="color:var(--warning);font-weight:600">'+s.sContractName+'</span>' : '')+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function buildModelDistStrip(scopes){
+    const strip = document.getElementById('modelDistStrip');
+    const chipsEl = document.getElementById('modelDistChips');
+    if(!strip || !chipsEl) return;
+    // Count by model
+    const counts = {};
+    scopes.forEach(s=>{
+      const model = s.sScopeTypeDesc || s.sModelDescription || 'Unknown';
+      counts[model] = (counts[model]||0) + 1;
+    });
+    const models = Object.keys(counts).sort();
+    if(models.length <= 1){ strip.style.display = 'none'; return; }
+    strip.style.display = 'flex';
+    chipsEl.innerHTML = '';
+    models.forEach(model=>{
+      const chip = document.createElement('button');
+      chip.className = 'model-dist-chip';
+      chip.textContent = model + ' \u00d7' + counts[model];
+      chip.addEventListener('click', function(){
+        if(_activeModelFilter === model){
+          clearModelFilter();
+        } else {
+          _activeModelFilter = model;
+          chipsEl.querySelectorAll('.model-dist-chip').forEach(c=>c.classList.remove('active'));
+          chip.classList.add('active');
+          document.getElementById('modelDistClearBtn').style.display = '';
+          renderScopesTable(_allScopes.filter(s=>(s.sScopeTypeDesc||s.sModelDescription||'Unknown')===model));
+        }
+      });
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  window.clearModelFilter = function(){
+    _activeModelFilter = null;
+    const chipsEl = document.getElementById('modelDistChips');
+    if(chipsEl) chipsEl.querySelectorAll('.model-dist-chip').forEach(c=>c.classList.remove('active'));
+    const clearBtn = document.getElementById('modelDistClearBtn');
+    if(clearBtn) clearBtn.style.display = 'none';
+    renderScopesTable(_allScopes);
+  };
+
+  /* ── Repairs tab ─────────────────────────────────────── */
+  async function loadDeptRepairs(deptKey){
+    try {
+      // Use MockDB if available, otherwise skip
+      const repairs = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
+        ? MockDB.getFiltered('repairs', function(r){ return r.lDepartmentKey == deptKey; })
+        : [];
+      const countBadge = document.getElementById('repairTabCount');
+
+      if(!repairs || repairs.length === 0){
+        if(countBadge){ countBadge.textContent='0'; countBadge.style.display='none'; }
+        return;
+      }
+
+      if(countBadge){ countBadge.textContent = repairs.length; countBadge.style.display=''; }
+
+      // KPIs
+      const open = repairs.filter(r=>['Received','Waiting Parts','Pending'].includes(r.sStatus||r.sRepairStatus)).length;
+      const inProg = repairs.filter(r=>['In Progress','In Repair','Diagnosing','D&I'].includes(r.sStatus||r.sRepairStatus)).length;
+      const now = Date.now();
+      const ms30 = 30*24*60*60*1000;
+      const completed30 = repairs.filter(r=>{
+        const s = r.sStatus||r.sRepairStatus||'';
+        if(!s.toLowerCase().includes('complet') && !s.toLowerCase().includes('ship')) return false;
+        const comp = r.dtCompleted||r.dtCompletedDate||r.dtShipped||'';
+        return comp && (now - new Date(comp).getTime()) < ms30;
+      }).length;
+      const tatVals = repairs.filter(r=>r.nTATDays||r.lTATDays).map(r=>+(r.nTATDays||r.lTATDays));
+      const avgTAT = tatVals.length ? (tatVals.reduce((a,b)=>a+b,0)/tatVals.length).toFixed(1) : '—';
+
+      const setKpi = (id,v) => { const el=$(id); if(el) el.textContent=v; };
+      setKpi('rkpi-open', open);
+      setKpi('rkpi-inprogress', inProg);
+      setKpi('rkpi-completed30', completed30);
+      setKpi('rkpi-avgtat', avgTAT);
+
+      const tbody = $('tbodyRepairs');
       if(!tbody) return;
       tbody.innerHTML = '';
-      $('scopesSummary').textContent = scopes.length + ' instruments';
-      scopes.forEach(s=>{
+      repairs.slice(0,100).forEach(r=>{
+        const wo = r.sWorkOrderNumber||r.sWONumber||r.lRepairKey||'';
+        const model = r.sScopeTypeDesc||r.sModelDescription||r.sModel||'';
+        const serial = r.sSerialNumber||r.sSN||'';
+        const scope = model+(serial?' / '+serial:'');
+        const status = r.sStatus||r.sRepairStatus||'';
+        const rcvd = fmtDate(r.dtReceived||r.dtReceivedDate||'');
+        const comp = fmtDate(r.dtCompleted||r.dtCompletedDate||'');
+        const tech = r.sTechName||r.sTech||'';
+        const cost = r.dblTotalCharges||r.dblCharge||r.nCost||0;
+
+        let statusBadge = '<span style="font-size:10px;color:var(--muted)">'+status+'</span>';
+        const sl = status.toLowerCase();
+        if(sl.includes('complet')||sl.includes('ship')) statusBadge = '<span class="badge b-active">'+status+'</span>';
+        else if(sl.includes('progress')||sl.includes('repair')||sl.includes('diag')) statusBadge = '<span class="badge ss-warn">'+status+'</span>';
+        else if(sl.includes('receiv')||sl.includes('pending')||sl.includes('wait')) statusBadge = '<span class="badge ss-info">'+status+'</span>';
+
         const tr = document.createElement('tr');
         tr.innerHTML =
-          '<td>'+(s.sScopeTypeDesc||s.sModelDescription||'')+'</td>'+
-          '<td style="color:var(--blue);font-weight:600;cursor:pointer">'+(s.sSerialNumber||'')+'</td>'+
-          '<td>'+(s.sInstrumentType||'')+'</td>'+
-          '<td style="color:var(--muted)">'+(s.lAvgDailyUses||'N/A')+'</td>'+
-          '<td>'+(s.sContractName ? '<span style="color:var(--warning);font-weight:600">'+s.sContractName+'</span>' : '')+'</td>';
+          '<td style="font-weight:600;color:var(--blue)">'+wo+'</td>'+
+          '<td style="font-size:11.5px">'+scope+'</td>'+
+          '<td>'+statusBadge+'</td>'+
+          '<td>'+rcvd+'</td>'+
+          '<td>'+comp+'</td>'+
+          '<td>'+tech+'</td>'+
+          '<td style="text-align:right;font-weight:700;color:var(--navy)">'+fmtMoney(cost)+'</td>';
         tbody.appendChild(tr);
       });
-    } catch(e){ console.warn('[Dept] Scopes:', e.message); }
+
+      const footer = document.getElementById('repairsFooter');
+      const cnt = document.getElementById('repairsCount');
+      if(footer) footer.style.display = '';
+      if(cnt) cnt.textContent = repairs.length + ' repair' + (repairs.length!==1?'s':'');
+    } catch(e){ console.warn('[Dept] Repairs tab:', e.message); }
+  }
+
+  /* ── Contracts tab ─────────────────────────────────── */
+  async function loadDeptContracts(deptKey){
+    try {
+      // Get client key for this department
+      const dept = allDepartments.find(d=>d.lDepartmentKey==deptKey);
+      const clientKey = dept ? dept.lClientKey : null;
+      if(!clientKey) return;
+
+      const contracts = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
+        ? MockDB.getFiltered('contracts', function(c){ return c.lClientKey == clientKey; })
+        : [];
+
+      const countBadge = document.getElementById('contractTabCount');
+      if(!contracts || contracts.length === 0){
+        if(countBadge){ countBadge.textContent='0'; countBadge.style.display='none'; }
+        return;
+      }
+      if(countBadge){ countBadge.textContent = contracts.length; countBadge.style.display=''; }
+
+      const typeLabels = {1:'Capitated',2:'Shared Risk',3:'PSA',4:'Fuse',5:'Airway',6:'Rental'};
+      const tbody = $('tbodyDeptContracts');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      contracts.forEach(c=>{
+        const num = c.sContractNumber||c.sWONumber||c.lContractKey||'';
+        const type = typeLabels[c.nContractType]||c.sContractType||'';
+        const tier = c.sTier||c.sContractTier||'';
+        const annual = c.dblAnnualValue||c.dblMonthlyFee*12||0;
+        const startD = fmtDate(c.dtStartDate||c.dtEffectiveDate||'');
+        const endD = fmtDate(c.dtEndDate||c.dtExpirationDate||'');
+        const term = (startD&&endD) ? startD+' – '+endD : (startD||'');
+        const active = c.bActive!==false && !(c.dtEndDate && new Date(c.dtEndDate)<new Date());
+        const statusBadge = active ? '<span class="badge b-active">Active</span>' : '<span class="badge b-inactive">Expired</span>';
+        const scopesCovered = c.nScopeCount||c.scopeCount||0;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><a href="contracts.html?contract='+c.lContractKey+'" style="color:var(--blue);font-weight:600;text-decoration:none" title="Open in Contracts">'+num+' <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></td>'+
+          '<td>'+type+'</td>'+
+          '<td>'+tier+'</td>'+
+          '<td style="text-align:right;font-weight:700;color:var(--navy)">'+fmtMoney(annual)+'</td>'+
+          '<td style="font-size:11px;color:var(--muted)">'+term+'</td>'+
+          '<td>'+statusBadge+'</td>'+
+          '<td style="font-weight:600;color:var(--blue)">'+(scopesCovered||'—')+'</td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e){ console.warn('[Dept] Contracts tab:', e.message); }
+  }
+
+  /* ── Technicians tab ─────────────────────────────────── */
+  function loadDeptTechnicians(deptKey){
+    try {
+      const repairs = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
+        ? MockDB.getFiltered('repairs', function(r){ return r.lDepartmentKey == deptKey; })
+        : [];
+      const grid = document.getElementById('techCardsGrid');
+      if(!grid) return;
+      if(!repairs || repairs.length === 0) return;
+
+      // Group by tech
+      const techMap = {};
+      const now = Date.now();
+      const ms30 = 30*24*60*60*1000;
+      repairs.forEach(r=>{
+        const key = r.lTechKey||r.sTechName||r.sTech||'Unknown';
+        const name = r.sTechName||r.sTech||'Unknown Tech';
+        if(!techMap[key]) techMap[key] = {name, repairs30:0, open:0, tatVals:[]};
+        const comp = r.dtCompleted||r.dtCompletedDate||'';
+        if(comp && (now - new Date(comp).getTime()) < ms30) techMap[key].repairs30++;
+        const s = (r.sStatus||r.sRepairStatus||'').toLowerCase();
+        if(!s.includes('complet')&&!s.includes('ship')) techMap[key].open++;
+        if(r.nTATDays||r.lTATDays) techMap[key].tatVals.push(+(r.nTATDays||r.lTATDays));
+      });
+
+      const techs = Object.values(techMap);
+      if(techs.length === 0) return;
+
+      grid.innerHTML = '';
+      techs.forEach(t=>{
+        const initials = t.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+        const avgTAT = t.tatVals.length ? (t.tatVals.reduce((a,b)=>a+b,0)/t.tatVals.length).toFixed(1) : '—';
+        const card = document.createElement('div');
+        card.className = 'panel';
+        card.style.cssText = 'margin:0';
+        card.innerHTML =
+          '<div class="panel-body" style="display:flex;align-items:center;gap:12px">'+
+            '<div style="width:40px;height:40px;border-radius:50%;background:var(--primary-light);border:2px solid var(--border-dk);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--primary);flex-shrink:0">'+initials+'</div>'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.name+'</div>'+
+              '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px">'+
+                '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--blue)">'+t.repairs30+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">30d Repairs</div></div>'+
+                '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--warning)">'+t.open+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Open</div></div>'+
+                '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--navy)">'+avgTAT+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Avg TAT</div></div>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        grid.appendChild(card);
+      });
+    } catch(e){ console.warn('[Dept] Technicians tab:', e.message); }
   }
 
   /* ── GPOs tab ───────────────────────────────────────── */
@@ -1905,6 +2394,8 @@ function openContactModal(mode){
       });
     });
   }
+
+  window.loadDeptTechnicians = loadDeptTechnicians;
 
   /* ═══ SAVE / CRUD OPERATIONS ═════════════════════════ */
 
@@ -2637,24 +3128,8 @@ function openContactModal(mode){
 
 })();
 
-/* ── Breadcrumb helper ── */
-function updateBreadcrumb(items) {
-  var el = document.getElementById('breadcrumb');
-  if (!el || !items || !items.length) { if (el) el.style.display = 'none'; return; }
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    if (i > 0) html += '<span class="breadcrumb-sep">\u203A</span>';
-    if (i < items.length - 1 && items[i].href) {
-      html += '<a href="' + items[i].href + '">' + items[i].label + '</a>';
-    } else if (i < items.length - 1) {
-      html += '<a href="#">' + items[i].label + '</a>';
-    } else {
-      html += '<span class="breadcrumb-current">' + items[i].label + '</span>';
-    }
-  }
-  el.innerHTML = html;
-  el.style.display = 'flex';
-}
+/* ── Breadcrumb removed (CLAUDE.md: sidebar shows location) ── */
+function updateBreadcrumb(items) { /* no-op */ }
 </script>
 <script src="js/new-order-wizard.js"></script>
 <script src="js/receiving.js"></script>

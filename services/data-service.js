@@ -170,6 +170,188 @@ const DataService = (() => {
       const contacts = MockDB.getFiltered('contacts', c => c.lDepartmentKey === deptKey);
       return ok({ ...dept, scopes, contacts });
     },
+
+    // Scope inventory summary for a department
+    // Returns: { total, byModel: [{model, manufacturer, count}], byStatus: {active, inactive} }
+    getScopeInventorySummary(deptKey) {
+      if (!dbAvailable()) return err('MockDB not available', 'DB_UNAVAILABLE');
+      const dept = MockDB.getByKey('departments', deptKey);
+      if (!dept) return notFound('Department', deptKey);
+
+      const scopes = MockDB.getFiltered('scopes', s => s.lDepartmentKey === deptKey);
+
+      // Group by model + manufacturer
+      const modelMap = new Map();
+      let activeCount = 0;
+      let inactiveCount = 0;
+
+      for (const scope of scopes) {
+        const model        = scope.sModel || scope.sScopeTypeDesc || 'Unknown';
+        const manufacturer = (scope.sManufacturer || '').trim();
+        const key          = `${manufacturer}|${model}`;
+
+        if (!modelMap.has(key)) {
+          modelMap.set(key, { model, manufacturer, count: 0 });
+        }
+        modelMap.get(key).count++;
+
+        if (scope.sScopeIsDead === 'Y' || scope.bDead) {
+          inactiveCount++;
+        } else {
+          activeCount++;
+        }
+      }
+
+      const byModel = Array.from(modelMap.values())
+        .sort((a, b) => b.count - a.count);
+
+      return ok({
+        total:    scopes.length,
+        byModel,
+        byStatus: { active: activeCount, inactive: inactiveCount },
+      }, { count: 1 });
+    },
+
+    // Repair history for a department with summary meta
+    // Returns: { data: repairs[], meta: { total, open, inProgress, completed30d, avgTAT } }
+    getRepairHistory(deptKey, options = {}) {
+      if (!dbAvailable()) return err('MockDB not available', 'DB_UNAVAILABLE');
+      const dept = MockDB.getByKey('departments', deptKey);
+      if (!dept) return notFound('Department', deptKey);
+
+      const limit  = options.limit  || 50;
+      const offset = options.offset || 0;
+
+      const allRepairs = MockDB.getFiltered('repairs', r => r.lDepartmentKey === deptKey);
+
+      // Calculate summary stats
+      const openStatuses       = new Set(['Received', 'D&I', 'Waiting Parts', 'Waiting Approval']);
+      const inProgressStatuses = new Set(['In Repair', 'QC', 'Ready to Ship']);
+      const thirtyDaysAgo      = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+      let openCount       = 0;
+      let inProgressCount = 0;
+      let completed30d    = 0;
+      let tatSum          = 0;
+      let tatCount        = 0;
+
+      for (const r of allRepairs) {
+        const status = r.sRepairStatus || '';
+        if (openStatuses.has(status))       openCount++;
+        if (inProgressStatuses.has(status)) inProgressCount++;
+
+        if (status === 'Completed' || status === 'Invoiced' || status === 'Shipped') {
+          const dtOut = r.dtDateOut ? new Date(r.dtDateOut) : null;
+          if (dtOut && dtOut >= thirtyDaysAgo) completed30d++;
+        }
+
+        if (r.nTurnAroundTime > 0) {
+          tatSum += r.nTurnAroundTime;
+          tatCount++;
+        }
+      }
+
+      const avgTAT = tatCount > 0 ? Math.round(tatSum / tatCount) : null;
+
+      const { rows: paged, meta } = paginate(allRepairs, Math.floor(offset / limit) + 1, limit);
+
+      return ok(paged, {
+        ...meta,
+        total:        allRepairs.length,
+        open:         openCount,
+        inProgress:   inProgressCount,
+        completed30d,
+        avgTAT,
+      });
+    },
+
+    // Technicians who have worked on repairs for this department
+    // Returns: [{userKey, name, repairCount30d, avgTAT, openCount}]
+    getAssignedTechs(deptKey) {
+      if (!dbAvailable()) return err('MockDB not available', 'DB_UNAVAILABLE');
+      const dept = MockDB.getByKey('departments', deptKey);
+      if (!dept) return notFound('Department', deptKey);
+
+      const repairs       = MockDB.getFiltered('repairs', r => r.lDepartmentKey === deptKey);
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const openStatuses  = new Set(['Received', 'D&I', 'Waiting Parts', 'Waiting Approval', 'In Repair', 'QC', 'Ready to Ship']);
+
+      // Aggregate by technician key
+      const techMap = new Map();
+
+      for (const r of repairs) {
+        const key  = r.lTechnicianKey || r.lTechKey || 0;
+        const name = r.sTechName || 'Unassigned';
+
+        if (!techMap.has(key)) {
+          techMap.set(key, { userKey: key, name, repairCount30d: 0, tatSum: 0, tatCount: 0, openCount: 0 });
+        }
+
+        const rec = techMap.get(key);
+        const dtOut = r.dtDateOut ? new Date(r.dtDateOut) : null;
+
+        if (dtOut && dtOut >= thirtyDaysAgo) rec.repairCount30d++;
+        if (r.nTurnAroundTime > 0) { rec.tatSum += r.nTurnAroundTime; rec.tatCount++; }
+        if (openStatuses.has(r.sRepairStatus || '')) rec.openCount++;
+      }
+
+      const rows = Array.from(techMap.values())
+        .filter(t => t.userKey !== 0)
+        .map(t => ({
+          userKey:       t.userKey,
+          name:          t.name,
+          repairCount30d: t.repairCount30d,
+          avgTAT:        t.tatCount > 0 ? Math.round(t.tatSum / t.tatCount) : null,
+          openCount:     t.openCount,
+        }))
+        .sort((a, b) => b.repairCount30d - a.repairCount30d);
+
+      return ok(rows);
+    },
+
+    // All departments for a client with summary counts attached
+    // Returns: departments[] with scopeCount, openRepairCount, contractStatus
+    getListForClient(clientKey) {
+      if (!dbAvailable()) return err('MockDB not available', 'DB_UNAVAILABLE');
+      const client = MockDB.getByKey('clients', clientKey);
+      if (!client) return notFound('Client', clientKey);
+
+      const depts         = MockDB.getFiltered('departments', d => d.lClientKey === clientKey);
+      const allScopes     = MockDB.getAll('scopes');
+      const allRepairs    = MockDB.getAll('repairs');
+      const allContracts  = MockDB.getAll('contracts');
+      const openStatuses  = new Set(['Received', 'D&I', 'Waiting Parts', 'Waiting Approval', 'In Repair', 'QC', 'Ready to Ship']);
+
+      // Build lookup maps for performance
+      const scopesByDept   = new Map();
+      const repairsByDept  = new Map();
+
+      for (const s of allScopes) {
+        if (!scopesByDept.has(s.lDepartmentKey)) scopesByDept.set(s.lDepartmentKey, 0);
+        scopesByDept.set(s.lDepartmentKey, scopesByDept.get(s.lDepartmentKey) + 1);
+      }
+
+      for (const r of allRepairs) {
+        if (!openStatuses.has(r.sRepairStatus || '')) continue;
+        if (!repairsByDept.has(r.lDepartmentKey)) repairsByDept.set(r.lDepartmentKey, 0);
+        repairsByDept.set(r.lDepartmentKey, repairsByDept.get(r.lDepartmentKey) + 1);
+      }
+
+      // Find active contracts for this client
+      const activeContracts = allContracts.filter(c =>
+        c.lClientKey === clientKey && c.sContractStatus !== 'Expired' && c.sContractStatus !== 'Cancelled'
+      );
+      const contractStatus = activeContracts.length > 0 ? 'Active' : 'None';
+
+      const rows = depts.map(d => ({
+        ...d,
+        scopeCount:      scopesByDept.get(d.lDepartmentKey)  || 0,
+        openRepairCount: repairsByDept.get(d.lDepartmentKey) || 0,
+        contractStatus,
+      }));
+
+      return ok(rows, { count: rows.length });
+    },
   };
 
   // ══════════════════════════════════════════════════════

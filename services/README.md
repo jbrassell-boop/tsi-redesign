@@ -10,6 +10,7 @@ A relationship-aware data service layer that sits between HTML pages and `MockDB
 | `data-service.js` | Query facade — relationship-aware methods for all entities |
 | `seed-data.js` | Deterministic test data generator (10 clients, 39 depts, 158 scopes, 393 repairs) |
 | `validators.js` | Required field, FK, type, and business rule validation |
+| `dept-enrichment.js` | Enriches dept/scope/repair records at runtime: dept-type labels, realistic scope models, orphan repair linking |
 
 ## Load Order
 
@@ -21,6 +22,9 @@ All files are plain browser scripts. Load after `mock-db.js`:
 <script src="services/data-service.js"></script>
 <script src="services/seed-data.js"></script>
 <script src="services/validators.js"></script>
+<script src="services/dept-enrichment.js"></script>
+<!-- Optional: run at startup to enrich all dept/scope/repair records -->
+<!-- DeptEnrichment.runAll(MockDB); -->
 ```
 
 ## Response Envelope
@@ -68,6 +72,23 @@ DataService.DepartmentService.getAll(svcLocationKey?)
 DataService.DepartmentService.getById(deptKey)
 DataService.DepartmentService.getByClient(clientKey)
 DataService.DepartmentService.getWithScopes(deptKey)   // dept + scopes + contacts
+
+// Scope inventory breakdown for a single department
+// Returns: { total, byModel: [{model, manufacturer, count}], byStatus: {active, inactive} }
+DataService.DepartmentService.getScopeInventorySummary(deptKey)
+
+// Paginated repair history with summary meta
+// Returns data[] + meta: { total, open, inProgress, completed30d, avgTAT }
+DataService.DepartmentService.getRepairHistory(deptKey, options?)
+// options: { limit: 50, offset: 0 }
+
+// Technicians who have worked repairs for this department
+// Returns: [{userKey, name, repairCount30d, avgTAT, openCount}]
+DataService.DepartmentService.getAssignedTechs(deptKey)
+
+// All departments for a client with denormalized counts attached
+// Returns: departments[] each with scopeCount, openRepairCount, contractStatus
+DataService.DepartmentService.getListForClient(clientKey)
 ```
 
 ### RepairService
