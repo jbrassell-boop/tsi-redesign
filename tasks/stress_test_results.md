@@ -225,9 +225,9 @@
 | **P4** | Add `tabindex` + `role="tab"` + `aria-selected` to tab bar | Small | OPEN |
 | **P4** | Add ARIA attributes throughout | Large | OPEN |
 | **P4** | Extract inline CSS to `repairs.css` | Small | OPEN |
-| **P4** | Remove dead `#repairListPanel` HTML | Small | OPEN |
+| **P4** | ~~Remove dead `#repairListPanel` HTML~~ | Small | FIXED 2026-03-29 |
 | **P4** | Add repair list pagination UI beyond 100 rows | Medium | OPEN |
-| **P4** | Sync URL state with selected repair | Small | OPEN |
+| **P4** | ~~Sync URL state with selected repair~~ | Small | FIXED 2026-03-29 |
 | **P4** | Use shared `.drawer-head` class instead of custom `.qc-drawer-head` | Small | OPEN |
 | **P4** | Align tab bar bg with other screens (`var(--card)` vs `var(--neutral-50)`) | Small | OPEN |
 

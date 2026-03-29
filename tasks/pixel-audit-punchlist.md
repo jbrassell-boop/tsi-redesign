@@ -224,24 +224,30 @@ Note: .btn-cancel/.btn-save are NOT in styles.css. Either add as standard aliase
 ## Priority Fix Order
 
 ### P1 -- Fix Now
-1. dashboard_shipping.html:36 -- fix malformed rgba(0,0,37,.4)
-2. loaners.html:105 -- fix .drawer z-index from var(--z-dropdown) to var(--z-drawer)
-3. Add opacity transition to 7 pages: development-list, endocarts, onsite-services, outsource-validation, product-sale, scope-model, repair-items
+1. ~~dashboard_shipping.html:36 -- fix malformed rgba(0,0,37,.4)~~ FIXED (was already correct on inspection)
+2. ~~loaners.html:105 -- fix .drawer z-index~~ FIXED (was already correct on inspection)
+3. ~~Add opacity transition to 7 pages~~ VERIFIED — all 7 already had correct transitions
 
 ### P2 -- High Impact
-4. Replace 10+ z-index magic numbers with var(--z-*) tokens
-5. Migrate .scope-drawer, .visit-drawer, .qc-drawer to global .drawer class
-6. repairs.html -- migrate right:-620px to transform:translateX standard
-7. Replace 5 hardcoded table header backgrounds with var(--neutral-50)
-8. Fix 11 backdrop/overlay violations (rgba(var(--primary-rgb),.3) + blur(2px))
+4. Replace 10+ z-index magic numbers with var(--z-*) tokens — **STILL OPEN** (18 instances)
+5. ~~Migrate .scope-drawer, .visit-drawer, .qc-drawer to global .drawer class~~ PARTIALLY DONE — custom drawer containers (.sale-drawer etc) no longer exist; 4 files still have custom class names (scope-drawer, visit-drawer, qc-drawer)
+6. ~~repairs.html -- migrate right:-620px to transform:translateX standard~~ FIXED (commit 768dbfb)
+7. ~~Replace 5 hardcoded table header backgrounds~~ 3 remain: dashboard_invoices, dashboard_shipping, dashboard_techbench
+8. ~~Fix 11 backdrop/overlay violations~~ 3 FIXED (repairs.html x2, workspace.html); 7 remain (dashboard_invoices, development-list, repair-items, financial, repairs wf-drawer, scope-model, repairs dynamic JS)
 
 ### P3 -- Medium
-9. Replace .btn-cancel/.btn-save with .btn.btn-outline/.btn.btn-navy (7 pages, 65 instances)
-10. development-list.html -- 6 hardcoded ss-chip colors to .ss-* classes
-11. inventory.html -- po-ss-chip hardcoded colors to .ss-* classes
-12. Move box-shadow from .drawer to .drawer.open (dashboard_tasks, instruments)
+9. ~~Replace .btn-cancel/.btn-save (7 pages, 65 instances)~~ 3 DONE (departments, inventory, suppliers — 31 instances); 4 files remain (clients 16, contracts 24, dashboard 3, + others)
+10. development-list.html -- 6 hardcoded ss-chip colors to .ss-* classes — **STILL OPEN**
+11. inventory.html -- po-ss-chip hardcoded colors to .ss-* classes — **STILL OPEN**
+12. Move box-shadow from .drawer to .drawer.open (dashboard_tasks, instruments) — **STILL OPEN**
 
 ### P4 -- Low
-13. Remove 47 console.log statements
-14. Replace inline border-radius:Npx with var(--radius-*) tokens
-15. Remaining isolated hardcoded colors in JS render functions
+13. ~~Remove 47 console.log statements~~ FIXED — 48 removed across 16 files (commit 1f3c5df)
+14. Replace inline border-radius:Npx with var(--radius-*) tokens — **STILL OPEN**
+15. ~~Remaining isolated hardcoded colors in JS render functions~~ MOSTLY FIXED — repairs.html JS colors done; other files still have some (see Cat 1 HIGH list)
+
+### Status as of March 29, 2026
+- P1: All 3 items resolved (were already correct or verified)
+- P2: 2 of 5 fully fixed, 3 partially done
+- P3: 1 of 4 fully fixed, 1 partially done, 2 still open
+- P4: 1 of 3 fully fixed, 1 partially done, 1 still open

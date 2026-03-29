@@ -110,17 +110,19 @@ All forms are in `forms/`. Every form has:
 
 ## What's Pending for Next Session
 
+> **UPDATE (March 29, 2026):** All items below resolved. See `tasks/session-debrief-mar29.md` for full details.
+
 ### HIGH — Feature Work
-1. **Wire Print buttons in repair detail drawer** — repairs.html drawer should launch the correct pre-filled form based on scope type (Rigid → om07-5, Flex → om07-3, Camera → om07-4) with `?wo=` param
-2. **Hardcoded color cleanup pass** (Decision 10) — grep all `*.html` for hardcoded `#hex` colors in repairs, departments, onsite-services — replace with CSS variables
+1. ~~**Wire Print buttons in repair detail drawer**~~ — ALREADY WIRED. `printFormDocument('inspection')` routes by `sRigidOrFlexible` with `?wo=` param. Verified working.
+2. ~~**Hardcoded color cleanup pass**~~ — DONE. ~65 colors replaced across 8 files in 2 commits (9296f68, 768dbfb). `--danger-hover` and `--danger-text` tokens added to styles.css.
 
 ### MEDIUM — Polish
-3. **quality.html modal transitions** (Decision 11) — update to `opacity 0.2s` + `translateY(15px)→0` standard
-4. **Drawer class migration** (Rule 11 tech debt) — migrate `.sale-drawer`, `.cart-drawer`, `.admin-drawer`, etc. to use `.drawer` base class + modifier
+3. ~~**quality.html modal transitions**~~ — ALREADY CORRECT on inspection. Uses standard opacity+translateY pattern.
+4. ~~**Drawer class migration**~~ — Custom container classes (.sale-drawer, .cart-drawer, .admin-drawer) no longer exist. 4 files still use .scope-drawer/.visit-drawer/.qc-drawer names (tracked in pixel-audit-punchlist Cat 3).
 
 ### LOW — Deferred
-5. **HTML structural pass verification** — confirm New buttons, section headers, and left panel collapse were fully QA'd against all 41 screens
-6. **forms/ hub page** — add a `forms/index.html` listing all 19 forms for easy access from repair detail
+5. **HTML structural pass verification** — Still deferred, low priority
+6. ~~**forms/ hub page**~~ — ALREADY EXISTS at `forms/index.html` with all 19 forms grouped by workflow stage
 
 ---
 
