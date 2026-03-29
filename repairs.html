@@ -612,6 +612,7 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
         <div class="queue-head">
           <span style="font-size:13px;font-weight:700;color:#fff;flex:1">Repair Queue</span>
           <span id="queueCount" class="tab-count">0</span>
+          <button id="qToggleClosed" onclick="toggleShowClosed()" title="Show/hide closed repairs" style="font-size:9px;font-weight:600;color:rgba(255,255,255,.6);border:none;background:none;cursor:pointer;padding:0 4px;white-space:nowrap">+0 closed</button>
           <button class="btn-icon btn-sm" id="collapseQueue" title="Collapse queue (Q)" onclick="toggleQueuePanel()" style="width:24px;height:24px;border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:4px;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">&#8592;</button>
         </div>
 
@@ -8987,6 +8988,9 @@ function renderQueue() {
     const dept = r.sDepartmentName || r.sDept || '';
     const model = r.sScopeTypeDesc || r.sModelNumber || r.sModel || '';
     const serial = r.sSerialNumber || r.sSerial || '';
+    const rawType = (r.sRigidOrFlexible || '').toUpperCase().charAt(0);
+    const typeLabel = rawType === 'F' ? 'Flex' : rawType === 'R' ? 'Rigid' : rawType === 'C' ? 'Camera' : '';
+    const typeColor = rawType === 'F' ? 'color:var(--blue)' : rawType === 'R' ? 'color:var(--navy)' : rawType === 'C' ? 'color:var(--primary)' : 'color:var(--muted)';
     const isActive = wo && activeWO && wo === activeWO;
     const rKey = r.lRepairKey || 0;
 
@@ -8998,7 +9002,7 @@ function renderQueue() {
         <span class="q-age ${ageClass}">${ageDays}d</span>
       </div>
       <div class="q-row-client">${clientName}${dept?' &middot; '+dept:''}</div>
-      <div class="q-row-model">${model}${serial?' &middot; '+serial:''}</div>
+      <div class="q-row-model">${typeLabel?`<span style="font-size:9px;font-weight:700;${typeColor};font-family:inherit;margin-right:4px">${typeLabel}</span>`:''}${model}${serial?' &middot; '+serial:''}</div>
       <div class="q-row-status">
         <span class="q-status-badge ${sClass}">${statusName||'Unknown'}</span>
         ${isFlagged?'<span class="q-flag-icon" title="Flagged">&#9873;</span>':''}
@@ -9054,11 +9058,28 @@ function navigateQueue(direction) {
 }
 
 // Populate queue from existing _repairListData after it's loaded
+// Statuses that mean a repair is done — exclude from open queue by default
+const CLOSED_STATUSES = /invoiced|billed|closed|complete|shipped|cancel|declined|no fault|write.?off/i;
+function isClosedStatus(name) { return name && CLOSED_STATUSES.test(name); }
+
+let _showClosedInQueue = false;
+
 function syncQueueFromRepairList() {
   if (typeof _repairListData !== 'undefined' && _repairListData.length) {
-    _queueAllRepairs = _repairListData;
+    _queueAllRepairs = _showClosedInQueue
+      ? _repairListData
+      : _repairListData.filter(r => !isClosedStatus(r._statusName || r.sRepairStatus || ''));
     renderQueue();
+    // Update the toggle label with closed count
+    const closedCount = _repairListData.filter(r => isClosedStatus(r._statusName || r.sRepairStatus || '')).length;
+    const toggleEl = document.getElementById('qToggleClosed');
+    if (toggleEl) toggleEl.textContent = _showClosedInQueue ? 'Hide closed' : `+${closedCount} closed`;
   }
+}
+
+function toggleShowClosed() {
+  _showClosedInQueue = !_showClosedInQueue;
+  syncQueueFromRepairList();
 }
 
 // ── STAGE PIPELINE ──────────────────────────────────────────────
