@@ -452,8 +452,7 @@ router.get('/InstrumentCode/GetAll', async (req, res, next) => {
       SELECT lRepairItemKey, sItemDescription, nUnitCost, sRigidOrFlexible,
         sMajorRepair, sProductID, sTSICode
       FROM tblRepairItem
-      WHERE bActive = 1
-        AND (sRigidOrFlexible = 'I' OR sRigidOrFlexible IS NULL OR sRigidOrFlexible = '')
+      WHERE sRigidOrFlexible = 'I'
       ORDER BY sItemDescription`, {});
     res.json({ success: true, data: rows });
   } catch (e) { next(e); }
@@ -468,9 +467,8 @@ router.get('/InstrumentCode/Search', async (req, res, next) => {
       SELECT TOP 50 lRepairItemKey, sItemDescription, nUnitCost, sRigidOrFlexible,
         sMajorRepair, sProductID, sTSICode
       FROM tblRepairItem
-      WHERE bActive = 1
-        AND (sRigidOrFlexible = 'I' OR sRigidOrFlexible IS NULL OR sRigidOrFlexible = '')
-        AND (sItemDescription LIKE '%' + @q + '%' OR sProductID LIKE '%' + @q + '%')
+      WHERE sRigidOrFlexible = 'I'
+        AND (sItemDescription LIKE '%' + @q + '%' OR ISNULL(sProductID,'') LIKE '%' + @q + '%')
       ORDER BY sItemDescription`, { q: query });
     res.json({ success: true, data: rows });
   } catch (e) { next(e); }
