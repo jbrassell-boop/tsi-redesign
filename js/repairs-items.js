@@ -158,14 +158,69 @@ function renderInvItemsList() {
 }
 function selectInvItem(idx) {
   _invSelectedItem = idx;
-  // Highlight selected
   document.querySelectorAll('#invItemsList > div').forEach((el, i) => {
     el.style.background = i === idx ? '#ECFEFF' : '';
     el.style.fontWeight = i === idx ? '600' : '';
   });
-  // TODO: load lots/available inventory for this repair item via API
-  document.getElementById('invLotsBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No lots on file</td></tr>';
-  document.getElementById('invAvailBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No available inventory</td></tr>';
+
+  const item = _repairItems[idx];
+  if (!item) return;
+
+  document.getElementById('invLotsBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Loading...</td></tr>';
+  document.getElementById('invAvailBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Loading...</td></tr>';
+
+  var repairKey = _currentRepair ? _currentRepair.lRepairKey : null;
+  if (repairKey) {
+    API.getRepairInventory(repairKey).then(function(data) {
+      var items = Array.isArray(data) ? data : (data && data.dataSource ? data.dataSource : []);
+      var tranKey = item.lRepairItemTranKey;
+      var assigned = items.filter(function(inv) { return inv.lRepairItemTranKey === tranKey; });
+      if (!assigned.length) {
+        document.getElementById('invLotsBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No parts assigned</td></tr>';
+      } else {
+        document.getElementById('invLotsBody').innerHTML = assigned.map(function(inv) {
+          return '<tr><td>' + esc(inv.sInventoryDescription || inv.sDescription || '') + '</td><td style="text-align:center">' + (inv.nQuantity || 1) + '</td><td style="text-align:right">' + fmtMoney(inv.dblUnitCost || 0) + '</td></tr>';
+        }).join('');
+      }
+    }).catch(function() {
+      document.getElementById('invLotsBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Error loading</td></tr>';
+    });
+  }
+
+  API.getInventoryList({ Pagination: { PageNumber: 1, PageSize: 50 }, Filters: {} }).then(function(data) {
+    var items = Array.isArray(data) ? data : (data && data.dataSource ? data.dataSource : []);
+    if (!items.length) {
+      document.getElementById('invAvailBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">No inventory items found</td></tr>';
+      return;
+    }
+    document.getElementById('invAvailBody').innerHTML = items.map(function(inv) {
+      var binNum = inv.sBinNumber || inv.sBin || '';
+      return '<tr style="cursor:pointer" onclick="addInvToRepair(' + (inv.lInventoryKey || inv.lInventoryItemKey) + ',' + _invSelectedItem + ')">' +
+        '<td>' + esc(inv.sInventoryDescription || inv.sDescription || '') + '</td>' +
+        '<td style="text-align:center;font-size:10px">' + binNum + '</td>' +
+        '<td style="text-align:center">' + (inv.nCurrentLevel || inv.nOnHand || 0) + '</td>' +
+        '<td style="text-align:right">' + fmtMoney(inv.dblUnitCost || 0) + '</td></tr>';
+    }).join('');
+  }).catch(function() {
+    document.getElementById('invAvailBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Error loading inventory</td></tr>';
+  });
+}
+
+async function addInvToRepair(inventoryKey, itemIdx) {
+  if (!_currentRepair || itemIdx < 0) return;
+  var item = _repairItems[itemIdx];
+  if (!item || !item.lRepairItemTranKey) { showToast('Select a repair item first'); return; }
+  try {
+    await API.addRepairInventory({
+      plRepairKey: _currentRepair.lRepairKey,
+      plRepairItemTranKey: item.lRepairItemTranKey,
+      plScopeTypeRepairItemInventoryKey: inventoryKey,
+      pnQuantity: 1
+    });
+    showToast('Part added');
+    selectInvItem(itemIdx);
+    loadRepairInventory(_currentRepair.lRepairKey);
+  } catch(e) { showToast('Failed to add part: ' + e.message); }
 }
 
 // ── Right-click context menu for repair items ──
@@ -492,7 +547,32 @@ function toggleShipSame() {
   markDirty();
 }
 
-// ── Autosave ──
+// ── Shipping helpers ──
+function copyTracking() {
+  var val = document.getElementById('sTracking2').value.trim();
+  if (!val) { showToast('No tracking number to copy'); return; }
+  navigator.clipboard.writeText(val).then(function() {
+    showToast('Tracking # copied');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = val; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Tracking # copied');
+  });
+}
+
+function populateShippingCost() {
+  if (!_currentRepair) return;
+  var dmKey = _currentRepair.lDeliveryMethodKey;
+  if (dmKey && typeof _deliveryMethods !== 'undefined') {
+    var dm = _deliveryMethods.find(function(m) { return m.lDeliveryMethodKey == dmKey; });
+    if (dm && dm.dblAmtShipping) {
+      var el = document.getElementById('sEstShipCost');
+      if (el) el.textContent = fmtMoney(dm.dblAmtShipping);
+    }
+  }
+}
 
 // ── Exports ──
 window.renderRepairItems = renderRepairItems;
@@ -506,6 +586,7 @@ window.openTechsDrawer = openTechsDrawer;
 window.openInvDrawer = openInvDrawer;
 window.renderInvItemsList = renderInvItemsList;
 window.selectInvItem = selectInvItem;
+window.addInvToRepair = addInvToRepair;
 window.initItemContextMenu = initItemContextMenu;
 window.toggleApproval = toggleApproval;
 window.toggleBlind = toggleBlind;
@@ -534,4 +615,6 @@ window.clearPickerSelections = clearPickerSelections;
 window.addSelectedItems = addSelectedItems;
 window.resetMaxCharge = resetMaxCharge;
 window.toggleShipSame = toggleShipSame;
+window.copyTracking = copyTracking;
+window.populateShippingCost = populateShippingCost;
 })();

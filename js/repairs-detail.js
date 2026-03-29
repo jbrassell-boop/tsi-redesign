@@ -223,6 +223,8 @@ async function loadRepair(repairKey) {
 
     // Run initial tab badge update (shipping/status-based badges)
     if (typeof updateTabBadges === 'function') updateTabBadges(d);
+    // Populate shipping cost estimate from delivery method
+    if (typeof populateShippingCost === 'function') populateShippingCost();
 
     // Load sub-tabs + scope history in parallel (non-blocking)
     Promise.all([
@@ -436,7 +438,20 @@ function populateDetail(d) {
   document.getElementById('hScopeCat').textContent = d.sScopeTypeCategory || d.sScopeCategory || '—';
   document.getElementById('hModel').textContent = d.sScopeTypeDesc || '—';
   document.getElementById('hSerial').textContent = d.sSerialNumber || '—';
-  document.getElementById('hCapFFS').textContent = d.lContractKey ? 'Contract' : 'FFS';
+  const capEl = document.getElementById('hCapFFS');
+  if (d.lContractKey) {
+    capEl.textContent = 'Contract';
+    capEl.style.cssText = 'background:#F0FDF4;color:var(--success);padding:1px 6px;border-radius:9999px;font-size:10px;font-weight:700;border:1px solid #BBF7D0';
+    API.getContractById(d.lContractKey).then(function(c) {
+      if (!c) return;
+      var cc = Array.isArray(c) ? c[0] : c;
+      capEl.title = 'Contract: ' + (cc.sContractNumber || '') + ' | Expires: ' + (cc.dtExpDate ? new Date(cc.dtExpDate).toLocaleDateString() : 'N/A');
+    }).catch(function() {});
+  } else {
+    capEl.textContent = 'FFS';
+    capEl.style.cssText = 'background:var(--neutral-100);color:var(--neutral-500);padding:1px 6px;border-radius:9999px;font-size:10px;font-weight:600;border:1px solid var(--neutral-200)';
+    capEl.title = 'Fee for Service — no contract';
+  }
   // PERF-004: use cached _repairListData instead of a fresh API.getRepairList() network call
   // Compute days since last repair + 40-day warranty flag from repair history
   var daysLastIn = d.nDaysSinceLastIn;
@@ -691,6 +706,31 @@ function populateDetail(d) {
   document.getElementById('fShipZip').value = d.sShipZip || '';
   var sameBill = (d.sShipAddr1 === d.sBillAddr1 && d.sShipName1 === d.sBillName1);
   document.getElementById('fShipSameBill').checked = sameBill;
+
+  // Auto-fill from department if address fields are empty
+  if (!d.sBillName1 && !d.sBillAddr1 && d.lDepartmentKey) {
+    API.getDepartmentDetail(d.lDepartmentKey, d.lClientKey).then(function(dept) {
+      if (!dept) return;
+      var dd = Array.isArray(dept) ? dept[0] : dept;
+      if (!document.getElementById('fBillName1').value) {
+        document.getElementById('fBillName1').value = dd.sBillName1 || dd.sDepartmentName || '';
+        document.getElementById('fBillAddr1').value = dd.sBillAddr1 || dd.sAddress1 || '';
+        document.getElementById('fBillCity').value = dd.sBillCity || dd.sCity || '';
+        document.getElementById('fBillState').value = dd.sBillState || dd.sState || '';
+        document.getElementById('fBillZip').value = dd.sBillZip || dd.sZip || '';
+      }
+      if (!document.getElementById('fShipName1').value) {
+        document.getElementById('fShipName1').value = dd.sShipName1 || dd.sDepartmentName || '';
+        document.getElementById('fShipAddr1').value = dd.sShipAddr1 || dd.sAddress1 || '';
+        document.getElementById('fShipCity').value = dd.sShipCity || dd.sCity || '';
+        document.getElementById('fShipState').value = dd.sShipState || dd.sState || '';
+        document.getElementById('fShipZip').value = dd.sShipZip || dd.sZip || '';
+      }
+      if (!document.getElementById('fBillEmail').value) {
+        document.getElementById('fBillEmail').value = dd.sContactEMail || dd.sEmail || '';
+      }
+    }).catch(function(e) { console.warn('[TSI Repairs] Dept address fallback failed:', e.message); });
+  }
 
   // Inbound
   document.getElementById('fTrackIn').value = d.sShipTrackingNumberIn || '';

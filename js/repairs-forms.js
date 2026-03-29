@@ -37,7 +37,7 @@ const FORM_DRAWER_CONFIG = {
     timestampId: 'wfReqTimestamp',
     footer: [
       { label: 'Print', cls: 'btn btn-outline', onclick: "printFormDocument('requisition')" },
-      { label: 'Email to Customer', cls: 'btn btn-outline' },
+      { label: 'Email to Customer', cls: 'btn btn-outline', onclick: "emailFormToCustomer('requisition')" },
       { label: 'Generate PDF', cls: 'btn btn-navy', onclick: "generateForm('requisition')" }
     ]
   },
@@ -62,7 +62,7 @@ const FORM_DRAWER_CONFIG = {
     title: 'Final Invoice',
     footer: [
       { label: 'Print & Generate', cls: 'btn btn-outline', onclick: "printFormDocument('invoice')" },
-      { label: 'Email to AP', cls: 'btn btn-outline' },
+      { label: 'Email to AP', cls: 'btn btn-outline', onclick: "emailFormToCustomer('invoice')" },
       { label: 'Generate', cls: 'btn btn-navy', onclick: "generateForm('invoice')" }
     ]
   },
@@ -1971,6 +1971,32 @@ function populateFormDrawer(formId) {
 }
 
 
+async function emailFormToCustomer(formId) {
+  if (!_currentRepair) { showToast('No repair loaded'); return; }
+  var r = _currentRepair;
+  var subject = formId === 'requisition'
+    ? 'Requisition for Approval — ' + (r.sWorkOrderNumber || '')
+    : 'Invoice — ' + (r.sWorkOrderNumber || '');
+  var recipientEmail = document.getElementById('fBillEmail') ? document.getElementById('fBillEmail').value : '';
+  if (!recipientEmail) {
+    showToast('No billing email on file — add email in Details tab');
+    return;
+  }
+  try {
+    await API.queueEmail({
+      lRepairKey: r.lRepairKey,
+      sFormType: formId,
+      sRecipientEmail: recipientEmail,
+      sSubject: subject,
+      sBody: 'Please review the attached ' + formId + ' for work order ' + (r.sWorkOrderNumber || '') + '.',
+      sSenderName: (API.getUser() || {}).sFirstName || 'TSI'
+    });
+    showToast('Email queued — check Dashboard Emails to review & send');
+  } catch(e) {
+    showToast('Failed to queue email: ' + e.message);
+  }
+}
+
 // ── Exports ──
 window.WORKFLOW_FORMS = WORKFLOW_FORMS;
 window.FORM_DRAWER_CONFIG = FORM_DRAWER_CONFIG;
@@ -1998,4 +2024,5 @@ window.openFormPreview = openFormPreview;
 window.tsiFormHeader = tsiFormHeader;
 window.populateFormDrawer = populateFormDrawer;
 window.generateForm = generateForm;
+window.emailFormToCustomer = emailFormToCustomer;
 })();

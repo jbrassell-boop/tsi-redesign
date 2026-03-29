@@ -521,6 +521,7 @@ const API = (() => {
   async function getEmails(ownerKey) { return get('/Email/GetAll' + (ownerKey ? '?lOwnerKey=' + ownerKey : '')); }
   async function getEmailTypes() { return get('/Email/GetTypes'); }
   async function getEmailAttachments(emailKey) { return get('/Email/GetAttachments?lEmailKey=' + emailKey); }
+  async function queueEmail(data) { return post('/emails/queue', data); }
 
   // ── Quality / ISO Complaints ─────────────────────────
   async function getQualityComplaints() { return get('/Quality/GetAll'); }
@@ -661,7 +662,7 @@ const API = (() => {
     getInstrumentTypes,
 
     // Emails
-    getEmails, getEmailTypes, getEmailAttachments,
+    getEmails, getEmailTypes, getEmailAttachments, queueEmail,
 
     // Quality
     getQualityComplaints, getQualityComplaintByKey,

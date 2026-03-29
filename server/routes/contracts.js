@@ -373,4 +373,44 @@ router.get('/Contract/GetAllContractClient', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Contract/GetContractByDepartment/:deptKey — Active contract covering a specific department
+// Used by repairs page for contract pricing lookup
+// Contract is "active" when today is between dtDateEffective and dtDateTermination
+router.get('/Contract/GetContractByDepartment/:deptKey', async (req, res, next) => {
+  try {
+    const deptKey = parseInt(req.params.deptKey) || 0;
+    if (!deptKey) return res.status(400).json({ success: false, error: 'deptKey required' });
+
+    const rows = await db.query(`
+      SELECT
+        con.lContractKey, con.sContractNumber, con.lClientKey,
+        con.lContractTypeKey, con.lSalesRepKey, con.lPaymentTermsKey,
+        con.dtDateEffective, con.dtDateTermination,
+        con.dblAmtTotal AS dblAmtContract,
+        con.dblAmtInvoiced AS dblAmtExpense,
+        con.nCountFlexible, con.nCountRigid, con.nCountCamera, con.nCountAll,
+        con.lBillType, con.lBillDay, con.dtNextBillDate,
+        con.sPurchaseOrder, con.mComments,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName,
+        ISNULL(ct.sContractType, '') AS sContractTypeName,
+        ISNULL(pt.sTermsDesc, '') AS sPaymentTerms,
+        cd.lContractDepartmentKey, cd.dtContractDepartmentEffectiveDate,
+        cd.dtContractDepartmentEndDate, cd.bNonBillable, cd.bCalcCostFromScopes,
+        'Active' AS sContractStatus
+      FROM tblContractDepartments cd
+        INNER JOIN tblContract con ON con.lContractKey = cd.lContractKey
+        LEFT JOIN tblClient c ON c.lClientKey = con.lClientKey
+        LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = con.lSalesRepKey
+        LEFT JOIN tblContractTypes ct ON ct.lContractTypeKey = con.lContractTypeKey
+        LEFT JOIN tblPaymentTerms pt ON pt.lPaymentTermsKey = con.lPaymentTermsKey
+      WHERE cd.lDepartmentKey = @deptKey
+        AND con.dtDateEffective <= GETDATE()
+        AND con.dtDateTermination >= GETDATE()
+      ORDER BY con.dtDateTermination DESC`, { deptKey });
+
+    res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

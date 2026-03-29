@@ -147,6 +147,74 @@ router.get('/Invoice/GetReadyToInvoice', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Invoice/GetInvoiceByRepairKey/:repairKey — Invoice header + line items for a repair (PDF build)
+// Combines tblGP_InvoiceStaging + tblInvoice header + tblRepairItemTran line items
+router.get('/Invoice/GetInvoiceByRepairKey/:repairKey', async (req, res, next) => {
+  try {
+    const repairKey = parseInt(req.params.repairKey) || 0;
+    if (!repairKey) return res.status(400).json({ success: false, error: 'repairKey required' });
+
+    // Get repair + client/dept details for invoice header
+    const repair = await db.queryOne(`
+      SELECT
+        r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtDateOut, r.dtShipDate,
+        r.dblAmtRepair, r.dblAmtShipping, r.lServiceLocationKey,
+        r.lContractKey, r.lSalesRepKey, r.sPurchaseOrder,
+        r.sComplaintDesc, r.lScopeKey,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        ISNULL(c.sMailAddr1, '') AS sBillAddr1,
+        ISNULL(c.sMailAddr2, '') AS sBillAddr2,
+        ISNULL(c.sMailCity, '') AS sBillCity,
+        ISNULL(c.sMailState, '') AS sBillState,
+        ISNULL(c.sMailZip, '') AS sBillZip,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(d.sShipName1, '') AS sShipName1,
+        ISNULL(d.sShipAddr1, '') AS sShipAddr1,
+        ISNULL(d.sShipCity, '') AS sShipCity,
+        ISNULL(d.sShipState, '') AS sShipState,
+        ISNULL(d.sShipZip, '') AS sShipZip,
+        ISNULL(s.sSerialNumber, '') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+        LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName
+      FROM tblRepair r
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+        LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = r.lSalesRepKey
+      WHERE r.lRepairKey = @repairKey`, { repairKey });
+
+    if (!repair) return res.status(404).json({ success: false, error: 'Repair not found' });
+
+    // Get GP invoice staging record if exists
+    const invoice = await db.queryOne(`
+      SELECT gp.GPInvoiceStagingID, gp.lInvoiceKey, gp.sTranNumber,
+        gp.dtTranDate, gp.TotalAmountDue, gp.dblTranAmount,
+        gp.dblShippingAmount, gp.dblTaxAmount, gp.sPurchaseOrder,
+        gp.bProcessed, gp.dtPostedDate
+      FROM tblGP_InvoiceStaging gp
+        INNER JOIN tblInvoice inv ON inv.lInvoiceKey = gp.lInvoiceKey
+      WHERE inv.lRepairKey = @repairKey
+      ORDER BY gp.dtTranDate DESC`, { repairKey });
+
+    // Get approved line items
+    const lineItems = await db.query(`
+      SELECT
+        rit.lRepairItemTranKey, rit.lRepairItemKey,
+        rit.dblRepairPrice, rit.sApproved, rit.sPrimaryRepair,
+        rit.sUAorNWT, rit.lQuantity, rit.sComments,
+        ISNULL(ri.sItemDescription, '') AS sItemDescription,
+        ISNULL(ri.sPartOrLabor, '') AS sPartOrLabor
+      FROM tblRepairItemTran rit
+        LEFT JOIN tblRepairItem ri ON ri.lRepairItemKey = rit.lRepairItemKey
+      WHERE rit.lRepairKey = @repairKey
+        AND rit.sApproved = 'Y'
+      ORDER BY rit.sPrimaryRepair DESC, ri.sItemDescription`, { repairKey });
+
+    res.json({ success: true, data: { repair, invoice: invoice || null, lineItems } });
+  } catch (e) { next(e); }
+});
+
 // POST /Invoice/GenerateInvoices — Create invoice staging records for repair keys
 // Inserts into tblGP_InvoiceStaging for each repair
 router.post('/Invoice/GenerateInvoices', async (req, res, next) => {
