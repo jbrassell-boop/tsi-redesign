@@ -120,7 +120,7 @@ function renderQueue() {
   if (_queueSearch) {
     repairs = repairs.filter(r =>
       (r.sWorkOrderNumber || r.sWONumber || '').toLowerCase().includes(_queueSearch) ||
-      (r.sClientName || r.sClient || r.sShipName1 || '').toLowerCase().includes(_queueSearch) ||
+      (r.sClientName1 || r.sClientName || r.sClient || r.sShipName1 || '').toLowerCase().includes(_queueSearch) ||
       (r.sSerialNumber || r.sSerial || '').toLowerCase().includes(_queueSearch) ||
       (r.sScopeTypeDesc || r.sModelNumber || r.sModel || '').toLowerCase().includes(_queueSearch)
     );
@@ -133,7 +133,7 @@ function renderQueue() {
     const bIn = b.dtDateIn || b.dDateIn || '';
     if (sortVal === 'age') return aIn.localeCompare(bIn);
     if (sortVal === 'age-desc') return bIn.localeCompare(aIn);
-    if (sortVal === 'client') return (a.sClientName || a.sClient || a.sShipName1 || '').localeCompare(b.sClientName || b.sClient || b.sShipName1 || '');
+    if (sortVal === 'client') return (a.sClientName1 || a.sClientName || a.sClient || a.sShipName1 || '').localeCompare(b.sClientName1 || b.sClientName || b.sClient || b.sShipName1 || '');
     if (sortVal === 'status') return (a._statusName || a.sStatus || '').localeCompare(b._statusName || b.sStatus || '');
     return 0;
   });
@@ -157,7 +157,7 @@ function renderQueue() {
     const wo = r.sWorkOrderNumber || r.sWONumber || '';
     // esc() all user-data fields inserted into innerHTML to prevent XSS
     const woSafe = esc(wo);
-    const clientName = esc((r.sClientName || r.sClient || r.sShipName1 || 'Unknown').substring(0, 28));
+    const clientName = esc((r.sClientName1 || r.sClientName || r.sClient || r.sShipName1 || 'Unknown').substring(0, 28));
     const dept = esc(r.sDepartmentName || r.sDept || '');
     const model = esc(r.sScopeTypeDesc || r.sModelNumber || r.sModel || '');
     const serial = esc(r.sSerialNumber || r.sSerial || '');
@@ -499,7 +499,7 @@ async function loadRepairIntoSplitRight(rKey) {
   // Find repair in queue list for header
   const r = _queueAllRepairs.find(x => x.lRepairKey === rKey) || {};
   const wo = r.sWorkOrderNumber || r.sWONumber || String(rKey);
-  const client = r.sClientName || r.sClient || r.sShipName1 || '';
+  const client = r.sClientName1 || r.sClientName || r.sClient || r.sShipName1 || '';
   const hdrWo = rightCol.querySelector('.split-wo');
   if (hdrWo) hdrWo.textContent = '#' + wo;
   const hdrCl = document.getElementById('splitRightClient');
@@ -837,7 +837,7 @@ function populateScopeHistoryTab(scopeHistory) {
     const items = r.nRepairItemCount || r.itemCount || '—';
     const tat = r.nTAT != null ? r.nTAT + 'd' : '—';
     const status = r.sRepairStatus || r.sStatus || '—';
-    const client = (r.sClientName || r.sShipName1 || '').substring(0, 20);
+    const client = (r.sClientName1 || r.sClientName || r.sShipName1 || '').substring(0, 20);
     const isCurrent = wo === currentWO || r.lRepairKey === (_currentRepair && _currentRepair.lRepairKey);
     return '<tr style="' + (isCurrent ? 'background:#BFDBFE;font-weight:600' : 'cursor:pointer') + '" ' + (!isCurrent ? 'onclick="loadRepairByWO(\'' + wo + '\')"' : '') + '>' +
       '<td style="font-family:monospace;font-weight:700;color:var(--navy)">' + wo + (isCurrent ? ' <span style="font-size:9px;background:var(--navy);color:#fff;padding:1px 4px;border-radius:3px">current</span>' : '') + '</td>' +
