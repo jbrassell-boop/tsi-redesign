@@ -3473,12 +3473,21 @@ function buildPickListPdf(d) {
 }
 
 // ── Invoice ─────────────────────────────────────────────────────
-function buildInvoicePdf(d) {
+async function buildInvoicePdf(d) {
   const r = d.r;
 
-  // TODO: await API.getAllInvoices() / API.getInvoiceDetails() — endpoints being built by backend-lead
+  // Fetch invoice from Express API
   let inv = null;
   let details = [];
+  try {
+    const invoices = await API.getInvoicesByRepair(r.lRepairKey) || [];
+    inv = invoices[0] || null;
+    if (inv) {
+      details = await API.getInvoiceDetails(inv.lInvoiceKey) || [];
+    }
+  } catch(e) {
+    console.warn('[repairs] Could not load invoice data:', e.message);
+  }
 
   // Fall back: build a synthetic invoice record from repair data
   if (!inv) {
@@ -5341,7 +5350,7 @@ function renderScopeTimeline(scopeKey, currentRepairKey) {
   var el = document.getElementById('scopeTimeline');
   if (!el) return;
   if (!scopeKey) { el.classList.remove('tl-visible'); return; }
-  // TODO: await API.getRepairList(null, null, scopeKey) — scope repair history endpoint being built by backend-lead
+  // Uses cached repair list — filters by scope key for timeline display
   var allReps = (_repairListData || []).filter(function(r) { return (r.lScopeKey || 0) == scopeKey; });
   if (!allReps || allReps.length <= 1) { el.classList.remove('tl-visible'); return; }
   allReps.sort(function(a, b) { return (a.dtDateIn || '').localeCompare(b.dtDateIn || ''); });

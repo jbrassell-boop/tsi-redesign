@@ -1027,8 +1027,21 @@ function ctxAction(action) {
       break;
     case 'printInvoice':
     case 'exportPdf':
-      // TODO: API.getAllInvoices() / API.getInvoiceDetails() — wire invoice PDF when endpoints ready
-      generateSalePdf(sale);
+      // Try to fetch real invoice by sale key
+      (async function() {
+        try {
+          const invoices = await API.getAllInvoices() || [];
+          const realInv = invoices.find(function(i) { return i.lProductSaleKey === sale.lSaleKey; });
+          if (realInv) {
+            const invDetails = await API.getInvoiceDetails(realInv.lInvoiceKey) || [];
+            TSIExport.buildInvoicePdf(realInv, invDetails, { salesperson: sale.salesRep || '' });
+            return;
+          }
+        } catch(e) {
+          console.warn('[product-sale] Invoice fetch failed:', e.message);
+        }
+        generateSalePdf(sale);
+      })();
       break;
     case 'cancel':
       sale.status = 'Cancelled';

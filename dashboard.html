@@ -1701,15 +1701,20 @@ function changeServiceLocation() {
 // ═══════════════════════════════════════════════════════
 //  KPI HERO ROW — prominent top-level metrics
 // ═══════════════════════════════════════════════════════
-function populateKpiHero() {
+async function populateKpiHero() {
   // ── KPI 1: Open Repairs — from SCOPES (same data the stat strip uses) ──
   var stats = calcStats();
   var openCount = stats.inHouse;
 
-  // ── KPI 2-4: TODO — wire to API.getRepairList() / API.getAllInvoices() when endpoints ready ──
+  // ── KPI 2-4: pull from real API ──
   var repairs = [];
   var invoices = [];
   var gpStaging = [];
+  try {
+    repairs = await API.getRepairList() || [];
+    invoices = await API.getAllInvoices() || [];
+    gpStaging = invoices; // GP staging IS invoices in the real DB
+  } catch(e) { console.warn('[dashboard] KPI data load:', e.message); }
 
   var now = new Date();
   var thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -733,10 +733,18 @@ var Profit = {
     };
   },
 
-  load: function() {
+  load: async function() {
     var self = this;
-    // TODO: await API.getProfitability() / API.getContractProfitability() — endpoints being built by backend-lead
-    self.allData = [];
+    try {
+      var standard = await API.getProfitability() || [];
+      var contract = await API.getContractProfitability() || [];
+      self.allData = [];
+      standard.forEach(function(r) { self.allData.push(self.mapRow(r, 'Standard')); });
+      contract.forEach(function(r) { self.allData.push(self.mapRow(r, 'Contract')); });
+    } catch(e) {
+      console.error('[analytics] Failed to load profitability data:', e.message);
+      self.allData = [];
+    }
     self.renderCards();
     self.renderTable();
     self.loaded = true;
@@ -886,9 +894,15 @@ var Revenue = {
 
   load: async function() {
     var self = this;
-    // TODO: await API.getProfitability() / API.getContractProfitability() — endpoints being built by backend-lead
-    await self.buildRepMap();
-    self.allData = [];
+    try {
+      await self.buildRepMap();
+      var standard = await API.getProfitability() || [];
+      var contract = await API.getContractProfitability() || [];
+      self.allData = standard.concat(contract);
+    } catch(e) {
+      console.error('[analytics] Failed to load revenue data:', e.message);
+      self.allData = [];
+    }
     self.renderAll();
     self.loaded = true;
   },

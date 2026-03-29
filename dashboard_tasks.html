@@ -442,10 +442,8 @@ async function loadTasks() {
     });
     const raw = Array.isArray(data) ? data : [];
 
-    // Also load status history
-    // TODO: await API.getTaskStatusHistory(taskKey) — load per-task when drawer opens
-    let history = [];
-    _statusHistory = history;
+    // Status history loaded per-task when drawer opens (see renderStatusHistory)
+    _statusHistory = [];
     const historyMap = buildHistoryMap(history);
 
     if (raw.length > 0) {
@@ -795,13 +793,17 @@ function openEditTask(id) {
   openDrawer();
 }
 
-function renderStatusHistory(taskKey) {
+async function renderStatusHistory(taskKey) {
   const section = document.getElementById('statusHistorySection');
   const timeline = document.getElementById('statusTimeline');
 
-  // Get history for this task from the loaded statusHistory
-  // TODO: await API.getTaskStatusHistory(taskKey) — endpoint being built by backend-lead
-  let history = (_statusHistory || []).filter(h => h.lTaskKey === taskKey);
+  // Fetch status history for this task from Express API
+  let history = [];
+  try {
+    history = await API.getTaskStatusHistory(taskKey) || [];
+  } catch(e) {
+    console.warn('[tasks] Could not load status history:', e.message);
+  }
 
   if (history.length === 0) {
     section.style.display = 'block';

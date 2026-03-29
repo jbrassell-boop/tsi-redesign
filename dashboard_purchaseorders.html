@@ -189,11 +189,16 @@ function computeEstDelivery(trans) {
 // ── Load data ──
 async function loadData() {
   try {
-    // TODO: await API.getSupplierPOs() / API.getSupplierPOTransactions() / API.getSupplierPOTypes() — endpoints being built by backend-lead
-    const suppliers = await API.getSuppliers();
-    const pos = [];
-    const allTrans = [];
-    const poTypes = [];
+    const [pos, suppliers, poTypes] = await Promise.all([
+      API.getSupplierPOs(),
+      API.getSuppliers(),
+      API.getSupplierPOTypes()
+    ]);
+    // Load all PO transactions (one call per PO — batched)
+    const allTransArrays = await Promise.all(
+      (Array.isArray(pos) ? pos : []).map(po => API.getSupplierPOTransactions(po.lSupplierPOKey).catch(() => []))
+    );
+    const allTrans = allTransArrays.flat();
 
     // Build lookup maps
     const supplierMap = {};
