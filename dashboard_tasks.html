@@ -455,7 +455,6 @@ async function loadTasks() {
     if (raw.length > 0) {
       TASKS = raw.map(r => mapTask(r, historyMap));
       _isDemo = false;
-      console.log('[TSI Tasks] Loaded', TASKS.length, 'tasks from mock-db');
       API.UI.updateDemoBadge(raw[0]._lTaskKey ? 'api' : 'live');
     } else {
       throw new Error('Empty task list');
@@ -476,7 +475,6 @@ async function loadTaskTypes() {
   try {
     const data = await API.getTaskTypes();
     _taskTypes = Array.isArray(data) ? data : [];
-    console.log('[TSI Tasks] Loaded', _taskTypes.length, 'task types');
     const sel = document.getElementById('taskType');
     sel.innerHTML = '<option value="">Select type\u2026</option>';
     _taskTypes.forEach(t => {
@@ -493,7 +491,6 @@ async function loadTaskPriorities() {
   try {
     const data = await API.getTaskPriorities(true);
     _taskPriorities = Array.isArray(data) ? data : [];
-    console.log('[TSI Tasks] Loaded', _taskPriorities.length, 'priorities');
     const sel = document.getElementById('taskPriority');
     sel.innerHTML = '';
     _taskPriorities.forEach(p => {
@@ -512,7 +509,6 @@ async function loadTaskStatuses() {
   try {
     const data = await API.getTaskStatuses(true, false);
     _taskStatuses = Array.isArray(data) ? data : [];
-    console.log('[TSI Tasks] Loaded', _taskStatuses.length, 'statuses');
     const sel = document.getElementById('taskStatus');
     sel.innerHTML = '';
     _taskStatuses.forEach(s => {
@@ -915,10 +911,8 @@ async function saveTask() {
         const existing = TASKS.find(t => t.id === parseInt(editId));
         apiPayload.plTaskKey = existing?._lTaskKey || parseInt(editId);
         await API.updateTask(apiPayload);
-        console.log('[TSI Tasks] Updated task', apiPayload.plTaskKey);
       } else {
         await API.addTask(apiPayload);
-        console.log('[TSI Tasks] Added new task');
       }
 
       closeDrawer();
@@ -973,7 +967,6 @@ async function deleteTask(btn, id) {
       const task = TASKS.find(t => t.id === id);
       const taskKey = task?._lTaskKey || id;
       await API.deleteTask(taskKey);
-      console.log('[TSI Tasks] Deleted task', taskKey);
       await loadTasks();
       return;
     } catch (e) {

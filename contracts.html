@@ -1590,7 +1590,6 @@ async function selectContract(el, contractKey) {
   try {
     const detail = await API.getContractById(contractKey);
     if (detail) {
-      console.log('[Contracts] Detail loaded for key=' + contractKey, detail);
       populateSpecsTab(detail);
       populateAddressTab(detail);
     }
@@ -2129,7 +2128,6 @@ async function loadCoverageTab(contractKey) {
   try {
     const data = await API.getContractCoverageCounts(contractKey);
     if (data) {
-      console.log('[Contracts] Coverage counts:', data);
     }
   } catch (err) {
     console.warn('[Contracts] Coverage counts load failed:', err.message);
@@ -2900,7 +2898,6 @@ async function loadLookups() {
       });
     }
 
-    console.log('[Contracts] Lookups loaded — types:', contractTypes.length, 'terms:', servicePlanTerms.length, 'clients:', contractClients.length);
   } catch (err) {
     console.warn('[Contracts] Lookups load failed:', err.message);
   }
@@ -3081,7 +3078,6 @@ async function loadContracts() {
         };
       });
       DATA_SOURCE = 'api';
-      console.log('[Contracts] Loaded ' + contracts.length + ' contracts from API');
     } else {
       throw new Error('Empty API response');
     }

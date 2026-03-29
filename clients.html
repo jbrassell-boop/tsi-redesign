@@ -2297,7 +2297,6 @@ async function changeServiceLocation(locKey) {
       // Reload departments cache for new service location
       try {
         _allDepartments = await API.getAllDepartments(locKey) || [];
-        console.log('[TSI Clients] Recached', _allDepartments.length, 'departments for location', locKey);
       } catch (e2) {
         console.warn('[TSI Clients] Could not reload departments:', e2.message);
         _allDepartments = [];
@@ -2339,7 +2338,6 @@ async function loadLookupDropdowns() {
     // Distributors
     populateSelect('def-dist', (dists || []).filter(d => d.bActive !== false).map(d => ({ value: d.lDistributorKey, text: d.sDistName1 })));
 
-    console.log('[TSI Clients] Loaded lookup dropdowns');
   } catch (e) {
     console.warn('[TSI Clients] Lookup load failed:', e.message);
   }
@@ -2521,7 +2519,6 @@ async function initPage() {
       // Cache all departments for this service location
       try {
         _allDepartments = await API.getAllDepartments(locKey) || [];
-        console.log('[TSI Clients] Cached', _allDepartments.length, 'departments');
       } catch (e) {
         console.warn('[TSI Clients] Could not load departments:', e.message);
         _allDepartments = [];
@@ -2537,7 +2534,6 @@ async function initPage() {
       // Load first client detail
       const first = clients[0];
       await selectClientByKey(first.lClientKey, first.sClientName1);
-      console.log('[TSI Clients] Loaded', clients.length, 'clients from API');
       return;
     }
   } catch (e) {

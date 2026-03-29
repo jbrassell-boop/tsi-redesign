@@ -489,20 +489,9 @@
 .wf-est-contact b{color:var(--primary-dark)}
 .wf-est-iso{font-size:8px;color:var(--muted);margin-top:6px}
 
-/* ── REPAIR LIST PANEL + FILTER CHIPS ── */
+/* ── FILTER CHIPS ── */
 .chip-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 6px;border-radius:9px;font-size:10px;font-weight:700;background:var(--neutral-200);color:var(--neutral-700);margin-left:4px}
 .chip.on .chip-count{background:rgba(255,255,255,.3);color:#fff}
-#repairListPanel{border-bottom:1px solid var(--border);background:var(--card);overflow:hidden;transition:max-height .2s ease}
-#repairListPanel.collapsed #rlBody{display:none}
-#rlToggle{background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);font-family:inherit;display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px}
-#rlToggle:hover{background:var(--primary-light)}
-#rlToggle svg{width:10px;height:10px;transition:transform .15s}
-#repairListPanel.collapsed #rlToggle svg{transform:rotate(-90deg)}
-table.rl-table{width:100%;border-collapse:collapse}
-table.rl-table th{background:var(--neutral-50);font-size:9px;font-weight:700;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;text-align:left;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:1}
-table.rl-table td{padding:4px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
-table.rl-table tbody tr:hover td{background:var(--primary-light)}
-table.rl-table tbody tr.rl-active td{background:var(--primary-light);font-weight:600}
 
 /* QUEUE PANEL */
 .split-left{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--card);transition:width .2s ease;overflow:hidden}
@@ -894,48 +883,6 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
     <header class="topbar">
       <!-- Injected by shell.js -->
     </header>
-
-    <!-- REPAIR LIST PANEL — hidden; replaced by split-layout queue -->
-    <div id="repairListPanel" class="collapsed" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;padding:4px 16px;border-bottom:1px solid var(--neutral-200);flex-wrap:wrap">
-        <button id="rlToggle" onclick="toggleRepairList()">
-          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,3 5,7 8,3"/></svg>
-          Repair List
-        </button>
-        <div style="position:relative;flex:0 0 200px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--neutral-500);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input class="inp" id="rlSearch" type="text" placeholder="Search WO#, client, serial, model…" style="height:26px;font-size:11px;padding-left:26px;width:100%" oninput="onRlSearch()">
-        </div>
-        <div class="chip-group" id="repairFilters" style="margin:0">
-          <button class="chip on" data-status="all">All <span class="chip-count" id="fcAll">0</span></button>
-          <button class="chip" data-status="Inspection">Inspection <span class="chip-count" id="fcInspection">0</span></button>
-          <button class="chip" data-status="In Repair">In Repair <span class="chip-count" id="fcInRepair">0</span></button>
-          <button class="chip" data-status="Approval">Approval <span class="chip-count" id="fcApproval">0</span></button>
-          <button class="chip" data-status="Shipping">Shipping <span class="chip-count" id="fcShipping">0</span></button>
-          <button class="chip" data-status="Other">Other <span class="chip-count" id="fcOther">0</span></button>
-        </div>
-      </div>
-      <div id="rlBody" style="max-height:220px;overflow-y:auto">
-        <table class="rl-table" id="rlTable">
-          <thead><tr>
-            <th>Work Order</th><th>Date In</th><th>Client</th><th>Model</th><th>Serial</th><th>Status</th><th>Level</th>
-          </tr></thead>
-          <tbody id="rlTbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px;font-size:10px">Loading repairs...</td></tr>
-          </tbody>
-        </table>
-        <div class="empty-state-full" id="emptyRepairs" style="display:none">
-          <div class="empty-state-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div class="empty-state-title">No repairs found</div>
-          <div class="empty-state-msg">Try adjusting your filters or create a new work order</div>
-          <div class="empty-state-action">
-            <button class="btn btn-navy" onclick="nwoRevealCreate()">+ New Repair</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- SPLIT LAYOUT: queue left, detail right -->
     <div class="split-layout" style="height:calc(100vh - 64px);overflow:hidden;display:flex">
@@ -2983,7 +2930,6 @@ async function generateForm(formId) {
     if (currentDrawer) {
       requestAnimationFrame(() => currentDrawer.classList.add('open'));
     }
-    console.log('[TSI Workflow] Generated', formId, '— status now', targetStatus || '(unchanged)');
   }
 }
 
@@ -5282,6 +5228,14 @@ async function loadRepair(repairKey) {
     _dirty = false;
     updateSaveStatus('ready');
     updateLocalTag(!!persisted);
+    // Sync URL so the selected repair is bookmarkable / refresh-safe
+    if (d.sWorkOrderNumber) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('wo', d.sWorkOrderNumber);
+      url.searchParams.delete('key');
+      url.searchParams.delete('action');
+      history.replaceState({ wo: d.sWorkOrderNumber }, '', url.toString());
+    }
     // Hide skeleton, reveal detail
     const _sk = document.getElementById('detailSkeleton');
     const _ds = document.getElementById('detailScroll');
@@ -6315,7 +6269,6 @@ function ctxDeleteItem() {
   _selectedItemIdx = -1;
   renderRepairItems(_repairItems);
   markDirty();
-  console.log('[TSI] Deleted repair item:', desc);
 }
 
 // ── Item Picker (multi-select) ──
@@ -6345,7 +6298,6 @@ async function loadItemCatalog(btn, type) {
     const data = await API.getRepairItemsCatalog(type);
     _itemCatalog = Array.isArray(data) ? data : [];
     _itemCatalog.sort((a, b) => (a.sItemDescription || '').localeCompare(b.sItemDescription || ''));
-    console.log('[TSI] Item catalog loaded:', _itemCatalog.length, type, 'items');
     renderPickerList(_itemCatalog);
   } catch (e) {
     document.getElementById('itemPickerList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:11px">Failed to load: ' + e.message + '</div>';
@@ -6463,7 +6415,6 @@ function addSelectedItems() {
   renderRepairItems(_repairItems);
   closeItemPicker();
   markDirty();
-  console.log('[TSI] Added', _pickerSelected.size, 'repair items with metadata — local only');
 }
 
 function resetMaxCharge() {
@@ -8073,7 +8024,6 @@ function reloadRepairs() { initPage(); }
 
 // ── Repair List Panel — filter chips + compact table ──
 var _repairListData = [];
-var _repairListFilter = 'all';
 
 // Map detailed statuses to chip categories
 function statusCategory(statusName) {
@@ -8126,99 +8076,9 @@ async function loadRepairList() {
   });
   // Sort by date descending
   _repairListData.sort(function(a, b) { return (b.dtDateIn || '').localeCompare(a.dtDateIn || ''); });
-  updateRepairListCounts();
-  renderRepairList();
   // Sync queue panel
   syncQueueFromRepairList();
 }
-
-function updateRepairListCounts() {
-  var counts = { all: _repairListData.length, Inspection: 0, 'In Repair': 0, Approval: 0, Shipping: 0, Other: 0 };
-  _repairListData.forEach(function(r) {
-    var cat = r._category || 'Other';
-    if (counts[cat] !== undefined) counts[cat]++;
-  });
-  document.getElementById('fcAll').textContent = counts.all;
-  document.getElementById('fcInspection').textContent = counts.Inspection;
-  document.getElementById('fcInRepair').textContent = counts['In Repair'];
-  document.getElementById('fcApproval').textContent = counts.Approval;
-  document.getElementById('fcShipping').textContent = counts.Shipping;
-  document.getElementById('fcOther').textContent = counts.Other;
-}
-
-var _rlSearchTerm = '';
-var _rlSearchTimer = null;
-function onRlSearch() {
-  clearTimeout(_rlSearchTimer);
-  _rlSearchTimer = setTimeout(function() {
-    _rlSearchTerm = (document.getElementById('rlSearch').value || '').toLowerCase().trim();
-    renderRepairList();
-  }, 200);
-}
-
-function renderRepairList() {
-  var tbody = document.getElementById('rlTbody');
-  var visible = _repairListFilter === 'all'
-    ? _repairListData
-    : _repairListData.filter(function(r) { return r._category === _repairListFilter; });
-  // Apply search filter
-  if (_rlSearchTerm) {
-    visible = visible.filter(function(r) {
-      var hay = ((r.sWorkOrderNumber || '') + ' ' + (r.sClientName || r.sShipName1 || '') + ' ' +
-        (r.sSerialNumber || '') + ' ' + (r.sScopeTypeDesc || r.sModel || '') + ' ' +
-        (r.sPurchaseOrder || r.sPONumber || '')).toLowerCase();
-      return hay.indexOf(_rlSearchTerm) !== -1;
-    });
-  }
-
-  var emptyEl = document.getElementById('emptyRepairs');
-  var tableEl = document.getElementById('rlTable');
-  if (!visible.length) {
-    tbody.innerHTML = '';
-    if (tableEl) tableEl.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = '';
-    return;
-  }
-  if (tableEl) tableEl.style.display = '';
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  var activeKey = _currentRepair ? _currentRepair.lRepairKey : 0;
-  tbody.innerHTML = visible.slice(0, 100).map(function(r) {
-    var isActive = r.lRepairKey === activeKey;
-    return '<tr class="' + (isActive ? 'rl-active' : '') + '" data-rkey="' + r.lRepairKey + '" onclick="rlSelectRepair(' + r.lRepairKey + ')">' +
-      '<td><code style="font-size:10px;font-weight:600">' + (r.sWorkOrderNumber || '') + '</code></td>' +
-      '<td>' + fmtDate(r.dtDateIn) + '</td>' +
-      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.sClientName || r.sShipName1 || '—') + '</td>' +
-      '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.sScopeTypeDesc || r.sModel || '—') + '</td>' +
-      '<td>' + (r.sSerialNumber || '—') + '</td>' +
-      '<td><span class="status-pill" style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600;' + statusPillStyle(r._statusName) + '">' + (r._statusName || '—') + '</span></td>' +
-      '<td>' + (r.sRepairLevel || '—') + '</td>' +
-      '</tr>';
-  }).join('');
-}
-
-function rlSelectRepair(key) {
-  loadRepair(key).then(function() {
-    // Update active row highlight
-    document.querySelectorAll('#rlTbody tr').forEach(function(tr) {
-      tr.classList.toggle('rl-active', parseInt(tr.dataset.rkey) === key);
-    });
-  });
-}
-
-function toggleRepairList() {
-  document.getElementById('repairListPanel').classList.toggle('collapsed');
-}
-
-// Wire chip clicks
-document.getElementById('repairFilters').addEventListener('click', function(e) {
-  var chip = e.target.closest('.chip');
-  if (!chip) return;
-  document.querySelectorAll('#repairFilters .chip').forEach(function(c) { c.classList.remove('on'); });
-  chip.classList.add('on');
-  _repairListFilter = chip.dataset.status;
-  renderRepairList();
-});
 
 // ── New Work Order ──
 let _nwoSelectedRepair = null;
@@ -8282,7 +8142,6 @@ function wizGoStep(step) {
   var createBtn = document.getElementById('wizBtnCreate');
   createBtn.style.display = step === 4 ? '' : 'none';
   wizUpdateNextBtn();
-  console.log('[NWO] Step', step, '| Client:', !!_wizClient, '| Dept:', !!_wizDept, '| Scope:', !!_wizScope);
 }
 
 function wizBack() { if (_wizStep > 1) wizGoStep(_wizStep - 1); }
@@ -8995,7 +8854,6 @@ function wizSubmit() {
   updateSaveStatus('ready');
   document.getElementById('fComplaint').focus();
   showToast('Work order created: ' + _currentRepair.sWorkOrderNumber, 'success');
-  console.log('[TSI Repairs] New work order:', clientName, '/', deptName, '/ SN#', scopeSN);
 
   // ── Attempt API create (non-blocking) ──
   if (_liveMode) {
@@ -9268,7 +9126,7 @@ function renderInventory() {
     '<td><button class="btn btn-danger" style="height:18px;font-size:8px;padding:0 6px" onclick="removeInvRow('+i+')">×</button></td></tr>'
   ).join('');
 }
-function postInventory() { console.log('[TSI] Post inventory — not yet wired'); }
+function postInventory() {}
 function populateInventory(items) {
   _inventoryItems = (items || []).map(r => ({
     lot: r.sLotNumber || r.lLotKey || '',
@@ -9386,7 +9244,7 @@ function renderRepairAuditTrail(d) {
 // ── Documents Tab ──
 let _docFilter = 'incoming';
 function setDocFilter(btn, filter) { _docFilter = filter; toggleSegBtn(btn); }
-function captureDoc() { console.log('[TSI] Capture doc — not yet wired'); }
+function captureDoc() {}
 function addDoc() { document.getElementById('docFileInput').click(); }
 function populateDocuments(docs) {
   const tbody = document.getElementById('docBody');
@@ -9427,7 +9285,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dz.addEventListener('click', () => fi.click());
     dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); console.log('[TSI] Files dropped:', e.dataTransfer.files.length); });
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); });
   }
 });
 
