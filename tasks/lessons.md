@@ -76,3 +76,8 @@
 **Date:** 2026-03-28
 **Pattern:** Grep-based audits catch class/token violations but not semantic UI conflicts — e.g. two `.btn-navy` primaries in the same toolbar, or a duplicate save button that's technically valid HTML/CSS but visually wrong.
 **Rule:** After any audit pass, do a visual sweep of the 5 highest-traffic pages. Check: (1) only one `.btn-navy` per toolbar, (2) no duplicate save affordances on the same screen, (3) save placement matches autosave vs explicit-save intent.
+
+### MockDB Removal (March 29)
+- When removing a data layer (MockDB → API), grep the ENTIRE codebase for references — not just the main pages
+- Files missed in the original March 29 removal: order-search.js, smart-alerts.js, command-palette.js, quotes-tab.js
+- Always verify with: `grep -rn "MockDB" --include="*.js" --include="*.html" | grep -v mock-db | grep -v mock-api | grep -v services/ | grep -v tasks/ | grep -v node_modules/`

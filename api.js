@@ -146,7 +146,6 @@ const API = (() => {
 
   // ── Core Fetch Wrapper ────────────────────────────────
   // Handles token attachment, 401 detection, JSON parsing
-  // When MockAPI is loaded, routes all calls through the mock layer.
   async function request(method, endpoint, body) {
     const headers = { 'Content-Type': 'application/json' };
     const opts = { method, headers };

@@ -4,7 +4,7 @@
    Entry point: iq_initPage() — called lazily when tab first clicked.
 */
 
-// ── API accessors (replaced MockDB) ──
+// ── API accessors ──
 async function iq_getClients() {
   try {
     var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '0');
