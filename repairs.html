@@ -6,6 +6,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <style>
+    /* Page-specific color tokens */
+    :root{
+      --qs-received:#0369A1;--qs-received-bg:#F0F9FF;--qs-received-border:#BAE6FD;
+      --qs-inspection:#C2410C;--qs-inspection-bg:#FFF7ED;--qs-inspection-border:#FED7AA;
+      --qs-approval:#B45309;
+      --qs-repair:#15803D;
+      --qs-shipping:#6D28D9;--qs-shipping-bg:#F5F3FF;--qs-shipping-border:#DDD6FE;
+      --est-navy:#00257A;--est-accent-light:#9DABE2;
+    }
     /* Page-specific overrides */
     #newOrderMenu.open{display:block!important}
     .save-indicator{display:none;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);white-space:nowrap;color:var(--amber)}
@@ -59,8 +68,8 @@
     /* QC INSPECTION DRAWER */
     .qc-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:var(--z-modal)}
     .qc-backdrop.open{display:block}
-    .drawer{position:fixed;top:0;right:-620px;width:600px;height:100vh;background:var(--card);z-index:var(--z-modal);box-shadow:none;transition:right .25s ease;display:flex;flex-direction:column}
-    .drawer.open{right:0 !important;box-shadow:-4px 0 24px rgba(var(--primary-rgb),.15)}
+    .drawer{position:fixed;top:64px;right:0;width:600px;height:calc(100vh - 64px);background:var(--card);z-index:var(--z-modal);box-shadow:none;transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;transform:translateX(100%)}
+    .drawer.open{transform:translateX(0);box-shadow:-4px 0 24px rgba(var(--primary-rgb),.15)}
     .qc-drawer-head{display:flex;align-items:center;padding:10px 16px;background:var(--primary-dark);color:#fff}
     .qc-drawer-head span{color:#fff}
     .qc-drawer-head .btn{color:#fff;border-color:rgba(255,255,255,.4)}
@@ -132,7 +141,7 @@
     .tab-pane.active{display:flex}
 
     /* SECTION CARDS */
-    .section-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow-card)}
+    .section-card{background:var(--card);border:1px solid var(--border-dk);border-radius:6px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow-card)}
     .section-head{background:var(--neutral-50);color:var(--navy);padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
     .section-body{padding:10px 14px}
     .form-grid{display:grid;gap:8px 12px}
@@ -415,10 +424,10 @@
 .wf-est-header img{height:56px;margin-right:14px}
 .wf-est-header-left{display:flex;align-items:center}
 .wf-est-header-left .est-company{font-size:17px;font-weight:700;letter-spacing:.2px;color:#fff}
-.wf-est-header-left .est-tagline{font-size:9px;color:#9DABE2;margin-top:2px}
+.wf-est-header-left .est-tagline{font-size:9px;color:var(--est-accent-light);margin-top:2px}
 .wf-est-header-right{text-align:right}
 .wf-est-header-right .est-title{font-size:20px;font-weight:300;letter-spacing:.05em;color:#fff}
-.wf-est-header-right .est-meta{font-size:10px;color:#9DABE2;margin-top:4px}
+.wf-est-header-right .est-meta{font-size:10px;color:var(--est-accent-light);margin-top:4px}
 .wf-est-section{padding:20px 28px}
 .wf-est-section+.wf-est-section{border-top:1px solid var(--border-dk)}
 .wf-est-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
@@ -433,7 +442,7 @@
 .wf-est-item-desc{flex:1;min-width:200px}
 .wf-est-item-desc .est-name{font-size:12px;font-weight:600;color:var(--text)}
 .wf-est-item-desc .est-code{font-size:9px;color:var(--muted);margin-top:2px}
-.wf-est-item-desc .est-note{font-size:10px;color:#00257A;font-style:italic;margin-top:4px;padding-left:10px;border-left:2px solid var(--neutral-200)}
+.wf-est-item-desc .est-note{font-size:10px;color:var(--est-navy);font-style:italic;margin-top:4px;padding-left:10px;border-left:2px solid var(--neutral-200)}
 .wf-est-item-price{font-size:14px;font-weight:700;color:var(--text);text-align:right;min-width:80px}
 .wf-est-item-approve{width:100%;display:flex;justify-content:flex-end;gap:6px;margin-top:6px;padding-top:8px;border-top:1px solid var(--border)}
 .wf-est-item-approve label{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:4px 12px;border:1px solid var(--border-dk);border-radius:16px;cursor:pointer;transition:all .15s}
@@ -449,7 +458,7 @@
 .wf-est-totals-grid .est-grand-val{color:var(--primary-dark);font-weight:700;font-size:14px;padding-top:8px;border-top:2px solid var(--primary-dark)}
 .wf-est-callout{font-size:10px;color:var(--muted);line-height:1.6;padding:12px 16px;background:var(--neutral-50);border-left:3px solid var(--neutral-200);border-radius:0 4px 4px 0;font-style:italic}
 .wf-est-repairs-tbl{width:100%;border-collapse:collapse;font-size:10px;border:1px solid var(--border-dk);border-radius:4px}
-.wf-est-repairs-tbl th{background:var(--neutral-50);color:#00257A;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;text-align:left;border-bottom:2px solid var(--neutral-200);border-right:1px solid var(--border)}
+.wf-est-repairs-tbl th{background:var(--neutral-50);color:var(--est-navy);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;text-align:left;border-bottom:2px solid var(--neutral-200);border-right:1px solid var(--border)}
 .wf-est-repairs-tbl th:last-child{border-right:none}
 .wf-est-repairs-tbl td{padding:5px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 .wf-est-repairs-tbl tr:last-child td{border-bottom:none}
@@ -461,7 +470,7 @@
 .est-tag-nw{background:var(--success-light);color:var(--success)}
 .est-tag-pass{background:var(--success-light);color:var(--success)}
 .est-tag-fail{background:#FEF2F2;color:var(--danger)}
-.wf-est-ps3{border:2px solid #00257A;border-radius:8px;padding:16px 20px;margin:0 28px 4px;background:var(--neutral-50)}
+.wf-est-ps3{border:2px solid var(--est-navy);border-radius:8px;padding:16px 20px;margin:0 28px 4px;background:var(--neutral-50)}
 .wf-est-ps3-scores{display:flex;align-items:center;justify-content:center;gap:24px;margin:10px 0}
 .wf-est-ps3-score{text-align:center;padding:10px 20px;border-radius:6px;min-width:100px}
 .wf-est-ps3-score .ps3-val{font-size:18px;font-weight:700;letter-spacing:.04em}
@@ -521,12 +530,12 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
 .q-row-model{font-size:10px;color:var(--muted);margin-bottom:3px;font-family:monospace}
 .q-row-status{display:flex;align-items:center;gap:5px}
 .q-status-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:var(--radius-pill);border:1px solid}
-.qs-received{background:#F0F9FF;color:#0369A1;border-color:#BAE6FD}
-.qs-inspection{background:#FFF7ED;color:#C2410C;border-color:#FED7AA}
-.qs-approval{background:#FFFBEB;color:#B45309;border-color:#FDE68A}
-.qs-repair{background:#F0FDF4;color:#15803D;border-color:#BBF7D0}
+.qs-received{background:var(--qs-received-bg);color:var(--qs-received);border-color:var(--qs-received-border)}
+.qs-inspection{background:var(--qs-inspection-bg);color:var(--qs-inspection);border-color:var(--qs-inspection-border)}
+.qs-approval{background:#FFFBEB;color:var(--qs-approval);border-color:#FDE68A}
+.qs-repair{background:#F0FDF4;color:var(--qs-repair);border-color:#BBF7D0}
 .qs-qc{background:var(--primary-light);color:var(--navy);border-color:var(--border-dk)}
-.qs-shipping{background:#F5F3FF;color:#6D28D9;border-color:#DDD6FE}
+.qs-shipping{background:var(--qs-shipping-bg);color:var(--qs-shipping);border-color:var(--qs-shipping-border)}
 .q-flag-icon,.q-overdue-icon{font-size:10px;display:none}
 .q-row.overdue .q-overdue-icon{display:inline;color:var(--danger)}
 
@@ -1034,7 +1043,6 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
         <span class="save-icon" id="saveIcon">&#9679;</span><span id="saveText">Ready</span>
       </span>
       <span style="font-size:10px;color:var(--muted);margin:0 8px" id="ssModified"></span>
-      <button class="btn btn-danger" onclick="confirmDeleteRepair(this)" style="gap:4px;height:26px;font-size:11px;padding:0 10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
     </div>
 
     <!-- SMART ALERTS BAR -->
@@ -1296,7 +1304,7 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
               <div style="display:flex;align-items:center;padding:0 10px;background:rgba(217,119,6,.06);border-right:1px solid var(--warning);flex-shrink:0">
                 <span style="font-size:9px;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">Complaint</span>
               </div>
-              <div id="fComplaint" contenteditable="true" style="flex:1;font-size:11.5px;font-family:'Inter',Arial,sans-serif;line-height:1.4;color:var(--text);padding:6px 10px;outline:none;min-height:28px;max-height:60px;overflow-y:auto" oninput="markDirty()" data-placeholder="Customer complaint..."></div>
+              <div id="fComplaint" contenteditable="true" style="flex:1;font-size:11.5px;font-family:'Inter',Arial,sans-serif;line-height:1.4;color:var(--text);padding:6px 10px;outline:none;min-height:28px;max-height:60px;overflow-y:auto" oninput="markDirty()" onpaste="event.preventDefault();document.execCommand('insertText',false,(event.clipboardData||window.clipboardData).getData('text/plain'))" data-placeholder="Customer complaint..."></div>
             </div>
             <div class="flags-bar" id="flagsBar">
               <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase">FLAGS</span>
@@ -1507,11 +1515,11 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
               <div class="action-group"><div class="lbl">Consumption</div><div class="val" id="aTotalConsumption">$0.00</div></div>
               <div style="flex:1"></div>
               <div class="field" style="width:105px"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly/></div>
-              <div class="field" style="width:105px"><label>Override</label><input id="fMaxOverride" onchange="markDirty()" placeholder="—"/></div>
+              <div class="field" style="width:105px"><label>Override</label><input id="fMaxOverride" type="number" step="0.01" min="0" onchange="markDirty()" placeholder="—"/></div>
               <div class="divider" style="height:30px;margin:0 4px"></div>
               <div class="field" style="min-width:160px;flex:1"><label>Out Vendor</label><input id="fOutVendor" onchange="markDirty()"/></div>
               <div class="field" style="min-width:180px;flex:1"><label>Out Tracking</label><input id="fOutTracking" onchange="markDirty()"/></div>
-              <div class="field" style="width:105px"><label>Out Cost</label><input id="fOutCost" onchange="markDirty()"/></div>
+              <div class="field" style="width:105px"><label>Out Cost</label><input id="fOutCost" type="number" step="0.01" min="0" onchange="markDirty()"/></div>
               <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fOutsourced" onchange="markDirty()" style="width:auto;height:auto"/> Outsourced</label>
               <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fVendorShipFlag" onchange="markDirty()" style="width:auto;height:auto"/> Vendor Ship</label>
             </div>
@@ -1530,10 +1538,10 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
                 <div class="section-body" style="padding:6px 10px">
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
                     <div class="field" style="margin:0"><label>Pricing Cat</label><select id="fPricingCat" onchange="markDirty()"></select></div>
-                    <div class="field" style="margin:0"><label>Discount %</label><input id="fDiscount" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Discount %</label><input id="fDiscount" type="number" step="0.01" min="0" max="100" onchange="markDirty()"/></div>
                     <div class="field" style="margin:0"><label>Payment Terms</label><select id="fPaymentTerms" onchange="markDirty()"></select></div>
                     <div class="field" style="margin:0"><label>Sales Rep</label><select id="fSalesRep" onchange="markDirty()"></select></div>
-                    <div class="field" style="margin:0"><label>Ship Cost</label><input id="fShipCost" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Ship Cost</label><input id="fShipCost" type="number" step="0.01" min="0" onchange="markDirty()"/></div>
                     <div class="field" style="margin:0"><label>Report Group</label><input id="fReportGroup" onchange="markDirty()"/></div>
                   </div>
                 </div>
@@ -2475,7 +2483,7 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
       <tbody id="ncpBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px;font-size:11px">No NCPs recorded</td></tr></tbody>
     </table>
     <div style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Record Non-Conformance</div>
-    <div style="background:#F8F9FA;border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
+    <div style="background:var(--neutral-50);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
       <span><b>WO#:</b> <span id="ncpWO">—</span></span>
       <span><b>Date:</b> <span id="ncpDate">—</span></span>
       <span><b>Client:</b> <span id="ncpClient">—</span></span>
@@ -2839,7 +2847,10 @@ let _liveMode = false;
 let _currentRepair = null;
 let _dirty = false;
 let _saveTimer = null;
+let _loadingKey = null;
 let _clients = [], _departments = [];
+
+window.onbeforeunload = function(e) { if (_dirty) { e.preventDefault(); e.returnValue = ''; return ''; } };
 
 // ── WORKFLOW FORMS ──
 const WORKFLOW_FORMS = [
@@ -3141,7 +3152,7 @@ function buildRequisitionPdf(d) {
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.setTextColor('#9DABE2');
+  doc.setTextColor(E.COLORS.estAccent);
   doc.text('W.O. # ' + (r.sWorkOrderNumber || '—') + '   •   ' + reqDate, E.PAGE.w - 18, 46, { align: 'right' });
 
   if (form.formNum && form.formNum !== '—') {
@@ -3950,15 +3961,15 @@ td,th{border:1px solid #ccc;padding:4px 6px;text-align:left;font-size:10px}
 th{background:var(--neutral-50);font-size:9px;text-transform:uppercase;font-weight:700;color:var(--text)}
 /* Internal form styles */
 .wf-card{border:1px solid #ccc;border-radius:4px;margin-bottom:6px;page-break-inside:avoid}
-.wf-card-head{background:#E3EAF6;color:#00257A;padding:5px 10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ccc}
+.wf-card-head{background:#E3EAF6;color:var(--est-navy);padding:5px 10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ccc}
 .wf-card-body{padding:8px 10px}
 .wf-ro{background:#F7F9FC;border:1px solid #ddd;border-radius:3px;padding:3px 8px;font-size:10px}
 .wf-form-header{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;font-size:10px;padding:6px 8px;background:#f0f4fa;border-radius:4px}
-.wf-fh-item b{color:#00257A;font-size:8px;text-transform:uppercase}
+.wf-fh-item b{color:var(--est-navy);font-size:8px;text-transform:uppercase}
 .wf-check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 10px;font-size:10px}
 .wf-di-table{width:100%;border-collapse:collapse;font-size:10px}
 .wf-di-table td{padding:3px 6px;border-bottom:1px solid #eee}
-.wf-di-cat{background:#f0f4fa;font-weight:700;color:#00257A;font-size:9px;text-transform:uppercase}
+.wf-di-cat{background:#f0f4fa;font-weight:700;color:var(--est-navy);font-size:9px;text-transform:uppercase}
 .wf-di-cat td{padding:5px 6px;border-bottom:1px solid #ccc}
 .wf-di-input{width:50px;border:1px solid #bbb;border-radius:2px;padding:1px 3px;font-size:9px}
 .wf-di-input.wide{width:80px}
@@ -3966,13 +3977,13 @@ th{background:var(--neutral-50);font-size:9px;text-transform:uppercase;font-weig
 .sig-line{border-bottom:1px solid #000;height:30px;margin-bottom:2px}
 .sig-label{font-size:8px;color:#666}
 /* Premium estimate styles */
-.wf-est-header{background:#00257A;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.wf-est-header{background:var(--est-navy);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .wf-est-header img{height:56px;margin-right:12px}
 .wf-est-header-left{display:flex;align-items:center}
-.est-company{font-size:15px;font-weight:700;color:#00257A}
+.est-company{font-size:15px;font-weight:700;color:var(--est-navy)}
 .est-tagline{font-size:8px;color:#5A6F8A;margin-top:1px}
 .wf-est-header-right{text-align:right}
-.est-title{font-size:18px;font-weight:300;letter-spacing:.3px;color:#00257A}
+.est-title{font-size:18px;font-weight:300;letter-spacing:.3px;color:var(--est-navy)}
 .est-meta{font-size:9px;color:#5A6F8A;margin-top:3px}
 .wf-est-section{padding:14px 24px}
 .wf-est-section+.wf-est-section{border-top:1px solid #C8D4E0}
@@ -3981,10 +3992,10 @@ th{background:var(--neutral-50);font-size:9px;text-transform:uppercase;font-weig
 .wf-est-equip{border:1px solid #ccc;border-radius:4px;padding:10px 12px;background:#FAFBFD}
 .wf-est-equip-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0}
 .wf-est-equip-row b{color:#5A6F8A;font-size:8px;text-transform:uppercase}
-.wf-est-complaint{background:var(--neutral-50);border-left:3px solid #00257A;padding:10px 14px;font-size:10px;line-height:1.5}
-.wf-est-complaint-label{font-size:8px;font-weight:700;color:#00257A;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.wf-est-complaint{background:var(--neutral-50);border-left:3px solid var(--est-navy);padding:10px 14px;font-size:10px;line-height:1.5}
+.wf-est-complaint-label{font-size:8px;font-weight:700;color:var(--est-navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
 .wf-est-repairs-tbl{width:100%;border-collapse:collapse;font-size:9px;border:1.5px solid #8898AA}
-.wf-est-repairs-tbl th{background:var(--neutral-50);color:#00257A;font-size:7px;font-weight:700;text-transform:uppercase;padding:5px 8px;text-align:left;border-bottom:2px solid #8898AA;border-right:1px solid var(--neutral-200)}
+.wf-est-repairs-tbl th{background:var(--neutral-50);color:var(--est-navy);font-size:7px;font-weight:700;text-transform:uppercase;padding:5px 8px;text-align:left;border-bottom:2px solid #8898AA;border-right:1px solid var(--neutral-200)}
 .wf-est-repairs-tbl th:last-child{border-right:none}
 .wf-est-repairs-tbl td{padding:4px 8px;border-bottom:1px solid #C0C8D4;border-right:1px solid #E0E4EA}
 .wf-est-repairs-tbl td:last-child{border-right:none}
@@ -3995,18 +4006,18 @@ th{background:var(--neutral-50);font-size:9px;text-transform:uppercase;font-weig
 .est-tag-nw{background:var(--success-light);color:var(--success)}
 .est-tag-pass{background:var(--success-light);color:var(--success)}
 .est-tag-fail{background:#FEF2F2;color:var(--danger)}
-.wf-est-ps3{border:2px solid #00257A;border-radius:8px;padding:14px 18px;background:var(--neutral-50);page-break-inside:avoid}
+.wf-est-ps3{border:2px solid var(--est-navy);border-radius:8px;padding:14px 18px;background:var(--neutral-50);page-break-inside:avoid}
 .wf-est-ps3-scores{display:flex;align-items:center;justify-content:center;gap:20px;margin:8px 0}
 .wf-est-ps3-score{text-align:center;padding:8px 16px;border-radius:6px;min-width:80px}
 .wf-est-ps3-score .ps3-val{font-size:16px;font-weight:700}
 .wf-est-ps3-score .ps3-lbl{font-size:7px;font-weight:600;text-transform:uppercase;color:#5A6F8A;margin-top:2px}
-.wf-est-ps3-arrow{font-size:20px;color:#00257A;font-weight:700}
+.wf-est-ps3-arrow{font-size:20px;color:var(--est-navy);font-weight:700}
 .wf-est-totals{display:flex;justify-content:flex-end;padding:12px 24px}
 .wf-est-totals-grid{display:grid;grid-template-columns:auto auto;gap:3px 16px;text-align:right;font-size:11px}
 .est-total-label{color:#5A6F8A}
 .est-total-val{font-weight:600}
-.est-grand-label{color:#00257A;font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid #00257A}
-.est-grand-val{color:#00257A;font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid #00257A}
+.est-grand-label{color:var(--est-navy);font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid var(--est-navy)}
+.est-grand-val{color:var(--est-navy);font-weight:700;font-size:13px;padding-top:6px;border-top:2px solid var(--est-navy)}
 .wf-est-callout{font-size:9px;color:#5A6F8A;line-height:1.5;padding:10px 14px;background:var(--neutral-50);border-left:3px solid var(--neutral-200);font-style:italic}
 .wf-est-tech{display:grid;grid-template-columns:repeat(4,1fr) auto;font-size:10px;border:1px solid #ccc;border-radius:3px;overflow:hidden}
 .wf-est-tech div{padding:4px 8px;border-right:1px solid #ccc}
@@ -4054,13 +4065,13 @@ function openFormPreview(formId) {
 }
 
 function tsiFormHeader(formName, formNum) {
-  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #00257A;padding-bottom:10px">
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid var(--est-navy);padding-bottom:10px">
     <div style="display:flex;align-items:center;gap:12px">
       <img src="assets/logo-color.jpg" alt="Total Scope, Inc." style="height:48px">
       <div style="font-size:9px;color:#666;line-height:1.5">17 Creek Parkway | Upper Chichester, PA 19061<br/>Phone: (610) 485-1616 | Fax: (610) 485-0404</div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:13px;font-weight:700;color:#00257A">${formName}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--est-navy)">${formName}</div>
       ${formNum && formNum !== '—' ? '<div style="font-size:9px;color:#666">Form #: ' + formNum + '</div>' : ''}
       <div style="font-size:8px;color:#999;margin-top:4px">An ISO 13485:2016 Certified Company</div>
     </div>
@@ -4089,14 +4100,14 @@ function populateFormDrawer(formId) {
 
   const headerHTML = `
     <div class="wf-form-header">
-      <div class="wf-fh-item"><b>Client</b> ${clientName}</div>
-      <div class="wf-fh-item"><b>W.O. #</b> ${r.sWorkOrderNumber || '—'}</div>
-      <div class="wf-fh-item"><b>Department</b> ${deptName}</div>
-      <div class="wf-fh-item"><b>Serial #</b> ${r.sSerialNumber || '—'}</div>
-      <div class="wf-fh-item"><b>Model</b> ${r.sScopeTypeDesc || '—'}</div>
+      <div class="wf-fh-item"><b>Client</b> ${esc(clientName)}</div>
+      <div class="wf-fh-item"><b>W.O. #</b> ${esc(r.sWorkOrderNumber || '—')}</div>
+      <div class="wf-fh-item"><b>Department</b> ${esc(deptName)}</div>
+      <div class="wf-fh-item"><b>Serial #</b> ${esc(r.sSerialNumber || '—')}</div>
+      <div class="wf-fh-item"><b>Model</b> ${esc(r.sScopeTypeDesc || '—')}</div>
       <div class="wf-fh-item"><b>Date</b> ${r.dtDateIn ? new Date(r.dtDateIn).toLocaleDateString() : '—'}</div>
-      <div class="wf-fh-item"><b>Rack #</b> ${r.sRackPosition || 'N/A'}</div>
-      <div class="wf-fh-item"><b>Type</b> ${r.sRigidOrFlexible || '—'}</div>
+      <div class="wf-fh-item"><b>Rack #</b> ${esc(r.sRackPosition || 'N/A')}</div>
+      <div class="wf-fh-item"><b>Type</b> ${esc(r.sRigidOrFlexible || '—')}</div>
     </div>`;
 
   if (formId === 'disassemble') {
@@ -4110,15 +4121,15 @@ function populateFormDrawer(formId) {
         <div class="wf-card-head">1. General Information</div>
         <div class="wf-card-body">
           <div class="wf-form-header" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="wf-fh-item"><b>Customer</b> ${clientName}</div>
-            <div class="wf-fh-item"><b>Work Order #</b> ${r.sWorkOrderNumber || '—'}</div>
+            <div class="wf-fh-item"><b>Customer</b> ${esc(clientName)}</div>
+            <div class="wf-fh-item"><b>Work Order #</b> ${esc(r.sWorkOrderNumber || '—')}</div>
             <div class="wf-fh-item"><b>Inspected By</b> <input class="wf-di-input wide" value="${techName}"></div>
             <div class="wf-fh-item"><b>Date</b> ${r.dtDateIn ? new Date(r.dtDateIn).toLocaleDateString() : '—'}</div>
-            <div class="wf-fh-item"><b>Scope Model</b> ${r.sScopeTypeDesc || '—'}</div>
-            <div class="wf-fh-item"><b>Rack #</b> ${r.sRackPosition || 'N/A'}</div>
+            <div class="wf-fh-item"><b>Scope Model</b> ${esc(r.sScopeTypeDesc || '—')}</div>
+            <div class="wf-fh-item"><b>Rack #</b> ${esc(r.sRackPosition || 'N/A')}</div>
             <div class="wf-fh-item"><b>Customer Type</b> ${r.lPricingCategoryKey === 4 ? 'CAP' : 'FFS'}</div>
-            <div class="wf-fh-item"><b>Serial #</b> ${r.sSerialNumber || '—'}</div>
-            <div class="wf-fh-item"><b>Package Type</b> ${r.sRigidOrFlexible || '—'}</div>
+            <div class="wf-fh-item"><b>Serial #</b> ${esc(r.sSerialNumber || '—')}</div>
+            <div class="wf-fh-item"><b>Package Type</b> ${esc(r.sRigidOrFlexible || '—')}</div>
           </div>
           <div style="margin-top:8px;font-size:10.5px"><b style="font-size:9px;color:var(--steel)">ACCESSORIES RECEIVED AT INTAKE:</b></div>
           <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:10.5px">
@@ -4277,7 +4288,7 @@ function populateFormDrawer(formId) {
 
       <!-- SCOPE OF REPAIR -->
       <div class="wf-est-section">
-        <div class="wf-est-label" style="font-size:11px;color:#00257A;margin-bottom:8px">Scope of Repair</div>
+        <div class="wf-est-label" style="font-size:11px;color:var(--est-navy);margin-bottom:8px">Scope of Repair</div>
         <div style="font-size:10px;color:#5A6F8A;margin-bottom:10px">Based on our diagnostic inspection, we recommend the following repairs:</div>
         ${isContract ? '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:6px 12px;margin-bottom:10px;text-align:center;font-weight:700;color:#1D4ED8;font-size:11px">Covered Under Service Agreement</div>' : ''}
         ${(() => {
@@ -4292,13 +4303,13 @@ function populateFormDrawer(formId) {
             // Angulation specs
             if (r.sAngInUp || r.sAngInDown || r.sAngInRight || r.sAngInLeft) {
               html += '<div style="margin-top:8px;font-size:10px;line-height:1.6">';
-              html += '<div><b style="color:#00257A">Angulation:</b> Up ' + (r.sAngInUp || 'N/A') + '\u00B0 / Down ' + (r.sAngInDown || 'N/A') + '\u00B0 / Right ' + (r.sAngInRight || 'N/A') + '\u00B0 / Left ' + (r.sAngInLeft || 'N/A') + '\u00B0</div>';
+              html += '<div><b style="color:var(--est-navy)">Angulation:</b> Up ' + (r.sAngInUp || 'N/A') + '\u00B0 / Down ' + (r.sAngInDown || 'N/A') + '\u00B0 / Right ' + (r.sAngInRight || 'N/A') + '\u00B0 / Left ' + (r.sAngInLeft || 'N/A') + '\u00B0</div>';
               html += '<div style="color:#5A6F8A">Should Be: Up 210\u00B0 / Down 180\u00B0 / Right 160\u00B0 / Left 160\u00B0</div>';
               html += '</div>';
             }
             // Broken fibers
             if (r.nBrokenFibers !== undefined && r.nBrokenFibers !== null) {
-              html += '<div style="margin-top:4px;font-size:10px"><b style="color:#00257A">Number of broken fibers:</b> ' + (r.nBrokenFibers || 'N/A') + '</div>';
+              html += '<div style="margin-top:4px;font-size:10px"><b style="color:var(--est-navy)">Number of broken fibers:</b> ' + (r.nBrokenFibers || 'N/A') + '</div>';
             }
             return html;
           } else if (isRigid) {
@@ -4308,7 +4319,7 @@ function populateFormDrawer(formId) {
               const isPkg = raw.startsWith('!!');
               const isInc = raw.startsWith('!') && !raw.startsWith('!!');
               const name = raw.replace(/^!+/, '').trim();
-              const displayName = isInc ? '<span style="padding-left:16px">' + name + '</span>' : (isPkg ? '<b style="color:#00257A">' + name + '</b>' : '<b>' + name + '</b>');
+              const displayName = isInc ? '<span style="padding-left:16px">' + name + '</span>' : (isPkg ? '<b style="color:var(--est-navy)">' + name + '</b>' : '<b>' + name + '</b>');
               const cost = isContract ? '$0.00' : isInc ? '<span style="color:#5A6F8A;font-style:italic">Included</span>' : fmt$(itemAmt(i));
               const approved = i.approved === 'Y' ? '\u2611 Y' : i.approved === 'N' ? '\u2610 N' : '\u2610';
               const bgStyle = isPkg ? ' style="background:#F0F4FA"' : '';
@@ -4360,7 +4371,7 @@ function populateFormDrawer(formId) {
 
       <!-- APPROVAL & FOOTER -->
       <div class="wf-est-section" style="border-top:1px solid #D0D8E4;padding:14px 28px;text-align:center">
-        <div style="font-size:10px;color:#1A202C;line-height:1.5;margin-bottom:8px">To approve, log in to your <b style="color:#00257A">TSI Customer Portal</b> or contact us: <b style="color:#00257A">ops-tsi@totalscopeinc.com</b> &bull; <b style="color:#00257A">800-471-2255</b> &nbsp; | &nbsp; Prepared by: <b>${repName}</b></div>
+        <div style="font-size:10px;color:#1A202C;line-height:1.5;margin-bottom:8px">To approve, log in to your <b style="color:var(--est-navy)">TSI Customer Portal</b> or contact us: <b style="color:var(--est-navy)">ops-tsi@totalscopeinc.com</b> &bull; <b style="color:var(--est-navy)">800-471-2255</b> &nbsp; | &nbsp; Prepared by: <b>${repName}</b></div>
         <div style="display:flex;align-items:flex-end;gap:16px;margin-top:10px;border-top:1px dashed #D0D8E4;padding-top:8px">
           <div style="flex:2"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">SIGNATURE (optional)</div></div>
           <div style="flex:1"><div style="border-bottom:1px solid #1A202C;height:18px"></div><div style="font-size:7px;color:#8896AA;margin-top:2px">DATE</div></div>
@@ -4626,7 +4637,7 @@ function populateFormDrawer(formId) {
 
       <!-- TEST RESULTS — category summaries -->
       <div class="wf-est-section" style="padding:10px 24px">
-        <div class="wf-est-label" style="font-size:10px;color:#00257A;margin-bottom:6px">Final Inspection Test Results</div>
+        <div class="wf-est-label" style="font-size:10px;color:var(--est-navy);margin-bottom:6px">Final Inspection Test Results</div>
         <table class="wf-est-repairs-tbl" style="font-size:9px">
           <thead><tr><th>Test Category</th><th style="width:70px;text-align:center">Result</th><th>Scope of Testing</th></tr></thead>
           <tbody>${testCategories.map(cat => {
@@ -4666,7 +4677,7 @@ function populateFormDrawer(formId) {
 
       <!-- WORK PERFORMED -->
       <div class="wf-est-section" style="padding:8px 24px">
-        <div class="wf-est-label" style="font-size:10px;color:#00257A;margin-bottom:6px">Work Performed</div>
+        <div class="wf-est-label" style="font-size:10px;color:var(--est-navy);margin-bottom:6px">Work Performed</div>
         <table class="wf-est-repairs-tbl" style="font-size:9px">
           <thead><tr><th>Repair</th><th style="width:70px;text-align:center">Assessment</th><th>Notes</th></tr></thead>
           <tbody>${visibleItems.map(i => {
@@ -4680,7 +4691,7 @@ function populateFormDrawer(formId) {
       <!-- RECOMMENDATIONS -->
       <div class="wf-est-section" style="padding:6px 24px">
         <div style="display:flex;align-items:baseline;gap:8px;font-size:10px">
-          <b style="color:#00257A;font-size:8px;text-transform:uppercase;white-space:nowrap">Recommendations:</b>
+          <b style="color:var(--est-navy);font-size:8px;text-transform:uppercase;white-space:nowrap">Recommendations:</b>
           <input type="text" class="wf-di-input" style="width:100%;height:22px;font-size:9px" placeholder="Prevention recommendations..." value="${r.sFinalQCRecommendations || ''}">
         </div>
       </div>
@@ -4691,7 +4702,7 @@ function populateFormDrawer(formId) {
           <b>Reprocessing Required:</b> This endoscope must be fully reprocessed per facility policies and manufacturer IFU before patient use. TSI does not perform HLD/sterilization.
         </div>
         <div style="text-align:center;margin-bottom:10px">
-          <div style="font-size:13px;font-weight:700;color:#00257A;letter-spacing:.3px">SCOPE HAS BEEN REPAIRED</div>
+          <div style="font-size:13px;font-weight:700;color:var(--est-navy);letter-spacing:.3px">SCOPE HAS BEEN REPAIRED</div>
           <div style="font-size:9px;color:#1A202C;margin-top:2px">Passed final inspection and QC testing per TSI SOPs. Diagnostically <b>USABLE</b> — cleared for return to clinical service.</div>
         </div>
         <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:8px">
@@ -5232,6 +5243,15 @@ document.getElementById('tabBar').addEventListener('click', function(e) {
 // ── Load Single Repair ──
 async function loadRepair(repairKey) {
   if (!repairKey) return;
+  // Flush pending autosave before switching repairs
+  if (_dirty && _currentRepair) {
+    clearTimeout(_saveTimer);
+    await autoSave();
+  }
+  clearTimeout(_saveTimer);
+  // Loading guard: prevent concurrent calls for the same repair
+  if (_loadingKey === repairKey) return;
+  _loadingKey = repairKey;
   // Switch from idle state to content on first load
   const idleEl = document.getElementById('detailIdle');
   const contentEl = document.getElementById('detailContent');
@@ -5249,6 +5269,7 @@ async function loadRepair(repairKey) {
   try {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
     const detail = await API.getRepairDetail(repairKey, svcKey);
+    if (_loadingKey !== repairKey) return; // Stale response, user clicked another
     const d = Array.isArray(detail) ? detail[0] : detail;
     // Check localStorage for persisted changes
     const persisted = loadPersistedRepair(repairKey);
@@ -5301,6 +5322,8 @@ async function loadRepair(repairKey) {
         '<button onclick="document.getElementById(\'detailErrorBanner\').style.display=\'none\';loadRepair(' + repairKey + ')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit">Retry</button>';
       _errBanner.style.display = 'flex';
     }
+  } finally {
+    _loadingKey = null;
   }
 }
 
@@ -5351,7 +5374,7 @@ function renderFlags(flags) {
   if (!flags || !flags.length) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML = flags.map(f =>
-    '<span class="flag-chip">' + (f.psFlag || f.sFlag || f.sFlagDescription || 'Flag') + '</span>'
+    '<span class="flag-chip">' + esc(f.psFlag || f.sFlag || f.sFlagDescription || 'Flag') + '</span>'
   ).join('');
 }
 
@@ -5995,7 +6018,7 @@ function renderRepairItems(ds) {
     const tech = item.sTechInits || item.sTech1 || '';
     const tech2 = item.sTechInits2 || item.sTech2Inits || item.sTech2 || '';
     const techDisplay = tech + (tech2 ? '/' + tech2 : '');
-    const comment = item.sComments || '';
+    const comment = esc(item.sComments || '');
     const rowBg = isBlind ? 'background:var(--neutral-50);opacity:.65' : (isApproved ? 'background:#F0FDF4' : '');
     const descStyle = isBlind ? 'font-weight:500;font-style:italic;text-decoration:line-through;color:var(--neutral-500)' : 'font-weight:500';
     return '<tr data-tran="' + key + '" onclick="selectItemRow(this,' + i + ')" style="' + rowBg + '">' +
@@ -6005,13 +6028,13 @@ function renderRepairItems(ds) {
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">' + (isBlind ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>') + '</svg>' +
         '</button>' +
       '</td>' +
-      '<td><code style="font-size:10px">' + (item.sTSICode||item.sRepairCode||'') + '</code></td>' +
-      '<td><span style="' + descStyle + '">' + (item.sItemDescription||item.sDescription||item.sRepairItem||'') + (isBlind ? ' <span style="font-size:8px;font-weight:700;color:#92400E;font-style:normal;text-decoration:none">BLIND</span>' : '') + '</span></td>' +
+      '<td><code style="font-size:10px">' + esc(item.sTSICode||item.sRepairCode||'') + '</code></td>' +
+      '<td><span style="' + descStyle + '">' + esc(item.sItemDescription||item.sDescription||item.sRepairItem||'') + (isBlind ? ' <span style="font-size:8px;font-weight:700;color:#92400E;font-style:normal;text-decoration:none">BLIND</span>' : '') + '</span></td>' +
       '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleUANWT(' + i + ')" title="Click to cycle: User Abuse / Normal Wear &amp; Tear / None">' + uanwtPill(item.sUAorNWT||item.sUANWT||'') + '</td>' +
       '<td style="text-align:center;cursor:pointer;user-select:none" onclick="event.stopPropagation();cycleWNCA(' + i + ')" title="Click to cycle: Repair / Warranty / Non-conformance / Customer / Amendment / None">' + wncaPill(item.sFixType||item.sWNCA||'') + '</td>' +
       '<td style="text-align:right;font-family:var(--mono);font-weight:600">' + fmtMoney(item.dblRepairPrice||item.mAmount||item.dblAmount||0) + '</td>' +
       '<td style="font-size:10px;color:var(--neutral-500)">' + techDisplay + '</td>' +
-      '<td><input type="text" value="' + comment.replace(/"/g,'&quot;') + '" placeholder="Add comment…" style="width:100%;height:22px;font-size:10px;border:1px solid transparent;border-radius:3px;padding:0 4px;font-family:inherit;color:var(--neutral-700);background:transparent;outline:none;box-sizing:border-box" onfocus="this.style.borderColor=\'var(--primary)\';this.style.background=\'var(--card)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'" onchange="setItemComment(' + i + ',this.value)" onclick="event.stopPropagation()"/></td></tr>';
+      '<td><input type="text" value="' + comment + '" placeholder="Add comment…" style="width:100%;height:22px;font-size:10px;border:1px solid transparent;border-radius:3px;padding:0 4px;font-family:inherit;color:var(--neutral-700);background:transparent;outline:none;box-sizing:border-box" onfocus="this.style.borderColor=\'var(--primary)\';this.style.background=\'var(--card)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'" onchange="setItemComment(' + i + ',this.value)" onclick="event.stopPropagation()"/></td></tr>';
   }).join('');
   // Update counter in header
   const approvedCount = _repairItems.filter(x => x.sApproved === 'Y').length;
@@ -6297,6 +6320,7 @@ function ctxDeleteItem() {
 
 // ── Item Picker (multi-select) ──
 let _itemCatalog = [], _itemCatalogFiltered = [];
+let _catalogLoading = false;
 let _pickerSelected = new Set(); // keys of selected items
 async function openItemPicker() {
   _pickerSelected.clear();
@@ -6313,6 +6337,8 @@ async function openItemPicker() {
 function closeItemPicker() { document.getElementById('itemPicker').classList.remove('open'); }
 
 async function loadItemCatalog(btn, type) {
+  if (_catalogLoading) return;
+  _catalogLoading = true;
   if (btn) toggleSegBtn(btn);
   document.getElementById('itemPickerList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Loading ' + type + ' items...</div>';
   try {
@@ -6323,6 +6349,8 @@ async function loadItemCatalog(btn, type) {
     renderPickerList(_itemCatalog);
   } catch (e) {
     document.getElementById('itemPickerList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:11px">Failed to load: ' + e.message + '</div>';
+  } finally {
+    _catalogLoading = false;
   }
 }
 
@@ -7441,7 +7469,7 @@ function printSlip() {
   const hasFindings = s.comment || s.findings || s.updateReason;
   const w = window.open('', '_blank', 'width=700,height=700');
   w.document.write('<html><head><title>Update Slip — ' + esc(d.sWorkOrderNumber || '') + '</title>');
-  w.document.write('<style>body{font-family:Calibri,sans-serif;font-size:12px;padding:20px}h2{color:#00257A;margin:0 0 10px}table{border-collapse:collapse;width:100%;margin:10px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4fa;font-size:10px;text-transform:uppercase}.blank-line{border-bottom:1px solid #999;height:22px;margin:4px 0}.section{margin:16px 0 6px;font-weight:700;font-size:11px;text-transform:uppercase;color:#00257A}</style>');
+  w.document.write('<style>body{font-family:Calibri,sans-serif;font-size:12px;padding:20px}h2{color:var(--est-navy);margin:0 0 10px}table{border-collapse:collapse;width:100%;margin:10px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4fa;font-size:10px;text-transform:uppercase}.blank-line{border-bottom:1px solid #999;height:22px;margin:4px 0}.section{margin:16px 0 6px;font-weight:700;font-size:11px;text-transform:uppercase;color:var(--est-navy)}</style>');
   w.document.write('</head><body>');
   w.document.write('<h2>UPDATE SLIP</h2>');
   w.document.write('<table><tr><td style="width:50%"><b>Work Order:</b> ' + esc(d.sWorkOrderNumber || '') + '</td><td><b>Date:</b> ' + esc(s.date) + '</td></tr>');
@@ -8076,7 +8104,7 @@ function statusPillStyle(s) {
   if (/on hold/i.test(s))                                                       return 'background:#F3F4F6;color:#374151';
   if (/approv|waiting|follow.?up/i.test(s))                                     return 'background:#FEF3C7;color:#92400E';
   if (/40.day|warranty/i.test(s))                                               return 'background:#FDF4FF;color:#7E22CE';
-  if (/inspection|outsourced|more info|evaluation/i.test(s))                    return 'background:#EDE9FE;color:#6D28D9';
+  if (/inspection|outsourced|more info|evaluation/i.test(s))                    return 'background:#EDE9FE;color:var(--qs-shipping)';
   return 'background:#F3F4F6;color:#4B5563';
 }
 
@@ -8716,8 +8744,6 @@ async function wizRenderSummary() {
     }
   } catch(e) { /* ignore */ }
 }
-
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // Search existing repairs
 async function nwoSearch() {
@@ -10249,7 +10275,7 @@ document.addEventListener('keydown', function(e) {
     case 'q': toggleQueuePanel(); break;
     case 'j': navigateQueue(1); break;
     case 'k': navigateQueue(-1); break;
-    case 'a': if (!e.ctrlKey && !e.metaKey) advanceStatus(); break;
+    case 'a': if (!e.ctrlKey && !e.metaKey) { if (confirm('Advance repair to next status?')) advanceStatus(); } break;
     case 'l': openItemPicker(); break;
     case 'x': toggleSplitView(); break;
     case 'b': toggleBatchMode(); break;
@@ -10374,8 +10400,8 @@ function populateLineItemsTab(items) {
     const price = item.dblRepairPrice || item.nPrice || item.nCost || item.dblPrice || item.mAmount || 0;
     return '<tr>' +
       '<td><span class="li-drag-handle">&#8597;</span></td>' +
-      '<td class="li-item-name">' + name + '</td>' +
-      '<td class="li-desc"><span contenteditable="true" style="outline:none;min-width:40px;display:inline-block" onblur="markDirty()">' + desc + '</span></td>' +
+      '<td class="li-item-name">' + esc(name) + '</td>' +
+      '<td class="li-desc"><span contenteditable="true" style="outline:none;min-width:40px;display:inline-block" onblur="markDirty()">' + esc(desc) + '</span></td>' +
       '<td style="text-align:center"><input type="number" value="' + qty + '" min="1" style="width:44px;height:24px;border:1px solid var(--border);border-radius:3px;text-align:center;font-size:11px;padding:0 4px" onchange="markDirty()"></td>' +
       '<td><span class="li-approved ' + approved + '">' + approvedLabel + '</span></td>' +
       '<td class="li-price-col" style="display:none;text-align:right;color:var(--navy);font-weight:600">$' + Number(price).toFixed(2) + '</td>' +
@@ -10421,11 +10447,11 @@ function populateNotesTab(statusHistory) {
     const isAuto = !e.sNote && !e.sComment && !e.mTranComments;
     return '<div class="note-entry">' +
       '<div class="note-header">' +
-        '<span class="note-tech">' + tech + '</span>' +
+        '<span class="note-tech">' + esc(tech) + '</span>' +
         '<span class="note-time">' + timeStr + '</span>' +
         '<span class="note-type">' + (isAuto ? 'Status' : 'Note') + '</span>' +
       '</div>' +
-      '<div class="note-body">' + msg + '</div>' +
+      '<div class="note-body">' + esc(msg) + '</div>' +
     '</div>';
   }).join('');
 }

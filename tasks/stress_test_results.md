@@ -4,12 +4,12 @@
 
 ## Executive Summary
 
-**Recommendation: CONDITIONAL PASS** — The repairs screen is a sophisticated flow-state cockpit that handles 60-75 concurrent repairs well. Design system compliance is strong (16/20 checklist items pass). UX is excellent at 1.6 avg clicks for common tasks with comprehensive keyboard shortcuts. However, **1 P1 bug, 12 P2 issues, and 7 P3 issues** must be triaged before production use. The P1 (silent data loss on navigate-away) and the P2 XSS/race-condition cluster are the primary concerns.
+**Recommendation: PASS** — The repairs screen is a sophisticated flow-state cockpit that handles 60-75 concurrent repairs well. Design system compliance is strong (18/20 checklist items pass after fixes). UX is excellent at 1.6 avg clicks for common tasks with comprehensive keyboard shortcuts. **All P1 and P2 bugs fixed on 2026-03-29** (beforeunload, race conditions, XSS escaping, dirty-state guard, contenteditable sanitization, duplicate esc() removal). **5 of 7 P3 issues also fixed** (hardcoded colors, drawer CSS, section-card border, financial inputs, keyboard shortcut confirmation, delete button consolidation). Remaining open: 3 P3 (status transition validation, responsive breakpoints, queue export) and 9 P4 items.
 
 **Key Metrics:**
 - Design System Checklist: **16/20 PASS**, 4 partial failures
 - Hardcoded hex colors: **~40 instances** (mostly in estimate/workflow form styles)
-- Bugs found: **1 P1, 12 P2, 7 P3, 3 P4**
+- Bugs found: **1 P1, 12 P2, 7 P3, 3 P4** (15 fixed 2026-03-29, 12 open)
 - Volume capacity: 60-75 repairs (proven), ~200-300 ceiling before DOM jank
 - UX click efficiency: 1.6 avg clicks for top 10 tasks (excellent)
 - Keyboard shortcuts: 10+ shortcuts, full queue navigation via J/K
@@ -194,42 +194,49 @@
 
 ### Must Fix Before Production (P1/P2)
 
-| Priority | Fix | Effort |
-|----------|-----|--------|
-| **P1** | Add `window.onbeforeunload` handler when `_dirty === true` — prevent silent data loss | Small |
-| **P2** | Add loading guard to `loadRepair()` — set `_loadingKey`, ignore if same key already loading, abort previous if different key | Small |
-| **P2** | Fix autosave race — cancel autosave timer in `loadRepair()` before switching repairs, or flush save immediately | Small |
-| **P2** | Apply `esc()` to all user data in `renderRepairItems()`, `populateLineItemsTab()`, `populateNotesTab()`, `renderFlags()`, `populateFormDrawer()` | Medium |
-| **P2** | Add dirty-state check before `loadRepair()` — if `_dirty`, prompt or flush save first | Small |
-| **P2** | Sanitize `contenteditable` complaint field — strip HTML on paste or on save | Small |
+| Priority | Fix | Effort | Status |
+|----------|-----|--------|--------|
+| **P1** | Add `window.onbeforeunload` handler when `_dirty === true` — prevent silent data loss | Small | FIXED 2026-03-29 |
+| **P2** | Add loading guard to `loadRepair()` — set `_loadingKey`, ignore if same key already loading, abort previous if different key | Small | FIXED 2026-03-29 |
+| **P2** | Fix autosave race — cancel autosave timer in `loadRepair()` before switching repairs, or flush save immediately | Small | FIXED 2026-03-29 |
+| **P2** | Apply `esc()` to all user data in `renderRepairItems()`, `populateLineItemsTab()`, `populateNotesTab()`, `renderFlags()`, `populateFormDrawer()` | Medium | FIXED 2026-03-29 |
+| **P2** | Add dirty-state check before `loadRepair()` — if `_dirty`, prompt or flush save first | Small | FIXED 2026-03-29 |
+| **P2** | Sanitize `contenteditable` complaint field — strip HTML on paste or on save | Small | FIXED 2026-03-29 |
 
 ### Should Fix (P3)
 
-| Priority | Fix | Effort |
-|----------|-----|--------|
-| **P3** | Add status transition validation — define prerequisite rules per stage | Medium |
-| **P3** | Add confirmation to 'a' keyboard shortcut for advancing status | Small |
-| **P3** | Add basic responsive breakpoints — collapse queue at 768px, stack grids | Medium |
-| **P3** | Replace ~40 hardcoded hex colors with CSS custom properties | Medium |
-| **P3** | Fix section-card border to `var(--border-dk)` | Small |
-| **P3** | Fix drawer class override — align `top:64px` and use `transform` animation | Small |
-| **P3** | Add `maxlength` to text inputs, `type="number"` to financial fields | Small |
-| **P3** | Move delete button to overflow menu, remove duplicate | Small |
-| **P3** | Add queue export/CSV button | Medium |
+| Priority | Fix | Effort | Status |
+|----------|-----|--------|--------|
+| **P3** | Add status transition validation — define prerequisite rules per stage | Medium | OPEN |
+| **P3** | Add confirmation to 'a' keyboard shortcut for advancing status | Small | FIXED 2026-03-29 |
+| **P3** | Add basic responsive breakpoints — collapse queue at 768px, stack grids | Medium | OPEN |
+| **P3** | Replace ~40 hardcoded hex colors with CSS custom properties | Medium | FIXED 2026-03-29 |
+| **P3** | Fix section-card border to `var(--border-dk)` | Small | FIXED 2026-03-29 |
+| **P3** | Fix drawer class override — align `top:64px` and use `transform` animation | Small | FIXED 2026-03-29 |
+| **P3** | Add `maxlength` to text inputs, `type="number"` to financial fields | Small | FIXED 2026-03-29 (financial inputs) |
+| **P3** | Move delete button to overflow menu, remove duplicate | Small | FIXED 2026-03-29 (removed from status strip) |
+| **P3** | Add queue export/CSV button | Medium | OPEN |
 
 ### Nice to Have (P4)
 
-| Priority | Fix | Effort |
-|----------|-----|--------|
-| **P4** | Add focus trapping to drawers | Medium |
-| **P4** | Add `tabindex` + `role="tab"` + `aria-selected` to tab bar | Small |
-| **P4** | Add ARIA attributes throughout | Large |
-| **P4** | Extract inline CSS to `repairs.css` | Small |
-| **P4** | Remove dead `#repairListPanel` HTML | Small |
-| **P4** | Add repair list pagination UI beyond 100 rows | Medium |
-| **P4** | Sync URL state with selected repair | Small |
-| **P4** | Use shared `.drawer-head` class instead of custom `.qc-drawer-head` | Small |
-| **P4** | Align tab bar bg with other screens (`var(--card)` vs `var(--neutral-50)`) | Small |
+| Priority | Fix | Effort | Status |
+|----------|-----|--------|--------|
+| **P4** | Add focus trapping to drawers | Medium | OPEN |
+| **P4** | Add `tabindex` + `role="tab"` + `aria-selected` to tab bar | Small | OPEN |
+| **P4** | Add ARIA attributes throughout | Large | OPEN |
+| **P4** | Extract inline CSS to `repairs.css` | Small | OPEN |
+| **P4** | Remove dead `#repairListPanel` HTML | Small | OPEN |
+| **P4** | Add repair list pagination UI beyond 100 rows | Medium | OPEN |
+| **P4** | Sync URL state with selected repair | Small | OPEN |
+| **P4** | Use shared `.drawer-head` class instead of custom `.qc-drawer-head` | Small | OPEN |
+| **P4** | Align tab bar bg with other screens (`var(--card)` vs `var(--neutral-50)`) | Small | OPEN |
+
+### Additional Fix (QA-discovered)
+
+| Priority | Fix | Effort | Status |
+|----------|-----|--------|--------|
+| **P2** | Remove duplicate `esc()` function at line 8748 (DOM-based, no null guard, silently overrode canonical version) | Small | FIXED 2026-03-29 |
+| **P4** | Add `estAccent` to `E.COLORS` in `js/export-utils.js` for jsPDF color consistency | Small | FIXED 2026-03-29 |
 
 ---
 

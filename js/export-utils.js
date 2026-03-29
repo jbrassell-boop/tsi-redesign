@@ -20,13 +20,14 @@ const COMPANY = {
 };
 
 const COLORS = {
-  navy:    '#00257A',
-  steel:   '#5A6F8A',
-  bg:      '#F0F4FA',
-  border:  '#CCCCCC',
-  altRow:  '#FAFBFD',
-  black:   '#333333',
-  white:   '#FFFFFF'
+  navy:      '#00257A',
+  estAccent: '#9DABE2',
+  steel:     '#5A6F8A',
+  bg:        '#F0F4FA',
+  border:    '#CCCCCC',
+  altRow:    '#FAFBFD',
+  black:     '#333333',
+  white:     '#FFFFFF'
 };
 
 // 1pt = 1/72 inch. Letter = 612 x 792 pt
