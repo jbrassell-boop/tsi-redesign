@@ -62,12 +62,14 @@ router.get('/Repair/GetAllRepairReasons', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// Patient Safety Levels — NO dedicated table exists in DB.
-// Return empty array to prevent frontend errors.
-router.get('/Repair/GetAllPatientSafetyLevels', async (req, res, next) => {
-  try {
-    res.json([]);
-  } catch (e) { next(e); }
+// Patient Safety Levels — no dedicated table in WinScopeNet DB.
+// Return static list matching BrightLogix API convention.
+router.get('/Repair/GetAllPatientSafetyLevels', (req, res) => {
+  res.json([
+    { id: 1, name: 'Level 1' },
+    { id: 2, name: 'Level 2' },
+    { id: 3, name: 'Level 3' }
+  ]);
 });
 
 // Sales Reps

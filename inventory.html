@@ -1562,8 +1562,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -2144,10 +2142,11 @@ async function selectApiItem(key, name) {
   }
 
   // Demand Forecast
+  // TODO: API.getInventoryDemandForecast(key) — endpoint being built by backend-lead
   var forecastPanel = document.getElementById('forecastPanel');
-  if (forecastPanel && typeof MockAPI !== 'undefined') {
+  if (forecastPanel && false) {
     try {
-      var fc = await MockAPI.handleRequest('GET', '/Inventory/GetDemandForecast?plInventoryKey=' + key);
+      var fc = await Promise.resolve(null);
       if (!fc) { forecastPanel.style.display = 'none'; return; }
       forecastPanel.style.display = '';
       var daysEl = document.getElementById('fcDays');

@@ -148,8 +148,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 if (!API.requireAuth()) throw new Error('redirect');
@@ -191,10 +189,11 @@ function computeEstDelivery(trans) {
 // ── Load data ──
 async function loadData() {
   try {
-    const pos = MockDB.getAll('supplierPOs');
-    const allTrans = MockDB.getAll('supplierPOTrans');
-    const suppliers = MockDB.getAll('suppliers');
-    const poTypes = MockDB.getAll('supplierPOTypes');
+    // TODO: await API.getSupplierPOs() / API.getSupplierPOTransactions() / API.getSupplierPOTypes() — endpoints being built by backend-lead
+    const suppliers = await API.getSuppliers();
+    const pos = [];
+    const allTrans = [];
+    const poTypes = [];
 
     // Build lookup maps
     const supplierMap = {};

@@ -20,25 +20,11 @@ const API = (() => {
   }
 
   function isMockMode() {
-    // Local mode bypasses MockAPI — use real Express server
-    if (isLocalMode()) return false;
-    return typeof MockAPI !== 'undefined' && typeof MockDB !== 'undefined';
+    return false;
   }
 
   function isLocalMode() {
-    // URL param ?api=local or localStorage flag
-    if (typeof window !== 'undefined') {
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('api') === 'local') {
-        localStorage.setItem('tsi_api_mode', 'local');
-        return true;
-      }
-      if (params.get('api') === 'mock') {
-        localStorage.removeItem('tsi_api_mode');
-        return false;
-      }
-    }
-    return localStorage.getItem('tsi_api_mode') === 'local';
+    return true;
   }
 
   function setToken(token) {
@@ -77,15 +63,15 @@ const API = (() => {
 
   // ── Login ─────────────────────────────────────────────
   async function login(email, password) {
-    // ── Mock mode: instant login ────────────────────────
-    if (isMockMode()) {
-      const mockUser = MockDB.getByKey('users', 1);
-      const tokenStr = 'mock-token-' + Date.now();
-      setToken(tokenStr);
-      if (mockUser) setUser(mockUser);
-      return { success: true, user: mockUser, data: { isAuthenticated: true, token: tokenStr, user: mockUser } };
-    }
+    // Express dev server has no auth — accept any credentials and issue a local token
+    const tokenStr = 'local-dev-' + Date.now();
+    setToken(tokenStr);
+    const user = { sFirstName: 'Dev', sLastName: 'User', sEmailAddress: email, lUserKey: 1 };
+    setUser(user);
+    return { success: true, user, data: { isAuthenticated: true, token: tokenStr, user } };
+  }
 
+  async function _loginBrightLogix(email, password) {
     const res = await fetch(BASE_URL + '/Authentication/UserLogin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -162,39 +148,16 @@ const API = (() => {
   // Handles token attachment, 401 detection, JSON parsing
   // When MockAPI is loaded, routes all calls through the mock layer.
   async function request(method, endpoint, body) {
-    // ── Mock mode: bypass network entirely ──────────────
-    if (isMockMode()) {
-      return MockAPI.handleRequest(method, endpoint, body);
-    }
-
-    // ── Choose base URL: local Express server or BrightLogix cloud ──
-    const baseUrl = isLocalMode() ? LOCAL_URL : BASE_URL;
-
-    const token = getToken();
     const headers = { 'Content-Type': 'application/json' };
-    // Skip auth token for local mode (Windows auth on SQL Server)
-    if (token && !isLocalMode()) {
-      headers['Authorization'] = 'Bearer ' + token;
-    }
-
     const opts = { method, headers };
     if (body && (method === 'POST' || method === 'PUT')) {
       opts.body = JSON.stringify(body);
     }
 
-    const res = await fetch(baseUrl + endpoint, opts);
+    const res = await fetch(LOCAL_URL + endpoint, opts);
 
-    // Token expired or invalid
     if (res.status === 401) {
-      // Demo mode — don't redirect, just throw so pages can fall back to demo data
-      if (isDemoMode()) {
-        console.warn('[TSI API] 401 on', endpoint, '— demo mode, falling back');
-        const err = new Error('Demo mode — no real API access');
-        err.status = 401;
-        throw err;
-      }
-      // Real token expired — redirect to login
-      console.warn('[TSI API] 401 on', endpoint, '— token expired, redirecting');
+      console.warn('[TSI API] 401 on', endpoint);
       clearToken();
       window.location.href = 'login.html?expired=1';
       return;
@@ -202,38 +165,12 @@ const API = (() => {
 
     const envelope = await res.json();
 
-    // ── Local mode: Express server returns raw JSON (arrays/objects) ──
-    if (isLocalMode()) {
-      // Paginated response: { dataSource: [...], totalRecord: N }
-      if (envelope && typeof envelope === 'object' && !Array.isArray(envelope) && Array.isArray(envelope.dataSource)) {
-        return envelope.dataSource;
-      }
-      return envelope;
+    // Express server returns raw JSON (arrays/objects)
+    // Paginated response: { dataSource: [...], totalRecord: N }
+    if (envelope && typeof envelope === 'object' && !Array.isArray(envelope) && Array.isArray(envelope.dataSource)) {
+      return envelope.dataSource;
     }
-
-    // ── BrightLogix mode: API wraps in { responseData: "JSON string" } ──
-    let json;
-    try {
-      if (envelope.responseData && typeof envelope.responseData === 'string') {
-        json = JSON.parse(envelope.responseData);
-      } else if (envelope.statusCode !== undefined) {
-        json = envelope;
-      } else {
-        json = envelope;
-      }
-    } catch (e) {
-      throw new Error('Could not parse server response');
-    }
-
-    if (json.statusCode === 200) {
-      const d = json.data;
-      if (d && typeof d === 'object' && !Array.isArray(d) && Array.isArray(d.dataSource)) {
-        return d.dataSource;
-      }
-      return d;
-    }
-
-    throw new Error(json.message || 'API request failed');
+    return envelope;
   }
 
   // ── Convenience Methods ───────────────────────────────
@@ -489,64 +426,25 @@ const API = (() => {
         if (welcome) welcome.innerHTML = 'Welcome back, <strong>' + (user.sFirstName || 'User') + '</strong>';
       }
     },
-    updateDemoBadge: function(status) {
+    updateDemoBadge: function() {
       const badge = document.getElementById('dataBadge');
-      if (!badge) return;
-
-      // Local SQL Server mode — show prominent warning
-      if (isLocalMode()) {
+      if (badge) {
         badge.className = 'data-badge live';
-        badge.textContent = '⚡ SQL Server — LIVE';
-        badge.style.background = '#DC2626';
+        badge.textContent = 'Dev Server';
+        badge.style.background = 'var(--primary, #2E75B6)';
         badge.style.color = '#fff';
-        badge.style.fontWeight = '700';
-        badge.style.cursor = 'pointer';
-        badge.title = 'Connected to local WinScopeNet. Changes are REAL. Click to switch to mock mode.';
-        badge.onclick = function() {
-          if (confirm('Switch to mock data mode? (No more writes to SQL Server)')) {
-            localStorage.removeItem('tsi_api_mode');
-            location.reload();
-          }
-        };
-        // Show banner if not already present
-        if (!document.getElementById('sqlBanner')) {
-          var banner = document.createElement('div');
-          banner.id = 'sqlBanner';
-          banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#DC2626;color:#fff;text-align:center;padding:4px 16px;font-size:11px;font-weight:600;font-family:Inter,system-ui,sans-serif;letter-spacing:.02em';
-          banner.innerHTML = '⚡ SQL SERVER MODE — All changes write directly to WinScopeNet production database. <a href="javascript:void(0)" onclick="localStorage.removeItem(\'tsi_api_mode\');location.reload()" style="color:#FCA5A5;text-decoration:underline;margin-left:8px">Switch to Mock</a>';
-          document.body.appendChild(banner);
-        }
-        return;
+        badge.style.fontWeight = '';
+        badge.style.cursor = '';
+        badge.title = 'Connected to Express dev server — localhost:4000';
+        badge.onclick = null;
       }
-
-      // Remove SQL banner if switching away
-      var oldBanner = document.getElementById('sqlBanner');
-      if (oldBanner) oldBanner.remove();
-
-      if (status === 'api' || status === 'live') {
-        badge.className = 'data-badge live';
-        badge.textContent = 'Live Data';
-        badge.style.background = '#E8F5E9';
-        badge.style.color = '#2E7D32';
-        badge.style.fontWeight = '';
-        badge.style.cursor = '';
-        badge.onclick = null;
-      } else if (status === 'mock') {
-        badge.className = 'data-badge mock';
-        badge.textContent = 'Mock Data';
-        badge.style.background = '#EFF6FF';
-        badge.style.color = '#1D4ED8';
-        badge.style.fontWeight = '';
-        badge.style.cursor = '';
-        badge.onclick = null;
-      } else {
-        badge.className = 'data-badge demo';
-        badge.textContent = 'Demo Data';
-        badge.style.background = '#FFFBEB';
-        badge.style.color = '#D97706';
-        badge.style.fontWeight = '';
-        badge.style.cursor = '';
-        badge.onclick = null;
+      // Show small unobtrusive banner if not already present
+      if (!document.getElementById('devBanner')) {
+        var banner = document.createElement('div');
+        banner.id = 'devBanner';
+        banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--primary,#2E75B6);color:#fff;text-align:center;padding:3px 16px;font-size:11px;font-family:Inter,system-ui,sans-serif;letter-spacing:.02em';
+        banner.textContent = 'Dev Server — localhost:4000';
+        document.body.appendChild(banner);
       }
     },
     setupNewOrderDropdown: function() {
@@ -591,7 +489,21 @@ const API = (() => {
   // ── Invoicing Engine ────────────────────────────────────
   async function getReadyToInvoice(svcKey) { return get('/Invoice/GetReadyToInvoice?plServiceLocationKey=' + (svcKey||1)); }
   async function generateInvoices(repairKeys) { return post('/Invoice/GenerateInvoices', { repairKeys: repairKeys }); }
-  async function getAllInvoices() { return get('/Invoice/GetAllInvoices'); }
+  async function getAllInvoices(svcKey) { return get('/Invoice/GetAllInvoices' + (svcKey ? '?svcKey=' + svcKey : '')); }
+  async function getInvoiceDetails(key) { return get('/Invoice/GetInvoiceDetails/' + key); }
+  async function getInvoicesByRepair(repairKey) { return get('/Invoice/GetInvoicesByRepair/' + repairKey); }
+
+  // ── Supplier POs ──────────────────────────────────────
+  async function getSupplierPOs() { return get('/SupplierPO/GetAll'); }
+  async function getSupplierPOTransactions(poKey) { return get('/SupplierPO/GetTransactions/' + poKey); }
+  async function getSupplierPOTypes() { return get('/SupplierPO/GetTypes'); }
+
+  // ── Analytics ─────────────────────────────────────────
+  async function getProfitability() { return get('/Analytics/GetProfitability'); }
+  async function getContractProfitability() { return get('/Analytics/GetContractProfitability'); }
+
+  // ── Task Status History ───────────────────────────────
+  async function getTaskStatusHistory(taskKey) { return get('/Tasks/GetStatusHistory/' + taskKey); }
 
   // ── Pending Arrivals (6) ─────────────────────────────
   async function getPendingArrivals(svcKey, status) {
@@ -740,6 +652,16 @@ const API = (() => {
 
     // Invoicing Engine
     getReadyToInvoice, generateInvoices, getAllInvoices,
+    getInvoiceDetails, getInvoicesByRepair,
+
+    // Supplier POs
+    getSupplierPOs, getSupplierPOTransactions, getSupplierPOTypes,
+
+    // Analytics
+    getProfitability, getContractProfitability,
+
+    // Task Status History
+    getTaskStatusHistory,
 
     // Pending Arrivals
     getPendingArrivals, getPendingArrivalByKey,

@@ -1285,8 +1285,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
@@ -1622,8 +1620,9 @@ async function selectContract(el, contractKey) {
 
   // Contract Health Score
   var healthPanel = document.getElementById('healthPanel');
-  if (healthPanel && typeof MockAPI !== 'undefined') {
-    MockAPI.handleRequest('GET', '/Contract/GetContractHealth?plContractKey=' + contractKey).then(function(h) {
+  // TODO: API.getContractHealth(contractKey) — endpoint being built by backend-lead
+  if (false && healthPanel) {
+    Promise.resolve(null).then(function(h) {
       if (!h) { healthPanel.style.display = 'none'; return; }
       healthPanel.style.display = '';
       document.getElementById('healthScore').textContent = h.score;

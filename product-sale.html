@@ -518,8 +518,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
@@ -1029,19 +1027,7 @@ function ctxAction(action) {
       break;
     case 'printInvoice':
     case 'exportPdf':
-      // Try shared invoice builder with real invoice data first
-      if (typeof MockDB !== 'undefined' && sale.lSaleKey) {
-        var realInv = (MockDB.getAll('invoices') || []).find(function(i) {
-          return i.lProductSaleKey === sale.lSaleKey;
-        });
-        if (realInv) {
-          var invDetails = (MockDB.getAll('invoiceDetails') || []).filter(function(d) {
-            return d.lInvoiceKey === realInv.lInvoiceKey;
-          });
-          TSIExport.buildInvoicePdf(realInv, invDetails, { salesperson: sale.salesRep || '' });
-          break;
-        }
-      }
+      // TODO: API.getAllInvoices() / API.getInvoiceDetails() — wire invoice PDF when endpoints ready
       generateSalePdf(sale);
       break;
     case 'cancel':

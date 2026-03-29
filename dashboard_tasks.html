@@ -341,8 +341,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
@@ -445,10 +443,8 @@ async function loadTasks() {
     const raw = Array.isArray(data) ? data : [];
 
     // Also load status history
+    // TODO: await API.getTaskStatusHistory(taskKey) — load per-task when drawer opens
     let history = [];
-    try {
-      history = MockDB.getAll('taskStatusHistory');
-    } catch(e) { /* no history available */ }
     _statusHistory = history;
     const historyMap = buildHistoryMap(history);
 
@@ -804,11 +800,8 @@ function renderStatusHistory(taskKey) {
   const timeline = document.getElementById('statusTimeline');
 
   // Get history for this task from the loaded statusHistory
-  let history = [];
-  try {
-    const allHistory = MockDB.getAll('taskStatusHistory');
-    history = allHistory.filter(h => h.lTaskKey === taskKey);
-  } catch(e) { /* fallback */ }
+  // TODO: await API.getTaskStatusHistory(taskKey) — endpoint being built by backend-lead
+  let history = (_statusHistory || []).filter(h => h.lTaskKey === taskKey);
 
   if (history.length === 0) {
     section.style.display = 'block';

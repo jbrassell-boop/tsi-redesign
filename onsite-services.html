@@ -524,8 +524,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
@@ -752,14 +750,13 @@ function populateTechFilter() {
     techs.map(t => '<option value="' + t + '">' + t + '</option>').join('');
 }
 
-function populateModalDropdowns() {
-  // Pull clients from full mock-db if available, otherwise fall back to existing visits
+async function populateModalDropdowns() {
   var clients;
-  if (typeof MockDB !== 'undefined') {
-    var allClients = MockDB.getAll('clients');
-    clients = allClients.map(c => c.sClientName || c.name || '').filter(Boolean);
+  try {
+    var allClients = await API.getAllClients();
+    clients = (allClients || []).map(c => c.sClientName || c.name || '').filter(Boolean);
     clients = [...new Set(clients)].sort();
-  } else {
+  } catch(e) {
     clients = [...new Set(allVisits.map(v => v.clientName))].sort();
   }
   document.getElementById('mClient').innerHTML = '<option value="">-- Select Client --</option>' +
@@ -770,22 +767,24 @@ function populateModalDropdowns() {
   document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
 }
 
-function onModalClientChange() {
+async function onModalClientChange() {
   const client = document.getElementById('mClient').value;
   var depts;
-  if (typeof MockDB !== 'undefined') {
-    var allClients = MockDB.getAll('clients');
-    var clientObj = allClients.find(c => (c.sClientName || c.name) === client);
+  try {
+    var allClients = await API.getAllClients();
+    var clientObj = (allClients || []).find(c => (c.sClientName || c.name) === client);
     if (clientObj) {
-      var allDepts = MockDB.getAll('departments');
-      var clientDepts = allDepts.filter(d => d.lClientKey === clientObj.lClientKey);
+      var allDepts = await API.getAllDepartments();
+      var clientDepts = (allDepts || []).filter(d => d.lClientKey === clientObj.lClientKey);
       depts = clientDepts.map(d => d.sDepartmentName || d.name || '').filter(Boolean);
       depts = [...new Set(depts)].sort();
     } else {
       depts = [];
     }
+  } catch(e) {
+    depts = [];
   }
-  // Fall back to existing visits if no mock-db match
+  // Fall back to existing visits if no API match
   if (!depts || !depts.length) {
     depts = [...new Set(allVisits.filter(v => v.clientName === client).map(v => v.deptName))].sort();
   }

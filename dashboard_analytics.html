@@ -497,8 +497,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -532,14 +530,9 @@ var Metrics = {
 
   load: function() {
     var self = this;
-    MockAPI.handleRequest('GET', '/Dashboard/GetRepairMetrics?period=' + self.currentPeriod)
-      .then(function(data) {
-        self.data = data;
-        self.renderCards();
-        self.renderTable();
-        self.loaded = true;
-      })
-      .catch(function(e) { console.error('Metrics load failed:', e); });
+    // TODO: API.getDashboardRepairMetrics(self.currentPeriod) — endpoint being built by backend-lead
+    console.warn('[analytics] Repair metrics endpoint not yet available');
+    self.loaded = true;
   },
 
   renderCards: function() {
@@ -601,15 +594,9 @@ var TAT = {
     var params = [];
     if (self.sourceFilter === 'inhouse') params.push('inhouse=true');
     if (self.sourceFilter === 'outsourced') params.push('outsourced=true');
-    MockAPI.handleRequest('GET', '/Dashboard/GetTATMatrix' + (params.length ? '?' + params.join('&') : ''))
-      .then(function(data) {
-        self.data = data;
-        self.renderMatrix();
-        self.renderScopeTable();
-        self.updateKPIStrip();
-        self.loaded = true;
-      })
-      .catch(function(e) { console.error('TAT load failed:', e); });
+    // TODO: API.getTATMatrix(params) — endpoint being built by backend-lead
+    console.warn('[analytics] TAT matrix endpoint not yet available');
+    self.loaded = true;
   },
 
   tatCell: function(avgTat, count, sla) {
@@ -748,16 +735,8 @@ var Profit = {
 
   load: function() {
     var self = this;
-    try {
-      var standard = MockDB.getAll('profitability') || [];
-      var contract = MockDB.getAll('contractProfitability') || [];
-      self.allData = [];
-      standard.forEach(function(r) { self.allData.push(self.mapRow(r, 'Standard')); });
-      contract.forEach(function(r) { self.allData.push(self.mapRow(r, 'Contract')); });
-    } catch (e) {
-      console.error('Failed to load profitability data:', e);
-      self.allData = [];
-    }
+    // TODO: await API.getProfitability() / API.getContractProfitability() — endpoints being built by backend-lead
+    self.allData = [];
     self.renderCards();
     self.renderTable();
     self.loaded = true;
@@ -892,26 +871,24 @@ var Revenue = {
     return 'margin-red';
   },
 
-  buildRepMap: function() {
-    var self = this;
-    var reps = MockDB.getAll('salesReps') || [];
-    reps.forEach(function(r) {
-      var name = ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim();
-      self.salesRepMap[r.lSalesRepKey] = name || ('Rep #' + r.lSalesRepKey);
-    });
-  },
-
-  load: function() {
+  buildRepMap: async function() {
     var self = this;
     try {
-      self.buildRepMap();
-      var standard = MockDB.getAll('profitability') || [];
-      var contract = MockDB.getAll('contractProfitability') || [];
-      self.allData = standard.concat(contract);
-    } catch (e) {
-      console.error('Failed to load revenue data:', e);
-      self.allData = [];
+      var reps = await API.getAllSalesReps() || [];
+      reps.forEach(function(r) {
+        var name = ((r.sRepFirst || '') + ' ' + (r.sRepLast || '')).trim();
+        self.salesRepMap[r.lSalesRepKey] = name || ('Rep #' + r.lSalesRepKey);
+      });
+    } catch(e) {
+      console.warn('[analytics] Could not load sales reps:', e.message);
     }
+  },
+
+  load: async function() {
+    var self = this;
+    // TODO: await API.getProfitability() / API.getContractProfitability() — endpoints being built by backend-lead
+    await self.buildRepMap();
+    self.allData = [];
     self.renderAll();
     self.loaded = true;
   },

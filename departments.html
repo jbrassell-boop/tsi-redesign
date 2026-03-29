@@ -1144,8 +1144,6 @@
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
@@ -1884,10 +1882,7 @@ function openContactModal(mode){
   /* ── Repairs tab ─────────────────────────────────────── */
   async function loadDeptRepairs(deptKey){
     try {
-      // Use MockDB if available, otherwise skip
-      const repairs = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
-        ? MockDB.getFiltered('repairs', function(r){ return r.lDepartmentKey == deptKey; })
-        : [];
+      const repairs = await API.getRepairList(null, deptKey);
       const countBadge = document.getElementById('repairTabCount');
 
       if(!repairs || repairs.length === 0){
@@ -1964,9 +1959,7 @@ function openContactModal(mode){
       const clientKey = dept ? dept.lClientKey : null;
       if(!clientKey) return;
 
-      const contracts = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
-        ? MockDB.getFiltered('contracts', function(c){ return c.lClientKey == clientKey; })
-        : [];
+      const contracts = await API.getContractsList({ lClientKey: clientKey });
 
       const countBadge = document.getElementById('contractTabCount');
       if(!contracts || contracts.length === 0){
@@ -2006,11 +1999,9 @@ function openContactModal(mode){
   }
 
   /* ── Technicians tab ─────────────────────────────────── */
-  function loadDeptTechnicians(deptKey){
+  async function loadDeptTechnicians(deptKey){
     try {
-      const repairs = (typeof MockDB !== 'undefined' && MockDB.getFiltered)
-        ? MockDB.getFiltered('repairs', function(r){ return r.lDepartmentKey == deptKey; })
-        : [];
+      const repairs = await API.getRepairList(null, deptKey);
       const grid = document.getElementById('techCardsGrid');
       if(!grid) return;
       if(!repairs || repairs.length === 0) return;

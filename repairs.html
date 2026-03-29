@@ -2768,9 +2768,6 @@ body.batch-mode .q-row.q-checked { background: var(--primary-light); border-left
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="services/repairs-mock-supplement.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
@@ -2819,7 +2816,7 @@ function getPhaseForStatus(statusId) {
   // No more hardcoded ID ranges — new statuses Just Work™.
   const sid = Number(statusId);
   const PHASE_MAP = { 'Intake':1, 'Approval':2, 'In Repair':3, 'Shipping':4, 'Cart / Build':4, 'On Hold':2 };
-  const allStatuses = (typeof MockDB !== 'undefined' && MockDB.getAll) ? MockDB.getAll('repairStatuses') : _statuses || [];
+  const allStatuses = _statuses || [];
   const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === sid);
   if (!status) return sid <= 1 ? 1 : 4; // safe fallback
   return PHASE_MAP[status.sPhaseGroup] || 1;
@@ -3479,16 +3476,9 @@ function buildPickListPdf(d) {
 function buildInvoicePdf(d) {
   const r = d.r;
 
-  // Look up real invoice record from MockDB
+  // TODO: await API.getAllInvoices() / API.getInvoiceDetails() — endpoints being built by backend-lead
   let inv = null;
   let details = [];
-  if (typeof MockDB !== 'undefined') {
-    const invoices = MockDB.getAll('invoices') || [];
-    inv = invoices.find(i => i.lRepairKey === r.lRepairKey);
-    if (inv) {
-      details = (MockDB.getAll('invoiceDetails') || []).filter(dt => dt.lInvoiceKey === inv.lInvoiceKey);
-    }
-  }
 
   // Fall back: build a synthetic invoice record from repair data
   if (!inv) {
@@ -3522,9 +3512,8 @@ function buildInvoicePdf(d) {
 
   // Resolve salesperson name
   let salesperson = d.repName || '';
-  if (!salesperson && typeof MockDB !== 'undefined') {
-    const reps = MockDB.getAll('salesReps') || [];
-    const rep = reps.find(s => s.lSalesRepKey === (r.lSalesRepNameKey || r.lSalesRepKey));
+  if (!salesperson && _salesReps && _salesReps.length) {
+    const rep = _salesReps.find(s => s.lSalesRepKey === (r.lSalesRepNameKey || r.lSalesRepKey));
     if (rep) salesperson = ((rep.sRepFirst || '') + ' ' + (rep.sRepLast || '')).trim();
   }
 
@@ -5035,7 +5024,7 @@ function updateStatusBadge(statusId) {
   const poReq = document.getElementById('fPORequired');
   const poVal = (document.getElementById('hPO').value || '').trim();
   if (poReq && poReq.checked && !poVal) {
-    const allSt = (typeof MockDB !== 'undefined' && MockDB.getAll) ? MockDB.getAll('repairStatuses') : _statuses || [];
+    const allSt = _statuses || [];
     const target = allSt.find(s => s.lRepairStatusID === sid);
     if (target && target.sPhaseGroup === 'Shipping') {
       // Redirect to "Approved - Awaiting PO" (ID 28)
@@ -5351,8 +5340,9 @@ function loadRepairByKey(key) { loadRepair(key); }
 function renderScopeTimeline(scopeKey, currentRepairKey) {
   var el = document.getElementById('scopeTimeline');
   if (!el) return;
-  if (!scopeKey || typeof MockDB === 'undefined') { el.classList.remove('tl-visible'); return; }
-  var allReps = MockDB.getFiltered('repairs', function(r) { return (r.lScopeKey || 0) == scopeKey; });
+  if (!scopeKey) { el.classList.remove('tl-visible'); return; }
+  // TODO: await API.getRepairList(null, null, scopeKey) — scope repair history endpoint being built by backend-lead
+  var allReps = (_repairListData || []).filter(function(r) { return (r.lScopeKey || 0) == scopeKey; });
   if (!allReps || allReps.length <= 1) { el.classList.remove('tl-visible'); return; }
   allReps.sort(function(a, b) { return (a.dtDateIn || '').localeCompare(b.dtDateIn || ''); });
   var has40 = false;
@@ -8065,9 +8055,8 @@ async function loadRepairList() {
     var list = await API.getRepairList(svcKey);
     _repairListData = Array.isArray(list) ? list : [];
   } catch (e) {
-    if (typeof MockDB !== 'undefined') {
-      _repairListData = MockDB.getAll('repairs');
-    }
+    console.error('[repairs] loadRepairList failed:', e.message);
+    _repairListData = [];
   }
   // Resolve status names
   _repairListData.forEach(function(r) {
@@ -8493,7 +8482,7 @@ function wizAutoAssignRack() {
   var occupied = new Set();
   try {
     var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
-    var repairs = typeof MockDB !== 'undefined' ? MockDB.getAll('repairs') : [];
+    var repairs = _repairListData || [];
     repairs.forEach(function(r) {
       if (r.lServiceLocationKey == svcKey && r.sRackPosition && r.sRackPosition !== 'N/A') {
         var s = (r.sRepairStatus || '').toLowerCase();
@@ -8520,7 +8509,7 @@ async function wizShowRackPicker() {
   var occupied = new Set();
   try {
     var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
-    var repairs = typeof MockDB !== 'undefined' ? MockDB.getAll('repairs') : [];
+    var repairs = _repairListData || [];
     repairs.forEach(function(r) {
       if (r.lServiceLocationKey == svcKey && r.sRackPosition && r.sRackPosition !== 'N/A') {
         var s = (r.sRepairStatus || '').toLowerCase();
@@ -9448,18 +9437,18 @@ async function initPage() {
     _liveMode = false;
     showDataBadge(false);
 
-    // Load lookups from MockDB as fallback
-    _statuses = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairStatuses') : [];
-    _levels = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairLevels') : [];
-    _repairReasons = (typeof MockDB !== 'undefined') ? MockDB.getAll('repairReasons') : [];
-    _safetyLevels = (typeof MockDB !== 'undefined') ? MockDB.getAll('patientSafetyLevels') : [];
-    _techs = (typeof MockDB !== 'undefined') ? MockDB.getAll('technicians') : [];
-    _salesReps = (typeof MockDB !== 'undefined') ? MockDB.getAll('salesReps') : [];
-    _deliveryMethods = (typeof MockDB !== 'undefined') ? MockDB.getAll('deliveryMethods') : [];
-    _pricingCategories = (typeof MockDB !== 'undefined') ? MockDB.getAll('pricingCategories') : [];
-    _paymentTerms = (typeof MockDB !== 'undefined') ? MockDB.getAll('paymentTerms') : [];
-    _clients = (typeof MockDB !== 'undefined') ? MockDB.getAll('clients') : [];
-    _departments = (typeof MockDB !== 'undefined') ? MockDB.getAll('departments') : [];
+    // Initialize lookups with empty arrays on API failure
+    if (!_statuses) _statuses = [];
+    if (!_levels) _levels = [];
+    if (!_repairReasons) _repairReasons = [];
+    if (!_safetyLevels) _safetyLevels = [];
+    if (!_techs) _techs = [];
+    if (!_salesReps) _salesReps = [];
+    if (!_deliveryMethods) _deliveryMethods = [];
+    if (!_pricingCategories) _pricingCategories = [];
+    if (!_paymentTerms) _paymentTerms = [];
+    if (!_clients) _clients = [];
+    if (!_departments) _departments = [];
 
     // Populate all dropdowns
     populateStatusSelect(false);
@@ -9473,16 +9462,6 @@ async function initPage() {
 
     // Load repair list for filter panel (fallback)
     loadRepairList();
-
-    // Load first repair from MockDB if available
-    if (typeof MockDB !== 'undefined') {
-      var allRepairs = MockDB.getAll('repairs');
-      if (allRepairs.length) {
-        _currentRepair = allRepairs[0];
-        populateDetail(_currentRepair);
-        updateWorkflowForms(_currentRepair.lRepairStatusID || 1);
-      }
-    }
 
     // Handle ?action=new even in fallback mode
     const action = params.get('action');

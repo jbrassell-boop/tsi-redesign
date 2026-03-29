@@ -148,8 +148,6 @@
 </div>
 
 <script src="shell.js"></script>
-<script src="mock-db.js"></script>
-<script src="mock-api.js"></script>
 <script src="api.js"></script>
 <script>
 // ── Auth Guard ──
@@ -180,22 +178,16 @@ let ownerNameMap = {};  // lOwnerKey -> resolved name
 async function loadFlags() {
   try {
     const svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
-    const results = await Promise.all([
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlags'),
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlagTypes'),
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocations'),
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlagLocationsUsed'),
-      MockAPI.handleRequest('GET', '/Flag/GetAllFlagInstrumentTypes'),
+    // TODO: API.getAllFlags/FlagTypes/FlagLocations/FlagInstrumentTypes — endpoints being built by backend-lead
+    const [clients, scopeTypes] = await Promise.all([
       API.getAllClients(svcKey).catch(() => []),
       API.getAllScopeTypes ? API.getAllScopeTypes().catch(() => []) : Promise.resolve([])
     ]);
-    allFlags = results[0] || [];
-    flagTypes = results[1] || [];
-    flagLocations = results[2] || [];
-    flagLocationsUsed = results[3] || [];
-    flagInstrumentTypes = results[4] || [];
-    const clients = Array.isArray(results[5]) ? results[5] : [];
-    const scopeTypes = Array.isArray(results[6]) ? results[6] : [];
+    allFlags = [];
+    flagTypes = [];
+    flagLocations = [];
+    flagLocationsUsed = [];
+    flagInstrumentTypes = [];
 
     // Build owner name lookup
     ownerNameMap = {};
