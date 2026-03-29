@@ -495,6 +495,59 @@ table.rl-table th{background:var(--neutral-50);font-size:9px;font-weight:700;col
 table.rl-table td{padding:4px 10px;font-size:11px;border-bottom:1px solid var(--border);cursor:pointer}
 table.rl-table tbody tr:hover td{background:var(--primary-light)}
 table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
+
+/* QUEUE PANEL */
+.split-left{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--card);transition:width .2s ease;overflow:hidden}
+.split-left.collapsed{width:32px!important}
+.queue-head{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--primary-dark);color:#fff;flex-shrink:0}
+.queue-filters{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.queue-filters::-webkit-scrollbar{display:none}
+.qf-chip{padding:3px 9px;border-radius:var(--radius-pill);font-size:10px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .1s}
+.qf-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.qf-chip.qf-urgent.active{background:var(--danger);border-color:var(--danger)}
+.qf-chip span{margin-left:3px;font-size:9px;opacity:.8}
+.queue-sort{padding:4px 8px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--neutral-50)}
+.queue-rows{flex:1;overflow-y:auto;overflow-x:hidden}
+.q-row{padding:9px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
+.q-row:hover{background:var(--primary-light)}
+.q-row.active{background:#BFDBFE;border-left:3px solid var(--primary)}
+.q-row.overdue{border-left:3px solid var(--danger)}
+.q-row.flagged .q-flag-icon{display:inline}
+.q-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.q-wo{font-size:11.5px;font-weight:700;color:var(--navy);font-family:monospace}
+.q-age{font-size:9.5px;font-weight:600;color:var(--muted)}
+.q-age-warn{color:var(--amber)}
+.q-age-danger{color:var(--danger);font-weight:700}
+.q-row-client{font-size:10.5px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.q-row-model{font-size:10px;color:var(--muted);margin-bottom:3px;font-family:monospace}
+.q-row-status{display:flex;align-items:center;gap:5px}
+.q-status-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:var(--radius-pill);border:1px solid}
+.qs-received{background:#F0F9FF;color:#0369A1;border-color:#BAE6FD}
+.qs-inspection{background:#FFF7ED;color:#C2410C;border-color:#FED7AA}
+.qs-approval{background:#FFFBEB;color:#B45309;border-color:#FDE68A}
+.qs-repair{background:#F0FDF4;color:#15803D;border-color:#BBF7D0}
+.qs-qc{background:var(--primary-light);color:var(--navy);border-color:var(--border-dk)}
+.qs-shipping{background:#F5F3FF;color:#6D28D9;border-color:#DDD6FE}
+.q-flag-icon,.q-overdue-icon{font-size:10px;display:none}
+.q-row.overdue .q-overdue-icon{display:inline;color:var(--danger)}
+
+/* STAGE PIPELINE */
+.stage-pipeline{display:flex;align-items:center;padding:6px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;gap:0;overflow-x:auto}
+.stage-step{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;min-width:56px}
+.stage-dot{width:10px;height:10px;border-radius:50%;background:var(--neutral-200);border:2px solid var(--neutral-200);transition:all .2s}
+.stage-label{font-size:9.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.stage-connector{flex:1;height:2px;background:var(--neutral-200);min-width:12px;transition:background .2s}
+.stage-step.completed .stage-dot{background:var(--success);border-color:var(--success)}
+.stage-step.completed + .stage-connector{background:var(--success)}
+.stage-step.active .stage-dot{background:var(--primary);border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.2)}
+.stage-step.active .stage-label{color:var(--primary);font-weight:700}
+
+/* QUICK ACTIONS BAR */
+.quick-actions{display:flex;align-items:center;gap:2px;padding:5px 10px;background:var(--neutral-50);border-bottom:1px solid var(--border);flex-shrink:0}
+.qa-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:11px;font-weight:500;color:var(--text);cursor:pointer;font-family:inherit;transition:all .1s;white-space:nowrap}
+.qa-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.qa-divider{width:1px;height:20px;background:var(--border);margin:0 4px}
+.qa-btn-danger:hover{background:#FEF2F2;border-color:var(--danger);color:var(--danger)}
   </style>
 </head>
 <body>
@@ -508,8 +561,8 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
       <!-- Injected by shell.js -->
     </header>
 
-    <!-- REPAIR LIST PANEL — collapsed by default, click to expand -->
-    <div id="repairListPanel" class="collapsed">
+    <!-- REPAIR LIST PANEL — hidden; replaced by split-layout queue -->
+    <div id="repairListPanel" class="collapsed" style="display:none">
       <div style="display:flex;align-items:center;gap:8px;padding:4px 16px;border-bottom:1px solid var(--neutral-200);flex-wrap:wrap">
         <button id="rlToggle" onclick="toggleRepairList()">
           <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,3 5,7 8,3"/></svg>
@@ -550,6 +603,60 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
       </div>
     </div>
 
+    <!-- SPLIT LAYOUT: queue left, detail right -->
+    <div class="split-layout" style="height:calc(100vh - 64px);overflow:hidden;display:flex">
+
+      <!-- LEFT: REPAIR QUEUE -->
+      <div class="split-left" id="queuePanel" style="width:300px;flex-shrink:0">
+        <!-- QUEUE HEADER -->
+        <div class="queue-head">
+          <span style="font-size:13px;font-weight:700;color:#fff;flex:1">Repair Queue</span>
+          <span id="queueCount" class="tab-count">0</span>
+          <button class="btn-icon btn-sm" id="collapseQueue" title="Collapse queue (Q)" onclick="toggleQueuePanel()" style="width:24px;height:24px;border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:4px;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">&#8592;</button>
+        </div>
+
+        <!-- QUEUE SEARCH -->
+        <div style="padding:8px;border-bottom:1px solid var(--border)">
+          <input class="search-input" id="qSearch" placeholder="WO#, client, serial…" oninput="queueSearch(this.value)" style="width:100%;box-sizing:border-box">
+        </div>
+
+        <!-- QUEUE FILTERS -->
+        <div class="queue-filters" id="queueFilters">
+          <button class="qf-chip active" data-f="all" onclick="setQueueFilter('all',this)">All <span id="qfAll">0</span></button>
+          <button class="qf-chip" data-f="Received" onclick="setQueueFilter('Received',this)">Received <span id="qfReceived">0</span></button>
+          <button class="qf-chip" data-f="Inspection" onclick="setQueueFilter('Inspection',this)">D&amp;I <span id="qfInspection">0</span></button>
+          <button class="qf-chip" data-f="Approval" onclick="setQueueFilter('Approval',this)">Approval <span id="qfApproval">0</span></button>
+          <button class="qf-chip qf-urgent" data-f="overdue" onclick="setQueueFilter('overdue',this)">Overdue <span id="qfOverdue">0</span></button>
+          <button class="qf-chip" data-f="In Repair" onclick="setQueueFilter('In Repair',this)">In Repair <span id="qfInRepair">0</span></button>
+          <button class="qf-chip" data-f="QC" onclick="setQueueFilter('QC',this)">QC <span id="qfQC">0</span></button>
+          <button class="qf-chip" data-f="Shipping" onclick="setQueueFilter('Shipping',this)">Shipping <span id="qfShipping">0</span></button>
+        </div>
+
+        <!-- QUEUE SORT -->
+        <div class="queue-sort">
+          <select id="queueSort" onchange="applySortAndFilter()" style="font-size:11px;border:none;background:none;color:var(--muted);cursor:pointer;outline:none">
+            <option value="age">Oldest first</option>
+            <option value="age-desc">Newest first</option>
+            <option value="client">Client A&#8594;Z</option>
+            <option value="priority">Priority</option>
+            <option value="status">Stage</option>
+          </select>
+        </div>
+
+        <!-- QUEUE ROWS -->
+        <div class="queue-rows" id="queueRows">
+          <div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Loading queue…</div>
+        </div>
+
+        <!-- COLLAPSED TAB (shown when panel collapsed) -->
+        <div id="queueCollapsed" style="display:none;position:absolute;width:32px;cursor:pointer;background:var(--primary-dark);top:0;bottom:0;left:0;flex-direction:column;align-items:center;padding-top:16px;gap:12px" onclick="toggleQueuePanel()" title="Expand queue (Q)">
+          <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.6);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.1em;text-transform:uppercase">Queue</span>
+        </div>
+      </div><!-- /queuePanel -->
+
+      <!-- RIGHT: DETAIL PANEL -->
+      <div id="detailPanel" style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0">
+
     <!-- STATUS STRIP -->
     <div class="status-strip" id="statusStrip">
       <span class="id-badge" id="repairBadge" style="margin-right:6px">#—</span>
@@ -574,10 +681,87 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
     <!-- BREADCRUMB -->
     <div class="breadcrumb" id="breadcrumb" style="display:none"></div>
 
+    <!-- STAGE PIPELINE BAR -->
+    <div class="stage-pipeline" id="stagePipeline">
+      <div class="stage-step" data-stage="Received" id="stage-Received">
+        <div class="stage-dot"></div>
+        <div class="stage-label">Received</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="D&amp;I" id="stage-DI">
+        <div class="stage-dot"></div>
+        <div class="stage-label">D&amp;I</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="Quoted" id="stage-Quoted">
+        <div class="stage-dot"></div>
+        <div class="stage-label">Quoted</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="Approved" id="stage-Approved">
+        <div class="stage-dot"></div>
+        <div class="stage-label">Approved</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="In Repair" id="stage-InRepair">
+        <div class="stage-dot"></div>
+        <div class="stage-label">In Repair</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="QC" id="stage-QC">
+        <div class="stage-dot"></div>
+        <div class="stage-label">QC</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="Shipping" id="stage-Shipping">
+        <div class="stage-dot"></div>
+        <div class="stage-label">Ship</div>
+      </div>
+      <div class="stage-connector"></div>
+      <div class="stage-step" data-stage="Invoiced" id="stage-Invoiced">
+        <div class="stage-dot"></div>
+        <div class="stage-label">Invoiced</div>
+      </div>
+    </div>
+
     <!-- DETAIL PANEL (full width) -->
     <div class="repair-detail">
         <div id="skRepairs" style="padding:4px 12px"></div>
         <div class="detail-scroll" id="detailScroll">
+
+          <!-- QUICK ACTIONS BAR -->
+          <div class="quick-actions" id="quickActions">
+            <button class="qa-btn" onclick="advanceStatus()" id="qaAdvance" title="Advance to next stage (A)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="9 18 15 12 9 6"/></svg>
+              <span id="qaAdvanceLabel">Next Stage</span>
+            </button>
+            <div class="qa-divider"></div>
+            <button class="qa-btn" onclick="openFormPreview('requisition')" title="Print quote (P)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Quote
+            </button>
+            <button class="qa-btn" onclick="openFormPreview('invoice')" title="Print work order (W)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Work Order
+            </button>
+            <button class="qa-btn" onclick="openDrawer('qc')" title="Open QC inspection (I)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              QC
+            </button>
+            <button class="qa-btn" onclick="openItemPicker()" title="Add line item (L)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Line Item
+            </button>
+            <div class="qa-divider"></div>
+            <button class="qa-btn qa-btn-danger" onclick="confirmDeleteRepair(this)" title="Delete repair">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>
+            <div style="flex:1"></div>
+            <span id="saveStatus2" style="font-size:10px;display:flex;align-items:center;gap:4px;color:var(--muted)" class="save-ready">
+              <span class="save-icon">&#9679;</span><span id="saveText2">Ready</span>
+            </span>
+          </div>
 
           <!-- TABS -->
           <div class="tabs" id="tabBar">
@@ -1374,6 +1558,9 @@ table.rl-table tbody tr.rl-active td{background:#BFDBFE;font-weight:600}
 
         </div><!-- /detail-scroll -->
     </div><!-- /repair-detail -->
+
+      </div><!-- /detailPanel -->
+    </div><!-- /split-layout -->
   </div><!-- /main -->
 </div><!-- /shell -->
 
@@ -4353,6 +4540,7 @@ function updateStatusBadge(statusId) {
   const chip = document.getElementById('ssStatus');
   if (chip) chip.querySelector('.ss-val').textContent = name || '—';
   updateWorkflowForms(sid);
+  if (typeof updateStagePipeline === 'function') updateStagePipeline(name);
 }
 
 function populateSelect(id, items, valKey, textKey, blank) {
@@ -4561,7 +4749,7 @@ function renderScopeTimeline(scopeKey, currentRepairKey) {
 
 function populateDetail(d) {
   // ── TOOLBAR / STATUS STRIP ──
-  document.getElementById('repairBadge').textContent = '#' + (d.lRepairKey || '');
+  document.getElementById('repairBadge').textContent = '#' + (d.sWorkOrderNumber || d.lRepairKey || '');
   const statusName = getStatusName(d.lRepairStatusID) || d.sRepairStatus || '—';
   document.getElementById('ssStatus').querySelector('.ss-val').textContent = statusName;
   const rep = _salesReps.find(x => (x.lSalesRepNameKey || x.lSalesRepKey) == d.lSalesRepKey);
@@ -5045,6 +5233,15 @@ function populateDetail(d) {
     var modEl = document.getElementById('ssModified');
     if (modEl) modEl.textContent = agoText ? 'Edited ' + agoText : '';
   }
+
+  // ── STAGE PIPELINE + QUEUE HIGHLIGHT ──
+  const _statusNameForPipeline = getStatusName(d.lRepairStatusID) || d.sRepairStatus || '';
+  if (typeof updateStagePipeline === 'function') updateStagePipeline(_statusNameForPipeline);
+  // Refresh queue row active highlight
+  const _activeWO = d.sWorkOrderNumber || '';
+  document.querySelectorAll('.q-row').forEach(function(row) {
+    row.classList.toggle('active', row.dataset.wo === _activeWO);
+  });
 }
 
 // ── Repair Items ──
@@ -7118,9 +7315,14 @@ function updateSaveStatus(state) {
   const wrap = document.getElementById('saveStatus');
   const icon = document.getElementById('saveIcon');
   const text = document.getElementById('saveText');
-  wrap.className = 'save-' + state;
+  if (wrap) wrap.className = 'save-' + state;
   const labels = { ready:'Ready', unsaved:'Unsaved', saving:'Saving...', saved:'Saved ' + new Date().toLocaleTimeString() };
-  text.textContent = labels[state] || state;
+  if (text) text.textContent = labels[state] || state;
+  // Mirror to quick-actions save indicator
+  const wrap2 = document.getElementById('saveStatus2');
+  const text2 = document.getElementById('saveText2');
+  if (wrap2) wrap2.className = 'save-' + state;
+  if (text2) text2.textContent = labels[state] || state;
 }
 
 document.addEventListener('keydown', function(e) { if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); if (_dirty) autoSave(); } });
@@ -7190,6 +7392,8 @@ async function loadRepairList() {
   _repairListData.sort(function(a, b) { return (b.dtDateIn || '').localeCompare(a.dtDateIn || ''); });
   updateRepairListCounts();
   renderRepairList();
+  // Sync queue panel
+  syncQueueFromRepairList();
 }
 
 function updateRepairListCounts() {
@@ -8682,6 +8886,262 @@ initPage().then(() => {
   API.UI.init();
 });
 initItemContextMenu();
+
+// ── QUEUE PANEL FUNCTIONS ──────────────────────────────────────
+let _queueAllRepairs = [];
+let _queueFilter = 'all';
+let _queueSearch = '';
+
+function toggleQueuePanel() {
+  const panel = document.getElementById('queuePanel');
+  const collapsed = document.getElementById('queueCollapsed');
+  if (!panel) return;
+  const isCollapsed = panel.classList.toggle('collapsed');
+  if (collapsed) collapsed.style.display = isCollapsed ? 'flex' : 'none';
+}
+
+function setQueueFilter(filter, btn) {
+  _queueFilter = filter;
+  document.querySelectorAll('.qf-chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderQueue();
+}
+
+function queueSearch(val) {
+  _queueSearch = val.toLowerCase();
+  renderQueue();
+}
+
+function applySortAndFilter() { renderQueue(); }
+
+function renderQueue() {
+  const container = document.getElementById('queueRows');
+  if (!container) return;
+
+  let repairs = _queueAllRepairs.slice();
+  const today = new Date();
+
+  // Filter
+  if (_queueFilter !== 'all') {
+    if (_queueFilter === 'overdue') {
+      repairs = repairs.filter(r => {
+        const dIn = r.dtDateIn || r.dDateIn ? new Date(r.dtDateIn || r.dDateIn) : null;
+        return dIn && (today - dIn) / 86400000 > 10;
+      });
+    } else {
+      repairs = repairs.filter(r => {
+        const st = (r._statusName || r.sStatus || '').toLowerCase();
+        return st.includes(_queueFilter.toLowerCase());
+      });
+    }
+  }
+
+  // Search
+  if (_queueSearch) {
+    repairs = repairs.filter(r =>
+      (r.sWorkOrderNumber || r.sWONumber || '').toLowerCase().includes(_queueSearch) ||
+      (r.sClientName || r.sClient || r.sShipName1 || '').toLowerCase().includes(_queueSearch) ||
+      (r.sSerialNumber || r.sSerial || '').toLowerCase().includes(_queueSearch) ||
+      (r.sScopeTypeDesc || r.sModelNumber || r.sModel || '').toLowerCase().includes(_queueSearch)
+    );
+  }
+
+  // Sort
+  const sortVal = document.getElementById('queueSort')?.value || 'age';
+  repairs.sort((a, b) => {
+    const aIn = a.dtDateIn || a.dDateIn || '';
+    const bIn = b.dtDateIn || b.dDateIn || '';
+    if (sortVal === 'age') return aIn.localeCompare(bIn);
+    if (sortVal === 'age-desc') return bIn.localeCompare(aIn);
+    if (sortVal === 'client') return (a.sClientName || a.sClient || a.sShipName1 || '').localeCompare(b.sClientName || b.sClient || b.sShipName1 || '');
+    if (sortVal === 'status') return (a._statusName || a.sStatus || '').localeCompare(b._statusName || b.sStatus || '');
+    return 0;
+  });
+
+  // Update count
+  const countEl = document.getElementById('queueCount');
+  if (countEl) countEl.textContent = repairs.length;
+
+  const statusMap = {
+    'received':'qs-received','inspection':'qs-inspection','in d&i':'qs-inspection',
+    'approval':'qs-approval','awaiting approval':'qs-approval','quoted':'qs-approval',
+    'in repair':'qs-repair','repair':'qs-repair',
+    'qc':'qs-qc','quality control':'qs-qc',
+    'shipping':'qs-shipping','ready to ship':'qs-shipping','shipped':'qs-shipping'
+  };
+
+  // Determine active WO
+  const activeBadge = document.getElementById('repairBadge');
+  const activeWO = activeBadge ? activeBadge.textContent.replace('#','').trim() : '';
+
+  container.innerHTML = repairs.map(r => {
+    const dIn = r.dtDateIn || r.dDateIn ? new Date(r.dtDateIn || r.dDateIn) : null;
+    const ageDays = dIn ? Math.floor((today - dIn) / 86400000) : 0;
+    const ageClass = ageDays > 14 ? 'q-age-danger' : ageDays > 7 ? 'q-age-warn' : '';
+    const isOverdue = ageDays > 10;
+    const isFlagged = !!(r.bFlagged || r.bFlaggedClient);
+    const statusName = r._statusName || r.sStatus || '';
+    const sClass = statusMap[statusName.toLowerCase()] || '';
+    const wo = r.sWorkOrderNumber || r.sWONumber || '';
+    const clientName = (r.sClientName || r.sClient || r.sShipName1 || 'Unknown').substring(0, 28);
+    const dept = r.sDepartmentName || r.sDept || '';
+    const model = r.sScopeTypeDesc || r.sModelNumber || r.sModel || '';
+    const serial = r.sSerialNumber || r.sSerial || '';
+    const isActive = wo && activeWO && wo === activeWO;
+    const rKey = r.lRepairKey || 0;
+
+    return `<div class="q-row${isActive?' active':''}${isOverdue?' overdue':''}${isFlagged?' flagged':''}"
+      data-wo="${wo}" data-rkey="${rKey}" onclick="qRowClick(${rKey},'${wo}')" tabindex="0"
+      onkeydown="if(event.key==='Enter')qRowClick(${rKey},'${wo}')">
+      <div class="q-row-top">
+        <span class="q-wo">${wo}</span>
+        <span class="q-age ${ageClass}">${ageDays}d</span>
+      </div>
+      <div class="q-row-client">${clientName}${dept?' &middot; '+dept:''}</div>
+      <div class="q-row-model">${model}${serial?' &middot; '+serial:''}</div>
+      <div class="q-row-status">
+        <span class="q-status-badge ${sClass}">${statusName||'Unknown'}</span>
+        ${isFlagged?'<span class="q-flag-icon" title="Flagged">&#9873;</span>':''}
+        ${isOverdue?'<span class="q-overdue-icon" title="Overdue">&#9888;</span>':''}
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">No repairs match filter</div>';
+
+  // Update filter counts
+  const all = _queueAllRepairs;
+  const td = new Date();
+  const counts = { all: all.length, Received: 0, Inspection: 0, Approval: 0, 'In Repair': 0, QC: 0, Shipping: 0, overdue: 0 };
+  all.forEach(r => {
+    const st = (r._statusName || r.sStatus || '').toLowerCase();
+    if (st.includes('received')) counts.Received++;
+    if (st.includes('inspection') || st.includes('d&i') || st.includes('d & i')) counts.Inspection++;
+    if (st.includes('approval') || st.includes('quoted') || st.includes('awaiting')) counts.Approval++;
+    if (st.includes('in repair') || st.includes('repair')) counts['In Repair']++;
+    if (st.includes('qc') || st.includes('quality')) counts.QC++;
+    if (st.includes('shipping') || st.includes('ship')) counts.Shipping++;
+    const dIn = r.dtDateIn || r.dDateIn ? new Date(r.dtDateIn || r.dDateIn) : null;
+    if (dIn && (td - dIn) / 86400000 > 10) counts.overdue++;
+  });
+
+  const idMap = { All:'qfAll', Received:'qfReceived', Inspection:'qfInspection', Approval:'qfApproval', 'In Repair':'qfInRepair', QC:'qfQC', Shipping:'qfShipping', overdue:'qfOverdue' };
+  Object.entries(idMap).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = counts[k] !== undefined ? counts[k] : counts.all;
+  });
+}
+
+function qRowClick(rKey, wo) {
+  if (rKey) {
+    loadRepair(rKey);
+  }
+}
+
+function loadRepairByWO(wo) {
+  const r = _queueAllRepairs.find(x => (x.sWorkOrderNumber || x.sWONumber || '') === wo);
+  if (r && r.lRepairKey) loadRepair(r.lRepairKey);
+}
+
+function navigateQueue(direction) {
+  const rows = Array.from(document.querySelectorAll('.q-row'));
+  const activeIdx = rows.findIndex(r => r.classList.contains('active'));
+  const nextIdx = activeIdx + direction;
+  if (nextIdx >= 0 && nextIdx < rows.length) {
+    const rKey = parseInt(rows[nextIdx].dataset.rkey) || 0;
+    const wo = rows[nextIdx].dataset.wo || '';
+    qRowClick(rKey, wo);
+    rows[nextIdx].scrollIntoView({ block: 'nearest' });
+  }
+}
+
+// Populate queue from existing _repairListData after it's loaded
+function syncQueueFromRepairList() {
+  if (typeof _repairListData !== 'undefined' && _repairListData.length) {
+    _queueAllRepairs = _repairListData;
+    renderQueue();
+  }
+}
+
+// ── STAGE PIPELINE ──────────────────────────────────────────────
+function updateStagePipeline(status) {
+  const stages = ['Received','D&I','Quoted','Approved','In Repair','QC','Shipping','Invoiced'];
+  const statusToStage = {
+    'Received':'Received','In D&I':'D&I','D&I':'D&I','Disassembly':'D&I',
+    'Awaiting Approval':'Quoted','Pending Approval':'Quoted','Quoted':'Quoted',
+    'Approved':'Approved','Approval':'Approved',
+    'In Repair':'In Repair','Repair':'In Repair',
+    'QC':'QC','Quality Control':'QC',
+    'Ready to Ship':'Shipping','Shipping':'Shipping','Shipped':'Shipping',
+    'Invoiced':'Invoiced','Closed':'Invoiced','Complete':'Invoiced'
+  };
+  const currentStage = statusToStage[status] || 'Received';
+  const currentIdx = stages.indexOf(currentStage);
+  document.querySelectorAll('.stage-step').forEach((el, i) => {
+    el.classList.remove('active', 'completed');
+    if (i < currentIdx) el.classList.add('completed');
+    else if (i === currentIdx) el.classList.add('active');
+  });
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  const tag = document.activeElement.tagName;
+  const isEditing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+    || document.activeElement.contentEditable === 'true';
+  if (isEditing) return;
+
+  switch(e.key.toLowerCase()) {
+    case 'q': toggleQueuePanel(); break;
+    case 'j': navigateQueue(1); break;
+    case 'k': navigateQueue(-1); break;
+    case 'a': if (!e.ctrlKey && !e.metaKey) advanceStatus(); break;
+    case 'l': openItemPicker(); break;
+    case 'i': openDrawer('qc'); break;
+    case 'p': if (!e.ctrlKey && !e.metaKey) openFormPreview('requisition'); break;
+    case 'w': if (!e.ctrlKey && !e.metaKey) openFormPreview('invoice'); break;
+    case '/': e.preventDefault(); document.getElementById('qSearch')?.focus(); break;
+    case 'escape':
+      document.querySelectorAll('.drawer.open').forEach(d => d.classList.remove('open'));
+      document.getElementById('qSearch')?.blur();
+      break;
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === '?' && !e.ctrlKey) showShortcutHelp();
+});
+
+function advanceStatus() {
+  const statusEl = document.getElementById('hRepairStatus');
+  if (statusEl) console.log('[TSI Repairs] Advancing status from:', statusEl.value);
+}
+
+function showShortcutHelp() {
+  const existing = document.getElementById('kbHelpModal');
+  if (existing) { existing.remove(); return; }
+  const modal = document.createElement('div');
+  modal.id = 'kbHelpModal';
+  modal.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--primary-dark);color:#fff;border-radius:8px;padding:16px 20px;z-index:var(--z-toast);font-size:12px;min-width:220px;box-shadow:var(--shadow-modal)';
+  modal.innerHTML = `
+    <div style="font-weight:700;margin-bottom:10px;font-size:13px">Shortcuts</div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px">
+      <kbd>J/K</kbd><span>Next / Prev repair</span>
+      <kbd>A</kbd><span>Advance stage</span>
+      <kbd>L</kbd><span>Add line item</span>
+      <kbd>I</kbd><span>QC inspection</span>
+      <kbd>P</kbd><span>Print quote</span>
+      <kbd>W</kbd><span>Print work order</span>
+      <kbd>Q</kbd><span>Toggle queue</span>
+      <kbd>/</kbd><span>Search queue</span>
+      <kbd>?</kbd><span>Toggle this help</span>
+      <kbd>Esc</kbd><span>Close panels</span>
+    </div>
+  `;
+  const style = document.createElement('style');
+  style.textContent = '#kbHelpModal kbd{background:rgba(255,255,255,.15);border-radius:3px;padding:1px 5px;font-family:monospace;font-size:11px}';
+  modal.appendChild(style);
+  document.body.appendChild(modal);
+  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 4000);
+}
 
 /* ── Breadcrumb helper ── */
 function updateBreadcrumb(items) {
