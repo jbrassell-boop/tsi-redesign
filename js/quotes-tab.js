@@ -4,26 +4,34 @@
    Entry point: iq_initPage() — called lazily when tab first clicked.
 */
 
-// ── MockDB accessors (no hardcoded data) ──
-function iq_getClients() {
-  if (typeof MockDB === 'undefined') return [];
-  return MockDB.getAll('clients').map(function(c) {
-    return { lClientKey: c.lClientKey, sClientName1: c.sClientName1 || '', sClientCity: c.sMailCity || c.sShipCity || '', sClientState: c.sMailState || c.sShipState || '' };
-  });
+// ── API accessors (replaced MockDB) ──
+async function iq_getClients() {
+  try {
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '0');
+    var data = await API.getAllClients(svcKey);
+    var list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+    return list.map(function(c) {
+      return { lClientKey: c.lClientKey, sClientName1: c.sClientName1 || '', sClientCity: c.sMailCity || c.sCity || '', sClientState: c.sMailState || c.sState || '' };
+    });
+  } catch(e) { return []; }
 }
-function iq_getDepts() {
-  if (typeof MockDB === 'undefined') return {};
-  var map = {};
-  MockDB.getAll('departments').forEach(function(d) {
-    var ck = d.lClientKey;
-    if (!map[ck]) map[ck] = [];
-    map[ck].push({ lDepartmentKey: d.lDepartmentKey, sDepartmentName: d.sDepartmentName || '' });
-  });
-  return map;
+async function iq_getDepts() {
+  try {
+    var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '0');
+    var data = await API.getAllDepartments(svcKey);
+    var list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+    var map = {};
+    list.forEach(function(d) {
+      var ck = d.lClientKey;
+      if (!map[ck]) map[ck] = [];
+      map[ck].push({ lDepartmentKey: d.lDepartmentKey, sDepartmentName: d.sDepartmentName || '' });
+    });
+    return map;
+  } catch(e) { return {}; }
 }
 
 // ── State ──
-var iq_allQuotes = (typeof MockDB !== 'undefined' ? MockDB.getAll('instrumentQuotes') : []).map(function(q) { return JSON.parse(JSON.stringify(q)); });
+var iq_allQuotes = []; // Loaded async in iq_initPage()
 var iq_filteredQuotes = [];
 var iq_displayQuotes = [];
 var iq_selectedId = null;

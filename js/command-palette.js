@@ -43,7 +43,8 @@
   }
 
   // ── Search logic ─────────────────────────────────────────────────────
-  function _search(q) {
+  var _searchCache = null;
+  async function _search(q) {
     var groups = [];
 
     if (!q || q.length < 2) {
@@ -65,20 +66,39 @@
     var max = 20;
     var perType = 5;
 
-    if (typeof MockDB === 'undefined') return groups;
+    // Search is now async — uses API.  Caller must await.
+    // We cache the last API results to avoid re-fetching on every keystroke.
+    if (!_searchCache || _searchCache._ts < Date.now() - 60000) {
+      // Cache expired or missing — fetch fresh data (all types in parallel)
+      try {
+        var svcKey = parseInt(localStorage.getItem('tsi_svcLocation') || '0');
+        var fetches = await Promise.all([
+          typeof API !== 'undefined' && API.getRepairList ? API.getRepairList(svcKey).catch(function() { return []; }) : Promise.resolve([]),
+          typeof API !== 'undefined' && API.getAllClients ? API.getAllClients(svcKey).catch(function() { return []; }) : Promise.resolve([]),
+          typeof API !== 'undefined' && API.getAllDepartments ? API.getAllDepartments(svcKey).catch(function() { return []; }) : Promise.resolve([]),
+          typeof API !== 'undefined' && API.getContractsList ? API.getContractsList().catch(function() { return []; }) : Promise.resolve([])
+        ]);
+        _searchCache = {
+          repairs: Array.isArray(fetches[0]) ? fetches[0] : (fetches[0] && fetches[0].dataSource ? fetches[0].dataSource : []),
+          clients: Array.isArray(fetches[1]) ? fetches[1] : (fetches[1] && fetches[1].data ? fetches[1].data : []),
+          departments: Array.isArray(fetches[2]) ? fetches[2] : (fetches[2] && fetches[2].data ? fetches[2].data : []),
+          contracts: Array.isArray(fetches[3]) ? fetches[3] : (fetches[3] && fetches[3].data ? fetches[3].data : []),
+          _ts: Date.now()
+        };
+      } catch(e) { _searchCache = { repairs:[], clients:[], departments:[], contracts:[], _ts: Date.now() }; }
+    }
 
     // 1. Repairs
-    var repairs = MockDB.getAll('repairs') || [];
     var repairHits = [];
-    for (var i = 0; i < repairs.length && repairHits.length < perType; i++) {
-      var r = repairs[i];
-      var wo = r.sWorkOrderNumber || r.psWorkOrderNumber || '';
-      var sn = r.sSerialNumber || r.psSerialNumber || '';
+    for (var i = 0; i < _searchCache.repairs.length && repairHits.length < perType; i++) {
+      var r = _searchCache.repairs[i];
+      var wo = r.sWorkOrderNumber || '';
+      var sn = r.sSerialNumber || '';
       if (wo.toLowerCase().indexOf(lower) !== -1 || sn.toLowerCase().indexOf(lower) !== -1) {
         repairHits.push({
           type: 'repair',
           title: wo || 'Repair',
-          subtitle: (r.sClientName1 || r.psClientName1 || '') + (sn ? ' \u2022 SN: ' + sn : ''),
+          subtitle: (r.sClientName1 || r.sShipName1 || '') + (sn ? ' \u2022 SN: ' + sn : ''),
           page: 'repairs',
           key: r.lRepairKey
         });
@@ -88,16 +108,15 @@
 
     // 2. Clients
     if (total < max) {
-      var clients = MockDB.getAll('clients') || [];
       var clientHits = [];
-      for (var ci = 0; ci < clients.length && clientHits.length < perType; ci++) {
-        var c = clients[ci];
-        var cname = c.psClientName1 || c.sClientName1 || '';
+      for (var ci = 0; ci < _searchCache.clients.length && clientHits.length < perType; ci++) {
+        var c = _searchCache.clients[ci];
+        var cname = c.sClientName1 || '';
         if (cname.toLowerCase().indexOf(lower) !== -1) {
           clientHits.push({
             type: 'client',
             title: cname,
-            subtitle: (c.sCity || '') + (c.sCity && c.sState ? ', ' : '') + (c.sState || ''),
+            subtitle: (c.sCity || c.sMailCity || '') + ((c.sCity || c.sMailCity) && (c.sState || c.sMailState) ? ', ' : '') + (c.sState || c.sMailState || ''),
             page: 'clients',
             key: c.lClientKey
           });
@@ -108,16 +127,15 @@
 
     // 3. Departments
     if (total < max) {
-      var depts = MockDB.getAll('departments') || [];
       var deptHits = [];
-      for (var di = 0; di < depts.length && deptHits.length < perType; di++) {
-        var dept = depts[di];
-        var dname = dept.psDepartmentName || dept.sDepartmentName1 || '';
+      for (var di = 0; di < _searchCache.departments.length && deptHits.length < perType; di++) {
+        var dept = _searchCache.departments[di];
+        var dname = dept.sDepartmentName || '';
         if (dname.toLowerCase().indexOf(lower) !== -1) {
           deptHits.push({
             type: 'department',
             title: dname,
-            subtitle: dept.psClientName1 || dept.sClientName1 || '',
+            subtitle: '',
             page: 'departments',
             key: dept.lDepartmentKey
           });
@@ -128,12 +146,11 @@
 
     // 4. Contracts
     if (total < max) {
-      var contracts = MockDB.getAll('contracts') || [];
       var contractHits = [];
-      for (var ki = 0; ki < contracts.length && contractHits.length < perType; ki++) {
-        var ct = contracts[ki];
-        var ctName = ct.sContractName || '';
-        var ctClient = ct.psClientName1 || ct.sClientName1 || '';
+      for (var ki = 0; ki < _searchCache.contracts.length && contractHits.length < perType; ki++) {
+        var ct = _searchCache.contracts[ki];
+        var ctName = ct.sContractNumber || '';
+        var ctClient = ct.sClientName1 || '';
         if (ctName.toLowerCase().indexOf(lower) !== -1 || ctClient.toLowerCase().indexOf(lower) !== -1) {
           contractHits.push({
             type: 'contract',
@@ -242,9 +259,9 @@
 
   function _onInput() {
     clearTimeout(_debounceTimer);
-    _debounceTimer = setTimeout(function() {
+    _debounceTimer = setTimeout(async function() {
       var q = (document.getElementById('cmdInput').value || '').trim();
-      var groups = _search(q);
+      var groups = await _search(q);
       _render(groups);
     }, 200);
   }
@@ -310,8 +327,7 @@
     inp.value = '';
     inp.focus();
     // Show recent + quick actions on open
-    var groups = _search('');
-    _render(groups);
+    _search('').then(function(groups) { _render(groups); });
   }
 
   function _close() {

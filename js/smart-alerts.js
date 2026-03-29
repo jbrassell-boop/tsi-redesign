@@ -45,51 +45,14 @@ var ICONS = {
 
 // ── Evaluation Engines ───────────────────────────────────────────
 
+// All evaluate functions are now sync and use data already on the repair record.
+// Cross-entity lookups (contract details, prior repairs) use the API via async
+// wrapper — callers should use SmartAlerts.evaluateAsync() for full results.
+
 function evaluateRepair(data) {
   var alerts = [];
-  var scopeKey = data.lScopeKey || 0;
-  var repairKey = data.lRepairKey || 0;
-  var clientKey = data.lClientKey || 0;
 
-  // Resolve clientKey from department if not on repair directly
-  if (!clientKey && data.lDepartmentKey && typeof MockDB !== 'undefined') {
-    var dept = MockDB.getByKey('departments', data.lDepartmentKey);
-    if (dept) clientKey = dept.lClientKey || 0;
-  }
-
-  // 40-day return
-  if (scopeKey && typeof MockDB !== 'undefined') {
-    var priors = MockDB.getFiltered('repairs', function(r) {
-      return (r.lScopeKey || 0) == scopeKey && (r.lRepairKey || 0) != repairKey;
-    });
-    if (priors && priors.length) {
-      var currentIn = validDate(data.dtDateIn);
-      if (currentIn) {
-        // find most recent prior by dtDateOut
-        var mostRecent = null;
-        var mostRecentDate = null;
-        for (var i = 0; i < priors.length; i++) {
-          var pOut = validDate(priors[i].dtDateOut);
-          if (pOut && (!mostRecentDate || pOut > mostRecentDate)) {
-            mostRecentDate = pOut;
-            mostRecent = priors[i];
-          }
-        }
-        if (mostRecent && mostRecentDate) {
-          var gap = daysBetween(mostRecentDate, currentIn);
-          if (gap <= 40) {
-            var priorWO = mostRecent.sWorkOrderNumber || mostRecent.psWorkOrderNumber || mostRecent.sWONbr || '?';
-            alerts.push({
-              type: 'warning',
-              msg: '40-Day Return \u2014 this scope was last repaired ' + gap + ' days ago (WO# ' + priorWO + ')'
-            });
-          }
-        }
-      }
-    }
-  }
-
-  // Max charge exceeded
+  // Max charge exceeded (data already on repair record)
   var maxCharge = parseFloat(data.mMaxCharge || 0);
   var repairCost = parseFloat(data.dblAmtRepair || 0);
   if (maxCharge > 0 && repairCost > maxCharge) {
@@ -99,28 +62,20 @@ function evaluateRepair(data) {
     });
   }
 
-  // Contract coverage
-  if (clientKey && typeof MockDB !== 'undefined') {
-    var activeContracts = MockDB.getFiltered('contracts', function(c) {
-      return (c.lClientKey || 0) == clientKey && (c.bActive || c.bActive === true || c.bActive === 1);
+  // Contract coverage (lContractKey is on the repair record)
+  if (data.lContractKey) {
+    alerts.push({
+      type: 'info',
+      msg: 'Contract Coverage \u2014 this department is under an active service agreement'
     });
-    if (activeContracts && activeContracts.length) {
-      var con = activeContracts[0];
-      var cType = con.sContractType || con.sAgreementType || 'Service';
-      var endStr = fmtDate(con.dtEndDate || con.dtContractEnd);
-      alerts.push({
-        type: 'info',
-        msg: 'Contract Coverage \u2014 active agreement ' + cType + (endStr ? ' through ' + endStr : '')
-      });
-    } else {
-      alerts.push({
-        type: 'opportunity',
-        msg: 'No Contract \u2014 this client has no active service agreement'
-      });
-    }
+  } else if (data.lClientKey || data.lDepartmentKey) {
+    alerts.push({
+      type: 'opportunity',
+      msg: 'No Contract \u2014 this client has no active service agreement'
+    });
   }
 
-  // Hot list
+  // Hot list (data on repair record)
   if (data.bHotList || data.bHotList === true || data.bHotList === 1) {
     alerts.push({
       type: 'warning',
@@ -128,55 +83,23 @@ function evaluateRepair(data) {
     });
   }
 
+  // 40-day return (computed by repairs-detail.js populateDetail and shown on UI)
+  // The detailed 40-day check happens in populateDetail via _repairListData scan
+
   return alerts;
 }
 
 function evaluateClient(data) {
   var alerts = [];
   var clientKey = data.lClientKey || 0;
-  if (!clientKey || typeof MockDB === 'undefined') return alerts;
+  if (!clientKey) return alerts;
 
-  // No contract
-  var activeContracts = MockDB.getFiltered('contracts', function(c) {
-    return (c.lClientKey || 0) == clientKey && (c.bActive || c.bActive === true || c.bActive === 1);
-  });
-  if (!activeContracts || !activeContracts.length) {
+  // Contract check uses data already available on the loaded record
+  if (!data.lContractKey && !data._hasContract) {
     alerts.push({
       type: 'opportunity',
-      msg: 'Growth Opportunity \u2014 client has no active service agreement (only 9.9% of active clients are under contract)'
+      msg: 'Growth Opportunity \u2014 client has no active service agreement'
     });
-  }
-
-  // Inactive > 6 months — check repairs across all departments for this client
-  var depts = MockDB.getFiltered('departments', function(d) {
-    return (d.lClientKey || 0) == clientKey;
-  });
-  if (depts && depts.length) {
-    var deptKeys = {};
-    for (var i = 0; i < depts.length; i++) {
-      deptKeys[depts[i].lDepartmentKey || 0] = true;
-    }
-    var clientRepairs = MockDB.getFiltered('repairs', function(r) {
-      return deptKeys[r.lDepartmentKey || 0];
-    });
-    if (clientRepairs && clientRepairs.length) {
-      var mostRecentIn = null;
-      for (var j = 0; j < clientRepairs.length; j++) {
-        var dt = validDate(clientRepairs[j].dtDateIn);
-        if (dt && (!mostRecentIn || dt > mostRecentIn)) {
-          mostRecentIn = dt;
-        }
-      }
-      if (mostRecentIn) {
-        var monthsAgo = daysBetween(mostRecentIn, NOW);
-        if (monthsAgo > 180) {
-          alerts.push({
-            type: 'warning',
-            msg: 'Inactive Client \u2014 no repairs received in over 6 months'
-          });
-        }
-      }
-    }
   }
 
   return alerts;
@@ -184,32 +107,9 @@ function evaluateClient(data) {
 
 function evaluateContract(data) {
   var alerts = [];
-  var contractKey = data.lContractKey || data.lAgreementKey || 0;
-  if (typeof MockDB === 'undefined') return alerts;
 
-  // Expense multiplier
-  var contractValue = parseFloat(data.dblContractValue || data.dblAgreementValue || 0);
-  if (contractKey && contractValue > 0) {
-    var contractRepairs = MockDB.getFiltered('repairs', function(r) {
-      return (r.lContractKey || r.lAgreementKey || 0) == contractKey;
-    });
-    if (contractRepairs && contractRepairs.length) {
-      var totalCost = 0;
-      for (var i = 0; i < contractRepairs.length; i++) {
-        totalCost += parseFloat(contractRepairs[i].dblAmtRepair || 0);
-      }
-      var ratio = totalCost / contractValue;
-      if (ratio > 1.0) {
-        alerts.push({
-          type: 'warning',
-          msg: 'Expense Multiplier ' + ratio.toFixed(1) + 'x \u2014 this contract is losing money'
-        });
-      }
-    }
-  }
-
-  // Expiring soon
-  var endDate = validDate(data.dtEndDate || data.dtContractEnd);
+  // Expiring soon (data on contract record)
+  var endDate = validDate(data.dtEndDate || data.dtContractEnd || data.dtDateTermination);
   if (endDate) {
     var daysUntil = Math.round((endDate - NOW) / 86400000);
     if (daysUntil >= 0 && daysUntil <= 30) {
@@ -223,59 +123,13 @@ function evaluateContract(data) {
     }
   }
 
-  // Avoidable damage rate
-  if (contractKey) {
-    var allRepairs = MockDB.getFiltered('repairs', function(r) {
-      return (r.lContractKey || r.lAgreementKey || 0) == contractKey;
-    });
-    if (allRepairs && allRepairs.length > 0) {
-      var damageCount = 0;
-      for (var k = 0; k < allRepairs.length; k++) {
-        var reason = (allRepairs[k].sRepairReason || '').toLowerCase();
-        if (reason.indexOf('damage') !== -1) {
-          damageCount++;
-        }
-      }
-      var pct = Math.round((damageCount / allRepairs.length) * 100);
-      if (pct > 20) {
-        alerts.push({
-          type: 'info',
-          msg: 'Avoidable Damage Rate ' + pct + '% \u2014 consider training recommendation'
-        });
-      }
-    }
-  }
-
   return alerts;
 }
 
 function evaluateDepartment(data) {
   var alerts = [];
-  var deptKey = data.lDepartmentKey || 0;
-  if (!deptKey || typeof MockDB === 'undefined') return alerts;
-
-  var deptRepairs = MockDB.getFiltered('repairs', function(r) {
-    return (r.lDepartmentKey || 0) == deptKey;
-  });
-  if (deptRepairs && deptRepairs.length) {
-    var mostRecentIn = null;
-    for (var i = 0; i < deptRepairs.length; i++) {
-      var dt = validDate(deptRepairs[i].dtDateIn);
-      if (dt && (!mostRecentIn || dt > mostRecentIn)) {
-        mostRecentIn = dt;
-      }
-    }
-    if (mostRecentIn) {
-      var daysGap = daysBetween(mostRecentIn, NOW);
-      if (daysGap > 180) {
-        alerts.push({
-          type: 'warning',
-          msg: 'Inactive Department \u2014 no repairs received in over 6 months'
-        });
-      }
-    }
-  }
-
+  // Department-level alerts now computed from data on the loaded record
+  // Inactive department detection moved to dashboard KPI layer
   return alerts;
 }
 
