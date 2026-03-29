@@ -602,23 +602,35 @@ function toggleShowClosed() {
 }
 
 // ── STAGE PIPELINE ──────────────────────────────────────────────
+// Stage pipeline maps status IDs to the 8 visual stages
+// Accepts either a status name (string) or status ID (number)
 function updateStagePipeline(status) {
-  const stages = ['Received','D&I','Quoted','Approved','In Repair','QC','Shipping','Invoiced'];
-  const statusToStage = {
-    'Received':'Received','In D&I':'D&I','D&I':'D&I','Disassembly':'D&I',
-    'Awaiting Approval':'Quoted','Pending Approval':'Quoted','Quoted':'Quoted',
-    'Approved':'Approved','Approval':'Approved',
-    'In Repair':'In Repair','Repair':'In Repair',
-    'QC':'QC','Quality Control':'QC',
-    'Ready to Ship':'Shipping','Shipping':'Shipping','Shipped':'Shipping',
-    'Invoiced':'Invoiced','Closed':'Invoiced','Complete':'Invoiced'
+  var stages = ['Received','D&I','Quoted','Approved','In Repair','QC','Shipping','Invoiced'];
+  // Map real status IDs to stage index
+  var idToStageIdx = {
+    1:0,         // Waiting on Inspection → Received
+    3:1,         // In the Drying Room → D&I
+    5:1,         // Additional Evaluation → D&I
+    6:3,         // Waiting for Approved → Approved
+    8:4, 9:4, 11:4, 14:4, 15:4, // In Repair variants
+    4:4,         // Outsourced → In Repair
+    18:4,        // Parts Hold → In Repair
+    21:5,        // QC - Waiting Customer Approval → QC
+    10:6, 12:6, 13:6, // Shipping variants
   };
-  const currentStage = statusToStage[status] || 'Received';
-  const currentIdx = stages.indexOf(currentStage);
-  document.querySelectorAll('.stage-step').forEach((el, i) => {
+  var idx = -1;
+  // Try ID lookup first (if called with a number or the repair's status ID)
+  var numStatus = Number(status);
+  if (numStatus && idToStageIdx[numStatus] !== undefined) {
+    idx = idToStageIdx[numStatus];
+  } else if (_currentRepair && idToStageIdx[Number(_currentRepair.lRepairStatusID)] !== undefined) {
+    idx = idToStageIdx[Number(_currentRepair.lRepairStatusID)];
+  }
+  if (idx < 0) idx = 0; // default to Received
+  document.querySelectorAll('.stage-step').forEach(function(el, i) {
     el.classList.remove('active', 'completed');
-    if (i < currentIdx) el.classList.add('completed');
-    else if (i === currentIdx) el.classList.add('active');
+    if (i < idx) el.classList.add('completed');
+    else if (i === idx) el.classList.add('active');
   });
 }
 
@@ -649,33 +661,39 @@ document.addEventListener('keydown', function(e) {
   if (e.key === '?' && !e.ctrlKey) showShortcutHelp();
 });
 
-// NEXT-STATUS MAP — ordered workflow progression
-// Keys = current status name pattern (lowercase), value = next status name to match
-const STATUS_NEXT_MAP = [
-  { from: /received/,              to: 'In D&I' },
-  { from: /in d&i|inspection|disassem|drying/, to: 'Quoted' },
-  { from: /quoted|awaiting approval/,          to: 'Approved' },
-  { from: /approved/,              to: 'In Repair' },
-  { from: /in repair|repair process/,          to: 'QC' },
-  { from: /\bqc\b|quality control/,            to: 'Scheduled to Ship' },
-  { from: /sched.*ship|ready.*ship/,           to: 'Invoiced' },
-  { from: /invoic/,                to: 'Closed' },
-];
+// NEXT-STATUS MAP — direct ID→ID from real tblRepairStatuses
+// 1=Waiting on Inspection, 3=Drying Room, 6=Waiting for Approved,
+// 8=Minor, 9=Major, 11=Mid Level, 21=QC, 10=Scheduled to Ship
+const STATUS_NEXT_MAP = {
+  1:  6,   // Waiting on Inspection → Waiting for Approved
+  3:  6,   // In the Drying Room → Waiting for Approved
+  5:  6,   // Additional Evaluation → Waiting for Approved
+  6:  8,   // Waiting for Approved → In Repair - Minor
+  8:  21,  // In Repair - Minor → QC
+  9:  21,  // In Repair - Major → QC
+  11: 21,  // In Repair - Mid Level → QC
+  14: 21,  // Semi Rigid Repair → QC
+  15: 21,  // Special Rigid → QC
+  21: 10,  // QC → Scheduled to Ship
+  10: 0,   // Scheduled to Ship → end of workflow
+  12: 0,   // Scheduled to Ship Tomorrow → end
+  13: 0,   // Shipping Today or Tomorrow → end
+};
 
 function advanceStatus() {
   if (!_currentRepair) return;
-  const currentId = _currentRepair.lRepairStatusID || 0;
-  const currentName = (getStatusName(currentId) || '').toLowerCase();
-  // Find the matching next rule
-  const rule = STATUS_NEXT_MAP.find(function(r) { return r.from.test(currentName); });
-  if (!rule) { showWorkflowToast('No next stage defined for: ' + (getStatusName(currentId) || 'current status')); return; }
-  // Find the target status in _statuses by name match
-  const target = _statuses.find(function(s) {
-    return (s.sRepairStatus || '').toLowerCase().includes(rule.to.toLowerCase());
-  });
-  if (!target) { showWorkflowToast('Status "' + rule.to + '" not found in lookup table'); return; }
-  applyStatusFromPopover(target.lRepairStatusID);
-  showWorkflowToast('Advanced to: ' + target.sRepairStatus);
+  var currentId = Number(_currentRepair.lRepairStatusID);
+  var nextId = STATUS_NEXT_MAP[currentId];
+  if (nextId === undefined) {
+    showWorkflowToast('No next stage for: ' + (getStatusName(currentId) || 'status ' + currentId));
+    return;
+  }
+  if (nextId === 0) {
+    showWorkflowToast('Workflow complete — this repair is ready to ship');
+    return;
+  }
+  applyStatusFromPopover(nextId);
+  showWorkflowToast('Advanced to: ' + getStatusName(nextId));
 }
 
 function showShortcutHelp() {

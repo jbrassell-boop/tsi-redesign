@@ -128,14 +128,13 @@ function openFormDrawer(formId) {
 }
 
 function getPhaseForStatus(statusId) {
-  // Data-driven phase lookup using sPhaseGroup from repairStatuses table.
-  // No more hardcoded ID ranges — new statuses Just Work™.
-  const sid = Number(statusId);
-  const PHASE_MAP = { 'Intake':1, 'Approval':2, 'In Repair':3, 'Shipping':4, 'Cart / Build':4, 'On Hold':2 };
-  const allStatuses = _statuses || [];
-  const status = allStatuses.find(s => (s.lRepairStatusID || s.lRepairStatusKey) === sid);
-  if (!status) return sid <= 1 ? 1 : 4; // safe fallback
-  return PHASE_MAP[status.sPhaseGroup] || 1;
+  // Hardcoded from real tblRepairStatuses — sPhaseGroup is empty in DB
+  var sid = Number(statusId);
+  if (sid === 1 || sid === 3) return 1;                         // Intake: Waiting on Inspection, Drying Room
+  if (sid === 5 || sid === 6 || sid === 19) return 2;           // Approval: Evaluation, Waiting for Approved, More Info
+  if ([8,9,11,14,15,4,18,20,22].indexOf(sid) >= 0) return 3;   // In Repair: Minor/Major/Mid/Semi/Special/Outsourced/Parts Hold/Build/PO
+  if ([21,10,12,13,16,17].indexOf(sid) >= 0) return 4;          // Shipping/Close: QC, Ship variants, Cart statuses
+  return 1;
 }
 
 function updateWorkflowForms(statusId) {
