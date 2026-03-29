@@ -33,102 +33,114 @@
       'background:' + c.bg + ';color:' + c.text + '">' + type + '</span>';
   }
 
-  // ── Collect results from all order types ───────────────────────────────
-  function searchAll(q) {
+  // ── Collect results from all order types via API ─────────────────────
+  async function searchAll(q) {
     var results = [];
     var lower = q.toLowerCase();
 
-    // 1. Repairs (from MockDB)
-    if (typeof MockDB !== 'undefined') {
-      var repairs = MockDB.getAll('repairs') || [];
-      repairs.forEach(function(r) {
-        if ((r.sWorkOrderNumber || '').toLowerCase().includes(lower) ||
-            (r.sSerialNumber || '').toLowerCase().includes(lower) ||
-            (r.sPurchaseOrder || '').toLowerCase().includes(lower)) {
-          results.push({
-            type: 'Repair',
-            orderNum: r.sWorkOrderNumber || '',
-            client: r.sClientName1 || r.sShipName1 || '\u2014',
-            model: r.sScopeTypeDesc || r.sModel || '',
-            serial: r.sSerialNumber || '',
-            po: r.sPurchaseOrder || '',
-            status: r.sRepairStatus || '',
-            date: r.dtDateIn || '',
-            page: 'repairs',
-            key: r.lRepairKey
-          });
-        }
-      });
+    // Helper: client-side filter against a query
+    function matches(r, fields) {
+      return fields.some(function(f) { return (r[f] || '').toLowerCase().includes(lower); });
     }
 
-    // 2. Product Sales (from MockDB)
-    if (typeof MockDB !== 'undefined') {
-      var sales = MockDB.getAll('productSales') || [];
-      sales.forEach(function(s) {
-        if ((s.sWorkOrderNumber || '').toLowerCase().includes(lower) ||
-            (s.sPurchaseOrder || '').toLowerCase().includes(lower)) {
-          results.push({
-            type: 'Product Sale',
-            orderNum: s.sWorkOrderNumber || '',
-            client: s.sClientName1 || '\u2014',
-            model: '',
-            serial: '',
-            po: s.sPurchaseOrder || '',
-            status: s.sStatus || '',
-            date: s.dtOrderDate || '',
-            page: 'product-sale',
-            key: s.lProductSaleKey
+    // Parallel API calls — scope repairs, instrument repairs, endocarts, product sales
+    var fetches = [];
+
+    // 1. Scope Repairs (NR/SR prefix — R/F/C scope types)
+    fetches.push(
+      API.getRepairList(0).then(function(data) {
+        var list = Array.isArray(data) ? data : (data && data.dataSource ? data.dataSource : []);
+        list.forEach(function(r) {
+          if (matches(r, ['sWorkOrderNumber','sSerialNumber','sPurchaseOrder'])) {
+            results.push({
+              type: 'Repair',
+              orderNum: r.sWorkOrderNumber || '',
+              client: r.sShipName1 || r.sClientName1 || '\u2014',
+              model: r.sScopeTypeDesc || '',
+              serial: r.sSerialNumber || '',
+              po: r.sPurchaseOrder || '',
+              status: r.sRepairStatus || '',
+              date: r.dtDateIn || '',
+              page: 'repairs',
+              key: r.lRepairKey
+            });
+          }
+        });
+      }).catch(function() {})
+    );
+
+    // 2. Instrument Repairs (I scope type)
+    fetches.push(
+      API.getInstrumentRepairs(0).then(function(data) {
+        var list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+        list.forEach(function(r) {
+          if (matches(r, ['sWorkOrderNumber','sSerialNumber','sPurchaseOrder'])) {
+            results.push({
+              type: 'Instrument',
+              orderNum: r.sWorkOrderNumber || '',
+              client: r.sShipName1 || r.sClientName1 || '\u2014',
+              model: r.sScopeTypeDesc || '',
+              serial: r.sSerialNumber || '',
+              po: r.sPurchaseOrder || '',
+              status: r.sRepairStatus || '',
+              date: r.dtDateIn || '',
+              page: 'instruments',
+              key: r.lRepairKey
+            });
+          }
+        });
+      }).catch(function() {})
+    );
+
+    // 3. EndoCarts (NK/SK prefix)
+    fetches.push(
+      API.getEndoCartQuotes(0).then(function(data) {
+        var list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+        list.forEach(function(r) {
+          if (matches(r, ['sWorkOrderNumber','sPurchaseOrder'])) {
+            results.push({
+              type: 'EndoCart',
+              orderNum: r.sWorkOrderNumber || '',
+              client: r.sClientName || r.sDepartmentName || '\u2014',
+              model: '',
+              serial: '',
+              po: r.sPurchaseOrder || '',
+              status: r.sRepairStatus || '',
+              date: r.dtDateIn || '',
+              page: 'endocarts',
+              key: r.lRepairKey
+            });
+          }
+        });
+      }).catch(function() {})
+    );
+
+    // 4. Product Sales
+    if (typeof API.getProductSales === 'function') {
+      fetches.push(
+        API.getProductSales(0).then(function(data) {
+          var list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+          list.forEach(function(s) {
+            if (matches(s, ['sWorkOrderNumber','sPurchaseOrder'])) {
+              results.push({
+                type: 'Product Sale',
+                orderNum: s.sWorkOrderNumber || '',
+                client: s.sClientName1 || s.sShipName1 || '\u2014',
+                model: '',
+                serial: '',
+                po: s.sPurchaseOrder || '',
+                status: s.sStatus || s.sRepairStatus || '',
+                date: s.dtOrderDate || s.dtDateIn || '',
+                page: 'product-sale',
+                key: s.lProductSaleKey || s.lRepairKey
+              });
+            }
           });
-        }
-      });
+        }).catch(function() {})
+      );
     }
 
-    // 3. Instrument Repairs (from MockDB)
-    var irList = (typeof MockDB !== 'undefined') ? (MockDB.getAll('instrumentRepairs') || []) : [];
-    irList.forEach(function(r) {
-      var serialMatch = false;
-      if (r.items) {
-        serialMatch = r.items.some(function(it) { return (it.serial || '').toLowerCase().includes(lower); });
-      } else if (r.serials) {
-        serialMatch = r.serials.some(function(sn) { return sn.toLowerCase().includes(lower); });
-      }
-      if ((r.orderNum || '').toLowerCase().includes(lower) ||
-          (r.poNumber || '').toLowerCase().includes(lower) ||
-          serialMatch) {
-        results.push({
-          type: 'Instrument',
-          orderNum: r.orderNum || '',
-          client: r.clientName || '\u2014',
-          model: '',
-          serial: '',
-          po: r.poNumber || '',
-          status: r.status || '',
-          date: r.dateReceived || '',
-          page: 'instruments',
-          key: r.id
-        });
-      }
-    });
-
-    // 4. EndoCarts (from page data or MockDB)
-    var ecList = (typeof _ecDemoQuotes !== 'undefined') ? _ecDemoQuotes : [];
-    ecList.forEach(function(e) {
-      if ((e.quoteNum || '').toLowerCase().includes(lower)) {
-        results.push({
-          type: 'EndoCart',
-          orderNum: e.quoteNum || '',
-          client: e.clientName || '\u2014',
-          model: e.cartModel || '',
-          serial: '',
-          po: '',
-          status: e.status || '',
-          date: e.dateCreated || '',
-          page: 'endocarts',
-          key: e.lQuoteKey || e.id
-        });
-      }
-    });
-
+    await Promise.all(fetches);
     return results;
   }
 
@@ -237,7 +249,7 @@
     if (el) el.classList.remove('open');
   };
 
-  window.orderSearchRun = function() {
+  window.orderSearchRun = async function() {
     var tbody = document.getElementById('orderSearchResults');
     var q = (document.getElementById('orderSearchInput').value || '').trim();
 
@@ -248,8 +260,8 @@
 
     tbody.innerHTML = '<tr><td colspan="8" class="msg-empty" style="color:var(--blue)">Searching\u2026</td></tr>';
 
-    setTimeout(function() {
-      var results = searchAll(q);
+    try {
+      var results = await searchAll(q);
 
       if (!results.length) {
         tbody.innerHTML = '<tr><td colspan="8" class="msg-empty">No orders found matching \u201c' + esc(q) + '\u201d</td></tr>';
@@ -257,7 +269,7 @@
       }
 
       tbody.innerHTML = results.slice(0, 50).map(function(r) {
-        return '<tr onclick="orderSearchOpen(\'' + r.page + '\',' + r.key + ')">' +
+        return '<tr onclick="orderSearchOpen(\'' + r.page + '\',' + r.key + ',\'' + esc(r.orderNum) + '\')">' +
           '<td>' + typeBadge(r.type) + '</td>' +
           '<td><code style="font-size:10px">' + esc(r.orderNum) + '</code></td>' +
           '<td style="font-weight:600">' + esc(r.client) + '</td>' +
@@ -268,19 +280,25 @@
           '<td><span style="color:' + statusColor(r.status) + ';font-weight:600">' + esc(r.status) + '</span></td>' +
           '</tr>';
       }).join('');
-    }, 50);
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="8" class="msg-empty" style="color:var(--red)">Search failed: ' + esc(e.message) + '</td></tr>';
+    }
   };
 
-  window.orderSearchOpen = function(page, key) {
+  window.orderSearchOpen = function(page, key, orderNum) {
     orderSearchClose();
-    var paramMap = {
-      'repairs':      'key',
-      'product-sale': 'key',
-      'instruments':  'id',
-      'endocarts':    'key'
-    };
-    var param = paramMap[page] || 'key';
-    window.location = page + '?' + param + '=' + key;
+    // Repairs and instruments load via ?wo= (WO number), others via ?key=
+    if (page === 'repairs' && orderNum) {
+      window.location = 'repairs.html?wo=' + encodeURIComponent(orderNum);
+    } else if (page === 'instruments' && key) {
+      window.location = 'instruments.html?key=' + key;
+    } else if (page === 'endocarts' && key) {
+      window.location = 'endocarts.html?key=' + key;
+    } else if (page === 'product-sale' && key) {
+      window.location = 'product-sale.html?key=' + key;
+    } else {
+      window.location = page + '.html?key=' + key;
+    }
   };
 
 })();
