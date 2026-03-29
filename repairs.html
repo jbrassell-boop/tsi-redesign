@@ -2789,7 +2789,12 @@ async function loadRepairList() {
   var svcKey = parseInt(document.getElementById('svcLocation').value) || 1;
   try {
     var list = await API.getRepairList(svcKey);
-    _repairListData = Array.isArray(list) ? list : [];
+    var raw = Array.isArray(list) ? list : [];
+    // Filter to scope repairs only (R/F/C) — instruments go to Instrument Repair module
+    _repairListData = raw.filter(function(r) {
+      var t = (r.sRigidOrFlexible || '').toUpperCase();
+      return t === 'R' || t === 'F' || t === 'C';
+    });
   } catch (e) {
     console.error('[repairs] loadRepairList failed:', e.message);
     _repairListData = [];
