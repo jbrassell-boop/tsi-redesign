@@ -282,6 +282,20 @@
     document.body.setAttribute('data-density', 'compact');
   }
 
+  // Suppress Chrome autofill/address save prompts on all forms & inputs
+  document.querySelectorAll('form').forEach(function (f) { f.setAttribute('autocomplete', 'off'); });
+  document.querySelectorAll('input, select, textarea').forEach(function (el) { el.setAttribute('autocomplete', 'off'); });
+  // Also catch dynamically added inputs (drawers, modals)
+  new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      m.addedNodes.forEach(function (n) {
+        if (n.nodeType !== 1) return;
+        if (n.matches && n.matches('input,select,textarea')) n.setAttribute('autocomplete', 'off');
+        if (n.querySelectorAll) n.querySelectorAll('input,select,textarea').forEach(function (el) { el.setAttribute('autocomplete', 'off'); });
+      });
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+
   // Density toggle function (global)
   window.toggleDensity = function () {
     var body = document.body;
