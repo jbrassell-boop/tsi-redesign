@@ -528,10 +528,16 @@ var Metrics = {
   searchTerm: '',
   data: null,
 
-  load: function() {
+  load: async function() {
     var self = this;
-    // FUTURE: needs Express endpoint for repair metrics aggregation
-    console.warn('[analytics] Repair metrics endpoint not yet available');
+    try {
+      var d = await API.get('/Analytics/GetMetrics?period=' + (self.currentPeriod || 'MTD'));
+      self.data = d;
+      self.renderCards();
+      self.renderTable();
+    } catch(e) {
+      console.warn('[analytics] Could not load metrics:', e.message);
+    }
     self.loaded = true;
   },
 

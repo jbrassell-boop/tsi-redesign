@@ -120,19 +120,32 @@ router.get('/DashBoardTask/GetAllTaskPriorities', async (req, res, next) => {
 // ── DashBoardTaskLoaner CRUD ────────────────────────────
 
 // GET /DashBoardTaskLoaner/GetAllTaskLoanerList — List task loaners
+// tblTaskLoaners: lTaskScopeTypeKey PK, lTaskKey, lScopeTypeKey, lQuantity
+// Join tblTasks for work order number and department; tblDepartment + tblClient for names
 router.get('/DashBoardTaskLoaner/GetAllTaskLoanerList', async (req, res, next) => {
   try {
     const rows = await db.query(`
-      SELECT tl.lTaskLoanerKey, tl.sTaskNumber, tl.lScopeTypeKey,
-        tl.lQuantity, tl.sStatus, tl.sLoanerTrackingNumber,
-        tl.dtCreateDate, tl.dtLastUpdate,
+      SELECT TOP 500
+        tl.lTaskScopeTypeKey AS lTaskLoanerKey,
+        tl.lTaskKey,
+        tl.lScopeTypeKey,
+        tl.lQuantity,
+        ISNULL(t.sWorkOrderNumber, '') AS sTaskNumber,
+        ISNULL(t.sShipTrackingNumber, '') AS sLoanerTrackingNumber,
+        t.dtTaskDate AS dtCreateDate,
+        t.lDepartmentKey,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(st.sRigidOrFlexible, '') AS sRigidOrFlexible,
-        ISNULL(m.sManufacturer, '') AS sManufacturer
-      FROM tblTaskLoaner tl
+        ISNULL(m.sManufacturer, '') AS sManufacturer,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(c.sClientName1, '') AS sClientName
+      FROM tblTaskLoaners tl
+        LEFT JOIN tblTasks t ON t.lTaskKey = tl.lTaskKey
         LEFT JOIN tblScopeType st ON st.lScopeTypeKey = tl.lScopeTypeKey
         LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
-      ORDER BY tl.dtCreateDate DESC`);
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = t.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      ORDER BY t.dtTaskDate DESC`);
     res.json(rows);
   } catch (e) { next(e); }
 });
@@ -142,16 +155,13 @@ router.post('/DashBoardTaskLoaner/AddTaskLoaner', async (req, res, next) => {
   try {
     const b = req.body || {};
     const result = await db.query(`
-      INSERT INTO tblTaskLoaner (sTaskNumber, lScopeTypeKey, lQuantity,
-        sStatus, sLoanerTrackingNumber, dtCreateDate)
-      VALUES (@taskNum, @scopeTypeKey, @qty, @status, @tracking, GETDATE());
+      INSERT INTO tblTaskLoaners (lTaskKey, lScopeTypeKey, lQuantity)
+      VALUES (@taskKey, @scopeTypeKey, @qty);
       SELECT SCOPE_IDENTITY() AS lTaskLoanerKey`,
       {
-        taskNum: b.sTaskNumber || '',
+        taskKey: b.lTaskKey || 0,
         scopeTypeKey: b.lScopeTypeKey || 0,
-        qty: b.lQuantity || 1,
-        status: b.sStatus || 'Requested',
-        tracking: b.sLoanerTrackingNumber || ''
+        qty: b.lQuantity || 1
       });
     const newKey = result[0] ? result[0].lTaskLoanerKey : 0;
     res.json({ lTaskLoanerKey: newKey, success: true });
@@ -165,19 +175,14 @@ router.post('/DashBoardTaskLoaner/UpdateTaskLoaner', async (req, res, next) => {
     const key = b.lTaskLoanerKey || 0;
     if (!key) return res.status(400).json({ error: 'lTaskLoanerKey required' });
     await db.query(`
-      UPDATE tblTaskLoaner SET
+      UPDATE tblTaskLoaners SET
         lScopeTypeKey = ISNULL(@scopeTypeKey, lScopeTypeKey),
-        lQuantity = ISNULL(@qty, lQuantity),
-        sStatus = ISNULL(@status, sStatus),
-        sLoanerTrackingNumber = ISNULL(@tracking, sLoanerTrackingNumber),
-        dtLastUpdate = GETDATE()
-      WHERE lTaskLoanerKey = @key`,
+        lQuantity = ISNULL(@qty, lQuantity)
+      WHERE lTaskScopeTypeKey = @key`,
       {
         key,
         scopeTypeKey: b.lScopeTypeKey || null,
-        qty: b.lQuantity || null,
-        status: b.sStatus || null,
-        tracking: b.sLoanerTrackingNumber || null
+        qty: b.lQuantity || null
       });
     res.json({ success: true });
   } catch (e) { next(e); }
@@ -188,7 +193,7 @@ router.delete('/DashBoardTaskLoaner/DeleteTaskLoaner', async (req, res, next) =>
   try {
     const key = parseInt(req.query.plTaskLoanerKey) || 0;
     if (!key) return res.status(400).json({ error: 'plTaskLoanerKey required' });
-    await db.query('DELETE FROM tblTaskLoaner WHERE lTaskLoanerKey = @key', { key });
+    await db.query('DELETE FROM tblTaskLoaners WHERE lTaskScopeTypeKey = @key', { key });
     res.json({ success: true });
   } catch (e) { next(e); }
 });

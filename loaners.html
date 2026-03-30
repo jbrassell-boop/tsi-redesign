@@ -599,7 +599,7 @@ async function loadScopeTypeOptions() {
     const key  = r.plScopeTypeKey || r.lScopeTypeKey || r.lScopeKey || 0;
     const desc = r.sScopeTypeDesc || r.sScopeType || r.sSerialNumber || '';
     const sn   = r.sSerialNumber ? ' (' + r.sSerialNumber + ')' : '';
-    sel.innerHTML += '<option value="' + key + '" data-serial="' + esc(r.sSerialNumber || '') + '" data-rack="' + esc(r.psLoanerRackPosition || '') + '">' + esc(desc + sn) + '</option>';
+    sel.innerHTML += '<option value="' + key + '" data-serial="' + esc(r.sSerialNumber || '') + '" data-rack="' + esc(r.sLoanerRackPosition || r.psLoanerRackPosition || '') + '">' + esc(desc + sn) + '</option>';
   });
 }
 
@@ -651,9 +651,11 @@ async function loadActiveLoaners() {
   try {
     const data = await API.getAllScopes(0);
     const raw  = unwrap(data);
-    activeRows = raw.filter(r => r.pbOnSiteLoaner || r.bOnSiteLoaner || r.pbLoaner || r.bLoaner);
+    // bOnSiteLoaner is the real DB column; pbOnSiteLoaner/pbLoaner are BrightLogix aliases
+    activeRows = raw.filter(r => r.bOnSiteLoaner || r.pbOnSiteLoaner || r.pbLoaner || r.bLoaner);
     if (!activeRows.length) {
-      activeRows = raw.filter(r => r.psLoanerRackPosition);
+      // Fall back to scopes with a loaner rack position assigned
+      activeRows = raw.filter(r => r.sLoanerRackPosition || r.sLoanerRackPosition || r.psLoanerRackPosition);
     }
     isDemo = false;
     API.UI.updateDemoBadge('api');
@@ -681,7 +683,7 @@ function getFilteredTaskRows() {
       else if (r._status !== sf) return false;
     }
     if (q) {
-      const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition, r.sLoanerTrackingNumber, r.psTrackingNumber, r.sLocation, r.sLoanerSalesRepName, r.sSalesRepName]
+      const hay = [r.sTaskNumber, r.sScopeTypeDesc, r.sSerialNumber, r.sDepartmentName, r.sClientName, r.sLoanerRackPosition || r.psLoanerRackPosition, r.sLoanerTrackingNumber, r.psTrackingNumber, r.sLocation, r.sLoanerSalesRepName, r.sSalesRepName]
         .map(v => (v || '').toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
@@ -699,7 +701,7 @@ function getFilteredActiveRows() {
     if (sf === 'Assigned' && !assigned) return false;
     if (sf === 'Available' && assigned) return false;
     if (q) {
-      const hay = [r.sSerialNumber, r.sScopeTypeDesc, r.sDepartmentName, r.sClientName, r.psLoanerRackPosition]
+      const hay = [r.sSerialNumber, r.sScopeTypeDesc, r.sDepartmentName, r.sClientName, r.sLoanerRackPosition || r.psLoanerRackPosition]
         .map(v => (v || '').toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
@@ -754,7 +756,7 @@ function renderTaskLoaners() {
         <td style="text-align:center;font-weight:700">${r.plQuantity || r.lQuantity || 1}</td>
         <td>${esc(r.sClientName || '—')}</td>
         <td style="color:var(--muted)">${esc(r.sDepartmentName || '—')}</td>
-        <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center">${rackChip(r.sLoanerRackPosition || r.psLoanerRackPosition)}</td>
         <td style="text-align:center"><span style="font-size:10px;color:var(--muted)">${esc(loc || '—')}</span></td>
         <td style="font-family:monospace;font-size:10px">${esc(r.sLoanerTrackingNumber || r.psTrackingNumber || '—')}</td>
         <td style="text-align:center">${statusBadge(r._status)}</td>
@@ -813,7 +815,7 @@ function renderActiveLoaners() {
       return `<tr onclick="showActiveDetail(${key})">
         <td style="font-family:monospace;font-size:11px;font-weight:600">${esc(r.sSerialNumber || '—')}</td>
         <td style="font-weight:500">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}&nbsp;${loanerBadge()}</td>
-        <td style="text-align:center">${rackChip(r.psLoanerRackPosition)}</td>
+        <td style="text-align:center">${rackChip(r.sLoanerRackPosition || r.psLoanerRackPosition)}</td>
         <td style="text-align:center"><span style="font-size:10px;color:var(--muted)">${esc(loc || '—')}</span></td>
         <td>${esc(client || (assigned ? '' : '—'))}</td>
         <td style="color:var(--muted)">${esc(r.sDepartmentName || (assigned ? '' : '—'))}</td>
@@ -947,7 +949,7 @@ function showTaskDetail(key) {
       <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Serial #</span><span class="detail-val" style="font-family:monospace">${esc(r.sSerialNumber || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Quantity</span><span class="detail-val"><strong>${r.plQuantity || r.lQuantity || 1}</strong></span></div>
-      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.sLoanerRackPosition || r.psLoanerRackPosition)}</span></div>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">Loan Status</div>
@@ -979,7 +981,7 @@ function showActiveDetail(key) {
       <div class="detail-section-title">Scope Identification</div>
       <div class="detail-row"><span class="detail-lbl">Serial #</span><span class="detail-val" style="font-family:monospace;font-weight:700">${esc(r.sSerialNumber || '—')}</span></div>
       <div class="detail-row"><span class="detail-lbl">Scope Type</span><span class="detail-val" style="font-weight:600">${esc(r.sScopeTypeDesc || r.sScopeType || '—')}</span></div>
-      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.psLoanerRackPosition)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">Rack Position</span><span class="detail-val">${rackChip(r.sLoanerRackPosition || r.psLoanerRackPosition)}</span></div>
       <div class="detail-row"><span class="detail-lbl">Loaner Flag</span><span class="detail-val">${loanerBadge()}</span></div>
       <div class="detail-row"><span class="detail-lbl">Location</span><span class="detail-val">${esc(r.sLocation || r.psLocationCode || '—')}</span></div>
     </div>
@@ -1021,7 +1023,7 @@ function openEditDrawer(key) {
   document.getElementById('loanerQty').value = r.plQuantity || r.lQuantity || 1;
   document.getElementById('loanerScopeType').value = r.plScopeTypeKey || r.lScopeTypeKey || '';
   document.getElementById('loanerSerial').value = r.sSerialNumber || '';
-  document.getElementById('loanerRack').value = r.psLoanerRackPosition || '';
+  document.getElementById('loanerRack').value = r.sLoanerRackPosition || r.psLoanerRackPosition || '';
   document.getElementById('loanerStatus').value = r.sStatus || 'Out';
   document.getElementById('loanerTracking').value = r.sLoanerTrackingNumber || r.psTrackingNumber || '';
   clearValidation();
