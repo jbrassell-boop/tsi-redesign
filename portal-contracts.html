@@ -23,7 +23,7 @@
 
     /* ── Sidebar ─────────────────────────────────────────────── */
     .ps-sidebar {
-      width: 220px;
+      width: 180px;
       flex-shrink: 0;
       background: rgb(255, 255, 255);
       box-shadow: rgb(53, 67, 109) 0px 0px 15px -8px;
@@ -55,8 +55,8 @@
       display: flex;
       align-items: center;
       gap: 9px;
-      width: 200px;
-      height: 36px;
+      width: 160px;
+      height: 34px;
       font-size: 11.4px;
       font-weight: 400;
       color: #000;
@@ -158,7 +158,7 @@
 
     /* ── List Panel ──────────────────────────────────────────── */
     .ps-list-panel {
-      width: 420px;
+      width: 360px;
       flex-shrink: 0;
       background: #fff;
       border-right: 1px solid #dee2e6;
@@ -287,6 +287,7 @@
 
     .ps-table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: collapse;
       border: 1px solid rgb(92, 92, 92);
       font-size: 11.5px;
@@ -332,6 +333,8 @@
       color: #000;
       border-bottom: 1px solid #fff;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .ps-table tbody td.right { text-align: right; }
@@ -722,11 +725,10 @@
           <table class="ps-table" id="contractTable">
             <thead>
               <tr>
-                <th style="width:100px">Contract #</th>
                 <th>Client</th>
-                <th style="width:58px">Status</th>
-                <th style="width:82px">Expires</th>
-                <th class="right" style="width:72px">Monthly</th>
+                <th style="width:52px">Status</th>
+                <th style="width:72px">Expires</th>
+                <th class="right" style="width:64px">Monthly</th>
               </tr>
             </thead>
             <tbody id="contractTbody">
@@ -855,7 +857,6 @@
       const fee    = monthlyFee(c);
       const sel    = c.lContractKey === selectedKey ? ' selected' : '';
       return `<tr class="${sel}" data-key="${c.lContractKey}" onclick="selectContract(${c.lContractKey})">
-        <td class="contract-num">${c.sContractNumber || '—'}</td>
         <td class="client-name" title="${c.sClientName1 || ''}">${c.sClientName1 || '—'}</td>
         <td>${badgeHtml(status)}</td>
         <td>${fmtDate(c.dtDateTermination)}</td>
