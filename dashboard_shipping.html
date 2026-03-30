@@ -268,7 +268,7 @@
           var days = completedDate ? Math.max(0, Math.floor((new Date() - new Date(completedDate)) / 86400000)) : 0;
           var checked = _selected.has(r.lRepairKey) ? ' checked' : '';
           var borderClass = 'group-border-' + (colorMap[r.sClientName1||''] || 'blue');
-          return '<tr class="' + borderClass + '" style="' + (isNew ? 'border-top:2px solid #BFDBFE;' : '') + '">' +
+          return '<tr class="' + borderClass + '" style="' + (isNew ? 'border-top:2px solid var(--primary-light);' : '') + '">' +
             '<td><input type="checkbox" class="sh-cb" data-key="' + r.lRepairKey + '"' + checked + ' onchange="shToggleOne(this)"/></td>' +
             '<td style="font-family:monospace;font-size:11px;font-weight:600;color:var(--navy)">' + _esc(r.sWorkOrderNumber) + '</td>' +
             '<td style="font-family:monospace;font-size:10.5px">' + _esc(r.sSerialNumber) + '</td>' +
@@ -351,18 +351,18 @@
     var today = new Date().toISOString().split('T')[0];
     var html = Object.keys(groups).map(function(gk, gi) {
       var g = groups[gk];
-      return '<div style="' + (gi > 0 ? 'margin-top:14px;padding-top:14px;border-top:1px solid #DDE3EE;' : '') + '">' +
+      return '<div style="' + (gi > 0 ? 'margin-top:14px;padding-top:14px;border-top:1px solid var(--border-dk);' : '') + '">' +
         '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">' + _esc(g.client) +
         ' <span style="font-weight:400;color:var(--muted)">(' + g.scopes.length + ' scope' + (g.scopes.length!==1?'s':'') + ')</span>' +
         ' <button class="print-btn" style="margin-left:8px" onclick="shPrintGroupSlip(' + gi + ')">Print Packing Slip</button></div>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 8px;margin-bottom:6px">' +
         '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Carrier</label>' +
-        '<select id="shCarrier' + gi + '" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px">' +
+        '<select id="shCarrier' + gi + '" style="width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px">' +
         '<option value="FedEx">FedEx</option><option value="UPS">UPS</option><option value="DHL">DHL</option><option value="Hand Delivery">Hand Delivery</option></select></div>' +
         '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Tracking #</label>' +
-        '<input id="shTrack' + gi + '" type="text" placeholder="Enter tracking#" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 8px;font-size:11px;font-family:monospace;outline:none;box-sizing:border-box;margin-top:2px"></div>' +
+        '<input id="shTrack' + gi + '" type="text" placeholder="Enter tracking#" style="width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 8px;font-size:11px;font-family:monospace;outline:none;box-sizing:border-box;margin-top:2px"></div>' +
         '<div><label style="font-size:9px;font-weight:600;color:var(--navy);text-transform:uppercase">Ship Date</label>' +
-        '<input id="shDate' + gi + '" type="date" value="' + today + '" style="width:100%;height:28px;border:1.5px solid #DDE3EE;border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px"></div></div>' +
+        '<input id="shDate' + gi + '" type="date" value="' + today + '" style="width:100%;height:28px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-top:2px"></div></div>' +
         '<div style="font-size:10px;color:var(--muted)">' + g.scopes.map(function(s) {
           return _esc(s.sSerialNumber||'') + ' (' + _esc(s.sScopeTypeDesc||'') + ')';
         }).join(', ') + '</div></div>';

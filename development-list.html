@@ -50,15 +50,15 @@
 
     /* PRIORITY BADGES */
     .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
-    .pri-high{background:#FEE2E2;color:#B91C1C;border:1px solid #FECACA}
-    .pri-medium{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
-    .pri-low{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
+    .pri-high{background:var(--danger-hover);color:var(--danger-text);border:1px solid var(--danger-border)}
+    .pri-medium{background:var(--warning-bg);color:var(--warning-text);border:1px solid var(--warning-border)}
+    .pri-low{background:var(--success-hover);color:var(--success-text);border:1px solid var(--success-border)}
 
     /* STATUS BADGES */
-    .st-open{background:var(--primary-light);color:#1D4ED8;border:1px solid #BFDBFE}
-    .st-inprogress{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
-    .st-done{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
-    .st-cancelled{background:var(--neutral-100);color:var(--neutral-500);border:1px solid #D1D5DB}
+    .st-open{background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-light)}
+    .st-inprogress{background:var(--warning-bg);color:var(--warning-text);border:1px solid var(--warning-border)}
+    .st-done{background:var(--success-hover);color:var(--success-text);border:1px solid var(--success-border)}
+    .st-cancelled{background:var(--neutral-100);color:var(--neutral-500);border:1px solid var(--border)}
 
     /* RIGHT PANEL — detail */
     .split-right{width:310px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;background:var(--card)}
@@ -684,7 +684,7 @@ function renderQuickActions(item) {
   if (statusId !== 2) {
     const b = document.createElement('button');
     b.className = 'btn btn-outline';
-    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#EFF6FF;border-color:#BFDBFE;color:#1D4ED8';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:var(--primary-light);border-color:var(--primary-light);color:var(--primary)';
     b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Mark In Progress';
     b.onclick = () => quickStatusChange(item.plToDoID, 2);
     el.appendChild(b);
@@ -692,7 +692,7 @@ function renderQuickActions(item) {
   if (statusId !== 3) {
     const b = document.createElement('button');
     b.className = 'btn btn-outline';
-    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#DCFCE7;border-color:#BBF7D0;color:#166534';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:var(--success-hover);border-color:var(--success-border);color:var(--success-text)';
     b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Mark Done';
     b.onclick = () => quickStatusChange(item.plToDoID, 3);
     el.appendChild(b);
@@ -700,7 +700,7 @@ function renderQuickActions(item) {
   if (statusId !== 4) {
     const b = document.createElement('button');
     b.className = 'btn btn-outline';
-    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:#F3F4F6;border-color:#D1D5DB;color:#6B7280';
+    b.style.cssText = 'height:26px;font-size:10.5px;gap:3px;background:var(--neutral-100);border-color:var(--border);color:var(--neutral-500)';
     b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel';
     b.onclick = () => quickStatusChange(item.plToDoID, 4);
     el.appendChild(b);
