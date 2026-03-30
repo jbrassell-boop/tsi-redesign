@@ -1291,6 +1291,11 @@
 //  Contracts Page — API-wired with demo fallback
 // ═══════════════════════════════════════════════════════
 
+// ── API Base URL (localhost dev vs Azure production) ──
+const LOCAL_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:4000/api'
+  : window.location.origin + '/api';
+
 // ── Auth Guard ────────────────────────────────────────
 if (!API.requireAuth()) throw new Error('redirect');
 
@@ -2321,7 +2326,7 @@ async function loadPendingContracts() {
   const countEl = document.getElementById('pendingCountLabel');
   if (!tbody) return;
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/GetAllPendingContracts', {
+    const resp = await fetch(LOCAL_API + '/PendingContract/GetAllPendingContracts', {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -2377,7 +2382,7 @@ async function selectPendingProposal(key) {
   const scopeBody = document.getElementById('pendingScopesBody');
   scopeBody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading scopes...</td></tr>';
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + key);
+    const resp = await fetch(LOCAL_API + '/PendingContract/GetPendingContractScopes?plPendingContractKey=' + key);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const scopes = await resp.json();
     renderPendingScopes(scopes);
@@ -2439,7 +2444,7 @@ async function updateScopeCost(input) {
   const nCost = parseFloat(input.value) || 0;
   input.style.borderColor = 'var(--amber)';
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/UpdateScopeCost', {
+    const resp = await fetch(LOCAL_API + '/PendingContract/UpdateScopeCost', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ lPendingContractScopeKey: parseInt(scopeKey), nCost })
@@ -2458,7 +2463,7 @@ async function removePendingScope(scopeKey, btn) {
   if (!confirm('Remove this scope from the proposal?')) return;
   btn.disabled = true;
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/RemoveScopeFromProposal?lPendingContractScopeKey=' + scopeKey, { method: 'DELETE' });
+    const resp = await fetch(LOCAL_API + '/PendingContract/RemoveScopeFromProposal?lPendingContractScopeKey=' + scopeKey, { method: 'DELETE' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     // Reload scopes and refresh totals
     await reloadPendingScopes();
@@ -2471,7 +2476,7 @@ async function removePendingScope(scopeKey, btn) {
 async function reloadPendingScopes() {
   if (!selectedPendingKey) return;
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + selectedPendingKey);
+    const resp = await fetch(LOCAL_API + '/PendingContract/GetPendingContractScopes?plPendingContractKey=' + selectedPendingKey);
     const scopes = await resp.json();
     renderPendingScopes(scopes);
     // Refresh total from new scope list
@@ -2504,7 +2509,7 @@ async function openAddScopeModal() {
   loadNewScopeDropdowns();
 
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/GetAvailableScopesForProposal?plPendingContractKey=' + selectedPendingKey);
+    const resp = await fetch(LOCAL_API + '/PendingContract/GetAvailableScopesForProposal?plPendingContractKey=' + selectedPendingKey);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     availableScopes = await resp.json();
     renderAddScopeList(availableScopes);
@@ -2563,8 +2568,8 @@ async function loadNewScopeDropdowns() {
   // Departments for this client
   try {
     const [deptResp, typeResp] = await Promise.all([
-      fetch('http://localhost:4000/api/PendingContract/GetClientDepartments?lClientKey=' + proposal.lClientKey),
-      fetch('http://localhost:4000/api/Scopes/GetAllScopeType')
+      fetch(LOCAL_API + '/PendingContract/GetClientDepartments?lClientKey=' + proposal.lClientKey),
+      fetch(LOCAL_API + '/Scopes/GetAllScopeType')
     ]);
     const depts = await deptResp.json();
     nsScopeTypes = await typeResp.json();
@@ -2609,7 +2614,7 @@ async function confirmAddNewScope() {
   status.textContent = '';
 
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/AddNewScopeToProposal', {
+    const resp = await fetch(LOCAL_API + '/PendingContract/AddNewScopeToProposal', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -2658,7 +2663,7 @@ async function confirmAddScopes() {
   }));
 
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/AddScopesToProposal', {
+    const resp = await fetch(LOCAL_API + '/PendingContract/AddScopesToProposal', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ lPendingContractKey: selectedPendingKey, scopes })
@@ -2690,7 +2695,7 @@ async function initiateRenewal() {
   statusEl.textContent = 'Creating renewal proposal...';
 
   try {
-    const resp = await fetch('http://localhost:4000/api/Contract/InitializeRenewal', {
+    const resp = await fetch(LOCAL_API + '/Contract/InitializeRenewal', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ plContractKey: selectedContractKey })
@@ -2703,7 +2708,7 @@ async function initiateRenewal() {
       '<a href="#" style="color:var(--blue)" onclick="switchModule(\'pending\',null);selectPendingProposal(' + renewalPendingKey + ')">View in Pending Contracts</a>';
 
     // Load scopes into the Renewal Scopes panel
-    const scopeResp = await fetch('http://localhost:4000/api/PendingContract/GetPendingContractScopes?plPendingContractKey=' + renewalPendingKey);
+    const scopeResp = await fetch(LOCAL_API + '/PendingContract/GetPendingContractScopes?plPendingContractKey=' + renewalPendingKey);
     const scopes = await scopeResp.json();
     countEl.textContent = scopes.length + ' scopes';
 
@@ -2746,8 +2751,8 @@ async function openNewPendingModal() {
   // Populate dropdowns from server
   try {
     const [clientsResp, repsResp] = await Promise.all([
-      fetch('http://localhost:4000/api/Client/GetAllClientList'),
-      fetch('http://localhost:4000/api/SalesRepNames/GetAllSalesRepNames')
+      fetch(LOCAL_API + '/Client/GetAllClientList'),
+      fetch(LOCAL_API + '/SalesRepNames/GetAllSalesRepNames')
     ]);
 
     const clientData = await clientsResp.json();
@@ -2814,7 +2819,7 @@ async function createPendingProposal() {
   status.textContent = '';
 
   try {
-    const resp = await fetch('http://localhost:4000/api/PendingContract/CreatePendingContract', {
+    const resp = await fetch(LOCAL_API + '/PendingContract/CreatePendingContract', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -3256,7 +3261,7 @@ async function generateCSADoc() {
   else body.plContractKey = contractKey;
 
   try {
-    const resp = await fetch('http://localhost:4000/api/Contract/GenerateCSA', {
+    const resp = await fetch(LOCAL_API + '/Contract/GenerateCSA', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)

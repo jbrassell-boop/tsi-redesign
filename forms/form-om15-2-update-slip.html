@@ -139,7 +139,9 @@
 
 <script>
 (function(){
-  var LOCAL_URL = 'http://localhost:4000/api';
+  var LOCAL_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:4000/api'
+    : window.location.origin + '/api';
   var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
   function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
   function fill(id,val){ var el=document.getElementById(id); if(el&&val) el.textContent=val; }
