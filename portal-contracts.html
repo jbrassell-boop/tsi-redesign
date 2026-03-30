@@ -158,7 +158,7 @@
 
     /* ── List Panel ──────────────────────────────────────────── */
     .ps-list-panel {
-      width: 380px;
+      width: 420px;
       flex-shrink: 0;
       background: #fff;
       border-right: 1px solid #dee2e6;
@@ -769,10 +769,12 @@
   }
 
   function contractStatus(contract) {
+    // Prefer the server-computed status (already correct)
+    if (contract.sContractStatus) return contract.sContractStatus;
     const now  = new Date();
     const term = new Date(contract.dtDateTermination);
     const eff  = new Date(contract.dtDateEffective);
-    if (!contract.bActive || term < now) return 'Expired';
+    if (term < now) return 'Expired';
     const daysLeft = (term - now) / 86400000;
     if (daysLeft <= 90) return 'Expiring';
     if (eff > now) return 'Pending';
@@ -843,7 +845,7 @@
       return `<tr class="${sel}" data-key="${c.lContractKey}" onclick="selectContract(${c.lContractKey})">
         <td class="contract-num">${c.sContractNumber || '—'}</td>
         <td class="client-name" title="${c.sClientName1 || ''}">${c.sClientName1 || '—'}</td>
-        <td>${typeLabel(c.nContractType)}</td>
+        <td>${c.sContractTypeName || '—'}</td>
         <td>${badgeHtml(status)}</td>
         <td>${fmtDate(c.dtDateTermination)}</td>
         <td class="right">${fee ? fmtMoney(fee) : '—'}</td>
@@ -907,21 +909,14 @@
     const depts   = detail.departments || [];
     const repairs = detail.repairs || [];
 
-    // Scope summary counts
-    const scopeCounts = { F: 0, R: 0, C: 0, I: 0 };
-    depts.forEach(d => {
-      scopeCounts.F += (d.nFlexible || 0);
-      scopeCounts.R += (d.nRigid    || 0);
-      scopeCounts.C += (d.nCamera   || 0);
-      scopeCounts.I += (d.nInstrument || 0);
-    });
-    // Fallback to contract-level counts if dept breakdown not available
-    if (!scopeCounts.F && !scopeCounts.R && !scopeCounts.C && !scopeCounts.I) {
-      scopeCounts.F = contract.nFlexible   || 0;
-      scopeCounts.R = contract.nRigid      || 0;
-      scopeCounts.C = contract.nCamera     || 0;
-      scopeCounts.I = contract.nInstrument || 0;
-    }
+    // Scope summary counts — from detail.coverage (server-computed)
+    const cov = detail.coverage || {};
+    const scopeCounts = {
+      F: cov.flexible   || 0,
+      R: cov.rigid      || 0,
+      C: cov.camera     || 0,
+      I: cov.instrument || 0
+    };
 
     const pillsHtml = [
       scopeCounts.F ? `<span class="ps-scope-pill flex"><i class="bi bi-activity"></i>Flexible: ${scopeCounts.F}</span>` : '',
@@ -941,15 +936,15 @@
           <tbody>
             ${depts.map(d => `<tr>
               <td>${d.sDepartmentName || d.sName || '—'}</td>
-              <td>${fmtDate(d.dtDateEffective)}</td>
-              <td>${fmtDate(d.dtDateTermination || d.dtEndDate)}</td>
-              <td>${d.sPurchaseOrder || d.sPONumber || '—'}</td>
+              <td>${fmtDate(d.dtContractDepartmentEffectiveDate)}</td>
+              <td>${fmtDate(d.dtContractDepartmentEndDate)}</td>
+              <td>${d.sPONumber || '—'}</td>
             </tr>`).join('')}
           </tbody>
         </table>`
       : `<div style="text-align:center;color:#6c757d;font-style:italic;padding:14px;font-size:11.5px">No departments on record</div>`;
 
-    const totalCharges = repairs.reduce((s, r) => s + (r.dblCharges || r.dblTotalCharges || 0), 0);
+    const totalCharges = repairs.reduce((s, r) => s + (r.dblAmtRepair || 0), 0);
 
     const repairsHtml = repairs.length
       ? `<table class="ps-repair-table">
@@ -964,18 +959,18 @@
           </tr></thead>
           <tbody>
             ${repairs.map(r => {
-              const charges = r.dblCharges || r.dblTotalCharges || 0;
-              const rStatus = r.sStatus || r.sStatusDesc || 'Complete';
+              const charges = r.dblAmtRepair || 0;
+              const rStatus = r.sRepairStatus || '';
               const rBadge  = badgeHtml(rStatusNormalize(rStatus));
               return `<tr>
                 <td>${fmtDate(r.dtDateIn)}</td>
-                <td class="wo-num">${r.sWorkOrder || r.lRepairKey || '—'}</td>
+                <td class="wo-num">${r.sWorkOrderNumber || '—'}</td>
                 <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                     title="${r.sDepartmentName || ''}">${r.sDepartmentName || '—'}</td>
                 <td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sModelNumber || r.sScope || ''}">${r.sModelNumber || r.sScope || '—'}</td>
+                    title="${r.sScopeTypeDesc || ''}">${r.sScopeTypeDesc || '—'}</td>
                 <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sRepairType || r.sComplaint || ''}">${r.sRepairType || r.sComplaint || '—'}</td>
+                    title="${r.sComplaintDesc || ''}">${r.sComplaintDesc || '—'}</td>
                 <td class="right">${charges ? fmtMoney(charges) : '—'}</td>
                 <td>${rBadge}</td>
               </tr>`;
@@ -1006,7 +1001,7 @@
             </div>
             <div class="ps-detail-field">
               <span class="ps-field-lbl">Type</span>
-              <span class="ps-field-val">${typeLabel(contract.nContractType)}</span>
+              <span class="ps-field-val">${contract.sContractTypeName || '—'}</span>
             </div>
             <div class="ps-detail-field">
               <span class="ps-field-lbl">Status</span>
@@ -1042,7 +1037,7 @@
             </div>
             <div class="ps-detail-field">
               <span class="ps-field-lbl">Billing Email</span>
-              <span class="ps-field-val">${contract.sEmailInvoice || contract.sBillingEmail || '—'}</span>
+              <span class="ps-field-val">${contract.sBillEmail || '—'}</span>
             </div>
           </div>
         </div>
