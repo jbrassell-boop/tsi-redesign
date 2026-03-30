@@ -984,6 +984,34 @@
     return '/api';
   }
 
+  function exportEquipmentCSV() {
+    const scopes = window._portalScopes || [];
+    const contract = window._portalContract || {};
+    if (!scopes.length) return;
+    const typeLabel = s => s.sRigidOrFlexible === 'F' ? 'Flexible' : s.sRigidOrFlexible === 'R' ? 'Rigid' : s.sRigidOrFlexible === 'C' ? 'Camera' : 'Instrument';
+    const esc = v => `"${(v||'').toString().replace(/"/g,'""')}"`;
+    const rows = [
+      ['Contract #', 'Client', 'Department', 'Serial #', 'Make', 'Model', 'Type', 'Repair Count'].join(','),
+      ...scopes.map(s => [
+        esc(contract.sContractNumber || ''),
+        esc(contract.sClientName1 || ''),
+        esc(s.sDeptName || 'Unassigned'),
+        esc(s.sSerialNumber || ''),
+        esc((s.sManufacturer || '').trim()),
+        esc(s.sScopeTypeDesc || ''),
+        esc(typeLabel(s)),
+        s.nRepairCount || 0
+      ].join(','))
+    ];
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `equipment-${(contract.sContractNumber||'contract').replace(/[^a-z0-9]/gi,'-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function fmtMoney(n) {
     if (n == null || n === '' || isNaN(Number(n))) return '—';
     return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1207,16 +1235,24 @@
       return '';
     }
 
+    function categoryChip(cat) {
+      if (cat === 2) return `<span style="display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:9999px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;white-space:nowrap"><i class="bi bi-exclamation-triangle-fill" style="font-size:8px"></i> Avoidable</span>`;
+      if (cat === 1) return `<span style="display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:9999px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;white-space:nowrap">Wear &amp; Tear</span>`;
+      return `<span style="color:#d1d5db">—</span>`;
+    }
+
     const recentRepairs = repairs.slice(0, 8);
     const overviewRepairsHtml = recentRepairs.length
       ? `<table class="ps-repair-table" style="margin:0;table-layout:fixed;width:100%">
           <thead><tr>
-            <th style="width:68px">Date</th>
-            <th style="width:100px">Scope</th>
-            <th style="width:175px">Customer Said</th>
+            <th style="width:74px">WO #</th>
+            <th style="width:62px">Date</th>
+            <th style="width:90px">Scope</th>
+            <th style="width:160px">Customer Complaint</th>
             <th>Root Cause</th>
-            <th style="width:42px;text-align:center">TAT</th>
-            <th style="width:86px">Outcome</th>
+            <th style="width:78px">Category</th>
+            <th style="width:36px;text-align:center">TAT</th>
+            <th style="width:68px">Outcome</th>
           </tr></thead>
           <tbody>
             ${recentRepairs.map(r => {
@@ -1226,19 +1262,20 @@
                 : `<span class="ps-tat" style="color:#d1d5db">—</span>`;
               const outcomeHtml = `<div class="ps-outcome">
                 ${pfChip(r.sInsFinalPF)}
-                ${r.nReasonCategory === 2 ? `<span class="ps-flag-chip" title="User-induced damage — avoidable"><i class="bi bi-exclamation-triangle-fill"></i> Avoidable</span>` : ''}
-                ${r.bReplaced   ? `<span class="ps-flag-chip"><i class="bi bi-arrow-repeat"></i> Replaced</span>` : ''}
-                ${r.bOutsourced ? `<span class="ps-flag-chip"><i class="bi bi-box-arrow-up-right"></i> Vendor</span>` : ''}
+                ${r.bReplaced   ? `<span class="ps-flag-chip"><i class="bi bi-arrow-repeat"></i> Repl</span>` : ''}
+                ${r.bOutsourced ? `<span class="ps-flag-chip"><i class="bi bi-box-arrow-up-right"></i> Vend</span>` : ''}
               </div>`;
               return `<tr>
+                <td style="font-family:monospace;font-size:10.5px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sWorkOrderNumber || '—'}</td>
                 <td style="color:#6b7280">${fmtDate(r.dtDateIn)}</td>
                 <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.sScopeTypeDesc||''}">
                   <span style="font-weight:600;color:rgb(17,60,139)">${r.sScopeTypeDesc || '—'}</span>
                   ${r.sSerialNumber ? `<br><span style="font-size:10px;color:#9ca3af">${r.sSerialNumber}</span>` : ''}
                 </td>
-                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:160px"
                     title="${r.sComplaintDesc||''}">${r.sComplaintDesc || '—'}</td>
                 <td class="ps-root-cause" title="${r.sRepairReason||''}">${r.sRepairReason || '<span style="color:#d1d5db">—</span>'}</td>
+                <td>${categoryChip(r.nReasonCategory)}</td>
                 <td style="text-align:center">${tatHtml}</td>
                 <td>${outcomeHtml}</td>
               </tr>`;
@@ -1270,6 +1307,10 @@
       <div style="margin:8px -18px 0">${overviewRepairsHtml}</div>`;
 
     // ── Equipment tab ────────────────────────────────────────────
+    // Store scopes on window so the export button can reach them
+    window._portalScopes = scopes;
+    window._portalContract = contract;
+
     let equipmentHtml;
     if (!scopes.length) {
       equipmentHtml = `<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:12px;font-style:italic">No equipment on file for this contract.</div>`;
@@ -1280,7 +1321,7 @@
         if (!byDept[key]) byDept[key] = [];
         byDept[key].push(s);
       });
-      equipmentHtml = Object.entries(byDept).map(([deptName, items]) => `
+      const tablesByDept = Object.entries(byDept).map(([deptName, items]) => `
         <div class="ps-eq-group">
           <div class="ps-eq-group-label">${deptName}</div>
           <table class="ps-eq-table">
@@ -1304,6 +1345,15 @@
             </tbody>
           </table>
         </div>`).join('');
+
+      equipmentHtml = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:11px;color:#6b7280">${scopes.length} scope${scopes.length !== 1 ? 's' : ''} under this agreement</span>
+          <button onclick="exportEquipmentCSV()" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:5px;cursor:pointer">
+            <i class="bi bi-download"></i> Export CSV
+          </button>
+        </div>
+        ${tablesByDept}`;
     }
 
     // ── Reasons tab ──────────────────────────────────────────────
