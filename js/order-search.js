@@ -287,17 +287,17 @@
 
   window.orderSearchOpen = function(page, key, orderNum) {
     orderSearchClose();
-    // Repairs and instruments load via ?wo= (WO number), others via ?key=
+    // Use clean URLs (no .html) so serve cleanUrls doesn't strip query params on redirect
     if (page === 'repairs' && orderNum) {
-      window.location = 'repairs.html?wo=' + encodeURIComponent(orderNum);
+      window.location = '/repairs?wo=' + encodeURIComponent(orderNum);
     } else if (page === 'instruments' && key) {
-      window.location = 'instruments.html?key=' + key;
+      window.location = '/instruments?key=' + key;
     } else if (page === 'endocarts' && key) {
-      window.location = 'endocarts.html?key=' + key;
+      window.location = '/endocarts?key=' + key;
     } else if (page === 'product-sale' && key) {
-      window.location = 'product-sale.html?key=' + key;
+      window.location = '/product-sale?key=' + key;
     } else {
-      window.location = page + '.html?key=' + key;
+      window.location = '/' + page + '?key=' + key;
     }
   };
 
