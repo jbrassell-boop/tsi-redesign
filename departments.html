@@ -297,195 +297,219 @@
 
       <!-- ══ MAIN TAB ══ -->
       <div id="dtab-main" class="tab-content show">
-        <div class="col-left">
-          <div class="panel">
-            <div class="panel-head">Department Info</div>
-            <div class="panel-body">
-              <div class="fg g2">
-                <div class="ff span2">
-                  <label>Name <span class="req">*</span></label>
-                  <input class="inp" id="fDeptName" value="Biomedical Engineering" required/>
-                  <div class="ff-error">Department name is required</div>
-                </div>
-                <div class="ff">
-                  <label>Customer Since</label>
-                  <input class="inp" id="fCustomerSince" type="date" value="2021-06-09"/>
-                </div>
-                <div class="ff" style="justify-content:flex-end">
-                  <label>Active</label>
-                  <div class="toggle-row" style="padding:0">
-                    <label class="toggle"><input type="checkbox" id="fActive" checked/><span class="toggle-slider"></span></label>
-                    <span id="fActiveLabel" style="font-size:11px;color:var(--green);font-weight:600">Yes</span>
-                  </div>
-                </div>
-                <div class="ff">
-                  <label>Sales Rep</label>
-                  <select class="inp" id="fSalesRep"><option>Brandi Cook</option><option>Bernie DeLacy</option><option>Brian Kenney</option><option>Debbie Hightower</option><option>Fausto Guillermo</option><option>Giuseppe Gambino</option><option>House Account</option><option>Maria Mercanti</option><option>Meghan Wright</option><option>Ryan George</option><option>Timothy Reilly</option></select>
-                </div>
-                <div class="ff">
-                  <label>Customer Service Rep</label>
-                  <select class="inp" id="fCSRep" onchange="deptDirty()"><option value="">— Same as Sales Rep —</option></select>
-                </div>
-                <div class="ff">
-                  <label>Additional CS</label>
-                  <select class="inp" id="fAdditionalCS"><option>Aesculap Inc.</option><option>BSC CAP</option><option>BSC CPO</option><option>BSC FFS</option><option>Cogentix Medical</option><option>Endoscopy Suite Partners</option><option>VSI Industrial</option><option>None</option></select>
-                </div>
-                <div class="ff">
-                  <label>National Acct</label>
-                  <select class="inp" id="fNationalAcct"><option value="">-- Select --</option><option>Covenant Health</option><option>HCA Healthcare</option><option>LifePoint Health</option><option>Partners Healthcare</option><option>Vizient</option></select>
-                </div>
-                <div class="ff">
-                  <label>Pricing Category</label>
-                  <select class="inp" id="fPricingCategory"><option>GSA 2014 (Joint)</option><option>Commercial 2021</option><option>Disabled Vet</option><option>GSA/ECAT 2022</option><option>Hospital 2020 Standard</option><option>HPG 2022 Joint</option><option>Partners Cooperative (Joint)</option><option>Surgical Solutions 2023</option><option>Vizient</option><option>Vizient Tier 2</option><option>Vizient Tier 3</option></select>
-                </div>
-                <div class="ff">
-                  <label>Reporting Group</label>
-                  <select class="inp" id="fReportingGroup"><option>GSA</option><option>HPG</option><option>Magnet</option><option>MedAsset</option><option>Novation</option><option>Premier</option><option>Vizient</option><option>Vizient Carts</option></select>
-                </div>
-                <div class="ff">
-                  <label>Shipping Carrier</label>
-                  <select class="inp" id="fShippingCarrier"><option>UPS</option><option>FedEx</option></select>
-                </div>
-                <div class="ff">
-                  <label>Default Shipping</label>
-                  <input class="inp" id="fDefaultShipping" type="number" step="0.01" value="77.77" style="text-align:right"/>
-                </div>
-                <div class="ff">
-                  <label>Discount %</label>
-                  <input class="inp" id="fDiscount" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
-                </div>
-                <div class="ff">
-                  <label>Markup %</label>
-                  <input class="inp" id="fMarkup" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
-                </div>
-                <div class="ff span2">
-                  <div class="toggle-row" style="padding:0">
-                    <label class="toggle"><input type="checkbox" id="fAcquisitions" checked/><span class="toggle-slider"></span></label>
-                    <span class="toggle-label" title="Marks this department as an acquisitions department for specialized purchasing workflows">Acquisitions Dept</span>
-                  </div>
+
+        <!-- Section: Department Information (always open) -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head">DEPARTMENT INFORMATION</div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g3" style="gap:6px 12px">
+              <div class="ff">
+                <label>NAME <span class="req">*</span></label>
+                <input class="inp" id="fDeptName" value="Biomedical Engineering" required/>
+                <div class="ff-error">Department name is required</div>
+              </div>
+              <div class="ff">
+                <label>CUSTOMER SINCE</label>
+                <input class="inp" id="fCustomerSince" type="date" value="2021-06-09"/>
+              </div>
+              <div class="ff">
+                <label>ACTIVE</label>
+                <div class="toggle-row" style="padding:6px 0 0">
+                  <label class="toggle"><input type="checkbox" id="fActive" checked/><span class="toggle-slider"></span></label>
+                  <span id="fActiveLabel" style="font-size:11px;color:var(--green);font-weight:600">Yes</span>
                 </div>
               </div>
-
-              <!-- Options -->
-              <div class="cb-section">
-                <div class="cb-section-label">Options</div>
-                <div class="cb-grid">
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowConsumption"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Consumption On Req</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fEnforceScopeType" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Enforce Scope Type Filtering</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowProductID"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Product ID</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowUAOrNWT"/><span class="toggle-slider"></span></label><span class="toggle-label">Show UA Or NWT</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fShowItemizedDesc" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Show Itemized Descriptions</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fOpenCreditMemo"/><span class="toggle-slider"></span></label><span class="toggle-label">Open Credit Memo</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fEmailNewRepairs"/><span class="toggle-slider"></span></label><span class="toggle-label">Email New Repairs</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fMemberBOA"/><span class="toggle-slider"></span></label><span class="toggle-label">Member Board Of Advisors</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fTrackingRequired"/><span class="toggle-slider"></span></label><span class="toggle-label">Tracking # Required</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fTaxExempt"/><span class="toggle-slider"></span></label><span class="toggle-label">Tax Exempt</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fPaysCreditCard"/><span class="toggle-slider"></span></label><span class="toggle-label">Pays By Credit Card</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fOnsiteService" onchange="var s=document.getElementById('vanServiceSection');if(s)s.style.display=this.checked?'':'none';deptDirty()"/><span class="toggle-slider"></span></label><span class="toggle-label">On-Site Service</span></div>
-                </div>
+            </div>
+            <div class="fg g4" style="gap:6px 12px;margin-top:6px">
+              <div class="ff">
+                <label>TYPE</label>
+                <select class="inp" id="fDeptType"><option>Large</option><option>Medium</option><option>Small</option></select>
               </div>
-
-              <!-- Van Service (conditional) -->
-              <div class="cb-section" id="vanServiceSection" style="display:none">
-                <div class="cb-section-label">Van Service</div>
-                <div class="fg g2" style="gap:6px">
-                  <div class="ff">
-                    <label>Capitated Cost</label>
-                    <input class="inp" id="fCapitatedCost" type="number" step="0.01" style="text-align:right" placeholder="0.00" oninput="deptDirty()"/>
-                  </div>
-                  <div class="ff">
-                    <label>Sales Tax</label>
-                    <select class="inp" id="fSalesTax" onchange="deptDirty()"><option value="">— None —</option></select>
-                  </div>
-                </div>
+              <div class="ff">
+                <label># OF PROCEDURES</label>
+                <input class="inp" id="fProcedures" type="number" value="777"/>
               </div>
-
-              <!-- Service Locations -->
-              <div class="cb-section">
-                <div class="cb-section-label">Service Locations</div>
-                <div style="display:flex;gap:16px">
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fSvcLocUC" checked/><span class="toggle-slider"></span></label><span class="toggle-label">Upper Chichester</span></div>
-                  <div class="toggle-row"><label class="toggle"><input type="checkbox" id="fSvcLocNash"/><span class="toggle-slider"></span></label><span class="toggle-label">Nashville</span></div>
+              <div class="ff">
+                <label>BED SIZE</label>
+                <input class="inp" id="fBedSize" type="number" value="777"/>
+              </div>
+              <div class="ff">
+                <label>SERVICE LOCATIONS</label>
+                <div style="display:flex;gap:6px;padding-top:8px">
+                  <label class="opt-chip"><input type="checkbox" id="fSvcLocUC" checked/><span>Upper Chichester</span></label>
+                  <label class="opt-chip"><input type="checkbox" id="fSvcLocNash"/><span>Nashville</span></label>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="col-right">
-          <div class="panel">
-            <div class="panel-head">Profile</div>
-            <div class="panel-body">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Facility profile — used for contract sizing and reporting</div>
-              <div class="fg" style="gap:10px">
-                <div class="ff">
-                  <label>Cleaning System</label>
-                  <select class="inp" id="fCleaningSystem"><option>Evotech</option><option>Medivator</option><option>Steris</option></select>
-                </div>
-                <div class="ff">
-                  <label>Chemical Germicide</label>
-                  <select class="inp" id="fChemicalGermicide"><option>Cidex OPA</option><option>CIDEX OPA-C</option></select>
-                </div>
-                <div class="ff">
-                  <label>Manufacturer</label>
-                  <select class="inp" id="fManufacturer"><option>Olympus</option><option>Fujifilm</option><option>Pentax</option><option>Karl Storz</option><option>Stryker</option></select>
-                </div>
-                <div class="ff">
-                  <label>Competition</label>
-                  <select class="inp" id="fCompetition"><option>IMS</option><option>Healthmark</option><option>Medline</option><option>None</option></select>
-                </div>
-                <div class="fg g2" style="gap:10px">
-                  <div class="ff">
-                    <label># of Procedures</label>
-                    <input class="inp" id="fProcedures" type="number" value="777"/>
-                  </div>
-                  <div class="ff">
-                    <label>Bed Size</label>
-                    <input class="inp" id="fBedSize" type="number" value="777"/>
-                  </div>
-                </div>
-                <div class="ff">
-                  <label>Type</label>
-                  <select class="inp" id="fDeptType"><option>Large</option><option>Medium</option><option>Small</option></select>
-                </div>
+        <!-- Section: Billing & Defaults (collapsible, open by default) -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            BILLING &amp; DEFAULTS
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g4" style="gap:6px 12px">
+              <div class="ff">
+                <label>SALES REP</label>
+                <select class="inp" id="fSalesRep"><option>Brandi Cook</option><option>Bernie DeLacy</option><option>Brian Kenney</option><option>Debbie Hightower</option><option>Fausto Guillermo</option><option>Giuseppe Gambino</option><option>House Account</option><option>Maria Mercanti</option><option>Meghan Wright</option><option>Ryan George</option><option>Timothy Reilly</option></select>
+              </div>
+              <div class="ff">
+                <label>CS REP</label>
+                <select class="inp" id="fCSRep" onchange="deptDirty()"><option value="">— Same as Sales Rep —</option></select>
+              </div>
+              <div class="ff">
+                <label>ADDITIONAL CS</label>
+                <select class="inp" id="fAdditionalCS"><option>Aesculap Inc.</option><option>BSC CAP</option><option>BSC CPO</option><option>BSC FFS</option><option>Cogentix Medical</option><option>Endoscopy Suite Partners</option><option>VSI Industrial</option><option>None</option></select>
+              </div>
+              <div class="ff">
+                <label>NATIONAL ACCT</label>
+                <select class="inp" id="fNationalAcct"><option value="">-- Select --</option><option>Covenant Health</option><option>HCA Healthcare</option><option>LifePoint Health</option><option>Partners Healthcare</option><option>Vizient</option></select>
               </div>
             </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-head">Notes</div>
-            <div class="panel-body">
-              <textarea class="inp" id="fNotes" style="height:100px" placeholder="Add department notes…"></textarea>
+            <div class="fg g4" style="gap:6px 12px;margin-top:6px">
+              <div class="ff">
+                <label>PRICING CATEGORY</label>
+                <select class="inp" id="fPricingCategory"><option>GSA 2014 (Joint)</option><option>Commercial 2021</option><option>Disabled Vet</option><option>GSA/ECAT 2022</option><option>Hospital 2020 Standard</option><option>HPG 2022 Joint</option><option>Partners Cooperative (Joint)</option><option>Surgical Solutions 2023</option><option>Vizient</option><option>Vizient Tier 2</option><option>Vizient Tier 3</option></select>
+              </div>
+              <div class="ff">
+                <label>REPORTING GROUP</label>
+                <select class="inp" id="fReportingGroup"><option>GSA</option><option>HPG</option><option>Magnet</option><option>MedAsset</option><option>Novation</option><option>Premier</option><option>Vizient</option><option>Vizient Carts</option></select>
+              </div>
+              <div class="ff">
+                <label>SHIPPING CARRIER</label>
+                <select class="inp" id="fShippingCarrier"><option>UPS</option><option>FedEx</option></select>
+              </div>
+              <div class="ff">
+                <label>DEFAULT SHIPPING</label>
+                <input class="inp" id="fDefaultShipping" type="number" step="0.01" value="77.77" style="text-align:right"/>
+              </div>
             </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-head">Integration</div>
-            <div class="panel-body">
-              <div class="fg" style="gap:6px">
-                <div class="ff">
-                  <label>Great Plains ID</label>
-                  <input class="inp" id="fGPID" oninput="deptDirty()"/>
-                </div>
-                <div class="ff">
-                  <label>GP ID South</label>
-                  <input class="inp" id="fGPIDSouth" oninput="deptDirty()"/>
-                </div>
-                <div class="ff">
-                  <label>Peachtree ID</label>
-                  <input class="inp" id="fPeachtreeID" oninput="deptDirty()"/>
-                </div>
-                <div class="ff">
-                  <label>NetSuite ID</label>
-                  <input class="inp" id="fNetSuiteID" oninput="deptDirty()"/>
+            <div class="fg g4" style="gap:6px 12px;margin-top:6px">
+              <div class="ff">
+                <label>DISCOUNT %</label>
+                <input class="inp" id="fDiscount" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
+              </div>
+              <div class="ff">
+                <label>MARKUP %</label>
+                <input class="inp" id="fMarkup" type="number" step="0.01" placeholder="0.00" style="text-align:right"/>
+              </div>
+              <div class="ff">
+                <label>CLEANING SYSTEM</label>
+                <select class="inp" id="fCleaningSystem"><option>Evotech</option><option>Medivator</option><option>Steris</option></select>
+              </div>
+              <div class="ff">
+                <label>CHEMICAL GERMICIDE</label>
+                <select class="inp" id="fChemicalGermicide"><option>Cidex OPA</option><option>CIDEX OPA-C</option></select>
+              </div>
+            </div>
+            <div class="fg g4" style="gap:6px 12px;margin-top:6px">
+              <div class="ff">
+                <label>MANUFACTURER</label>
+                <select class="inp" id="fManufacturer"><option>Olympus</option><option>Fujifilm</option><option>Pentax</option><option>Karl Storz</option><option>Stryker</option></select>
+              </div>
+              <div class="ff">
+                <label>COMPETITION</label>
+                <select class="inp" id="fCompetition"><option>IMS</option><option>Healthmark</option><option>Medline</option><option>None</option></select>
+              </div>
+              <div class="ff" style="grid-column:span 2">
+                <label>ACQUISITIONS DEPT</label>
+                <div style="padding-top:8px">
+                  <label class="opt-chip"><input type="checkbox" id="fAcquisitions" checked/><span>Acquisitions Department</span></label>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Section: Options & Toggles (collapsible, open by default) -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            OPTIONS &amp; TOGGLES
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <label class="opt-chip"><input type="checkbox" id="fShowConsumption"/><span>Show Consumption On Req</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fEnforceScopeType" checked/><span>Enforce Scope Type Filtering</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fShowProductID"/><span>Show Product ID</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fShowUAOrNWT"/><span>Show UA Or NWT</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fShowItemizedDesc" checked/><span>Show Itemized Descriptions</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fOpenCreditMemo"/><span>Open Credit Memo</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fEmailNewRepairs"/><span>Email New Repairs</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fMemberBOA"/><span>Member Board Of Advisors</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fTrackingRequired"/><span>Tracking # Required</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fTaxExempt"/><span>Tax Exempt</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fPaysCreditCard"/><span>Pays By Credit Card</span></label>
+              <label class="opt-chip"><input type="checkbox" id="fOnsiteService" onchange="var s=document.getElementById('vanServiceSection');if(s)s.classList.toggle('collapsed',!this.checked);deptDirty()"/><span>On-Site Service</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Van Service (collapsible, collapsed by default) -->
+        <div class="panel collapsed" id="vanServiceSection" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            VAN SERVICE
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g4" style="gap:6px 12px">
+              <div class="ff">
+                <label>CAPITATED COST</label>
+                <input class="inp" id="fCapitatedCost" type="number" step="0.01" style="text-align:right" placeholder="0.00" oninput="deptDirty()"/>
+              </div>
+              <div class="ff">
+                <label>SALES TAX</label>
+                <select class="inp" id="fSalesTax" onchange="deptDirty()"><option value="">— None —</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Integration / ERP (collapsible, collapsed by default) -->
+        <div class="panel collapsed" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            INTEGRATION / ERP
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g4" style="gap:6px 12px">
+              <div class="ff">
+                <label>GREAT PLAINS ID</label>
+                <input class="inp" id="fGPID" oninput="deptDirty()"/>
+              </div>
+              <div class="ff">
+                <label>GP ID SOUTH</label>
+                <input class="inp" id="fGPIDSouth" oninput="deptDirty()"/>
+              </div>
+              <div class="ff">
+                <label>PEACHTREE ID</label>
+                <input class="inp" id="fPeachtreeID" oninput="deptDirty()"/>
+              </div>
+              <div class="ff">
+                <label>NETSUITE ID</label>
+                <input class="inp" id="fNetSuiteID" oninput="deptDirty()"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Notes (collapsible, collapsed by default) -->
+        <div class="panel collapsed" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            NOTES
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <textarea class="inp" id="fNotes" style="height:80px;resize:vertical" placeholder="Add department notes..."></textarea>
+          </div>
+        </div>
+
       </div>
 
-      <!-- ══ ADDRESSES TAB ══ -->
+            <!-- ══ ADDRESSES TAB ══ -->
       <div id="dtab-addresses" class="tab-content" style="display:none">
         <div style="flex:1;min-width:0">
           <div class="addr-grid">
