@@ -1243,16 +1243,16 @@
 
     const recentRepairs = repairs.slice(0, 8);
     const overviewRepairsHtml = recentRepairs.length
-      ? `<table class="ps-repair-table" style="margin:0;table-layout:fixed;width:100%">
+      ? `<table class="ps-repair-table" style="margin:0;table-layout:fixed;width:100%;max-width:900px">
           <thead><tr>
-            <th style="width:74px">WO #</th>
+            <th style="width:78px">WO #</th>
             <th style="width:62px">Date</th>
-            <th style="width:90px">Scope</th>
-            <th style="width:160px">Customer Complaint</th>
-            <th>Root Cause</th>
-            <th style="width:78px">Category</th>
+            <th style="width:88px">Scope</th>
+            <th style="width:155px">Customer Complaint</th>
+            <th style="width:185px">Root Cause</th>
+            <th style="width:82px">Category</th>
             <th style="width:36px;text-align:center">TAT</th>
-            <th style="width:68px">Outcome</th>
+            <th style="width:72px">Outcome</th>
           </tr></thead>
           <tbody>
             ${recentRepairs.map(r => {
@@ -1272,7 +1272,7 @@
                   <span style="font-weight:600;color:rgb(17,60,139)">${r.sScopeTypeDesc || '—'}</span>
                   ${r.sSerialNumber ? `<br><span style="font-size:10px;color:#9ca3af">${r.sSerialNumber}</span>` : ''}
                 </td>
-                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:160px"
+                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                     title="${r.sComplaintDesc||''}">${r.sComplaintDesc || '—'}</td>
                 <td class="ps-root-cause" title="${r.sRepairReason||''}">${r.sRepairReason || '<span style="color:#d1d5db">—</span>'}</td>
                 <td>${categoryChip(r.nReasonCategory)}</td>
@@ -1304,7 +1304,7 @@
         ${deptNames.length ? '<span class="sep" style="color:#ddd">|</span>' + coverageDeptsHtml : ''}
       </div>
       <div class="ps-sh" style="margin:12px -18px 0;padding:10px 18px 6px">Recent Repairs — Root Cause &amp; Outcome</div>
-      <div style="margin:8px -18px 0">${overviewRepairsHtml}</div>`;
+      <div style="margin:8px -18px 0;overflow-x:auto">${overviewRepairsHtml}</div>`;
 
     // ── Equipment tab ────────────────────────────────────────────
     // Store scopes on window so the export button can reach them
