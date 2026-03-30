@@ -229,17 +229,25 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       // 3. Last 100 repairs under this contract
       db.query(
         `SELECT TOP 100
-           r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtDateOut,
-           r.dblAmtRepair, r.sComplaintDesc,
-           ISNULL(rs.sRepairStatus, '')    AS sRepairStatus,
-           ISNULL(s.sSerialNumber, '')     AS sSerialNumber,
-           ISNULL(st.sScopeTypeDesc, '')   AS sScopeTypeDesc,
-           ISNULL(d.sDepartmentName, '')   AS sDepartmentName
+           r.lRepairKey, r.sWorkOrderNumber,
+           r.dtDateIn, r.dtDateOut, r.dtShipDate,
+           r.dblAmtRepair,
+           r.sComplaintDesc,
+           r.sInsFinalPF,
+           r.bReplaced, r.bOutsourced,
+           ISNULL(rs.sRepairStatus, '')   AS sRepairStatus,
+           ISNULL(rr.sRepairReason, '')   AS sRepairReason,
+           ISNULL(s.sSerialNumber, '')    AS sSerialNumber,
+           ISNULL(st.sScopeTypeDesc, '')  AS sScopeTypeDesc,
+           ISNULL(d.sDepartmentName, '')  AS sDepartmentName,
+           ISNULL(t.sTechName, '')        AS sTechName
          FROM tblRepair r
-           LEFT JOIN tblRepairStatuses rs ON rs.lRepairStatusID = r.lRepairStatusID
-           LEFT JOIN tblScope s           ON s.lScopeKey        = r.lScopeKey
-           LEFT JOIN tblScopeType st      ON st.lScopeTypeKey   = s.lScopeTypeKey
-           LEFT JOIN tblDepartment d      ON d.lDepartmentKey   = r.lDepartmentKey
+           LEFT JOIN tblRepairStatuses rs  ON rs.lRepairStatusID  = r.lRepairStatusID
+           LEFT JOIN tblRepairReasons rr   ON rr.lRepairReasonKey = r.lRepairReasonKey
+           LEFT JOIN tblScope s            ON s.lScopeKey         = r.lScopeKey
+           LEFT JOIN tblScopeType st       ON st.lScopeTypeKey    = s.lScopeTypeKey
+           LEFT JOIN tblDepartment d       ON d.lDepartmentKey    = r.lDepartmentKey
+           LEFT JOIN tblTechnicians t      ON t.lTechnicianKey    = r.lTechnicianKey
          WHERE r.lContractKey = @contractKey
          ORDER BY r.dtDateIn DESC`,
         { contractKey }
@@ -279,17 +287,16 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
         { contractKey }
       ),
 
-      // 6. Top 15 repair reason breakdown
+      // 6. Top 15 repair reason breakdown (grouped on standardized repair reason code)
       db.query(
         `SELECT TOP 15
-           LTRIM(RTRIM(r.sComplaintDesc)) AS sReason,
+           ISNULL(rr.sRepairReason, 'Unknown') AS sReason,
            COUNT(*) AS nCount,
            SUM(ISNULL(r.dblAmtRepair, 0)) AS dblCharges
          FROM tblRepair r
+           LEFT JOIN tblRepairReasons rr ON rr.lRepairReasonKey = r.lRepairReasonKey
          WHERE r.lContractKey = @contractKey
-           AND r.sComplaintDesc IS NOT NULL
-           AND LEN(LTRIM(RTRIM(r.sComplaintDesc))) > 0
-         GROUP BY LTRIM(RTRIM(r.sComplaintDesc))
+         GROUP BY rr.sRepairReason
          ORDER BY nCount DESC`,
         { contractKey }
       )

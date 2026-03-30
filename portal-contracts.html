@@ -623,6 +623,31 @@
       text-decoration: underline;
     }
 
+    /* Repair outcome chips */
+    .ps-outcome { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .ps-pf-pass {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a;
+      font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 9999px;
+    }
+    .ps-pf-fail {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #fef2f2; border: 1px solid #fecaca; color: #b71234;
+      font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 9999px;
+    }
+    .ps-flag-chip {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+      font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 9999px;
+    }
+    .ps-tat {
+      font-size: 10.5px; color: #6b7280; white-space: nowrap;
+    }
+    .ps-root-cause {
+      font-size: 10.5px; color: #374151; font-style: italic;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
     /* Spinner */
     .spinner-sm {
       display: inline-block;
@@ -1161,25 +1186,52 @@
 </div>`;
 
     // ── Overview tab ────────────────────────────────────────────
-    const recentRepairs = repairs.slice(0, 5);
+    function calcTAT(r) {
+      const closeDate = r.dtShipDate || r.dtDateOut;
+      if (!closeDate || !r.dtDateIn) return null;
+      const days = Math.round((new Date(closeDate) - new Date(r.dtDateIn)) / 86400000);
+      return days >= 0 ? days : null;
+    }
+    function pfChip(pf) {
+      if (!pf) return '';
+      if (pf === 'P') return `<span class="ps-pf-pass"><i class="bi bi-check-circle-fill"></i> Pass</span>`;
+      if (pf === 'F') return `<span class="ps-pf-fail"><i class="bi bi-x-circle-fill"></i> Fail</span>`;
+      return '';
+    }
+
+    const recentRepairs = repairs.slice(0, 8);
     const overviewRepairsHtml = recentRepairs.length
-      ? `<table class="ps-repair-table" style="margin:0">
+      ? `<table class="ps-repair-table" style="margin:0;table-layout:fixed;width:100%">
           <thead><tr>
-            <th style="width:75px">Date</th>
-            <th style="width:100px">Scope</th>
-            <th>What Broke</th>
-            <th style="width:68px">Status</th>
+            <th style="width:68px">Date</th>
+            <th style="width:105px">Scope</th>
+            <th>Customer Said</th>
+            <th>Root Cause</th>
+            <th style="width:48px;text-align:center">TAT</th>
+            <th style="width:90px">Outcome</th>
           </tr></thead>
           <tbody>
             ${recentRepairs.map(r => {
-              const rBadge = badgeHtml(rStatusNormalize(r.sRepairStatus));
+              const tat  = calcTAT(r);
+              const tatHtml = tat !== null
+                ? `<span class="ps-tat">${tat}d</span>`
+                : `<span class="ps-tat" style="color:#d1d5db">—</span>`;
+              const outcomeHtml = `<div class="ps-outcome">
+                ${pfChip(r.sInsFinalPF)}
+                ${r.bReplaced   ? `<span class="ps-flag-chip"><i class="bi bi-arrow-repeat"></i> Replaced</span>` : ''}
+                ${r.bOutsourced ? `<span class="ps-flag-chip"><i class="bi bi-box-arrow-up-right"></i> Vendor</span>` : ''}
+              </div>`;
               return `<tr>
-                <td>${fmtDate(r.dtDateIn)}</td>
-                <td style="font-weight:600;color:rgb(17,60,139);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sScopeTypeDesc||''}">${r.sScopeTypeDesc || r.sSerialNumber || '—'}</td>
+                <td style="color:#6b7280">${fmtDate(r.dtDateIn)}</td>
+                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.sScopeTypeDesc||''}">
+                  <span style="font-weight:600;color:rgb(17,60,139)">${r.sScopeTypeDesc || '—'}</span>
+                  ${r.sSerialNumber ? `<br><span style="font-size:10px;color:#9ca3af">${r.sSerialNumber}</span>` : ''}
+                </td>
                 <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                     title="${r.sComplaintDesc||''}">${r.sComplaintDesc || '—'}</td>
-                <td>${rBadge}</td>
+                <td class="ps-root-cause" title="${r.sRepairReason||''}">${r.sRepairReason || '<span style="color:#d1d5db">—</span>'}</td>
+                <td style="text-align:center">${tatHtml}</td>
+                <td>${outcomeHtml}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1205,7 +1257,7 @@
         ${pillsHtml}
         ${deptNames.length ? '<span class="sep" style="color:#ddd">|</span>' + coverageDeptsHtml : ''}
       </div>
-      <div class="ps-sh" style="margin:12px -18px 0;padding:10px 18px 6px">Recent Repairs</div>
+      <div class="ps-sh" style="margin:12px -18px 0;padding:10px 18px 6px">Recent Repairs — Root Cause &amp; Outcome</div>
       <div style="margin:8px -18px 0">${overviewRepairsHtml}</div>`;
 
     // ── Equipment tab ────────────────────────────────────────────
