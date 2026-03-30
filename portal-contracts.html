@@ -1163,6 +1163,14 @@
     const daysLeft     = Math.max(0, Math.round((new Date(contract.dtDateTermination) - new Date()) / 86400000));
     const totalScopes  = scopeCounts.F + scopeCounts.R + scopeCounts.C + scopeCounts.I;
 
+    // Avoidable rate: category 2 = user-induced damage; category 1 = wear/failure
+    const diagnosedRepairs = repairs.filter(r => r.nReasonCategory === 1 || r.nReasonCategory === 2);
+    const avoidableRepairs = diagnosedRepairs.filter(r => r.nReasonCategory === 2);
+    const avoidablePct     = diagnosedRepairs.length > 0
+      ? Math.round(avoidableRepairs.length / diagnosedRepairs.length * 100)
+      : null;
+    const avoidableColor   = avoidablePct === null ? '' : avoidablePct >= 50 ? ' amber' : avoidablePct <= 25 ? ' green' : '';
+
     // Coverage dept tags
     const deptNames = depts.map(d => d.sDepartmentName).filter(Boolean);
     const coverageDeptsHtml = deptNames.length
@@ -1204,11 +1212,11 @@
       ? `<table class="ps-repair-table" style="margin:0;table-layout:fixed;width:100%">
           <thead><tr>
             <th style="width:68px">Date</th>
-            <th style="width:105px">Scope</th>
-            <th>Customer Said</th>
+            <th style="width:100px">Scope</th>
+            <th style="width:175px">Customer Said</th>
             <th>Root Cause</th>
-            <th style="width:48px;text-align:center">TAT</th>
-            <th style="width:90px">Outcome</th>
+            <th style="width:42px;text-align:center">TAT</th>
+            <th style="width:86px">Outcome</th>
           </tr></thead>
           <tbody>
             ${recentRepairs.map(r => {
@@ -1218,6 +1226,7 @@
                 : `<span class="ps-tat" style="color:#d1d5db">—</span>`;
               const outcomeHtml = `<div class="ps-outcome">
                 ${pfChip(r.sInsFinalPF)}
+                ${r.nReasonCategory === 2 ? `<span class="ps-flag-chip" title="User-induced damage — avoidable"><i class="bi bi-exclamation-triangle-fill"></i> Avoidable</span>` : ''}
                 ${r.bReplaced   ? `<span class="ps-flag-chip"><i class="bi bi-arrow-repeat"></i> Replaced</span>` : ''}
                 ${r.bOutsourced ? `<span class="ps-flag-chip"><i class="bi bi-box-arrow-up-right"></i> Vendor</span>` : ''}
               </div>`;
@@ -1302,16 +1311,46 @@
     if (!reasons.length) {
       reasonsHtml = `<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:12px;font-style:italic">No repair history on file.</div>`;
     } else {
+      // Avoidable vs Wear split summary from reasons array
+      const reasonsAvoidable = reasons.filter(r => r.nReasonCategory === 2);
+      const reasonsWear      = reasons.filter(r => r.nReasonCategory === 1);
+      const nAvoid = reasonsAvoidable.reduce((s, r) => s + r.nCount, 0);
+      const nWear  = reasonsWear.reduce((s, r) => s + r.nCount, 0);
+      const nTotal = nAvoid + nWear;
+      const avoidPct = nTotal > 0 ? Math.round(nAvoid / nTotal * 100) : 0;
+      const wearPct  = nTotal > 0 ? Math.round(nWear  / nTotal * 100) : 0;
+
+      const splitHtml = nTotal > 0 ? `
+        <div style="display:flex;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f3f4f6">
+          <div style="flex:1;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px">
+            <div style="font-size:22px;font-weight:800;color:#92400e">${avoidPct}%</div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#92400e">Avoidable</div>
+            <div style="font-size:10.5px;color:#6b7280;margin-top:2px">${nAvoid} repairs — user-induced damage</div>
+          </div>
+          <div style="flex:1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px">
+            <div style="font-size:22px;font-weight:800;color:#15803d">${wearPct}%</div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#15803d">Wear &amp; Failure</div>
+            <div style="font-size:10.5px;color:#6b7280;margin-top:2px">${nWear} repairs — component/normal wear</div>
+          </div>
+        </div>` : '';
+
       const maxCount = reasons[0]?.nCount || 1;
-      reasonsHtml = reasons.map(r => `
+      const reasonRowsHtml = reasons.map(r => {
+        const isAvoidable = r.nReasonCategory === 2;
+        const barColor = isAvoidable ? '#f59e0b' : '#2563eb';
+        const labelStyle = isAvoidable ? 'color:#92400e;font-weight:500' : 'color:#111827';
+        return `
         <div class="ps-reason-row">
-          <div class="ps-reason-label">${r.sReason || r.sComplaintDesc || '—'}</div>
+          <div class="ps-reason-label" style="${labelStyle}" title="${r.sReason||''}">${r.sReason || '—'}${isAvoidable ? ' <span style="font-size:9px;color:#f59e0b">⚠</span>' : ''}</div>
           <div class="ps-reason-bar-wrap">
-            <div class="ps-reason-bar-fill" style="width:${Math.round((r.nCount / maxCount) * 100)}%"></div>
+            <div class="ps-reason-bar-fill" style="width:${Math.round((r.nCount / maxCount) * 100)}%;background:${barColor}"></div>
           </div>
           <div class="ps-reason-count">${r.nCount}</div>
           <div class="ps-reason-charges">${r.dblCharges ? fmtMoney(r.dblCharges) : ''}</div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
+
+      reasonsHtml = splitHtml + reasonRowsHtml;
     }
 
     // ── Documents tab ────────────────────────────────────────────
@@ -1356,6 +1395,10 @@
         <div class="ps-metric">
           <div class="ps-metric-val">${totalScopes || '—'}</div>
           <div class="ps-metric-lbl">Scopes Covered</div>
+        </div>
+        <div class="ps-metric">
+          <div class="ps-metric-val${avoidableColor}">${avoidablePct !== null ? avoidablePct + '%' : '—'}</div>
+          <div class="ps-metric-lbl">Avoidable Rate</div>
         </div>
       </div>
 

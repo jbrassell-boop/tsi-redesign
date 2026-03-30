@@ -235,8 +235,9 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
            r.sComplaintDesc,
            r.sInsFinalPF,
            r.bReplaced, r.bOutsourced,
-           ISNULL(rs.sRepairStatus, '')   AS sRepairStatus,
+           ISNULL(rs.sRepairStatus, '')    AS sRepairStatus,
            ISNULL(rr.sRepairReason, '')   AS sRepairReason,
+           rr.lRepairReasonCategoryKey    AS nReasonCategory,
            ISNULL(s.sSerialNumber, '')    AS sSerialNumber,
            ISNULL(st.sScopeTypeDesc, '')  AS sScopeTypeDesc,
            ISNULL(d.sDepartmentName, '')  AS sDepartmentName,
@@ -291,12 +292,13 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       db.query(
         `SELECT TOP 15
            ISNULL(rr.sRepairReason, 'Unknown') AS sReason,
+           rr.lRepairReasonCategoryKey          AS nReasonCategory,
            COUNT(*) AS nCount,
            SUM(ISNULL(r.dblAmtRepair, 0)) AS dblCharges
          FROM tblRepair r
            LEFT JOIN tblRepairReasons rr ON rr.lRepairReasonKey = r.lRepairReasonKey
          WHERE r.lContractKey = @contractKey
-         GROUP BY rr.sRepairReason
+         GROUP BY rr.sRepairReason, rr.lRepairReasonCategoryKey
          ORDER BY nCount DESC`,
         { contractKey }
       )
