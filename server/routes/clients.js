@@ -40,6 +40,7 @@ const CLIENT_SELECT = `
 router.get('/Client/GetAllClientList', async (req, res, next) => {
   try {
     const rows = await db.query(`${CLIENT_SELECT}
+      WHERE c.bActive = 1
       ORDER BY c.sClientName1`);
     res.json(rows);
   } catch (e) { next(e); }

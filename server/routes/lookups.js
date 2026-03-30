@@ -33,7 +33,7 @@ router.get('/Repair/GetAllTechs', async (req, res, next) => {
   try {
     const rows = await db.query(`
       SELECT lTechnicianKey, sTechInits, sTechName, bIsActive, lServiceLocationKey
-      FROM tblTechnicians ORDER BY sTechName`);
+      FROM tblTechnicians WHERE bIsActive = 1 ORDER BY sTechName`);
     res.json(rows);
   } catch (e) { next(e); }
 });
@@ -80,7 +80,7 @@ router.get('/SalesRepNames/GetAllSalesRepNames', async (req, res, next) => {
       SELECT lSalesRepKey, lSalesRepKey AS lSalesRepNameKey,
              sRepFirst, sRepLast, sRepInits, sRepEMail, sActiveFlag,
              LTRIM(RTRIM(ISNULL(sRepFirst,'') + ' ' + ISNULL(sRepLast,''))) AS sSalesRepName
-      FROM tblSalesRep ORDER BY sRepLast, sRepFirst`);
+      FROM tblSalesRep WHERE sActiveFlag = 'Y' ORDER BY sRepLast, sRepFirst`);
     res.json(rows);
   } catch (e) { next(e); }
 });
@@ -91,7 +91,7 @@ router.get('/PricingCategory/GetAllPricingCategories', async (req, res, next) =>
   try {
     const rows = await db.query(`
       SELECT lPricingCategoryKey, sPricingDescription, bActive
-      FROM tblPricingCategory ORDER BY sPricingDescription`);
+      FROM tblPricingCategory WHERE bActive = 1 ORDER BY sPricingDescription`);
     res.json(rows);
   } catch (e) { next(e); }
 });

@@ -35,7 +35,7 @@ router.get('/Departments/GetAllDepartments', async (req, res, next) => {
   try {
     const svcKey = parseInt(req.query.plServiceLocationKey) || 0;
     const rows = await db.query(`${DEPT_SELECT}
-      WHERE (@svcKey = 0 OR d.lServiceLocationKey = @svcKey)
+      WHERE d.bActive = 1 AND (@svcKey = 0 OR d.lServiceLocationKey = @svcKey)
       ORDER BY d.sDepartmentName`, { svcKey });
     res.json(rows);
   } catch (e) { next(e); }
