@@ -245,6 +245,7 @@ const API = (() => {
   // ── Client (7) ────────────────────────────────────────
   async function getAllClients(svcKey) { return get('/Client/GetAllClientList?plServiceLocationKey=' + (svcKey||1)); }
   async function getClientById(key) { return get('/Client/GetClientDetailsByClientId?plClientKey=' + key); }
+  async function getClientKPIs(clientKey) { return get('/Client/GetClientKPIs?plClientKey=' + clientKey); }
   async function addClient(data) { return post('/Client/AddClient', data); }
   async function updateClient(data) { return post('/Client/UpdateClient', data); }
   async function deleteClient(key) { return del('/Client/DeleteClient?plClientKey=' + key); }
@@ -617,7 +618,7 @@ const API = (() => {
     getTaskTypes, getTaskType,
 
     // Clients
-    getAllClients, getClientById, addClient, updateClient, deleteClient,
+    getAllClients, getClientById, getClientKPIs, addClient, updateClient, deleteClient,
     getCityStateByZip,
 
     // Departments

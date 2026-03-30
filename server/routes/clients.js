@@ -69,6 +69,45 @@ router.get('/Client/GetClientDetailsByClientId', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Client/GetClientKPIs — Revenue, open repairs, scope count, avg TAT for a client
+router.get('/Client/GetClientKPIs', async (req, res, next) => {
+  try {
+    const clientKey = parseInt(req.query.plClientKey) || 0;
+    if (!clientKey) return res.json({ revenueYTD: 0, openRepairs: 0, scopeCount: 0, avgTAT: 0 });
+
+    const row = await db.queryOne(`
+      SELECT
+        (SELECT ISNULL(SUM(gp.TotalAmountDue), 0)
+         FROM tblGP_InvoiceStaging gp
+         JOIN tblInvoice inv ON inv.lInvoiceKey = gp.lInvoiceKey
+         JOIN tblRepair r ON r.lRepairKey = inv.lRepairKey
+         JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+         WHERE d.lClientKey = @clientKey
+           AND gp.dtTranDate >= DATEADD(YEAR, -1, GETDATE())) AS revenueYTD,
+
+        (SELECT COUNT(*)
+         FROM tblRepair r
+         JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+         LEFT JOIN tblInvoice inv ON inv.lRepairKey = r.lRepairKey
+         WHERE d.lClientKey = @clientKey AND inv.lRepairKey IS NULL) AS openRepairs,
+
+        (SELECT COUNT(*)
+         FROM tblScope s
+         JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
+         WHERE d.lClientKey = @clientKey) AS scopeCount,
+
+        (SELECT AVG(DATEDIFF(DAY, r.dtDateIn, r.dtShipDate))
+         FROM tblRepair r
+         JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+         WHERE d.lClientKey = @clientKey
+           AND r.dtShipDate IS NOT NULL
+           AND r.dtDateIn >= DATEADD(YEAR, -1, GETDATE())) AS avgTAT
+    `, { clientKey });
+
+    res.json(row || { revenueYTD: 0, openRepairs: 0, scopeCount: 0, avgTAT: 0 });
+  } catch (e) { next(e); }
+});
+
 // POST /Client/AddClient — Insert new client
 // Removed non-existent columns: sShipName1, sBillName1, sEMailAddress, lServiceLocationKey
 // dtDateCreated → dtCreateDate

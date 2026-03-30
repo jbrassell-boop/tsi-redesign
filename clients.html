@@ -19,6 +19,33 @@
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--steel)}
     .status-pill{background:var(--primary-light);border:1px solid var(--border-dk);border-radius:var(--radius-pill);padding:3px 12px;font-size:11.5px;font-weight:700;color:var(--green)}
 
+    /* Collapsible panels */
+    .panel.collapsed .panel-body { display: none; }
+    .panel.collapsed .panel-head svg { transform: rotate(-90deg); }
+
+    /* Option toggle chips */
+    .opt-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .opt-chip input { display: none; }
+    .opt-chip:has(input:checked) {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--navy);
+      font-weight: 600;
+    }
+
   </style>
 </head>
 <body>
@@ -111,16 +138,20 @@
           <div class="s-data"><div class="s-val s-navy" id="ss-terms">Due Upon Receipt</div><div class="s-lbl">TERMS</div></div>
         </div>
         <div class="stat-chip" style="flex-shrink:0">
-          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 14h12"/><path d="M3 14V7l5-4 5 4v7"/><rect x="6" y="9" width="4" height="5"/></svg></div>
-          <div class="s-data"><div class="s-val s-blue" id="ss-depts">2</div><div class="s-lbl">DEPTS</div></div>
+          <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
+          <div class="s-data"><div class="s-val s-green" id="ss-revenue">—</div><div class="s-lbl">REVENUE (YTD)</div></div>
         </div>
         <div class="stat-chip" style="flex-shrink:0">
-          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="6" r="2"/><path d="M1 14c0-2.5 2-4.5 5-4.5s5 2 5 4.5"/><path d="M11.5 8.5c2 0 3.5 1.5 3.5 3.5"/></svg></div>
-          <div class="s-data"><div class="s-val s-blue" id="ss-contacts">4</div><div class="s-lbl">CONTACTS</div></div>
+          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M3 8h10M10 5l3 3-3 3"/><path d="M2 3h3M2 13h3"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-open-repairs">—</div><div class="s-lbl">OPEN REPAIRS</div></div>
         </div>
         <div class="stat-chip" style="flex-shrink:0">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M3 9V3h3l2 3-2 3H3z"/><line x1="3" y1="3" x2="3" y2="14"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber" id="ss-flags">0</div><div class="s-lbl">FLAGS</div></div>
+          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2"/></svg></div>
+          <div class="s-data"><div class="s-val s-navy" id="ss-scopes">—</div><div class="s-lbl">SCOPES</div></div>
+        </div>
+        <div class="stat-chip" style="flex-shrink:0">
+          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="ss-tat">—</div><div class="s-lbl">AVG TAT</div></div>
         </div>
         <div style="flex:1;flex-shrink:1"></div>
         <span style="font-size:10px;color:var(--muted);padding:8px 12px;white-space:nowrap;flex-shrink:0" id="ss-modified">Modified 03/02/2026 by J. Brassell</span>
@@ -134,281 +165,147 @@
       <div class="tab-bar">
         <div class="tab active" onclick="showTab('main',this)">Main</div>
         <div class="tab" onclick="showTab('addresses',this)">Addresses</div>
-        <div class="tab" onclick="showTab('departments',this)">Departments</div>
-        <div class="tab" onclick="showTab('flags',this)">Flags</div>
-        <div class="tab" onclick="showTab('contacts',this)">Contacts</div>
+        <div class="tab" onclick="showTab('departments',this)">Departments <span class="tab-count" id="badge-depts"></span></div>
+        <div class="tab" onclick="showTab('flags',this)">Flags <span class="tab-count" id="badge-flags"></span></div>
+        <div class="tab" onclick="showTab('contacts',this)">Contacts <span class="tab-count" id="badge-contacts"></span></div>
         <div class="tab" onclick="showTab('reportcard',this)">Report Card</div>
         <div class="tab" onclick="showTab('activity',this)">Activity</div>
       </div>
 
       <!-- ══════════ MAIN TAB ══════════ -->
-      <div id="tab-main" class="tab-content show">
-        <div class="col-left">
+      <div id="tab-main" class="tab-content show" style="flex-direction:column">
+        <!-- Hidden legacy fields kept for JS compatibility -->
+        <input id="ci-active" type="checkbox" checked style="display:none" onchange="if(!this.checked){this.checked=true;confirmDeactivate()}"/>
+        <span id="ci-active-lbl" style="display:none"></span>
 
-          <!-- Client Info -->
-          <div class="panel">
-            <div class="panel-head">Client Information</div>
-            <div class="panel-body">
-              <div class="fg g2">
-                <div class="ff span2">
-                  <label>Client Name <span class="req">*</span></label>
-                  <input id="ci-name" class="inp" value="88th Medical Group"/>
-                </div>
-                <div class="ff span2">
-                  <label>Unit / Building</label>
-                  <input id="ci-unit" class="inp" value="Wright Patterson AFB, Bldg. 830123"/>
-                </div>
-                <div class="ff span2">
-                  <label>Address Line 1 <span class="req">*</span></label>
-                  <input id="ci-addr1" class="inp" value="4881 Sugar Maple Drive"/>
-                </div>
-                <div class="ff span2">
-                  <label>Address Line 2</label>
-                  <input id="ci-addr2" class="inp" placeholder="Suite, floor, building (optional)"/>
-                </div>
-                <div class="ff">
-                  <label>Zip <span class="req">*</span></label>
-                  <input id="ci-zip" class="inp" value="36020" onblur="lookupZip(this.value)" placeholder="Enter zip…"/>
-                </div>
-                <div class="ff">
-                  <label>City <span class="req">*</span></label>
-                  <input id="ci-city" class="inp" value="Coosada"/>
-                </div>
-                <div class="ff">
-                  <label>State <span class="req">*</span></label>
-                  <select id="ci-state" class="inp">
-                    <option value="">— Select —</option>
-                    <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
-                    <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
-                    <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
-                    <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
-                    <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-                  </select>
-                </div>
-                <div class="ff">
-                  <label>Country <span class="req">*</span></label>
-                  <select id="ci-country" class="inp"><option>USA</option><option>Canada</option></select>
-                </div>
-                <div class="ff">
-                  <label>Phone</label>
-                  <input id="ci-phone" class="inp" value="+1 (222) 222-2222"/>
-                </div>
-                <div class="ff">
-                  <label>Fax</label>
-                  <input id="ci-fax" class="inp" value="(111) 111-1111"/>
-                </div>
-                <div class="fg g3 span2" style="gap:6px 10px">
-                  <div class="ff">
-                    <label>Client Since</label>
-                    <input id="ci-since" class="inp" type="date" value="2006-06-04"/>
-                  </div>
-                  <div class="ff">
-                    <label title="Number of months this client has portal access">Portal Months</label>
-                    <input id="ci-portal" class="inp" value="24" placeholder="e.g. 12"/>
-                  </div>
-                  <div class="ff">
-                    <label>Active</label>
-                    <div style="display:flex;align-items:center;gap:9px;padding-top:4px">
-                      <label class="toggle"><input id="ci-active" type="checkbox" checked onchange="if(!this.checked){this.checked=true;confirmDeactivate()}"/><span class="toggle-slider"></span></label>
-                      <span id="ci-active-lbl" style="font-size:12px;color:var(--green);font-weight:600">Yes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+        <!-- Section: Client Information -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head">CLIENT INFORMATION</div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g3" style="gap:6px 12px">
+              <div class="ff"><label>CLIENT NAME <span class="req">*</span></label><input class="inp" id="ci-name" value="88th Medical Group"/></div>
+              <div class="ff"><label>UNIT / BUILDING</label><input class="inp" id="ci-unit" value="Wright Patterson AFB, Bldg. 830123"/></div>
+              <div class="ff"><label>CLIENT SINCE</label><input class="inp" type="date" id="ci-since" value="2006-06-04"/></div>
             </div>
-          </div>
-
-          <!-- Additional Details -->
-          <div class="panel">
-            <div class="panel-head">Additional Details</div>
-            <div class="panel-body">
-              <div class="fg g2">
-                <div class="ff span2">
-                  <label>Secondary Name / AP Contact</label>
-                  <input id="ci-name2" class="inp" placeholder="e.g. Accounts Payable"/>
-                </div>
-                <div class="ff span2">
-                  <label>Client Terms</label>
-                  <input id="ci-terms-text" class="inp" placeholder="Client-specific terms"/>
-                </div>
-                <div class="ff">
-                  <label>Reference #1</label>
-                  <input id="ci-ref1" class="inp"/>
-                </div>
-                <div class="ff">
-                  <label>Reference #2</label>
-                  <input id="ci-ref2" class="inp"/>
-                </div>
-                <div class="ff">
-                  <label>Sales Tax</label>
-                  <select id="ci-sales-tax" class="inp"><option value="">— None —</option></select>
-                </div>
-                <div class="ff">
-                  <label>Reporting Group</label>
-                  <select id="ci-reporting-group" class="inp"><option value="">— None —</option></select>
-                </div>
+            <div class="fg g3" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>ADDRESS LINE 1 <span class="req">*</span></label><input class="inp" id="ci-addr1" value="4881 Sugar Maple Drive"/></div>
+              <div class="ff"><label>CITY <span class="req">*</span></label><input class="inp" id="ci-city" value="Coosada"/></div>
+              <div class="ff"><label>STATE <span class="req">*</span></label>
+                <select class="inp" id="ci-state">
+                  <option value="">— Select —</option>
+                  <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+                  <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+                  <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+                  <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+                  <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+                  <option>AB</option><option>BC</option><option>MB</option><option>NB</option><option>NL</option><option>NS</option><option>NT</option><option>NU</option><option>ON</option><option>PE</option><option>QC</option><option>SK</option><option>YT</option>
+                </select>
               </div>
             </div>
+            <div class="fg g3" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>ADDRESS LINE 2</label><input class="inp" id="ci-addr2" placeholder="Suite, floor, building (optional)"/></div>
+              <div class="ff"><label>ZIP <span class="req">*</span></label><input class="inp" id="ci-zip" value="36020" onblur="lookupZip(this.value)" placeholder="Enter zip…"/></div>
+              <div class="ff"><label>COUNTRY <span class="req">*</span></label><select class="inp" id="ci-country"><option>USA</option><option>Canada</option></select></div>
+            </div>
+            <div class="fg g3" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>PHONE</label><input class="inp" id="ci-phone" value="+1 (222) 222-2222"/></div>
+              <div class="ff"><label>FAX</label><input class="inp" id="ci-fax" value="(111) 111-1111"/></div>
+              <div class="ff"><label>PORTAL MONTHS</label><input class="inp" type="number" id="ci-portal" value="24" placeholder="e.g. 12"/></div>
+            </div>
           </div>
-
         </div>
 
-        <!-- RIGHT -->
-        <div class="col-right">
-
-          <!-- Defaults -->
-          <div class="panel">
-            <div class="panel-head">Defaults</div>
-            <div class="panel-body">
-              <div class="fg" style="gap:6px">
-                <div class="ff">
-                  <label>Pricing Category <span class="ctx-help">?<span class="ctx-help-tip">Determines repair pricing tier. GSA/VA/Federal = government rates. Standard = commercial rates.</span></span> <span class="req">*</span></label>
-                  <select id="def-pricing" class="inp"><option>GSA 2014 (Joint)</option><option>Standard</option><option>Federal</option><option>VA</option><option>Premier</option></select>
-                </div>
-                <div class="ff">
-                  <label>Sales Rep <span class="ctx-help">?<span class="ctx-help-tip">Account manager responsible for this client relationship and contract renewals.</span></span> <span class="req">*</span></label>
-                  <select id="def-salesrep" class="inp"><option>Brandi Cook</option><option>Joseph Brassell</option><option>Rob Mancini</option><option>Tom Velez</option><option>Debbie Hightower</option></select>
-                </div>
-                <div class="ff">
-                  <label>Distributor <span class="req">*</span></label>
-                  <select id="def-dist" class="inp"><option>Total Scope South</option><option>Total Scope North</option><option>Direct</option></select>
-                </div>
-                <div class="ff">
-                  <label>Payment Terms <span class="req">*</span></label>
-                  <select id="def-terms" class="inp"><option>Due Upon Receipt</option><option>Net 30</option><option>Net 60</option></select>
-                </div>
-                <div class="ff">
-                  <label>Credit Limit <span class="req">*</span></label>
-                  <select id="def-credit" class="inp">
-                    <option>1,000</option><option>2,500</option><option>5,000</option>
-                    <option>7,500</option><option>10,000</option><option>15,000</option>
-                    <option>20,000</option><option>25,000</option><option>50,000</option>
-                    <option>100,000</option><option>Unlimited</option>
-                  </select>
-                </div>
-                <div class="ff">
-                  <label>Bill To <span class="req">*</span></label>
-                  <select id="def-billto" class="inp"><option>Customer</option><option>Government</option><option>Third Party</option></select>
-                </div>
-                <div class="fg g2" style="gap:10px;margin-top:2px">
-                  <div class="ff">
-                    <label>Discount %</label>
-                    <input id="def-discount" class="inp" value="22.22%"/>
-                  </div>
-                  <div class="ff">
-                    <label>Markup %</label>
-                    <input id="def-markup" class="inp" value="66.66%"/>
-                  </div>
-                </div>
-
-                <!-- Invoice display options -->
-                <div style="border-top:1px solid var(--border);padding-top:7px;margin-top:4px">
-                  <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Invoice Display</div>
-                  <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label" title="Hides PS3 patient safety level from customer-facing documents">Blind PS3</div>
-                    <label class="toggle"><input id="def-blind-ps3" type="checkbox" checked/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label" title="Shows only totals (no line items) on requisition forms">Req. Totals Only</div>
-                    <label class="toggle"><input id="def-req-totals" type="checkbox" checked/><span class="toggle-slider"></span></label>
-                  </div>
-                  <div class="toggle-row" style="justify-content:space-between; gap:0;">
-                    <div class="toggle-label" title="Hides individual line item totals on final invoice">Blind Totals On Final</div>
-                    <label class="toggle"><input id="def-blind-final" type="checkbox" checked/><span class="toggle-slider"></span></label>
-                  </div>
-                </div>
+        <!-- Section: Billing & Pricing Defaults -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            BILLING &amp; PRICING DEFAULTS
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g4" style="gap:6px 12px">
+              <div class="ff"><label>PRICING CATEGORY <span class="req">*</span></label><select class="inp" id="def-pricing"><option>GSA 2014 (Joint)</option><option>Standard</option><option>Federal</option><option>VA</option><option>Premier</option></select></div>
+              <div class="ff"><label>SALES REP <span class="req">*</span></label><select class="inp" id="def-salesrep"><option>Brandi Cook</option><option>Joseph Brassell</option><option>Rob Mancini</option><option>Tom Velez</option><option>Debbie Hightower</option></select></div>
+              <div class="ff"><label>PAYMENT TERMS <span class="req">*</span></label><select class="inp" id="def-terms"><option>Due Upon Receipt</option><option>Net 30</option><option>Net 60</option></select></div>
+              <div class="ff"><label>CREDIT LIMIT <span class="req">*</span></label>
+                <select class="inp" id="def-credit">
+                  <option>1,000</option><option>2,500</option><option>5,000</option>
+                  <option>7,500</option><option>10,000</option><option>15,000</option>
+                  <option>20,000</option><option>25,000</option><option>50,000</option>
+                  <option>100,000</option><option>Unlimited</option>
+                </select>
               </div>
             </div>
-          </div>
-
-          <!-- Options -->
-          <div class="panel">
-            <div class="panel-head">Options</div>
-            <div class="panel-body">
-              <div class="toggle-row">
-                <div class="toggle-label">Skip Metrics</div>
-                <label class="toggle"><input id="ci-skip" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div style="display:flex;align-items:center;gap:8px" class="toggle-label">
-                  Open Credit Memo
-                  <span id="cm-balance-badge" class="b-active" style="display:none;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer" onclick="openCreditMemo()"></span>
-                </div>
-                <label class="toggle"><input id="ci-credit-memo" type="checkbox" onchange="onCreditMemoToggle(this)"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">National Account</div>
-                <label class="toggle"><input id="ci-national" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">PO Required</div>
-                <label class="toggle"><input id="ci-po-required" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Never Hold</div>
-                <label class="toggle"><input id="ci-never-hold" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Skip Tracking</div>
-                <label class="toggle"><input id="ci-skip-tracking" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Email New Repairs</div>
-                <label class="toggle"><input id="ci-email-repairs" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label" style="display:flex;align-items:center;gap:8px">Bad Debt Risk
-                  <span id="bad-debt-badge" class="b-fail" style="display:none;font-size:10px;font-weight:700;padding:2px 7px">At Risk</span>
-                </div>
-                <label class="toggle"><input id="ci-bad-debt" type="checkbox"/><span class="toggle-slider"></span></label>
-              </div>
-
-              <!-- Service Locations -->
-              <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:6px">
-                <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Service Locations</div>
-                <div class="chip-group">
-                  <button class="chip on" onclick="this.classList.toggle('on')"><span class="dot"></span> Upper Chichester</button>
-                  <button class="chip" onclick="this.classList.toggle('on')"><span class="dot"></span> Nashville</button>
-                </div>
-              </div>
+            <div class="fg g4" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>DISTRIBUTOR <span class="req">*</span></label><select class="inp" id="def-dist"><option>Total Scope South</option><option>Total Scope North</option><option>Direct</option></select></div>
+              <div class="ff"><label>BILL TO <span class="req">*</span></label><select class="inp" id="def-billto"><option>Customer</option><option>Department</option><option>Government</option><option>Third Party</option></select></div>
+              <div class="ff"><label>DISCOUNT %</label><input class="inp" id="def-discount" type="text" value="22.22%"/></div>
+              <div class="ff"><label>MARKUP %</label><input class="inp" id="def-markup" type="text" value="66.66%"/></div>
             </div>
           </div>
-
-          <!-- Integration / ERP -->
-          <div class="panel">
-            <div class="panel-head">Integration</div>
-            <div class="panel-body">
-              <div class="fg" style="gap:6px">
-                <div class="ff">
-                  <label>Great Plains ID</label>
-                  <input id="ci-gpid" class="inp" placeholder="North region"/>
-                </div>
-                <div class="ff">
-                  <label>GP ID South</label>
-                  <input id="ci-gpid-south" class="inp" placeholder="South region"/>
-                </div>
-                <div class="ff">
-                  <label>Peachtree ID</label>
-                  <input id="ci-peachtree" class="inp"/>
-                </div>
-                <div class="fg g2" style="gap:6px">
-                  <div class="ff">
-                    <label>Adjustment %</label>
-                    <input id="ci-adj-pct" class="inp" placeholder="0.00"/>
-                  </div>
-                  <div class="ff" style="display:flex;align-items:flex-end">
-                    <div class="toggle-row" style="padding:0">
-                      <div class="toggle-label" style="font-size:11px">Use Adj %</div>
-                      <label class="toggle"><input id="ci-use-adj" type="checkbox"/><span class="toggle-slider"></span></label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        <!-- Section: Invoice & Options -->
+        <div class="panel" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            INVOICE &amp; OPTIONS
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <label class="opt-chip"><input type="checkbox" id="def-blind-ps3" checked/><span>Blind PS3</span></label>
+              <label class="opt-chip"><input type="checkbox" id="def-req-totals" checked/><span>Req. Totals Only</span></label>
+              <label class="opt-chip"><input type="checkbox" id="def-blind-final" checked/><span>Blind Totals On Final</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-skip"/><span>Skip Metrics</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-po-required"/><span>PO Required</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-never-hold"/><span>Never Hold</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-skip-tracking"/><span>Skip Tracking</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-email-repairs"/><span>Email New Repairs</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-national"/><span>National Account</span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-bad-debt"/><span>Bad Debt Risk <span id="bad-debt-badge" class="b-fail" style="display:none;font-size:10px;font-weight:700;padding:1px 5px">At Risk</span></span></label>
+              <label class="opt-chip"><input type="checkbox" id="ci-credit-memo" onchange="onCreditMemoToggle(this)"/><span>Open Credit Memo <span id="cm-balance-badge" class="b-active" style="display:none;font-size:10px;font-weight:700;padding:1px 5px;cursor:pointer" onclick="event.stopPropagation();openCreditMemo()"></span></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Integration / ERP (collapsed by default) -->
+        <div class="panel collapsed" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            INTEGRATION / ERP
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g3" style="gap:6px 12px">
+              <div class="ff"><label>GREAT PLAINS ID</label><input class="inp" id="ci-gpid" placeholder="North region"/></div>
+              <div class="ff"><label>GP ID SOUTH</label><input class="inp" id="ci-gpid-south" placeholder="South region"/></div>
+              <div class="ff"><label>PEACHTREE ID</label><input class="inp" id="ci-peachtree"/></div>
+            </div>
+            <div class="fg g2" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>ADJUSTMENT %</label><input class="inp" type="number" id="ci-adj-pct" placeholder="0.00"/></div>
+              <div class="ff"><label>USE ADJ %</label><div style="padding-top:10px"><label class="toggle"><input type="checkbox" id="ci-use-adj"/><span class="toggle-slider"></span></label></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Additional Details (collapsed by default) -->
+        <div class="panel collapsed" style="margin-bottom:10px">
+          <div class="panel-head" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+            ADDITIONAL DETAILS
+            <svg width="12" height="12" viewBox="0 0 12 12" style="transition:transform .2s;flex-shrink:0"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="panel-body" style="padding:8px 12px">
+            <div class="fg g3" style="gap:6px 12px">
+              <div class="ff"><label>SECONDARY NAME / AP CONTACT</label><input class="inp" id="ci-name2" placeholder="e.g. Accounts Payable"/></div>
+              <div class="ff"><label>REFERENCE #1</label><input class="inp" id="ci-ref1"/></div>
+              <div class="ff"><label>REFERENCE #2</label><input class="inp" id="ci-ref2"/></div>
+            </div>
+            <div class="fg g3" style="gap:6px 12px;margin-top:6px">
+              <div class="ff"><label>CLIENT TERMS</label><input class="inp" id="ci-terms-text" placeholder="Client-specific terms"/></div>
+              <div class="ff"><label>SALES TAX</label><select class="inp" id="ci-sales-tax"><option value="">— None —</option></select></div>
+              <div class="ff"><label>REPORTING GROUP</label><select class="inp" id="ci-reporting-group"><option value="">— None —</option></select></div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ══════════ ADDRESSES TAB ══════════ -->
@@ -1394,17 +1291,18 @@ function loadClient(c) {
     const clientKey = parseInt(document.querySelector('.client-select').value);
     loadFlagsFromAPI(clientKey);
   }
-  // Update status strip counts
+  // Update status strip counts and tab badges
   const deptCount = (c.departments || []).length;
   const contactCount = (c.contacts || []).length;
   const flagRows = document.querySelectorAll('#flags-tbody tr:not(#flags-empty-row)');
   const flagCount = flagRows.length;
-  const ssDepts = document.getElementById('ss-depts');
-  const ssContacts = document.getElementById('ss-contacts');
-  const ssFlags = document.getElementById('ss-flags');
-  if (ssDepts) ssDepts.textContent = deptCount;
-  if (ssContacts) ssContacts.textContent = contactCount;
-  if (ssFlags) ssFlags.textContent = flagCount;
+  // Tab badges
+  const badgeDepts = document.getElementById('badge-depts');
+  const badgeContacts = document.getElementById('badge-contacts');
+  const badgeFlags = document.getElementById('badge-flags');
+  if (badgeDepts) badgeDepts.textContent = deptCount || '';
+  if (badgeContacts) badgeContacts.textContent = contactCount || '';
+  if (badgeFlags) badgeFlags.textContent = flagCount || '';
   _dirty = false;
   updateSaveStatus('ready');
   // Smart Alerts
@@ -1563,8 +1461,8 @@ async function loadFlagsFromAPI(clientKey) {
       return true;
     });
     renderFlagsFromAPI(_currentFlags);
-    const countEl = document.getElementById('ss-flags');
-    if (countEl) countEl.textContent = _currentFlags.length;
+    const badgeFlags = document.getElementById('badge-flags');
+    if (badgeFlags) badgeFlags.textContent = _currentFlags.length || '';
   } catch (e) {
     console.warn('[TSI Clients] Flag API failed:', e.message);
     const tbody = document.getElementById('flags-tbody');
@@ -1643,9 +1541,9 @@ async function loadContactsFromAPI(clientKey) {
     const list = Array.isArray(contacts) ? contacts : [];
     _currentContacts = list;
     renderContactsFromAPI(list);
-    // Update status strip — show total contacts count
-    const countEl = document.getElementById('ss-contacts');
-    if (countEl) countEl.textContent = list.length;
+    // Update tab badge — show total contacts count
+    const badgeContacts = document.getElementById('badge-contacts');
+    if (badgeContacts) badgeContacts.textContent = list.length || '';
   } catch (e) {
     console.warn('[TSI Clients] Contact API failed:', e.message);
     const tbody = document.getElementById('contacts-tbody');
@@ -2341,6 +2239,23 @@ function _renderClientSearchRows(q) {
   }).join('');
 }
 
+async function loadClientKPIs(clientKey) {
+  if (!_liveMode || !clientKey) return;
+  try {
+    const kpi = await API.getClientKPIs(clientKey);
+    const rev = document.getElementById('ss-revenue');
+    const open = document.getElementById('ss-open-repairs');
+    const scopes = document.getElementById('ss-scopes');
+    const tat = document.getElementById('ss-tat');
+    if (rev) rev.textContent = '$' + (kpi.revenueYTD || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    if (open) open.textContent = kpi.openRepairs || '0';
+    if (scopes) scopes.textContent = kpi.scopeCount || '0';
+    if (tat) tat.textContent = (kpi.avgTAT || 0) + ' days';
+  } catch (e) {
+    console.warn('[TSI Clients] KPI load failed:', e.message);
+  }
+}
+
 // Load a specific client by API key
 async function selectClientByKey(key, name) {
   document.getElementById('searchModal').classList.remove('open');
@@ -2357,6 +2272,7 @@ async function selectClientByKey(key, name) {
       const mapped = mapApiClient(detail);
       _currentClientName = mapped.name;
       loadClient(mapped);
+      loadClientKPIs(key); // fire without await — non-blocking
       return;
     } catch (e) {
       console.warn('[TSI Clients] Failed to load client detail:', e);
@@ -2749,8 +2665,9 @@ const flagsTbody = document.getElementById('flags-tbody');
 if (flagsTbody) {
   const obs = new MutationObserver(() => {
     const rows = flagsTbody.querySelectorAll('tr:not(#flags-empty-row)');
-    const ssFlags = document.getElementById('ss-flags');
-    if (ssFlags) ssFlags.textContent = rows.length;
+    const cnt = rows.length;
+    const badgeFlags = document.getElementById('badge-flags');
+    if (badgeFlags) badgeFlags.textContent = cnt || '';
   });
   obs.observe(flagsTbody, { childList: true });
 }
