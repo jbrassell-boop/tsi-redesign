@@ -2606,19 +2606,15 @@ async function initPage() {
   // Try loading from API
   try {
     const locKey = document.getElementById('svcLocation').value || 1;
-    const clients = await API.getAllClients(locKey);
+    const [clients, depts] = await Promise.all([
+      API.getAllClients(locKey),
+      API.getAllDepartments(locKey).catch(e => { console.warn('[TSI Clients] Could not load departments:', e.message); return []; })
+    ]);
     if (clients && clients.length > 0) {
       _liveMode = true;
       API.UI.updateDemoBadge('api');
+      _allDepartments = depts || [];
       populateClientList(clients);
-
-      // Cache all departments for this service location
-      try {
-        _allDepartments = await API.getAllDepartments(locKey) || [];
-      } catch (e) {
-        console.warn('[TSI Clients] Could not load departments:', e.message);
-        _allDepartments = [];
-      }
 
       // Load reference dropdowns
       loadLookupDropdowns();
@@ -2627,9 +2623,11 @@ async function initPage() {
       const sel = document.querySelector('.client-select');
       sel.onchange = function() { onClientChange(this.value); };
 
-      // Load first client detail
-      const first = clients[0];
-      await selectClientByKey(first.lClientKey, first.sClientName1);
+      // Load first client detail (use dropdown's first option — list is sorted)
+      const sel2 = document.querySelector('.client-select');
+      const firstKey = sel2.options[0] ? sel2.options[0].value : '';
+      const firstName = sel2.options[0] ? sel2.options[0].textContent : '';
+      if (firstKey) await selectClientByKey(firstKey, firstName);
       return;
     }
   } catch (e) {
