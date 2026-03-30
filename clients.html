@@ -77,12 +77,12 @@
         <div class="toolbar-more" style="position:relative;display:inline-flex;align-items:center">
           <button class="btn btn-outline" title="More actions" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:4px 10px;font-size:16px;letter-spacing:2px;color:var(--muted);border-color:var(--border)">&#x22EF;</button>
           <div class="toolbar-more-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:var(--z-dropdown);min-width:200px;padding:6px 0;font-size:13px">
-            <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--warning)" onmouseover="this.style.background='#f7f3e8'" onmouseout="this.style.background=''">
+            <button onclick="confirmDeactivate();this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--warning)" onmouseover="this.style.background='var(--warning-bg,#FFFBEB)'" onmouseout="this.style.background=''">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
               Deactivate Client
             </button>
             <div style="height:1px;background:var(--border);margin:4px 12px"></div>
-            <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--red)" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
+            <button onclick="document.getElementById('deleteClientModal').classList.add('open');this.closest('.toolbar-more-dropdown').style.display='none'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 16px;border:none;background:none;cursor:pointer;font-size:13px;text-align:left;font-family:inherit;color:var(--red)" onmouseover="this.style.background='var(--danger-bg,#FEF2F2)'" onmouseout="this.style.background=''">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
               Delete Client
             </button>
@@ -546,7 +546,7 @@
       <!-- Search input -->
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <div style="position:relative;flex:1">
-          <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8896AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted,#8896AA)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="clientSearchInput" class="inp" style="padding-left:34px" placeholder="Search by zip, name, city, or ID…" oninput="filterClients(this.value)" autofocus/>
         </div>
         <select class="inp" style="width:160px">
@@ -1161,11 +1161,11 @@ function loadClient(c) {
     const sIcon = statusChip.querySelector('.s-icon');
     const sVal = statusChip.querySelector('.s-val');
     if (c.active) {
-      sIcon.style.background = '#F0FDF4';
+      sIcon.style.background = 'var(--success-bg,#F0FDF4)';
       sVal.textContent = 'Active';
       sVal.className = 's-val s-green';
     } else {
-      sIcon.style.background = '#FEF2F2';
+      sIcon.style.background = 'var(--danger-bg,#FEF2F2)';
       sVal.textContent = 'Inactive';
       sVal.className = 's-val s-red';
     }
@@ -1493,7 +1493,7 @@ function renderFlagsFromAPI(flags) {
 async function deleteFlagAPI(btn, flagKey) {
   if (!btn._confirming) {
     btn._confirming = true; btn._origText = btn.textContent; btn._origBg = btn.style.background;
-    btn.textContent = 'Sure?'; btn.style.background = '#dc3545'; btn.style.color = '#fff';
+    btn.textContent = 'Sure?'; btn.style.background = 'var(--red,#dc3545)'; btn.style.color = '#fff';
     setTimeout(() => { if (btn._confirming) { btn._confirming = false; btn.textContent = btn._origText; btn.style.background = btn._origBg; btn.style.color = ''; } }, 3000);
     return;
   }
@@ -1688,8 +1688,8 @@ function renderCreditMemos(c) {
   }
   list.innerHTML = memos.map((m, idx) => {
     const statusColor = m.status === 'Open' ? 'var(--green)' : m.status === 'Closed' ? 'var(--muted)' : 'var(--amber)';
-    const statusBg = m.status === 'Open' ? '#F0FDF4' : m.status === 'Closed' ? '#F8F9FA' : '#FFFBEB';
-    const statusBorder = m.status === 'Open' ? '#BBF7D0' : m.status === 'Closed' ? '#DEE2E6' : '#FDE68A';
+    const statusBg = m.status === 'Open' ? 'var(--success-bg,#F0FDF4)' : m.status === 'Closed' ? 'var(--neutral-50,#F8F9FA)' : 'var(--warning-bg,#FFFBEB)';
+    const statusBorder = m.status === 'Open' ? 'var(--success-border,#BBF7D0)' : m.status === 'Closed' ? 'var(--border,#DEE2E6)' : 'var(--warning-border,#FDE68A)';
     const apps = m.applications.length > 0
       ? `<div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Applied To</div>
@@ -2036,7 +2036,7 @@ function doDeactivate() {
   if (statusChip) {
     const sIcon = statusChip.querySelector('.s-icon');
     const sVal = statusChip.querySelector('.s-val');
-    sIcon.style.background = '#FEF2F2';
+    sIcon.style.background = 'var(--danger-bg,#FEF2F2)';
     sVal.textContent = 'Inactive';
     sVal.className = 's-val s-red';
   }
@@ -2433,6 +2433,25 @@ async function saveClientToAPI() {
     pbBlindPS3: document.getElementById('def-blind-ps3').checked,
     pbReqTotalsOnly: document.getElementById('def-req-totals').checked,
     pbBlindTotalsOnFinal: document.getElementById('def-blind-final').checked,
+    // Extended fields
+    pdtClientSince: document.getElementById('ci-since').value || null,
+    plPortalMonths: parseInt(document.getElementById('ci-portal').value) || null,
+    psPORequired: document.getElementById('ci-po-required').checked ? 'Y' : 'N',
+    pbNeverHold: document.getElementById('ci-never-hold').checked,
+    pbSkipTracking: document.getElementById('ci-skip-tracking').checked,
+    pbEmailNewRepairs: document.getElementById('ci-email-repairs').checked,
+    psBadDebtRisk: document.getElementById('ci-bad-debt').checked ? 'Y' : 'N',
+    psClientName2: document.getElementById('ci-name2').value.trim(),
+    psReferenceNum: document.getElementById('ci-ref1').value.trim(),
+    psReferenceNum2: document.getElementById('ci-ref2').value.trim(),
+    psClntTerms: document.getElementById('ci-terms-text').value.trim(),
+    plSalesTaxKey: parseInt(document.getElementById('ci-sales-tax').value) || null,
+    plReportingGroupKey: parseInt(document.getElementById('ci-reporting-group').value) || null,
+    psGPID: document.getElementById('ci-gpid').value.trim(),
+    psGPIDSouth: document.getElementById('ci-gpid-south').value.trim(),
+    psPeachTreeCustID: document.getElementById('ci-peachtree').value.trim(),
+    pdblAdjustmentPct: parseFloat(document.getElementById('ci-adj-pct').value) || null,
+    pbUseAdjustmentPct: document.getElementById('ci-use-adj').checked,
   };
 
   try {
