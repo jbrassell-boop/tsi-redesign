@@ -34,11 +34,13 @@ const CONTRACT_SELECT = `
     LEFT JOIN tblPaymentTerms pt ON pt.lPaymentTermsKey = con.lPaymentTermsKey
 `;
 
-// POST /Contract/GetAllContractsList — Paginated contract list
+// POST /Contract/GetAllContractsList — Paginated contract list (active by default)
 router.post('/Contract/GetAllContractsList', async (req, res, next) => {
   try {
     const body = req.body || {};
-    const result = await db.queryPage(CONTRACT_SELECT,
+    const showExpired = body.showExpired === true;
+    const where = showExpired ? '' : ' WHERE con.dtDateTermination >= GETDATE()';
+    const result = await db.queryPage(`${CONTRACT_SELECT}${where}`,
       'con.dtDateTermination DESC', {}, body.Pagination);
     res.json(result);
   } catch (e) { next(e); }
