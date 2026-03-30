@@ -203,12 +203,16 @@ router.get('/Analytics/GetTATMatrix', async (req, res, next) => {
       ORDER BY r.dtDateOut DESC`, {});
 
     // Load holidays once — used to subtract from business day calc
-    const holidays = await db.query(`
-      SELECT CAST(dtHoliday AS date) AS hDate FROM tblHolidays`, {});
-    const holidaySet = new Set(holidays.map(h => {
-      const d = new Date(h.hDate);
-      return d.toISOString().substring(0, 10);
-    }));
+    // tblHolidays may not exist in all DB instances — gracefully fallback to weekends-only
+    let holidaySet = new Set();
+    try {
+      const holidays = await db.query(`
+        SELECT CAST(dtHoliday AS date) AS hDate FROM tblHolidays`, {});
+      holidaySet = new Set(holidays.map(h => {
+        const d = new Date(h.hDate);
+        return d.toISOString().substring(0, 10);
+      }));
+    } catch (_) { /* table missing — weekends-only calc */ }
 
     // Count business days between two dates (inclusive start, exclusive end — like TAT)
     function businessDays(dtIn, dtOut) {

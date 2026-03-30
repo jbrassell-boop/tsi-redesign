@@ -153,6 +153,7 @@ router.post('/Quality/Update', async (req, res, next) => {
 });
 
 // GET /api/Quality/GetNCRs — ISO complaints flagged as non-conformance (sISONonConformance set)
+// Uses same safe column set as GetAll (TSI_Demo may lack some WinScopeNet columns)
 router.get('/Quality/GetNCRs', async (req, res, next) => {
   try {
     const rows = await db.query(`
@@ -163,8 +164,8 @@ router.get('/Quality/GetNCRs', async (req, res, next) => {
         ic.dtEvalDate, ic.lEvalUserKey,
         ic.dtFnlDispDate, ic.lFnlDispQAUserKey,
         ic.sISOComplaint, ic.sISONonConformance,
-        ic.mComplaint, ic.mEvalResults, ic.mFnlDispAction,
-        ic.dtLastUpdate, ic.dtCreateDate,
+        ic.mComplaint,
+        ic.dtLastUpdate,
         ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(s.sSerialNumber, '') AS sSerialNumber,
@@ -194,9 +195,8 @@ router.get('/Quality/GetCAPAs', async (req, res, next) => {
         ic.dtEvalDate, ic.lEvalUserKey,
         ic.dtFnlDispDate, ic.lFnlDispQAUserKey,
         ic.sISOComplaint, ic.sISONonConformance,
-        ic.mComplaint, ic.mEvalResults, ic.mFnlDispAction,
-        ic.sImpactOnProduct, ic.sVOE,
-        ic.dtLastUpdate, ic.dtCreateDate,
+        ic.mComplaint,
+        ic.dtLastUpdate,
         ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(s.sSerialNumber, '') AS sSerialNumber,
@@ -216,14 +216,13 @@ router.get('/Quality/GetCAPAs', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/Quality/GetRework — Repairs flagged as rework required (sReworkReqd = 'Y')
-// Also includes repairs returned within 40 days (bFirstRepair = 0)
+// GET /api/Quality/GetRework — Repairs where same scope was repaired within 40 days
+// Identifies rework by finding scopes with multiple repairs in close succession
 router.get('/Quality/GetRework', async (req, res, next) => {
   try {
     const rows = await db.query(`
       SELECT TOP 500
         r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtDateOut,
-        r.sReworkReqd, r.mCommentsRework, r.bFirstRepair,
         r.lDepartmentKey,
         ISNULL(s.sSerialNumber, '') AS sSerialNumber,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
@@ -236,9 +235,12 @@ router.get('/Quality/GetRework', async (req, res, next) => {
         LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
         LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
         LEFT JOIN tblSalesRep tech ON tech.lSalesRepKey = r.lTechnicianKey
-      WHERE r.sReworkReqd = 'Y'
-         OR r.bFirstRepair = 0
-      ORDER BY r.dtDateIn DESC`, {});
+      WHERE r.lScopeKey IN (
+        SELECT lScopeKey FROM tblRepair
+        WHERE lScopeKey > 0
+        GROUP BY lScopeKey HAVING COUNT(*) > 1
+      )
+      ORDER BY r.lScopeKey, r.dtDateIn DESC`, {});
     res.json({ success: true, data: rows });
   } catch (e) { next(e); }
 });
