@@ -23,13 +23,13 @@ const config = isCloud
         encrypt: true,
         trustServerCertificate: false
       },
-      pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
+      pool: { max: 50, min: 5, idleTimeoutMillis: 30000 }
     }
   : {
       database: 'TSI_Demo',
       driver: 'msnodesqlv8',
       connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TSI_Demo;Trusted_Connection=yes;TrustServerCertificate=yes;',
-      pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
+      pool: { max: 50, min: 5, idleTimeoutMillis: 30000 }
     };
 
 let _pool = null;
@@ -75,16 +75,14 @@ async function queryPage(sqlText, orderBy, params, pagination) {
   const pageSize = parseInt(page.PageSize) || 50;
   const offset = (pageNum - 1) * pageSize;
 
-  // Get total count
-  const countSql = `SELECT COUNT(*) AS cnt FROM (${sqlText}) AS _t`;
-  const countResult = await query(countSql, params);
-  const totalRecord = countResult[0] ? countResult[0].cnt : 0;
-
-  // Get page
-  const pageSql = `${sqlText} ORDER BY ${orderBy} OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+  // Single query with COUNT(*) OVER() — one pass instead of two
+  const pageSql = `SELECT *, COUNT(*) OVER() AS _totalRecord FROM (${sqlText}) AS _src ORDER BY ${orderBy} OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
   const rows = await query(pageSql, params);
+  const totalRecord = rows.length > 0 ? rows[0]._totalRecord : 0;
 
-  return { dataSource: rows, totalRecord };
+  // Strip the _totalRecord column from results
+  const dataSource = rows.map(r => { const { _totalRecord, ...rest } = r; return rest; });
+  return { dataSource, totalRecord };
 }
 
 module.exports = { connect, close, query, queryOne, queryPage, sql };

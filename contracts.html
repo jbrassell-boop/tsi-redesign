@@ -3101,8 +3101,8 @@ async function loadContracts() {
 API.UI.init();
 wireButtons();
 API.UI.showSkeleton('skContracts', 6);
-// Load lookups first so type/frequency resolution works, then contracts
-loadLookups().then(() => loadContracts()).then(function() { API.UI.hideSkeleton('skContracts'); });
+// Load lookups and contracts in parallel — they don't depend on each other
+Promise.all([loadLookups(), loadContracts()]).then(function() { API.UI.hideSkeleton('skContracts'); });
 
 // Tab bar scroll-fade indicator
 (function() {

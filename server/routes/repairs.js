@@ -209,10 +209,12 @@ router.post('/Dashboard/GetDashboardScopeDataList', async (req, res, next) => {
     if (type === 'Flexible' || type === 'F') typeFilter = "AND st.sRigidOrFlexible = 'F'";
     else if (type === 'Rigid' || type === 'R') typeFilter = "AND st.sRigidOrFlexible = 'R'";
 
+    const limit = parseInt(body.limit) || 500;
     const rows = await db.query(`${REPAIR_SELECT}
       WHERE (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
         ${typeFilter}
-      ORDER BY r.dtDateIn DESC`, { svcKey });
+      ORDER BY r.dtDateIn DESC
+      OFFSET 0 ROWS FETCH NEXT @limit ROWS ONLY`, { svcKey, limit });
     res.json(rows);
   } catch (e) { next(e); }
 });
@@ -235,22 +237,26 @@ router.get('/Repair/GetReadyToShip', async (req, res, next) => {
 router.post('/Repair/BatchShip', async (req, res, next) => {
   try {
     const b = req.body || {};
-    const repairKeys = Array.isArray(b.repairKeys) ? b.repairKeys : [];
+    const repairKeys = Array.isArray(b.repairKeys) ? b.repairKeys.map(k => parseInt(k)).filter(k => k > 0) : [];
     if (!repairKeys.length) return res.status(400).json({ error: 'repairKeys[] required' });
 
-    let shipped = 0;
-    for (const key of repairKeys) {
-      const repairKey = parseInt(key) || 0;
-      if (!repairKey) continue;
-      await db.query(`
-        UPDATE tblRepair SET lRepairStatusID = 8, dtShipDate = GETDATE(), dtLastUpdate = GETDATE()
-        WHERE lRepairKey = @repairKey`, { repairKey });
-      await db.query(`
-        INSERT INTO tblStatusTran (lRepairKey, lStatusKey, sStatusDesc, dtCompleteDate, dtCreateDate)
-        VALUES (@repairKey, 18, 'Shipped', GETDATE(), GETDATE())`, { repairKey });
-      shipped++;
-    }
-    res.json({ shipped, success: true });
+    // Build parameterized key list
+    const keyParams = {};
+    const keyPlaceholders = repairKeys.map((k, i) => { keyParams[`k${i}`] = k; return `@k${i}`; });
+    const keyList = keyPlaceholders.join(',');
+
+    // Bulk update repairs
+    await db.query(`
+      UPDATE tblRepair SET lRepairStatusID = 8, dtShipDate = GETDATE(), dtLastUpdate = GETDATE()
+      WHERE lRepairKey IN (${keyList})`, keyParams);
+
+    // Bulk insert status transitions
+    await db.query(`
+      INSERT INTO tblStatusTran (lRepairKey, lStatusKey, sStatusDesc, dtCompleteDate, dtCreateDate)
+      SELECT lRepairKey, 18, 'Shipped', GETDATE(), GETDATE()
+      FROM tblRepair WHERE lRepairKey IN (${keyList})`, keyParams);
+
+    res.json({ shipped: repairKeys.length, success: true });
   } catch (e) { next(e); }
 });
 

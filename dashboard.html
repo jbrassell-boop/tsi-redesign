@@ -1703,7 +1703,7 @@ function submitNewWorkspace() {
 function changeServiceLocation() {
   const sel = document.getElementById('svcLocation');
   const locationKey = parseInt(sel.value) || 1;
-  loadDashboardData({ plServiceLocationKey: locationKey, instrumentTypeValue: 'all' });
+  loadDashboardData({ plServiceLocationKey: locationKey, instrumentTypeValue: 'all', limit: 500 });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1821,7 +1821,7 @@ async function populateKpiHero() {
 // ═══════════════════════════════════════════════════════
 API.UI.init();
 API.UI.showSkeleton('skDashboard', 6);
-loadDashboardData({ instrumentTypeValue: 'all' }).then(function() {
+loadDashboardData({ instrumentTypeValue: 'all', limit: 500 }).then(function() {
   API.UI.hideSkeleton('skDashboard');
   populateKpiHero();
 });

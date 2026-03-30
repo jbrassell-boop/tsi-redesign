@@ -194,6 +194,19 @@ const API = (() => {
     return request('DELETE', endpoint);
   }
 
+  // ── Lookup cache (5-minute TTL) ──
+  const _lookupCache = {};
+  const CACHE_TTL = 5 * 60 * 1000;
+
+  function cachedFetch(key, fetchFn) {
+    const cached = _lookupCache[key];
+    if (cached && (Date.now() - cached.ts < CACHE_TTL)) return Promise.resolve(cached.data);
+    return fetchFn().then(data => {
+      _lookupCache[key] = { data, ts: Date.now() };
+      return data;
+    });
+  }
+
   // ═══════════════════════════════════════════════════════
   //  Domain-Specific API Calls — ALL 49 Controllers
   //  Full coverage of BrightLogix .NET API (445 endpoints)
@@ -216,8 +229,8 @@ const API = (() => {
   async function addTask(data) { return post('/DashBoardTask/AddTask', data); }
   async function updateTask(data) { return post('/DashBoardTask/UpdateTasks', data); }
   async function deleteTask(taskKey) { return del('/DashBoardTask/DeleteTask?plTaskKey=' + taskKey); }
-  async function getTaskStatuses(includeBlank, includeNotCompleted) { return get('/DashBoardTask/GetAllTaskStatus?pbIncludeBlank=' + (includeBlank||true) + '&pbIncludeNotCompleted=' + (includeNotCompleted||false)); }
-  async function getTaskPriorities(includeBlank) { return get('/DashBoardTask/GetAllTaskPriorities?pbIncludeBlank=' + (includeBlank||true)); }
+  function getTaskStatuses(includeBlank, includeNotCompleted) { return cachedFetch('taskStatuses_' + (includeBlank||true) + '_' + (includeNotCompleted||false), () => get('/DashBoardTask/GetAllTaskStatus?pbIncludeBlank=' + (includeBlank||true) + '&pbIncludeNotCompleted=' + (includeNotCompleted||false))); }
+  function getTaskPriorities(includeBlank) { return cachedFetch('taskPriorities_' + (includeBlank||true), () => get('/DashBoardTask/GetAllTaskPriorities?pbIncludeBlank=' + (includeBlank||true))); }
 
   // ── DashBoardTaskLoaner (4) ───────────────────────────
   async function addTaskLoaner(data) { return post('/DashBoardTaskLoaner/AddTaskLoaner', data); }
@@ -226,7 +239,7 @@ const API = (() => {
   async function deleteTaskLoaner(key) { return del('/DashBoardTaskLoaner/DeleteTaskLoaner?plTaskLoanerKey=' + key); }
 
   // ── DashboardTaskTypes (5) ────────────────────────────
-  async function getTaskTypes() { return get('/DashboardTaskTypes/GetAllTaskTypeList'); }
+  function getTaskTypes() { return cachedFetch('taskTypes', () => get('/DashboardTaskTypes/GetAllTaskTypeList')); }
   async function getTaskType() { return get('/DashboardTaskTypes/GetAllTaskType'); }
 
   // ── Client (7) ────────────────────────────────────────
@@ -263,12 +276,12 @@ const API = (() => {
   async function getAllScopes(deptKey, isDead) { return get('/Scopes/GetAllScopes?plDepartmentKey=' + deptKey + (isDead ? '&psScopeIsDead=' + isDead : '')); }
   async function getScopeByKey(scopeKey) { return get('/Scopes/GetScopeByScopeId?plScopeKey=' + scopeKey); }
   async function checkOpenRepairForScope(scopeKey) { return get('/Scopes/CheckOpenRepaireScope?plScopeKey=' + scopeKey); }
-  async function getAllScopeTypes() { return get('/Scopes/GetAllScopeType'); }
+  function getAllScopeTypes() { return cachedFetch('scopeTypes', () => get('/Scopes/GetAllScopeType')); }
   async function addScope(data) { return post('/Scopes/AddScope', data); }
   async function deleteScope(scopeKey) { return del('/Scopes/DeleteScope?plScopeKey=' + scopeKey); }
 
   // ── ScopeType (6) — Department scope type assignments ─
-  async function getScopeTypeNames(instrumentType) { return get('/ScopeType/GetscopeTypeNameList' + (instrumentType ? '?psInstrumentType=' + instrumentType : '')); }
+  function getScopeTypeNames(instrumentType) { return cachedFetch('scopeTypeNames_' + (instrumentType||''), () => get('/ScopeType/GetscopeTypeNameList' + (instrumentType ? '?psInstrumentType=' + instrumentType : ''))); }
   async function getDepartmentScopeTypes(deptKey) { return get('/ScopeType/GetDepartmentScopeTypesList?plDepartmentKey=' + deptKey); }
   async function getAvailableDepartmentScopeTypes(deptKey, desc) { return get('/ScopeType/GetAvailableDepartmentScopeTypesList?plDepartmentKey=' + deptKey + (desc ? '&psScopeTypeDesc=' + desc : '')); }
   async function addDepartmentScopeTypes(data) { return post('/ScopeType/AddDepartmentScopeTypes', data); }
@@ -290,10 +303,10 @@ const API = (() => {
   async function getRepairList(svcKey, deptKey) { return get('/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=' + (deptKey||0) + '&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairDetail(repairKey, svcKey) { return get('/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + repairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=' + (svcKey||1)); }
   async function getRepairByWO(wo) { return get('/Repair/GetByWorkOrder?wo=' + encodeURIComponent(wo)); }
-  async function getRepairReasons() { return get('/Repair/GetAllRepairReasons?plRepairReasonKey=0'); }
-  async function getDeliveryMethods() { return get('/Repair/GetAllDeliveryMethods'); }
+  function getRepairReasons() { return cachedFetch('repairReasons', () => get('/Repair/GetAllRepairReasons?plRepairReasonKey=0')); }
+  function getDeliveryMethods() { return cachedFetch('deliveryMethods', () => get('/Repair/GetAllDeliveryMethods')); }
   async function getAllTechs() { return get('/Repair/GetAllTechs'); }
-  async function getPatientSafetyLevels() { return get('/Repair/GetAllPatientSafetyLevels'); }
+  function getPatientSafetyLevels() { return cachedFetch('patientSafetyLevels', () => get('/Repair/GetAllPatientSafetyLevels')); }
   // NOTE: AddRepair/UpdateRepair/DeleteRepair not yet in BrightLogix API (verified 2026-03-15).
   // These stubs are ready to work the moment MOL-Tech adds the endpoints.
   async function addRepair(data) { return post('/Repair/AddRepair', data); }
@@ -308,8 +321,8 @@ const API = (() => {
   async function addRepairItem(data) { return post('/RepairItems/AddRepairItems', data); }
   async function updateRepairItem(data) { return post('/RepairItems/UpdateRepairItems', data); }
   async function deleteRepairItem(key) { return del('/RepairItems/DeleteRepairItems?plRepairItemKey=' + key); }
-  async function getRepairLevels() { return get('/RepairItems/GetRepairLevels'); }
-  async function getRepairStatuses() { return get('/RepairItems/GetRepairStatus'); }
+  function getRepairLevels() { return cachedFetch('repairLevels', () => get('/RepairItems/GetRepairLevels')); }
+  function getRepairStatuses() { return cachedFetch('repairStatuses', () => get('/RepairItems/GetRepairStatus')); }
 
   // ── Detail (8) — Repair line item transactions ────────
   async function getRepairDetailItems(repairKey) { return get('/Detail/GetAllRepairDetailsList?plRepairKey=' + repairKey); }
@@ -355,8 +368,8 @@ const API = (() => {
   async function addContract(data) { return post('/Contract/AddContract', data); }
   async function updateContract(data) { return post('/Contract/UpdateContract', data); }
   async function deleteContract(key) { return del('/Contract/DeleteContract?plContractKey=' + key); }
-  async function getContractTypes(includeBlank) { return get('/Contract/GetAllContractType?pbIncludeBlank=' + (includeBlank||true)); }
-  async function getContractServicePlanTerms(includeBlank) { return get('/Contract/GetAllContractServicePlanTerms?pbIncludeBlank=' + (includeBlank||true)); }
+  function getContractTypes(includeBlank) { return cachedFetch('contractTypes_' + (includeBlank||true), () => get('/Contract/GetAllContractType?pbIncludeBlank=' + (includeBlank||true))); }
+  function getContractServicePlanTerms(includeBlank) { return cachedFetch('contractTerms_' + (includeBlank||true), () => get('/Contract/GetAllContractServicePlanTerms?pbIncludeBlank=' + (includeBlank||true))); }
   async function getContractDepartments(key, contractKey, clientKey) { return get('/Contract/GetContractDepartments?plContractDepartmentKey=' + (key||0) + '&plContractKey=' + (contractKey||0) + '&plClientKey=' + (clientKey||0)); }
   async function getContractDepartmentsAvailable(contractKey) { return get('/Contract/GetContractDepartmentsAvailable?plContractKey=' + contractKey); }
   async function getContractScopes(data) { return post('/Contract/GetAllContractScopes', data); }
@@ -391,21 +404,21 @@ const API = (() => {
   async function deleteFlag(key) { return del('/Flag/DeleteFlag?plFlagKey=' + key); }
 
   // ── Lookups / Reference ───────────────────────────────
-  async function getAllSalesReps() { return get('/SalesRepNames/GetAllSalesRepNames'); }
-  async function getAllPricingCategories(opts) { return get('/PricingCategory/GetAllPricingCategories' + (opts ? '?pbDefaultFirst=' + (opts.defaultFirst||false) + '&pbActiveOnly=' + (opts.activeOnly||false) : '')); }
+  function getAllSalesReps() { return cachedFetch('salesReps', () => get('/SalesRepNames/GetAllSalesRepNames')); }
+  function getAllPricingCategories(opts) { return cachedFetch('pricingCats_' + JSON.stringify(opts||null), () => get('/PricingCategory/GetAllPricingCategories' + (opts ? '?pbDefaultFirst=' + (opts.defaultFirst||false) + '&pbActiveOnly=' + (opts.activeOnly||false) : ''))); }
   async function getPricingDetails(opts) { return get('/pricing/details' + (opts ? '?' + new URLSearchParams(opts) : '')); }
   async function getPricingForItem(repairItemKey) { return get('/pricing/details/' + repairItemKey); }
   async function getPricingByCategory(categoryKey) { return get('/pricing/by-category/' + categoryKey); }
   async function validatePrice(repairItemKey, pricingCategoryKey) { return get('/pricing/validate?repairItemKey=' + repairItemKey + '&pricingCategoryKey=' + pricingCategoryKey); }
-  async function getPricingCategories() { return get('/pricing/categories'); }
+  function getPricingCategories() { return cachedFetch('pricingCategories', () => get('/pricing/categories')); }
   async function addPricingCategory(data) { return post('/pricing/categories', data); }
   async function updatePricingCategory(key, data) { return put('/pricing/categories/' + key, data); }
   async function updatePricingDetail(data) { return put('/pricing/detail', data); }
   async function importPricing(data) { return post('/pricing/import', data); }
-  async function getAllPaymentTerms() { return get('/PaymentTerms/GetAllPaymentTerms'); }
-  async function getAllCreditLimits() { return get('/CreditLimit/GetAllCreditLimits'); }
-  async function getAllDistributors() { return get('/DistributorName/GetAllDistributorNames'); }
-  async function getInstrumentTypes() { return get('/InstrumentType/GetInstrumentTypes'); }
+  function getAllPaymentTerms() { return cachedFetch('paymentTerms', () => get('/PaymentTerms/GetAllPaymentTerms')); }
+  function getAllCreditLimits() { return cachedFetch('creditLimits', () => get('/CreditLimit/GetAllCreditLimits')); }
+  function getAllDistributors() { return cachedFetch('distributors', () => get('/DistributorName/GetAllDistributorNames')); }
+  function getInstrumentTypes() { return cachedFetch('instrumentTypes', () => get('/InstrumentType/GetInstrumentTypes')); }
 
   // ── UserManagement (8) ────────────────────────────────
   async function updateUser(data) { return post('/UserManagement/UpdateUser', data); }

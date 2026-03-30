@@ -4,6 +4,7 @@
 //  Mirrors BrightLogix API endpoints for local development
 // ═══════════════════════════════════════════════════════
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -15,7 +16,16 @@ const ROOT = path.resolve(__dirname, '..');
 
 // Middleware
 app.use(cors({ origin: true })); // allow all origins in dev
+app.use(compression());
 app.use(express.json({ limit: '10mb' }));
+
+// Cache headers for lookup data
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=60');
+  }
+  next();
+});
 
 // Request logging
 app.use('/api', (req, res, next) => {

@@ -136,11 +136,9 @@ router.get('/Invoice/GetReadyToInvoice', async (req, res, next) => {
         LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
         LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
         LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+        LEFT JOIN tblInvoice inv2 ON inv2.lRepairKey = r.lRepairKey
       WHERE r.lRepairStatusID = 8
-        AND r.lRepairKey NOT IN (
-          SELECT DISTINCT inv.lRepairKey FROM tblInvoice inv
-          WHERE inv.lRepairKey IS NOT NULL
-        )
+        AND inv2.lRepairKey IS NULL
         AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
       ORDER BY r.dtShipDate`, { svcKey });
     res.json(rows);
