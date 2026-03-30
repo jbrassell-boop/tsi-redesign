@@ -12,9 +12,9 @@ const db = require('../db');
 // GET /api/ProductSales/ProductSalesSearch — Search product sales
 router.get('/ProductSales/ProductSalesSearch', async (req, res, next) => {
   try {
-    const invoice = req.query.invoice || null;
-    const po = req.query.po || null;
-    const desc = req.query.desc || null;
+    const invoice = req.query.psInvoiceNumber || null;
+    const po = req.query.psPONumber || null;
+    const desc = req.query.psDescription2 || null;
     const params = {
       invoice: invoice ? `%${invoice}%` : null,
       po: po ? `%${po}%` : null,

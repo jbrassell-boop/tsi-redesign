@@ -851,20 +851,26 @@ function applyFilters() {
   const showInactive = document.querySelector('.filter-bar .toggle input').checked;
   const search = (document.getElementById('suppSearch').value || '').toLowerCase().trim();
 
+  const allSegsActive = showParts && showRepair && showAcquisition && showCarts;
+  const noSegsActive = !showParts && !showRepair && !showAcquisition && !showCarts;
+
   _filteredSuppliers = _allSuppliers.filter(s => {
     // Active filter
     if (!showInactive && !s.bActive) return false;
-    // Role filter — show if supplier matches ANY active segment
-    const matchRole = (showParts && s.bPartsVendor) || (showRepair && s.bRepairVendor) ||
-                      (showAcquisition && s.bAcquisitionVendor) || (showCarts && s.bCartsVendor);
-    if (!showParts && !showRepair && !showAcquisition && !showCarts) {
-      // No segments active — show all
-    } else if (!matchRole) {
-      return false;
+    // Role filter — only apply when a specific subset of segments is selected.
+    // tblSupplier only has bAcquisitionVendor; treat all-active or none-active as "show all".
+    if (!allSegsActive && !noSegsActive) {
+      const matchRole = (showAcquisition && s.bAcquisitionVendor);
+      if (!matchRole) return false;
     }
     // Search filter
     if (search) {
-      const hay = (s.sSupplierName1 || '').toLowerCase() + ' ' + (s.sCity || '').toLowerCase() + ' ' + (s.sState || '').toLowerCase() + ' ' + (s.sAltContact || '').toLowerCase() + ' ' + (s.sEMailAlt || '').toLowerCase();
+      const hay = (s.sSupplierName1 || '').toLowerCase() + ' ' +
+                  (s.sCity || s.sMailCity || '').toLowerCase() + ' ' +
+                  (s.sState || s.sMailState || '').toLowerCase() + ' ' +
+                  (s.sContactFirst || '').toLowerCase() + ' ' +
+                  (s.sContactLast || '').toLowerCase() + ' ' +
+                  (s.sContactEMail || s.sBillEmail || '').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;

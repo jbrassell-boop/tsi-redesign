@@ -11,10 +11,12 @@ const db = require('../db');
 const SUPPLIER_SELECT = `
   SELECT s.lSupplierKey, s.sSupplierName1, s.sSupplierName2,
     s.sMailAddr1, s.sMailAddr2, s.sMailCity, s.sMailState, s.sMailZip,
+    s.sMailCity AS sCity, s.sMailState AS sState,
     s.sShipAddr1, s.sShipAddr2, s.sShipCity, s.sShipState, s.sShipZip,
     s.sBillAddr1, s.sBillAddr2, s.sBillCity, s.sBillState, s.sBillZip,
     s.sPhoneVoice, s.sPhoneFAX, s.sContactEMail AS sEmailAddress,
     s.sBillEmail, s.bActive, s.bAcquisitionSupplier,
+    s.bAcquisitionSupplier AS bAcquisitionVendor,
     s.dtCreateDate, s.dtLastUpdate, s.mComments
   FROM tblSupplier s
 `;
