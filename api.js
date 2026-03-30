@@ -27,9 +27,9 @@ const API = (() => {
   }
 
   function isLocalMode() {
-    // When served from Express (localhost:4000 or ngrok/cloud), use same-origin API
+    // When served from Express (localhost, ngrok, or Azure), use same-origin API
     const host = window.location.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || host.includes('ngrok');
+    return host === 'localhost' || host === '127.0.0.1' || host.includes('ngrok') || host.includes('azurewebsites.net');
   }
 
   function setToken(token) {
@@ -434,14 +434,15 @@ const API = (() => {
     updateDemoBadge: function(mode) {
       const badge = document.getElementById('dataBadge');
       if (badge) {
-        // Always show "Dev Server" when connected to local Express — ignore mode arg
+        // Show server connection badge
+        const isAzure = window.location.hostname.includes('azurewebsites.net');
         badge.className = 'data-badge live';
-        badge.textContent = 'Dev Server';
-        badge.style.background = 'var(--primary, #2E75B6)';
+        badge.textContent = isAzure ? 'Cloud' : 'Dev Server';
+        badge.style.background = isAzure ? 'var(--green, #16A34A)' : 'var(--primary, #2E75B6)';
         badge.style.color = '#fff';
         badge.style.fontWeight = '';
         badge.style.cursor = '';
-        badge.title = 'Connected to Express dev server — localhost:4000';
+        badge.title = isAzure ? 'Connected to Azure SQL' : 'Connected to Express dev server — localhost:4000';
         badge.onclick = null;
       }
       // Show fixed banner if not already present; add paddingBottom so it
@@ -450,7 +451,9 @@ const API = (() => {
         var banner = document.createElement('div');
         banner.id = 'devBanner';
         banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--primary,#2E75B6);color:#fff;text-align:center;padding:3px 16px;font-size:11px;font-family:Inter,system-ui,sans-serif;letter-spacing:.02em';
-        banner.textContent = 'Dev Server — localhost:4000';
+        const isAzureBanner = window.location.hostname.includes('azurewebsites.net');
+        banner.textContent = isAzureBanner ? 'Cloud Server — Azure SQL' : 'Dev Server — localhost:4000';
+        banner.style.background = isAzureBanner ? 'var(--green, #16A34A)' : 'var(--primary,#2E75B6)';
         document.body.appendChild(banner);
         document.body.style.paddingBottom = '30px';
       }
