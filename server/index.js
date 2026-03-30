@@ -68,6 +68,8 @@ app.use('/api', require('./routes/quality'));
 app.use('/api', require('./routes/acquisitions'));
 app.use('/api', require('./routes/product-sales'));
 app.use('/api', require('./routes/users'));
+app.use('/api', require('./routes/pending-arrivals'));
+app.use('/api', require('./routes/development-list'));
 
 // 404 for unmatched API routes
 app.use('/api', (req, res) => {

@@ -5,9 +5,9 @@
 const sql = require('mssql/msnodesqlv8');
 
 const config = {
-  database: 'WinScopeNet',
+  database: 'TSI_Demo',
   driver: 'msnodesqlv8',
-  connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=WinScopeNet;Trusted_Connection=yes;TrustServerCertificate=yes;',
+  connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TSI_Demo;Trusted_Connection=yes;TrustServerCertificate=yes;',
   pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
 };
 

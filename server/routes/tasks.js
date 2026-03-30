@@ -7,6 +7,194 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// ── DashBoardTask CRUD ──────────────────────────────────
+
+// POST /DashBoardTask/GetAllTaskList — List tasks (filtered)
+router.post('/DashBoardTask/GetAllTaskList', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const svcKey = parseInt(body.plServiceLocationKey) || 0;
+    const rows = await db.query(`
+      SELECT t.lTaskKey, t.lTaskTypeKey, t.lTaskStatusKey, t.lTaskPriorityKey,
+        t.lOwnerKey, t.lAssignedToUserKey, t.sTaskDescription,
+        t.dtDueDate, t.dtCreateDate, t.dtLastUpdate, t.lCreatedByUserKey,
+        ISNULL(ts.TaskStatus, '') AS sTaskStatus,
+        ISNULL(tp.sTaskPriority, '') AS sTaskPriority,
+        ISNULL(tt.sTaskType, '') AS sTaskType,
+        ISNULL(u.sUserFullName, '') AS sAssignedToName,
+        ISNULL(cu.sUserFullName, '') AS sCreatedByName
+      FROM tblTasks t
+        LEFT JOIN tblTaskStatuses ts ON ts.TaskStatusKey = t.lTaskStatusKey
+        LEFT JOIN tblTaskPriorities tp ON tp.lTaskPriorityKey = t.lTaskPriorityKey
+        LEFT JOIN tblTaskTypes tt ON tt.lTaskTypeKey = t.lTaskTypeKey
+        LEFT JOIN tblUsers u ON u.lUserKey = t.lAssignedToUserKey
+        LEFT JOIN tblUsers cu ON cu.lUserKey = t.lCreatedByUserKey
+      ORDER BY t.dtDueDate`, {});
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /DashBoardTask/AddTask — Create task
+router.post('/DashBoardTask/AddTask', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const result = await db.query(`
+      INSERT INTO tblTasks (lTaskTypeKey, lTaskStatusKey, lTaskPriorityKey,
+        lOwnerKey, lAssignedToUserKey, sTaskDescription, dtDueDate,
+        lCreatedByUserKey, dtCreateDate)
+      VALUES (@typeKey, @statusKey, @priorityKey,
+        @ownerKey, @assignedKey, @desc, @dueDate,
+        @createdBy, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lTaskKey`,
+      {
+        typeKey: b.lTaskTypeKey || 1,
+        statusKey: b.lTaskStatusKey || 1,
+        priorityKey: b.lTaskPriorityKey || 2,
+        ownerKey: b.lOwnerKey || 0,
+        assignedKey: b.lAssignedToUserKey || 0,
+        desc: b.sTaskDescription || '',
+        dueDate: b.dtDueDate || null,
+        createdBy: b.lCreatedByUserKey || 1
+      });
+    const newKey = result[0] ? result[0].lTaskKey : 0;
+    res.json({ lTaskKey: newKey, success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /DashBoardTask/UpdateTasks — Update task
+router.post('/DashBoardTask/UpdateTasks', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const taskKey = b.lTaskKey || b.plTaskKey || 0;
+    if (!taskKey) return res.status(400).json({ error: 'lTaskKey required' });
+    await db.query(`
+      UPDATE tblTasks SET
+        lTaskStatusKey = ISNULL(@statusKey, lTaskStatusKey),
+        lTaskPriorityKey = ISNULL(@priorityKey, lTaskPriorityKey),
+        lAssignedToUserKey = ISNULL(@assignedKey, lAssignedToUserKey),
+        sTaskDescription = ISNULL(@desc, sTaskDescription),
+        dtDueDate = ISNULL(@dueDate, dtDueDate),
+        dtLastUpdate = GETDATE()
+      WHERE lTaskKey = @taskKey`,
+      {
+        taskKey,
+        statusKey: b.lTaskStatusKey || null,
+        priorityKey: b.lTaskPriorityKey || null,
+        assignedKey: b.lAssignedToUserKey || null,
+        desc: b.sTaskDescription || null,
+        dueDate: b.dtDueDate || null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /DashBoardTask/DeleteTask — Delete task
+router.delete('/DashBoardTask/DeleteTask', async (req, res, next) => {
+  try {
+    const taskKey = parseInt(req.query.plTaskKey) || 0;
+    if (!taskKey) return res.status(400).json({ error: 'plTaskKey required' });
+    await db.query('DELETE FROM tblTaskStatusHistory WHERE lTaskKey = @taskKey', { taskKey });
+    await db.query('DELETE FROM tblTasks WHERE lTaskKey = @taskKey', { taskKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// GET /DashBoardTask/GetAllTaskStatus — Task status dropdown
+router.get('/DashBoardTask/GetAllTaskStatus', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT TaskStatusKey, TaskStatus FROM tblTaskStatuses ORDER BY TaskStatusKey`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// GET /DashBoardTask/GetAllTaskPriorities — Task priority dropdown
+router.get('/DashBoardTask/GetAllTaskPriorities', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT lTaskPriorityKey, sTaskPriority FROM tblTaskPriorities ORDER BY lTaskPriorityKey`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// ── DashBoardTaskLoaner CRUD ────────────────────────────
+
+// GET /DashBoardTaskLoaner/GetAllTaskLoanerList — List task loaners
+router.get('/DashBoardTaskLoaner/GetAllTaskLoanerList', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT tl.lTaskLoanerKey, tl.sTaskNumber, tl.lScopeTypeKey,
+        tl.lQuantity, tl.sStatus, tl.sLoanerTrackingNumber,
+        tl.dtCreateDate, tl.dtLastUpdate,
+        ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+        ISNULL(st.sRigidOrFlexible, '') AS sRigidOrFlexible,
+        ISNULL(m.sManufacturer, '') AS sManufacturer
+      FROM tblTaskLoaner tl
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = tl.lScopeTypeKey
+        LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
+      ORDER BY tl.dtCreateDate DESC`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /DashBoardTaskLoaner/AddTaskLoaner — Add task loaner
+router.post('/DashBoardTaskLoaner/AddTaskLoaner', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const result = await db.query(`
+      INSERT INTO tblTaskLoaner (sTaskNumber, lScopeTypeKey, lQuantity,
+        sStatus, sLoanerTrackingNumber, dtCreateDate)
+      VALUES (@taskNum, @scopeTypeKey, @qty, @status, @tracking, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lTaskLoanerKey`,
+      {
+        taskNum: b.sTaskNumber || '',
+        scopeTypeKey: b.lScopeTypeKey || 0,
+        qty: b.lQuantity || 1,
+        status: b.sStatus || 'Requested',
+        tracking: b.sLoanerTrackingNumber || ''
+      });
+    const newKey = result[0] ? result[0].lTaskLoanerKey : 0;
+    res.json({ lTaskLoanerKey: newKey, success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /DashBoardTaskLoaner/UpdateTaskLoaner — Update task loaner
+router.post('/DashBoardTaskLoaner/UpdateTaskLoaner', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const key = b.lTaskLoanerKey || 0;
+    if (!key) return res.status(400).json({ error: 'lTaskLoanerKey required' });
+    await db.query(`
+      UPDATE tblTaskLoaner SET
+        lScopeTypeKey = ISNULL(@scopeTypeKey, lScopeTypeKey),
+        lQuantity = ISNULL(@qty, lQuantity),
+        sStatus = ISNULL(@status, sStatus),
+        sLoanerTrackingNumber = ISNULL(@tracking, sLoanerTrackingNumber),
+        dtLastUpdate = GETDATE()
+      WHERE lTaskLoanerKey = @key`,
+      {
+        key,
+        scopeTypeKey: b.lScopeTypeKey || null,
+        qty: b.lQuantity || null,
+        status: b.sStatus || null,
+        tracking: b.sLoanerTrackingNumber || null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /DashBoardTaskLoaner/DeleteTaskLoaner — Delete task loaner
+router.delete('/DashBoardTaskLoaner/DeleteTaskLoaner', async (req, res, next) => {
+  try {
+    const key = parseInt(req.query.plTaskLoanerKey) || 0;
+    if (!key) return res.status(400).json({ error: 'plTaskLoanerKey required' });
+    await db.query('DELETE FROM tblTaskLoaner WHERE lTaskLoanerKey = @key', { key });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// ── Task Status History ─────────────────────────────────
+
 // GET /Tasks/GetStatusHistory/:taskKey — Status change history for a task
 router.get('/Tasks/GetStatusHistory/:taskKey', async (req, res, next) => {
   try {
