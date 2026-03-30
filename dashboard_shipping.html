@@ -9,15 +9,15 @@
 <style>
   /* Same styling patterns as dashboard_invoices.html */
   .page-body{display:flex;flex-direction:column;overflow:hidden}
-  .stat-strip{display:flex;gap:8px;padding:10px 16px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--border)}
+  .stat-strip{display:flex;gap:8px;padding:10px 16px;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border)}
   .stat-chip{flex:1;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px}
   .stat-chip .sc-val{font-size:22px;font-weight:800;color:var(--navy)}
   .stat-chip .sc-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
   .toolbar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-  .seg-group{display:flex;border:1px solid var(--border);border-radius:5px;overflow:hidden}
-  .seg-btn{padding:5px 12px;font-size:11px;font-weight:600;border:none;background:#fff;cursor:pointer;color:var(--muted);font-family:inherit;border-right:1px solid var(--border)}
+  .seg-group{display:flex;border:1px solid var(--border);border-radius:var(--radius-pill);overflow:hidden}
+  .seg-btn{padding:5px 12px;font-size:11px;font-weight:600;border:none;background:var(--card);cursor:pointer;color:var(--muted);font-family:inherit;border-right:1px solid var(--border)}
   .seg-btn:last-child{border-right:none}
-  .seg-btn.active{background:var(--navy);color:#fff}
+  .seg-btn.active{background:var(--primary);color:#fff}
   .table-wrap{flex:1;overflow:auto;padding:0 16px 16px}
   table{width:100%;border-collapse:collapse;font-size:11.5px}
   thead th{position:sticky;top:0;z-index:2;background:var(--neutral-50);padding:7px 8px;text-align:left;font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.3px;border-bottom:1.5px solid var(--border-dk);white-space:nowrap;user-select:none}
@@ -29,8 +29,8 @@
   .search-input{height:30px;width:220px;border:1.5px solid var(--border);border-radius:5px;padding:0 10px 0 30px;font-size:11.5px;font-family:inherit;outline:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") 9px center/14px no-repeat}
   .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
   .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
-  .b-ready{background:var(--warn-bg,#FFFBEB);color:var(--amber)}
-  .b-shipped{background:var(--success-bg,#F0FDF4);color:var(--green)}
+  .b-ready{background:var(--warning-light);color:var(--amber)}
+  .b-shipped{background:var(--success-light);color:var(--green)}
   .print-btn{padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--navy);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit}
   /* Ship Modal */
   .ship-overlay{position:fixed;inset:0;background:rgba(var(--primary-rgb),.3);z-index:var(--z-modal);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
@@ -109,13 +109,13 @@
 <!-- Ship Modal -->
 <div class="ship-overlay" id="shipOverlay">
   <div class="ship-modal">
-    <div style="padding:14px 20px;background:linear-gradient(120deg,var(--navy) 0%,var(--steel) 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="padding:14px 20px;background:var(--primary-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <span style="font-size:14px;font-weight:600">Ship Scopes</span>
       <button onclick="shCloseShipModal()" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center">&times;</button>
     </div>
     <div id="shipModalBody" style="padding:16px 20px;overflow-y:auto;flex:1"></div>
     <div style="padding:12px 20px;border-top:1px solid #DDE3EE;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
-      <button onclick="shCloseShipModal()" style="height:34px;padding:0 16px;border:1.5px solid var(--border);border-radius:6px;background:#fff;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+      <button onclick="shCloseShipModal()" style="height:34px;padding:0 16px;border:1.5px solid var(--border);border-radius:6px;background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
       <button id="shipConfirmBtn" onclick="shConfirmShip()" style="height:34px;padding:0 20px;border:none;border-radius:6px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>Confirm Ship</button>
     </div>

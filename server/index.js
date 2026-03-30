@@ -5,10 +5,13 @@
 // ═══════════════════════════════════════════════════════
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const ROOT = path.resolve(__dirname, '..');
 
 // Middleware
 app.use(cors({ origin: true })); // allow all origins in dev
@@ -74,6 +77,23 @@ app.use('/api', require('./routes/development-list'));
 // 404 for unmatched API routes
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Route not found', path: req.originalUrl });
+});
+
+// ── Static file serving (HTML, CSS, JS, assets) ────────
+// Serve static assets (css, js, images, fonts, etc.)
+app.use(express.static(ROOT, { extensions: ['html'] }));
+
+// Clean URLs: /clients → clients.html, /dashboard → dashboard.html
+app.use((req, res, next) => {
+  // Skip API routes and files with extensions
+  if (req.path.startsWith('/api') || path.extname(req.path)) return next();
+  // Try to find matching .html file
+  const htmlPath = path.join(ROOT, req.path + '.html');
+  if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
+  // Fallback to index.html
+  const indexPath = path.join(ROOT, 'index.html');
+  if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
+  next();
 });
 
 // Error handler

@@ -7,7 +7,10 @@ const API = (() => {
   // API supports CORS — call directly from any origin.
   // Netlify proxy is available as fallback at /api/* if needed.
   const BASE_URL = 'https://totalscopetestapi.mol-tech.com/api';
-  const LOCAL_URL = 'http://localhost:4000/api';
+  // When served from Express (ngrok, Azure, etc.), use same-origin; otherwise localhost:4000
+  const LOCAL_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:4000/api'
+    : window.location.origin + '/api';
 
   // ── Token Management ──────────────────────────────────
   function getToken() {
@@ -24,7 +27,9 @@ const API = (() => {
   }
 
   function isLocalMode() {
-    return true;
+    // When served from Express (localhost:4000 or ngrok/cloud), use same-origin API
+    const host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host.includes('ngrok');
   }
 
   function setToken(token) {
