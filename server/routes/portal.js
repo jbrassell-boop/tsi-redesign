@@ -204,8 +204,8 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'contractKey required' });
     }
 
-    // Run all four queries in parallel for minimum round-trip time.
-    const [info, departments, repairs, coverageRows] = await Promise.all([
+    // Run all six queries in parallel for minimum round-trip time.
+    const [info, departments, repairs, coverageRows, scopes, reasons] = await Promise.all([
 
       // 1. Contract header row
       db.queryOne(
@@ -255,6 +255,43 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
          WHERE cs.lContractKey = @contractKey
          GROUP BY ISNULL(st.sRigidOrFlexible, 'I')`,
         { contractKey }
+      ),
+
+      // 5. Scopes enrolled on this contract
+      db.query(
+        `SELECT
+           cs.lScopeKey,
+           ISNULL(s.sSerialNumber, '') AS sSerialNumber,
+           ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+           ISNULL(st.sRigidOrFlexible, 'I') AS sRigidOrFlexible,
+           ISNULL(m.sManufacturer, '') AS sManufacturer,
+           ISNULL(d.sDepartmentName, '') AS sDeptName,
+           (SELECT COUNT(*) FROM tblRepair r2
+            WHERE r2.lScopeKey = cs.lScopeKey
+              AND r2.lContractKey = @contractKey) AS nRepairCount
+         FROM tblContractScope cs
+           LEFT JOIN tblScope s          ON s.lScopeKey          = cs.lScopeKey
+           LEFT JOIN tblScopeType st     ON st.lScopeTypeKey      = s.lScopeTypeKey
+           LEFT JOIN tblManufacturers m  ON m.lManufacturerKey    = st.lManufacturerKey
+           LEFT JOIN tblDepartment d     ON d.lDepartmentKey      = s.lDepartmentKey
+         WHERE cs.lContractKey = @contractKey
+         ORDER BY d.sDepartmentName, st.sScopeTypeDesc`,
+        { contractKey }
+      ),
+
+      // 6. Top 15 repair reason breakdown
+      db.query(
+        `SELECT TOP 15
+           LTRIM(RTRIM(r.sComplaintDesc)) AS sReason,
+           COUNT(*) AS nCount,
+           SUM(ISNULL(r.dblAmtRepair, 0)) AS dblCharges
+         FROM tblRepair r
+         WHERE r.lContractKey = @contractKey
+           AND r.sComplaintDesc IS NOT NULL
+           AND LEN(LTRIM(RTRIM(r.sComplaintDesc))) > 0
+         GROUP BY LTRIM(RTRIM(r.sComplaintDesc))
+         ORDER BY nCount DESC`,
+        { contractKey }
       )
     ]);
 
@@ -275,7 +312,10 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       info:        info || {},
       departments,
       repairs,
-      coverage
+      coverage,
+      scopes,
+      reasons,
+      documents: []
     });
   } catch (e) { next(e); }
 });

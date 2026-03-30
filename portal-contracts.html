@@ -192,7 +192,7 @@
 
     /* ── List Panel ──────────────────────────────────────────── */
     .ps-list-panel {
-      width: 360px;
+      width: 400px;
       flex-shrink: 0;
       background: #fff;
       border-right: 1px solid #dee2e6;
@@ -413,8 +413,10 @@
     .ps-detail-panel {
       flex: 1;
       background: #fff;
-      overflow-y: auto;
+      overflow: hidden;
       padding: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .ps-detail-panel::-webkit-scrollbar { width: 6px; }
@@ -658,6 +660,161 @@
       text-align: center;
       color: #6c757d;
     }
+
+    /* ── Detail Tabs ─────────────────────────────────────────── */
+    .ps-dtab-bar {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      padding: 0 18px;
+      background: #fff;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .ps-dtab {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #6b7280;
+      padding: 8px 14px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.12s;
+    }
+    .ps-dtab:hover { color: rgb(17,60,139); }
+    .ps-dtab.active {
+      color: rgb(17,60,139);
+      border-bottom-color: rgb(17,60,139);
+      font-weight: 600;
+    }
+    .ps-dtab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 9px;
+      font-weight: 700;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 9999px;
+      padding: 0 4px;
+      margin-left: 5px;
+    }
+    .ps-dtab.active .ps-dtab-badge {
+      background: rgb(17,60,139);
+      color: #fff;
+    }
+    .ps-dtab-pane { display: none; padding: 14px 18px; overflow-y: auto; flex: 1; }
+    .ps-dtab-pane.active { display: block; }
+
+    /* ── Equipment tab ───────────────────────────────────────── */
+    .ps-eq-group { margin-bottom: 16px; }
+    .ps-eq-group-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      padding: 0 0 5px;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 6px;
+    }
+    .ps-eq-table { width: 100%; border-collapse: collapse; font-size: 11.5px; table-layout: fixed; }
+    .ps-eq-table th {
+      background: #f3f4f6;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+      padding: 5px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .ps-eq-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #f3f4f6;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #111;
+    }
+    .ps-eq-table tr:last-child td { border-bottom: none; }
+    .ps-eq-table .repairs-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #fef2f2;
+      color: #b71234;
+      border: 1px solid #fecaca;
+      border-radius: 9999px;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+    }
+    .ps-eq-table .no-repairs { color: #9ca3af; font-size: 11px; }
+
+    /* ── Reasons tab ─────────────────────────────────────────── */
+    .ps-reason-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 11.5px;
+    }
+    .ps-reason-row:last-child { border-bottom: none; }
+    .ps-reason-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #111827;
+    }
+    .ps-reason-bar-wrap {
+      width: 120px;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .ps-reason-bar-fill {
+      height: 100%;
+      background: rgb(17, 60, 139);
+      border-radius: 4px;
+    }
+    .ps-reason-count {
+      width: 28px;
+      text-align: right;
+      font-weight: 700;
+      color: rgb(17,60,139);
+      font-size: 11.5px;
+      flex-shrink: 0;
+    }
+    .ps-reason-charges {
+      width: 65px;
+      text-align: right;
+      color: #6b7280;
+      font-size: 10.5px;
+      flex-shrink: 0;
+    }
+
+    /* ── Documents tab ───────────────────────────────────────── */
+    .ps-doc-stub {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      gap: 10px;
+    }
+    .ps-doc-stub i { font-size: 36px; color: #d1d5db; }
+    .ps-doc-stub h6 { font-size: 13px; font-weight: 600; color: #374151; margin: 0; }
+    .ps-doc-stub p { font-size: 11.5px; color: #9ca3af; margin: 0; max-width: 260px; }
   </style>
 </head>
 <body>
@@ -937,9 +1094,10 @@
     });
 
     // Show loading in detail panel
-    document.getElementById('detailEmpty').style.display   = 'none';
-    document.getElementById('detailContent').style.display = 'block';
-    document.getElementById('detailContent').innerHTML =
+    document.getElementById('detailEmpty').style.display = 'none';
+    const detailContent = document.getElementById('detailContent');
+    detailContent.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;';
+    detailContent.innerHTML =
       `<div class="ps-detail-loading"><span class="spinner-sm"></span> Loading contract details…</div>`;
 
     const contract = allContracts.find(c => c.lContractKey === key);
@@ -961,7 +1119,9 @@
     const status  = contractStatus(contract);
     const fee     = monthlyFee(contract);
     const depts   = detail.departments || [];
-    const repairs = detail.repairs || [];
+    const repairs = detail.repairs     || [];
+    const scopes  = detail.scopes      || [];
+    const reasons = detail.reasons     || [];
 
     // Scope summary counts — from detail.coverage (server-computed)
     const cov = detail.coverage || {};
@@ -972,6 +1132,18 @@
       I: cov.instrument || 0
     };
 
+    const totalValue   = contract.dblAmtContract || 0;
+    const totalCharges = repairs.reduce((s, r) => s + (r.dblAmtRepair || 0), 0);
+    const pct          = totalValue > 0 ? Math.min(100, Math.round(totalCharges / totalValue * 100)) : 0;
+    const daysLeft     = Math.max(0, Math.round((new Date(contract.dtDateTermination) - new Date()) / 86400000));
+    const totalScopes  = scopeCounts.F + scopeCounts.R + scopeCounts.C + scopeCounts.I;
+
+    // Coverage dept tags
+    const deptNames = depts.map(d => d.sDepartmentName).filter(Boolean);
+    const coverageDeptsHtml = deptNames.length
+      ? deptNames.map(n => `<span class="ps-dept-tag"><i class="bi bi-hospital"></i> ${n}</span>`).join('')
+      : '<span style="color:#aaa;font-size:11px">No departments on file</span>';
+
     const pillsHtml = [
       scopeCounts.F ? `<span class="ps-scope-pill flex"><i class="bi bi-activity"></i>Flexible: ${scopeCounts.F}</span>` : '',
       scopeCounts.R ? `<span class="ps-scope-pill rigid"><i class="bi bi-camera-video"></i>Rigid: ${scopeCounts.R}</span>` : '',
@@ -979,83 +1151,135 @@
       scopeCounts.I ? `<span class="ps-scope-pill inst"><i class="bi bi-tools"></i>Instrument: ${scopeCounts.I}</span>` : '',
     ].filter(Boolean).join('') || '<span style="color:#6c757d;font-size:12px;font-style:italic">No scope breakdown available</span>';
 
-    const deptsHtml = depts.length
-      ? `<table class="ps-dept-table">
+    // Tab bar
+    const tabBarHtml = `
+<div class="ps-dtab-bar" id="dtabBar">
+  <button class="ps-dtab active" data-tab="overview">Overview</button>
+  <button class="ps-dtab" data-tab="equipment">Equipment <span class="ps-dtab-badge">${scopes.length}</span></button>
+  <button class="ps-dtab" data-tab="reasons">Why It Breaks <span class="ps-dtab-badge">${reasons.length}</span></button>
+  <button class="ps-dtab" data-tab="documents">Documents</button>
+</div>`;
+
+    // ── Overview tab ────────────────────────────────────────────
+    const recentRepairs = repairs.slice(0, 5);
+    const overviewRepairsHtml = recentRepairs.length
+      ? `<table class="ps-repair-table" style="margin:0">
           <thead><tr>
-            <th>Department</th>
-            <th style="width:88px">Eff. Date</th>
-            <th style="width:88px">End Date</th>
-            <th style="width:90px">PO #</th>
+            <th style="width:75px">Date</th>
+            <th style="width:100px">Scope</th>
+            <th>What Broke</th>
+            <th style="width:68px">Status</th>
           </tr></thead>
           <tbody>
-            ${depts.map(d => `<tr>
-              <td>${d.sDepartmentName || d.sName || '—'}</td>
-              <td>${fmtDate(d.dtContractDepartmentEffectiveDate)}</td>
-              <td>${fmtDate(d.dtContractDepartmentEndDate)}</td>
-              <td>${d.sPONumber || '—'}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>`
-      : `<div style="text-align:center;color:#6c757d;font-style:italic;padding:14px;font-size:11.5px">No departments on record</div>`;
-
-    const totalCharges = repairs.reduce((s, r) => s + (r.dblAmtRepair || 0), 0);
-
-    const repairsHtml = repairs.length
-      ? `<table class="ps-repair-table">
-          <thead><tr>
-            <th style="width:80px">Date In</th>
-            <th style="width:88px">Work Order</th>
-            <th>Department</th>
-            <th>Scope</th>
-            <th>Repair</th>
-            <th class="right" style="width:72px">Charges</th>
-            <th style="width:72px">Status</th>
-          </tr></thead>
-          <tbody>
-            ${repairs.map(r => {
-              const charges = r.dblAmtRepair || 0;
-              const rStatus = r.sRepairStatus || '';
-              const rBadge  = badgeHtml(rStatusNormalize(rStatus));
+            ${recentRepairs.map(r => {
+              const rBadge = badgeHtml(rStatusNormalize(r.sRepairStatus));
               return `<tr>
                 <td>${fmtDate(r.dtDateIn)}</td>
-                <td class="wo-num">${r.sWorkOrderNumber || '—'}</td>
-                <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sDepartmentName || ''}">${r.sDepartmentName || '—'}</td>
-                <td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sScopeTypeDesc || ''}">${r.sScopeTypeDesc || '—'}</td>
-                <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                    title="${r.sComplaintDesc || ''}">${r.sComplaintDesc || '—'}</td>
-                <td class="right">${charges ? fmtMoney(charges) : '—'}</td>
+                <td style="font-weight:600;color:rgb(17,60,139);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                    title="${r.sScopeTypeDesc||''}">${r.sScopeTypeDesc || r.sSerialNumber || '—'}</td>
+                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                    title="${r.sComplaintDesc||''}">${r.sComplaintDesc || '—'}</td>
                 <td>${rBadge}</td>
               </tr>`;
             }).join('')}
           </tbody>
         </table>`
-      : `<div style="text-align:center;color:#6c757d;font-style:italic;padding:14px;font-size:11.5px">No repairs on record</div>`;
+      : `<div style="padding:16px 0;color:#6c757d;font-size:12px;font-style:italic">No repairs on record for this contract.</div>`;
 
-    const repairSummary = repairs.length
-      ? `<p class="ps-repair-summary"><strong>${repairs.length}</strong> repair${repairs.length !== 1 ? 's' : ''} · <strong>${fmtMoney(totalCharges)}</strong> total charges</p>`
-      : '';
+    const overviewHtml = `
+      <div class="ps-sh" style="margin:0 -18px;padding:10px 18px 6px">Consumption</div>
+      <div class="ps-consume" style="margin:0 -18px">
+        <div class="ps-consume-meta">
+          <span><strong>${fmtMoney(totalCharges)}</strong> charged under contract</span>
+          <span>${pct}% of ${fmtMoney(totalValue)}</span>
+        </div>
+        <div class="ps-bar-track">
+          <div class="ps-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="ps-consume-note">${repairs.length} repair${repairs.length !== 1 ? 's' : ''} processed
+          ${contract.sPurchaseOrder ? ' · PO: ' + contract.sPurchaseOrder : ''}
+          · Billed to: ${contract.sBillEmail || 'not on file'}</div>
+      </div>
+      <div class="ps-sh" style="margin:12px -18px 0;padding:10px 18px 6px">What's Covered</div>
+      <div class="ps-coverage" style="margin:0 -18px">
+        ${pillsHtml}
+        ${deptNames.length ? '<span class="sep" style="color:#ddd">|</span>' + coverageDeptsHtml : ''}
+      </div>
+      <div class="ps-sh" style="margin:12px -18px 0;padding:10px 18px 6px">Recent Repairs</div>
+      <div style="margin:8px -18px 0">${overviewRepairsHtml}</div>`;
 
-    const totalValue  = contract.dblAmtContract || 0;
-    const pct         = totalValue > 0 ? Math.min(100, Math.round(totalCharges / totalValue * 100)) : 0;
-    const daysLeft    = Math.max(0, Math.round((new Date(contract.dtDateTermination) - new Date()) / 86400000));
-    const totalScopes = scopeCounts.F + scopeCounts.R + scopeCounts.C + scopeCounts.I;
+    // ── Equipment tab ────────────────────────────────────────────
+    let equipmentHtml;
+    if (!scopes.length) {
+      equipmentHtml = `<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:12px;font-style:italic">No equipment on file for this contract.</div>`;
+    } else {
+      const byDept = {};
+      scopes.forEach(s => {
+        const key = s.sDeptName || 'Unassigned';
+        if (!byDept[key]) byDept[key] = [];
+        byDept[key].push(s);
+      });
+      equipmentHtml = Object.entries(byDept).map(([deptName, items]) => `
+        <div class="ps-eq-group">
+          <div class="ps-eq-group-label">${deptName}</div>
+          <table class="ps-eq-table">
+            <thead><tr>
+              <th style="width:120px">Serial #</th>
+              <th style="width:100px">Make</th>
+              <th>Model</th>
+              <th style="width:80px">Type</th>
+              <th style="width:70px;text-align:right">Repairs</th>
+            </tr></thead>
+            <tbody>
+              ${items.map(s => `<tr>
+                <td>${s.sSerialNumber || '—'}</td>
+                <td>${s.sManufacturer?.trim() || '—'}</td>
+                <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.sScopeTypeDesc || '—'}</td>
+                <td>${s.sRigidOrFlexible === 'F' ? 'Flexible' : s.sRigidOrFlexible === 'R' ? 'Rigid' : s.sRigidOrFlexible === 'C' ? 'Camera' : 'Instrument'}</td>
+                <td style="text-align:right">${s.nRepairCount > 0
+                  ? `<span class="repairs-badge">${s.nRepairCount}</span>`
+                  : `<span class="no-repairs">—</span>`}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`).join('');
+    }
 
-    // Coverage dept tags (compact — just names, no full table)
-    const deptNames = depts.map(d => d.sDepartmentName).filter(Boolean);
-    const coverageDeptsHtml = deptNames.length
-      ? deptNames.map(n => `<span class="ps-dept-tag"><i class="bi bi-hospital"></i> ${n}</span>`).join('')
-      : '<span style="color:#aaa;font-size:11px">No departments on file</span>';
+    // ── Reasons tab ──────────────────────────────────────────────
+    let reasonsHtml;
+    if (!reasons.length) {
+      reasonsHtml = `<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:12px;font-style:italic">No repair history on file.</div>`;
+    } else {
+      const maxCount = reasons[0]?.nCount || 1;
+      reasonsHtml = reasons.map(r => `
+        <div class="ps-reason-row">
+          <div class="ps-reason-label">${r.sReason || r.sComplaintDesc || '—'}</div>
+          <div class="ps-reason-bar-wrap">
+            <div class="ps-reason-bar-fill" style="width:${Math.round((r.nCount / maxCount) * 100)}%"></div>
+          </div>
+          <div class="ps-reason-count">${r.nCount}</div>
+          <div class="ps-reason-charges">${r.dblCharges ? fmtMoney(r.dblCharges) : ''}</div>
+        </div>`).join('');
+    }
 
-    document.getElementById('detailContent').innerHTML = `
+    // ── Documents tab ────────────────────────────────────────────
+    const documentsHtml = `
+      <div class="ps-doc-stub">
+        <i class="bi bi-file-earmark-pdf"></i>
+        <h6>Signed Agreement &amp; Documents</h6>
+        <p>Document access is coming soon. Your signed service agreement and related files will be available here for download.</p>
+      </div>`;
+
+    // ── Assemble ─────────────────────────────────────────────────
+    const detailContent = document.getElementById('detailContent');
+    detailContent.innerHTML = `
       <!-- Identity band -->
-      <div class="ps-ctr-band">
+      <div class="ps-ctr-band" style="flex-shrink:0">
         <div class="ps-ctr-band-title">${contract.sClientName1 || contract.sContractName || '—'}</div>
         <div class="ps-ctr-band-meta">
           ${badgeHtml(status)}
           <span class="sep">|</span>
-          <span>${contract.sContractTypeName || 'Service Agreement'}</span>
+          <span>${contract.sContractTypeName || typeLabel(contract.nContractType) || 'Service Agreement'}</span>
           <span class="sep">|</span>
           <span>${fmtDate(contract.dtDateEffective)} – ${fmtDate(contract.dtDateTermination)}</span>
           ${contract.sPurchaseOrder ? `<span class="sep">|</span><span>PO: ${contract.sPurchaseOrder}</span>` : ''}
@@ -1064,7 +1288,7 @@
       </div>
 
       <!-- 4 key metrics -->
-      <div class="ps-metrics">
+      <div class="ps-metrics" style="flex-shrink:0">
         <div class="ps-metric">
           <div class="ps-metric-val">${fee ? fmtMoney(fee) : '—'}</div>
           <div class="ps-metric-lbl">Monthly Fee</div>
@@ -1083,55 +1307,22 @@
         </div>
       </div>
 
-      <!-- Consumption bar -->
-      <div class="ps-sh">Consumption</div>
-      <div class="ps-consume">
-        <div class="ps-consume-meta">
-          <span><strong>${fmtMoney(totalCharges)}</strong> charged under contract</span>
-          <span>${pct}% of ${fmtMoney(totalValue)}</span>
-        </div>
-        <div class="ps-bar-track">
-          <div class="ps-bar-fill" style="width:${pct}%"></div>
-        </div>
-        <div class="ps-consume-note">${repairs.length} repair${repairs.length !== 1 ? 's' : ''} processed
-          ${contract.sPurchaseOrder ? ' · PO: ' + contract.sPurchaseOrder : ''}
-          · Billed to: ${contract.sBillEmail || 'not on file'}</div>
-      </div>
+      ${tabBarHtml}
 
-      <!-- Coverage (compact) -->
-      <div class="ps-sh">What's Covered</div>
-      <div class="ps-coverage">
-        ${pillsHtml}
-        ${deptNames.length ? '<span class="sep" style="color:#ddd">|</span>' + coverageDeptsHtml : ''}
-      </div>
-
-      <!-- Repair history (customer-focused) -->
-      <div class="ps-sh">Repair History — Why Scopes Come In</div>
-      ${repairs.length ? `
-      <table class="ps-repair-table" style="margin:0">
-        <thead><tr>
-          <th style="width:75px">Date</th>
-          <th style="width:95px">Scope</th>
-          <th>What Broke</th>
-          <th style="width:75px;text-align:right">Charges</th>
-          <th style="width:68px">Status</th>
-        </tr></thead>
-        <tbody>
-          ${repairs.map(r => {
-            const charges  = r.dblAmtRepair || 0;
-            const rBadge   = badgeHtml(rStatusNormalize(r.sRepairStatus));
-            return `<tr>
-              <td>${fmtDate(r.dtDateIn)}</td>
-              <td style="font-weight:600;color:rgb(17,60,139)" title="${r.sScopeTypeDesc||''}">${r.sScopeTypeDesc || r.sSerialNumber || '—'}</td>
-              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                  title="${r.sComplaintDesc||''}">${r.sComplaintDesc || '—'}</td>
-              <td style="text-align:right">${charges ? fmtMoney(charges) : '—'}</td>
-              <td>${rBadge}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>` : `<div style="padding:20px 18px;color:#6c757d;font-size:12px;font-style:italic">No repairs on record for this contract.</div>`}
+      <div class="ps-dtab-pane active" data-tab="overview">${overviewHtml}</div>
+      <div class="ps-dtab-pane" data-tab="equipment">${equipmentHtml}</div>
+      <div class="ps-dtab-pane" data-tab="reasons">${reasonsHtml}</div>
+      <div class="ps-dtab-pane" data-tab="documents">${documentsHtml}</div>
     `;
+
+    // Attach tab click handler
+    document.getElementById('dtabBar').addEventListener('click', e => {
+      const btn = e.target.closest('.ps-dtab');
+      if (!btn) return;
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.ps-dtab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.ps-dtab-pane').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
+    });
   }
 
   function rStatusNormalize(s) {
