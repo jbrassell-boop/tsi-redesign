@@ -1,22 +1,37 @@
 // ═══════════════════════════════════════════════════════
 //  db.js — SQL Server connection pool + query helpers
-//  Uses Windows Authentication (no credentials needed)
+//  Supports both Windows Auth (local) and SQL Auth (cloud)
 // ═══════════════════════════════════════════════════════
-const sql = require('mssql/msnodesqlv8');
 
-const config = {
-  database: 'TSI_Demo',
-  driver: 'msnodesqlv8',
-  connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TSI_Demo;Trusted_Connection=yes;TrustServerCertificate=yes;',
-  pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
-};
+// Use msnodesqlv8 (Windows ODBC) locally, tedious (cross-platform) on cloud
+const isCloud = !!process.env.DB_SERVER;
+const sql = isCloud ? require('mssql') : require('mssql/msnodesqlv8');
+
+const config = isCloud
+  ? {
+      server: process.env.DB_SERVER,
+      database: process.env.DB_NAME || 'TSI_Demo',
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      options: {
+        encrypt: true,
+        trustServerCertificate: false
+      },
+      pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
+    }
+  : {
+      database: 'TSI_Demo',
+      driver: 'msnodesqlv8',
+      connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TSI_Demo;Trusted_Connection=yes;TrustServerCertificate=yes;',
+      pool: { max: 10, min: 2, idleTimeoutMillis: 30000 }
+    };
 
 let _pool = null;
 
 async function connect() {
   if (_pool) return _pool;
   _pool = await new sql.ConnectionPool(config).connect();
-  console.log('[DB] Connected to', config.server + '/' + config.database);
+  console.log('[DB] Connected to', (config.server || 'localhost') + '/' + config.database);
   return _pool;
 }
 
