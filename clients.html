@@ -1153,11 +1153,8 @@ function loadClient(c) {
   if(!c) return;
   _currentClientData = c;
   document.getElementById('clientBadge').textContent = '#' + c.id;
-  // Breadcrumb
-  updateBreadcrumb([
-    { label: 'Clients', href: 'clients.html' },
-    { label: c.name || ('Client #' + c.id) }
-  ]);
+  // Breadcrumb disabled per design standards (sidebar shows location)
+  // updateBreadcrumb([...]);
   // Update the Active/Inactive chip in the status strip
   const statusChip = document.getElementById('statusChip');
   if (statusChip) {
@@ -1428,7 +1425,7 @@ async function saveFlagMock() {
     <td style="padding:9px 14px;font-size:12.5px">${showAt.length ? showAt.join(', ') : '<span style="color:var(--muted)">—</span>'}</td>
     <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${text}</td>
     <td style="padding:9px 14px">
-      <button onclick="this.closest('tr').remove();if(!document.querySelector('#flags-tbody tr')){const r=document.createElement('tr');r.id='flags-empty-row';r.innerHTML='<td colspan=\\'4\\' style=\\'text-align:center;padding:40px;color:var(--muted)\\'><div style=\\'font-size:32px;margin-bottom:10px;opacity:.3\\'>🚩</div>No flags on record — click <strong>+ Add</strong> to create one</td>';document.getElementById('flags-tbody').appendChild(r)}"
+      <button onclick="if(!this._confirming){this._confirming=true;this.textContent='Sure?';this.classList.add('btn-danger');setTimeout(()=>{this._confirming=false;this.textContent='Remove'},2000);return}this.closest('tr').remove();if(!document.querySelector('#flags-tbody tr')){const r=document.createElement('tr');r.id='flags-empty-row';r.innerHTML='<td colspan=\\'4\\' style=\\'text-align:center;padding:40px;color:var(--muted)\\'><div style=\\'font-size:32px;margin-bottom:10px;opacity:.3\\'>🚩</div>No flags on record — click <strong>+ Add</strong> to create one</td>';document.getElementById('flags-tbody').appendChild(r)}"
         class="btn btn-danger btn-sm">Remove</button>
     </td>`;
   tbody.appendChild(tr);
