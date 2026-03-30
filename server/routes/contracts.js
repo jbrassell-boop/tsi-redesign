@@ -72,16 +72,16 @@ router.post('/Contract/AddContract', async (req, res, next) => {
         @po, @comments, GETDATE());
       SELECT SCOPE_IDENTITY() AS lContractKey`,
       {
-        contractNum: b.sContractNumber || '',
-        clientKey: b.lClientKey || 0,
-        typeKey: b.lContractTypeKey || 0,
-        repKey: b.lSalesRepKey || 0,
-        termsKey: b.lPaymentTermsKey || 0,
-        dateEff: b.dtDateEffective || null,
-        dateTerm: b.dtDateTermination || null,
+        contractNum: b.sContractNumber || b.psContractName || b.psContractNumber || '',
+        clientKey: b.lClientKey || b.plClientKey || 0,
+        typeKey: b.lContractTypeKey || b.plContractTypeKey || 0,
+        repKey: b.lSalesRepKey || b.plSalesRepKey || 0,
+        termsKey: b.lPaymentTermsKey || b.plPaymentTermsKey || 0,
+        dateEff: b.dtDateEffective || b.pdtStartDate || null,
+        dateTerm: b.dtDateTermination || b.pdtEndDate || null,
         amtContract: b.dblAmtContract || b.dblAmtTotal || 0,
-        po: b.sPurchaseOrder || '',
-        comments: b.mComments || ''
+        po: b.sPurchaseOrder || b.psPurchaseOrder || '',
+        comments: b.mComments || b.pmContractNotes || ''
       });
     const newKey = result[0] ? result[0].lContractKey : 0;
     res.json({ lContractKey: newKey, success: true });

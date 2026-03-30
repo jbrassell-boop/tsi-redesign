@@ -72,11 +72,11 @@ router.post('/Departments/AddDepartment', async (req, res, next) => {
         @gpoid, 1, GETDATE());
       SELECT SCOPE_IDENTITY() AS lDepartmentKey`,
       {
-        name: b.sDepartmentName || '',
-        clientKey: b.lClientKey || 0,
-        svcKey: b.lServiceLocationKey || 1,
-        repKey: b.lSalesRepKey || 0,
-        pricingKey: b.lPricingCategoryKey || 0,
+        name: b.sDepartmentName || b.psDepartmentName || '',
+        clientKey: b.lClientKey || b.plClientKey || 0,
+        svcKey: b.lServiceLocationKey || b.plServiceLocationKey || 1,
+        repKey: b.lSalesRepKey || b.plSalesRepKey || 0,
+        pricingKey: b.lPricingCategoryKey || b.plPricingCategoryKey || 0,
         shipName1: b.sShipName1 || '',
         shipName2: b.sShipName2 || '',
         shipAddr1: b.sShipAddr1 || '',

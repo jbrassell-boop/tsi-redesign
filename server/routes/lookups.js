@@ -211,7 +211,13 @@ router.get('/InstrumentType/GetInstrumentTypes', async (req, res, next) => {
     const labelMap = { R: 'Rigid', F: 'Flexible', C: 'Camera', I: 'Instrument' };
     const result = rows
       .filter(r => r.type && labelMap[r.type])
-      .map(r => ({ type: r.type, label: labelMap[r.type] || r.type }));
+      .map(r => ({
+        type: r.type,
+        label: labelMap[r.type] || r.type,
+        sInstrumentType: r.type,
+        sInstrumentTypeKey: r.type,
+        sDescription: labelMap[r.type] || r.type
+      }));
     res.json(result);
   } catch (e) { next(e); }
 });
