@@ -87,7 +87,10 @@ router.delete('/Detail/DeleteRepairDetail', async (req, res, next) => {
 // tblRepairItem: NO dblRepairPrice (has nUnitCost), NO sInstrumentType
 router.get('/RepairItems/GetAllRepairItems', async (req, res, next) => {
   try {
-    const flex = req.query.psRigidOrFlexible || null;
+    const rawFlex = req.query.psRigidOrFlexible || null;
+    // Map full words to single-char codes used in tblRepairItem.sRigidOrFlexible
+    const flexMap = { flexible: 'F', rigid: 'R', camera: 'C' };
+    const flex = rawFlex ? (flexMap[rawFlex.toLowerCase()] || rawFlex) : null;
     const rows = await db.query(`
       SELECT lRepairItemKey, sItemDescription, sTSICode, sRigidOrFlexible,
         sPartOrLabor, sMajorRepair, nUnitCost AS dblRepairPrice, bActive

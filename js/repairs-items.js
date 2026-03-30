@@ -387,9 +387,15 @@ async function openItemPicker() {
   document.getElementById('itemPickerSearch').value = '';
   document.getElementById('itemPickerSearch').focus();
   var scopeType = (_currentRepair && _currentRepair.sRigidOrFlexible) || 'F';
-  var catType = /^R/i.test(scopeType) ? 'Rigid' : 'Flexible';
-  if (!_itemCatalog.length) await loadItemCatalog(null, catType);
-  else renderPickerList(_itemCatalog);
+  var catType = /^C/i.test(scopeType) ? 'Camera' : /^R/i.test(scopeType) ? 'Rigid' : 'Flexible';
+  // Auto-select the matching seg-btn in the picker header
+  var segBtns = document.querySelectorAll('#itemPicker .seg-btn');
+  segBtns.forEach(function(b) {
+    b.classList.toggle('active', b.textContent.trim() === catType);
+  });
+  // Always reload catalog for the current scope type (don't use stale cache)
+  _itemCatalog = [];
+  await loadItemCatalog(null, catType);
 }
 function closeItemPicker() { document.getElementById('itemPicker').classList.remove('open'); }
 
