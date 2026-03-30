@@ -984,6 +984,9 @@ function renderTable() {
   var emptyDash = document.getElementById('emptyDashboard');
   var dashWrap = document.getElementById('dashTableWrap');
 
+  // Always hide empty state first — prevents it persisting across re-renders
+  if (emptyDash) emptyDash.style.display = 'none';
+
   if (!filtered.length) {
     tbody.innerHTML = '';
     if (dashWrap) dashWrap.style.display = 'none';
@@ -994,7 +997,6 @@ function renderTable() {
     return;
   }
   if (dashWrap) dashWrap.style.display = '';
-  if (emptyDash) emptyDash.style.display = 'none';
 
   // ── GROUPED MODE ──
   if (groupBy) {

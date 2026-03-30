@@ -426,9 +426,10 @@ const API = (() => {
         if (welcome) welcome.innerHTML = 'Welcome back, <strong>' + (user.sFirstName || 'User') + '</strong>';
       }
     },
-    updateDemoBadge: function() {
+    updateDemoBadge: function(mode) {
       const badge = document.getElementById('dataBadge');
       if (badge) {
+        // Always show "Dev Server" when connected to local Express — ignore mode arg
         badge.className = 'data-badge live';
         badge.textContent = 'Dev Server';
         badge.style.background = 'var(--primary, #2E75B6)';
@@ -438,13 +439,15 @@ const API = (() => {
         badge.title = 'Connected to Express dev server — localhost:4000';
         badge.onclick = null;
       }
-      // Show small unobtrusive banner if not already present
+      // Show fixed banner if not already present; add paddingBottom so it
+      // doesn't overlap pagination or table footer controls
       if (!document.getElementById('devBanner')) {
         var banner = document.createElement('div');
         banner.id = 'devBanner';
         banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--primary,#2E75B6);color:#fff;text-align:center;padding:3px 16px;font-size:11px;font-family:Inter,system-ui,sans-serif;letter-spacing:.02em';
         banner.textContent = 'Dev Server — localhost:4000';
         document.body.appendChild(banner);
+        document.body.style.paddingBottom = '30px';
       }
     },
     setupNewOrderDropdown: function() {
