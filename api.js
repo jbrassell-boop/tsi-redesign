@@ -257,6 +257,7 @@ const API = (() => {
   async function addDepartment(data) { return post('/Departments/AddDepartment', data); }
   async function updateDepartment(data) { return post('/Departments/UpdateDepartment', data); }
   async function deleteDepartment(key) { return del('/Departments/DeleteDepartment?plDepartmentKey=' + key); }
+  async function getDepartmentKPIs(deptKey) { return get('/Departments/GetDepartmentKPIs?plDepartmentKey=' + deptKey); }
 
   // ── DepartmentReportingGroups (2) ─────────────────────
   async function getDepartmentGPOList(deptKey) { return get('/DepartmentReportingGroups/GetAllDepartmentGPOList?plDepartmentKey=' + deptKey); }
@@ -623,7 +624,7 @@ const API = (() => {
 
     // Departments
     getAllDepartments, getDepartmentDetail, addDepartment, updateDepartment, deleteDepartment,
-    getDepartmentGPOList,
+    getDepartmentKPIs, getDepartmentGPOList,
     getSubGroups, getSubGroupsAvailable, addDepartmentSubGroups, deleteDepartmentSubGroups,
 
     // Contacts

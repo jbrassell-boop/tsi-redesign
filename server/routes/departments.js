@@ -176,6 +176,39 @@ router.delete('/Departments/DeleteDepartment', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Departments/GetDepartmentKPIs — Open repairs, scopes, revenue, contract status
+router.get('/Departments/GetDepartmentKPIs', async (req, res, next) => {
+  try {
+    const deptKey = parseInt(req.query.plDepartmentKey) || 0;
+    if (!deptKey) return res.json({ openRepairs: 0, scopeCount: 0, revenueYTD: 0, contractStatus: 'None' });
+
+    const row = await db.queryOne(`
+      SELECT
+        (SELECT COUNT(*) FROM tblRepair r
+         LEFT JOIN tblInvoice inv ON inv.lRepairKey = r.lRepairKey
+         WHERE r.lDepartmentKey = @deptKey AND inv.lRepairKey IS NULL) AS openRepairs,
+
+        (SELECT COUNT(*) FROM tblScope WHERE lDepartmentKey = @deptKey) AS scopeCount,
+
+        (SELECT ISNULL(SUM(gp.TotalAmountDue), 0)
+         FROM tblGP_InvoiceStaging gp
+         JOIN tblInvoice inv ON inv.lInvoiceKey = gp.lInvoiceKey
+         JOIN tblRepair r ON r.lRepairKey = inv.lRepairKey
+         WHERE r.lDepartmentKey = @deptKey
+           AND gp.dtTranDate >= DATEADD(YEAR, -1, GETDATE())) AS revenueYTD,
+
+        (SELECT TOP 1
+           CASE WHEN c.dtEndDate >= GETDATE() THEN 'Active' ELSE 'Expired' END
+         FROM tblContract c
+         JOIN tblContractDepartments cd ON cd.lContractKey = c.lContractKey
+         WHERE cd.lDepartmentKey = @deptKey
+         ORDER BY c.dtEndDate DESC) AS contractStatus
+    `, { deptKey });
+
+    res.json(row || { openRepairs: 0, scopeCount: 0, revenueYTD: 0, contractStatus: 'None' });
+  } catch (e) { next(e); }
+});
+
 // GET /DepartmentReportingGroups/GetAllDepartmentGPOList — GPO associations for a department
 // sGPID (not GPOID) on tblDepartment
 router.get('/DepartmentReportingGroups/GetAllDepartmentGPOList', async (req, res, next) => {
