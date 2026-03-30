@@ -5,7 +5,13 @@
 
 // Use msnodesqlv8 (Windows ODBC) locally, tedious (cross-platform) on cloud
 const isCloud = !!process.env.DB_SERVER;
-const sql = isCloud ? require('mssql') : require('mssql/msnodesqlv8');
+let sql;
+if (isCloud) {
+  sql = require('mssql');
+} else {
+  try { sql = require('mssql/msnodesqlv8'); }
+  catch { sql = require('mssql'); }
+}
 
 const config = isCloud
   ? {
