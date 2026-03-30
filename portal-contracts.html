@@ -809,6 +809,15 @@
     document.getElementById('kpiScopes').textContent   = scopes || '—';
   }
 
+  /* ── Render KPIs from API ────────────────────────────────── */
+  function renderKpis(kpis) {
+    document.getElementById('kpiActive').textContent   = kpis.activeCount ?? '—';
+    document.getElementById('kpiRevenue').textContent  = kpis.monthlyRevenue
+      ? '$' + Math.round(kpis.monthlyRevenue / 1000) + 'K' : '—';
+    document.getElementById('kpiExpiring').textContent = kpis.expiringCount ?? '—';
+    document.getElementById('kpiScopes').textContent   = kpis.totalScopes ?? '—';
+  }
+
   /* ── Render Table ─────────────────────────────────────────── */
   function renderTable(contracts) {
     const search   = document.getElementById('searchInput').value.toLowerCase();
@@ -845,10 +854,14 @@
   /* ── Load Contracts ───────────────────────────────────────── */
   async function loadContracts() {
     try {
-      const res  = await fetch(`${getBase()}/portal/contracts?salesRepKey=12`);
+      const res  = await fetch(`${getBase()}/portal/contracts?salesRepKey=236`);
       const data = await res.json();
-      allContracts = (data.data || data || []);
-      computeKpis(allContracts);
+      allContracts = (data.contracts || data.data || data || []);
+      if (data.kpis) {
+        renderKpis(data.kpis);
+      } else {
+        computeKpis(allContracts);
+      }
       renderTable(allContracts);
     } catch (err) {
       // Fallback demo data when API is unavailable
@@ -879,7 +892,7 @@
     try {
       const res    = await fetch(`${getBase()}/portal/contracts/${key}/detail`);
       const detail = await res.json();
-      renderDetail(contract, detail.data || detail);
+      renderDetail(contract, detail);
     } catch (err) {
       // Fallback: render contract info only, use demo detail
       const demo = DEMO_DETAILS[key] || { departments: [], repairs: [] };
