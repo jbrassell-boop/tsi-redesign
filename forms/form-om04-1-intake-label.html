@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Intake Label — OM04-1</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Free 3 of 9','Libre Barcode 39',Arial,sans-serif;background:#fff;color:#000}
+
+    /* Screen preview button */
+    .print-btn{display:flex;align-items:center;justify-content:center;padding:16px;background:#f0f0f0;font-family:Arial,sans-serif}
+    .print-btn button{padding:8px 20px;background:#2E75B6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif}
+
+    /* Label body — 4in wide x 2in tall (standard Zebra ZPL-compatible media) */
+    .label{
+      width:4in;
+      height:2in;
+      padding:8px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      border:1px dashed #ccc; /* dashed border only shows on screen for alignment */
+      margin:0 auto;
+      overflow:hidden;
+      font-family:Arial,sans-serif;
+    }
+
+    /* Header row: WO# large + date small right-aligned */
+    .lbl-header{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1.5px solid #000;padding-bottom:4px;margin-bottom:2px}
+    .lbl-wo{font-size:20px;font-weight:900;letter-spacing:-.3px;color:#000;font-family:Arial,sans-serif}
+    .lbl-date{font-size:9px;color:#444;text-align:right;line-height:1.3}
+    .lbl-date strong{display:block;font-size:10px;color:#000}
+
+    /* Data rows */
+    .lbl-row{display:flex;align-items:baseline;gap:6px;line-height:1.3}
+    .lbl-lbl{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#555;width:44px;flex-shrink:0}
+    .lbl-val{font-size:11px;font-weight:600;color:#000;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Barcode — uses Free 3 of 9 font for Code 39 */
+    .lbl-barcode{margin-top:auto;text-align:center}
+    .lbl-barcode-font{
+      font-family:'Free 3 of 9','Libre Barcode 39',monospace;
+      font-size:36px;
+      line-height:1;
+      letter-spacing:0;
+      color:#000;
+    }
+    .lbl-barcode-text{font-size:7.5px;color:#555;letter-spacing:.08em;margin-top:1px;font-family:Arial,sans-serif}
+
+    @media print{
+      .print-btn{display:none}
+      body{background:#fff;padding:0;margin:0}
+      .label{
+        border:none;
+        margin:0;
+        width:4in;
+        height:2in;
+        /* Thermal printers: no color ink — everything black */
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+      @page{
+        size:4in 2in landscape;
+        margin:0;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="print-btn">
+  <button onclick="window.print()">Print Label</button>
+</div>
+
+<div class="label">
+
+  <div class="lbl-header">
+    <div class="lbl-wo" id="l-wo">WO#</div>
+    <div class="lbl-date">
+      <strong id="l-date">—</strong>
+      Date Received
+    </div>
+  </div>
+
+  <div class="lbl-row">
+    <span class="lbl-lbl">Client</span>
+    <span class="lbl-val" id="l-client">—</span>
+  </div>
+
+  <div class="lbl-row">
+    <span class="lbl-lbl">Model</span>
+    <span class="lbl-val" id="l-model">—</span>
+  </div>
+
+  <div class="lbl-row">
+    <span class="lbl-lbl">Serial</span>
+    <span class="lbl-val" id="l-serial">—</span>
+  </div>
+
+  <div class="lbl-barcode">
+    <!-- Code 39 barcode: wrap WO# with * delimiters for Free 3 of 9 font -->
+    <div class="lbl-barcode-font" id="l-barcode">*WO*</div>
+    <div class="lbl-barcode-text" id="l-barcode-text">OM04-1</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var BASE = 'http://localhost:4000/api';
+
+  function fill(id, val){
+    var el = document.getElementById(id);
+    if(el && val != null) el.textContent = val;
+  }
+
+  function fmtDate(d){
+    if(!d) return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+    return new Date(d).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  }
+
+  // Default: today's date, blank label
+  fill('l-date', fmtDate());
+
+  var wo = new URLSearchParams(window.location.search).get('wo');
+  if(!wo) return;
+
+  // Set WO# immediately (don't wait for API)
+  fill('l-wo', wo);
+  fill('l-barcode', '*' + wo + '*');
+  fill('l-barcode-text', wo + ' · OM04-1');
+
+  // Look up repair by WO number
+  fetch(BASE + '/Repair/GetAllRepairs?plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=0')
+    .then(function(r){ return r.json(); })
+    .then(function(list){
+      var arr = Array.isArray(list) ? list : [];
+      var match = arr.find(function(r){ return r.sWorkOrderNumber === wo; });
+      if(!match) return;
+
+      fetch(BASE + '/Repair/GetAllrepairsBylRepairKey?plRepairKey=' + match.lRepairKey + '&plScopeKey=0&plDepartmentKey=0&plServiceLocationKey=0')
+        .then(function(r){ return r.json(); })
+        .then(function(detail){
+          var r = Array.isArray(detail) ? detail[0] : detail;
+          if(!r) return;
+          fill('l-client', r.sClientName1 || r.sClientName || '');
+          fill('l-model', r.sModelNumber || r.sScopeModel || '');
+          fill('l-serial', r.sSerialNumber || r.sSerial || '');
+          fill('l-date', fmtDate(r.dtDateIn));
+        })
+        .catch(function(e){ console.warn('Repair detail load failed:', e); });
+    })
+    .catch(function(e){ console.warn('Repair list load failed:', e); });
+})();
+</script>
+</body>
+</html>
