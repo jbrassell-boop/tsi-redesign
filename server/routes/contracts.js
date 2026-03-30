@@ -111,16 +111,16 @@ router.post('/Contract/UpdateContract', async (req, res, next) => {
       WHERE lContractKey = @contractKey`,
       {
         contractKey,
-        contractNum: b.sContractNumber || null,
-        clientKey: b.lClientKey || null,
-        typeKey: b.lContractTypeKey || null,
-        repKey: b.lSalesRepKey || null,
-        termsKey: b.lPaymentTermsKey || null,
-        dateEff: b.dtDateEffective || null,
-        dateTerm: b.dtDateTermination || null,
+        contractNum: b.sContractNumber || b.psContractName || b.psContractNumber || null,
+        clientKey: b.lClientKey || b.plClientKey || null,
+        typeKey: b.lContractTypeKey || b.plContractTypeKey || null,
+        repKey: b.lSalesRepKey || b.plSalesRepKey || null,
+        termsKey: b.lPaymentTermsKey || b.plPaymentTermsKey || null,
+        dateEff: b.dtDateEffective || b.pdtStartDate || null,
+        dateTerm: b.dtDateTermination || b.pdtEndDate || null,
         amtContract: b.dblAmtContract != null ? b.dblAmtContract : (b.dblAmtTotal != null ? b.dblAmtTotal : null),
-        po: b.sPurchaseOrder || null,
-        comments: b.mComments || null
+        po: b.sPurchaseOrder || b.psPurchaseOrder || null,
+        comments: b.mComments || b.pmContractNotes || null
       });
     res.json({ success: true });
   } catch (e) { next(e); }

@@ -796,9 +796,17 @@
     renderRows();
   });
 
+  // ── Toast helper ─────────────────────────────────────
+  function showToast(msg, ms) {
+    var t = document.getElementById('tsiToast');
+    if (!t) { t = document.createElement('div'); t.id = 'tsiToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;font-family:inherit;z-index:var(--z-toast);box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
+    t.textContent = msg; t.style.opacity = '1';
+    clearTimeout(t._tid); t._tid = setTimeout(function() { t.style.opacity = '0'; }, ms || 4000);
+  }
+
   // ── + New Invoice button ──────────────────────────────
   document.getElementById('btnNewInvoice').addEventListener('click', function() {
-    alert('Create Invoice: Select a completed repair from the Work Orders page to generate an invoice. Invoices are created from the repair workflow (Repair → Draft Invoice → Finalize).');
+    showToast('To create an invoice, open a completed repair from the Work Orders page and use the Invoice action.');
   });
 
   // ── Global action stubs ─────────────────────────────────

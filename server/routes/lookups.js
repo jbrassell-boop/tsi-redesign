@@ -143,7 +143,7 @@ router.get('/Scopes/GetAllScopeType', async (req, res, next) => {
       FROM tblScopeType st
         LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
         LEFT JOIN tblScopeTypeCategories stc ON stc.lScopeTypeCategoryKey = st.lScopeTypeCatKey
-      WHERE st.bActive = 1
+      WHERE (st.bActive = 1 OR st.bActive IS NULL)
       ORDER BY st.sScopeTypeDesc`);
     res.json(rows);
   } catch (e) { next(e); }
@@ -156,7 +156,7 @@ router.get('/ScopeType/GetscopeTypeNameList', async (req, res, next) => {
     const rows = await db.query(`
       SELECT lScopeTypeKey, sScopeTypeDesc, sRigidOrFlexible
       FROM tblScopeType
-      WHERE bActive = 1 AND (@type IS NULL OR sRigidOrFlexible = @type)
+      WHERE (bActive = 1 OR bActive IS NULL) AND (@type IS NULL OR sRigidOrFlexible = @type)
       ORDER BY sScopeTypeDesc`, { type });
     res.json(rows);
   } catch (e) { next(e); }
@@ -205,7 +205,7 @@ router.get('/InstrumentType/GetInstrumentTypes', async (req, res, next) => {
     const rows = await db.query(`
       SELECT DISTINCT sRigidOrFlexible AS type
       FROM tblScopeType
-      WHERE bActive = 1 AND sRigidOrFlexible IS NOT NULL
+      WHERE (bActive = 1 OR bActive IS NULL) AND sRigidOrFlexible IS NOT NULL
       ORDER BY sRigidOrFlexible`);
     // Map to labeled objects
     const labelMap = { R: 'Rigid', F: 'Flexible', C: 'Camera', I: 'Instrument' };
