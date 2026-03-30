@@ -754,7 +754,7 @@ async function populateModalDropdowns() {
   var clients;
   try {
     var allClients = await API.getAllClients();
-    clients = (allClients || []).map(c => c.sClientName || c.name || '').filter(Boolean);
+    clients = (allClients || []).map(c => c.sClientName1 || c.sClientName || c.name || '').filter(Boolean);
     clients = [...new Set(clients)].sort();
   } catch(e) {
     clients = [...new Set(allVisits.map(v => v.clientName))].sort();
@@ -772,7 +772,7 @@ async function onModalClientChange() {
   var depts;
   try {
     var allClients = await API.getAllClients();
-    var clientObj = (allClients || []).find(c => (c.sClientName || c.name) === client);
+    var clientObj = (allClients || []).find(c => (c.sClientName1 || c.sClientName || c.name) === client);
     if (clientObj) {
       var allDepts = await API.getAllDepartments();
       var clientDepts = (allDepts || []).filter(d => d.lClientKey === clientObj.lClientKey);

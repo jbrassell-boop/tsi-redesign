@@ -50,8 +50,7 @@ const REPAIR_SELECT = `
     pt.sTermsDesc AS sPaymentTerms,
     pc.sPricingDescription,
     sl.sServiceLocation AS sServiceLocationName,
-    rr.sRepairReason AS sRepairReasonDesc,
-    rl.sRepairLevel
+    rr.sRepairReason AS sRepairReasonDesc
   FROM tblRepair r
     LEFT JOIN tblRepairStatuses rs ON rs.lRepairStatusID = r.lRepairStatusID
     LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
@@ -67,7 +66,6 @@ const REPAIR_SELECT = `
     LEFT JOIN tblPricingCategory pc ON pc.lPricingCategoryKey = r.lPricingCategoryKey
     LEFT JOIN tblServiceLocations sl ON sl.lServiceLocationKey = r.lServiceLocationKey
     LEFT JOIN tblRepairReasons rr ON rr.lRepairReasonKey = r.lRepairReasonKey
-    LEFT JOIN tblRepairLevels rl ON rl.lRepairLevelKey = r.lRepairStatusID
 `;
 
 // GET /Repair/GetAllRepairs — List repairs (filtered)
@@ -287,15 +285,14 @@ router.post('/InstrumentRepair/Add', async (req, res, next) => {
   try {
     const b = req.body || {};
     const result = await db.query(`
-      INSERT INTO tblRepair (lDepartmentKey, lScopeKey, sWorkOrderNumber, dtDateIn, dtDateDue,
+      INSERT INTO tblRepair (lDepartmentKey, lScopeKey, sWorkOrderNumber, dtDateIn,
         lRepairStatusID, lServiceLocationKey, sPurchaseOrder, sComplaintDesc, dtLastUpdate)
-      VALUES (@deptKey, 0, @wo, GETDATE(), @dateDue,
+      VALUES (@deptKey, 0, @wo, GETDATE(),
         1, @svcKey, @po, @notes, GETDATE());
       SELECT SCOPE_IDENTITY() AS lRepairKey`,
       {
         deptKey: b.lDepartmentKey || 0,
         wo: b.sWorkOrderNumber || '',
-        dateDue: b.dtDateDue || null,
         svcKey: b.lServiceLocationKey || 1,
         po: b.sPurchaseOrder || '',
         notes: b.sComplaintDesc || ''
@@ -323,7 +320,6 @@ router.post('/InstrumentRepair/Update', async (req, res, next) => {
       UPDATE tblRepair SET
         lRepairStatusID = ISNULL(@statusId, lRepairStatusID),
         dtDateIn        = ISNULL(@dateIn,   dtDateIn),
-        dtDateDue       = ISNULL(@dateDue,  dtDateDue),
         dtDateOut       = ISNULL(@dateOut,  dtDateOut),
         sPurchaseOrder  = ISNULL(@po,       sPurchaseOrder),
         sComplaintDesc  = ISNULL(@notes,    sComplaintDesc),
@@ -341,7 +337,6 @@ router.post('/InstrumentRepair/Update', async (req, res, next) => {
         repairKey,
         statusId: b.lRepairStatusID != null ? b.lRepairStatusID : null,
         dateIn:   b.dtDateIn   || null,
-        dateDue:  b.dtDateDue  || null,
         dateOut:  b.dtDateOut  || null,
         po:       b.sPurchaseOrder   || null,
         notes:    b.sComplaintDesc   || null,
