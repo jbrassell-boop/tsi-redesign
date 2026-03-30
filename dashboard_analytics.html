@@ -597,12 +597,24 @@ var TAT = {
 
   load: function() {
     var self = this;
-    var params = [];
-    if (self.sourceFilter === 'inhouse') params.push('inhouse=true');
-    if (self.sourceFilter === 'outsourced') params.push('outsourced=true');
-    // FUTURE: needs Express endpoint for TAT matrix aggregation
-    console.warn('[analytics] TAT matrix endpoint not yet available');
     self.loaded = true;
+    var params = {};
+    if (self.sourceFilter === 'inhouse') params.inhouse = 'true';
+    if (self.sourceFilter === 'outsourced') params.outsourced = 'true';
+    document.getElementById('t-matrixTbody').innerHTML =
+      '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Loading&hellip;</td></tr>';
+    API.getTATMatrix(Object.keys(params).length ? params : null).then(function(resp) {
+      var d = (resp && resp.data) ? resp.data : resp;
+      if (!d || !d.matrix) throw new Error('no matrix');
+      self.data = d;
+      self.renderMatrix();
+      self.renderScopeTable();
+      self.updateKPIStrip();
+    }).catch(function(e) {
+      console.warn('[analytics] TAT matrix failed:', e.message);
+      document.getElementById('t-matrixTbody').innerHTML =
+        '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Data unavailable</td></tr>';
+    });
   },
 
   tatCell: function(avgTat, count, sla) {

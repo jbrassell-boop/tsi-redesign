@@ -956,22 +956,65 @@ function runQualityReport(idx) {
 // ══════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════
+function mapCAPA(r) {
+  var status = 'Open';
+  if (r.dtFnlDispDate) status = 'Completed';
+  else if (r.dtEvalDate) status = 'In Progress';
+  else if (r.dtDateResponseDue && new Date(r.dtDateResponseDue) < new Date()) status = 'Overdue';
+  return {
+    capa: 'CAPA-' + String(r.lISOComplaintKey).padStart(4, '0'),
+    ncrRef: r.sISONonConformance ? 'ISO-' + String(r.lISOComplaintKey).padStart(4, '0') : '',
+    type: r.sISOComplaint || 'Corrective',
+    desc: r.mComplaint || r.sISONonConformance || '',
+    owner: r.sClientName1 || '',
+    due: (r.dtDateResponseDue || '').substring(0, 10),
+    status: status,
+    _raw: r
+  };
+}
+
+function mapRework(r) {
+  var status = 'Pending';
+  if (r.dtDateOut) status = 'Complete';
+  else if (r.dtDateIn) status = 'In Progress';
+  return {
+    rw: 'RW-' + String(r.lRepairKey).padStart(6, '0'),
+    wo: r.sWorkOrderNumber || '',
+    serial: r.sSerialNumber || '',
+    reason: r.mCommentsRework || (r.bFirstRepair === false || r.bFirstRepair === 0 ? '40-Day Return' : 'Rework Required'),
+    tech: r.sTechName || '',
+    origComplete: (r.dtDateOut || '').substring(0, 10),
+    due: (r.dtDateIn || '').substring(0, 10),
+    status: status,
+    _raw: r
+  };
+}
+
 async function init() {
   if (API && API.UI) API.UI.showSkeleton('skQuality', 5);
+  var apiMode = true;
   try {
-    var raw = await API.getQualityComplaints();
-    var list = Array.isArray(raw) ? raw : (raw && raw.data ? raw.data : []);
-    DEMO_NCR = list.map(mapComplaint);
-    // Update NCR count in stat strip (re-use kpiConditional for open count)
+    var [ncrRaw, capaRaw, reworkRaw] = await Promise.all([
+      API.getQualityNCRs(),
+      API.getQualityCAPAs(),
+      API.getQualityRework()
+    ]);
+    var ncrList = Array.isArray(ncrRaw) ? ncrRaw : (ncrRaw && ncrRaw.data ? ncrRaw.data : []);
+    var capaList = Array.isArray(capaRaw) ? capaRaw : (capaRaw && capaRaw.data ? capaRaw.data : []);
+    var reworkList = Array.isArray(reworkRaw) ? reworkRaw : (reworkRaw && reworkRaw.data ? reworkRaw.data : []);
+    DEMO_NCR = ncrList.map(mapComplaint);
+    DEMO_CAPA = capaList.map(mapCAPA);
+    DEMO_REWORK = reworkList.map(mapRework);
+    // Update NCR count in stat strip
     var open = DEMO_NCR.filter(function(r){ return r.status === 'Open'; }).length;
     var el = document.querySelector('#kpiConditional .s-val');
     if (el) el.textContent = open;
-    API.UI.updateDemoBadge('api');
   } catch(e) {
     console.warn('[TSI Quality] API unavailable:', e.message);
-    DEMO_NCR = [];
-    API.UI.updateDemoBadge('demo');
+    DEMO_NCR = []; DEMO_CAPA = []; DEMO_REWORK = [];
+    apiMode = false;
   }
+  if (API && API.UI) API.UI.updateDemoBadge(apiMode ? 'api' : 'demo');
   _tabInited.inspections = true;
   renderInspections();
   if (API && API.UI) API.UI.hideSkeleton('skQuality');

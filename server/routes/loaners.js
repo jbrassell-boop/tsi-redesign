@@ -116,4 +116,103 @@ router.post('/Loaner/Update', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /api/Loaner/GetRequests — Open/pending loaner requests
+// Requests = loaner records with no scope assigned (lScopeKey=0) or no ship date yet
+// Includes fulfilled requests (lScopeKey assigned) and open ones
+router.get('/Loaner/GetRequests', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT lt.lLoanerTranKey, lt.lDepartmentKey, lt.lScopeKey,
+        lt.lRepairKey, lt.lSalesRepKey,
+        lt.sDateOut, lt.sDateIn, lt.sPurchaseOrder, lt.sRepairClosed,
+        lt.dtCreateDate, lt.sTrackingNumber,
+        ISNULL(s.sSerialNumber, '') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
+        LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName,
+        CASE
+          WHEN lt.sRepairClosed = '1' THEN 'Fulfilled'
+          WHEN lt.lScopeKey > 0 AND (lt.sDateOut IS NOT NULL AND lt.sDateOut <> '') THEN 'Fulfilled'
+          WHEN lt.lScopeKey > 0 THEN 'Approved'
+          ELSE 'Pending'
+        END AS sRequestStatus
+      FROM tblLoanerTran lt
+        LEFT JOIN tblScope s ON s.lScopeKey = lt.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = lt.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+        LEFT JOIN tblRepair r ON r.lRepairKey = lt.lRepairKey
+        LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = lt.lSalesRepKey
+      WHERE lt.dtCreateDate >= DATEADD(MONTH, -3, GETDATE())
+      ORDER BY lt.lLoanerTranKey DESC`, {});
+    res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+});
+
+// POST /api/Loaner/Request — Create a new loaner request (no scope assigned yet)
+router.post('/Loaner/Request', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const deptKey = parseInt(b.lDepartmentKey) || 0;
+    if (!deptKey) return res.status(400).json({ success: false, error: 'lDepartmentKey required' });
+    const result = await db.query(`
+      INSERT INTO tblLoanerTran (lDepartmentKey, lScopeKey, lRepairKey,
+        lSalesRepKey, lDeliveryMethodKey, sDateOut, sDateIn,
+        sPurchaseOrder, sRepairClosed, lContractKey, dtCreateDate)
+      VALUES (@deptKey, 0, @repairKey,
+        @salesRepKey, @delivKey, '', '',
+        @po, '0', @contractKey, GETDATE());
+      SELECT SCOPE_IDENTITY() AS lLoanerTranKey`,
+      {
+        deptKey,
+        repairKey: b.lRepairKey || null,
+        salesRepKey: b.lSalesRepKey || null,
+        delivKey: b.lDeliveryMethodKey || null,
+        po: b.sPurchaseOrder || '',
+        contractKey: b.lContractKey || null
+      });
+    const newKey = result[0] ? result[0].lLoanerTranKey : 0;
+    res.json({ success: true, lLoanerTranKey: newKey });
+  } catch (e) { next(e); }
+});
+
+// POST /api/Loaner/FulfillRequest — Assign a scope to an existing loaner request
+router.post('/Loaner/FulfillRequest', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const loanerKey = parseInt(b.lLoanerTranKey) || 0;
+    const scopeKey = parseInt(b.lScopeKey) || 0;
+    if (!loanerKey || !scopeKey) {
+      return res.status(400).json({ success: false, error: 'lLoanerTranKey and lScopeKey required' });
+    }
+    await db.query(`
+      UPDATE tblLoanerTran SET
+        lScopeKey = @scopeKey,
+        sDateOut = ISNULL(@dateOut, sDateOut),
+        dtLastUpdate = GETDATE()
+      WHERE lLoanerTranKey = @loanerKey`,
+      {
+        loanerKey,
+        scopeKey,
+        dateOut: b.sDateOut || null
+      });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// DELETE /api/Loaner/Delete — Soft-delete (mark closed) a loaner transaction
+router.delete('/Loaner/Delete', async (req, res, next) => {
+  try {
+    const loanerKey = parseInt(req.query.lLoanerTranKey) || 0;
+    if (!loanerKey) return res.status(400).json({ success: false, error: 'lLoanerTranKey required' });
+    await db.query(`
+      UPDATE tblLoanerTran SET sRepairClosed = '1', dtLastUpdate = GETDATE()
+      WHERE lLoanerTranKey = @loanerKey`,
+      { loanerKey });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

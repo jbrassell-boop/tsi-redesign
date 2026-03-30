@@ -1275,22 +1275,37 @@ window.showActiveDetail  = showActiveDetail;
 window.openEditDrawer    = openEditDrawer;
 
 // ═══════════════════════════════════════════════════════
-//  REQUESTS TAB — placeholder data (no API endpoint yet)
-//  tblLoanerTran covers active loaners; requests are a separate
-//  workflow not yet in the Express server. Replace when built.
+//  REQUESTS TAB — live data from /Loaner/GetRequests
 // ═══════════════════════════════════════════════════════
-var DEMO_REQUESTS = [
-  { requestNum: 'LR-2026-001', client: 'Penn Medicine', department: 'GI Lab', scopeType: 'Colonoscope', requestedDate: '2026-02-10', neededBy: '2026-02-14', status: 'Fulfilled', assignedLoaner: 'SN-4410827' },
-  { requestNum: 'LR-2026-002', client: 'Jefferson Health', department: 'Endoscopy', scopeType: 'Gastroscope', requestedDate: '2026-02-15', neededBy: '2026-02-20', status: 'Fulfilled', assignedLoaner: 'SN-3382910' },
-  { requestNum: 'LR-2026-003', client: 'Main Line Health', department: 'Pulmonology', scopeType: 'Bronchoscope', requestedDate: '2026-02-22', neededBy: '2026-02-28', status: 'Denied', assignedLoaner: '' },
-  { requestNum: 'LR-2026-004', client: 'ChristianaCare', department: 'GI Lab', scopeType: 'Duodenoscope', requestedDate: '2026-03-01', neededBy: '2026-03-05', status: 'Fulfilled', assignedLoaner: 'SN-5519034' },
-  { requestNum: 'LR-2026-005', client: 'WellSpan Health', department: 'Surgery', scopeType: 'Colonoscope', requestedDate: '2026-03-04', neededBy: '2026-03-10', status: 'Approved', assignedLoaner: '' },
-  { requestNum: 'LR-2026-006', client: 'Penn Medicine', department: 'Endoscopy', scopeType: 'Gastroscope', requestedDate: '2026-03-06', neededBy: '2026-03-12', status: 'Pending', assignedLoaner: '' },
-  { requestNum: 'LR-2026-007', client: 'Temple Health', department: 'GI Lab', scopeType: 'Sigmoidoscope', requestedDate: '2026-03-08', neededBy: '2026-03-14', status: 'Pending', assignedLoaner: '' },
-  { requestNum: 'LR-2026-008', client: 'Crozer Health', department: 'Pulmonology', scopeType: 'Bronchoscope', requestedDate: '2026-03-10', neededBy: '2026-03-16', status: 'Approved', assignedLoaner: '' },
-  { requestNum: 'LR-2026-009', client: 'Jefferson Health', department: 'Surgery', scopeType: 'Ureteroscope', requestedDate: '2026-03-12', neededBy: '2026-03-18', status: 'Pending', assignedLoaner: '' },
-  { requestNum: 'LR-2026-010', client: 'Main Line Health', department: 'GI Lab', scopeType: 'Duodenoscope', requestedDate: '2026-03-14', neededBy: '2026-03-20', status: 'Denied', assignedLoaner: '' }
-];
+var DEMO_REQUESTS = [];
+var _requestsLoaded = false;
+
+function mapLoanerRequest(r) {
+  var created = (r.dtCreateDate || '').substring(0, 10);
+  return {
+    requestNum: 'LR-' + String(r.lLoanerTranKey).padStart(6, '0'),
+    client: r.sClientName1 || '',
+    department: r.sDepartmentName || '',
+    scopeType: r.sScopeTypeDesc || '',
+    requestedDate: created,
+    neededBy: created,
+    status: r.sRequestStatus || 'Pending',
+    assignedLoaner: r.sSerialNumber || '',
+    _key: r.lLoanerTranKey
+  };
+}
+
+async function loadLoanerRequests() {
+  try {
+    var resp = await API.getLoanerRequests();
+    var list = Array.isArray(resp) ? resp : (resp && resp.data ? resp.data : []);
+    DEMO_REQUESTS = list.map(mapLoanerRequest);
+  } catch(e) {
+    console.warn('[loaners] GetRequests failed:', e.message);
+    DEMO_REQUESTS = [];
+  }
+  filterRequests();
+}
 
 var requestsStatusFilter = 'All';
 var requestsDateFrom = '';
@@ -1312,7 +1327,12 @@ function renderRequests() {
   document.getElementById('reqDateTo').value = requestsDateTo;
   document.getElementById('reqStatusFilter').value = requestsStatusFilter;
   document.getElementById('reqSearchInput').value = searchTerm;
-  filterRequests();
+  if (!_requestsLoaded) {
+    _requestsLoaded = true;
+    loadLoanerRequests(); // async; calls filterRequests() when done
+  } else {
+    filterRequests();
+  }
 }
 
 function getFilteredRequests() {

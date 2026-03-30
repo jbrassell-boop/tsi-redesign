@@ -504,6 +504,10 @@ const API = (() => {
   // ── Analytics ─────────────────────────────────────────
   async function getProfitability() { return get('/Analytics/GetProfitability'); }
   async function getContractProfitability() { return get('/Analytics/GetContractProfitability'); }
+  async function getTATMatrix(params) {
+    var qs = params ? Object.entries(params).map(function(kv){ return kv[0]+'='+encodeURIComponent(kv[1]); }).join('&') : '';
+    return get('/Analytics/GetTATMatrix' + (qs ? '?' + qs : ''));
+  }
 
   // ── Task Status History ───────────────────────────────
   async function getTaskStatusHistory(taskKey) { return get('/Tasks/GetStatusHistory/' + taskKey); }
@@ -529,12 +533,21 @@ const API = (() => {
   // ── Quality / ISO Complaints ─────────────────────────
   async function getQualityComplaints() { return get('/Quality/GetAll'); }
   async function getQualityComplaintByKey(key) { return get('/Quality/GetByKey?key=' + key); }
+  async function addQualityComplaint(data) { return post('/Quality/Add', data); }
+  async function updateQualityComplaint(data) { return post('/Quality/Update', data); }
+  async function getQualityNCRs() { return get('/Quality/GetNCRs'); }
+  async function getQualityCAPAs() { return get('/Quality/GetCAPAs'); }
+  async function getQualityRework() { return get('/Quality/GetRework'); }
 
   // ── Loaner Instruments ───────────────────────────────
   async function getLoanerTrans(deptKey, openOnly) { return get('/Loaner/GetAll?lDepartmentKey=' + (deptKey||0) + (openOnly ? '&openOnly=1' : '')); }
   async function getLoanersByRepair(repairKey) { return get('/Loaner/GetByRepair?lRepairKey=' + repairKey); }
   async function addLoanerTran(data) { return post('/Loaner/Add', data); }
   async function updateLoanerTran(data) { return post('/Loaner/Update', data); }
+  async function getLoanerRequests() { return get('/Loaner/GetRequests'); }
+  async function requestLoaner(data) { return post('/Loaner/Request', data); }
+  async function fulfillLoaner(data) { return post('/Loaner/FulfillRequest', data); }
+  async function deleteLoanerTran(key) { return del('/Loaner/Delete?lLoanerTranKey=' + key); }
 
   // ── Product Sale Details ─────────────────────────────
   async function getProductSaleDetails(key) { return get('/ProductSales/GetDetails?lProductSaleKey=' + key); }
@@ -681,9 +694,12 @@ const API = (() => {
 
     // Quality
     getQualityComplaints, getQualityComplaintByKey,
+    addQualityComplaint, updateQualityComplaint,
+    getQualityNCRs, getQualityCAPAs, getQualityRework,
 
     // Loaner Instruments
     getLoanerTrans, getLoanersByRepair, addLoanerTran, updateLoanerTran,
+    getLoanerRequests, requestLoaner, fulfillLoaner, deleteLoanerTran,
 
     // Product Sale Details
     getProductSaleDetails,
@@ -707,7 +723,7 @@ const API = (() => {
     getSupplierPOs, getSupplierPOTransactions, getSupplierPOTypes,
 
     // Analytics
-    getProfitability, getContractProfitability,
+    getProfitability, getContractProfitability, getTATMatrix,
 
     // Task Status History
     getTaskStatusHistory,

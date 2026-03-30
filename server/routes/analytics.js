@@ -180,4 +180,148 @@ router.get('/Analytics/GetMetrics', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Analytics/GetTATMatrix — Business-day TAT aggregated by repair level and time window
+// Repair level joins via tblRepairRevenueAndExpenses.lRepairLevelKey (tblRepair has none)
+// Business days = calendar days minus weekends and tblHolidays dates
+router.get('/Analytics/GetTATMatrix', async (req, res, next) => {
+  try {
+    // Pull all completed repairs with level info from the revenue/expenses staging table
+    // tblRepairRevenueAndExpenses has lRepairKey + lRepairLevelKey + tblRepairLevels.sRepairLevel
+    const rows = await db.query(`
+      SELECT
+        r.lRepairKey,
+        r.dtDateIn,
+        r.dtDateOut,
+        ISNULL(rl.sRepairLevel, 'Unknown') AS sRepairLevel,
+        CAST(DATEDIFF(DAY, r.dtDateIn, r.dtDateOut) AS int) AS nCalendarDays
+      FROM tblRepair r
+        INNER JOIN tblRepairRevenueAndExpenses rre ON rre.lRepairKey = r.lRepairKey
+        INNER JOIN tblRepairLevels rl ON rl.lRepairLevelKey = rre.lRepairLevelKey
+      WHERE r.dtDateIn IS NOT NULL
+        AND r.dtDateOut IS NOT NULL
+        AND r.dtDateIn >= DATEADD(MONTH, -7, GETDATE())
+      ORDER BY r.dtDateOut DESC`, {});
+
+    // Load holidays once — used to subtract from business day calc
+    const holidays = await db.query(`
+      SELECT CAST(dtHoliday AS date) AS hDate FROM tblHolidays`, {});
+    const holidaySet = new Set(holidays.map(h => {
+      const d = new Date(h.hDate);
+      return d.toISOString().substring(0, 10);
+    }));
+
+    // Count business days between two dates (inclusive start, exclusive end — like TAT)
+    function businessDays(dtIn, dtOut) {
+      const start = new Date(dtIn);
+      const end = new Date(dtOut);
+      let count = 0;
+      const cur = new Date(start);
+      while (cur < end) {
+        const dow = cur.getDay(); // 0=Sun, 6=Sat
+        const iso = cur.toISOString().substring(0, 10);
+        if (dow !== 0 && dow !== 6 && !holidaySet.has(iso)) count++;
+        cur.setDate(cur.getDate() + 1);
+      }
+      return count;
+    }
+
+    // Enrich rows with business-day TAT
+    const enriched = rows.map(r => ({
+      level: r.sRepairLevel,
+      bizDays: businessDays(r.dtDateIn, r.dtDateOut),
+      dtOut: new Date(r.dtDateOut)
+    }));
+
+    // Time window boundaries
+    const now = new Date();
+    const cmStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const l30Start = new Date(now); l30Start.setDate(l30Start.getDate() - 30);
+    const l3mStart = new Date(now); l3mStart.setMonth(l3mStart.getMonth() - 3);
+    const l6mStart = new Date(now); l6mStart.setMonth(l6mStart.getMonth() - 6);
+
+    const WINDOWS = [
+      { key: 'Current Month', start: cmStart },
+      { key: 'Last 30 Days', start: l30Start },
+      { key: 'Last 3 Months', start: l3mStart },
+      { key: 'Last 6 Months', start: l6mStart }
+    ];
+
+    // Get distinct levels in display order
+    const LEVEL_ORDER = ['Minor', 'Mid-Level', 'Major', 'VSI'];
+    const levels = Array.from(new Set(enriched.map(r => r.level)));
+    levels.sort((a, b) => {
+      const ai = LEVEL_ORDER.indexOf(a); const bi = LEVEL_ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1; if (bi === -1) return -1;
+      return ai - bi;
+    });
+
+    // Aggregate
+    const matrix = levels.map(level => {
+      const row = { level };
+      WINDOWS.forEach(w => {
+        const subset = enriched.filter(r => r.level === level && r.dtOut >= w.start);
+        if (!subset.length) {
+          row[w.key] = { avgTat: null, count: 0 };
+        } else {
+          const avg = subset.reduce((s, r) => s + r.bizDays, 0) / subset.length;
+          row[w.key] = { avgTat: Math.round(avg * 10) / 10, count: subset.length };
+        }
+      });
+      return row;
+    });
+
+    // Scope-type breakdown for the secondary table (all 6-month data, top 15 types by volume)
+    const scopeRows = await db.query(`
+      SELECT TOP 15
+        ISNULL(st.sScopeTypeDesc, 'Unknown') AS sType,
+        r.lRepairKey,
+        r.dtDateIn,
+        r.dtDateOut
+      FROM tblRepair r
+        LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+      WHERE r.dtDateIn IS NOT NULL
+        AND r.dtDateOut IS NOT NULL
+        AND r.dtDateIn >= DATEADD(MONTH, -7, GETDATE())
+      ORDER BY sType`, {});
+
+    // Group scope rows by type, compute biz days per row
+    const scopeMap = {};
+    scopeRows.forEach(r => {
+      const type = r.sType;
+      if (!scopeMap[type]) scopeMap[type] = [];
+      scopeMap[type].push({
+        bizDays: businessDays(r.dtDateIn, r.dtDateOut),
+        dtOut: new Date(r.dtDateOut)
+      });
+    });
+
+    const scopeTypes = Object.entries(scopeMap).map(([type, items]) => {
+      const entry = { type, totalCount: items.length };
+      const allAvg = items.reduce((s, r) => s + r.bizDays, 0) / items.length;
+      entry.avgTat = Math.round(allAvg * 10) / 10;
+      WINDOWS.forEach(w => {
+        const subset = items.filter(r => r.dtOut >= w.start);
+        if (!subset.length) {
+          entry[w.key] = { avgTat: null, count: 0 };
+        } else {
+          const avg = subset.reduce((s, r) => s + r.bizDays, 0) / subset.length;
+          entry[w.key] = { avgTat: Math.round(avg * 10) / 10, count: subset.length };
+        }
+      });
+      return entry;
+    }).sort((a, b) => b.totalCount - a.totalCount);
+
+    res.json({
+      success: true,
+      data: {
+        windows: WINDOWS.map(w => w.key),
+        matrix,
+        scopeTypes
+      }
+    });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;
