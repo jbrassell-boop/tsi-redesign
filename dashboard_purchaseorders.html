@@ -140,7 +140,7 @@
       <!-- FOOTER -->
       <div class="table-footer">
         <div class="record-info" id="poRecordInfo">Loading...</div>
-        <div></div>
+        <div id="poPagination" style="display:flex;align-items:center;gap:6px"></div>
       </div>
 
     </div>
@@ -161,6 +161,8 @@ let searchTerm = '';
 let sortCol = 'date';
 let sortDir = 'desc';
 const NOW = new Date();
+let _poPage = 0;
+const _poPerPage = 50;
 
 // ── Derive PO status from line items ──
 function derivePOStatus(po, trans) {
@@ -186,7 +188,7 @@ function computeEstDelivery(trans) {
   return earliest;
 }
 
-// ── Load data ──
+// ── Load data — fetch PO headers only; transactions are loaded on demand ──
 async function loadData() {
   try {
     const [pos, suppliers, poTypes] = await Promise.all([
@@ -194,11 +196,6 @@ async function loadData() {
       API.getSuppliers(),
       API.getSupplierPOTypes()
     ]);
-    // Load all PO transactions (one call per PO — batched)
-    const allTransArrays = await Promise.all(
-      (Array.isArray(pos) ? pos : []).map(po => API.getSupplierPOTransactions(po.lSupplierPOKey).catch(() => []))
-    );
-    const allTrans = allTransArrays.flat();
 
     // Build lookup maps
     const supplierMap = {};
@@ -206,27 +203,19 @@ async function loadData() {
     const typeMap = {};
     poTypes.forEach(t => { typeMap[t.lSupplierPOTypeKey] = t.sSupplierPOType || ''; });
 
-    // Group transactions by PO
-    const transByPO = {};
-    allTrans.forEach(t => {
-      if (!transByPO[t.lSupplierPOKey]) transByPO[t.lSupplierPOKey] = [];
-      transByPO[t.lSupplierPOKey].push(t);
-    });
-
-    ALL_POS = pos.map(po => {
-      const trans = transByPO[po.lSupplierPOKey] || [];
-      const status = derivePOStatus(po, trans);
-      const estDelivery = computeEstDelivery(trans);
-      const isOverdue = estDelivery && (status === 'Open' || status === 'Partial') && estDelivery < NOW;
+    // Build PO list from headers only — no per-PO transaction fetches
+    ALL_POS = (Array.isArray(pos) ? pos : []).map(po => {
+      const status = po.bCancelled ? 'Cancelled' : 'Open';
       return {
         ...po,
         _supplierName: po.sSupplierName || supplierMap[po.lSupplierKey] || 'Unknown',
         _typeName: typeMap[po.lSupplierPOTypeKey] || '',
         _status: status,
-        _itemCount: trans.length,
-        _totalReceived: trans.reduce((s, t) => s + (t.nReceivedQuantity || 0), 0),
-        _estDelivery: estDelivery,
-        _overdue: isOverdue
+        _itemCount: po.nLineItems || 0,
+        _totalReceived: 0,
+        _estDelivery: po.dtEstimatedDelivery ? new Date(po.dtEstimatedDelivery) : null,
+        _overdue: false,
+        _transLoaded: false
       };
     });
 
@@ -265,6 +254,7 @@ function fmtDate(dt) {
 
 // ── Filter + render ──
 window.applyFilters = function() {
+  _poPage = 0;
   searchTerm = document.getElementById('poSearch').value.trim().toLowerCase();
   let items = ALL_POS;
 
@@ -306,17 +296,25 @@ window.applyFilters = function() {
 };
 
 // ── Render ──
+let _filteredPOs = [];
 function renderTable(items) {
+  _filteredPOs = items;
   const tbody = document.getElementById('poTbody');
   if (items.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No purchase orders match your filters</td></tr>';
     document.getElementById('poRecordInfo').innerHTML = 'No POs found';
+    document.getElementById('poPagination').innerHTML = '';
     return;
   }
 
+  const totalPages = Math.max(1, Math.ceil(items.length / _poPerPage));
+  if (_poPage >= totalPages) _poPage = totalPages - 1;
+  const start = _poPage * _poPerPage;
+  const pageItems = items.slice(start, start + _poPerPage);
+
   const badgeClass = {Open:'b-open',Received:'b-received',Partial:'b-partial',Cancelled:'b-cancelled'};
 
-  tbody.innerHTML = items.map(po => {
+  tbody.innerHTML = pageItems.map(po => {
     const dateStr = fmtDate(po.dtDateOfPO ? new Date(po.dtDateOfPO) : null);
     const total = (po.dblPOTotal || 0);
     const totalStr = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -335,9 +333,28 @@ function renderTable(items) {
     '</tr>';
   }).join('');
 
+  const end = Math.min(start + _poPerPage, items.length);
   document.getElementById('poRecordInfo').innerHTML =
-    'Showing <strong>' + items.length + '</strong> of <strong>' + ALL_POS.length + '</strong> POs';
+    'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + items.length + '</strong> POs';
+
+  const pgDiv = document.getElementById('poPagination');
+  if (totalPages <= 1) {
+    pgDiv.innerHTML = '';
+  } else {
+    pgDiv.innerHTML =
+      '<button class="pg-btn" onclick="poPrevPage()" ' + (_poPage === 0 ? 'disabled' : '') + '>‹ Prev</button>' +
+      '<span style="font-size:11px;color:var(--muted)">Page ' + (_poPage + 1) + ' of ' + totalPages + '</span>' +
+      '<button class="pg-btn" onclick="poNextPage()" ' + (_poPage >= totalPages - 1 ? 'disabled' : '') + '>Next ›</button>';
+  }
 }
+
+window.poPrevPage = function() {
+  if (_poPage > 0) { _poPage--; renderTable(_filteredPOs); }
+};
+window.poNextPage = function() {
+  const totalPages = Math.ceil(_filteredPOs.length / _poPerPage);
+  if (_poPage < totalPages - 1) { _poPage++; renderTable(_filteredPOs); }
+};
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 

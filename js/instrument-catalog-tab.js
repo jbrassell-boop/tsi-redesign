@@ -15,6 +15,8 @@ var ic_selectedKey    = null;
 var ic_inited         = false;
 var ic_activeParent   = null;  // null = All
 var ic_activeInstGrp  = null;  // null = All Instruments
+var ic_mfrPage        = 0;
+var ic_mfrPerPage     = 50;
 
 var IC = {KEY:0, CAT:1, CODE:2, REPAIRS:3, STATUS:4, MFR_KEY:5, MFR:6, MDL_KEY:7, MDL:8, MAX:9, HPG:10, VIZ:11, SS:12, USED:13};
 
@@ -253,7 +255,8 @@ function ic_selectCategory(cat) {
   // Update header
   document.getElementById('ic_mfrHead').textContent = cat + ' — Manufacturers & Models';
 
-  // Render manufacturer groups
+  // Reset page and render manufacturer groups
+  ic_mfrPage = 0;
   ic_renderMfrModels();
 }
 
@@ -291,14 +294,35 @@ function ic_renderMfrModels() {
     return;
   }
 
-  var html = '';
+  // Flatten all models into a single ordered list (sorted by mfr then model)
+  var allModels = [];
   mfrOrder.forEach(function(mfr) {
     var models = mfrMap[mfr];
     models.sort(function(a, b) { return a.model.localeCompare(b.model); });
+    models.forEach(function(item) { allModels.push({ mfr: mfr, item: item }); });
+  });
+
+  var totalModels = allModels.length;
+  var totalPages = Math.max(1, Math.ceil(totalModels / ic_mfrPerPage));
+  if (ic_mfrPage >= totalPages) ic_mfrPage = totalPages - 1;
+  var start = ic_mfrPage * ic_mfrPerPage;
+  var pageModels = allModels.slice(start, start + ic_mfrPerPage);
+
+  // Group the page slice back by manufacturer for display
+  var pageMfrMap = {}, pageMfrOrder = [];
+  pageModels.forEach(function(entry) {
+    if (!pageMfrMap[entry.mfr]) { pageMfrMap[entry.mfr] = []; pageMfrOrder.push(entry.mfr); }
+    pageMfrMap[entry.mfr].push(entry.item);
+  });
+
+  var html = '';
+  pageMfrOrder.forEach(function(mfr) {
+    var models = pageMfrMap[mfr];
+    var totalMfrCount = mfrMap[mfr].length;
 
     html += '<div class="ic-mfr-group">';
     html += '<div class="ic-mfr-head" onclick="ic_toggleMfr(this)">';
-    html += '<span>' + ic_esc(mfr) + ' <span style="font-weight:400;color:var(--muted);font-size:10px">(' + models.length + ' model' + (models.length === 1 ? '' : 's') + ')</span></span>';
+    html += '<span>' + ic_esc(mfr) + ' <span style="font-weight:400;color:var(--muted);font-size:10px">(' + totalMfrCount + ' model' + (totalMfrCount === 1 ? '' : 's') + ')</span></span>';
     html += '<span class="ic-mfr-toggle">&#9660;</span>';
     html += '</div>';
     html += '<div class="ic-mfr-body">';
@@ -316,7 +340,27 @@ function ic_renderMfrModels() {
     html += '</div></div>';
   });
 
+  // Pagination footer
+  if (totalPages > 1) {
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--border);background:var(--neutral-50);font-size:11px;color:var(--muted)">';
+    html += '<span>' + totalModels + ' models</span>';
+    html += '<span style="display:flex;align-items:center;gap:4px">';
+    if (ic_mfrPage > 0) html += '<button class="pg-btn" onclick="ic_mfrPrevPage()">&#8249; Prev</button>';
+    html += ' Page ' + (ic_mfrPage + 1) + ' of ' + totalPages + ' ';
+    if (ic_mfrPage < totalPages - 1) html += '<button class="pg-btn" onclick="ic_mfrNextPage()">Next &#8250;</button>';
+    html += '</span></div>';
+  }
+
   area.innerHTML = html;
+}
+
+function ic_mfrPrevPage() {
+  if (ic_mfrPage > 0) { ic_mfrPage--; ic_renderMfrModels(); }
+}
+function ic_mfrNextPage() {
+  var items = ic_activeCat && ic_byCat[ic_activeCat] ? ic_byCat[ic_activeCat] : [];
+  var tp = Math.ceil(items.length / ic_mfrPerPage);
+  if (ic_mfrPage < tp - 1) { ic_mfrPage++; ic_renderMfrModels(); }
 }
 
 function ic_toggleMfr(el) {
@@ -326,6 +370,7 @@ function ic_toggleMfr(el) {
 
 function ic_filterMfrModels() {
   ic_mfrSearch = (document.getElementById('ic_mfrSearch').value || '');
+  ic_mfrPage = 0;
   if (!ic_activeCat && ic_mfrSearch.trim().length >= 2) {
     var head = document.getElementById('ic_mfrHead');
     if (head) head.textContent = 'Search Results';

@@ -473,6 +473,10 @@
             <tbody id="departments-tbody">
             </tbody>
           </table>
+          <div class="table-footer" id="deptFooter" style="display:none">
+            <div class="record-info" id="deptRecordInfo"></div>
+            <div id="deptPagination" style="display:flex;align-items:center;gap:6px"></div>
+          </div>
         </div>
       </div>
 
@@ -1412,6 +1416,8 @@ function loadClient(c) {
 
 let _currentClientName = '88th Medical Group';
 let _currentClientData = null; // Holds current loaded client for live mode
+let _deptPage = 0;
+const _deptPerPage = 50;
 
 function toggleAllInstrChips(allBtn) {
   allBtn.classList.toggle('on');
@@ -1687,18 +1693,27 @@ function openEditContactAPI(contactKey) {
   document.getElementById('contactModal').classList.add('open');
 }
 
-function renderDepartments(c) {
+function renderDepartments(c, resetPage) {
   const container = document.getElementById('departments-tbody');
   if (!container) return;
   const moduleLink = document.getElementById('deptModuleLink');
   if (moduleLink && c.id) moduleLink.href = 'departments.html?clientKey=' + c.id;
   const depts = c.departments || [];
+  const footerEl = document.getElementById('deptFooter');
+  if (resetPage !== false) _deptPage = 0;
   if (depts.length === 0) {
     container.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--muted)">No departments assigned to this client.</td></tr>';
+    if (footerEl) footerEl.style.display = 'none';
     return;
   }
-  container.innerHTML = depts.map((d, i) => {
-    const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
+  const totalPages = Math.max(1, Math.ceil(depts.length / _deptPerPage));
+  if (_deptPage >= totalPages) _deptPage = totalPages - 1;
+  const start = _deptPage * _deptPerPage;
+  const pageDepts = depts.slice(start, start + _deptPerPage);
+
+  container.innerHTML = pageDepts.map((d, i) => {
+    const absIdx = start + i;
+    const bg = absIdx % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
     const badge = d.active
       ? '<span class="badge b-active">Active</span>'
       : '<span class="badge b-inactive">Inactive</span>';
@@ -1709,6 +1724,32 @@ function renderDepartments(c) {
       <td>${badge}</td>
     </tr>`;
   }).join('');
+
+  if (footerEl) {
+    const end = Math.min(start + _deptPerPage, depts.length);
+    footerEl.style.display = 'flex';
+    document.getElementById('deptRecordInfo').innerHTML =
+      'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + depts.length + '</strong> departments';
+    const pgDiv = document.getElementById('deptPagination');
+    if (totalPages <= 1) {
+      pgDiv.innerHTML = '';
+    } else {
+      pgDiv.innerHTML =
+        '<button class="pg-btn" onclick="deptPrevPage()" ' + (_deptPage === 0 ? 'disabled' : '') + '>‹ Prev</button>' +
+        '<span style="font-size:11px;color:var(--muted)">Page ' + (_deptPage + 1) + ' of ' + totalPages + '</span>' +
+        '<button class="pg-btn" onclick="deptNextPage()" ' + (_deptPage >= totalPages - 1 ? 'disabled' : '') + '>Next ›</button>';
+    }
+  }
+}
+
+function deptPrevPage() {
+  if (_deptPage > 0) { _deptPage--; renderDepartments(_currentClientData || CLIENTS[_currentClientName], false); }
+}
+function deptNextPage() {
+  const c = _currentClientData || CLIENTS[_currentClientName];
+  const depts = c ? (c.departments || []) : [];
+  const totalPages = Math.ceil(depts.length / _deptPerPage);
+  if (_deptPage < totalPages - 1) { _deptPage++; renderDepartments(c, false); }
 }
 
 function onCreditMemoToggle(cb) {
@@ -2164,17 +2205,7 @@ function showTab(name, el) {
 }
 
 function filterClients(val) {
-  const q = val.toLowerCase();
-  let visibleCount = 0;
-  document.querySelectorAll('#clientSearchBody .search-row').forEach(row => {
-    const show = row.textContent.toLowerCase().includes(q);
-    row.style.display = show ? '' : 'none';
-    if (show) visibleCount++;
-  });
-  const emptyEl = document.getElementById('emptyClients');
-  const tableEl = document.getElementById('clientSearchTable');
-  if (emptyEl) emptyEl.style.display = visibleCount === 0 ? '' : 'none';
-  if (tableEl) tableEl.style.display = visibleCount === 0 ? 'none' : '';
+  _renderClientSearchRows(val);
 }
 
 function selectClient(row, name, id) {
@@ -2247,33 +2278,67 @@ function fmtDate(v) {
 function populateClientList(clients) {
   _clientList = clients;
   const sel = document.querySelector('.client-select');
-  sel.innerHTML = '';
-  const tbody = document.getElementById('clientSearchBody');
-  tbody.innerHTML = '';
 
   clients.sort((a, b) => ((a.sClientName1 || a.name || '')).localeCompare(b.sClientName1 || b.name || ''));
-  clients.forEach(c => {
-    const name = c.sClientName1 || c.name || '';
+
+  // Build dropdown with single innerHTML assignment
+  sel.innerHTML = clients.map(c => {
+    const name = (c.sClientName1 || c.name || '').replace(/"/g, '&quot;');
     const key = c.lClientKey || c.id || '';
-    // Dropdown option
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = name;
-    sel.appendChild(opt);
-    // Find modal row
-    const tr = document.createElement('tr');
-    tr.className = 'search-row';
-    tr.style.cursor = 'pointer';
-    tr.onclick = () => selectClientByKey(key, name);
-    tr.innerHTML = `
+    return `<option value="${key}">${name}</option>`;
+  }).join('');
+
+  // Render search modal rows (filtered view, first 200 shown until search)
+  _renderClientSearchRows('');
+}
+
+var _clientSearchQuery = '';
+
+function _renderClientSearchRows(q) {
+  _clientSearchQuery = q;
+  const tbody = document.getElementById('clientSearchBody');
+  const emptyEl = document.getElementById('emptyClients');
+  const tableEl = document.getElementById('clientSearchTable');
+  const lower = q.toLowerCase();
+  const matched = lower
+    ? _clientList.filter(c => {
+        const name = (c.sClientName1 || c.name || '').toLowerCase();
+        const zip = (c.sMailZip || c.sZipCode || c.zip || '').toLowerCase();
+        const city = (c.sMailCity || c.sCity || c.city || '').toLowerCase();
+        const key = String(c.lClientKey || c.id || '');
+        return name.includes(lower) || zip.includes(lower) || city.includes(lower) || key.includes(lower);
+      })
+    : _clientList;
+
+  // Cap display at 200 rows to avoid DOM bloat
+  const display = matched.slice(0, 200);
+  if (display.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = '';
+    if (tableEl) tableEl.style.display = 'none';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (tableEl) tableEl.style.display = '';
+
+  tbody.innerHTML = display.map(c => {
+    const name = (c.sClientName1 || c.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const key = c.lClientKey || c.id || '';
+    const zip = (c.sMailZip || c.sZipCode || c.zip || '').replace(/</g, '&lt;');
+    const cityState = ((c.sMailCity || c.sCity || c.city || '') +
+      (c.sMailState ? ', ' + c.sMailState : (c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : '')))).replace(/</g, '&lt;');
+    const svcLoc = (c.sServiceLocation || '').replace(/</g, '&lt;');
+    const badgeCls = c.bActive === false ? 'b-inactive' : 'b-active';
+    const badgeTxt = c.bActive === false ? 'Inactive' : 'Active';
+    return `<tr class="search-row" onclick="selectClientByKey(${JSON.stringify(key)},${JSON.stringify(c.sClientName1 || c.name || '')})" style="cursor:pointer">
       <td style="font-weight:600;color:var(--blue)">${name}</td>
       <td>#${key}</td>
-      <td style="font-weight:600">${c.sMailZip || c.sZipCode || c.zip || ''}</td>
-      <td>${c.sMailCity || c.sCity || c.city || ''}${c.sMailState ? ', ' + c.sMailState : (c.sState ? ', ' + c.sState : (c.state ? ', ' + c.state : ''))}</td>
-      <td>${c.sServiceLocation || ''}</td>
-      <td><span class="badge ${c.bActive === false ? 'b-inactive' : 'b-active'}">${c.bActive === false ? 'Inactive' : 'Active'}</span></td>`;
-    tbody.appendChild(tr);
-  });
+      <td style="font-weight:600">${zip}</td>
+      <td>${cityState}</td>
+      <td>${svcLoc}</td>
+      <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 // Load a specific client by API key

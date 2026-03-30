@@ -398,7 +398,7 @@
         <!-- Footer -->
         <div class="table-footer">
           <div class="record-info" id="p-profitRecordInfo">Loading...</div>
-          <div></div>
+          <div id="p-profitPagination" style="display:flex;align-items:center;gap:6px"></div>
         </div>
       </div>
 
@@ -488,7 +488,7 @@
         <!-- Footer -->
         <div class="table-footer">
           <div class="record-info" id="r-revRecordInfo">Loading...</div>
-          <div></div>
+          <div id="r-revPagination" style="display:flex;align-items:center;gap:6px"></div>
         </div>
       </div>
 
@@ -683,6 +683,8 @@ var Profit = {
   searchTerm: '',
   sortCol: 'profit',
   sortDir: 'desc',
+  _page: 0,
+  _perPage: 50,
 
   escHtml: function(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); },
 
@@ -819,22 +821,30 @@ var Profit = {
 
     if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No records found</td></tr>';
-    } else {
-      tbody.innerHTML = filtered.map(function(r) {
-        return '<tr>' +
-          '<td>' + (r.wo ? '<a class="wo-link" href="repairs?wo=' + self.escHtml(r.wo) + '">' + self.escHtml(r.wo) + '</a>' : '<span style="color:var(--muted)">&#8212;</span>') + '</td>' +
-          '<td style="font-weight:500">' + self.escHtml(r.scopeType) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.outsource) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.shipping) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.labor) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.gpo) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.commission) + '</td>' +
-          '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + self.fmtCurrency(r.profit) + '</td>' +
-          '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
-        '</tr>';
-      }).join('');
+      document.getElementById('p-profitRecordInfo').innerHTML = 'No records found';
+      document.getElementById('p-profitPagination').innerHTML = '';
+      return;
     }
+
+    var totalPages = Math.max(1, Math.ceil(filtered.length / self._perPage));
+    if (self._page >= totalPages) self._page = totalPages - 1;
+    var start = self._page * self._perPage;
+    var pageRows = filtered.slice(start, start + self._perPage);
+
+    tbody.innerHTML = pageRows.map(function(r) {
+      return '<tr>' +
+        '<td>' + (r.wo ? '<a class="wo-link" href="repairs?wo=' + self.escHtml(r.wo) + '">' + self.escHtml(r.wo) + '</a>' : '<span style="color:var(--muted)">&#8212;</span>') + '</td>' +
+        '<td style="font-weight:500">' + self.escHtml(r.scopeType) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.outsource) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.shipping) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.labor) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.gpo) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.commission) + '</td>' +
+        '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + self.fmtCurrency(r.profit) + '</td>' +
+        '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
+      '</tr>';
+    }).join('');
 
     // Update sort indicators scoped to profitability thead
     document.querySelectorAll('#p-profitThead th[data-col]').forEach(function(th) {
@@ -842,8 +852,20 @@ var Profit = {
       if (th.dataset.col === self.sortCol) th.classList.add(self.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
     });
 
+    var end = Math.min(start + self._perPage, filtered.length);
     var typeLabel = self.filterType === 'All' ? 'All Types' : self.filterType;
-    document.getElementById('p-profitRecordInfo').innerHTML = '<strong>' + filtered.length + '</strong> records &middot; ' + typeLabel;
+    document.getElementById('p-profitRecordInfo').innerHTML =
+      'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + filtered.length + '</strong> records &middot; ' + typeLabel;
+
+    var pgDiv = document.getElementById('p-profitPagination');
+    if (totalPages <= 1) {
+      pgDiv.innerHTML = '';
+    } else {
+      pgDiv.innerHTML =
+        '<button class="pg-btn" onclick="Profit._page--;Profit.renderTable()" ' + (self._page === 0 ? 'disabled' : '') + '>‹ Prev</button>' +
+        '<span style="font-size:11px;color:var(--muted)">Page ' + (self._page + 1) + ' of ' + totalPages + '</span>' +
+        '<button class="pg-btn" onclick="Profit._page++;Profit.renderTable()" ' + (self._page >= totalPages - 1 ? 'disabled' : '') + '>Next ›</button>';
+    }
   }
 };
 
@@ -858,6 +880,8 @@ var Revenue = {
   searchTerm: '',
   sortCol: 'revenue',
   sortDir: 'desc',
+  _page: 0,
+  _perPage: 50,
 
   escHtml: function(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); },
 
@@ -1010,18 +1034,26 @@ var Revenue = {
 
     if (!rows.length) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No data found</td></tr>';
-    } else {
-      tbody.innerHTML = rows.map(function(r) {
-        return '<tr>' +
-          '<td style="font-weight:600;color:var(--navy)">' + self.escHtml(r.name) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
-          '<td class="num-cell">' + self.fmtCurrency(r.expenses) + '</td>' +
-          '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + self.fmtCurrency(r.profit) + '</td>' +
-          '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
-          '<td class="num-cell">' + r.count + '</td>' +
-        '</tr>';
-      }).join('');
+      document.getElementById('r-revRecordInfo').innerHTML = 'No data found';
+      document.getElementById('r-revPagination').innerHTML = '';
+      return;
     }
+
+    var totalPages = Math.max(1, Math.ceil(rows.length / self._perPage));
+    if (self._page >= totalPages) self._page = totalPages - 1;
+    var start = self._page * self._perPage;
+    var pageRows = rows.slice(start, start + self._perPage);
+
+    tbody.innerHTML = pageRows.map(function(r) {
+      return '<tr>' +
+        '<td style="font-weight:600;color:var(--navy)">' + self.escHtml(r.name) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.revenue) + '</td>' +
+        '<td class="num-cell">' + self.fmtCurrency(r.expenses) + '</td>' +
+        '<td class="num-cell" style="font-weight:600;color:' + (r.profit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + self.fmtCurrency(r.profit) + '</td>' +
+        '<td class="num-cell"><span class="margin-badge ' + self.marginClass(r.margin) + '">' + self.fmtPct(r.margin) + '</span></td>' +
+        '<td class="num-cell">' + r.count + '</td>' +
+      '</tr>';
+    }).join('');
 
     // Update sort indicators scoped to revenue thead
     document.querySelectorAll('#r-revThead th[data-col]').forEach(function(th) {
@@ -1029,9 +1061,20 @@ var Revenue = {
       if (th.dataset.col === self.sortCol) th.classList.add(self.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
     });
 
+    var end = Math.min(start + self._perPage, rows.length);
     document.getElementById('r-revRecordInfo').innerHTML =
-      '<strong>' + rows.length + '</strong> ' + entityLabel.toLowerCase() + (rows.length !== 1 ? 's' : '') +
-      ' &middot; By ' + entityLabel;
+      'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + rows.length + '</strong> ' +
+      entityLabel.toLowerCase() + (rows.length !== 1 ? 's' : '') + ' &middot; By ' + entityLabel;
+
+    var pgDiv = document.getElementById('r-revPagination');
+    if (totalPages <= 1) {
+      pgDiv.innerHTML = '';
+    } else {
+      pgDiv.innerHTML =
+        '<button class="pg-btn" onclick="Revenue._page--;Revenue.renderTable()" ' + (self._page === 0 ? 'disabled' : '') + '>‹ Prev</button>' +
+        '<span style="font-size:11px;color:var(--muted)">Page ' + (self._page + 1) + ' of ' + totalPages + '</span>' +
+        '<button class="pg-btn" onclick="Revenue._page++;Revenue.renderTable()" ' + (self._page >= totalPages - 1 ? 'disabled' : '') + '>Next ›</button>';
+    }
   }
 };
 
@@ -1077,6 +1120,7 @@ document.getElementById('p-typeFilter').querySelectorAll('.seg-btn').forEach(fun
     document.getElementById('p-typeFilter').querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     Profit.filterType = btn.dataset.val;
+    Profit._page = 0;
     Profit.renderCards();
     Profit.renderTable();
   });
@@ -1085,6 +1129,7 @@ document.getElementById('p-typeFilter').querySelectorAll('.seg-btn').forEach(fun
 // -- Profitability: Search --
 document.getElementById('p-profitSearch').addEventListener('input', function() {
   Profit.searchTerm = this.value.trim();
+  Profit._page = 0;
   Profit.renderCards();
   Profit.renderTable();
 });
@@ -1095,6 +1140,7 @@ document.querySelectorAll('#p-profitThead th[data-col]').forEach(function(th) {
     var col = th.dataset.col;
     if (Profit.sortCol === col) { Profit.sortDir = Profit.sortDir === 'asc' ? 'desc' : 'asc'; }
     else { Profit.sortCol = col; Profit.sortDir = 'desc'; }
+    Profit._page = 0;
     Profit.renderCards();
     Profit.renderTable();
   });
@@ -1108,6 +1154,7 @@ document.getElementById('r-viewFilter').querySelectorAll('.seg-btn').forEach(fun
     Revenue.currentView = btn.dataset.val;
     Revenue.sortCol = 'revenue';
     Revenue.sortDir = 'desc';
+    Revenue._page = 0;
     Revenue.renderAll();
   });
 });
@@ -1115,6 +1162,7 @@ document.getElementById('r-viewFilter').querySelectorAll('.seg-btn').forEach(fun
 // -- Revenue: Search --
 document.getElementById('r-revSearch').addEventListener('input', function() {
   Revenue.searchTerm = this.value.trim();
+  Revenue._page = 0;
   Revenue.renderAll();
 });
 
@@ -1124,6 +1172,7 @@ document.querySelectorAll('#r-revThead th[data-col]').forEach(function(th) {
     var col = th.dataset.col;
     if (Revenue.sortCol === col) { Revenue.sortDir = Revenue.sortDir === 'asc' ? 'desc' : 'asc'; }
     else { Revenue.sortCol = col; Revenue.sortDir = 'desc'; }
+    Revenue._page = 0;
     Revenue.renderTable();
   });
 });

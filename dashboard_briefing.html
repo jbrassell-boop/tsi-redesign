@@ -215,6 +215,10 @@ function loadFloorMeeting() {
 function loadFlow(date, loc) {
   fmFetch('/floor-meeting/flow?date=' + date + '&location=' + loc).then(function(data) {
     var tb = document.querySelector('#tblFlow tbody');
+    if (!data.rows || data.rows.length === 0) {
+      tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">No flow data for this date</td></tr>';
+      return;
+    }
     var html = '';
     var totR = 0, totC = 0, totM = 0, totN = 0;
     data.rows.forEach(function(r) {
@@ -260,6 +264,10 @@ function loadCommitments(date, loc) {
 function loadProduction(date, loc) {
   fmFetch('/floor-meeting/production?date=' + date + '&location=' + loc).then(function(data) {
     var tb = document.querySelector('#tblProd tbody');
+    if (!data.rows || data.rows.length === 0) {
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px">No production data for this date</td></tr>';
+      return;
+    }
     var html = '';
     var tOpen = 0, tBench = 0, tOut = 0, tGoal = 0, tGap = 0;
     data.rows.forEach(function(r) {
@@ -280,6 +288,10 @@ function loadProduction(date, loc) {
 function loadInstruments(loc) {
   fmFetch('/floor-meeting/instruments?location=' + loc).then(function(data) {
     var tb = document.querySelector('#tblInst tbody');
+    if (!data.rows || data.rows.length === 0) {
+      tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px">No instrument data for this date</td></tr>';
+      return;
+    }
     var html = '';
     data.rows.forEach(function(r) {
       html += '<tr><td>' + esc(r.channel) + '</td><td class="num">' + r.woOpen + '</td><td class="num">' + r.expectedSoon + '</td><td class="num">' + r.waitingQuotes + '</td></tr>';
@@ -289,20 +301,57 @@ function loadInstruments(loc) {
 }
 
 // ── Section: Delay Tracking ────────────────────────────
+var _delayRows = [];
+var _delayPage = 0;
+var _delayPerPage = 50;
+
 function loadDelays(loc) {
   fmFetch('/floor-meeting/delays?location=' + loc).then(function(data) {
-    var tb = document.querySelector('#tblDelay tbody');
-    if (!data.rows || data.rows.length === 0) {
-      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px">No delays</td></tr>';
-      return;
-    }
-    var html = '';
-    data.rows.forEach(function(r) {
-      html += '<tr><td>' + esc(r.category) + '</td><td>' + esc(r.customer) + '</td><td>' + esc(r.wo) + '</td><td>' + esc(r.model) + '</td><td>' + esc(r.sn) + '</td><td class="num">' + (r.daysOpen || '') + '</td><td></td></tr>';
-    });
-    tb.innerHTML = html;
+    _delayRows = data.rows || [];
+    _delayPage = 0;
+    renderDelays();
   });
 }
+
+function renderDelays() {
+  var tb = document.querySelector('#tblDelay tbody');
+  if (_delayRows.length === 0) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px">No delays</td></tr>';
+    renderDelayFooter();
+    return;
+  }
+  var start = _delayPage * _delayPerPage;
+  var pageRows = _delayRows.slice(start, start + _delayPerPage);
+  var html = '';
+  pageRows.forEach(function(r) {
+    html += '<tr><td>' + esc(r.category) + '</td><td>' + esc(r.customer) + '</td><td>' + esc(r.wo) + '</td><td>' + esc(r.model) + '</td><td>' + esc(r.sn) + '</td><td class="num">' + (r.daysOpen || '') + '</td><td></td></tr>';
+  });
+  tb.innerHTML = html;
+  renderDelayFooter();
+}
+
+function renderDelayFooter() {
+  var totalPages = Math.max(1, Math.ceil(_delayRows.length / _delayPerPage));
+  var footer = document.getElementById('delayFooter');
+  if (!footer) {
+    footer = document.createElement('div');
+    footer.id = 'delayFooter';
+    footer.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--neutral-50);border-top:1px solid var(--neutral-200);font-size:11px;color:var(--muted)';
+    document.querySelector('#tblDelay').closest('.fm-section').appendChild(footer);
+  }
+  if (totalPages <= 1) { footer.style.display = 'none'; return; }
+  footer.style.display = 'flex';
+  footer.innerHTML =
+    '<span>' + _delayRows.length + ' records</span>' +
+    '<span style="display:flex;align-items:center;gap:4px">' +
+    (_delayPage > 0 ? '<button class="fm-btn fm-btn-secondary" style="padding:3px 8px;font-size:10px" onclick="delayPrevPage()">&#8249; Prev</button>' : '') +
+    ' Page ' + (_delayPage + 1) + ' of ' + totalPages + ' ' +
+    (_delayPage < totalPages - 1 ? '<button class="fm-btn fm-btn-secondary" style="padding:3px 8px;font-size:10px" onclick="delayNextPage()">Next &#8250;</button>' : '') +
+    '</span>';
+}
+
+function delayPrevPage() { if (_delayPage > 0) { _delayPage--; renderDelays(); } }
+function delayNextPage() { var tp = Math.ceil(_delayRows.length / _delayPerPage); if (_delayPage < tp - 1) { _delayPage++; renderDelays(); } }
 
 // ── Generate PPTX ──────────────────────────────────────
 function generatePptx() {

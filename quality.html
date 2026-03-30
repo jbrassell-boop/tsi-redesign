@@ -165,7 +165,7 @@
           <input type="date" class="date-input" id="insDateFrom" onchange="renderInspections()" title="From date"/>
           <span style="font-size:10px;color:var(--muted)">to</span>
           <input type="date" class="date-input" id="insDateTo" onchange="renderInspections()" title="To date"/>
-          <input class="search-input" id="insSearch" placeholder="Search WO#, Serial#, Client..." oninput="renderInspections()" style="margin-left:auto"/>
+          <input class="search-input" id="insSearch" placeholder="Search WO#, Serial#, Client..." oninput="_pages.inspections=0;renderInspections()" style="margin-left:auto"/>
           <button class="btn btn-outline btn-sm" onclick="exportTableCSV('insTableWrap','quality-inspections')" title="Export to CSV">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             Export
@@ -215,7 +215,7 @@
             <button class="seg-btn" onclick="setSegFilter('ncrStatus','Under Review',this)">Under Review</button>
             <button class="seg-btn" onclick="setSegFilter('ncrStatus','Closed',this)">Closed</button>
           </div>
-          <input class="search-input" id="ncrSearch" placeholder="Search NCR#, WO#, description..." oninput="renderNCR()" style="margin-left:auto"/>
+          <input class="search-input" id="ncrSearch" placeholder="Search NCR#, WO#, description..." oninput="_pages.ncr=0;renderNCR()" style="margin-left:auto"/>
         </div>
         <div class="table-wrap">
           <table>
@@ -259,7 +259,7 @@
             <button class="seg-btn" onclick="setSegFilter('capaStatus','Completed',this)">Completed</button>
             <button class="seg-btn" onclick="setSegFilter('capaStatus','Overdue',this)">Overdue</button>
           </div>
-          <input class="search-input" id="capaSearch" placeholder="Search CAPA#, NCR ref, description..." oninput="renderCAPA()" style="margin-left:auto"/>
+          <input class="search-input" id="capaSearch" placeholder="Search CAPA#, NCR ref, description..." oninput="_pages.capa=0;renderCAPA()" style="margin-left:auto"/>
         </div>
         <div class="table-wrap">
           <table>
@@ -295,7 +295,7 @@
             <button class="seg-btn" onclick="setSegFilter('reworkStatus','In Progress',this)">In Progress</button>
             <button class="seg-btn" onclick="setSegFilter('reworkStatus','Complete',this)">Complete</button>
           </div>
-          <input class="search-input" id="rwSearch" placeholder="Search RW#, WO#, Serial#..." oninput="renderRework()" style="margin-left:auto"/>
+          <input class="search-input" id="rwSearch" placeholder="Search RW#, WO#, Serial#..." oninput="_pages.rework=0;renderRework()" style="margin-left:auto"/>
         </div>
         <div class="table-wrap">
           <table>
@@ -405,6 +405,29 @@ function mapComplaint(r) {
 var activeTab = 'inspections';
 var _tabInited = { inspections: false, ncr: false, capa: false, rework: false, reports: false };
 var tabFilters = { inspections:'', ncr:'', ncrStatus:'', capaType:'', capaStatus:'', reworkStatus:'' };
+var _perPage = 50;
+var _pages = { inspections: 0, ncr: 0, capa: 0, rework: 0 };
+
+function _pgFooter(tabKey, total) {
+  var page = _pages[tabKey];
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _pages[tabKey] = totalPages - 1; page = _pages[tabKey]; }
+  var pgHtml = '';
+  if (totalPages > 1) {
+    if (page > 0) pgHtml += '<button class="pg-btn" onclick="_pgPrev(\'' + tabKey + '\')">&#8249; Prev</button>';
+    pgHtml += '<span style="padding:0 4px">Page ' + (page + 1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) pgHtml += '<button class="pg-btn" onclick="_pgNext(\'' + tabKey + '\')">Next &#8250;</button>';
+  }
+  return pgHtml;
+}
+function _pgPrev(tabKey) { if (_pages[tabKey] > 0) { _pages[tabKey]--; _rerender(tabKey); } }
+function _pgNext(tabKey) { _pages[tabKey]++; _rerender(tabKey); }
+function _rerender(tabKey) {
+  if (tabKey === 'inspections') renderInspections();
+  else if (tabKey === 'ncr') renderNCR();
+  else if (tabKey === 'capa') renderCAPA();
+  else if (tabKey === 'rework') renderRework();
+}
 
 // ══════════════════════════════════════════════════════════
 // TAB SWITCHING
@@ -454,10 +477,10 @@ function setSegFilter(key, val, btnEl) {
   var group = btnEl.parentElement;
   group.querySelectorAll('.seg-btn').forEach(function(b){ b.classList.remove('active'); });
   btnEl.classList.add('active');
-  if (key === 'inspections') renderInspections();
-  else if (key === 'ncr' || key === 'ncrStatus') renderNCR();
-  else if (key === 'capaType' || key === 'capaStatus') renderCAPA();
-  else if (key === 'reworkStatus') renderRework();
+  if (key === 'inspections') { _pages.inspections = 0; renderInspections(); }
+  else if (key === 'ncr' || key === 'ncrStatus') { _pages.ncr = 0; renderNCR(); }
+  else if (key === 'capaType' || key === 'capaStatus') { _pages.capa = 0; renderCAPA(); }
+  else if (key === 'reworkStatus') { _pages.rework = 0; renderRework(); }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -518,11 +541,17 @@ function renderInspections() {
     return true;
   });
 
+  var page = _pages.inspections;
+  var totalPages = Math.max(1, Math.ceil(rows.length / _perPage));
+  if (page >= totalPages) { _pages.inspections = totalPages - 1; page = _pages.inspections; }
+  var pageRows = rows.slice(page * _perPage, (page + 1) * _perPage);
+
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">No inspections match current filters</td></tr>';
   } else {
-    tbody.innerHTML = rows.map(function(r, i) {
-      return '<tr onclick="openInspectionDrawer('+i+')">'
+    tbody.innerHTML = pageRows.map(function(r, i) {
+      var absIdx = page * _perPage + i;
+      return '<tr onclick="openInspectionDrawer('+absIdx+')">'
         +'<td class="inv-link">'+r.wo+'</td>'
         +'<td>'+r.serial+'</td>'
         +'<td>'+r.client+'</td>'
@@ -535,6 +564,7 @@ function renderInspections() {
     }).join('');
   }
   document.getElementById('insRecordInfo').textContent = rows.length + ' record' + (rows.length !== 1 ? 's' : '');
+  document.getElementById('insPagination').innerHTML = _pgFooter('inspections', rows.length);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -553,11 +583,17 @@ function renderNCR() {
     return true;
   });
 
+  var page = _pages.ncr;
+  var totalPages = Math.max(1, Math.ceil(rows.length / _perPage));
+  if (page >= totalPages) { _pages.ncr = totalPages - 1; page = _pages.ncr; }
+  var pageRows = rows.slice(page * _perPage, (page + 1) * _perPage);
+
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No non-conformances match current filters</td></tr>';
   } else {
-    tbody.innerHTML = rows.map(function(r, i) {
-      return '<tr onclick="openNCRDrawer('+i+')">'
+    tbody.innerHTML = pageRows.map(function(r, i) {
+      var absIdx = page * _perPage + i;
+      return '<tr onclick="openNCRDrawer('+absIdx+')">'
         +'<td class="inv-link">'+r.ncr+'</td>'
         +'<td>'+r.wo+'</td>'
         +'<td title="'+r.desc+'">'+r.desc+'</td>'
@@ -569,6 +605,7 @@ function renderNCR() {
     }).join('');
   }
   document.getElementById('ncrRecordInfo').textContent = rows.length + ' record' + (rows.length !== 1 ? 's' : '');
+  document.getElementById('ncrPagination').innerHTML = _pgFooter('ncr', rows.length);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -587,11 +624,17 @@ function renderCAPA() {
     return true;
   });
 
+  var page = _pages.capa;
+  var totalPages = Math.max(1, Math.ceil(rows.length / _perPage));
+  if (page >= totalPages) { _pages.capa = totalPages - 1; page = _pages.capa; }
+  var pageRows = rows.slice(page * _perPage, (page + 1) * _perPage);
+
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No CAPA records match current filters</td></tr>';
   } else {
-    tbody.innerHTML = rows.map(function(r, i) {
-      return '<tr onclick="openCAPADrawer('+i+')">'
+    tbody.innerHTML = pageRows.map(function(r, i) {
+      var absIdx = page * _perPage + i;
+      return '<tr onclick="openCAPADrawer('+absIdx+')">'
         +'<td class="inv-link">'+r.capa+'</td>'
         +'<td>'+r.ncrRef+'</td>'
         +'<td>'+r.type+'</td>'
@@ -603,6 +646,7 @@ function renderCAPA() {
     }).join('');
   }
   document.getElementById('capaRecordInfo').textContent = rows.length + ' record' + (rows.length !== 1 ? 's' : '');
+  document.getElementById('capaPagination').innerHTML = _pgFooter('capa', rows.length);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -619,11 +663,17 @@ function renderRework() {
     return true;
   });
 
+  var page = _pages.rework;
+  var totalPages = Math.max(1, Math.ceil(rows.length / _perPage));
+  if (page >= totalPages) { _pages.rework = totalPages - 1; page = _pages.rework; }
+  var pageRows = rows.slice(page * _perPage, (page + 1) * _perPage);
+
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">No rework records match current filters</td></tr>';
   } else {
-    tbody.innerHTML = rows.map(function(r, i) {
-      return '<tr onclick="openReworkDrawer('+i+')">'
+    tbody.innerHTML = pageRows.map(function(r, i) {
+      var absIdx = page * _perPage + i;
+      return '<tr onclick="openReworkDrawer('+absIdx+')">'
         +'<td class="inv-link">'+r.rw+'</td>'
         +'<td>'+r.wo+'</td>'
         +'<td>'+r.serial+'</td>'
@@ -636,6 +686,7 @@ function renderRework() {
     }).join('');
   }
   document.getElementById('rwRecordInfo').textContent = rows.length + ' record' + (rows.length !== 1 ? 's' : '');
+  document.getElementById('rwPagination').innerHTML = _pgFooter('rework', rows.length);
 }
 
 // ══════════════════════════════════════════════════════════

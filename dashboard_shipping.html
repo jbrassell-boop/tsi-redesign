@@ -27,7 +27,7 @@
   .batch-bar.visible{display:flex}
   .ship-btn{height:32px;padding:0 16px;border:none;border-radius:6px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
   .search-input{height:30px;width:220px;border:1.5px solid var(--border);border-radius:5px;padding:0 10px 0 30px;font-size:11.5px;font-family:inherit;outline:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238896AA' stroke-width='2'%3E%3Ccircle cx='6' cy='6' r='5'/%3E%3Cline x1='10' y1='10' x2='13' y2='13'/%3E%3C/svg%3E") 9px center/14px no-repeat}
-  .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0}
+  .record-info{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
   .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
   .b-ready{background:var(--warn-bg,#FFFBEB);color:var(--amber)}
   .b-shipped{background:var(--success-bg,#F0FDF4);color:var(--green)}
@@ -141,6 +141,8 @@
   var _segment = 'ready'; // 'ready', 'today', 'all'
   var _selected = new Set();
   var _groupColors = ['blue','green','amber','purple','rose','cyan','orange','indigo'];
+  var _page = 0;
+  var _perPage = 50;
 
   function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function _fmtDate(d) { if (!d) return '\u2014'; var p = d.split('-'); return (p[1]||'')+'/'+(p[2]||'').substring(0,2)+'/'+(p[0]||''); }
@@ -236,12 +238,17 @@
       _filtered.sort(function(a,b) { return (b.dtShipDate||'').localeCompare(a.dtShipDate||''); });
     }
 
+    _page = 0;
     _render();
   };
 
   function _render() {
     var thead = document.getElementById('shThead');
     var tbody = document.getElementById('shTbody');
+    var totalPages = Math.max(1, Math.ceil(_filtered.length / _perPage));
+    if (_page >= totalPages) _page = totalPages - 1;
+    var start = _page * _perPage;
+    var pageItems = _filtered.slice(start, start + _perPage);
 
     if (_segment === 'ready') {
       thead.innerHTML = '<tr>' +
@@ -254,7 +261,7 @@
       } else {
         var colorMap = _buildClientColorMap(_filtered);
         var lastClient = '';
-        tbody.innerHTML = _filtered.map(function(r) {
+        tbody.innerHTML = pageItems.map(function(r) {
           var isNew = r.sClientName1 !== lastClient;
           lastClient = r.sClientName1 || '';
           var completedDate = r.dtDateCompleted || r.dtDateOut || r.dtDateIn;
@@ -280,7 +287,7 @@
       if (!_filtered.length) {
         tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--muted)">No shipped items</td></tr>';
       } else {
-        tbody.innerHTML = _filtered.map(function(r) {
+        tbody.innerHTML = pageItems.map(function(r) {
           return '<tr>' +
             '<td style="font-family:monospace;font-size:11px;font-weight:600;color:var(--navy)">' + _esc(r.sWorkOrderNumber) + '</td>' +
             '<td style="font-weight:500">' + _esc(r.sClientName1) + '</td>' +
@@ -293,8 +300,19 @@
       }
     }
 
-    document.getElementById('shFooter').innerHTML = '<strong>' + _filtered.length + '</strong> record' + (_filtered.length!==1?'s':'');
+    var pgHtml = '';
+    if (totalPages > 1) {
+      if (_page > 0) pgHtml += '<button class="pg-btn" onclick="shPrevPage()">&#8249; Prev</button> ';
+      pgHtml += 'Page ' + (_page + 1) + ' of ' + totalPages;
+      if (_page < totalPages - 1) pgHtml += ' <button class="pg-btn" onclick="shNextPage()">Next &#8250;</button>';
+    }
+    document.getElementById('shFooter').innerHTML =
+      '<strong>' + _filtered.length + '</strong> record' + (_filtered.length !== 1 ? 's' : '') +
+      (pgHtml ? '<span style="display:flex;align-items:center;gap:4px">' + pgHtml + '</span>' : '');
   }
+
+  window.shPrevPage = function() { if (_page > 0) { _page--; _render(); } };
+  window.shNextPage = function() { var tp = Math.ceil(_filtered.length / _perPage); if (_page < tp - 1) { _page++; _render(); } };
 
   // -- Selection --
   window.shToggleAll = function(checked) {
