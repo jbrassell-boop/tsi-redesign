@@ -362,7 +362,7 @@
               </div>
               <div class="ff">
                 <label>ADDITIONAL CS</label>
-                <select class="inp" id="fAdditionalCS"><option>Aesculap Inc.</option><option>BSC CAP</option><option>BSC CPO</option><option>BSC FFS</option><option>Cogentix Medical</option><option>Endoscopy Suite Partners</option><option>VSI Industrial</option><option>None</option></select>
+                <select class="inp" id="fAdditionalCS"><option value="">-- Select --</option></select>
               </div>
               <div class="ff">
                 <label>NATIONAL ACCT</label>
@@ -1700,9 +1700,9 @@ function openContactModal(mode){
     f('fPeachtreeID', d.sPeachTreeCustID ?? '');
     f('fNetSuiteID', d.NetSuiteID ?? '');
 
-    // Service locations
-    chk('fSvcLocUC', d.bServiceLocationUC ?? d.bUpperChichester);
-    chk('fSvcLocNash', d.bServiceLocationNash ?? d.bNashville);
+    // Service locations — DB has single lServiceLocationKey (1=UC, 2=Nashville)
+    chk('fSvcLocUC',   d.lServiceLocationKey === 1);
+    chk('fSvcLocNash', d.lServiceLocationKey === 2);
 
     // Profile panel
     setSelectByText($('fCleaningSystem'), d.sCleaningSystem);
@@ -1769,7 +1769,7 @@ function openContactModal(mode){
       cats.forEach(c=>{
         const o = document.createElement('option');
         o.value = c.lPricingCategoryKey;
-        o.textContent = c.sPricingCategoryDesc || c.sPricingCategoryName || ('Cat #'+c.lPricingCategoryKey);
+        o.textContent = c.sPricingDescription || c.sPricingCategoryDesc || c.sPricingCategoryName || ('Cat #'+c.lPricingCategoryKey);
         sel.appendChild(o);
       });
       setSelectByValue(sel, selectedKey);

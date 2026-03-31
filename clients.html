@@ -325,6 +325,7 @@
                   <div class="ff"><label>ZIP</label><input id="clBillZip" class="inp"/></div>
                 </div>
                 <div class="ff" style="grid-column:span 2"><label>COUNTRY</label><input id="clBillCountry" class="inp"/></div>
+                <div class="ff" style="grid-column:span 2"><label>BILLING CONTACT</label><input class="inp" id="clBillContact" placeholder="Contact name for invoices"/></div>
                 <div class="ff" style="grid-column:span 2"><label>BILLING EMAIL</label><input class="inp" id="clBillEmail" type="email" placeholder="invoices@client.com"/></div>
               </div>
             </div>
@@ -348,7 +349,7 @@
                   <div class="ff"><label>ZIP</label><input id="clShipZip" class="inp"/></div>
                 </div>
                 <div class="ff" style="grid-column:span 2"><label>COUNTRY</label><input id="clShipCountry" class="inp"/></div>
-                <div class="ff" style="grid-column:span 2"><label>BILLING EMAIL</label><input class="inp" id="clShipEmail" type="email" placeholder="invoices@client.com"/></div>
+                <div class="ff" style="grid-column:span 2"><label>SHIPPING EMAIL</label><input class="inp" id="clShipEmail" type="email" placeholder="shipping@client.com"/></div>
               </div>
             </div>
           </div>
@@ -1228,6 +1229,8 @@ function loadClient(c) {
   setVal('clShipName1', c._raw?.sShipName1 || '');
   const billEmail = document.getElementById('clBillEmail');
   if (billEmail) billEmail.value = c._raw?.sBillEmail || '';
+  setVal('clBillContact', c._raw?.sBillContact || '');
+  setVal('clShipEmail', c._raw?.sShipEmail || '');
   if (_liveMode && c._raw) {
     const r = c._raw;
     // Set by key value (dropdowns now use API keys as option values)
@@ -2458,6 +2461,8 @@ async function saveClientToAPI() {
     pdblAdjustmentPct: parseFloat(document.getElementById('ci-adj-pct').value) || null,
     pbUseAdjustmentPct: document.getElementById('ci-use-adj').checked,
     psBillEmail: document.getElementById('clBillEmail')?.value.trim() || '',
+    psBillContact: document.getElementById('clBillContact')?.value.trim() || '',
+    psShipEmail: document.getElementById('clShipEmail')?.value.trim() || '',
   };
 
   try {
