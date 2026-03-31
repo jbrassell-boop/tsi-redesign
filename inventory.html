@@ -2102,6 +2102,8 @@ function populateItemList(items) {
 }
 
 async function selectApiItem(key, name) {
+  sessionStorage.setItem('lastInventoryKey', key);
+  sessionStorage.setItem('lastInventoryName', name || '');
   // Highlight in list
   document.querySelectorAll('.item-row').forEach(r => r.classList.remove('selected'));
   document.querySelectorAll('.item-row').forEach(r => {
@@ -2337,8 +2339,10 @@ async function initPage() {
       showDataBadge(true);
       populateItemList(items);
       paginateItemList();
-      // Auto-select first item
-      const first = items[0];
+      // Auto-select last-visited or first item
+      const lastInvKey = sessionStorage.getItem('lastInventoryKey');
+      const lastItem = lastInvKey && items.find(i => i.lInventoryKey == lastInvKey);
+      const first = lastItem || items[0];
       await selectApiItem(first.lInventoryKey, first.sItemDescription);
       return;
     }

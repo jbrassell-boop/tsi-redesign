@@ -929,6 +929,7 @@ function changePageSize() { _currentPage = 1; renderSupplierList(); }
 
 // ── Select Supplier ──────────────────────────────────
 async function selectSupplierByKey(key, el) {
+  sessionStorage.setItem('lastSupplierKey', key);
   // Highlight in list
   document.querySelectorAll('.supp-row').forEach(r => r.classList.remove('selected'));
   if (el) el.classList.add('selected');
@@ -1441,9 +1442,13 @@ async function reloadSuppliers() {
   _filteredSuppliers = [..._allSuppliers];
   applyFilters();
 
-  // Auto-select first supplier
+  // Auto-select last-visited or first supplier
   if (_filteredSuppliers.length > 0) {
-    selectSupplierByKey(_filteredSuppliers[0].lSupplierKey, document.querySelector('.supp-row'));
+    const lastSuppKey = parseInt(sessionStorage.getItem('lastSupplierKey'));
+    const target = lastSuppKey && _filteredSuppliers.find(s => s.lSupplierKey === lastSuppKey);
+    const pickKey = target ? target.lSupplierKey : _filteredSuppliers[0].lSupplierKey;
+    const pickEl = document.querySelector(`.supp-row[data-key="${pickKey}"]`) || document.querySelector('.supp-row');
+    selectSupplierByKey(pickKey, pickEl);
   }
 }
 

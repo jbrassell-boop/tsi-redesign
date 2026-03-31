@@ -2276,6 +2276,8 @@ async function selectClientByKey(key, name) {
       const detail = await API.getClientById(key);
       const mapped = mapApiClient(detail);
       _currentClientName = mapped.name;
+      sessionStorage.setItem('lastClientKey', key);
+      sessionStorage.setItem('lastClientName', mapped.name);
       loadClient(mapped);
       loadClientKPIs(key); // fire without await — non-blocking
       return;
@@ -2566,11 +2568,13 @@ async function initPage() {
       const sel = document.querySelector('.client-select');
       sel.onchange = function() { onClientChange(this.value); };
 
-      // Load first client detail (use dropdown's first option — list is sorted)
+      // Load last-visited client from sessionStorage, or fall back to first option
       const sel2 = document.querySelector('.client-select');
-      const firstKey = sel2.options[0] ? sel2.options[0].value : '';
-      const firstName = sel2.options[0] ? sel2.options[0].textContent : '';
-      if (firstKey) await selectClientByKey(firstKey, firstName);
+      const lastKey = sessionStorage.getItem('lastClientKey');
+      const lastName = sessionStorage.getItem('lastClientName');
+      const targetKey = (lastKey && sel2.querySelector(`option[value="${lastKey}"]`)) ? lastKey : (sel2.options[0]?.value || '');
+      const targetName = (lastKey && targetKey === lastKey) ? lastName : (sel2.options[0]?.textContent || '');
+      if (targetKey) await selectClientByKey(targetKey, targetName);
       return;
     }
   } catch (e) {

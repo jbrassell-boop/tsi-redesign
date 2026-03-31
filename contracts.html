@@ -1540,10 +1540,12 @@ function renderList(data) {
   }).join('');
   document.getElementById('listCount').textContent = 'Showing ' + data.length + ' of ' + contracts.length;
 
-  // Auto-select first
+  // Auto-select last-visited or first
   if (data.length > 0) {
-    const firstKey = data[0].lContractKey || 0;
-    selectContract(el.querySelector('.list-item'), firstKey);
+    const lastKey = parseInt(sessionStorage.getItem('lastContractKey'));
+    const target = lastKey && data.find(d => d.lContractKey === lastKey);
+    const pickKey = target ? target.lContractKey : (data[0].lContractKey || 0);
+    selectContract(el.querySelector(`.list-item[data-key="${pickKey}"]`) || el.querySelector('.list-item'), pickKey);
   }
 }
 
@@ -1571,6 +1573,8 @@ async function selectContract(el, contractKey) {
   // Find contract in list data for header
   const c = contracts.find(x => x.lContractKey === contractKey);
   if (c) {
+    sessionStorage.setItem('lastContractKey', contractKey);
+    sessionStorage.setItem('lastContractName', c.sContractName || '');
     const status = deriveStatus(c);
     document.getElementById('detailName').textContent = c.sContractName || '(Unnamed)';
     document.getElementById('detailId').textContent = 'CNT-' + contractKey;

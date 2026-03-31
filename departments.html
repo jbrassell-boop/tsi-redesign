@@ -1491,9 +1491,11 @@ function openContactModal(mode){
       });
       // Render left panel list
       renderDeptList(depts);
-      // Select requested dept (from URL param), or fall back to first
+      // Select requested dept (from URL param), last-visited, or first
       const target = selectKey && depts.find(d => d.lDepartmentKey == selectKey);
-      const pick = target ? target : (depts.length > 0 ? depts[0] : null);
+      const lastDeptKey = sessionStorage.getItem('lastDeptKey');
+      const lastTarget = !target && lastDeptKey && depts.find(d => d.lDepartmentKey == lastDeptKey);
+      const pick = target ? target : (lastTarget ? lastTarget : (depts.length > 0 ? depts[0] : null));
       if(pick){
         sel.value = pick.lDepartmentKey;
         await loadDepartmentDetail(pick.lDepartmentKey);
@@ -1575,6 +1577,7 @@ function openContactModal(mode){
   async function loadDepartmentDetail(deptKey){
     currentDeptKey = deptKey;
     window._currentDeptKey = deptKey;
+    sessionStorage.setItem('lastDeptKey', deptKey);
     _curDeptName = '';
     $('deptIdBadge').textContent = '#' + deptKey;
 
