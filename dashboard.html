@@ -196,19 +196,6 @@
     /* Dashboard: scrollbar — add horizontal size */
     ::-webkit-scrollbar{height:6px}
 
-    /* KPI HERO ROW */
-    .kpi-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--card);border-bottom:1px solid var(--neutral-200)}
-    .kpi-hero-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--radius-lg)}
-    .kpi-hero-icon{width:40px;height:40px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .kpi-hero-data{flex:1;min-width:0}
-    .kpi-hero-val{font-size:24px;font-weight:800;color:var(--primary-dark);line-height:1.1;letter-spacing:-.5px}
-    .kpi-hero-lbl{font-size:11px;font-weight:600;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-    .kpi-hero-trend{font-size:11px;font-weight:700;white-space:nowrap}
-    .kpi-hero-trend.up{color:var(--success)}
-    .kpi-hero-trend.down{color:var(--danger)}
-    .kpi-hero-trend.flat{color:var(--neutral-500)}
-    .kpi-loading{color:var(--muted);font-size:13px;font-weight:500;animation:kpi-pulse 1.5s infinite}
-    @keyframes kpi-pulse{0%,100%{opacity:1}50%{opacity:.4}}
   </style>
 </head>
 <body>
@@ -228,89 +215,6 @@
     <!-- PAGE BODY -->
     <div class="page-body">
 
-      <!-- KPI HERO ROW -->
-      <div class="kpi-hero" id="kpiHero">
-        <div class="kpi-hero-card">
-          <div class="kpi-hero-icon si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-          <div class="kpi-hero-data">
-            <div class="kpi-hero-val" id="kpiOpenRepairs">&mdash;</div>
-            <div class="kpi-hero-lbl">Open Repairs <span class="ctx-help">?<span class="ctx-help-tip">Count of all repairs not yet shipped or invoiced across both facilities.</span></span></div>
-          </div>
-          <div class="kpi-hero-trend" id="kpiOpenTrend"></div>
-        </div>
-        <div class="kpi-hero-card">
-          <div class="kpi-hero-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="kpi-hero-data">
-            <div class="kpi-hero-val" id="kpiAvgTat">&mdash;</div>
-            <div class="kpi-hero-lbl">Avg Turnaround <span class="ctx-help">?<span class="ctx-help-tip">Average calendar days from received to shipped for repairs completed this month.</span></span></div>
-          </div>
-          <div class="kpi-hero-trend" id="kpiTatTrend"></div>
-        </div>
-        <div class="kpi-hero-card">
-          <div class="kpi-hero-icon si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-          <div class="kpi-hero-data">
-            <div class="kpi-hero-val" id="kpiMonthRepairs">&mdash;</div>
-            <div class="kpi-hero-lbl">Repairs This Month</div>
-          </div>
-          <div class="kpi-hero-trend" id="kpiMonthTrend"></div>
-        </div>
-        <div class="kpi-hero-card">
-          <div class="kpi-hero-icon si-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div class="kpi-hero-data">
-            <div class="kpi-hero-val" id="kpiRevenueMtd">&mdash;</div>
-            <div class="kpi-hero-lbl">Revenue MTD <span class="ctx-help">?<span class="ctx-help-tip">Month-to-date invoiced revenue from GP staging. Includes all repair and contract billing.</span></span></div>
-          </div>
-          <div class="kpi-hero-trend" id="kpiRevTrend"></div>
-        </div>
-      </div>
-
-      <!-- STAT STRIP — compact pulse, not hero cards -->
-      <div class="stat-strip" id="kpiStrip">
-        <div class="stat-chip" id="chipExpectedArrivals" onclick="openReceiving()" style="cursor:pointer" title="Click to open Receiving">
-          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 4.5L8 1.5l6 3v7l-6 3-6-3z"/><path d="M2 4.5L8 7.5l6-3"/><line x1="8" y1="7.5" x2="8" y2="14.5"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy" id="statExpectedArrivals">0</div><div class="s-lbl">Expected</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon si-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M10.3 2.5a4 4 0 0 0-4.8 5.2L2 11.2V14h2.8l3.5-3.5a4 4 0 0 0 5.2-4.8L11.3 7.9 9.1 5.7z"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy">47</div><div class="s-lbl">In-House</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="6"/><path d="M8 4.5v3.5l2.5 1.5"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber">8</div><div class="s-lbl">Waiting Approval</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon si-navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy">23</div><div class="s-lbl">In Repair</div></div>
-        </div>
-        <div class="stat-chip alert">
-          <div class="s-icon si-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
-          <div class="s-data"><div class="s-val s-red">4</div><div class="s-lbl">Overdue</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="5" y1="3" x2="5" y2="13"/><line x1="11" y1="3" x2="11" y2="13"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber">2</div><div class="s-lbl">On Hold</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="12 5 7 11 4 8"/></svg></div>
-          <div class="s-data"><div class="s-val s-green">11</div><div class="s-lbl">Ready to Ship</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="1 3 1 7 5 7"/><path d="M2.5 10A5.5 5.5 0 1 0 4 4.5L1 7"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber">4</div><div class="s-lbl">Loaners Out</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon si-purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M2 4.5L8 1.5l6 3v7l-6 3-6-3z"/><path d="M2 4.5L8 7.5l6-3"/><line x1="8" y1="7.5" x2="8" y2="14.5"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy">3</div><div class="s-lbl">Shipped</div></div>
-        </div>
-        <div class="stat-chip warn">
-          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M11 2.5a1.5 1.5 0 0 1 2.12 0l.38.38a1.5 1.5 0 0 1 0 2.12L6 12.5 2.5 13.5 3.5 10z"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber">0</div><div class="s-lbl">Draft Invoice</div></div>
-        </div>
-        <div class="stat-chip">
-          <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
-          <div class="s-data"><div class="s-val s-green">0</div><div class="s-lbl">Invoiced</div></div>
-        </div>
-      </div>
 
       <!-- SUB-NAV TABS (rendered by shell.js) -->
       <div class="subnav" id="dashSubnav"></div>
@@ -701,7 +605,6 @@ async function loadDashboardData(filters) {
   API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'fallback');
   updateStats();
   renderTable();
-  populateKpiHero();
 }
 
 // ── Demo Data & User Info centralized in API.UI ──
@@ -1820,7 +1723,6 @@ API.UI.init();
 API.UI.showSkeleton('skDashboard', 6);
 loadDashboardData({ instrumentTypeValue: 'all', limit: 500 }).then(function() {
   API.UI.hideSkeleton('skDashboard');
-  populateKpiHero();
 });
 
 // Add Admin badge to Analytics subnav tab
