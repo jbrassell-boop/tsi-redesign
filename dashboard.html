@@ -532,15 +532,9 @@ function mapApiRow(r) {
     return 'F'; // default flexible
   }
 
-  // Large-diameter flexible scope model prefixes (GIF=gastroscope, CF=colonoscope, etc.)
-  const LD_PREFIXES = ['GIF','CF','PCF','EG','GF','TJF','JF','MJF','SIF'];
-
-  // Determine size: bLargeDiameter flag first; fall back to model prefix heuristic
+  // Determine size from bLargeDiameter (sourced from tblScopeTypeCategories.bLargeDiameter)
   function guessSize(row) {
-    if (row.bLargeDiameter === 1 || row.bLargeDiameter === true) return 'L';
-    const model = (row.sScopeTypeDesc || row.sModel || '').toUpperCase().trim();
-    if (model && LD_PREFIXES.some(p => model.startsWith(p))) return 'L';
-    return 'S';
+    return (row.bLargeDiameter === 1 || row.bLargeDiameter === true) ? 'L' : 'S';
   }
 
   // Determine source from bOutsourced flag
