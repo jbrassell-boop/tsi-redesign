@@ -879,10 +879,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               QC
             </button>
-            <button class="qa-btn" onclick="openItemPicker()" title="Add line item (L)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Line Item
-            </button>
             <div class="qa-divider"></div>
             <button class="qa-btn qa-btn-danger" onclick="confirmDeleteRepair(this)" title="Delete repair">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -894,8 +890,8 @@
             </span>
           </div>
 
-          <!-- TABS -->
-          <div class="tab-bar" id="tabBar">
+          <!-- HIDDEN LEGACY TAB BAR — IDs preserved for JS compatibility; tabs not shown to user -->
+          <div class="tab-bar" id="tabBar" style="display:none">
             <div class="tab active" data-tab="lineitems">Line Items<span class="tab-badge" id="badge-lineitems"></span></div>
             <div class="tab" data-tab="notes">Notes<span class="tab-badge" id="badge-notes"></span></div>
             <div class="tab" data-tab="scopehistory">Scope History<span class="tab-badge" id="badge-scopehistory"></span></div>
@@ -905,74 +901,6 @@
             <div class="tab ctx-dimmed" data-tab="details">Details</div>
             <div class="tab ctx-dimmed" data-tab="inspections">Inspections</div>
             <div class="tab ctx-dimmed" data-tab="financials">Financials</div>
-          </div>
-
-          <!-- WORKFLOW FORMS BAR — persistent across all tabs -->
-          <div class="wf-bar" id="workflowBar" style="margin:0 10px;border-radius:0 0 5px 5px;border-top:none">
-            <span class="wf-label">WORKFLOW</span>
-            <div class="wf-phase">
-              <span class="wf-phase-label">Intake</span>
-              <button class="wf-pill wf-locked" id="wf-disassemble" data-form="disassemble" onclick="openFormPreview('disassemble')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-                D&I
-              </button>
-            </div>
-            <span class="wf-divider"></span>
-            <div class="wf-phase">
-              <span class="wf-phase-label">Quote</span>
-              <button class="wf-pill wf-locked" id="wf-requisition" data-form="requisition" onclick="openFormPreview('requisition')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Req
-              </button>
-            </div>
-            <span class="wf-divider"></span>
-            <div class="wf-phase">
-              <span class="wf-phase-label">Repair</span>
-              <button class="wf-pill" id="wf-slips" onclick="openDrawer('slips')" title="Update Slips — mid-repair corrections">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
-                Update Slips
-              </button>
-              <button class="wf-pill wf-locked" id="wf-inspection" data-form="inspection" onclick="openFormPreview('inspection')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                Inspect
-              </button>
-              <button class="wf-pill wf-locked" id="wf-picklist" data-form="picklist" onclick="openFormPreview('picklist')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                Pick List
-              </button>
-            </div>
-            <span class="wf-divider"></span>
-            <div class="wf-phase">
-              <span class="wf-phase-label">QA</span>
-              <button class="wf-pill" id="wf-amendment" data-form="amendment" onclick="openFormPreview('amendment')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Amend
-              </button>
-              <button class="wf-pill" id="wf-40day" onclick="openDrawer('fortyDay')" title="40-Day Warranty Evaluation (OM06-2)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                40 Day
-              </button>
-              <button class="wf-pill" id="wf-defect" data-form="defect" onclick="openFormPreview('defect')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Defect
-              </button>
-            </div>
-            <span class="wf-divider" id="wf-close-divider"></span>
-            <div class="wf-phase" id="wf-close-phase">
-              <span class="wf-phase-label">Close</span>
-              <button class="wf-pill wf-locked" id="wf-invoice" data-form="invoice" onclick="openFormPreview('invoice')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Invoice
-              </button>
-              <button class="wf-pill wf-locked" id="wf-packing" data-form="packing" onclick="openFormPreview('packing')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                Packing
-              </button>
-              <button class="wf-pill wf-locked" id="wf-finalqc" data-form="finalqc" onclick="openFormPreview('finalqc')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Final QC
-              </button>
-            </div>
           </div>
 
           <!-- SCOPE GLANCE CARD — replaces ref-strip visually -->
@@ -1005,278 +933,360 @@
             </div>
           </div>
 
-          <!-- PERSISTENT CONTEXT — visible on all tabs -->
-          <div style="padding:8px 14px 0;background:var(--bg);flex-shrink:0">
-            <div class="ref-strip" style="display:none">
-              <div class="ref-group">
-                <span class="ref-group-label">Order</span>
-                <span class="ref-item"><b>WO</b> <span id="hWO" class="ref-val">—</span></span>
-                <span class="ref-item"><b>Client</b> <span id="hClient" class="ref-val">—</span></span>
-                <span class="ref-item"><b>Dept</b> <span id="hDept" class="ref-val">—</span></span>
-                <span class="ref-item"><b>PO</b> <input id="hPO" class="ref-input" style="width:130px" onchange="markDirty()"/></span>
-                <span class="ref-item"><label style="font-size:9px;display:flex;align-items:center;gap:3px;cursor:pointer;font-weight:700;color:var(--muted)"><input type="checkbox" id="fPORequired" style="width:auto;height:auto" onchange="markDirty()"/> PO Req</label></span>
-                <span class="ref-item"><b>Cust Ref#</b> <input id="fCustomerRef" class="ref-input" style="width:110px" placeholder="CMMS WO#" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Rack</b> <input id="hRack" class="ref-input" style="width:50px" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Source</b> <select id="fRepairSource" class="ref-input" style="width:auto;min-width:70px" onchange="markDirty()"><option value="">—</option><option>Email</option><option>Phone</option><option>Portal</option><option>Van Service</option><option>Walk-in</option></select></span>
-                <span class="ref-item"><b>Status</b> <select id="hRepairStatus" class="ref-input" style="width:auto;min-width:120px;max-width:280px" onchange="updateStatusBadge(this.value); markDirty()"></select></span>
-              </div>
-              <div class="ref-group">
-                <span class="ref-group-label">Scope</span>
-                <span class="ref-item"><b>Mfr</b> <span id="hMfr" class="ref-val">—</span></span>
-                <span class="ref-item"><b>Category</b> <span id="hScopeCat" class="ref-val">—</span></span>
-                <span class="ref-item"><b>Model</b> <span id="hModel" class="ref-val">—</span></span>
-                <span class="ref-item" style="position:relative"><b>SN#</b> <span id="hSerial" class="ref-val" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick="toggleScopeHistory()" title="Click for repair history">—</span><span id="hHistoryCount" class="history-badge" style="display:none" onclick="toggleScopeHistory()">0</span>
-                  <div class="scope-history-panel" id="scopeHistoryPanel"></div>
-                </span>
-                <span class="ref-item"><b>Cap/FFS</b> <span id="hCapFFS" class="ref-val">—</span></span>
-                <span class="ref-item"><b>Loaner</b> <select id="fLoanerProvided" style="height:20px;font-size:10px;padding:0 4px;border:1px solid var(--border);border-radius:3px;background:var(--card)" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select></span>
-              </div>
-              <div class="ref-group">
-                <span class="ref-group-label">Timing</span>
-                <span class="ref-item"><b>Date In</b> <input type="date" id="hDateIn" class="ref-input" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Req Sent</b> <input type="date" id="fSentDate" class="ref-input" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Approval</b> <input type="date" id="fRecvdApproval" class="ref-input" onchange="markDirty()"/></span>
-                <span class="ref-item"><b>Date Out</b> <span class="ref-val" id="hDateOutRO">—</span></span>
-                <span class="ref-item"><b>Days Since Last</b> <span id="hDaysLastIn" class="ref-val">—</span></span>
-                <span class="ref-item" style="cursor:pointer" onclick="openDrawer('fortyDay')" title="Click for 40-day evaluation"><b>40 Days</b> <span class="ctx-help">?<span class="ctx-help-tip">40-day warranty from ship date. Returns within 40 days trigger warranty repair at no charge.</span></span> <span id="hWithin40" class="ref-val" style="text-decoration:underline;text-decoration-style:dotted">—</span></span>
-                <span class="ref-item" id="ncpBadgeItem" style="display:none;cursor:pointer" onclick="openNCPDrawer()" title="Non-Conforming Product record — click to view"><b>NCP</b> <span id="ncpBadge" class="ref-val">—</span></span>
-                <span class="ref-item"><b>TAT</b> <span class="ctx-help">?<span class="ctx-help-tip">Calendar days from received to shipped. Target is under 5 business days for standard repairs.</span></span> <span class="ref-val" id="hTAT">—</span></span>
-                <span class="ref-item"><b>Lead Time</b> <span class="ref-val" id="hLeadTime">—</span></span>
-              </div>
-            </div>
-            <!-- SCOPE TIMELINE — repair history for this scope -->
-            <div class="scope-timeline" id="scopeTimeline"></div>
+          <!-- HIDDEN LEGACY CONTEXT — IDs preserved for JS compatibility -->
+          <div style="display:none">
+            <span id="hWO"></span>
+            <span id="hClient"></span>
+            <span id="hDept"></span>
+            <input type="checkbox" id="fPORequired" onchange="markDirty()"/>
+            <span id="hMfr"></span>
+            <span id="hScopeCat"></span>
+            <span id="hModel"></span>
+            <span id="hSerial"></span>
+            <span id="hHistoryCount"></span>
+            <div id="scopeHistoryPanel" class="scope-history-panel"></div>
+            <span id="hCapFFS"></span>
+            <select id="fLoanerProvided" onchange="markDirty()"><option value="">—</option><option>Yes</option><option>No</option></select>
+            <input type="date" id="fSentDate" onchange="markDirty()"/>
+            <input type="date" id="fRecvdApproval" onchange="markDirty()"/>
+            <span id="hDateOutRO"></span>
+            <span id="hDaysLastIn"></span>
+            <span id="hWithin40"></span>
+            <span id="ncpBadgeItem"></span>
+            <span id="ncpBadge"></span>
+            <span id="hTAT"></span>
+            <span id="hLeadTime"></span>
+            <select id="hRepairStatus" onchange="updateStatusBadge(this.value); markDirty()"></select>
+          </div>
+          <!-- SCOPE TIMELINE — repair history for this scope -->
+          <div class="scope-timeline" id="scopeTimeline"></div>
 
-            <!-- COMPLAINT STRIP — customer's incoming complaint, persistent across tabs -->
-            <div style="display:flex;align-items:stretch;gap:0;margin-bottom:4px;background:var(--warning-light);border:1px solid var(--warning);border-radius:5px;overflow:hidden">
-              <div style="display:flex;align-items:center;padding:0 10px;background:rgba(217,119,6,.06);border-right:1px solid var(--warning);flex-shrink:0">
-                <span style="font-size:9px;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">Complaint</span>
+          <!-- ═══ FLOW STATE 2-COLUMN LAYOUT ═══ -->
+          <div style="display:flex;gap:10px;padding:10px 14px;flex:1;overflow:hidden;min-height:0">
+
+            <!-- ═══ LEFT COLUMN: 340px fixed ═══ -->
+            <div style="width:340px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+
+              <!-- COMPLAINT -->
+              <div class="section-card" style="margin-bottom:0;flex-shrink:0">
+                <div class="section-head">Complaint / Symptom</div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div id="fComplaint" contenteditable="true"
+                    style="min-height:48px;max-height:100px;overflow-y:auto;font-size:12px;font-family:inherit;line-height:1.5;color:var(--text);border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 8px;outline:none;background:var(--card)"
+                    oninput="markDirty()"
+                    onpaste="event.preventDefault();document.execCommand('insertText',false,(event.clipboardData||window.clipboardData).getData('text/plain'))"
+                    data-placeholder="Describe the customer complaint..."></div>
+                </div>
               </div>
-              <div id="fComplaint" contenteditable="true" style="flex:1;font-size:11.5px;font-family:'Inter',Arial,sans-serif;line-height:1.4;color:var(--text);padding:6px 10px;outline:none;min-height:28px;max-height:60px;overflow-y:auto" oninput="markDirty()" onpaste="event.preventDefault();document.execCommand('insertText',false,(event.clipboardData||window.clipboardData).getData('text/plain'))" data-placeholder="Customer complaint..."></div>
+
+              <!-- ORDER -->
+              <div class="section-card" style="margin-bottom:0;flex-shrink:0">
+                <div class="section-head">Order</div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 10px">
+                    <div class="field" style="margin:0"><label>PO#</label><input id="hPO" class="inp" style="height:28px;font-size:11px" placeholder="—" onchange="markDirty();document.getElementById('sgcPO').value=this.value"/></div>
+                    <div class="field" style="margin:0"><label>Customer Ref#</label><input id="fCustomerRef" class="inp" style="height:28px;font-size:11px" placeholder="CMMS WO#" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Source</label><select id="fRepairSource" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"><option value="">—</option><option>Email</option><option>Phone</option><option>Portal</option><option>Van Service</option><option>Walk-in</option></select></div>
+                    <div class="field" style="margin:0"><label>Rack</label><input id="hRack" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Level</label><select id="hRepairLevel" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>PS Level</label><select id="fPSLevelIn" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>Reason</label><select id="fRepairReason" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"></select></div>
+                    <div class="field" style="margin:0"><label>Date In</label><input type="date" id="hDateIn" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label>Carrier</label><select id="sCarrier2" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"><option>—</option><option>FedEx</option><option>UPS</option><option>USPS</option><option>OnTrac</option></select></div>
+                    <div class="field" style="margin:0"><label>Tracking #</label><input id="sTracking2" class="inp" style="height:28px;font-size:11px" onchange="markDirty()"/></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ANGULATION & SCOPE NOTES -->
+              <div class="section-card" style="margin-bottom:0;flex-shrink:0">
+                <div class="section-head">Angulation In</div>
+                <div class="section-body" style="padding:6px 12px">
+                  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px 6px">
+                    <div class="field" style="margin:0"><label style="font-size:9px">Up</label><input id="fAngInUp" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label style="font-size:9px">Down</label><input id="fAngInDown" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label style="font-size:9px">Right</label><input id="fAngInRight" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label style="font-size:9px">Left</label><input id="fAngInLeft" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label style="font-size:9px">Epoxy</label><input id="fEpoxyIn" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                    <div class="field" style="margin:0"><label style="font-size:9px">BR Jig</label><input id="fBRJig" class="inp" style="height:24px;font-size:11px;text-align:center" onchange="markDirty()"/></div>
+                  </div>
+                  <div style="margin-top:5px">
+                    <textarea id="fScopeNotes" rows="2" oninput="markDirty()" placeholder="Scope-in notes..." style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;resize:none"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ADDRESSES -->
+              <div class="section-card" style="margin-bottom:0;flex-shrink:0">
+                <div class="section-head">
+                  Addresses
+                  <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">Defaults from dept · editable per order</span>
+                </div>
+                <div class="section-body" style="padding:8px 12px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <!-- Bill To -->
+                    <div>
+                      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Bill To</div>
+                      <div style="display:flex;flex-direction:column;gap:3px">
+                        <input id="fBillName1" placeholder="Company" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <input id="fBillAddr1" placeholder="Address" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
+                          <input id="fBillCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                          <input id="fBillState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
+                          <input id="fBillZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Ship To -->
+                    <div>
+                      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;align-items:center;gap:6px">
+                        Ship To
+                        <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:3px;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--muted)"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same</label>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:3px">
+                        <input id="fShipName1" placeholder="Company" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <input id="fShipAddr1" placeholder="Address" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
+                          <input id="fShipCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                          <input id="fShipState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
+                          <input id="fShipZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FLAGS BAR — shown only when flags exist -->
+              <div class="flags-bar" id="flagsBar" style="display:none">
+                <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase">FLAGS</span>
+              </div>
+
+            </div><!-- /left column -->
+
+            <!-- ═══ RIGHT COLUMN: flex 1 ═══ -->
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;min-height:0">
+
+              <!-- REPAIR ITEMS -->
+              <div class="section-card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column;overflow:hidden">
+                <div class="section-head">
+                  Repair Items
+                  <span id="riApprCounter" style="font-size:10px;font-weight:700;color:var(--success);margin-left:4px"></span>
+                  <div style="display:flex;gap:4px;margin-left:auto">
+                    <button class="btn btn-outline btn-xs" style="color:var(--success);border-color:var(--success)" onclick="approveAllItems()">&#10003; Approve All</button><span class="role-badge rb-manager">Manager</span>
+                    <button class="btn btn-outline btn-xs" onclick="unapproveAllItems()">Unapprove All</button>
+                    <button class="btn btn-outline btn-xs" onclick="openTechsDrawer()">Techs</button>
+                    <button class="btn btn-outline btn-xs" onclick="openInvDrawer()">Inv</button>
+                    <button class="btn btn-navy btn-xs" onclick="openItemPicker()">+ Add Item</button>
+                  </div>
+                </div>
+                <div style="flex:1;overflow-y:auto;min-height:80px">
+                  <table class="items" id="repairItemsTable">
+                    <thead style="position:sticky;top:0;z-index:1">
+                      <tr>
+                        <th style="width:58px;text-align:center">Appr</th>
+                        <th style="width:70px">Code</th>
+                        <th>Repair Item</th>
+                        <th style="width:68px;text-align:center" title="User Abuse or Normal Wear &amp; Tear">Cause</th>
+                        <th style="width:68px;text-align:center" title="Warranty / Non-conformance / Customer / Amendment">Fix Type</th>
+                        <th style="width:85px;text-align:right">Amount</th>
+                        <th style="width:55px">Tech</th>
+                        <th>Comments</th>
+                      </tr>
+                    </thead>
+                    <tbody id="repairItemsBody">
+                      <tr><td colspan="8" class="empty-state">No repair items — click + Add Item to begin</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- SECONDARY TABS: Documents | Scope History | Notes | Images -->
+              <div style="display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;background:var(--card);border:1px solid var(--border-dk);border-radius:6px;min-height:200px;max-height:260px">
+                <div class="tab-bar" id="secTabBar" style="flex-shrink:0;padding:0 10px">
+                  <div class="tab active" data-sectab="documents" onclick="switchSecTab(this)">Documents</div>
+                  <div class="tab" data-sectab="scopehistory2" onclick="switchSecTab(this)">Scope History</div>
+                  <div class="tab" data-sectab="notes2" onclick="switchSecTab(this)">Notes</div>
+                  <div class="tab" data-sectab="images2" onclick="switchSecTab(this)">Images</div>
+                </div>
+
+                <!-- Documents pane -->
+                <div id="sec-pane-documents" style="flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px">
+                  <!-- WORKFLOW FORMS BAR -->
+                  <div class="wf-bar" id="workflowBar" style="margin:0;border-radius:4px">
+                    <span class="wf-label">WORKFLOW</span>
+                    <div class="wf-phase">
+                      <span class="wf-phase-label">Intake</span>
+                      <button class="wf-pill wf-locked" id="wf-disassemble" data-form="disassemble" onclick="openFormPreview('disassemble')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+                        D&amp;I
+                      </button>
+                    </div>
+                    <span class="wf-divider"></span>
+                    <div class="wf-phase">
+                      <span class="wf-phase-label">Quote</span>
+                      <button class="wf-pill wf-locked" id="wf-requisition" data-form="requisition" onclick="openFormPreview('requisition')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Req
+                      </button>
+                    </div>
+                    <span class="wf-divider"></span>
+                    <div class="wf-phase">
+                      <span class="wf-phase-label">Repair</span>
+                      <button class="wf-pill" id="wf-slips" onclick="openDrawer('slips')" title="Update Slips — mid-repair corrections">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+                        Update Slips
+                      </button>
+                      <button class="wf-pill wf-locked" id="wf-inspection" data-form="inspection" onclick="openFormPreview('inspection')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Inspect
+                      </button>
+                      <button class="wf-pill wf-locked" id="wf-picklist" data-form="picklist" onclick="openFormPreview('picklist')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        Pick List
+                      </button>
+                    </div>
+                    <span class="wf-divider"></span>
+                    <div class="wf-phase">
+                      <span class="wf-phase-label">QA</span>
+                      <button class="wf-pill" id="wf-amendment" data-form="amendment" onclick="openFormPreview('amendment')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Amend
+                      </button>
+                      <button class="wf-pill" id="wf-40day" onclick="openDrawer('fortyDay')" title="40-Day Warranty Evaluation (OM06-2)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        40 Day
+                      </button>
+                      <button class="wf-pill" id="wf-defect" data-form="defect" onclick="openFormPreview('defect')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Defect
+                      </button>
+                    </div>
+                    <span class="wf-divider" id="wf-close-divider"></span>
+                    <div class="wf-phase" id="wf-close-phase">
+                      <span class="wf-phase-label">Close</span>
+                      <button class="wf-pill wf-locked" id="wf-invoice" data-form="invoice" onclick="openFormPreview('invoice')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Invoice
+                      </button>
+                      <button class="wf-pill wf-locked" id="wf-packing" data-form="packing" onclick="openFormPreview('packing')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        Packing
+                      </button>
+                      <button class="wf-pill wf-locked" id="wf-finalqc" data-form="finalqc" onclick="openFormPreview('finalqc')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Final QC
+                      </button>
+                    </div>
+                  </div>
+                  <!-- ACTION BAR (totals) -->
+                  <div class="action-bar" style="margin-top:0">
+                    <div class="action-group"><div class="lbl">Approved</div><div class="val green" id="aTotalApproved">$0.00</div></div>
+                    <div class="action-group"><div class="lbl">Unapproved</div><div class="val red" id="aTotalUnapproved">$0.00</div></div>
+                    <div class="action-group" style="display:none"><div class="lbl">Blind</div><div class="val" id="aTotalBlind" style="color:var(--warning)">$0.00</div></div>
+                    <div class="action-group"><div class="lbl">Consumption</div><div class="val" id="aTotalConsumption">$0.00</div></div>
+                    <div style="flex:1"></div>
+                    <div class="field" style="width:90px"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly style="height:24px;font-size:11px"/></div>
+                    <div class="field" style="width:90px"><label>Override</label><input id="fMaxOverride" type="number" step="0.01" min="0" onchange="markDirty()" placeholder="—" style="height:24px;font-size:11px"/></div>
+                  </div>
+                  <!-- FIN SUMMARY -->
+                  <div class="fin-summary" id="finMarginSummary" style="margin:0">
+                    <span class="fin-summary-label">Repair Margin</span>
+                    <span class="fin-summary-val positive" id="finMarginBadge">—</span>
+                  </div>
+                </div>
+
+                <!-- Scope History pane -->
+                <div id="sec-pane-scopehistory2" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+                  <div class="sh-tab-header">
+                    <span id="shSerial" style="font-size:12px;font-weight:700;color:var(--navy)">—</span>
+                    <span id="shRepairCount" style="font-size:11px;color:var(--muted)">— prior repairs</span>
+                  </div>
+                  <div style="flex:1;overflow:auto">
+                    <table class="li-table" id="shTable">
+                      <thead>
+                        <tr>
+                          <th>WO #</th><th>Date In</th><th>Complaint</th><th>Items</th><th>TAT</th><th>Status</th><th>Client</th>
+                        </tr>
+                      </thead>
+                      <tbody id="shTbody">
+                        <tr><td colspan="7" class="li-empty">Loading history…</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Notes pane -->
+                <div id="sec-pane-notes2" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+                  <div class="notes-compose">
+                    <textarea id="noteText" class="inp" placeholder="Add tech note, observation, or update…" style="height:50px;resize:vertical;width:100%"></textarea>
+                    <div style="display:flex;justify-content:flex-end;margin-top:6px;gap:8px">
+                      <button class="btn btn-sm btn-outline" onclick="document.getElementById('noteText').value=''">Clear</button>
+                      <button class="btn btn-sm btn-navy" onclick="addTechNote()">Add Note</button>
+                    </div>
+                  </div>
+                  <div class="notes-list" id="notesList" style="flex:1;overflow-y:auto">
+                    <div class="notes-empty" id="notesEmpty">No notes yet.</div>
+                  </div>
+                </div>
+
+                <!-- Images pane -->
+                <div id="sec-pane-images2" style="display:none;flex:1;overflow-y:auto;padding:12px">
+                  <div class="img-grid">
+                    <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:28px;height:28px;opacity:.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:10px;margin-top:6px">Before</span></div>
+                    <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:28px;height:28px;opacity:.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:10px;margin-top:6px">After</span></div>
+                    <div class="img-placeholder" style="border-style:dashed;border-color:var(--border)"><span style="font-size:20px;color:var(--muted);opacity:.4">+</span><span style="font-size:10px;margin-top:4px;color:var(--muted)">Upload</span></div>
+                  </div>
+                </div>
+              </div><!-- /secondary tabs container -->
+
+            </div><!-- /right column -->
+
+          </div><!-- /flow state 2-column layout -->
+
+          <!-- ═══ HIDDEN LEGACY PANES — IDs preserved for JS compatibility ═══ -->
+          <div style="display:none" id="legacyPaneContainer">
+
+            <!-- pane-lineitems: JS uses liTbody, liEmpty, liAddBtn, liPriceToggleWrap, liShowPricing, liTotal -->
+            <div id="pane-lineitems">
+              <button id="liAddBtn" onclick="openItemPicker()"></button>
+              <label id="liPriceToggleWrap"><input type="checkbox" id="liShowPricing" onchange="toggleLineItemPricing(this.checked)"/></label>
+              <span id="liTotal"></span>
+              <table><tbody id="liTbody"><tr id="liEmpty"><td colspan="7"></td></tr></tbody></table>
             </div>
-            <div class="flags-bar" id="flagsBar">
-              <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase">FLAGS</span>
-            </div>
+
+            <!-- pane-notes: full content now in sec-pane-notes2; stubs here for JS class toggling -->
+            <div id="pane-notes"></div>
+
+            <!-- pane-scopehistory: content in sec-pane-scopehistory2 above -->
+            <div id="pane-scopehistory"></div>
+
+          <!-- pane-images: content displayed in sec-pane-images2; no unique IDs needed -->
+          <div id="pane-images"></div>
+
+          <!-- pane-shipping: sCarrier2/sTracking2 moved to Order section in left column.
+               Remaining IDs preserved here for save payload / JS population. -->
+          <div id="pane-shipping">
+            <input type="hidden" id="sShipDate2"/>
+            <input type="hidden" id="sDeliveryDate2"/>
+            <input type="hidden" id="sShipBillAcct"/>
+            <span id="sEstShipCost" style="display:none"></span>
+            <input type="hidden" id="sShipAttn2"/>
+            <input type="hidden" id="sShipAddr2"/>
+            <input type="hidden" id="sShipCity2"/>
+            <input type="hidden" id="sShipState2"/>
+            <input type="hidden" id="sShipZip2"/>
           </div>
 
-          <!-- ═══ NEW TAB 1: LINE ITEMS ═══ -->
-          <div class="tab-pane active" id="pane-lineitems">
-            <!-- TOOLBAR ROW -->
-            <div class="li-toolbar">
-              <button class="btn btn-sm btn-navy" onclick="openItemPicker()" id="liAddBtn">+ Add Item</button>
-              <div style="flex:1"></div>
-              <!-- Pricing toggle — hidden by default, show for admin/authorized -->
-              <label class="li-price-toggle" id="liPriceToggleWrap" style="display:none">
-                <input type="checkbox" id="liShowPricing" onchange="toggleLineItemPricing(this.checked)"> Show pricing
-              </label>
-              <span id="liTotal" style="font-size:11px;font-weight:700;color:var(--navy);display:none"></span>
-            </div>
-
-            <!-- LINE ITEMS TABLE -->
-            <div class="li-table-wrap">
-              <table class="li-table">
-                <thead>
-                  <tr>
-                    <th style="width:32px"></th>
-                    <th>Item</th>
-                    <th style="width:280px">Description / Finding</th>
-                    <th style="width:60px;text-align:center">Qty</th>
-                    <th style="width:90px">Status</th>
-                    <th class="li-price-col" style="width:80px;text-align:right;display:none">Price</th>
-                    <th style="width:32px"></th>
-                  </tr>
-                </thead>
-                <tbody id="liTbody">
-                  <tr id="liEmpty"><td colspan="7" class="li-empty">No line items yet — click <strong>+ Add Item</strong> to begin the repair quote</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- liAddRow removed — Add Item now routes to openItemPicker() modal -->
-          </div><!-- /pane-lineitems -->
-
-          <!-- ═══ NEW TAB 2: NOTES ═══ -->
-          <div class="tab-pane" id="pane-notes">
-            <!-- ADD NOTE -->
-            <div class="notes-compose">
-              <textarea id="noteText" class="inp" placeholder="Add tech note, observation, or update…" style="height:60px;resize:vertical;width:100%"></textarea>
-              <div style="display:flex;justify-content:flex-end;margin-top:6px;gap:8px">
-                <button class="btn btn-sm btn-outline" onclick="document.getElementById('noteText').value=''">Clear</button>
-                <button class="btn btn-sm btn-navy" onclick="addTechNote()">Add Note</button>
-              </div>
-            </div>
-            <!-- NOTES LIST -->
-            <div class="notes-list" id="notesList">
-              <div class="notes-empty" id="notesEmpty">No notes yet. Add a tech note above to start the repair log.</div>
-            </div>
-          </div><!-- /pane-notes -->
-
-          <!-- ═══ NEW TAB 3: SCOPE HISTORY ═══ -->
-          <div class="tab-pane" id="pane-scopehistory">
-            <div class="sh-tab-header">
-              <span id="shSerial" style="font-size:12px;font-weight:700;color:var(--navy)">—</span>
-              <span id="shRepairCount" style="font-size:11px;color:var(--muted)">— prior repairs</span>
-            </div>
-            <div class="li-table-wrap">
-              <table class="li-table" id="shTable">
-                <thead>
-                  <tr>
-                    <th>WO #</th>
-                    <th>Date In</th>
-                    <th>Complaint</th>
-                    <th>Items</th>
-                    <th>TAT</th>
-                    <th>Status</th>
-                    <th>Client</th>
-                  </tr>
-                </thead>
-                <tbody id="shTbody">
-                  <tr><td colspan="7" class="li-empty">Loading history…</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div><!-- /pane-scopehistory -->
-
-          <!-- ═══ NEW TAB 4: IMAGES ═══ -->
-          <div class="tab-pane" id="pane-images">
-            <div class="li-toolbar">
-              <button class="btn btn-sm btn-outline">+ Upload Image</button>
-              <span style="font-size:10px;color:var(--muted);margin-left:8px">Before/after photos, documents, attachments</span>
-            </div>
-            <div style="padding:16px">
-              <div class="img-grid">
-                <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:28px;height:28px;opacity:.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:10px;margin-top:6px">Before</span></div>
-                <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:28px;height:28px;opacity:.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:10px;margin-top:6px">After</span></div>
-                <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:28px;height:28px;opacity:.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:10px;margin-top:6px">Document</span></div>
-                <div class="img-placeholder" style="border-style:dashed;border-color:var(--border)"><span style="font-size:20px;color:var(--muted);opacity:.4">+</span><span style="font-size:10px;margin-top:4px;color:var(--muted)">Upload</span></div>
-              </div>
-            </div>
-          </div><!-- /pane-images -->
-
-          <!-- ═══ NEW TAB 5: SHIPPING ═══ -->
-          <div class="tab-pane" id="pane-shipping">
-            <div style="padding:12px 14px;display:flex;flex-direction:column;gap:14px">
-              <!-- Tracking -->
-              <details class="collapsible-section" open>
-                <summary class="section-head">Tracking &amp; Carrier</summary>
-                <div class="section-body">
-                  <div class="fg g2">
-                    <div class="ff"><label>Carrier</label><select id="sCarrier2" class="inp" onchange="markDirty()"><option>—</option><option>FedEx</option><option>UPS</option><option>USPS</option><option>OnTrac</option></select></div>
-                    <div class="ff"><label>Tracking #</label><div style="display:flex;gap:4px"><input id="sTracking2" class="inp" style="flex:1" onchange="markDirty()" placeholder="Enter tracking number"/><button type="button" class="btn-icon" style="width:28px;height:40px;border:1px solid var(--border-dk);border-radius:4px;background:var(--card);cursor:pointer;flex-shrink:0" onclick="copyTracking()" title="Copy tracking #"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
-                    <div class="ff"><label>Ship Date</label><input id="sShipDate2" class="inp" type="date" onchange="markDirty()"/></div>
-                    <div class="ff"><label>Est. Delivery</label><input id="sDeliveryDate2" class="inp" type="date" onchange="markDirty()"/></div>
-                  </div>
-                  <div class="fg g2" style="margin-top:8px">
-                    <div class="ff"><label>Bill Account #</label><input id="sShipBillAcct" class="inp" onchange="markDirty()" placeholder="Carrier billing account"/></div>
-                    <div class="ff"><label>Est. Ship Cost</label><span id="sEstShipCost" style="font-size:13px;font-weight:600;color:var(--navy);padding:10px 0">—</span></div>
-                  </div>
-                </div>
-              </details>
-              <!-- Return Address -->
-              <details class="collapsible-section">
-                <summary class="section-head">Return Address</summary>
-                <div class="section-body">
-                  <div class="ff" style="margin-bottom:8px"><label>Attn</label><input class="inp" id="sShipAttn2" placeholder="Contact name" onchange="markDirty()"/></div>
-                  <div class="fg g2">
-                    <div class="ff span2"><label>Address</label><input class="inp" id="sShipAddr2" onchange="markDirty()"/></div>
-                    <div class="ff"><label>City</label><input class="inp" id="sShipCity2" onchange="markDirty()"/></div>
-                    <div class="ff"><label>State / Zip</label><div style="display:flex;gap:6px"><input class="inp" style="width:52px" id="sShipState2" placeholder="ST" onchange="markDirty()"/><input class="inp" id="sShipZip2" placeholder="Zip" onchange="markDirty()"/></div></div>
-                  </div>
-                </div>
-              </details>
-              <!-- Scope includes -->
-              <details class="collapsible-section">
-                <summary class="section-head">Scope Includes</summary>
-                <div class="section-body">
-                  <div style="display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px">
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> ETO Cap</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> A/W Valve</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> Suction Valve</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> Waterproof Cap</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> Light Post Adapter</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> Case</label>
-                    <label style="display:flex;align-items:center;gap:5px"><input type="checkbox" onchange="markDirty()"> Box</label>
-                  </div>
-                </div>
-              </details>
-            </div>
-          </div><!-- /pane-shipping -->
-
-          <!-- ═══ PAGE 1: SCOPE IN (now "Workflow" tab) ═══ -->
-          <div class="tab-pane" id="pane-scopein">
-
-            <!-- ASSESSMENT — reason, level, angulation, drawer buttons -->
-            <div style="display:flex;align-items:flex-end;gap:6px 14px;padding:6px 14px;margin-bottom:4px;background:var(--neutral-50);border:1px solid var(--border);border-radius:5px;flex-wrap:wrap">
-              <div class="field" style="min-width:130px;margin:0"><label>Reason</label><select id="fRepairReason" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:100px;margin:0"><label>Level <span class="ctx-help">?<span class="ctx-help-tip">Complexity: Evaluation Only, Minor, Standard, Major, or Rebuild. Determines base pricing.</span></span></label><select id="hRepairLevel" onchange="markDirty()"></select></div>
-              <div class="field" style="min-width:100px;margin:0"><label>PS Level <span class="ctx-help">?<span class="ctx-help-tip">FDA patient safety classification. Critical items require additional QC documentation.</span></span></label><select id="fPSLevelIn" onchange="markDirty()"></select></div>
-              <div style="width:1px;height:24px;background:var(--border-dk);margin:0 2px;flex-shrink:0"></div>
-              <div class="field" style="width:56px;margin:0"><label>Up</label><input id="fAngInUp" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:56px;margin:0"><label>Down</label><input id="fAngInDown" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:56px;margin:0"><label>Right</label><input id="fAngInRight" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:56px;margin:0"><label>Left</label><input id="fAngInLeft" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:56px;margin:0"><label>Epoxy</label><input id="fEpoxyIn" style="text-align:center" onchange="markDirty()"/></div>
-              <div class="field" style="width:56px;margin:0"><label>BR Jig</label><input id="fBRJig" style="text-align:center" onchange="markDirty()"/></div>
-            </div>
-
-            <!-- ★ REPAIR ITEMS — the main work area ★ -->
-            <div class="section-card" style="margin-top:0;flex:1;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(var(--primary-rgb),.1);border-color:var(--border-dk)">
-              <div class="section-head" style="display:flex;align-items:center;gap:8px">
-                Repair Items
-                <span id="riApprCounter" style="font-size:10px;font-weight:700;color:var(--success);margin-left:4px"></span>
-                <div style="display:flex;gap:4px;margin-left:auto">
-                  <button class="btn btn-outline btn-xs" style="color:var(--success);border-color:var(--success)" onclick="approveAllItems()">✓ Approve All</button><span class="role-badge rb-manager">Manager</span>
-                  <button class="btn btn-outline btn-xs" onclick="unapproveAllItems()">Unapprove All</button>
-                  <button class="btn btn-outline btn-xs" onclick="openTechsDrawer()">Techs</button>
-                  <button class="btn btn-outline btn-xs" onclick="openInvDrawer()">Inventory</button>
-                  <button class="btn btn-outline btn-xs" style="color:var(--primary);border-color:var(--primary);font-weight:700" onclick="openItemPicker()">+ Add Item</button>
-                </div>
-              </div>
-              <div style="flex:1;overflow-y:auto;min-height:120px">
-                <table class="items" id="repairItemsTable">
-                  <thead style="position:sticky;top:0;z-index:1">
-                    <tr>
-                      <th style="width:58px;text-align:center">Appr</th>
-                      <th style="width:70px">Code</th>
-                      <th>Repair Item</th>
-                      <th style="width:68px;text-align:center" title="User Abuse or Normal Wear & Tear">Cause</th>
-                      <th style="width:68px;text-align:center" title="Warranty / Non-conformance / Customer / Amendment">Fix Type</th>
-                      <th style="width:85px;text-align:right">Amount</th>
-                      <th style="width:55px">Tech</th>
-                      <th>Comments</th>
-                    </tr>
-                  </thead>
-                  <tbody id="repairItemsBody">
-                    <tr><td colspan="8" class="empty-state">No repair items</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- NOTES -->
-            <div style="margin-top:6px;margin-bottom:4px">
-              <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Notes</div>
-              <textarea id="fScopeNotes" rows="3" oninput="markDirty()" placeholder="Scope-in notes..." style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-dk);border-radius:4px;padding:6px 10px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:60px"></textarea>
-            </div>
-
-            <!-- TOTALS + ACTIONS (sticky footer feel) -->
-            <div class="action-bar">
-              <div class="action-group"><div class="lbl">Approved</div><div class="val green" id="aTotalApproved">$0.00</div></div>
-              <div class="action-group"><div class="lbl">Unapproved</div><div class="val red" id="aTotalUnapproved">$0.00</div></div>
-              <div class="action-group" style="display:none"><div class="lbl">Blind</div><div class="val" id="aTotalBlind" style="color:var(--warning)">$0.00</div></div>
-              <div class="action-group"><div class="lbl">Consumption</div><div class="val" id="aTotalConsumption">$0.00</div></div>
-              <div style="flex:1"></div>
-              <div class="field" style="width:105px"><label>Max Charge</label><input id="fMaxCharge" class="ro" readonly/></div>
-              <div class="field" style="width:105px"><label>Override</label><input id="fMaxOverride" type="number" step="0.01" min="0" onchange="markDirty()" placeholder="—"/></div>
-              <div class="divider" style="height:30px;margin:0 4px"></div>
-              <div class="field" style="min-width:160px;flex:1"><label>Out Vendor</label><input id="fOutVendor" onchange="markDirty()"/></div>
-              <div class="field" style="min-width:180px;flex:1"><label>Out Tracking</label><input id="fOutTracking" onchange="markDirty()"/></div>
-              <div class="field" style="width:105px"><label>Out Cost</label><input id="fOutCost" type="number" step="0.01" min="0" onchange="markDirty()"/></div>
-              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fOutsourced" onchange="markDirty()" style="width:auto;height:auto"/> Outsourced</label>
-              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap"><input type="checkbox" id="fVendorShipFlag" onchange="markDirty()" style="width:auto;height:auto"/> Vendor Ship</label>
-            </div>
-
-          </div><!-- /pane-scopein -->
+          <!-- pane-scopein: all unique IDs moved to visible layout above.
+               Outsource fields preserved here (no visible panel for them yet). -->
+          <div id="pane-scopein">
+            <input type="hidden" id="fOutVendor"/>
+            <input type="hidden" id="fOutTracking"/>
+            <input type="hidden" id="fOutCost"/>
+            <input type="hidden" id="fOutsourced"/>
+            <input type="hidden" id="fVendorShipFlag"/>
+          </div>
 
           <!-- ═══ PAGE 2: DETAILS ═══ -->
           <div class="tab-pane" id="pane-details">
@@ -1339,46 +1349,7 @@
 
             </div>
 
-            <!-- ROW 2: Addresses (2 cols, full width) -->
-            <div class="section-card" style="margin-bottom:0">
-              <div class="section-head" style="padding:4px 10px;font-size:9px;display:flex;align-items:center;justify-content:space-between">
-                Addresses
-                <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">Defaults from department · editable per order</span>
-              </div>
-              <div class="section-body" style="padding:6px 10px">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                  <!-- Bill To -->
-                  <div>
-                    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Bill To</div>
-                    <div style="display:flex;flex-direction:column;gap:3px">
-                      <input id="fBillName1" placeholder="Company name" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      <input id="fBillAddr1" placeholder="Address line 1" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
-                        <input id="fBillCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                        <input id="fBillState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
-                        <input id="fBillZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Ship To -->
-                  <div>
-                    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;align-items:center;gap:8px">
-                      Ship To
-                      <label style="font-size:9px;font-weight:500;display:flex;align-items:center;gap:3px;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--muted)"><input type="checkbox" id="fShipSameBill" style="width:auto;height:auto" onchange="toggleShipSame()"/> Same as Bill To</label>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:3px">
-                      <input id="fShipName1" placeholder="Company name" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      <input id="fShipAddr1" placeholder="Address line 1" oninput="markDirty()" style="width:100%;box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      <div style="display:grid;grid-template-columns:1fr 44px 68px;gap:3px">
-                        <input id="fShipCity" placeholder="City" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                        <input id="fShipState" placeholder="ST" maxlength="2" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none;text-align:center"/>
-                        <input id="fShipZip" placeholder="Zip" oninput="markDirty()" style="box-sizing:border-box;border:1px solid var(--border-dk);border-radius:3px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);background:#fff;outline:none"/>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- ROW 2: Addresses — moved to left column in flow state layout -->
 
 
             <!-- ROW 3: Loaner + Scope Usage -->
@@ -1767,46 +1738,38 @@
 
           </div><!-- /pane-history -->
 
-          <!-- ═══ PAGE 9: FINANCIALS ═══ -->
-          <div class="tab-pane" id="pane-financials">
-            <div class="fin-summary" id="finMarginSummary">
-              <span class="fin-summary-label">Repair Margin</span>
-              <span class="fin-summary-val positive" id="finMarginBadge">80.4%</span>
-            </div>
-
+          <!-- pane-financials: finMarginSummary/finMarginBadge moved to Documents pane in new layout.
+               All other financial IDs are unique to this pane. -->
+          <div id="pane-financials">
             <div class="fin-section">
               <div class="fin-section-head">Revenue</div>
-              <div class="fin-row"><span class="fin-label">Sale Amount</span><span class="fin-val" id="finSaleAmt">$650.00</span></div>
-              <div class="fin-row"><span class="fin-label">Tax</span><span class="fin-val" id="finTax">$0.00</span></div>
-              <div class="fin-row fin-total"><span class="fin-label">Invoice Total</span><span class="fin-val" id="finInvoiceTotal">$650.00</span></div>
+              <div class="fin-row"><span class="fin-label">Sale Amount</span><span class="fin-val" id="finSaleAmt">—</span></div>
+              <div class="fin-row"><span class="fin-label">Tax</span><span class="fin-val" id="finTax">—</span></div>
+              <div class="fin-row fin-total"><span class="fin-label">Invoice Total</span><span class="fin-val" id="finInvoiceTotal">—</span></div>
             </div>
-
             <div class="fin-section">
               <div class="fin-section-head">Expenses</div>
-              <div class="fin-row"><span class="fin-label">Outsource</span><span class="fin-val" id="finOutsource">$0.00</span></div>
-              <div class="fin-row"><span class="fin-label">Shipping</span><span class="fin-val" id="finShipping">$90.00</span></div>
-              <div class="fin-row"><span class="fin-label">Labor</span><span class="fin-val" id="finLabor">$4.68</span></div>
-              <div class="fin-row"><span class="fin-label">Inventory</span><span class="fin-val" id="finInventory">$0.00</span></div>
-              <div class="fin-row"><span class="fin-label">GPO</span><span class="fin-val" id="finGPO">$0.00</span></div>
-              <div class="fin-row"><span class="fin-label">Commission</span><span class="fin-val" id="finCommission">$32.50</span></div>
-              <div class="fin-row fin-total"><span class="fin-label">Total Expenses</span><span class="fin-val" id="finTotalExp">$127.18</span></div>
+              <div class="fin-row"><span class="fin-label">Outsource</span><span class="fin-val" id="finOutsource">—</span></div>
+              <div class="fin-row"><span class="fin-label">Shipping</span><span class="fin-val" id="finShipping">—</span></div>
+              <div class="fin-row"><span class="fin-label">Labor</span><span class="fin-val" id="finLabor">—</span></div>
+              <div class="fin-row"><span class="fin-label">Inventory</span><span class="fin-val" id="finInventory">—</span></div>
+              <div class="fin-row"><span class="fin-label">GPO</span><span class="fin-val" id="finGPO">—</span></div>
+              <div class="fin-row"><span class="fin-label">Commission</span><span class="fin-val" id="finCommission">—</span></div>
+              <div class="fin-row fin-total"><span class="fin-label">Total Expenses</span><span class="fin-val" id="finTotalExp">—</span></div>
             </div>
-
             <div class="fin-section">
               <div class="fin-section-head">Margins</div>
-              <div class="fin-row fin-margin"><span class="fin-label">Margin</span><span class="fin-val positive" id="finMarginPct">80.4%</span></div>
-              <div class="fin-row fin-margin"><span class="fin-label">Contract Margin</span><span class="fin-val" id="finContractMargin" style="color:var(--muted)">0.0%</span></div>
+              <div class="fin-row fin-margin"><span class="fin-label">Margin</span><span class="fin-val positive" id="finMarginPct">—</span></div>
+              <div class="fin-row fin-margin"><span class="fin-label">Contract Margin</span><span class="fin-val" id="finContractMargin" style="color:var(--muted)">—</span></div>
             </div>
-
             <div class="fin-section">
               <div class="fin-section-head">Margin Analysis</div>
-              <div class="fin-row"><span class="fin-label">Margin Adj Required</span><span class="fin-val" id="finMarginAdjReqd">$0.00</span></div>
-              <div class="fin-row"><span class="fin-label">Expected Margin</span><span class="fin-val" id="finMarginExpected">$0.00</span></div>
-              <div class="fin-row"><span class="fin-label">Actual Margin %</span><span class="fin-val" id="finMarginPctActual">0.0%</span></div>
-              <div class="fin-row"><span class="fin-label">Default Margin %</span><span class="fin-val" id="finMarginPctDefault">0.0%</span></div>
+              <div class="fin-row"><span class="fin-label">Margin Adj Required</span><span class="fin-val" id="finMarginAdjReqd">—</span></div>
+              <div class="fin-row"><span class="fin-label">Expected Margin</span><span class="fin-val" id="finMarginExpected">—</span></div>
+              <div class="fin-row"><span class="fin-label">Actual Margin %</span><span class="fin-val" id="finMarginPctActual">—</span></div>
+              <div class="fin-row"><span class="fin-label">Default Margin %</span><span class="fin-val" id="finMarginPctDefault">—</span></div>
               <div class="fin-row"><span class="fin-label">Margin Approval User</span><span class="fin-val" id="finMarginApprUser">—</span></div>
             </div>
-
           </div><!-- /pane-financials -->
 
           <div class="tab-pane" id="pane-inspections">
@@ -1860,6 +1823,8 @@
             </div><!-- /insp-two-col -->
 
           </div><!-- /pane-inspections -->
+
+          </div><!-- /legacyPaneContainer -->
 
         </div><!-- /detail-scroll -->
     </div><!-- /repair-detail -->
@@ -2516,6 +2481,19 @@ function updateUserInfo() {
 function fmtDate(v) { if (!v) return ''; const d = new Date(v); return isNaN(d) ? v : d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
 function toDateInput(v) { if (!v) return ''; const d = new Date(v); return isNaN(d) ? '' : d.toISOString().split('T')[0]; }
 function fmtMoney(v) { const n = parseFloat(v); return isNaN(n) ? '$0.00' : '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+// Secondary tab switcher for the flow-state right column
+function switchSecTab(tabEl) {
+  const bar = document.getElementById('secTabBar');
+  if (!bar) return;
+  bar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const target = tabEl.dataset.sectab;
+  ['documents','scopehistory2','notes2','images2'].forEach(id => {
+    const pane = document.getElementById('sec-pane-' + id);
+    if (pane) pane.style.display = (id === target) ? '' : 'none';
+  });
+}
 
 function getStatusName(id) { const n = Number(id); const s = _statuses.find(x => Number(x.lRepairStatusID) === n); return s ? s.sRepairStatus : ''; }
 
