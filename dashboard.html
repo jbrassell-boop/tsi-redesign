@@ -246,7 +246,7 @@
           <span class="filter-label">Source</span>
           <div class="seg-group">
             <button class="seg-btn active">In House</button>
-            <button class="seg-btn">Outsourced</button>
+            <button class="seg-btn">Outsourced <span id="outsourcedCount" style="display:none;background:rgba(0,0,0,.15);border-radius:9999px;padding:0 5px;font-size:9px;font-weight:700;margin-left:3px"></span></button>
             <button class="seg-btn">Hot List</button>
           </div>
         </div>
@@ -608,6 +608,13 @@ async function loadDashboardData(filters) {
 
   // Update the topbar to show data source
   API.UI.updateDemoBadge(DATA_SOURCE === 'api' ? 'api' : 'fallback');
+  // Update outsourced count badge
+  const outCount = SCOPES.filter(s => s.src === 'outsourced').length;
+  const outBadge = document.getElementById('outsourcedCount');
+  if (outBadge) {
+    if (outCount > 0) { outBadge.textContent = outCount; outBadge.style.display = 'inline'; }
+    else { outBadge.style.display = 'none'; }
+  }
   updateStats();
   renderTable();
 }
