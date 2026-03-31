@@ -33,7 +33,7 @@ const REPAIR_SELECT = `
     rs.sRepairStatus,
     s.sSerialNumber,
     st.sScopeTypeDesc, st.lScopeTypeCatKey,
-    st.sRigidOrFlexible, stc.bLargeDiameter,
+    st.sRigidOrFlexible, st.bLargeDiameter,
     st.sAngUp AS sAngSpecUp, st.sAngDown AS sAngSpecDown,
     st.sAngLeft AS sAngSpecLeft, st.sAngRight AS sAngSpecRight,
     ISNULL(stc.sScopeTypeCategory, '') AS sScopeTypeCategory,

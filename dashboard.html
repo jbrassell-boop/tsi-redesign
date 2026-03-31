@@ -532,8 +532,13 @@ function mapApiRow(r) {
     return 'F'; // default flexible
   }
 
-  // Determine size from bLargeDiameter (sourced from tblScopeTypeCategories.bLargeDiameter)
+  // LD categories per tblScopeTypeCategories legacy data (bLargeDiameter=1)
+  const LD_CATEGORIES = new Set(['Gastroscope','Colonoscope','ERCP','Sigmoidoscope','Enteroscope']);
+
+  // Determine size from scope category (authoritative) or bLargeDiameter flag as fallback
   function guessSize(row) {
+    const cat = row.sScopeTypeCategory || '';
+    if (cat) return LD_CATEGORIES.has(cat) ? 'L' : 'S';
     return (row.bLargeDiameter === 1 || row.bLargeDiameter === true) ? 'L' : 'S';
   }
 
