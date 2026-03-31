@@ -628,17 +628,14 @@ function mapApiRow(r) {
     return 'F'; // default flexible
   }
 
-  // Guess size from diameter field
-  function guessSize(diameter) {
-    if (!diameter) return 'L';
-    const d = parseFloat(diameter);
-    return d && d < 10 ? 'S' : 'L';
+  // Determine size from bLargeDiameter flag (1 = large, 0/null = small)
+  function guessSize(row) {
+    return (row.bLargeDiameter === 1 || row.bLargeDiameter === true) ? 'L' : 'S';
   }
 
-  // Determine source
+  // Determine source from bOutsourced flag
   function getSource(row) {
-    if (row.IsCogentix === 1) return 'cogentix';
-    if (row.VendorKey && row.VendorKey > 0) return 'outsourced';
+    if (row.bOutsourced === 1 || row.bOutsourced === true) return 'outsourced';
     return 'inhouse';
   }
 
@@ -659,7 +656,7 @@ function mapApiRow(r) {
     quoted: 0,
     invoice: '',
     cat: guessCategory(r.sScopeTypeDesc, r.sRigidOrFlexible),
-    size: guessSize(r.Diameter),
+    size: guessSize(r),
     src: getSource(r),
     hot: r.bHotList === true || r.bHotList === 1,
     // Keep raw API fields for future use

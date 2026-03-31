@@ -28,7 +28,7 @@ const CLIENT_SELECT = `
     c.sReferenceNum, c.sReferenceNum2, c.sClntTerms,
     c.lSalesTaxKey, c.lReportingGroupKey,
     c.sGPID, c.sGPIDSouth, c.sPeachTreeCustID,
-    c.dblAdjustmentPct, c.bUseAdjustmentPct,
+    c.dblAdjustmentPct,
     LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName,
     sr.lSalesRepKey AS lSalesRepNameKey,
     ISNULL(pc.sPricingDescription, '') AS sPricingDescription,
@@ -219,7 +219,6 @@ router.post('/Client/UpdateClient', async (req, res, next) => {
         sGPIDSouth = ISNULL(@gpidSouth, sGPIDSouth),
         sPeachTreeCustID = ISNULL(@peachtree, sPeachTreeCustID),
         dblAdjustmentPct = ISNULL(@adjPct, dblAdjustmentPct),
-        bUseAdjustmentPct = ISNULL(@useAdjPct, bUseAdjustmentPct),
         dtLastUpdate = GETDATE()
       WHERE lClientKey = @clientKey`,
       {
@@ -264,8 +263,7 @@ router.post('/Client/UpdateClient', async (req, res, next) => {
         gpid: b.sGPID || b.psGPID || null,
         gpidSouth: b.sGPIDSouth || b.psGPIDSouth || null,
         peachtree: b.sPeachTreeCustID || b.psPeachTreeCustID || null,
-        adjPct: b.dblAdjustmentPct != null ? b.dblAdjustmentPct : (b.pdblAdjustmentPct != null ? b.pdblAdjustmentPct : null),
-        useAdjPct: b.bUseAdjustmentPct != null ? b.bUseAdjustmentPct : (b.pbUseAdjustmentPct != null ? b.pbUseAdjustmentPct : null)
+        adjPct: b.dblAdjustmentPct != null ? b.dblAdjustmentPct : (b.pdblAdjustmentPct != null ? b.pdblAdjustmentPct : null)
       });
     res.json({ success: true });
   } catch (e) { next(e); }

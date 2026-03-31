@@ -26,14 +26,14 @@ const SCOPE_JOIN = `
   LEFT JOIN tblScopeTypeCategories stc ON st.lScopeTypeCatKey = stc.lScopeTypeCategoryKey`;
 
 const SCOPE_CASE = `CASE
-  WHEN st.sRigidOrFlexible = 'F' AND ISNULL(stc.bLargeDiameter, 0) = 1 THEN 'LD Flex'
+  WHEN st.sRigidOrFlexible = 'F' AND ISNULL(st.bLargeDiameter, 0) = 1 THEN 'LD Flex'
   WHEN st.sRigidOrFlexible = 'F' THEN 'SD Flex'
   WHEN st.sRigidOrFlexible = 'R' THEN 'Rigid'
   WHEN st.sRigidOrFlexible = 'C' THEN 'Camera'
 END`;
 
 const PROD_CASE = `CASE
-  WHEN st.sRigidOrFlexible = 'F' AND ISNULL(stc.bLargeDiameter, 0) = 1 THEN 'LD'
+  WHEN st.sRigidOrFlexible = 'F' AND ISNULL(st.bLargeDiameter, 0) = 1 THEN 'LD'
   WHEN st.sRigidOrFlexible = 'F' THEN 'SD'
   WHEN st.sRigidOrFlexible = 'R' THEN 'Rigid'
   WHEN st.sRigidOrFlexible = 'C' THEN 'Cameras'
@@ -87,7 +87,7 @@ router.get('/floor-meeting/flow', async (req, res, next) => {
       FROM tblRepair r ${SCOPE_JOIN}
       WHERE CAST(r.dtDateIn AS DATE) = @yesterday
         AND st.sRigidOrFlexible IN ('F','R','C') ${LOC} ${SKIP}
-      GROUP BY st.sRigidOrFlexible, ISNULL(stc.bLargeDiameter, 0)
+      GROUP BY st.sRigidOrFlexible, ISNULL(st.bLargeDiameter, 0)
     `, { yesterday });
 
     const closed = await db.query(`
@@ -96,7 +96,7 @@ router.get('/floor-meeting/flow', async (req, res, next) => {
       WHERE CAST(r.dtDateOut AS DATE) = @yesterday
         AND ISNULL(r.sRepairClosed, 'N') = 'Y'
         AND st.sRigidOrFlexible IN ('F','R','C') ${LOC} ${SKIP}
-      GROUP BY st.sRigidOrFlexible, ISNULL(stc.bLargeDiameter, 0)
+      GROUP BY st.sRigidOrFlexible, ISNULL(st.bLargeDiameter, 0)
     `, { yesterday });
 
     const missed = await db.query(`
@@ -105,7 +105,7 @@ router.get('/floor-meeting/flow', async (req, res, next) => {
       WHERE CAST(r.dtExpDelDateTSI AS DATE) = @yesterday
         AND ISNULL(r.sRepairClosed, 'N') <> 'Y'
         AND st.sRigidOrFlexible IN ('F','R','C') ${LOC} ${SKIP}
-      GROUP BY st.sRigidOrFlexible, ISNULL(stc.bLargeDiameter, 0)
+      GROUP BY st.sRigidOrFlexible, ISNULL(st.bLargeDiameter, 0)
     `, { yesterday });
 
     const toMap = rows => Object.fromEntries(rows.map(r => [r.category, r.cnt]));
@@ -200,7 +200,7 @@ router.get('/floor-meeting/production', async (req, res, next) => {
       WHERE ISNULL(r.sRepairClosed, 'N') <> 'Y'
         AND st.sRigidOrFlexible IN ('F','R','C')
         AND ${IN_HOUSE} ${LOC} ${SKIP}
-      GROUP BY st.sRigidOrFlexible, ISNULL(stc.bLargeDiameter, 0), ${LEVEL_CASE}
+      GROUP BY st.sRigidOrFlexible, ISNULL(st.bLargeDiameter, 0), ${LEVEL_CASE}
     `);
 
     const weeklyOut = await db.query(`
@@ -212,7 +212,7 @@ router.get('/floor-meeting/production', async (req, res, next) => {
       WHERE CAST(r.dtDateOut AS DATE) BETWEEN @weekAgo AND @yesterday
         AND ISNULL(r.sRepairClosed, 'N') = 'Y'
         AND st.sRigidOrFlexible IN ('F','R','C') ${LOC} ${SKIP}
-      GROUP BY st.sRigidOrFlexible, ISNULL(stc.bLargeDiameter, 0), ${LEVEL_CASE}
+      GROUP BY st.sRigidOrFlexible, ISNULL(st.bLargeDiameter, 0), ${LEVEL_CASE}
     `, { weekAgo, yesterday });
 
     const openMap = {};
