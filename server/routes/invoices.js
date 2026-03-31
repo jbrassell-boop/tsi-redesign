@@ -245,11 +245,11 @@ router.post('/Invoice/GenerateInvoices', async (req, res, next) => {
         INSERT INTO tblGP_InvoiceStaging (
           lInvoiceKey, sTranNumber, dtTranDate, sBatchNumber,
           TotalAmountDue, dblTranAmount, dblShippingAmount,
-          GPID_SalesRep, bProcessed, lDatabaseKey
+          bProcessed, lDatabaseKey
         ) VALUES (
           @repairKey, @tranNumber, GETDATE(), 'TSI-BATCH',
           @total, @amount, @shipping,
-          '', 0, @dbKey
+          0, @dbKey
         )`,
         {
           repairKey,

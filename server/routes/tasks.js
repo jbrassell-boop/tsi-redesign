@@ -130,9 +130,6 @@ router.get('/DashBoardTaskLoaner/GetAllTaskLoanerList', async (req, res, next) =
         tl.lTaskKey,
         tl.lScopeTypeKey,
         tl.lQuantity,
-        ISNULL(t.sWorkOrderNumber, '') AS sTaskNumber,
-        ISNULL(t.sShipTrackingNumber, '') AS sLoanerTrackingNumber,
-        t.dtTaskDate AS dtCreateDate,
         t.lDepartmentKey,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(st.sRigidOrFlexible, '') AS sRigidOrFlexible,
@@ -145,7 +142,7 @@ router.get('/DashBoardTaskLoaner/GetAllTaskLoanerList', async (req, res, next) =
         LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
         LEFT JOIN tblDepartment d ON d.lDepartmentKey = t.lDepartmentKey
         LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
-      ORDER BY t.dtTaskDate DESC`);
+      ORDER BY tl.lTaskScopeTypeKey DESC`);
     res.json(rows);
   } catch (e) { next(e); }
 });

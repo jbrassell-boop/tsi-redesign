@@ -67,16 +67,16 @@ router.post('/Quality/Add', async (req, res, next) => {
     const result = await db.query(`
       INSERT INTO tblISOComplaint (
         lRepairKey, dtDateReceived, lRecvdByUserKey, nRecvdByMethod,
-        sRecvdByOther, mComplaint, lResponsibleMgrUserKey,
-        dtDateAssigned, dtDateResponseDue, mInstructions,
+        mComplaint, lResponsibleMgrUserKey,
+        dtDateAssigned, dtDateResponseDue,
         sISOComplaint, sISONonConformance,
-        dtCreateDate, lCreateUser, dtLastUpdate
+        dtLastUpdate
       ) VALUES (
         @repairKey, @dtDateReceived, @recvdByUser, @recvdByMethod,
-        @recvdByOther, @complaint, @mgrUser,
-        @dateAssigned, @dateDue, @instructions,
+        @complaint, @mgrUser,
+        @dateAssigned, @dateDue,
         @isoComplaint, @isoNonConformance,
-        GETDATE(), @createUser, GETDATE()
+        GETDATE()
       );
       SELECT SCOPE_IDENTITY() AS lISOComplaintKey`,
       {
@@ -84,15 +84,12 @@ router.post('/Quality/Add', async (req, res, next) => {
         dtDateReceived: b.dtDateReceived || null,
         recvdByUser: b.lRecvdByUserKey || null,
         recvdByMethod: b.nRecvdByMethod || 0,
-        recvdByOther: b.sRecvdByOther || '',
         complaint: b.mComplaint || '',
         mgrUser: b.lResponsibleMgrUserKey || null,
         dateAssigned: b.dtDateAssigned || null,
         dateDue: b.dtDateResponseDue || null,
-        instructions: b.mInstructions || '',
         isoComplaint: b.sISOComplaint || '',
-        isoNonConformance: b.sISONonConformance || '',
-        createUser: b.lCreateUser || null
+        isoNonConformance: b.sISONonConformance || ''
       });
     const newKey = result[0] ? result[0].lISOComplaintKey : 0;
     res.json({ success: true, lISOComplaintKey: newKey });
@@ -113,19 +110,11 @@ router.post('/Quality/Update', async (req, res, next) => {
         lResponsibleMgrUserKey  = ISNULL(@mgrUser, lResponsibleMgrUserKey),
         dtDateAssigned          = ISNULL(@dateAssigned, dtDateAssigned),
         dtDateResponseDue       = ISNULL(@dateDue, dtDateResponseDue),
-        mInstructions           = ISNULL(@instructions, mInstructions),
         dtEvalDate              = ISNULL(@evalDate, dtEvalDate),
         lEvalUserKey            = ISNULL(@evalUser, lEvalUserKey),
-        mEvalResults            = ISNULL(@evalResults, mEvalResults),
-        mEvalConclusion         = ISNULL(@evalConclusion, mEvalConclusion),
         dtFnlDispDate           = ISNULL(@fnlDate, dtFnlDispDate),
         lFnlDispQAUserKey       = ISNULL(@fnlUser, lFnlDispQAUserKey),
-        mFnlDispAction          = ISNULL(@fnlAction, mFnlDispAction),
-        sImpactOnProduct        = ISNULL(@impact, sImpactOnProduct),
-        sVOE                    = ISNULL(@voe, sVOE),
-        dtVOE                   = ISNULL(@dtVOE, dtVOE),
-        dtLastUpdate            = GETDATE(),
-        lLastUpdateUser         = ISNULL(@updateUser, lLastUpdateUser)
+        dtLastUpdate            = GETDATE()
       WHERE lISOComplaintKey = @key`,
       {
         key,
@@ -135,18 +124,10 @@ router.post('/Quality/Update', async (req, res, next) => {
         mgrUser: b.lResponsibleMgrUserKey || null,
         dateAssigned: b.dtDateAssigned || null,
         dateDue: b.dtDateResponseDue || null,
-        instructions: b.mInstructions || null,
         evalDate: b.dtEvalDate || null,
         evalUser: b.lEvalUserKey || null,
-        evalResults: b.mEvalResults || null,
-        evalConclusion: b.mEvalConclusion || null,
         fnlDate: b.dtFnlDispDate || null,
-        fnlUser: b.lFnlDispQAUserKey || null,
-        fnlAction: b.mFnlDispAction || null,
-        impact: b.sImpactOnProduct || null,
-        voe: b.sVOE || null,
-        dtVOE: b.dtVOE || null,
-        updateUser: b.lLastUpdateUser || null
+        fnlUser: b.lFnlDispQAUserKey || null
       });
     res.json({ success: true });
   } catch (e) { next(e); }
