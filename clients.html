@@ -1212,27 +1212,27 @@ function loadClient(c) {
   setVal('ci-adj-pct', c._raw?.dblAdjustmentPct || c.adjPct || '');
   setChk('ci-use-adj', c._raw?.bUseAdjustmentPct || c.useAdj);
 
-  // Addresses tab
-  setVal('clBillAddr1', c._raw?.sBillAddr1 || '');
-  setVal('clBillAddr2', c._raw?.sBillAddr2 || '');
-  setVal('clBillCity', c._raw?.sBillCity || '');
-  setVal('clBillState', c._raw?.sBillState || '');
-  setVal('clBillZip', c._raw?.sBillZip || '');
-  setVal('clBillCountry', c._raw?.sBillCountry || '');
-  setVal('clBillName1', c._raw?.sClientName1 || c.name || '');
-  setVal('clShipAddr1', c._raw?.sShipAddr1 || '');
-  setVal('clShipAddr2', c._raw?.sShipAddr2 || '');
-  setVal('clShipCity', c._raw?.sShipCity || '');
-  setVal('clShipState', c._raw?.sShipState || '');
-  setVal('clShipZip', c._raw?.sShipZip || '');
-  setVal('clShipCountry', c._raw?.sShipCountry || '');
-  setVal('clShipName1', c._raw?.sShipName1 || '');
+  // Addresses tab — sBillAddr*/sShipAddr* are override fields; fall back to sMailAddr* (primary)
+  const r = c._raw || {};
+  setVal('clBillAddr1', r.sBillAddr1 || r.sMailAddr1 || '');
+  setVal('clBillAddr2', r.sBillAddr2 || r.sMailAddr2 || '');
+  setVal('clBillCity',  r.sBillCity  || r.sMailCity  || '');
+  setVal('clBillState', r.sBillState || r.sMailState || '');
+  setVal('clBillZip',   r.sBillZip   || r.sMailZip   || '');
+  setVal('clBillCountry', r.sBillCountry || r.sMailCountry || '');
+  setVal('clBillName1', r.sClientName1 || c.name || '');
+  setVal('clShipAddr1', r.sShipAddr1 || r.sMailAddr1 || '');
+  setVal('clShipAddr2', r.sShipAddr2 || r.sMailAddr2 || '');
+  setVal('clShipCity',  r.sShipCity  || r.sMailCity  || '');
+  setVal('clShipState', r.sShipState || r.sMailState || '');
+  setVal('clShipZip',   r.sShipZip   || r.sMailZip   || '');
+  setVal('clShipCountry', r.sShipCountry || r.sMailCountry || '');
+  setVal('clShipName1', r.sShipName1 || r.sClientName1 || '');
   const billEmail = document.getElementById('clBillEmail');
   if (billEmail) billEmail.value = c._raw?.sBillEmail || '';
   setVal('clBillContact', c._raw?.sBillContact || '');
   setVal('clShipEmail', c._raw?.sShipEmail || '');
   if (_liveMode && c._raw) {
-    const r = c._raw;
     // Set by key value (dropdowns now use API keys as option values)
     setVal('def-salesrep', r.lSalesRepKey || '');
     setVal('def-pricing', r.lPricingCategoryKey || '');
