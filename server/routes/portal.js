@@ -227,14 +227,21 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       ),
 
       // 3. Last 100 repairs under this contract
-      //    nStickerCost = max charge for this scope type + department
-      //    (what the customer would have paid without a contract)
+      //    nConsumption = sum of approved line items priced at the
+      //    client's pricing category (what they would have paid
+      //    without a contract).
       db.query(
         `SELECT TOP 100
            r.lRepairKey, r.sWorkOrderNumber,
            r.dtDateIn, r.dtDateOut, r.dtShipDate,
            r.dblAmtRepair,
-           ISNULL(mc.nMaxCharge, 0)        AS nConsumption,
+           ISNULL((SELECT SUM(ISNULL(pd.dblRepairPrice, 0) * ISNULL(rit.lQuantity, 1))
+                   FROM tblRepairItemTran rit
+                     LEFT JOIN tblPricingDetail pd
+                       ON pd.lRepairItemKey = rit.lRepairItemKey
+                       AND pd.lPricingCategoryKey = cl.lPricingCategoryKey
+                   WHERE rit.lRepairKey = r.lRepairKey
+                     AND rit.sApproved = 'Y'), 0) AS nConsumption,
            r.sComplaintDesc,
            r.sInsFinalPF,
            r.bReplaced, r.bOutsourced,
@@ -250,11 +257,10 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
            LEFT JOIN tblRepairReasons rr   ON rr.lRepairReasonKey = r.lRepairReasonKey
            LEFT JOIN tblScope s            ON s.lScopeKey         = r.lScopeKey
            LEFT JOIN tblScopeType st       ON st.lScopeTypeKey    = s.lScopeTypeKey
-           LEFT JOIN tblScopeTypeDepartmentMaxCharges mc
-             ON mc.lScopeTypeKey = s.lScopeTypeKey
-             AND mc.lDepartmentKey = r.lDepartmentKey
            LEFT JOIN tblDepartment d       ON d.lDepartmentKey    = r.lDepartmentKey
            LEFT JOIN tblTechnicians t      ON t.lTechnicianKey    = r.lTechnicianKey
+           INNER JOIN tblContract con      ON con.lContractKey    = r.lContractKey
+           LEFT JOIN tblClient cl          ON cl.lClientKey       = con.lClientKey
          WHERE r.lContractKey = @contractKey
          ORDER BY r.dtDateIn DESC`,
         { contractKey }
