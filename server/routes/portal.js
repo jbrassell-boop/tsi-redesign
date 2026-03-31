@@ -234,7 +234,7 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
            r.lRepairKey, r.sWorkOrderNumber,
            r.dtDateIn, r.dtDateOut, r.dtShipDate,
            r.dblAmtRepair,
-           ISNULL(mc.nMaxCharge, 0)        AS nStickerCost,
+           ISNULL(mc.nMaxCharge, 0)        AS nConsumption,
            r.sComplaintDesc,
            r.sInsFinalPF,
            r.bReplaced, r.bOutsourced,
