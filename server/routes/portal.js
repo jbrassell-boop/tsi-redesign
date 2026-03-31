@@ -227,11 +227,14 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
       ),
 
       // 3. Last 100 repairs under this contract
+      //    nStickerCost = max charge for this scope type + department
+      //    (what the customer would have paid without a contract)
       db.query(
         `SELECT TOP 100
            r.lRepairKey, r.sWorkOrderNumber,
            r.dtDateIn, r.dtDateOut, r.dtShipDate,
            r.dblAmtRepair,
+           ISNULL(mc.nMaxCharge, 0)        AS nStickerCost,
            r.sComplaintDesc,
            r.sInsFinalPF,
            r.bReplaced, r.bOutsourced,
@@ -247,6 +250,9 @@ router.get('/portal/contracts/:contractKey/detail', async (req, res, next) => {
            LEFT JOIN tblRepairReasons rr   ON rr.lRepairReasonKey = r.lRepairReasonKey
            LEFT JOIN tblScope s            ON s.lScopeKey         = r.lScopeKey
            LEFT JOIN tblScopeType st       ON st.lScopeTypeKey    = s.lScopeTypeKey
+           LEFT JOIN tblScopeTypeDepartmentMaxCharges mc
+             ON mc.lScopeTypeKey = s.lScopeTypeKey
+             AND mc.lDepartmentKey = r.lDepartmentKey
            LEFT JOIN tblDepartment d       ON d.lDepartmentKey    = r.lDepartmentKey
            LEFT JOIN tblTechnicians t      ON t.lTechnicianKey    = r.lTechnicianKey
          WHERE r.lContractKey = @contractKey
