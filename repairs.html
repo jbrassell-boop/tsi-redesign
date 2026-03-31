@@ -879,12 +879,18 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               QC
             </button>
-            <div class="qa-divider"></div>
-            <button class="qa-btn qa-btn-danger" onclick="confirmDeleteRepair(this)" title="Delete repair">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-              Delete
-            </button>
             <div style="flex:1"></div>
+            <div style="position:relative" id="repairOverflowWrap">
+              <button class="qa-btn" onclick="toggleRepairOverflow()" title="More actions" id="repairOverflowBtn">•••</button>
+              <div id="repairOverflowMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border-dk);border-radius:6px;box-shadow:var(--shadow-dropdown);min-width:160px;z-index:200;padding:4px 0">
+                <div style="padding:3px 0;border-top:1px solid var(--border);margin-top:2px">
+                  <button onclick="toggleRepairOverflow();confirmDeleteRepair(this)" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 14px;background:none;border:none;font-size:12px;font-family:inherit;color:var(--danger);cursor:pointer;text-align:left" onmouseover="this.style.background='#FEF2F2'" onmouseout="this.style.background='none'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Delete Repair
+                  </button>
+                </div>
+              </div>
+            </div>
             <span id="saveStatus2" style="font-size:10px;display:flex;align-items:center;gap:4px;color:var(--muted)" class="save-ready">
               <span class="save-icon">&#9679;</span><span id="saveText2">Ready</span>
             </span>
@@ -3817,6 +3823,23 @@ async function jumpToWO(wo) {
 }
 
 // ── Init ──
+function toggleRepairOverflow() {
+  const menu = document.getElementById('repairOverflowMenu');
+  if (!menu) return;
+  const open = menu.style.display !== 'none';
+  menu.style.display = open ? 'none' : 'block';
+  if (!open) {
+    const close = e => { if (!document.getElementById('repairOverflowWrap').contains(e.target)) { menu.style.display='none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+}
+
+function confirmDeleteRepair(btn) {
+  if (!confirm('Delete this repair permanently? This cannot be undone.')) return;
+  // TODO: call delete API endpoint
+  alert('Delete not yet wired to API.');
+}
+
 async function initPage() {
   updateUserInfo();
   if (window.TSIExport) TSIExport.preloadLogo('assets/logo-white.png');
