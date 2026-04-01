@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════
-//  tasks.js — Task management + status history
+//  tasks.js — Task management (real WinScopeNet schema)
 //  Tables: tblTasks, tblTaskStatusHistory, tblTaskStatuses,
-//          tblTaskPriorities, tblTaskTypes
+//          tblTaskPriorities, tblTaskTypes, tblTaskLoaners
 // ═══════════════════════════════════════════════════════
 const express = require('express');
 const router = express.Router();
@@ -15,21 +15,20 @@ router.post('/DashBoardTask/GetAllTaskList', async (req, res, next) => {
     const body = req.body || {};
     const svcKey = parseInt(body.plServiceLocationKey) || 0;
     const rows = await db.query(`
-      SELECT t.lTaskKey, t.lTaskTypeKey, t.lTaskStatusKey, t.lTaskPriorityKey,
-        t.lOwnerKey, t.lAssignedToUserKey, t.sTaskDescription,
-        t.dtDueDate, t.dtCreateDate, t.dtLastUpdate, t.lCreatedByUserKey,
-        ISNULL(ts.TaskStatus, '') AS sTaskStatus,
+      SELECT t.lTaskKey, t.lDepartmentKey, t.sTaskTitle, t.sCustomerMessage,
+        t.dtTaskDate, t.lTaskPriorityKey, t.sTaskNotes,
+        t.bFromPortal, t.lTaskTypeKey, t.lRepairKey,
+        t.sWorkOrderNumber, t.sShipTrackingNumber,
         ISNULL(tp.sTaskPriority, '') AS sTaskPriority,
         ISNULL(tt.sTaskType, '') AS sTaskType,
-        ISNULL(u.sUserFullName, '') AS sAssignedToName,
-        ISNULL(cu.sUserFullName, '') AS sCreatedByName
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(c.sClientName1, '') AS sClientName1
       FROM tblTasks t
-        LEFT JOIN tblTaskStatuses ts ON ts.TaskStatusKey = t.lTaskStatusKey
         LEFT JOIN tblTaskPriorities tp ON tp.lTaskPriorityKey = t.lTaskPriorityKey
         LEFT JOIN tblTaskTypes tt ON tt.lTaskTypeKey = t.lTaskTypeKey
-        LEFT JOIN tblUsers u ON u.lUserKey = t.lAssignedToUserKey
-        LEFT JOIN tblUsers cu ON cu.lUserKey = t.lCreatedByUserKey
-      ORDER BY t.dtDueDate`, {});
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = t.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      ORDER BY t.dtTaskDate DESC`, {});
     res.json(rows);
   } catch (e) { next(e); }
 });
@@ -39,22 +38,25 @@ router.post('/DashBoardTask/AddTask', async (req, res, next) => {
   try {
     const b = req.body || {};
     const result = await db.query(`
-      INSERT INTO tblTasks (lTaskTypeKey, lTaskStatusKey, lTaskPriorityKey,
-        lOwnerKey, lAssignedToUserKey, sTaskDescription, dtDueDate,
-        lCreatedByUserKey, dtCreateDate)
-      VALUES (@typeKey, @statusKey, @priorityKey,
-        @ownerKey, @assignedKey, @desc, @dueDate,
-        @createdBy, GETDATE());
+      INSERT INTO tblTasks (lDepartmentKey, sTaskTitle, sCustomerMessage,
+        dtTaskDate, lTaskPriorityKey, sTaskNotes, bFromPortal,
+        lTaskTypeKey, lRepairKey, sWorkOrderNumber, sShipTrackingNumber)
+      VALUES (@deptKey, @title, @message,
+        ISNULL(@taskDate, GETDATE()), @priorityKey, @notes, @fromPortal,
+        @typeKey, @repairKey, @wo, @tracking);
       SELECT SCOPE_IDENTITY() AS lTaskKey`,
       {
-        typeKey: b.lTaskTypeKey || 1,
-        statusKey: b.lTaskStatusKey || 1,
+        deptKey: b.lDepartmentKey || 0,
+        title: b.sTaskTitle || b.sTaskDescription || '',
+        message: b.sCustomerMessage || '',
+        taskDate: b.dtTaskDate || b.dtDueDate || null,
         priorityKey: b.lTaskPriorityKey || 2,
-        ownerKey: b.lOwnerKey || 0,
-        assignedKey: b.lAssignedToUserKey || 0,
-        desc: b.sTaskDescription || '',
-        dueDate: b.dtDueDate || null,
-        createdBy: b.lCreatedByUserKey || 1
+        notes: b.sTaskNotes || '',
+        fromPortal: b.bFromPortal || false,
+        typeKey: b.lTaskTypeKey || 1,
+        repairKey: b.lRepairKey || null,
+        wo: b.sWorkOrderNumber || '',
+        tracking: b.sShipTrackingNumber || ''
       });
     const newKey = result[0] ? result[0].lTaskKey : 0;
     res.json({ lTaskKey: newKey, success: true });
@@ -69,20 +71,25 @@ router.post('/DashBoardTask/UpdateTasks', async (req, res, next) => {
     if (!taskKey) return res.status(400).json({ error: 'lTaskKey required' });
     await db.query(`
       UPDATE tblTasks SET
-        lTaskStatusKey = ISNULL(@statusKey, lTaskStatusKey),
+        sTaskTitle = ISNULL(@title, sTaskTitle),
+        sCustomerMessage = ISNULL(@message, sCustomerMessage),
+        dtTaskDate = ISNULL(@taskDate, dtTaskDate),
         lTaskPriorityKey = ISNULL(@priorityKey, lTaskPriorityKey),
-        lAssignedToUserKey = ISNULL(@assignedKey, lAssignedToUserKey),
-        sTaskDescription = ISNULL(@desc, sTaskDescription),
-        dtDueDate = ISNULL(@dueDate, dtDueDate),
-        dtLastUpdate = GETDATE()
+        sTaskNotes = ISNULL(@notes, sTaskNotes),
+        lTaskTypeKey = ISNULL(@typeKey, lTaskTypeKey),
+        sWorkOrderNumber = ISNULL(@wo, sWorkOrderNumber),
+        sShipTrackingNumber = ISNULL(@tracking, sShipTrackingNumber)
       WHERE lTaskKey = @taskKey`,
       {
         taskKey,
-        statusKey: b.lTaskStatusKey || null,
+        title: b.sTaskTitle || b.sTaskDescription || null,
+        message: b.sCustomerMessage || null,
+        taskDate: b.dtTaskDate || b.dtDueDate || null,
         priorityKey: b.lTaskPriorityKey || null,
-        assignedKey: b.lAssignedToUserKey || null,
-        desc: b.sTaskDescription || null,
-        dueDate: b.dtDueDate || null
+        notes: b.sTaskNotes || null,
+        typeKey: b.lTaskTypeKey || null,
+        wo: b.sWorkOrderNumber || null,
+        tracking: b.sShipTrackingNumber || null
       });
     res.json({ success: true });
   } catch (e) { next(e); }

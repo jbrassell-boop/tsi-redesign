@@ -57,7 +57,7 @@ router.get('/Client/GetClientDetailsByClientId', async (req, res, next) => {
     // Attach contacts via tblContactTran (tblContacts has no lClientKey directly)
     client.contacts = await db.query(`
       SELECT con.lContactKey, con.sContactLast, con.sContactFirst,
-        con.sContactPhoneVoice, con.sContactPhoneFAX, con.sContactEMail, con.bActive
+        con.sContactPhoneVoice, con.sContactPhoneFAX, con.sContactEMail, con.sContactEMail AS sContactEmail, con.bActive
       FROM tblContacts con
         INNER JOIN tblContactTran ct ON ct.lContactKey = con.lContactKey
       WHERE ct.lClientKey = @clientKey
@@ -268,7 +268,7 @@ router.get('/Contacts/GetContactsList', async (req, res, next) => {
     if (clientKey) { where = 'ct.lClientKey = @clientKey'; params.clientKey = clientKey; }
     else if (deptKey) { where = 'ct.lDepartmentKey = @deptKey'; params.deptKey = deptKey; }
     const rows = await db.query(`
-      SELECT con.* FROM tblContacts con
+      SELECT con.*, con.sContactEMail AS sContactEmail FROM tblContacts con
         INNER JOIN tblContactTran ct ON ct.lContactKey = con.lContactKey
       WHERE ${where}
       ORDER BY con.sContactLast, con.sContactFirst`, params);
@@ -282,14 +282,14 @@ router.get('/Contacts/GetAllContacts', async (req, res, next) => {
     const deptKey = parseInt(req.query.plDepartmentKey) || 0;
     if (deptKey) {
       const rows = await db.query(`
-        SELECT con.* FROM tblContacts con
+        SELECT con.*, con.sContactEMail AS sContactEmail FROM tblContacts con
           INNER JOIN tblContactTran ct ON ct.lContactKey = con.lContactKey
         WHERE ct.lDepartmentKey = @deptKey
         ORDER BY con.sContactLast, con.sContactFirst`, { deptKey });
       return res.json(rows);
     }
     const rows = await db.query(`
-      SELECT * FROM tblContacts
+      SELECT *, sContactEMail AS sContactEmail FROM tblContacts
       ORDER BY sContactLast, sContactFirst`);
     res.json(rows);
   } catch (e) { next(e); }

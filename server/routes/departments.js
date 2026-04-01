@@ -198,11 +198,11 @@ router.get('/Departments/GetDepartmentKPIs', async (req, res, next) => {
            AND gp.dtTranDate >= DATEADD(YEAR, -1, GETDATE())) AS revenueYTD,
 
         (SELECT TOP 1
-           CASE WHEN c.dtEndDate >= GETDATE() THEN 'Active' ELSE 'Expired' END
+           CASE WHEN c.dtDateTermination >= GETDATE() THEN 'Active' ELSE 'Expired' END
          FROM tblContract c
          JOIN tblContractDepartments cd ON cd.lContractKey = c.lContractKey
          WHERE cd.lDepartmentKey = @deptKey
-         ORDER BY c.dtEndDate DESC) AS contractStatus
+         ORDER BY c.dtDateTermination DESC) AS contractStatus
     `, { deptKey });
 
     res.json(row || { openRepairs: 0, scopeCount: 0, revenueYTD: 0, contractStatus: 'None' });

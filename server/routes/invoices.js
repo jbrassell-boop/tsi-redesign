@@ -17,8 +17,8 @@ router.get('/Invoice/GetAllInvoices', async (req, res, next) => {
         gp.lInvoiceKey,
         gp.sTranNumber,
         gp.dtTranDate,
-        gp.TotalAmountDue,
-        gp.dblTranAmount,
+        gp.TotalAmountDue, gp.TotalAmountDue AS dblTotal,
+        gp.dblTranAmount, gp.dblTranAmount AS dblAmount,
         gp.dblShippingAmount,
         gp.dblTaxAmount,
         gp.docDescription,
@@ -71,8 +71,8 @@ router.post('/Invoice/GetAllInvoices', async (req, res, next) => {
         gp.lInvoiceKey,
         gp.sTranNumber,
         gp.dtTranDate,
-        gp.TotalAmountDue,
-        gp.dblTranAmount,
+        gp.TotalAmountDue, gp.TotalAmountDue AS dblTotal,
+        gp.dblTranAmount, gp.dblTranAmount AS dblAmount,
         gp.dblShippingAmount,
         gp.dblTaxAmount,
         gp.docDescription,
@@ -157,8 +157,8 @@ router.get('/Invoice/GetInvoicesByRepair/:repairKey', async (req, res, next) => 
         gp.lInvoiceKey,
         gp.sTranNumber,
         gp.dtTranDate,
-        gp.TotalAmountDue,
-        gp.dblTranAmount,
+        gp.TotalAmountDue, gp.TotalAmountDue AS dblTotal,
+        gp.dblTranAmount, gp.dblTranAmount AS dblAmount,
         gp.dblShippingAmount,
         gp.dblTaxAmount,
         gp.bProcessed,
@@ -270,7 +270,7 @@ router.get('/Invoice/GetInvoiceByRepairKey/:repairKey', async (req, res, next) =
     // Get GP invoice staging record if exists
     const invoice = await db.queryOne(`
       SELECT gp.GPInvoiceStagingID, gp.lInvoiceKey, gp.sTranNumber,
-        gp.dtTranDate, gp.TotalAmountDue, gp.dblTranAmount,
+        gp.dtTranDate, gp.TotalAmountDue, gp.TotalAmountDue AS dblTotal, gp.dblTranAmount, gp.dblTranAmount AS dblAmount,
         gp.dblShippingAmount, gp.dblTaxAmount, gp.sPurchaseOrder,
         gp.bProcessed, gp.dtPostedDate
       FROM tblGP_InvoiceStaging gp
