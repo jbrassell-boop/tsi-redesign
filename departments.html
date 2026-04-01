@@ -135,14 +135,7 @@
     .di-scopes{font-size:10px;background:var(--primary-light);border:1px solid var(--border-dk);color:var(--blue);padding:1px 6px;border-radius:8px;font-weight:700}
     .dept-detail-panel{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
 
-    /* ── Model distribution chips (Scopes tab) ── */
-    .model-dist-strip{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;background:var(--neutral-50);border-bottom:1px solid var(--border);align-items:flex-start}
-    .model-dist-chips-wrap{display:flex;flex-wrap:wrap;gap:6px;max-height:34px;overflow:hidden;transition:max-height .25s ease;flex:1}
-    .model-dist-chips-wrap.expanded{max-height:none}
-    .model-dist-chip{padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--border-dk);color:var(--navy);cursor:pointer;transition:all .12s;white-space:nowrap}
-    .model-dist-chip:hover{background:var(--primary-light);border-color:var(--primary)}
-    .model-dist-chip.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
-    .model-dist-toggle{padding:3px 10px;border-radius:var(--radius-pill);font-size:10px;font-weight:700;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:flex-start}
+    /* ── (model-dist-strip removed — replaced by search) ── */
 
     /* ── Repair/contract tab tables ── */
     .tab-kpi-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;background:var(--card)}
@@ -572,17 +565,12 @@
 
       <!-- ══ SCOPES TAB ══ -->
       <div id="dtab-scopes" class="tab-content show-block" style="display:none">
-        <!-- Model distribution strip -->
-        <div class="model-dist-strip" id="modelDistStrip" style="display:none">
-          <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;flex-shrink:0;line-height:24px">Filter:</span>
-          <div class="model-dist-chips-wrap" id="modelDistChips"></div>
-          <button class="model-dist-toggle" id="modelDistToggle" style="display:none" onclick="toggleModelChips()">Show all</button>
-          <button class="model-dist-chip" id="modelDistClearBtn" style="display:none;border-color:var(--primary);color:var(--primary);flex-shrink:0" onclick="clearModelFilter()">Clear</button>
-        </div>
+        <!-- Scopes search (replaced model-dist filter chips) -->
         <div class="tbl-card">
           <div class="tbl-head">
             <span class="tbl-title">Scopes</span>
             <div style="display:flex;align-items:center;gap:10px">
+              <input type="text" id="scopeSearchInput" class="search-input" placeholder="Search scopes..." oninput="filterScopesBySearch()" style="width:180px">
               <span id="scopesSummary" style="font-size:11px;color:var(--muted)">16 instruments &bull; 5 with active contract</span>
               <button class="btn btn-navy" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="openScopeDrawer()">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1933,7 +1921,6 @@ function openContactModal(mode){
 
   /* ── Scopes tab ─────────────────────────────────────── */
   let _allScopes = [];
-  let _activeModelFilter = null;
 
   async function loadScopes(deptKey){
     try {
@@ -1941,13 +1928,14 @@ function openContactModal(mode){
       if(!Array.isArray(scopes)) return;
       _allScopes = scopes;
       window._allScopesCache = scopes;
-      _activeModelFilter = null;
       setTabCount('scopes', scopes.length);
       const ssScopes = document.getElementById('ss-scopes');
       if (ssScopes) ssScopes.textContent = scopes.length;
       $('scopesSummary').textContent = scopes.length + ' instruments';
       renderScopesTable(scopes);
-      buildModelDistStrip(scopes);
+      // Reset search input when department changes
+      const scopeSearch = document.getElementById('scopeSearchInput');
+      if(scopeSearch) scopeSearch.value = '';
     } catch(e){ console.warn('[Dept] Scopes:', e.message); }
   }
 
@@ -1971,63 +1959,15 @@ function openContactModal(mode){
     });
   }
 
-  function buildModelDistStrip(scopes){
-    const strip = document.getElementById('modelDistStrip');
-    const chipsEl = document.getElementById('modelDistChips');
-    if(!strip || !chipsEl) return;
-    // Count by model
-    const counts = {};
-    scopes.forEach(s=>{
-      const model = s.sScopeTypeDesc || s.sModelDescription || 'Unknown';
-      counts[model] = (counts[model]||0) + 1;
-    });
-    const models = Object.keys(counts).sort();
-    if(models.length <= 1){ strip.style.display = 'none'; return; }
-    strip.style.display = 'flex';
-    chipsEl.innerHTML = '';
-    chipsEl.classList.remove('expanded');
-    models.forEach(model=>{
-      const chip = document.createElement('button');
-      chip.className = 'model-dist-chip';
-      chip.textContent = model + ' \u00d7' + counts[model];
-      chip.addEventListener('click', function(){
-        if(_activeModelFilter === model){
-          clearModelFilter();
-        } else {
-          _activeModelFilter = model;
-          chipsEl.querySelectorAll('.model-dist-chip').forEach(c=>c.classList.remove('active'));
-          chip.classList.add('active');
-          document.getElementById('modelDistClearBtn').style.display = '';
-          renderScopesTable(_allScopes.filter(s=>(s.sScopeTypeDesc||s.sModelDescription||'Unknown')===model));
-        }
-      });
-      chipsEl.appendChild(chip);
-    });
-    // Show toggle if chips overflow the collapsed height
-    const toggle = document.getElementById('modelDistToggle');
-    if(toggle){
-      requestAnimationFrame(function(){
-        toggle.style.display = chipsEl.scrollHeight > 40 ? '' : 'none';
-        toggle.textContent = 'Show all (' + models.length + ')';
-      });
-    }
-  }
-
-  window.clearModelFilter = function(){
-    _activeModelFilter = null;
-    const chipsEl = document.getElementById('modelDistChips');
-    if(chipsEl) chipsEl.querySelectorAll('.model-dist-chip').forEach(c=>c.classList.remove('active'));
-    const clearBtn = document.getElementById('modelDistClearBtn');
-    if(clearBtn) clearBtn.style.display = 'none';
-    renderScopesTable(_allScopes);
-  };
-
-  window.toggleModelChips = function(){
-    const wrap = document.getElementById('modelDistChips');
-    const toggle = document.getElementById('modelDistToggle');
-    if(!wrap || !toggle) return;
-    var expanded = wrap.classList.toggle('expanded');
-    toggle.textContent = expanded ? 'Show less' : 'Show all (' + Object.keys(_allScopes.reduce(function(m,s){ m[s.sScopeTypeDesc||s.sModelDescription||'Unknown']=1; return m; },{})).length + ')';
+  window.filterScopesBySearch = function(){
+    const q = (document.getElementById('scopeSearchInput').value || '').toLowerCase().trim();
+    if(!q){ renderScopesTable(_allScopes); return; }
+    renderScopesTable(_allScopes.filter(function(s){
+      return (s.sScopeTypeDesc||s.sModelDescription||'').toLowerCase().indexOf(q) !== -1
+        || (s.sSerialNumber||'').toLowerCase().indexOf(q) !== -1
+        || (s.sInstrumentType||'').toLowerCase().indexOf(q) !== -1
+        || (s.sContractName||'').toLowerCase().indexOf(q) !== -1;
+    }));
   };
 
   /* ── Repairs tab ─────────────────────────────────────── */
