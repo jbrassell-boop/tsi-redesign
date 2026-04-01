@@ -956,15 +956,8 @@
   /* Auth guard */
   if (!API.requireAuth()) throw new Error('redirect');
 
-  /* Data badge (demo only) */
-  function showDataBadge(live){
-    var b=document.getElementById('dataBadge');
-    if(!b)return;
-    b.style.cssText='display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:600;';
-    if(live){b.textContent='Live Data';b.style.background='var(--success-text)';b.style.color='var(--success-border)';b.style.border='1px solid var(--success)';}
-    else{b.textContent='Demo Data';b.style.background='var(--warning-text)';b.style.color='var(--warning-border)';b.style.border='1px solid var(--warning)';}
-  }
-  showDataBadge(false);
+  /* Data badge — use centralized API badge */
+  API.UI.updateDemoBadge('demo');
 
   /* ==============================
      DEMO DATA

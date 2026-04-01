@@ -117,27 +117,27 @@
       <div class="stat-strip">
         <div class="stat-chip active-chip" id="kpiTotal" onclick="chipFilter('')">
           <div class="s-icon si-navy"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div class="s-data"><div class="s-val s-navy">847</div><div class="s-lbl">Total Inspections</div></div>
+          <div class="s-data"><div class="s-val s-navy" id="kpiTotalVal">--</div><div class="s-lbl">Total Inspections</div></div>
         </div>
         <div class="stat-chip" id="kpiPass" onclick="chipFilter('Pass')">
           <div class="s-icon si-green"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="s-data"><div class="s-val s-green">94.2%</div><div class="s-lbl">Pass Rate</div></div>
+          <div class="s-data"><div class="s-val s-green" id="kpiPassVal">--</div><div class="s-lbl">Pass Rate</div></div>
         </div>
         <div class="stat-chip" id="kpiFPY" onclick="chipFilter('')">
           <div class="s-icon si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:14px;height:14px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-          <div class="s-data"><div class="s-val s-blue">89.1%</div><div class="s-lbl">First-Pass Yield</div></div>
+          <div class="s-data"><div class="s-val s-blue" id="kpiFPYVal">--</div><div class="s-lbl">First-Pass Yield</div></div>
         </div>
         <div class="stat-chip" id="kpiConditional" onclick="chipFilter('Conditional')">
           <div class="s-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" style="width:14px;height:14px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <div class="s-data"><div class="s-val s-amber">32</div><div class="s-lbl">Conditionals</div></div>
+          <div class="s-data"><div class="s-val s-amber" id="kpiCondVal">--</div><div class="s-lbl">Conditionals</div></div>
         </div>
         <div class="stat-chip" id="kpiFail" onclick="chipFilter('Fail')">
           <div class="s-icon si-red"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
-          <div class="s-data"><div class="s-val s-red">17</div><div class="s-lbl">Failures</div></div>
+          <div class="s-data"><div class="s-val s-red" id="kpiFailVal">--</div><div class="s-lbl">Failures</div></div>
         </div>
         <div class="stat-chip" style="cursor:default" title="Cost of Poor Quality">
           <div class="s-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" style="width:14px;height:14px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div class="s-data"><div class="s-val" style="color:var(--danger)" id="kpiCOPQ">$3,840</div><div class="s-lbl">COPQ</div></div>
+          <div class="s-data"><div class="s-val" style="color:var(--danger)" id="kpiCOPQ">--</div><div class="s-lbl">COPQ</div></div>
         </div>
       </div>
 
@@ -362,14 +362,8 @@
 // Auth guard
 try { if (!API.requireAuth()) throw new Error('redirect'); } catch(e) { if (e.message==='redirect') window.location='login.html'; }
 
-// Data badge
-function showDataBadge(live) {
-  var b = document.getElementById('dataBadge');
-  if (!b) return;
-  b.textContent = live ? 'Live Data' : 'Demo Data';
-  b.className = 'data-badge ' + (live ? 'badge-live' : 'badge-demo');
-}
-showDataBadge(false);
+// Data badge — use centralized API badge
+if (API && API.UI) API.UI.updateDemoBadge('demo');
 
 // ══════════════════════════════════════════════════════════
 // ── Live data arrays (populated async on init) ──
@@ -990,6 +984,23 @@ function mapRework(r) {
   };
 }
 
+function updateQualityKPIs() {
+  var total = DEMO_INSPECTIONS.length;
+  var pass = DEMO_INSPECTIONS.filter(function(r){ return r.result === 'Pass'; }).length;
+  var fail = DEMO_INSPECTIONS.filter(function(r){ return r.result === 'Fail'; }).length;
+  var cond = DEMO_INSPECTIONS.filter(function(r){ return r.result === 'Conditional'; }).length;
+  var openNCR = DEMO_NCR.filter(function(r){ return r.status === 'Open'; }).length;
+  var passRate = total ? ((pass / total) * 100).toFixed(1) + '%' : '--';
+  var fpyRate = total ? (((total - fail - cond) / total) * 100).toFixed(1) + '%' : '--';
+
+  var el;
+  el = document.getElementById('kpiTotalVal'); if (el) el.textContent = total || '--';
+  el = document.getElementById('kpiPassVal'); if (el) el.textContent = passRate;
+  el = document.getElementById('kpiFPYVal'); if (el) el.textContent = fpyRate;
+  el = document.getElementById('kpiCondVal'); if (el) el.textContent = openNCR || '--';
+  el = document.getElementById('kpiFailVal'); if (el) el.textContent = fail || '--';
+}
+
 async function init() {
   if (API && API.UI) API.UI.showSkeleton('skQuality', 5);
   var apiMode = true;
@@ -1005,10 +1016,7 @@ async function init() {
     DEMO_NCR = ncrList.map(mapComplaint);
     DEMO_CAPA = capaList.map(mapCAPA);
     DEMO_REWORK = reworkList.map(mapRework);
-    // Update NCR count in stat strip
-    var open = DEMO_NCR.filter(function(r){ return r.status === 'Open'; }).length;
-    var el = document.querySelector('#kpiConditional .s-val');
-    if (el) el.textContent = open;
+    updateQualityKPIs();
   } catch(e) {
     console.warn('[TSI Quality] API unavailable:', e.message);
     DEMO_NCR = []; DEMO_CAPA = []; DEMO_REWORK = [];

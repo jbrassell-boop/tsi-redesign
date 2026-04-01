@@ -136,10 +136,13 @@
     .dept-detail-panel{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
 
     /* ── Model distribution chips (Scopes tab) ── */
-    .model-dist-strip{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;background:var(--neutral-50);border-bottom:1px solid var(--border);align-items:center}
+    .model-dist-strip{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;background:var(--neutral-50);border-bottom:1px solid var(--border);align-items:flex-start}
+    .model-dist-chips-wrap{display:flex;flex-wrap:wrap;gap:6px;max-height:34px;overflow:hidden;transition:max-height .25s ease;flex:1}
+    .model-dist-chips-wrap.expanded{max-height:none}
     .model-dist-chip{padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--border-dk);color:var(--navy);cursor:pointer;transition:all .12s;white-space:nowrap}
     .model-dist-chip:hover{background:var(--primary-light);border-color:var(--primary)}
     .model-dist-chip.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+    .model-dist-toggle{padding:3px 10px;border-radius:var(--radius-pill);font-size:10px;font-weight:700;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:flex-start}
 
     /* ── Repair/contract tab tables ── */
     .tab-kpi-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;background:var(--card)}
@@ -571,9 +574,10 @@
       <div id="dtab-scopes" class="tab-content show-block" style="display:none">
         <!-- Model distribution strip -->
         <div class="model-dist-strip" id="modelDistStrip" style="display:none">
-          <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Filter:</span>
-          <div id="modelDistChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-          <button class="model-dist-chip" id="modelDistClearBtn" style="display:none;border-color:var(--primary);color:var(--primary)" onclick="clearModelFilter()">Clear</button>
+          <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;flex-shrink:0;line-height:24px">Filter:</span>
+          <div class="model-dist-chips-wrap" id="modelDistChips"></div>
+          <button class="model-dist-toggle" id="modelDistToggle" style="display:none" onclick="toggleModelChips()">Show all</button>
+          <button class="model-dist-chip" id="modelDistClearBtn" style="display:none;border-color:var(--primary);color:var(--primary);flex-shrink:0" onclick="clearModelFilter()">Clear</button>
         </div>
         <div class="tbl-card">
           <div class="tbl-head">
@@ -1980,6 +1984,7 @@ function openContactModal(mode){
     if(models.length <= 1){ strip.style.display = 'none'; return; }
     strip.style.display = 'flex';
     chipsEl.innerHTML = '';
+    chipsEl.classList.remove('expanded');
     models.forEach(model=>{
       const chip = document.createElement('button');
       chip.className = 'model-dist-chip';
@@ -1997,6 +2002,14 @@ function openContactModal(mode){
       });
       chipsEl.appendChild(chip);
     });
+    // Show toggle if chips overflow the collapsed height
+    const toggle = document.getElementById('modelDistToggle');
+    if(toggle){
+      requestAnimationFrame(function(){
+        toggle.style.display = chipsEl.scrollHeight > 40 ? '' : 'none';
+        toggle.textContent = 'Show all (' + models.length + ')';
+      });
+    }
   }
 
   window.clearModelFilter = function(){
@@ -2006,6 +2019,14 @@ function openContactModal(mode){
     const clearBtn = document.getElementById('modelDistClearBtn');
     if(clearBtn) clearBtn.style.display = 'none';
     renderScopesTable(_allScopes);
+  };
+
+  window.toggleModelChips = function(){
+    const wrap = document.getElementById('modelDistChips');
+    const toggle = document.getElementById('modelDistToggle');
+    if(!wrap || !toggle) return;
+    var expanded = wrap.classList.toggle('expanded');
+    toggle.textContent = expanded ? 'Show less' : 'Show all (' + Object.keys(_allScopes.reduce(function(m,s){ m[s.sScopeTypeDesc||s.sModelDescription||'Unknown']=1; return m; },{})).length + ')';
   };
 
   /* ── Repairs tab ─────────────────────────────────────── */

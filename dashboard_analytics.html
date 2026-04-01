@@ -545,14 +545,14 @@ var Metrics = {
     if (!this.data) return;
     var d = this.data;
     document.getElementById('m-kInHouse').textContent = d.inHouse;
-    document.getElementById('m-kAvgTat').textContent = d.avgTat + 'd';
-    document.getElementById('m-kOnTime').textContent = d.onTimePct + '%';
-    document.getElementById('m-kThruput').textContent = d.throughput;
-    document.getElementById('m-mcAvgTat').textContent = d.avgTat + 'd';
+    document.getElementById('m-kAvgTat').textContent = d.avgTat != null ? d.avgTat + 'd' : '--';
+    document.getElementById('m-kOnTime').textContent = d.onTimePct != null ? d.onTimePct + '%' : '--';
+    document.getElementById('m-kThruput').textContent = d.throughput ?? '--';
+    document.getElementById('m-mcAvgTat').textContent = d.avgTat != null ? d.avgTat + 'd' : '--';
     document.getElementById('m-mcAvgTatSub').textContent = d.totalInPeriod + ' repairs in period';
-    document.getElementById('m-mcThruput').textContent = d.throughput;
+    document.getElementById('m-mcThruput').textContent = d.throughput ?? '--';
     document.getElementById('m-mcThruputSub').textContent = this.currentPeriod + ' shipped';
-    document.getElementById('m-mcOnTime').textContent = d.onTimePct + '%';
+    document.getElementById('m-mcOnTime').textContent = d.onTimePct != null ? d.onTimePct + '%' : '--';
     document.getElementById('m-mcOnTimeSub').textContent = 'within 10-day SLA';
     document.getElementById('m-mcInHouse').textContent = d.inHouse;
     document.getElementById('m-mcInHouseSub').textContent = 'awaiting completion';
@@ -603,7 +603,8 @@ var TAT = {
     if (self.sourceFilter === 'outsourced') params.outsourced = 'true';
     document.getElementById('t-matrixTbody').innerHTML =
       '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Loading&hellip;</td></tr>';
-    API.getTATMatrix(Object.keys(params).length ? params : null).then(function(resp) {
+    var timeout = new Promise(function(_, reject) { setTimeout(function() { reject(new Error('timeout')); }, 15000); });
+    Promise.race([API.getTATMatrix(Object.keys(params).length ? params : null), timeout]).then(function(resp) {
       var d = (resp && resp.data) ? resp.data : resp;
       if (!d || !d.matrix) throw new Error('no matrix');
       self.data = d;
@@ -614,6 +615,8 @@ var TAT = {
       console.warn('[analytics] TAT matrix failed:', e.message);
       document.getElementById('t-matrixTbody').innerHTML =
         '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Data unavailable</td></tr>';
+      document.getElementById('t-scopeTbody').innerHTML =
+        '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Data unavailable</td></tr>';
     });
   },
 
