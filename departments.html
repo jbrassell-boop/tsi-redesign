@@ -1086,6 +1086,12 @@
             <option value="">All Categories</option>
           </select>
         </div>
+        <div class="ff" id="mcDiameterWrap" style="display:none">
+          <label>Diameter</label>
+          <select class="inp" id="mcFieldDiam" onchange="mcCascadeDiam()">
+            <option value="">All Diameters</option>
+          </select>
+        </div>
         <div class="ff">
           <label>Model <span class="req">*</span></label>
           <select class="inp" id="mcFieldModel">
@@ -3345,18 +3351,24 @@ function openContactModal(mode){
     var type = $('mcFieldInstType').value;
     var mfr = $('mcFieldMfr').value;
     var cat = $('mcFieldCat').value;
+    var diam = $('mcFieldDiam').value;
     return _allScopeTypes.filter(function(st){
       if(type && (st.sRigidOrFlexible||'') !== type) return false;
       if(mfr && (st.sManufacturerName||'') !== mfr) return false;
       if(cat && (st.sScopeTypeCategory||'') !== cat) return false;
+      if(diam && (st.sInsertTubeDiameter||'').trim() !== diam) return false;
       return true;
     });
   }
 
   window.mcCascadeType = function(){
+    // Show/hide diameter dropdown for Rigid scopes
+    var type = $('mcFieldInstType').value;
+    var diamWrap = $('mcDiameterWrap');
+    if(diamWrap) diamWrap.style.display = (type === 'R') ? '' : 'none';
+    if(type !== 'R'){ $('mcFieldDiam').value = ''; }
     // Rebuild manufacturer options based on type filter
     var filtered = _allScopeTypes.filter(function(st){
-      var type = $('mcFieldInstType').value;
       return !type || (st.sRigidOrFlexible||'') === type;
     });
     var mfrs = []; filtered.forEach(function(st){ if(st.sManufacturerName && mfrs.indexOf(st.sManufacturerName)===-1) mfrs.push(st.sManufacturerName); });
@@ -3384,11 +3396,38 @@ function openContactModal(mode){
   };
 
   window.mcCascadeCat = function(){
+    // Rebuild diameter options if Rigid
+    var type = $('mcFieldInstType').value;
+    if(type === 'R'){
+      var mfr = $('mcFieldMfr').value;
+      var cat = $('mcFieldCat').value;
+      var filtered = _allScopeTypes.filter(function(st){
+        if((st.sRigidOrFlexible||'') !== 'R') return false;
+        if(mfr && (st.sManufacturerName||'') !== mfr) return false;
+        if(cat && (st.sScopeTypeCategory||'') !== cat) return false;
+        return true;
+      });
+      var diams = [];
+      filtered.forEach(function(st){
+        var d = (st.sInsertTubeDiameter||'').trim();
+        if(d && diams.indexOf(d)===-1) diams.push(d);
+      });
+      diams.sort(function(a,b){ return parseFloat(a)-parseFloat(b); });
+      var sel = $('mcFieldDiam');
+      sel.innerHTML = '<option value="">All Diameters</option>';
+      diams.forEach(function(d){ sel.innerHTML += '<option value="'+d+'">'+d+' mm</option>'; });
+    }
+    mcCascadeDiam();
+  };
+
+  window.mcCascadeDiam = function(){
     var models = mcGetFiltered();
     var sel = $('mcFieldModel');
     sel.innerHTML = '<option value="">Select Model (' + models.length + ' available)</option>';
     models.forEach(function(st){
-      sel.innerHTML += '<option value="'+st.lScopeTypeKey+'">'+(st.sScopeTypeDesc||'(unnamed)')+'</option>';
+      var label = st.sScopeTypeDesc || '(unnamed)';
+      if(st.sInsertTubeDiameter) label += ' (' + st.sInsertTubeDiameter.trim() + 'mm)';
+      sel.innerHTML += '<option value="'+st.lScopeTypeKey+'">'+label+'</option>';
     });
   };
 

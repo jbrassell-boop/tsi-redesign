@@ -138,6 +138,7 @@ router.get('/Scopes/GetAllScopeType', async (req, res, next) => {
       SELECT st.lScopeTypeKey, st.sScopeTypeDesc, st.sRigidOrFlexible,
              st.lScopeTypeCatKey, st.lManufacturerKey,
              st.sAngUp, st.sAngDown, st.sAngLeft, st.sAngRight,
+             ISNULL(st.sInsertTubeDiameter, '') AS sInsertTubeDiameter,
              m.sManufacturer AS sManufacturerName,
              ISNULL(stc.sScopeTypeCategory, '') AS sScopeTypeCategory
       FROM tblScopeType st
