@@ -297,12 +297,15 @@ router.get('/Contract/GetAllContractCoverageCounts', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /Contract/GetContractReportCardDetails — Computed performance stats for a contract
+// GET /Contract/GetContractReportCardDetails — Performance stats for a contract
+// Merges tblContractReportCard (pre-computed KPIs) with live repair stats
 router.get('/Contract/GetContractReportCardDetails', async (req, res, next) => {
   try {
     const contractKey = parseInt(req.query.lContractKey) || 0;
     if (!contractKey) return res.status(400).json({ error: 'lContractKey required' });
-    const row = await db.queryOne(`
+
+    // Live repair stats
+    const repairStats = await db.queryOne(`
       SELECT
         COUNT(*) AS nTotalRepairs,
         SUM(CASE WHEN r.dtDateOut IS NOT NULL THEN 1 ELSE 0 END) AS nCompleted,
@@ -312,7 +315,42 @@ router.get('/Contract/GetContractReportCardDetails', async (req, res, next) => {
         MAX(r.dtDateIn) AS dtLastRepairIn
       FROM tblRepair r
       WHERE r.lContractKey = @contractKey`, { contractKey });
-    res.json(row || {});
+
+    // Pre-computed report card (alias n* → dbl* for client compatibility)
+    const reportCard = await db.queryOne(`
+      SELECT
+        rc.nRevenue AS dblRevenue,
+        rc.nConsumption AS dblConsumption,
+        rc.nConsumption AS dblTotalConsumption,
+        rc.nPercentTimeElapsed AS dblPercentTimeElapsed,
+        rc.nPercentValueConsumedConsumption AS dblConsumptionIndex,
+        rc.dtLastUpdateDate
+      FROM tblContractReportCard rc
+      WHERE rc.lContractKey = @contractKey`, { contractKey });
+
+    // Contract header for annual value and expenses
+    const header = await db.queryOne(`
+      SELECT con.dblAmtTotal AS dblContractTotal,
+        con.dblAmtTotal AS dblAnnualValue,
+        con.dblAmtInvoiced AS dblExpenses,
+        con.dblAmtInvoiced AS dblTotalExpenses,
+        CASE WHEN con.dblAmtTotal > 0
+          THEN ROUND((con.dblAmtTotal - ISNULL(con.dblAmtInvoiced, 0)) / con.dblAmtTotal * 100, 1)
+          ELSE 0 END AS dblMargin,
+        CASE WHEN con.dblAmtTotal > 0 AND rc2.nPercentTimeElapsed > 0
+          THEN ROUND(con.dblAmtTotal * (rc2.nPercentTimeElapsed / 100.0), 2)
+          ELSE 0 END AS dblBudgetAllocation,
+        CASE WHEN con.dblAmtTotal > 0 AND rc2.nPercentTimeElapsed > 0
+          THEN ROUND(ISNULL(con.dblAmtInvoiced, 0) / NULLIF(con.dblAmtTotal * (rc2.nPercentTimeElapsed / 100.0), 0), 3)
+          ELSE 0 END AS dblExpenseIndex,
+        CASE WHEN ISNULL(con.dblAmtInvoiced, 0) > 0
+          THEN ROUND(ISNULL(con.dblAmtInvoiced, 0) / NULLIF(con.dblAmtTotal, 0) * 100, 1)
+          ELSE 0 END AS dblEfficiency
+      FROM tblContract con
+        LEFT JOIN tblContractReportCard rc2 ON rc2.lContractKey = con.lContractKey
+      WHERE con.lContractKey = @contractKey`, { contractKey });
+
+    res.json(Object.assign({}, repairStats || {}, reportCard || {}, header || {}));
   } catch (e) { next(e); }
 });
 
