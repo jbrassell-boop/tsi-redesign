@@ -121,6 +121,31 @@ All tables migrated successfully:
 
 ---
 
+### Step 4: InventorySizeBuild Migration (DONE April 1, 2026)
+- tblInventorySizeBuild: 2,825 rows migrated with +100K PK offset
+- tblInventorySizeBuildItems: 31,346 rows migrated with +100K PK offset
+- FKs remapped: lInventorySizeKey via _xwalk_InventorySize, lTechnicianKey via _xwalk_Technician
+
+### Step 5: Stored Procedure Fixes (DONE April 1, 2026)
+- **186 procs fixed** — replaced `TSS.WinScopeNetNashville.dbo.` and `TSI.WinScopeNet.dbo.` with `dbo.`
+- **14 dead procs dropped** (migration helpers + broken backups)
+- **1 remaining**: `gpInvoiceExistsInGP` (references GP/Great Plains linked server — separate system)
+- Approach: bulk REPLACE via cursor + sp_executesql
+
+### Step 6: Trigger Fixes (DONE April 1, 2026)
+- **trRepairUpd**: replaced `TSS.WinScopeNetNashville.dbo.tblSalesRep` → `dbo.tblSalesRep`
+- **trInvoiceUpdateCustomerSince**: replaced `TSS.WinScopeNetNashville.dbo.tblInvoice` → `dbo.tblInvoice`
+- **trPortalTrackingNumbersInsert**: replaced `TSS.WinScopeNetNashville.dbo.tblSalesRep` → `dbo.tblSalesRep`
+- Other 5 triggers: dead Nashville code paths (IF DB_NAME()='Nashville') — harmless, left as-is
+- Verified: trRepairUpd fires successfully on South repair UPDATE
+
+### Step 8: READ_ONLY Burn-in (STARTED April 1, 2026)
+- `ALTER DATABASE WinScopeNetNashville SET READ_ONLY` executed at 19:32
+- Any writes to Nashville will now fail, revealing remaining dependencies
+- Monitor for 2 weeks before decommissioning
+
+---
+
 ## NOT YET DONE — Remaining Nashville Merge Work
 
 ### The Problem
