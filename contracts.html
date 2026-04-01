@@ -2617,6 +2617,8 @@ async function loadNewScopeDropdowns() {
     const typeSel = document.getElementById('nsScopeTypeKey');
     typeSel.innerHTML = '<option value="">-- Select Model --</option>' +
       nsScopeTypes.map(t => '<option value="' + t.lScopeTypeKey + '">' + esc(t.sScopeTypeDesc || t.sDesc || '') + '</option>').join('');
+    if (window._nsScopeSearch) window._nsScopeSearch.refresh();
+    else window._nsScopeSearch = API.UI.searchableSelect('nsScopeTypeKey', { placeholder: 'Search scope types...' });
   } catch (e) {
     console.warn('[NewScope] Dropdown load failed:', e.message);
   }
@@ -2798,6 +2800,8 @@ async function openNewPendingModal() {
     const clientSel = document.getElementById('npClientKey');
     clientSel.innerHTML = '<option value="">-- Select Client --</option>' +
       npClients.map(c => '<option value="' + c.lClientKey + '">' + esc(c.sClientName1) + '</option>').join('');
+    if (window._npClientSearch) window._npClientSearch.refresh();
+    else window._npClientSearch = API.UI.searchableSelect('npClientKey', { placeholder: 'Search clients...' });
 
     const repSel = document.getElementById('npSalesRepKey');
     repSel.innerHTML = '<option value="">-- Select Rep --</option>' +

@@ -451,6 +451,8 @@
   function populateClientFilter() {
     const clients = [...new Set(rows.map(r => r.sClientName1 || r.sClientName || '').filter(Boolean))].sort();
     filterClient.innerHTML = '<option value="">All Clients</option>' + clients.map(c => '<option>' + esc(c) + '</option>').join('');
+    if (window._filterClientSearch) window._filterClientSearch.refresh();
+    else window._filterClientSearch = API.UI.searchableSelect('filterClient', { placeholder: 'Search clients...' });
   }
 
   // ── Filter logic ────────────────────────────────────────

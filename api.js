@@ -494,6 +494,148 @@ const API = (() => {
       if (!el) return;
       var skeletons = el.querySelectorAll('.skeleton');
       skeletons.forEach(function(s) { s.remove(); });
+    },
+
+    /**
+     * searchableSelect — Enhance a <select> with a filterable dropdown overlay.
+     * Replaces the native select visually with a text input + dropdown list.
+     * Works with any number of options (thousands safe — only renders matches).
+     *
+     * @param {string|HTMLElement} selectEl - Select element or its ID
+     * @param {Object} [opts] - Options
+     * @param {string} [opts.placeholder='Search...'] - Placeholder text
+     * @param {number} [opts.maxVisible=50] - Max items rendered in dropdown
+     * @returns {{ refresh, setValue, getValue, destroy }}
+     */
+    searchableSelect: function(selectEl, opts) {
+      if (typeof selectEl === 'string') selectEl = document.getElementById(selectEl);
+      if (!selectEl || selectEl.tagName !== 'SELECT') return null;
+      opts = opts || {};
+      var placeholder = opts.placeholder || 'Search...';
+      var maxVisible = opts.maxVisible || 50;
+      var options = [];
+      var selectedValue = selectEl.value;
+
+      // Extract options from the select
+      function extractOptions() {
+        options = [];
+        for (var i = 0; i < selectEl.options.length; i++) {
+          options.push({ value: selectEl.options[i].value, text: selectEl.options[i].textContent });
+        }
+      }
+      extractOptions();
+
+      // Hide the original select
+      selectEl.style.display = 'none';
+
+      // Build wrapper
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;display:inline-block;min-width:' + (selectEl.style.minWidth || '200px');
+      selectEl.parentNode.insertBefore(wrap, selectEl.nextSibling);
+
+      // Display input (shows selected text, acts as search when focused)
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = selectEl.className || 'sel';
+      inp.placeholder = placeholder;
+      inp.style.cssText = (selectEl.getAttribute('style') || '') + ';display:block;width:100%;box-sizing:border-box;cursor:pointer';
+      inp.readOnly = false;
+      wrap.appendChild(inp);
+
+      // Dropdown list
+      var dd = document.createElement('div');
+      dd.style.cssText = 'position:absolute;top:100%;left:0;right:0;max-height:240px;overflow-y:auto;background:var(--card);border:1.5px solid var(--border-dk);border-top:none;border-radius:0 0 6px 6px;z-index:var(--z-dropdown,100);display:none;box-shadow:var(--shadow-dropdown)';
+      wrap.appendChild(dd);
+
+      function renderList(filter) {
+        dd.innerHTML = '';
+        var q = (filter || '').toLowerCase();
+        var count = 0;
+        for (var i = 0; i < options.length; i++) {
+          if (q && options[i].text.toLowerCase().indexOf(q) === -1) continue;
+          if (count >= maxVisible) {
+            var more = document.createElement('div');
+            more.style.cssText = 'padding:6px 10px;font-size:11px;color:var(--muted);font-style:italic';
+            more.textContent = '...' + (options.length - count) + ' more — type to filter';
+            dd.appendChild(more);
+            break;
+          }
+          var row = document.createElement('div');
+          row.style.cssText = 'padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+          row.textContent = options[i].text;
+          row.dataset.value = options[i].value;
+          row.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            pick(this.dataset.value, this.textContent);
+          });
+          row.addEventListener('mouseenter', function() { this.style.background = 'var(--primary-light)'; });
+          row.addEventListener('mouseleave', function() { this.style.background = ''; });
+          dd.appendChild(row);
+          count++;
+        }
+        if (count === 0) {
+          var empty = document.createElement('div');
+          empty.style.cssText = 'padding:8px 10px;font-size:11px;color:var(--muted)';
+          empty.textContent = 'No matches';
+          dd.appendChild(empty);
+        }
+      }
+
+      function pick(value, text) {
+        selectedValue = value;
+        selectEl.value = value;
+        inp.value = text;
+        close();
+        // Fire change event on the original select
+        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      function open() {
+        inp.value = '';
+        inp.placeholder = placeholder;
+        renderList('');
+        dd.style.display = 'block';
+      }
+
+      function close() {
+        dd.style.display = 'none';
+        // Restore display text
+        var sel = options.find(function(o) { return o.value === selectedValue; });
+        inp.value = sel ? sel.text : '';
+        inp.placeholder = placeholder;
+      }
+
+      // Set initial display
+      var initial = options.find(function(o) { return o.value === selectedValue; });
+      inp.value = initial ? initial.text : '';
+
+      // Events
+      inp.addEventListener('focus', function() { open(); });
+      inp.addEventListener('input', function() { renderList(inp.value); });
+      inp.addEventListener('blur', function() { setTimeout(close, 150); });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { close(); inp.blur(); }
+      });
+
+      return {
+        refresh: function() {
+          extractOptions();
+          selectedValue = selectEl.value;
+          var sel = options.find(function(o) { return o.value === selectedValue; });
+          inp.value = sel ? sel.text : '';
+        },
+        setValue: function(val) {
+          selectedValue = val;
+          selectEl.value = val;
+          var sel = options.find(function(o) { return o.value === val; });
+          inp.value = sel ? sel.text : '';
+        },
+        getValue: function() { return selectedValue; },
+        destroy: function() {
+          selectEl.style.display = '';
+          if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+        }
+      };
     }
   };
 

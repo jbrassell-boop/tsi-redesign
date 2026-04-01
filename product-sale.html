@@ -1064,6 +1064,8 @@ function populateDrawer(s) {
   salesReps.forEach(function(r) {
     repSel.innerHTML += '<option value="'+r+'"'+(r===s.salesRep?' selected':'')+'>'+r+'</option>';
   });
+  if (window._psRepSearch) window._psRepSearch.refresh();
+  else window._psRepSearch = API.UI.searchableSelect('fSalesRep', { placeholder: 'Search reps...' });
 
   var subtotal = s.total || 0;
   document.getElementById('fSubtotal').value = fmtMoney(subtotal);
@@ -1360,6 +1362,8 @@ function openAddModal() {
   clientData.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).forEach(function(c) {
     mClient.innerHTML += '<option value="'+c.key+'">'+c.name+'</option>';
   });
+  if (window._psClientSearch) window._psClientSearch.refresh();
+  else window._psClientSearch = API.UI.searchableSelect('mClient', { placeholder: 'Search clients...' });
   document.getElementById('mDept').innerHTML = '<option value="">Select department...</option>';
   // Populate sales rep dropdown
   var mRep = document.getElementById('mSalesRep');
@@ -1367,6 +1371,8 @@ function openAddModal() {
   salesReps.slice().sort().forEach(function(r) {
     mRep.innerHTML += '<option value="'+r+'">'+r+'</option>';
   });
+  if (window._psModalRepSearch) window._psModalRepSearch.refresh();
+  else window._psModalRepSearch = API.UI.searchableSelect('mSalesRep', { placeholder: 'Search reps...' });
   // Default date to today
   document.getElementById('mOrderDate').value = new Date().toISOString().slice(0,10);
   document.getElementById('mPO').value = '';

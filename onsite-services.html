@@ -761,6 +761,8 @@ async function populateModalDropdowns() {
   }
   document.getElementById('mClient').innerHTML = '<option value="">-- Select Client --</option>' +
     clients.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+  if (window._mClientSearch) window._mClientSearch.refresh();
+  else window._mClientSearch = API.UI.searchableSelect('mClient', { placeholder: 'Search clients...' });
   const techs = [...new Set(allVisits.map(v => v.techName))].sort();
   document.getElementById('mTech').innerHTML = '<option value="">-- Select Tech --</option>' +
     techs.map(t => '<option value="' + t + '">' + t + '</option>').join('');
