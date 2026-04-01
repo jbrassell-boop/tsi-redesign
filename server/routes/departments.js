@@ -16,7 +16,7 @@ const DEPT_SELECT = `
     d.sShipName1, d.sShipName2, d.sShipAddr1, d.sShipAddr2, d.sShipCity, d.sShipState, d.sShipZip,
     d.sBillName1, d.sBillName2, d.sBillAddr1, d.sBillAddr2, d.sBillCity, d.sBillState, d.sBillZip,
     d.sContactPhoneVoice AS sPhoneVoice, d.sContactPhoneFAX AS sPhoneFAX,
-    d.sContactEMail AS sEMailAddress,
+    d.sContactEMail AS sEMailAddress, d.sContactEMail AS sContactEmail,
     d.sGPID AS GPOID, d.bActive,
     d.mComments, d.dtCreateDate, d.dtLastUpdate,
     c.sClientName1,

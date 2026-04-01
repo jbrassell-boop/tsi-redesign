@@ -29,6 +29,19 @@ const REPAIR_SELECT = `
     r.sAngOutUp, r.sAngOutDown, r.sAngOutRight, r.sAngOutLeft,
     r.sBrokenFibersIn, r.sBrokenFibersOut,
     r.mComments, r.mCommentsISO, r.mCommentsDisIns,
+    -- Shipping cost columns (aliased to client-expected names)
+    r.dblShippingAdjustments AS dblShippingAdjustment,
+    r.dblShippingClientIn AS dblClientShippingIn,
+    r.dblShippingClientOut AS dblClientShippingOut,
+    r.dblShippingVendorIn AS dblVendorShippingIn,
+    -- D&I inspection metadata (aliased to client-expected names)
+    r.sDICheckedInBy AS sCheckedInBy,
+    -- Camera inspection PF fields (aliased to client-expected names)
+    r.sInsCamCablePF AS sCamCablePF,
+    r.sInsCamFocusPF AS sCamFocusPF,
+    r.sInsCamLensCleanedPF AS sCamLensCleanedPF,
+    -- Completion date alias (client reads dtCompleted; DB column is dtDateOut)
+    r.dtDateOut AS dtCompleted,
     -- Enrichment JOINs
     rs.sRepairStatus,
     s.sSerialNumber,
