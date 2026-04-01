@@ -9,18 +9,20 @@ const db = require('../db');
 // GET /api/ModelMaxCharges/GetAllModelMaxChargesList — Max charges for a department
 router.get('/ModelMaxCharges/GetAllModelMaxChargesList', async (req, res, next) => {
   try {
-    const deptKey = parseInt(req.query.lDepartmentKey) || 0;
+    const deptKey = parseInt(req.query.plDepartmentKey || req.query.lDepartmentKey) || 0;
     if (!deptKey) return res.status(400).json({ error: 'lDepartmentKey required' });
     const rows = await db.query(`
       SELECT mc.lScopeTypeKey, mc.lDepartmentKey, mc.nMaxCharge,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(st.sRigidOrFlexible, '') AS sRigidOrFlexible,
-        ISNULL(m.sManufacturer, '') AS sManufacturerName
+        ISNULL(m.sManufacturer, '') AS sManufacturerName,
+        ISNULL(stc.sScopeTypeCategory, '') AS sScopeTypeCategory
       FROM tblScopeTypeDepartmentMaxCharges mc
         LEFT JOIN tblScopeType st ON st.lScopeTypeKey = mc.lScopeTypeKey
         LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
+        LEFT JOIN tblScopeTypeCategories stc ON stc.lScopeTypeCategoryKey = st.lScopeTypeCatKey
       WHERE mc.lDepartmentKey = @deptKey
-      ORDER BY st.sScopeTypeDesc`, { deptKey });
+      ORDER BY st.sRigidOrFlexible, m.sManufacturer, stc.sScopeTypeCategory, st.sScopeTypeDesc`, { deptKey });
     res.json(rows);
   } catch (e) { next(e); }
 });
