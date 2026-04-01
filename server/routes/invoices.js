@@ -7,12 +7,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET /Invoice/GetAllInvoices — All invoices from GP staging joined to repair/client/dept
+// GET /Invoice/GetAllInvoices — Recent invoices (last 2 years, TOP 200) — legacy fallback
 router.get('/Invoice/GetAllInvoices', async (req, res, next) => {
   try {
     const svcKey = parseInt(req.query.svcKey) || 0;
     const rows = await db.query(`
-      SELECT TOP 500
+      SELECT TOP 200
         gp.GPInvoiceStagingID,
         gp.lInvoiceKey,
         gp.sTranNumber,
@@ -44,8 +44,64 @@ router.get('/Invoice/GetAllInvoices', async (req, res, next) => {
         LEFT JOIN tblClient c ON c.lClientKey = inv.lClientKey
         LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = inv.lSalesRepKey
       WHERE (@svcKey = 0 OR gp.lDatabaseKey = @svcKey)
+        AND gp.dtTranDate >= DATEADD(YEAR, -2, GETDATE())
       ORDER BY gp.dtTranDate DESC`, { svcKey });
     res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /Invoice/GetAllInvoices — Paginated invoice list with date-range filtering
+router.post('/Invoice/GetAllInvoices', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const svcKey = parseInt(body.svcKey) || 0;
+    const dateFrom = body.dateFrom || new Date(Date.now() - 2 * 365.25 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const dateTo = body.dateTo || null;
+
+    const params = { svcKey, dateFrom };
+    let dateToClause = '';
+    if (dateTo) {
+      params.dateTo = dateTo;
+      dateToClause = 'AND gp.dtTranDate <= @dateTo';
+    }
+
+    const result = await db.queryPage(`
+      SELECT
+        gp.GPInvoiceStagingID,
+        gp.lInvoiceKey,
+        gp.sTranNumber,
+        gp.dtTranDate,
+        gp.TotalAmountDue,
+        gp.dblTranAmount,
+        gp.dblShippingAmount,
+        gp.dblTaxAmount,
+        gp.docDescription,
+        gp.sPurchaseOrder,
+        gp.dtDueDate,
+        gp.bProcessed,
+        gp.dtPostedDate,
+        gp.lDatabaseKey,
+        inv.lRepairKey,
+        inv.lClientKey,
+        inv.lDepartmentKey,
+        inv.lSalesRepKey,
+        inv.lContractKey,
+        inv.sTranNumber AS sWOTranNumber,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
+        LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName
+      FROM tblGP_InvoiceStaging gp
+        LEFT JOIN tblInvoice inv ON inv.lInvoiceKey = gp.lInvoiceKey
+        LEFT JOIN tblRepair r ON r.lRepairKey = inv.lRepairKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = inv.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = inv.lClientKey
+        LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = inv.lSalesRepKey
+      WHERE (@svcKey = 0 OR gp.lDatabaseKey = @svcKey)
+        AND gp.dtTranDate >= @dateFrom
+        ${dateToClause}`,
+      'gp.dtTranDate DESC', params, body.Pagination);
+    res.json(result);
   } catch (e) { next(e); }
 });
 
@@ -115,9 +171,8 @@ router.get('/Invoice/GetInvoicesByRepair/:repairKey', async (req, res, next) => 
   } catch (e) { next(e); }
 });
 
-// GET /Invoice/GetReadyToInvoice — Repairs that are shipped but not yet invoiced
-// Shipped = status 8 in tblRepair (lRepairStatusID values map to tblRepairStatuses)
-// "Scope Out (Invoice)" is status 2 in tblRepairStatuses
+// GET /Invoice/GetReadyToInvoice — Repairs shipped but not yet invoiced — legacy fallback
+// Shipped = lRepairStatusID = 8; excludes repairs that already have a tblInvoice record
 router.get('/Invoice/GetReadyToInvoice', async (req, res, next) => {
   try {
     const svcKey = parseInt(req.query.svcKey || req.query.plServiceLocationKey) || 0;
@@ -136,12 +191,40 @@ router.get('/Invoice/GetReadyToInvoice', async (req, res, next) => {
         LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
         LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
         LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
-        LEFT JOIN tblInvoice inv2 ON inv2.lRepairKey = r.lRepairKey
       WHERE r.lRepairStatusID = 8
-        AND inv2.lRepairKey IS NULL
+        AND NOT EXISTS (SELECT 1 FROM tblInvoice inv2 WHERE inv2.lRepairKey = r.lRepairKey)
         AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)
       ORDER BY r.dtShipDate`, { svcKey });
     res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// POST /Invoice/GetReadyToInvoice — Paginated repairs shipped but not yet invoiced
+router.post('/Invoice/GetReadyToInvoice', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const svcKey = parseInt(body.svcKey || body.plServiceLocationKey) || 0;
+
+    const result = await db.queryPage(`
+      SELECT r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtShipDate,
+        r.lRepairStatusID, r.lDepartmentKey, r.lScopeKey,
+        r.dblAmtRepair, r.dblAmtShipping, r.lServiceLocationKey,
+        rs.sRepairStatus,
+        ISNULL(s.sSerialNumber,'') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc,'') AS sScopeTypeDesc,
+        ISNULL(d.sDepartmentName,'') AS sDepartmentName,
+        ISNULL(c.sClientName1,'') AS sClientName1
+      FROM tblRepair r
+        LEFT JOIN tblRepairStatuses rs ON rs.lRepairStatusID = r.lRepairStatusID
+        LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+      WHERE r.lRepairStatusID = 8
+        AND NOT EXISTS (SELECT 1 FROM tblInvoice inv2 WHERE inv2.lRepairKey = r.lRepairKey)
+        AND (@svcKey = 0 OR r.lServiceLocationKey = @svcKey)`,
+      'r.dtShipDate', { svcKey }, body.Pagination);
+    res.json(result);
   } catch (e) { next(e); }
 });
 

@@ -227,4 +227,19 @@ router.get('/DepartmentReportingGroups/GetAllDepartmentGPOList', async (req, res
   } catch (e) { next(e); }
 });
 
+// POST /Departments/GetAllDepartmentsList — Paginated department list with optional service location + client filter
+router.post('/Departments/GetAllDepartmentsList', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const svcKey = parseInt(body.plServiceLocationKey) || 0;
+    const clientKey = parseInt(body.plClientKey) || 0;
+    const result = await db.queryPage(`${DEPT_SELECT}
+      WHERE d.bActive = 1
+        AND (@svcKey = 0 OR d.lServiceLocationKey = @svcKey)
+        AND (@clientKey = 0 OR d.lClientKey = @clientKey)`,
+      'd.sDepartmentName', { svcKey, clientKey }, body.Pagination);
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

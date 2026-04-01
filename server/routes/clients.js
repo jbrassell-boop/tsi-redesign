@@ -362,4 +362,20 @@ router.post('/Contacts/UpdateContacts', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /Client/GetAllClientsList — Paginated client list with optional service location filter
+router.post('/Client/GetAllClientsList', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const svcKey = parseInt(body.plServiceLocationKey) || 0;
+    const result = await db.queryPage(`${CLIENT_SELECT}
+      WHERE c.bActive = 1
+        AND (@svcKey = 0 OR EXISTS (
+          SELECT 1 FROM tblDepartment d2
+          WHERE d2.lClientKey = c.lClientKey AND d2.lServiceLocationKey = @svcKey
+        ))`,
+      'c.sClientName1', { svcKey }, body.Pagination);
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

@@ -8,7 +8,56 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET /api/Quality/GetAll — All ISO complaints with repair/client info
+// Shared SELECT for ISO complaint list queries
+const COMPLAINT_SELECT = `
+  SELECT
+    ic.lISOComplaintKey, ic.lRepairKey, ic.dtDateReceived,
+    ic.lRecvdByUserKey, ic.nRecvdByMethod,
+    ic.lResponsibleMgrUserKey, ic.dtDateAssigned, ic.dtDateResponseDue,
+    ic.dtEvalDate, ic.lEvalUserKey,
+    ic.dtFnlDispDate, ic.lFnlDispQAUserKey,
+    ic.sISOComplaint, ic.sISONonConformance,
+    ic.mComplaint,
+    ic.dtLastUpdate,
+    ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
+    ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+    ISNULL(s.sSerialNumber, '') AS sSerialNumber,
+    ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+    ISNULL(c.sClientName1, '') AS sClientName1
+  FROM tblISOComplaint ic
+    LEFT JOIN tblRepair r ON r.lRepairKey = ic.lRepairKey
+    LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+    LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+    LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+    LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey`;
+
+// Helper: default dateFrom to 2 years ago if not provided
+function defaultDateFrom(val) {
+  return val || new Date(Date.now() - 2 * 365.25 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+// POST /api/Quality/GetAll — All ISO complaints with pagination + date range
+router.post('/Quality/GetAll', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const dateFrom = defaultDateFrom(body.dateFrom);
+    const dateTo = body.dateTo || null;
+
+    const params = { dateFrom };
+    let where = ' WHERE ic.dtDateReceived >= @dateFrom';
+    if (dateTo) { where += ' AND ic.dtDateReceived <= @dateTo'; params.dateTo = dateTo; }
+
+    const result = await db.queryPage(
+      `${COMPLAINT_SELECT}${where}`,
+      'ic.dtDateReceived DESC',
+      params,
+      body.Pagination
+    );
+    res.json({ success: true, data: result.dataSource, totalRecord: result.totalRecord });
+  } catch (e) { next(e); }
+});
+
+// GET /api/Quality/GetAll — legacy fallback (TOP 500, no pagination)
 router.get('/Quality/GetAll', async (req, res, next) => {
   try {
     const rows = await db.query(`
@@ -133,8 +182,29 @@ router.post('/Quality/Update', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/Quality/GetNCRs — ISO complaints flagged as non-conformance (sISONonConformance set)
-// Uses same safe column set as GetAll (TSI_Demo may lack some WinScopeNet columns)
+// POST /api/Quality/GetNCRs — Non-conformance records with pagination + date range
+router.post('/Quality/GetNCRs', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const dateFrom = defaultDateFrom(body.dateFrom);
+    const dateTo = body.dateTo || null;
+
+    const params = { dateFrom };
+    let where = ` WHERE ic.sISONonConformance IS NOT NULL AND ic.sISONonConformance <> ''
+      AND ic.dtDateReceived >= @dateFrom`;
+    if (dateTo) { where += ' AND ic.dtDateReceived <= @dateTo'; params.dateTo = dateTo; }
+
+    const result = await db.queryPage(
+      `${COMPLAINT_SELECT}${where}`,
+      'ic.dtDateReceived DESC',
+      params,
+      body.Pagination
+    );
+    res.json({ success: true, data: result.dataSource, totalRecord: result.totalRecord });
+  } catch (e) { next(e); }
+});
+
+// GET /api/Quality/GetNCRs — legacy fallback (TOP 500, no pagination)
 router.get('/Quality/GetNCRs', async (req, res, next) => {
   try {
     const rows = await db.query(`
@@ -164,8 +234,32 @@ router.get('/Quality/GetNCRs', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/Quality/GetCAPAs — Complaints where corrective action has been assigned
+// POST /api/Quality/GetCAPAs — CAPA records with pagination + date range
 // CAPA = complaints with an assigned manager and response due date (corrective action workflow)
+router.post('/Quality/GetCAPAs', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const dateFrom = defaultDateFrom(body.dateFrom);
+    const dateTo = body.dateTo || null;
+
+    const params = { dateFrom };
+    let where = ` WHERE ic.lResponsibleMgrUserKey IS NOT NULL
+      AND ic.lResponsibleMgrUserKey > 0
+      AND ic.dtDateAssigned IS NOT NULL
+      AND ic.dtDateReceived >= @dateFrom`;
+    if (dateTo) { where += ' AND ic.dtDateReceived <= @dateTo'; params.dateTo = dateTo; }
+
+    const result = await db.queryPage(
+      `${COMPLAINT_SELECT}${where}`,
+      'ic.dtDateResponseDue ASC',
+      params,
+      body.Pagination
+    );
+    res.json({ success: true, data: result.dataSource, totalRecord: result.totalRecord });
+  } catch (e) { next(e); }
+});
+
+// GET /api/Quality/GetCAPAs — legacy fallback (TOP 500, no pagination)
 router.get('/Quality/GetCAPAs', async (req, res, next) => {
   try {
     const rows = await db.query(`
@@ -197,8 +291,47 @@ router.get('/Quality/GetCAPAs', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/Quality/GetRework — Repairs where same scope was repaired within 40 days
-// Identifies rework by finding scopes with multiple repairs in close succession
+// POST /api/Quality/GetRework — Rework repairs with pagination + date range
+// Uses derived table to find scopes with multiple repairs within the date window (avoids O(n^2) subquery)
+router.post('/Quality/GetRework', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const dateFrom = defaultDateFrom(body.dateFrom);
+    const dateTo = body.dateTo || null;
+
+    const params = { dateFrom };
+    let dateFilter = 'r.dtDateIn >= @dateFrom';
+    if (dateTo) { dateFilter += ' AND r.dtDateIn <= @dateTo'; params.dateTo = dateTo; }
+
+    // Use a derived table (not a CTE) so queryPage can wrap this as a subquery
+    const sql = `
+      SELECT
+        r.lRepairKey, r.sWorkOrderNumber, r.dtDateIn, r.dtDateOut,
+        r.lDepartmentKey,
+        ISNULL(s.sSerialNumber, '') AS sSerialNumber,
+        ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
+        ISNULL(d.sDepartmentName, '') AS sDepartmentName,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        LTRIM(RTRIM(ISNULL(tech.sRepFirst,'') + ' ' + ISNULL(tech.sRepLast,''))) AS sTechName
+      FROM tblRepair r
+        INNER JOIN (
+          SELECT lScopeKey FROM tblRepair
+          WHERE lScopeKey > 0 AND dtDateIn >= @dateFrom
+          GROUP BY lScopeKey HAVING COUNT(*) > 1
+        ) mrs ON mrs.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScope s ON s.lScopeKey = r.lScopeKey
+        LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
+        LEFT JOIN tblDepartment d ON d.lDepartmentKey = r.lDepartmentKey
+        LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+        LEFT JOIN tblSalesRep tech ON tech.lSalesRepKey = r.lTechnicianKey
+      WHERE ${dateFilter}`;
+
+    const result = await db.queryPage(sql, 'r.lScopeKey, r.dtDateIn DESC', params, body.Pagination);
+    res.json({ success: true, data: result.dataSource, totalRecord: result.totalRecord });
+  } catch (e) { next(e); }
+});
+
+// GET /api/Quality/GetRework — legacy fallback (TOP 500, no pagination)
 router.get('/Quality/GetRework', async (req, res, next) => {
   try {
     const rows = await db.query(`

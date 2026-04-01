@@ -172,4 +172,18 @@ router.delete('/ScopeType/DeleteDepartmentScopeTypes', async (req, res, next) =>
   } catch (e) { next(e); }
 });
 
+// POST /Scopes/GetAllScopesList — Paginated scope list with optional dept + dead-status filter
+router.post('/Scopes/GetAllScopesList', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const deptKey = parseInt(body.plDepartmentKey) || 0;
+    const isDead = body.psScopeIsDead || null;
+    const result = await db.queryPage(`${SCOPE_SELECT}
+      WHERE (@deptKey = 0 OR s.lDepartmentKey = @deptKey)
+        AND (@isDead IS NULL OR s.sScopeIsDead = @isDead)`,
+      's.sSerialNumber', { deptKey, isDead }, body.Pagination);
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

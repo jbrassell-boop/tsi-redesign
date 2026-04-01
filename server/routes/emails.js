@@ -28,6 +28,7 @@ router.get('/Email/GetAll', async (req, res, next) => {
       WHERE (@ownerKey = 0 OR e.lOwnerKey = @ownerKey)
         AND (@emailTypeKey = 0 OR e.lEmailTypeKey = @emailTypeKey)
         AND e.bIgnore = 0
+        AND (@ownerKey != 0 OR e.dtCreateDate >= DATEADD(YEAR, -2, GETDATE()))
       ORDER BY e.dtCreateDate DESC`, params);
     res.json(rows);
   } catch (e) { next(e); }
@@ -94,7 +95,7 @@ router.post('/emails/queue', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/emails/queue — All queued (pending) emails for dashboard_emails.html
+// GET /api/emails/queue — Queued (pending) emails for dashboard_emails.html, last 2 years
 router.get('/emails/queue', async (req, res, next) => {
   try {
     const rows = await db.query(`
@@ -110,8 +111,36 @@ router.get('/emails/queue', async (req, res, next) => {
         LEFT JOIN tblRepair r ON r.lRepairKey = e.lOwnerKey
       WHERE e.lEmailTypeKey = 0
         AND e.bIgnore = 0
+        AND e.dtCreateDate >= DATEADD(YEAR, -2, GETDATE())
       ORDER BY e.dtCreateDate DESC`);
     res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+});
+
+// POST /api/emails/queue/list — Paginated queue for dashboard_emails.html
+const EMAIL_QUEUE_SELECT = `
+  SELECT
+    e.lEmailKey, e.lOwnerKey AS lRepairKey,
+    e.sFrom AS sSenderName, e.sTo AS sRecipientEmail,
+    e.sCC, e.sSubject, e.sBody, e.bIsBodyHTML,
+    e.dtCreateDate, e.dtSentDate,
+    CASE WHEN e.dtSentDate IS NULL THEN 'Pending' ELSE 'Sent' END AS sStatus,
+    CASE WHEN e.sCC LIKE 'FORM:%' THEN SUBSTRING(e.sCC, 6, 50) ELSE '' END AS sFormType,
+    ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber
+  FROM tblEmails e
+    LEFT JOIN tblRepair r ON r.lRepairKey = e.lOwnerKey
+  WHERE e.lEmailTypeKey = 0
+    AND e.bIgnore = 0
+    AND e.dtCreateDate >= @dateFrom
+`;
+
+router.post('/emails/queue/list', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const twoYearsAgo = new Date(Date.now() - 2 * 365.25 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const dateFrom = body.dateFrom || twoYearsAgo;
+    const result = await db.queryPage(EMAIL_QUEUE_SELECT, 'e.dtCreateDate DESC', { dateFrom }, body.Pagination);
+    res.json({ success: true, data: result.dataSource, totalRecord: result.totalRecord });
   } catch (e) { next(e); }
 });
 

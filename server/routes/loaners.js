@@ -215,4 +215,18 @@ router.delete('/Loaner/Delete', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /api/Loaner/GetAllList — Paginated loaner list with optional dept + open-only filter
+router.post('/Loaner/GetAllList', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const deptKey = parseInt(body.plDepartmentKey) || 0;
+    const openOnly = body.openOnly ? 1 : 0;
+    const result = await db.queryPage(`${LOANER_SELECT}
+      WHERE (@deptKey = 0 OR lt.lDepartmentKey = @deptKey)
+        AND (@openOnly = 0 OR lt.sRepairClosed = '0' OR lt.sDateIn IS NULL OR lt.sDateIn = '')`,
+      'lt.lLoanerTranKey DESC', { deptKey, openOnly }, body.Pagination);
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

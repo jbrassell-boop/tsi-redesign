@@ -37,16 +37,16 @@ const PENDING_SELECT = `
 // POST /PendingContract/GetPendingContractsList — Alias for GetAllPendingContracts
 router.post('/PendingContract/GetPendingContractsList', async (req, res, next) => {
   try {
-    const rows = await db.query(`${PENDING_SELECT} ORDER BY pc.dtCreationDate DESC`);
-    res.json({ list: rows, total: rows.length });
+    const result = await db.queryPage(PENDING_SELECT, 'pc.dtCreationDate DESC', {}, req.body.Pagination);
+    res.json({ list: result.dataSource, total: result.totalRecord });
   } catch (e) { next(e); }
 });
 
 // POST /PendingContract/GetAllPendingContracts
 router.post('/PendingContract/GetAllPendingContracts', async (req, res, next) => {
   try {
-    const rows = await db.query(`${PENDING_SELECT} ORDER BY pc.dtCreationDate DESC`);
-    res.json({ list: rows, total: rows.length });
+    const result = await db.queryPage(PENDING_SELECT, 'pc.dtCreationDate DESC', {}, req.body.Pagination);
+    res.json({ list: result.dataSource, total: result.totalRecord });
   } catch (e) { next(e); }
 });
 
