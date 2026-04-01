@@ -277,7 +277,8 @@
       <div class="tab-bar">
         <div class="tab active" onclick="showDeptTab('main',this)">Main</div>
         <div class="tab" onclick="showDeptTab('addresses',this)">Addresses</div>
-        <div class="tab" onclick="showDeptTab('scopes',this)">Scopes<span class="tab-count">16</span></div>
+        <div class="tab" onclick="showDeptTab('scopes',this)">Scopes<span class="tab-count" id="scopeTabCount" style="display:none">0</span></div>
+        <div class="tab" onclick="showDeptTab('instruments',this)">Instruments<span class="tab-count" id="instrTabCount" style="display:none">0</span></div>
         <div class="tab" onclick="showDeptTab('repairs',this)">Repairs<span class="tab-count" id="repairTabCount" style="display:none">0</span></div>
         <div class="tab" onclick="showDeptTab('contracts',this)">Contracts<span class="tab-count" id="contractTabCount" style="display:none">0</span></div>
         <div class="tab" onclick="showDeptTab('technicians',this)">Technicians</div>
@@ -565,40 +566,97 @@
 
       <!-- ══ SCOPES TAB ══ -->
       <div id="dtab-scopes" class="tab-content show-block" style="display:none">
-        <!-- Scopes search (replaced model-dist filter chips) -->
+        <div class="tab-kpi-strip" id="scopeKpiStrip">
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterScopeKpi('all')">
+            <div class="tab-kpi-val s-navy" id="skpi-total">—</div>
+            <div class="tab-kpi-lbl">Total</div>
+          </div>
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterScopeKpi('F')">
+            <div class="tab-kpi-val s-green" id="skpi-flex">—</div>
+            <div class="tab-kpi-lbl">Flexible</div>
+          </div>
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterScopeKpi('R')">
+            <div class="tab-kpi-val s-blue" id="skpi-rigid">—</div>
+            <div class="tab-kpi-lbl">Rigid</div>
+          </div>
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterScopeKpi('C')">
+            <div class="tab-kpi-val s-muted" id="skpi-camera">—</div>
+            <div class="tab-kpi-lbl">Camera</div>
+          </div>
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterScopeKpi('contract')">
+            <div class="tab-kpi-val s-amber" id="skpi-contract">—</div>
+            <div class="tab-kpi-lbl">Under Contract</div>
+          </div>
+        </div>
         <div class="tbl-card">
           <div class="tbl-head">
             <span class="tbl-title">Scopes</span>
-            <div style="display:flex;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
               <input type="text" id="scopeSearchInput" class="search-input" placeholder="Search scopes..." oninput="filterScopesBySearch()" style="width:180px">
-              <span id="scopesSummary" style="font-size:11px;color:var(--muted)">16 instruments &bull; 5 with active contract</span>
               <button class="btn btn-navy" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="openScopeDrawer()">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Scope
               </button>
             </div>
           </div>
-          <table class="readonly-tbl">
-            <thead><tr><th>Model</th><th>Serial Number</th><th>Instrument Type</th><th>Avg Daily Uses</th><th>Current Contract</th></tr></thead>
-            <tbody id="tbodyScopes">
-              <tr><td>GF-UE160-AL5</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1011439</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:var(--warning);font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:var(--warning);background:var(--warning-light);border:1px solid var(--warning);padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
-              <tr><td>BF 1T240</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1030608</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:var(--warning);font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:var(--warning);background:var(--warning-light);border:1px solid var(--warning);padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
-              <tr><td>A22002A</td><td style="color:var(--blue);font-weight:600;cursor:pointer">020612</td><td>Rigid</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>27010K</td><td style="color:var(--blue);font-weight:600;cursor:pointer">10002K</td><td>Rigid</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>STORZ 27026AO</td><td style="color:var(--blue);font-weight:600;cursor:pointer">10002N</td><td>Instrument</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>4300 DRILL</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1111105173</td><td>Instrument</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>STRYKER 6203 ROTARY DRILL</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1112521713</td><td>Instrument</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>28731CWA ARTHRO 70</td><td style="color:var(--blue);font-weight:600;cursor:pointer">1115421S</td><td>Rigid</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>OLYMPUS 00121 GRASPER</td><td style="color:var(--blue);font-weight:600;cursor:pointer">11XW</td><td>Instrument</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>ENF GP</td><td style="color:var(--blue);font-weight:600;cursor:pointer">2007037</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:var(--warning);font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:var(--warning);background:var(--warning-light);border:1px solid var(--warning);padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
-              <tr><td>GIF H180</td><td style="color:var(--blue);font-weight:600;cursor:pointer">2515171</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:var(--warning);font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:var(--warning);background:var(--warning-light);border:1px solid var(--warning);padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
-              <tr><td>CF H185</td><td style="color:var(--blue);font-weight:600;cursor:pointer">3015882</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td><span style="color:var(--warning);font-weight:600">88th Medical Group - Capitated Service</span> <span style="font-size:10.5px;color:var(--warning);background:var(--warning-light);border:1px solid var(--warning);padding:1px 6px;border-radius:4px;margin-left:4px">exp 11/14/2026</span></td></tr>
-              <tr><td>CF-HQ190L</td><td style="color:var(--blue);font-weight:600;cursor:pointer">2920145</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>TJF-Q180V</td><td style="color:var(--blue);font-weight:600;cursor:pointer">2810377</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>CYF-VHA</td><td style="color:var(--blue);font-weight:600;cursor:pointer">7210082</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-              <tr><td>BF-H190</td><td style="color:var(--blue);font-weight:600;cursor:pointer">2920877</td><td>Flexible</td><td style="color:var(--muted)">N/A</td><td></td></tr>
-            </tbody>
+          <table>
+            <thead>
+              <tr>
+                <th>Serial Number</th>
+                <th>Model</th>
+                <th style="width:120px">Manufacturer</th>
+                <th style="width:90px">Type</th>
+                <th>Contract</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyScopes"></tbody>
           </table>
+          <div class="table-footer" id="scopesFooter" style="display:none">
+            <span id="scopesCount" style="font-size:11px;color:var(--muted)"></span>
+            <div id="scopesPagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ INSTRUMENTS TAB ══ -->
+      <div id="dtab-instruments" class="tab-content show-block" style="display:none">
+        <div class="tab-kpi-strip" id="instrKpiStrip">
+          <div class="tab-kpi-chip">
+            <div class="tab-kpi-val s-navy" id="ikpi-total">—</div>
+            <div class="tab-kpi-lbl">Total</div>
+          </div>
+          <div class="tab-kpi-chip" style="cursor:pointer" onclick="filterInstrKpi('contract')">
+            <div class="tab-kpi-val s-amber" id="ikpi-contract">—</div>
+            <div class="tab-kpi-lbl">Under Contract</div>
+          </div>
+        </div>
+        <div class="tbl-card">
+          <div class="tbl-head">
+            <span class="tbl-title">Instruments</span>
+            <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+              <input type="text" id="instrSearchInput" class="search-input" placeholder="Search instruments..." oninput="filterInstrBySearch()" style="width:180px">
+              <button class="btn btn-navy" style="height:26px;font-size:11px;padding:0 10px;gap:4px" onclick="openScopeDrawer()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Instrument
+              </button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Serial Number</th>
+                <th>Model</th>
+                <th style="width:120px">Manufacturer</th>
+                <th style="width:100px">Category</th>
+                <th>Contract</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInstruments"></tbody>
+          </table>
+          <div class="table-footer" id="instrFooter" style="display:none">
+            <span id="instrCount" style="font-size:11px;color:var(--muted)"></span>
+            <div id="instrPagination"></div>
+          </div>
         </div>
       </div>
 
@@ -1259,7 +1317,7 @@ document.addEventListener('change', function(e) {
 
 /* ── Tab switching ────────────────────────── */
 function showDeptTab(name,el){
-  ['main','addresses','scopes','repairs','contracts','technicians','gpos','scopetypes','subgroups','contacts','flags','documents','maxcharges','activity'].forEach(t=>{
+  ['main','addresses','scopes','instruments','repairs','contracts','technicians','gpos','scopetypes','subgroups','contacts','flags','documents','maxcharges','activity'].forEach(t=>{
     const el2=document.getElementById('dtab-'+t);
     if(el2)el2.style.display='none';
   });
@@ -1884,11 +1942,11 @@ function openContactModal(mode){
       // Demo mode fallback — just add to table visually
       var instType = document.getElementById('asType').value;
       var modelText = document.getElementById('asModel').options[document.getElementById('asModel').selectedIndex].text;
-      var typeLabels = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
-      var tbody = document.getElementById('tbodyScopes');
+      var isInstr = instType === 'I' || instType === '';
+      var tbody = document.getElementById(isInstr ? 'tbodyInstruments' : 'tbodyScopes');
       var tr = document.createElement('tr');
       tr.style.background = 'var(--success-light)';
-      tr.innerHTML = '<td>'+modelText+'</td><td style="color:var(--blue);font-weight:600;cursor:pointer">'+sn+'</td><td>'+(typeLabels[instType]||instType)+'</td><td style="color:var(--muted)">N/A</td><td></td>';
+      tr.innerHTML = '<td style="color:var(--blue);font-weight:600">'+sn+'</td><td>'+modelText+'</td><td></td><td>'+(isInstr ? '' : typeBadge(instType))+'</td><td></td>';
       tbody.insertBefore(tr, tbody.firstChild);
       closeScopeDrawer();
     }
@@ -1906,69 +1964,268 @@ function openContactModal(mode){
     // Reuse the scope drawer in view mode — populate fields read-only
     document.getElementById('scopeDrawer').classList.add('open');
     document.getElementById('scopeOverlay').classList.add('open');
-    document.getElementById('scopeDrawerSub').textContent = (s.sSerialNumber||'') + ' — ' + (s.sScopeTypeDesc||s.sModelDescription||'');
-    document.getElementById('asType').value = s.sInstrumentType || '';
+    document.getElementById('scopeDrawerSub').textContent = (s.sSerialNumber||'') + ' — ' + (s.sScopeTypeDesc||'');
+    document.getElementById('asType').value = s.sRigidOrFlexible || '';
     document.getElementById('asSN').value = s.sSerialNumber || '';
-    document.getElementById('asUPC').value = s.sUPCNumber || '';
-    document.getElementById('asLocation').value = s.sLocation || '';
-    document.getElementById('asLoaner').checked = !!s.bLoaner;
-    document.getElementById('asInactive').checked = !!s.bInactive;
-    document.getElementById('asComments').value = s.sComments || '';
+    document.getElementById('asUPC').value = s.sUPC || '';
+    document.getElementById('asLocation').value = '';
+    document.getElementById('asLoaner').checked = !!s.bOnSiteLoaner;
+    document.getElementById('asInactive').checked = (s.sScopeIsDead||'').toUpperCase() === 'Y';
+    document.getElementById('asComments').value = s.mComments || '';
     onScopeTypeChange();
   };
 
   /* ═══ TAB DATA LOADERS ═══════════════════════════════ */
 
-  /* ── Scopes tab ─────────────────────────────────────── */
-  let _allScopes = [];
+  /* ── Scopes + Instruments tabs (split by R/F/C vs I/empty) ── */
+  let _allScopes = [];      // R, F, C only
+  let _allInstruments = [];  // I or empty type
+  let _scopeFilter = 'all';
+  let _instrFilter = 'all';
+  let _scopePage = 1;
+  let _instrPage = 1;
+  const PAGE_SIZE = 50;
+
+  function isScope(s) {
+    var t = (s.sRigidOrFlexible || '').toUpperCase();
+    return t === 'R' || t === 'F' || t === 'C';
+  }
 
   async function loadScopes(deptKey){
     try {
-      const scopes = await API.getAllScopes(deptKey);
-      if(!Array.isArray(scopes)) return;
-      _allScopes = scopes;
-      window._allScopesCache = scopes;
-      setTabCount('scopes', scopes.length);
-      const ssScopes = document.getElementById('ss-scopes');
-      if (ssScopes) ssScopes.textContent = scopes.length;
-      $('scopesSummary').textContent = scopes.length + ' instruments';
-      renderScopesTable(scopes);
-      // Reset search input when department changes
-      const scopeSearch = document.getElementById('scopeSearchInput');
-      if(scopeSearch) scopeSearch.value = '';
+      var all = await API.getAllScopes(deptKey);
+      if(!Array.isArray(all)) return;
+      window._allScopesCache = all;
+      _allScopes = all.filter(isScope);
+      _allInstruments = all.filter(function(s){ return !isScope(s); });
+
+      // Tab counts
+      var scopeTab = document.getElementById('scopeTabCount');
+      if(scopeTab){ scopeTab.textContent = _allScopes.length; scopeTab.style.display = _allScopes.length ? '' : 'none'; }
+      var instrTab = document.getElementById('instrTabCount');
+      if(instrTab){ instrTab.textContent = _allInstruments.length; instrTab.style.display = _allInstruments.length ? '' : 'none'; }
+
+      // Stat strip header count
+      var ssScopes = document.getElementById('ss-scopes');
+      if(ssScopes) ssScopes.textContent = all.length;
+
+      // Reset filters & search
+      _scopeFilter = 'all'; _instrFilter = 'all';
+      _scopePage = 1; _instrPage = 1;
+      var si = document.getElementById('scopeSearchInput');
+      if(si) si.value = '';
+      var ii = document.getElementById('instrSearchInput');
+      if(ii) ii.value = '';
+
+      updateScopeKpis();
+      updateInstrKpis();
+      renderScopesTable(getFilteredScopes());
+      renderInstrTable(getFilteredInstr());
     } catch(e){ console.warn('[Dept] Scopes:', e.message); }
   }
 
-  function renderScopesTable(scopes){
-    const tbody = $('tbodyScopes');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    if(scopes.length === 0){
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div>No scopes found</div></td></tr>';
-      return;
-    }
-    scopes.forEach(s=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>'+(s.sScopeTypeDesc||s.sModelDescription||'')+'</td>'+
-        '<td style="color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline" onclick="viewScopeDetail('+s.lScopeKey+')">'+(s.sSerialNumber||'')+'</td>'+
-        '<td>'+(s.sInstrumentType||'')+'</td>'+
-        '<td style="color:var(--muted)">'+(s.lAvgDailyUses||'N/A')+'</td>'+
-        '<td>'+(s.sContractName ? '<span style="color:var(--warning);font-weight:600">'+s.sContractName+'</span>' : '')+'</td>';
-      tbody.appendChild(tr);
-    });
+  /* ── Scope KPIs ── */
+  function updateScopeKpis(){
+    var el = function(id){ return document.getElementById(id); };
+    var flex = _allScopes.filter(function(s){ return (s.sRigidOrFlexible||'').toUpperCase()==='F'; }).length;
+    var rigid = _allScopes.filter(function(s){ return (s.sRigidOrFlexible||'').toUpperCase()==='R'; }).length;
+    var cam = _allScopes.filter(function(s){ return (s.sRigidOrFlexible||'').toUpperCase()==='C'; }).length;
+    var contracted = _allScopes.filter(function(s){ return !!s.sContractName; }).length;
+    if(el('skpi-total')) el('skpi-total').textContent = _allScopes.length;
+    if(el('skpi-flex'))  el('skpi-flex').textContent = flex;
+    if(el('skpi-rigid')) el('skpi-rigid').textContent = rigid;
+    if(el('skpi-camera'))el('skpi-camera').textContent = cam;
+    if(el('skpi-contract'))el('skpi-contract').textContent = contracted;
   }
 
-  window.filterScopesBySearch = function(){
-    const q = (document.getElementById('scopeSearchInput').value || '').toLowerCase().trim();
-    if(!q){ renderScopesTable(_allScopes); return; }
-    renderScopesTable(_allScopes.filter(function(s){
-      return (s.sScopeTypeDesc||s.sModelDescription||'').toLowerCase().indexOf(q) !== -1
-        || (s.sSerialNumber||'').toLowerCase().indexOf(q) !== -1
-        || (s.sInstrumentType||'').toLowerCase().indexOf(q) !== -1
-        || (s.sContractName||'').toLowerCase().indexOf(q) !== -1;
-    }));
+  function updateInstrKpis(){
+    var el = function(id){ return document.getElementById(id); };
+    var contracted = _allInstruments.filter(function(s){ return !!s.sContractName; }).length;
+    if(el('ikpi-total')) el('ikpi-total').textContent = _allInstruments.length;
+    if(el('ikpi-contract'))el('ikpi-contract').textContent = contracted;
+  }
+
+  /* ── Scope filtering ── */
+  function getFilteredScopes(){
+    var list = _allScopes;
+    if(_scopeFilter === 'F' || _scopeFilter === 'R' || _scopeFilter === 'C'){
+      list = list.filter(function(s){ return (s.sRigidOrFlexible||'').toUpperCase() === _scopeFilter; });
+    } else if(_scopeFilter === 'contract'){
+      list = list.filter(function(s){ return !!s.sContractName; });
+    }
+    var q = (document.getElementById('scopeSearchInput')?.value || '').toLowerCase().trim();
+    if(q){
+      list = list.filter(function(s){
+        return (s.sSerialNumber||'').toLowerCase().indexOf(q) !== -1
+          || (s.sScopeTypeDesc||'').toLowerCase().indexOf(q) !== -1
+          || (s.sManufacturer||'').toLowerCase().indexOf(q) !== -1
+          || (s.sContractName||'').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    return list;
+  }
+
+  function getFilteredInstr(){
+    var list = _allInstruments;
+    if(_instrFilter === 'contract'){
+      list = list.filter(function(s){ return !!s.sContractName; });
+    }
+    var q = (document.getElementById('instrSearchInput')?.value || '').toLowerCase().trim();
+    if(q){
+      list = list.filter(function(s){
+        return (s.sSerialNumber||'').toLowerCase().indexOf(q) !== -1
+          || (s.sScopeTypeDesc||'').toLowerCase().indexOf(q) !== -1
+          || (s.sManufacturer||'').toLowerCase().indexOf(q) !== -1
+          || (s.sScopeTypeCategory||'').toLowerCase().indexOf(q) !== -1
+          || (s.sContractName||'').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    return list;
+  }
+
+  /* ── Type badge helper ── */
+  function typeBadge(t){
+    var code = (t||'').toUpperCase();
+    if(code==='F') return '<span class="b-active" style="font-size:10px">Flexible</span>';
+    if(code==='R') return '<span class="ss-info" style="font-size:10px">Rigid</span>';
+    if(code==='C') return '<span class="ss-neutral" style="font-size:10px">Camera</span>';
+    return '<span class="ss-neutral" style="font-size:10px">Other</span>';
+  }
+
+  /* ── Contract cell helper ── */
+  function contractCell(s){
+    if(!s.sContractName) return '';
+    var html = '<span style="font-weight:600;font-size:12px">'+s.sContractName+'</span>';
+    if(s.dtContractEnd){
+      var d = new Date(s.dtContractEnd);
+      var now = new Date();
+      var days = Math.round((d - now) / 86400000);
+      var color = days < 90 ? 'var(--danger)' : 'var(--warning)';
+      var bg = days < 90 ? '#FEF2F2' : '#FFFBEB';
+      var border = days < 90 ? '#FECACA' : '#FDE68A';
+      html += ' <span style="font-size:10px;color:'+color+';background:'+bg+';border:1px solid '+border+';padding:1px 6px;border-radius:4px;margin-left:4px">exp '+(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()+'</span>';
+    }
+    return html;
+  }
+
+  /* ── Pagination helper ── */
+  function buildPagination(total, page, containerId, onPageFn){
+    var pages = Math.ceil(total / PAGE_SIZE);
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    if(pages <= 1){ container.innerHTML = ''; return; }
+    var html = '';
+    for(var i = 1; i <= pages; i++){
+      html += '<button class="pg-btn'+(i===page?' active':'')+'" onclick="'+onPageFn+'('+i+')">'+i+'</button>';
+    }
+    container.innerHTML = html;
+  }
+
+  /* ── Render Scopes table ── */
+  function renderScopesTable(scopes){
+    var tbody = document.getElementById('tbodyScopes');
+    if(!tbody) return;
+    var total = scopes.length;
+    var start = (_scopePage - 1) * PAGE_SIZE;
+    var page = scopes.slice(start, start + PAGE_SIZE);
+
+    if(total === 0){
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:.2;margin-bottom:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div>No scopes found</div></td></tr>';
+      var footer = document.getElementById('scopesFooter');
+      if(footer) footer.style.display = 'none';
+      return;
+    }
+
+    var html = '';
+    page.forEach(function(s){
+      html += '<tr>'
+        + '<td style="color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline" onclick="viewScopeDetail('+s.lScopeKey+')">'+(s.sSerialNumber||'')+'</td>'
+        + '<td>'+(s.sScopeTypeDesc||'<span style="color:var(--muted);font-style:italic">—</span>')+'</td>'
+        + '<td>'+(s.sManufacturer||'')+'</td>'
+        + '<td>'+typeBadge(s.sRigidOrFlexible)+'</td>'
+        + '<td>'+contractCell(s)+'</td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+
+    // Footer
+    var footer = document.getElementById('scopesFooter');
+    if(footer) footer.style.display = 'flex';
+    var countEl = document.getElementById('scopesCount');
+    if(countEl) countEl.textContent = total + ' scope' + (total !== 1 ? 's' : '');
+    buildPagination(total, _scopePage, 'scopesPagination', 'goScopePage');
+  }
+
+  /* ── Render Instruments table ── */
+  function renderInstrTable(instruments){
+    var tbody = document.getElementById('tbodyInstruments');
+    if(!tbody) return;
+    var total = instruments.length;
+    var start = (_instrPage - 1) * PAGE_SIZE;
+    var page = instruments.slice(start, start + PAGE_SIZE);
+
+    if(total === 0){
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;height:28px;opacity:.2;margin-bottom:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div>No instruments found</div></td></tr>';
+      var footer = document.getElementById('instrFooter');
+      if(footer) footer.style.display = 'none';
+      return;
+    }
+
+    var html = '';
+    page.forEach(function(s){
+      html += '<tr>'
+        + '<td style="color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline" onclick="viewScopeDetail('+s.lScopeKey+')">'+(s.sSerialNumber||'')+'</td>'
+        + '<td>'+(s.sScopeTypeDesc||'<span style="color:var(--muted);font-style:italic">—</span>')+'</td>'
+        + '<td>'+(s.sManufacturer||'')+'</td>'
+        + '<td>'+(s.sScopeTypeCategory||'')+'</td>'
+        + '<td>'+contractCell(s)+'</td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+
+    // Footer
+    var footer = document.getElementById('instrFooter');
+    if(footer) footer.style.display = 'flex';
+    var countEl = document.getElementById('instrCount');
+    if(countEl) countEl.textContent = total + ' instrument' + (total !== 1 ? 's' : '');
+    buildPagination(total, _instrPage, 'instrPagination', 'goInstrPage');
+  }
+
+  /* ── Filter & pagination global handlers ── */
+  window.filterScopeKpi = function(type){
+    _scopeFilter = (_scopeFilter === type) ? 'all' : type;
+    _scopePage = 1;
+    renderScopesTable(getFilteredScopes());
+    // Highlight active chip
+    var chips = document.querySelectorAll('#scopeKpiStrip .tab-kpi-chip');
+    chips.forEach(function(c){ c.style.outline = ''; c.style.background = ''; });
+    if(_scopeFilter !== 'all'){
+      var idx = {all:0,F:1,R:2,C:3,contract:4}[_scopeFilter];
+      if(idx !== undefined && chips[idx]){ chips[idx].style.outline = '2.5px solid var(--navy)'; chips[idx].style.background = 'var(--primary-light)'; }
+    }
   };
+
+  window.filterInstrKpi = function(type){
+    _instrFilter = (_instrFilter === type) ? 'all' : type;
+    _instrPage = 1;
+    renderInstrTable(getFilteredInstr());
+    var chips = document.querySelectorAll('#instrKpiStrip .tab-kpi-chip');
+    chips.forEach(function(c){ c.style.outline = ''; c.style.background = ''; });
+    if(_instrFilter === 'contract' && chips[1]){ chips[1].style.outline = '2.5px solid var(--navy)'; chips[1].style.background = 'var(--primary-light)'; }
+  };
+
+  window.filterScopesBySearch = function(){
+    _scopePage = 1;
+    renderScopesTable(getFilteredScopes());
+  };
+
+  window.filterInstrBySearch = function(){
+    _instrPage = 1;
+    renderInstrTable(getFilteredInstr());
+  };
+
+  window.goScopePage = function(p){ _scopePage = p; renderScopesTable(getFilteredScopes()); };
+  window.goInstrPage = function(p){ _instrPage = p; renderInstrTable(getFilteredInstr()); };
 
   /* ── Repairs tab ─────────────────────────────────────── */
   async function loadDeptRepairs(deptKey){
@@ -2773,7 +3030,7 @@ function openContactModal(mode){
 
   /* ── Export actions ──────────────────────────────── */
   function exportDeptAudit(){
-    var tbl = document.querySelector('#dtab-scopes table.readonly-tbl');
+    var tbl = document.querySelector('#dtab-scopes table');
     if (!tbl || !tbl.querySelector('tbody tr')) {
       if(typeof showToast === 'function') showToast('No scope data to export.', 'warning'); return;
     }
@@ -3255,14 +3512,7 @@ function openContactModal(mode){
   const newDeptInput = $('newDeptName');
   if(newDeptInput) newDeptInput.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); submitNewDepartment(); } });
 
-  // D-9: Hide "Avg Daily Uses" column if all values are N/A
-  (function hideEmptyAvgUses(){
-    const tbl = document.querySelector('.readonly-tbl');
-    if(!tbl) return;
-    const cells = tbl.querySelectorAll('tbody td:nth-child(4)');
-    const allNA = Array.from(cells).every(td => td.textContent.trim() === 'N/A');
-    if(allNA && cells.length) tbl.classList.add('hide-avg-uses');
-  })();
+  // D-9: (removed — Avg Daily Uses column no longer exists)
 
   // D-5: Inline delete — generic handler removed.
   // Each tab (contacts, GPOs, documents, max charges) now wires its own

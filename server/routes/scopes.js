@@ -22,13 +22,17 @@ const SCOPE_SELECT = `
     ISNULL(m.sManufacturer, '') AS sManufacturer,
     ISNULL(stc.sScopeTypeCategory, '') AS sScopeTypeCategory,
     ISNULL(d.sDepartmentName, '') AS sDepartmentName,
-    ISNULL(c.sClientName1, '') AS sClientName1
+    ISNULL(c.sClientName1, '') AS sClientName1,
+    ISNULL(ct.sContractNumber, '') AS sContractName,
+    ct.dtDateTermination AS dtContractEnd
   FROM tblScope s
     LEFT JOIN tblScopeType st ON st.lScopeTypeKey = s.lScopeTypeKey
     LEFT JOIN tblManufacturers m ON m.lManufacturerKey = st.lManufacturerKey
     LEFT JOIN tblScopeTypeCategories stc ON stc.lScopeTypeCategoryKey = st.lScopeTypeCatKey
     LEFT JOIN tblDepartment d ON d.lDepartmentKey = s.lDepartmentKey
     LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
+    LEFT JOIN tblContractScope cs ON cs.lScopeKey = s.lScopeKey
+    LEFT JOIN tblContract ct ON ct.lContractKey = cs.lContractKey
 `;
 
 // GET /Scopes/GetAllScopes — List scopes for a department
