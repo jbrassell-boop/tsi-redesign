@@ -225,7 +225,7 @@
       <!-- FOOTER -->
       <div class="table-footer">
         <div class="record-info" id="taskRecordInfo">Loading...</div>
-        <div></div>
+        <div id="taskPgFooter"></div>
       </div>
 
     </div>
@@ -545,6 +545,28 @@ function updateKPIs() {
 }
 
 // ===============================================================
+//  PAGINATION
+// ===============================================================
+var _perPage = 50;
+var _curPage = 0;
+
+function pgFooter(total) {
+  var page = _curPage;
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="goPage(-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="goPage(1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+function goPage(dir) { _curPage += dir; renderTasks(); }
+
+// ===============================================================
 //  STATE & HELPERS
 // ===============================================================
 let taskFilterPriority = 'All';
@@ -645,11 +667,12 @@ function getFilteredTasks() {
 
 function renderTasks() {
   const filtered = getFilteredTasks();
+  const pageRows = filtered.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
   const tbody = document.getElementById('tasksTbody');
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No tasks found</td></tr>';
   } else {
-    tbody.innerHTML = filtered.map(t => `<tr>
+    tbody.innerHTML = pageRows.map(t => `<tr>
       <td style="white-space:nowrap">${escHtml(t.date)}</td>
       <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(t.title)}">${escHtml(t.title)}</td>
       <td style="font-weight:500">${escHtml(t.client)}</td>
@@ -667,6 +690,7 @@ function renderTasks() {
   }
   const openCount = filtered.filter(t => OPEN_STATUSES.includes(t.status)).length;
   document.getElementById('taskRecordInfo').innerHTML = `<strong>${filtered.length}</strong> task${filtered.length!==1?'s':''} &middot; <strong>${openCount}</strong> open`;
+  document.getElementById('taskPgFooter').innerHTML = pgFooter(filtered.length);
 
   // Update sort indicators
   document.querySelectorAll('th[data-col]').forEach(th => {
@@ -1002,6 +1026,7 @@ document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEa
     document.getElementById('taskPriorityFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     taskFilterPriority = btn.textContent.trim();
+    _curPage = 0;
     renderTasks();
   });
 });
@@ -1010,11 +1035,13 @@ document.getElementById('taskStatusFilter').querySelectorAll('.seg-btn').forEach
     document.getElementById('taskStatusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     taskFilterStatus = btn.textContent.trim();
+    _curPage = 0;
     renderTasks();
   });
 });
 document.getElementById('taskSearch').addEventListener('input', function() {
   taskSearchTerm = this.value.trim();
+  _curPage = 0;
   renderTasks();
 });
 
@@ -1045,6 +1072,7 @@ document.querySelectorAll('#taskStatStrip .stat-chip[data-filter]').forEach(chip
       // Custom filter — re-render with portal filter
       // We'll use a temporary override
     }
+    _curPage = 0;
     renderTasks();
   });
 });

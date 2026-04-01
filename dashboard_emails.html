@@ -133,7 +133,7 @@
       <!-- FOOTER -->
       <div class="table-footer">
         <div class="record-info" id="emailRecordInfo">Loading...</div>
-        <div></div>
+        <div id="emailPgFooter"></div>
       </div>
 
     </div>
@@ -149,6 +149,25 @@ if (!API.requireAuth()) throw new Error('redirect');
 // ===============================================================
 //  PENDING EMAIL QUEUE — Real Nashville data
 // ===============================================================
+var _perPage = 50;
+var _curPage = 0;
+
+function pgFooter(total) {
+  var page = _curPage;
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="goPage(-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="goPage(1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+function goPage(dir) { _curPage += dir; renderEmails(); }
+
 let EMAILS = [];
 let _emailTypes = [];
 let filterStatus = 'All';
@@ -274,10 +293,11 @@ function statusBadge(s) {
 function renderEmails() {
   const filtered = getFiltered();
   const tbody = document.getElementById('emailsTbody');
+  const pageRows = filtered.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No emails found</td></tr>';
   } else {
-    tbody.innerHTML = filtered.map(e => `<tr>
+    tbody.innerHTML = pageRows.map(e => `<tr>
       <td style="white-space:nowrap">${escHtml(e.dateStr)}</td>
       <td style="font-size:10.5px">${escHtml(e.type)}</td>
       <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(e.from)}">${escHtml(e.from)}</td>
@@ -290,9 +310,11 @@ function renderEmails() {
   document.getElementById('emailRecordInfo').innerHTML =
     '<strong>' + filtered.length + '</strong> email' + (filtered.length !== 1 ? 's' : '') +
     ' &middot; <strong>' + pendingCount + '</strong> pending';
+  document.getElementById('emailPgFooter').innerHTML = pgFooter(filtered.length);
 }
 
 function applyFilters() {
+  _curPage = 0;
   searchTerm = document.getElementById('emailSearch').value.trim();
   filterType = document.getElementById('typeFilter').value;
   renderEmails();
@@ -304,6 +326,7 @@ document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(btn
     document.getElementById('statusFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     filterStatus = btn.textContent.trim();
+    _curPage = 0;
     renderEmails();
   });
 });

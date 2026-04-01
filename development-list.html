@@ -198,6 +198,7 @@
               <tbody id="itemTableBody">
               </tbody>
             </table>
+            <div class="table-footer" id="tblFooter" style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-top:1px solid var(--border)"></div>
           </div>
           <div class="list-footer" id="listFooter">Loading...</div>
         </div>
@@ -369,6 +370,9 @@ let SELECTED_ID  = null;
 let IS_DEMO      = false;
 let sortCol      = null;
 let sortDir      = 'asc';
+
+var _perPage = 50;
+var _curPage = 0;
 
 // ═══════════════════════════════════════
 //  DEMO DATA
@@ -580,16 +584,34 @@ function applyFilters() {
     return matchQ && matchSt && matchPr;
   });
 
+  _curPage = 0;
   sortFiltered();
   renderTable();
   updateStatStrip();
 }
+
+function pgFooter(total) {
+  var page = _curPage;
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="goPage(-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="goPage(1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+function goPage(dir) { _curPage += dir; renderTable(); }
 
 function renderTable() {
   const tbody = document.getElementById('itemTableBody');
   const cnt   = document.getElementById('listCount');
   const foot  = document.getElementById('listFooter');
   const fcnt  = document.getElementById('filterCount');
+  const tblFooter = document.getElementById('tblFooter');
 
   if (FILTERED.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">' +
@@ -598,6 +620,7 @@ function renderTable() {
     cnt.textContent  = '0 records';
     foot.textContent = '0 records shown';
     fcnt.textContent = '';
+    if (tblFooter) tblFooter.innerHTML = pgFooter(0);
     return;
   }
 
@@ -605,7 +628,12 @@ function renderTable() {
   foot.textContent = 'Showing ' + FILTERED.length + ' of ' + ALL_ITEMS.length + ' items';
   fcnt.textContent = FILTERED.length + ' of ' + ALL_ITEMS.length + ' shown';
 
-  tbody.innerHTML = FILTERED.map((item, idx) => {
+  var totalPages = Math.max(1, Math.ceil(FILTERED.length / _perPage));
+  if (_curPage >= totalPages) _curPage = totalPages - 1;
+  var pageRows = FILTERED.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
+  var pageOffset = _curPage * _perPage;
+
+  tbody.innerHTML = pageRows.map((item, idx) => {
     const id       = item.plToDoID;
     const title    = escHtml(item.psToDoTitle || '(Untitled)');
     const priBadge = getPriorityBadge(item.plToDoPriorityKey);
@@ -614,7 +642,7 @@ function renderTable() {
     const assignee = escHtml(item.psAssigneeName || '—');
     const selClass = SELECTED_ID === id ? ' selected' : '';
     return '<tr class="' + selClass + '" onclick="selectItem(' + id + ')" data-id="' + id + '">' +
-      '<td class="col-num">' + (idx+1) + '</td>' +
+      '<td class="col-num">' + (pageOffset + idx + 1) + '</td>' +
       '<td class="col-title" title="' + title + '">' + title + '</td>' +
       '<td>' + priBadge + '</td>' +
       '<td>' + stBadge  + '</td>' +
@@ -622,6 +650,8 @@ function renderTable() {
       '<td class="col-assignee" title="' + assignee + '">' + assignee + '</td>' +
       '</tr>';
   }).join('');
+
+  if (tblFooter) tblFooter.innerHTML = pgFooter(FILTERED.length);
 }
 
 function updateStatStrip() {

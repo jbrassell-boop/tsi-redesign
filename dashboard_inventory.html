@@ -138,7 +138,7 @@
       <!-- FOOTER -->
       <div class="table-footer">
         <div class="record-info" id="invRecordInfo">Loading...</div>
-        <div></div>
+        <div id="invPgFooter"></div>
       </div>
 
     </div>
@@ -153,6 +153,26 @@ if (!API.requireAuth()) throw new Error('redirect');
 
 (function() {
 'use strict';
+
+var _perPage = 50;
+var _curPage = 0;
+
+function pgFooter(total) {
+  var page = _curPage;
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="invGoPage(-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="invGoPage(1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+var _lastFilteredItems = [];
+window.invGoPage = function(dir) { _curPage += dir; renderTable(_lastFilteredItems); };
 
 let ALL_ITEMS = [];
 let filterStatus = 'All';
@@ -206,6 +226,7 @@ function updateKPIs() {
 
 // ── Filter + render ──
 window.applyFilters = function() {
+  _curPage = 0;
   searchTerm = document.getElementById('invSearch').value.trim().toLowerCase();
   let items = ALL_ITEMS;
 
@@ -256,17 +277,20 @@ window.applyFilters = function() {
 
 // ── Render table rows ──
 function renderTable(items) {
+  _lastFilteredItems = items;
   const tbody = document.getElementById('invTbody');
   if (items.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No inventory items match your filters</td></tr>';
     document.getElementById('invRecordInfo').innerHTML = 'No items found';
+    document.getElementById('invPgFooter').innerHTML = pgFooter(0);
     return;
   }
 
+  const pageRows = items.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
   const typeName = {F:'Flexible',R:'Rigid',C:'Camera',I:'Instrument'};
   const badgeClass = {Critical:'b-critical',Low:'b-low',OK:'b-ok'};
 
-  tbody.innerHTML = items.map(item => {
+  tbody.innerHTML = pageRows.map(item => {
     const cur = item.nLevelCurrent || 0;
     const min = item.nLevelMinimum || 0;
     const max = item.nLevelMaximum || 0;
@@ -287,6 +311,7 @@ function renderTable(items) {
 
   document.getElementById('invRecordInfo').innerHTML =
     'Showing <strong>' + items.length + '</strong> of <strong>' + ALL_ITEMS.length + '</strong> items';
+  document.getElementById('invPgFooter').innerHTML = pgFooter(items.length);
 }
 
 function esc(s) {

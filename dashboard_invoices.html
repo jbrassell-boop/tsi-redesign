@@ -81,7 +81,10 @@
     <table id="invTable"><thead id="invThead"></thead><tbody id="invTbody"></tbody></table>
   </div>
 
-  <div class="record-info" id="invFooter">0 records</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card)">
+    <div class="record-info" id="invFooter">0 records</div>
+    <div id="invPgFooter"></div>
+  </div>
 </div>
   </div>
 </div>
@@ -112,6 +115,25 @@
 <script>
 (function() {
   'use strict';
+
+  var _perPage = 50;
+  var _curPage = 0;
+
+  function _pgFooter(total) {
+    var page = _curPage;
+    var totalPages = Math.max(1, Math.ceil(total / _perPage));
+    if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+    var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+    if (totalPages > 1) {
+      html += '<div style="display:flex;gap:4px;align-items:center">';
+      if (page > 0) html += '<button class="pg-btn" onclick="invGoPage(-1)">&#8249; Prev</button>';
+      html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+      if (page < totalPages - 1) html += '<button class="pg-btn" onclick="invGoPage(1)">Next &#8250;</button>';
+      html += '</div>';
+    }
+    return html;
+  }
+  window.invGoPage = function(dir) { _curPage += dir; _render(); };
 
   var _readyRepairs = [];
   var _invoices = [];
@@ -164,6 +186,7 @@
 
   window.invSetSegment = function(seg, btn) {
     _segment = seg;
+    _curPage = 0;
     _selected.clear();
     _updateBatchBar();
     document.querySelectorAll('#segGroup .seg-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -172,6 +195,7 @@
   };
 
   window.invApplyFilters = function() {
+    _curPage = 0;
     var search = (document.getElementById('invSearch').value || '').toLowerCase();
 
     if (_segment === 'ready') {
@@ -194,6 +218,7 @@
   function _render() {
     var thead = document.getElementById('invThead');
     var tbody = document.getElementById('invTbody');
+    var pageRows = _filtered.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
 
     if (_segment === 'ready') {
       thead.innerHTML = '<tr>' +
@@ -205,7 +230,7 @@
       if (!_filtered.length) {
         tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--muted)">All shipped repairs have been invoiced</td></tr>';
       } else {
-        tbody.innerHTML = _filtered.map(function(r) {
+        tbody.innerHTML = pageRows.map(function(r) {
           var days = r.dtShipDate ? Math.floor((new Date() - new Date(r.dtShipDate)) / 86400000) : 0;
           var checked = _selected.has(r.lRepairKey) ? ' checked' : '';
           return '<tr>' +
@@ -228,7 +253,7 @@
       if (!_filtered.length) {
         tbody.innerHTML = '<tr><td colspan="9" style="padding:30px;text-align:center;color:var(--muted)">No invoices</td></tr>';
       } else {
-        tbody.innerHTML = _filtered.map(function(inv) {
+        tbody.innerHTML = pageRows.map(function(inv) {
           var status = inv.bPaid ? 'Paid' : (inv.bFinalized ? 'Finalized' : 'Pending');
           var cls = inv.bPaid ? 'b-paid' : (inv.bFinalized ? 'b-finalized' : 'b-pending');
           return '<tr style="cursor:pointer" onclick="invOpenDrawer(\'' + _esc(inv.sInvoiceNumber) + '\')">' +
@@ -246,6 +271,7 @@
     }
 
     document.getElementById('invFooter').innerHTML = '<strong>' + _filtered.length + '</strong> record' + (_filtered.length !== 1 ? 's' : '');
+    document.getElementById('invPgFooter').innerHTML = _pgFooter(_filtered.length);
   }
 
   // Selection

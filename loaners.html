@@ -557,12 +557,11 @@ function renderLoanerPagination(totalRows) {
 }
 
 function goLoanerPage(n) {
-  var rows = activeTab === 'task' ? getFilteredTaskRows() : getFilteredActiveRows();
-  var totalPages = Math.max(1, Math.ceil(rows.length / LOANER_PAGE_SIZE));
-  if (n < 1 || n > totalPages) return;
+  if (n < 1) return;
   loanerPage = n;
   if (activeTab === 'task') renderTaskLoaners();
   else if (activeTab === 'active') renderActiveLoaners();
+  else if (activeTab === 'needs') renderScopeNeeds();
   else if (activeTab === 'requests') filterRequests();
 }
 window.goLoanerPage = goLoanerPage;
@@ -883,6 +882,10 @@ function renderScopeNeeds() {
   }
   updateSortHeaders();
 
+  var totalAnalysis = analysis.length;
+  var fullAnalysis = analysis;
+  renderLoanerPagination(totalAnalysis);
+  analysis = applyPagination(analysis);
   const tbody = document.getElementById('tableBody');
   if (!analysis.length) {
     tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
@@ -917,10 +920,11 @@ function renderScopeNeeds() {
     }).join('');
   }
 
-  const acquireCount = analysis.filter(r => r.poolQty === 0 && r.requests > 0).length;
-  const considerCount = analysis.filter(r => (r.gap > 0 || r.declined > 0) && r.poolQty > 0).length;
+  const acquireCount = fullAnalysis.filter(r => r.poolQty === 0 && r.requests > 0).length;
+  const considerCount = fullAnalysis.filter(r => (r.gap > 0 || r.declined > 0) && r.poolQty > 0).length;
+  var needsPageInfo = totalAnalysis > LOANER_PAGE_SIZE ? ' (showing ' + ((loanerPage-1)*LOANER_PAGE_SIZE+1) + '-' + Math.min(loanerPage*LOANER_PAGE_SIZE, totalAnalysis) + ')' : '';
   document.getElementById('recordInfo').innerHTML =
-    '<strong>' + analysis.length + '</strong> model' + (analysis.length !== 1 ? 's' : '') +
+    '<strong>' + totalAnalysis + '</strong> model' + (totalAnalysis !== 1 ? 's' : '') + needsPageInfo +
     ' analyzed &nbsp;·&nbsp; <strong style="color:var(--red)">' + acquireCount + '</strong> to acquire' +
     ' &nbsp;·&nbsp; <strong style="color:var(--amber)">' + considerCount + '</strong> to consider';
 }
@@ -1169,6 +1173,7 @@ function closeDetailDrawer() {
 // ═══════════════════════════════════════════════════════
 function switchTab(tab) {
   activeTab = tab;
+  loanerPage = 1;
   document.querySelectorAll('.subnav-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tab);
   });
@@ -1245,6 +1250,7 @@ document.getElementById('statusFilter').addEventListener('click', function(e) {
   this.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   statusFilter = btn.dataset.status || 'All';
+  loanerPage = 1;
   if (activeTab === 'task') renderTaskLoaners();
   else renderActiveLoaners();
 });
@@ -1253,6 +1259,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
   clearTimeout(searchTimer);
   searchTerm = this.value;
   searchTimer = setTimeout(function() {
+    loanerPage = 1;
     if (activeTab === 'task') renderTaskLoaners();
     else if (activeTab === 'active') renderActiveLoaners();
     else if (activeTab === 'requests') filterRequests();
@@ -1260,13 +1267,13 @@ document.getElementById('searchInput').addEventListener('input', function() {
 });
 
 // Requests toolbar events
-document.getElementById('reqDateFrom').addEventListener('change', function() { requestsDateFrom = this.value; filterRequests(); });
-document.getElementById('reqDateTo').addEventListener('change', function() { requestsDateTo = this.value; filterRequests(); });
-document.getElementById('reqStatusFilter').addEventListener('change', function() { requestsStatusFilter = this.value; filterRequests(); });
+document.getElementById('reqDateFrom').addEventListener('change', function() { requestsDateFrom = this.value; loanerPage = 1; filterRequests(); });
+document.getElementById('reqDateTo').addEventListener('change', function() { requestsDateTo = this.value; loanerPage = 1; filterRequests(); });
+document.getElementById('reqStatusFilter').addEventListener('change', function() { requestsStatusFilter = this.value; loanerPage = 1; filterRequests(); });
 document.getElementById('reqSearchInput').addEventListener('input', function() {
   searchTerm = this.value;
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(function() { filterRequests(); }, 200);
+  searchTimer = setTimeout(function() { loanerPage = 1; filterRequests(); }, 200);
 });
 
 // Make row-click functions global
@@ -1366,7 +1373,11 @@ function filterRequests() {
 
   var filtered = applySortToRows(getFilteredRequests(), loanerSortCol, loanerSortDir);
   updateSortHeaders();
-  renderLoanerPagination(filtered.length);
+  var totalRequests = filtered.length;
+  var pendingCount = filtered.filter(function(r) { return r.status === 'Pending'; }).length;
+  var fulfilledCount = filtered.filter(function(r) { return r.status === 'Fulfilled'; }).length;
+  renderLoanerPagination(totalRequests);
+  filtered = applyPagination(filtered);
   var tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
@@ -1393,10 +1404,9 @@ function filterRequests() {
     }).join('');
   }
 
-  var pendingCount = filtered.filter(function(r) { return r.status === 'Pending'; }).length;
-  var fulfilledCount = filtered.filter(function(r) { return r.status === 'Fulfilled'; }).length;
+  var reqPageInfo = totalRequests > LOANER_PAGE_SIZE ? ' (showing ' + ((loanerPage-1)*LOANER_PAGE_SIZE+1) + '-' + Math.min(loanerPage*LOANER_PAGE_SIZE, totalRequests) + ')' : '';
   document.getElementById('recordInfo').innerHTML =
-    '<strong>' + filtered.length + '</strong> request' + (filtered.length !== 1 ? 's' : '') +
+    '<strong>' + totalRequests + '</strong> request' + (totalRequests !== 1 ? 's' : '') + reqPageInfo +
     ' &nbsp;\u00b7&nbsp; <strong>' + pendingCount + '</strong> pending' +
     ' &nbsp;\u00b7&nbsp; <strong>' + fulfilledCount + '</strong> fulfilled';
 }

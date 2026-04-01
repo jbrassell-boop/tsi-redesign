@@ -517,6 +517,7 @@
                   </tbody>
                 </table>
               </div>
+              <div class="table-footer" id="pgFooter-scopes" style="display:none"></div>
             </div>
             <div class="panel">
               <div class="panel-head">
@@ -556,6 +557,7 @@
                   </tbody>
                 </table>
               </div>
+              <div class="table-footer" id="pgFooter-repairs" style="display:none"></div>
             </div>
           </div>
 
@@ -572,6 +574,7 @@
                     <tr><td style="white-space:nowrap">11/20/2025</td><td>J. Brassell</td><td>Initial contract setup complete. All 16 scopes verified and added.</td></tr>
                   </tbody>
                 </table>
+                <div class="table-footer" id="pgFooter-notes" style="display:none"></div>
               </div>
             </div>
           </div>
@@ -588,6 +591,7 @@
                   </tbody>
                 </table>
               </div>
+              <div class="table-footer" id="pgFooter-amendments" style="display:none"></div>
             </div>
             <div class="panel">
               <div class="panel-head"><span>Amendment Scopes</span></div>
@@ -663,6 +667,7 @@
                   </tbody>
                 </table>
               </div>
+              <div class="table-footer" id="pgFooter-invoices" style="display:none"></div>
             </div>
           </div>
 
@@ -695,6 +700,7 @@
                   </tbody>
                 </table>
               </div>
+              <div class="table-footer" id="pgFooter-documents" style="display:none"></div>
             </div>
           </div>
 
@@ -818,6 +824,7 @@
                     <tr><td>11/14/2025</td><td>11/14/2026</td><td>J. Miller</td><td style="font-weight:700;color:var(--navy)">8.5%</td></tr>
                   </tbody>
                 </table>
+                <div class="table-footer" id="pgFooter-commissions" style="display:none"></div>
               </div>
             </div>
           </div>
@@ -1159,6 +1166,7 @@
             </tbody>
           </table>
         </div>
+        <div class="table-footer" id="pgFooter-items" style="display:none;margin-top:4px"></div>
       </div>
 
       <!-- Tab 2: New Scope -->
@@ -1321,11 +1329,13 @@ let contractCommissions = [
 function renderNotes() {
   var tbody = document.getElementById('notesTbody');
   if (!tbody) return;
-  tbody.innerHTML = contractNotes.map(function(n) {
+  var page = _pgSlice('notes', contractNotes);
+  tbody.innerHTML = page.map(function(n) {
     return '<tr><td style="white-space:nowrap">' + n.date + '</td><td>' + n.author + '</td><td>' + n.text + '</td></tr>';
   }).join('');
   var head = document.getElementById('notesHeadCount');
   if (head) head.textContent = 'Contract Notes (' + contractNotes.length + ')';
+  _pgShow('notes', contractNotes.length);
 }
 
 function saveNote() {
@@ -1348,9 +1358,11 @@ function saveNote() {
 function renderCommissions() {
   var tbody = document.getElementById('commissionsTbody');
   if (!tbody) return;
-  tbody.innerHTML = contractCommissions.map(function(c) {
+  var page = _pgSlice('commissions', contractCommissions);
+  tbody.innerHTML = page.map(function(c) {
     return '<tr><td>' + c.effDate + '</td><td>' + c.endDate + '</td><td>' + c.rep + '</td><td style="font-weight:700;color:var(--navy)">' + c.rate + '%</td></tr>';
   }).join('');
+  _pgShow('commissions', contractCommissions.length);
 }
 
 function saveCommission() {
@@ -1569,6 +1581,9 @@ async function selectContract(el, contractKey) {
   document.querySelectorAll('.list-item').forEach(i => i.classList.remove('selected'));
   if (el) el.classList.add('selected');
   selectedContractKey = contractKey;
+
+  // Reset all sub-table page states when switching contracts
+  _pgState = {};
 
   // Find contract in list data for header
   const c = contracts.find(x => x.lContractKey === contractKey);
@@ -1904,7 +1919,8 @@ async function loadScopesTab(contractKey) {
       coveredPanel.querySelector('.panel-head span').textContent = 'Covered Scopes (' + scopes.length + ')';
       const tbody = coveredPanel.querySelector('tbody');
       if (tbody) {
-        tbody.innerHTML = scopes.map(s =>
+        const pageScopes = _pgSlice('scopes', scopes);
+        tbody.innerHTML = pageScopes.map(s =>
           '<tr>' +
             '<td style="font-weight:600;color:var(--blue)">' + (s.sSerialNumber || s.sSerial || '—') + '</td>' +
             '<td>' + (s.sModelName || s.sModel || '—') + '</td>' +
@@ -1913,6 +1929,7 @@ async function loadScopesTab(contractKey) {
             '<td>' + fmtDate(s.dtEffectiveDate || s.dtStartDate) + '</td>' +
           '</tr>'
         ).join('') || '<tr><td colspan="5" class="empty-state">No scopes on this contract</td></tr>';
+        _pgShow('scopes', scopes.length);
       }
     }
 
@@ -1935,7 +1952,8 @@ async function loadRepairsTab(contractKey) {
     const tbody = tab.querySelector('tbody');
     if (tbody) {
       tab.querySelector('.panel-head span').textContent = 'Repair History (' + repairs.length + ')';
-      tbody.innerHTML = repairs.map(r => {
+      const pageRepairs = _pgSlice('repairs', repairs);
+      tbody.innerHTML = pageRepairs.map(r => {
         const statusColor = (r.sRepairStatus || '').toLowerCase().includes('complete') ? 'var(--green)' :
                            (r.sRepairStatus || '').toLowerCase().includes('repair') ? 'var(--amber)' : 'var(--muted)';
         return '<tr>' +
@@ -1949,6 +1967,7 @@ async function loadRepairsTab(contractKey) {
           '<td>' + (r.sTechnicianName || r.sPrimaryTech || '—') + '</td>' +
         '</tr>';
       }).join('') || '<tr><td colspan="8" class="empty-state">No repairs for this contract</td></tr>';
+      _pgShow('repairs', repairs.length);
     }
 
     // Update tab count badge
@@ -1970,7 +1989,8 @@ async function loadAmendmentsTab(contractKey) {
     // Populate amendments table (first panel)
     const tbody = tab.querySelector('.panel:first-child tbody');
     if (tbody) {
-      tbody.innerHTML = amendments.map(a =>
+      const pageAmendments = _pgSlice('amendments', amendments);
+      tbody.innerHTML = pageAmendments.map(a =>
         '<tr>' +
           '<td style="font-weight:600">' + (a.sAmendmentNumber || 'AMD-' + (a.lAmendmentKey || '?')) + '</td>' +
           '<td>' + fmtDate(a.dtAmendmentDate || a.dtCreated) + '</td>' +
@@ -1979,6 +1999,7 @@ async function loadAmendmentsTab(contractKey) {
           '<td><button class="btn btn-outline" style="height:20px;font-size:9px">View</button></td>' +
         '</tr>'
       ).join('') || '<tr><td colspan="5" class="empty-state">No amendments</td></tr>';
+      _pgShow('amendments', amendments.length);
     }
 
     // Clear amendment scopes table (second panel) — will be populated from amendment detail
@@ -2012,7 +2033,8 @@ async function loadInvoicesTab(contractKey) {
     const tbody = tab.querySelector('tbody');
     if (tbody) {
       tab.querySelector('.panel-head span').textContent = 'Invoices (' + invoices.length + ')';
-      tbody.innerHTML = invoices.map(inv => {
+      const pageInvoices = _pgSlice('invoices', invoices);
+      tbody.innerHTML = pageInvoices.map(inv => {
         const statusColor = (inv.sInvoiceStatus || '').toLowerCase().includes('paid') ? 'var(--green)' : 'var(--amber)';
         return '<tr>' +
           '<td style="font-weight:600;color:var(--blue)">' + (inv.sTranNumber || inv.sInvoiceNumber || 'INV-' + (inv.lInvoiceKey || '?')) + '</td>' +
@@ -2022,6 +2044,7 @@ async function loadInvoicesTab(contractKey) {
           '<td><span style="color:' + statusColor + ';font-weight:600">' + (inv.sInvoiceStatus || '—') + '</span></td>' +
         '</tr>';
       }).join('') || '<tr><td colspan="5" class="empty-state">No invoices</td></tr>';
+      _pgShow('invoices', invoices.length);
     }
 
     // Update tab count badge
@@ -2144,7 +2167,8 @@ async function loadDocumentsTab(contractKey) {
     const tbody = tab.querySelector('tbody');
     if (tbody) {
       tab.querySelector('.panel-head span').textContent = 'Documents (' + docs.length + ')';
-      tbody.innerHTML = docs.map(d => {
+      const pageDocs = _pgSlice('documents', docs);
+      tbody.innerHTML = pageDocs.map(d => {
         const ext = (d.sFileName || '').split('.').pop().toLowerCase();
         const color = ext === 'pdf' ? 'var(--red)' : ext === 'xlsx' || ext === 'xls' ? 'var(--green)' : 'var(--blue)';
         return '<tr>' +
@@ -2154,6 +2178,7 @@ async function loadDocumentsTab(contractKey) {
           '<td><button class="btn btn-outline" style="height:20px;font-size:9px" onclick="downloadDocument(' + (d.lDocumentKey || 0) + ')">Download</button></td>' +
         '</tr>';
       }).join('') || '<tr><td colspan="4" class="empty-state">No documents</td></tr>';
+      _pgShow('documents', docs.length);
     }
 
     // Update tab count badge
@@ -2505,6 +2530,9 @@ async function openAddScopeModal() {
   document.getElementById('addScopeSearch').value = '';
   document.getElementById('addScopeStatus').textContent = '';
   document.getElementById('addScopeListBody').innerHTML = '<tr><td colspan="5" class="empty-state">Loading...</td></tr>';
+  // Reset items pagination when opening modal
+  _pgState['items'] = 0;
+  _cItemsCache = [];
   // Reset to tab 1
   switchAddScopeTab(1);
   modal.classList.add('open');
@@ -2523,8 +2551,10 @@ async function openAddScopeModal() {
 }
 
 function renderAddScopeList(list) {
+  _cItemsCache = list || [];
   const tbody = document.getElementById('addScopeListBody');
-  tbody.innerHTML = list.length ? list.map(s =>
+  const pageList = _pgSlice('items', _cItemsCache);
+  tbody.innerHTML = pageList.length ? pageList.map(s =>
     '<tr>' +
       '<td><input type="checkbox" class="add-scope-cb" data-key="' + s.lScopeKey + '" ' +
         'data-type="' + (s.lScopeTypeKey||'') + '" ' +
@@ -2536,12 +2566,14 @@ function renderAddScopeList(list) {
       '<td style="font-family:monospace">' + esc(s.sSerialNumber || '—') + '</td>' +
       '<td style="text-align:right">' + (s.nContractCost ? fmtMoney(s.nContractCost) : '—') + '</td>' +
     '</tr>'
-  ).join('') : '<tr><td colspan="5" class="empty-state">All client scopes are already on this proposal</td></tr>';
+  ).join('') : (_cItemsCache.length === 0 ? '<tr><td colspan="5" class="empty-state">All client scopes are already on this proposal</td></tr>' : '<tr><td colspan="5" class="empty-state">No results</td></tr>');
+  _pgShow('items', _cItemsCache.length);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const searchBox = document.getElementById('addScopeSearch');
   if (searchBox) searchBox.addEventListener('input', e => {
+    _pgState['items'] = 0; // reset to page 1 on new search
     const q = e.target.value.toLowerCase();
     const filtered = q ? availableScopes.filter(s =>
       (s.sSerialNumber||'').toLowerCase().includes(q) ||
@@ -3213,6 +3245,61 @@ function updateBreadcrumb(items) {
   el.innerHTML = html;
   el.style.display = 'flex';
 }
+
+// ═══════════════════════════════════════════════════════
+//  CLIENT-SIDE PAGINATION — generic system for 9 sub-tables
+// ═══════════════════════════════════════════════════════
+var _pgSize = 50;
+var _pgState = {}; // { tableKey: currentPage (0-indexed) }
+
+function _getPage(key) { return _pgState[key] || 0; }
+
+function _pgFooter(key, total) {
+  var page = _getPage(key);
+  var totalPages = Math.max(1, Math.ceil(total / _pgSize));
+  if (page >= totalPages) { _pgState[key] = totalPages - 1; page = _pgState[key]; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="_cPgNav(\'' + key + '\',-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page + 1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="_cPgNav(\'' + key + '\',1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function _pgSlice(key, data) {
+  var page = _getPage(key);
+  var totalPages = Math.max(1, Math.ceil(data.length / _pgSize));
+  if (page >= totalPages) { _pgState[key] = totalPages - 1; page = _pgState[key]; }
+  return data.slice(page * _pgSize, (page + 1) * _pgSize);
+}
+
+function _pgShow(key, total) {
+  var el = document.getElementById('pgFooter-' + key);
+  if (!el) return;
+  el.style.display = 'flex';
+  el.innerHTML = _pgFooter(key, total);
+}
+
+window._cPgNav = function(key, dir) {
+  _pgState[key] = Math.max(0, (_pgState[key] || 0) + dir);
+  var renderers = {
+    notes:       renderNotes,
+    commissions: renderCommissions,
+    scopes:      function() { loadScopesTab(selectedContractKey); },
+    repairs:     function() { loadRepairsTab(selectedContractKey); },
+    amendments:  function() { loadAmendmentsTab(selectedContractKey); },
+    invoices:    function() { loadInvoicesTab(selectedContractKey); },
+    documents:   function() { loadDocumentsTab(selectedContractKey); },
+    items:       function() { renderAddScopeList(_cItemsCache || []); }
+  };
+  if (renderers[key]) renderers[key]();
+};
+
+// Cache for add-scope items list (needed for pagination re-render)
+var _cItemsCache = [];
 
 // ── CSA Generation ─────────────────────────────────────────────────────────
 function openGenerateCSAModal() {

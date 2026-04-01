@@ -145,7 +145,7 @@
       <!-- FOOTER -->
       <div class="table-footer">
         <div class="record-info" id="flagRecordInfo">Loading...</div>
-        <div class="footer-summary" id="flagSummary"></div>
+        <div id="flagPgFooter"></div>
       </div>
 
     </div>
@@ -157,6 +157,28 @@
 <script>
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
+
+// ═══════════════════════════════════════════════════════
+//  PAGINATION
+// ═══════════════════════════════════════════════════════
+var _perPage = 50;
+var _curPage = 0;
+
+function pgFooter(total) {
+  var page = _curPage;
+  var totalPages = Math.max(1, Math.ceil(total / _perPage));
+  if (page >= totalPages) { _curPage = totalPages - 1; page = _curPage; }
+  var html = '<span style="font-size:12px;color:var(--muted)">' + total + ' records</span>';
+  if (totalPages > 1) {
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    if (page > 0) html += '<button class="pg-btn" onclick="goPage(-1)">&#8249; Prev</button>';
+    html += '<span style="padding:0 6px;font-size:11px;color:var(--muted)">Page ' + (page+1) + ' of ' + totalPages + '</span>';
+    if (page < totalPages - 1) html += '<button class="pg-btn" onclick="goPage(1)">Next &#8250;</button>';
+    html += '</div>';
+  }
+  return html;
+}
+function goPage(dir) { _curPage += dir; renderTable(); }
 
 // ═══════════════════════════════════════════════════════
 //  STATE
@@ -317,12 +339,13 @@ function formatDate(dt) {
 
 function renderTable() {
   const filtered = getFiltered();
+  const pageRows = filtered.slice(_curPage * _perPage, (_curPage + 1) * _perPage);
   const tbody = document.getElementById('flagsTbody');
 
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No flags found</td></tr>';
   } else {
-    tbody.innerHTML = filtered.map(f => `<tr>
+    tbody.innerHTML = pageRows.map(f => `<tr>
       <td style="font-weight:500">${f.sFlag || '&#8212;'}</td>
       <td style="text-align:center">${typeBadge(f.lFlagTypeKey)}</td>
       <td style="font-size:10.5px;font-weight:500">${ownerName(f)}</td>
@@ -339,6 +362,8 @@ function renderTable() {
   filtered.forEach(f => { const t = typeMap[f.lFlagTypeKey] || 'Other'; byTypeSummary[t] = (byTypeSummary[t]||0) + 1; });
   document.getElementById('flagSummary').innerHTML =
     Object.entries(byTypeSummary).map(([t, n]) => `<span style="color:var(--label);font-weight:500">${n} ${t}</span>`).join('<span style="color:var(--muted)">&middot;</span>');
+
+  document.getElementById('flagPgFooter').innerHTML = pgFooter(filtered.length);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -349,12 +374,14 @@ document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(btn =
     document.getElementById('typeFilter').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     typeFilter = btn.dataset.val;
+    _curPage = 0;
     renderTable();
   });
 });
 
 document.getElementById('flagSearch').addEventListener('input', function() {
   searchTerm = this.value.trim();
+  _curPage = 0;
   renderTable();
 });
 
