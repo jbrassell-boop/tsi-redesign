@@ -1862,12 +1862,13 @@ function openContactModal(mode){
     try {
       var models = await API.getScopeTypeNames(instType);
       if(!Array.isArray(models) || !models.length) throw new Error('empty');
-      dd.innerHTML = '<option value="">Select model…</option>';
+      var mHtml = '';
       models.slice().sort(function(a,b){ return (a.sScopeTypeDesc||a.sScopeTypeName||'').localeCompare(b.sScopeTypeDesc||b.sScopeTypeName||''); }).forEach(function(m){
         var key  = m.lScopeTypeKey || m.plScopeTypeKey;
         var name = m.sScopeTypeDesc || m.sScopeTypeName || '';
-        dd.innerHTML += '<option value="'+key+'">'+name+'</option>';
+        mHtml += '<option value="'+key+'">'+name+'</option>';
       });
+      dd.innerHTML = '<option value="">Select model…</option>' + mHtml;
     } catch(e){
       dd.innerHTML = '<option value="">No models found</option>';
     }

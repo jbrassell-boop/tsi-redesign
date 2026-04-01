@@ -515,26 +515,23 @@ function populateLookupSelects() {
   // Filter bar
   const fStatus   = document.getElementById('filterStatus');
   const fPriority = document.getElementById('filterPriority');
-  fStatus.innerHTML   = '<option value="">All Statuses</option>';
-  fPriority.innerHTML = '<option value="">All Priorities</option>';
-  STATUSES.forEach(s   => { fStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
-  PRIORITIES.forEach(p => { fPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+  const statusOpts   = STATUSES.map(s   => '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>').join('');
+  const priorityOpts = PRIORITIES.map(p => '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>').join('');
+
+  fStatus.innerHTML   = '<option value="">All Statuses</option>'  + statusOpts;
+  fPriority.innerHTML = '<option value="">All Priorities</option>' + priorityOpts;
 
   // Detail selects
   const dStatus   = document.getElementById('dStatus');
   const dPriority = document.getElementById('dPriority');
-  dStatus.innerHTML   = '';
-  dPriority.innerHTML = '';
-  STATUSES.forEach(s   => { dStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
-  PRIORITIES.forEach(p => { dPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+  dStatus.innerHTML   = statusOpts;
+  dPriority.innerHTML = priorityOpts;
 
   // Modal selects
   const mStatus   = document.getElementById('mStatus');
   const mPriority = document.getElementById('mPriority');
-  mStatus.innerHTML   = '';
-  mPriority.innerHTML = '';
-  STATUSES.forEach(s   => { mStatus.innerHTML   += '<option value="' + s.plToDoStatusID   + '">' + escHtml(s.psStatus)   + '</option>'; });
-  PRIORITIES.forEach(p => { mPriority.innerHTML += '<option value="' + p.plToDoPriorityKey + '">' + escHtml(p.psPriority) + '</option>'; });
+  mStatus.innerHTML   = statusOpts;
+  mPriority.innerHTML = priorityOpts;
 }
 
 async function loadItems() {

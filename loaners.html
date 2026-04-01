@@ -593,13 +593,12 @@ async function loadScopeTypeOptions() {
   }
 
   const sel = document.getElementById('loanerScopeType');
-  sel.innerHTML = '<option value="">Select scope type\u2026</option>';
-  scopeTypeOptions.slice().sort((a,b) => (a.sScopeTypeDesc||a.sScopeType||'').localeCompare(b.sScopeTypeDesc||b.sScopeType||'')).forEach(r => {
+  sel.innerHTML = '<option value="">Select scope type\u2026</option>' + scopeTypeOptions.slice().sort((a,b) => (a.sScopeTypeDesc||a.sScopeType||'').localeCompare(b.sScopeTypeDesc||b.sScopeType||'')).map(r => {
     const key  = r.plScopeTypeKey || r.lScopeTypeKey || r.lScopeKey || 0;
     const desc = r.sScopeTypeDesc || r.sScopeType || r.sSerialNumber || '';
     const sn   = r.sSerialNumber ? ' (' + r.sSerialNumber + ')' : '';
-    sel.innerHTML += '<option value="' + key + '" data-serial="' + esc(r.sSerialNumber || '') + '" data-rack="' + esc(r.sLoanerRackPosition || r.psLoanerRackPosition || '') + '">' + esc(desc + sn) + '</option>';
-  });
+    return '<option value="' + key + '" data-serial="' + esc(r.sSerialNumber || '') + '" data-rack="' + esc(r.sLoanerRackPosition || r.psLoanerRackPosition || '') + '">' + esc(desc + sn) + '</option>';
+  }).join('');
 }
 
 // Auto-populate serial & rack when scope type changes

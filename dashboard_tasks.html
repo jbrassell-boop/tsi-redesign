@@ -470,12 +470,13 @@ async function loadTaskTypes() {
     const data = await API.getTaskTypes();
     _taskTypes = Array.isArray(data) ? data : [];
     const sel = document.getElementById('taskType');
-    sel.innerHTML = '<option value="">Select type\u2026</option>';
+    let ttHtml = '';
     _taskTypes.forEach(t => {
       const key = t.lTaskTypeKey || t.lTaskTypesKey || t.lKey || 0;
       const name = t.sTaskType || t.sTaskTypeName || t.sName || t.sDescription || '';
-      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+      if (name) ttHtml += '<option value="' + key + '">' + name + '</option>';
     });
+    sel.innerHTML = '<option value="">Select type\u2026</option>' + ttHtml;
   } catch (e) {
     console.warn('[TSI Tasks] Could not load task types:', e.message);
   }
@@ -486,12 +487,13 @@ async function loadTaskPriorities() {
     const data = await API.getTaskPriorities(true);
     _taskPriorities = Array.isArray(data) ? data : [];
     const sel = document.getElementById('taskPriority');
-    sel.innerHTML = '';
+    let tpHtml = '';
     _taskPriorities.forEach(p => {
       const key = p.lTaskPriorityKey || p.lPriorityKey || p.lKey || 0;
       const name = p.sTaskPriority || p.sPriorityName || p.sName || p.sDescription || '';
-      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+      if (name) tpHtml += '<option value="' + key + '">' + name + '</option>';
     });
+    sel.innerHTML = tpHtml;
     const normalOpt = [...sel.options].find(o => /normal/i.test(o.text));
     if (normalOpt) normalOpt.selected = true;
   } catch (e) {
@@ -504,12 +506,13 @@ async function loadTaskStatuses() {
     const data = await API.getTaskStatuses(true, false);
     _taskStatuses = Array.isArray(data) ? data : [];
     const sel = document.getElementById('taskStatus');
-    sel.innerHTML = '';
+    let tsHtml = '';
     _taskStatuses.forEach(s => {
       const key = s.lTaskStatusKey || s.lStatusKey || s.lKey || 0;
       const name = s.sTaskStatus || s.sStatusName || s.sName || s.sDescription || '';
-      if (name) sel.innerHTML += '<option value="' + key + '">' + name + '</option>';
+      if (name) tsHtml += '<option value="' + key + '">' + name + '</option>';
     });
+    sel.innerHTML = tsHtml;
     const nsOpt = [...sel.options].find(o => /not started/i.test(o.text));
     if (nsOpt) nsOpt.selected = true;
   } catch (e) {

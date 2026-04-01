@@ -1987,10 +1987,12 @@
   (function(){
     var fromSel = document.getElementById('reassignFrom');
     var toSel = document.getElementById('reassignTo');
+    var reHtml = '';
     SALES_REPS_LIST.forEach(function(r){
-      fromSel.innerHTML += '<option value="'+r+'">'+r+'</option>';
-      toSel.innerHTML += '<option value="'+r+'">'+r+'</option>';
+      reHtml += '<option value="'+r+'">'+r+'</option>';
     });
+    fromSel.innerHTML += reHtml;
+    toSel.innerHTML += reHtml;
     if (window._reassignFromSearch) window._reassignFromSearch.refresh();
     else window._reassignFromSearch = API.UI.searchableSelect('reassignFrom', { placeholder: 'Search reps...' });
     if (window._reassignToSearch) window._reassignToSearch.refresh();

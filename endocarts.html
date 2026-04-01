@@ -1014,8 +1014,7 @@ function populateDrawer(q) {
 
   // Settings & Payment
   var repDD = document.getElementById('fSalesRep');
-  repDD.innerHTML = '<option value="">—</option>';
-  salesReps.forEach(function(r) { repDD.innerHTML += '<option value="'+r+'">'+r+'</option>'; });
+  repDD.innerHTML = '<option value="">—</option>' + salesReps.map(function(r) { return '<option value="'+r+'">'+r+'</option>'; }).join('');
   repDD.value = q.salesRep || '';
   document.getElementById('fPaymentTerms').value = q.paymentTerms || '';
   document.getElementById('fPricingCat').value = q.pricingCat || '';
@@ -1168,24 +1167,21 @@ function saveNotes() {
 function openNewQuoteModal(prePopModel) {
   // Populate client dropdown
   var mClient = document.getElementById('mClient');
-  mClient.innerHTML = '<option value="">Select client...</option>';
-  clientData.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).forEach(function(c) {
-    mClient.innerHTML += '<option value="'+c.key+'">'+c.name+'</option>';
-  });
+  mClient.innerHTML = '<option value="">Select client...</option>' + clientData.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).map(function(c) {
+    return '<option value="'+c.key+'">'+c.name+'</option>';
+  }).join('');
   document.getElementById('mDept').innerHTML = '<option value="">Select department...</option>';
   // Populate cart model dropdown
   var mModel = document.getElementById('mCartModel');
-  mModel.innerHTML = '<option value="">Select model...</option>';
-  allModels.slice().sort(function(a,b){ return (a.modelName||'').localeCompare(b.modelName||''); }).forEach(function(m) {
-    mModel.innerHTML += '<option value="'+m.modelName+'">'+m.modelName+' \u2014 '+m.desc+'</option>';
-  });
+  mModel.innerHTML = '<option value="">Select model...</option>' + allModels.slice().sort(function(a,b){ return (a.modelName||'').localeCompare(b.modelName||''); }).map(function(m) {
+    return '<option value="'+m.modelName+'">'+m.modelName+' \u2014 '+m.desc+'</option>';
+  }).join('');
   if (prePopModel) mModel.value = prePopModel;
   // Populate sales rep dropdown
   var mRep = document.getElementById('mSalesRep');
-  mRep.innerHTML = '<option value="">Select sales rep...</option>';
-  salesReps.slice().sort().forEach(function(r) {
-    mRep.innerHTML += '<option value="'+r+'">'+r+'</option>';
-  });
+  mRep.innerHTML = '<option value="">Select sales rep...</option>' + salesReps.slice().sort().map(function(r) {
+    return '<option value="'+r+'">'+r+'</option>';
+  }).join('');
   document.getElementById('mNotes').value = '';
   document.getElementById('newQuoteModal').classList.add('open');
 }
@@ -1200,9 +1196,9 @@ function populateModalDepts() {
   dd.innerHTML = '<option value="">Select department...</option>';
   var c = clientData.find(function(x) { return x.key === clientKey; });
   if (c) {
-    c.depts.forEach(function(d) {
-      dd.innerHTML += '<option value="'+d+'">'+d+'</option>';
-    });
+    dd.innerHTML += c.depts.map(function(d) {
+      return '<option value="'+d+'">'+d+'</option>';
+    }).join('');
   }
 }
 

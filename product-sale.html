@@ -1060,10 +1060,9 @@ function populateDrawer(s) {
 
   // Populate sales rep select
   var repSel = document.getElementById('fSalesRep');
-  repSel.innerHTML = '<option value="">Select rep...</option>';
-  salesReps.forEach(function(r) {
-    repSel.innerHTML += '<option value="'+r+'"'+(r===s.salesRep?' selected':'')+'>'+r+'</option>';
-  });
+  repSel.innerHTML = '<option value="">Select rep...</option>' + salesReps.map(function(r) {
+    return '<option value="'+r+'"'+(r===s.salesRep?' selected':'')+'>'+r+'</option>';
+  }).join('');
   if (window._psRepSearch) window._psRepSearch.refresh();
   else window._psRepSearch = API.UI.searchableSelect('fSalesRep', { placeholder: 'Search reps...' });
 
@@ -1358,19 +1357,17 @@ function generateQuote(saleKey) {
 function openAddModal() {
   // Populate client dropdown
   var mClient = document.getElementById('mClient');
-  mClient.innerHTML = '<option value="">Select client...</option>';
-  clientData.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).forEach(function(c) {
-    mClient.innerHTML += '<option value="'+c.key+'">'+c.name+'</option>';
-  });
+  mClient.innerHTML = '<option value="">Select client...</option>' + clientData.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).map(function(c) {
+    return '<option value="'+c.key+'">'+c.name+'</option>';
+  }).join('');
   if (window._psClientSearch) window._psClientSearch.refresh();
   else window._psClientSearch = API.UI.searchableSelect('mClient', { placeholder: 'Search clients...' });
   document.getElementById('mDept').innerHTML = '<option value="">Select department...</option>';
   // Populate sales rep dropdown
   var mRep = document.getElementById('mSalesRep');
-  mRep.innerHTML = '<option value="">Select sales rep...</option>';
-  salesReps.slice().sort().forEach(function(r) {
-    mRep.innerHTML += '<option value="'+r+'">'+r+'</option>';
-  });
+  mRep.innerHTML = '<option value="">Select sales rep...</option>' + salesReps.slice().sort().map(function(r) {
+    return '<option value="'+r+'">'+r+'</option>';
+  }).join('');
   if (window._psModalRepSearch) window._psModalRepSearch.refresh();
   else window._psModalRepSearch = API.UI.searchableSelect('mSalesRep', { placeholder: 'Search reps...' });
   // Default date to today
@@ -1390,9 +1387,9 @@ function populateModalDepts() {
   dd.innerHTML = '<option value="">Select department...</option>';
   var c = clientData.find(function(x) { return x.key === clientKey; });
   if (c) {
-    c.depts.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).forEach(function(d) {
-      dd.innerHTML += '<option value="'+d.name+'">'+d.name+'</option>';
-    });
+    dd.innerHTML += c.depts.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).map(function(d) {
+      return '<option value="'+d.name+'">'+d.name+'</option>';
+    }).join('');
   }
 }
 

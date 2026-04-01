@@ -232,11 +232,10 @@ async function loadEmails() {
 
   // Populate type dropdown — only types where bShowOnDash is true
   const typeSel = document.getElementById('typeFilter');
-  typeSel.innerHTML = '<option value="">All Types</option>';
   const dashTypes = _emailTypes.filter(t => t.bShowOnDash);
-  dashTypes.forEach(t => {
-    typeSel.innerHTML += '<option value="' + (t.lEmailTypeKey || '') + '">' + escHtml(t.sEmailType || t.sEmailTypeDesc || '') + '</option>';
-  });
+  typeSel.innerHTML = '<option value="">All Types</option>' + dashTypes.map(t =>
+    '<option value="' + (t.lEmailTypeKey || '') + '">' + escHtml(t.sEmailType || t.sEmailTypeDesc || '') + '</option>'
+  ).join('');
 
   updateKPIs();
   renderEmails();

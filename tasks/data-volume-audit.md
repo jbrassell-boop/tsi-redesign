@@ -129,29 +129,29 @@ These pages already have proper pagination:
 
 ## Fix Priorities
 
-### Phase 1 — Backend query guardrails (prevent timeouts)
-1. Add date-range params to quality.js endpoints (default last 2 years)
-2. Add date-range params to invoices.js GetAllInvoices
-3. Add pagination to pending-contracts.js
-4. Add pagination to loaners.js, departments.js, clients.js, scopes.js
-5. Fix rework query O(n^2) subquery pattern
-6. Add date-range to emails.js
+### Phase 1 — Backend query guardrails (prevent timeouts) — **DONE** (commit c00bc60)
+1. ~~Add date-range params to quality.js endpoints (default last 2 years)~~ **DONE**
+2. ~~Add date-range params to invoices.js GetAllInvoices~~ **DONE**
+3. ~~Add pagination to pending-contracts.js~~ **DONE**
+4. ~~Add pagination to loaners.js, departments.js, clients.js, scopes.js~~ **DONE**
+5. ~~Fix rework query O(n^2) subquery pattern~~ **DONE**
+6. ~~Add date-range to emails.js~~ **DONE**
 
-### Phase 2 — Frontend table pagination (prevent DOM explosion)
+### Phase 2 — Frontend table pagination (prevent DOM explosion) — **DONE** (commit 3f78473)
 1. ~~departments.html chip strip~~ **DONE**
-2. Add pagination to dashboard sub-pages: emails, flags, tasks, invoices, inventory
-3. Add pagination to development-list.html
-4. Add pagination to loaners.html active/analysis/requests tables
-5. Add pagination to all contracts.html sub-tables (9 tables)
-6. Add pagination to clients.html flags/contacts tables
+2. ~~Add pagination to dashboard sub-pages: emails, flags, tasks, invoices, inventory~~ **DONE**
+3. ~~Add pagination to development-list.html~~ **DONE**
+4. ~~Add pagination to loaners.html active/analysis/requests tables~~ **DONE**
+5. ~~Add pagination to all contracts.html sub-tables (9 tables)~~ **DONE**
+6. Add pagination to clients.html flags/contacts tables — deferred (per-client, bounded)
 
-### Phase 3 — Dropdown / select overflow
-1. Convert large dropdowns to searchable typeahead: clients, departments, reps, scope types
-2. Affects: product-sale, administration, contracts, financial, scope-model, onsite-services, repairs
-3. Add search + max-height to shuttle panels in departments.html
+### Phase 3 — Dropdown / select overflow — **DONE** (commit db74fab)
+1. ~~Convert large dropdowns to searchable typeahead~~ **DONE** (8 dropdowns across 5 pages)
+2. ~~API.UI.searchableSelect() utility added to api.js~~ **DONE**
+3. Shuttle panels in departments.html — deferred (already has max-height scroll)
 
-### Phase 4 — Standardization
-1. Establish `db.queryPage()` as standard for all list endpoints
-2. All time-series queries default to 2-year lookback unless user specifies
-3. All dropdowns with 50+ potential options use typeahead pattern
-4. innerHTML += in loops → build string first, assign once (O(n) vs O(n^2))
+### Phase 4 — Standardization — **DONE** (commit pending)
+1. ~~db.queryPage() established as standard~~ **DONE** (Phase 1)
+2. ~~2-year lookback default on time-series queries~~ **DONE** (Phase 1)
+3. ~~50+ option dropdowns use typeahead~~ **DONE** (Phase 3)
+4. ~~innerHTML += in loops → build string first, assign once~~ **DONE** (27 instances across 9 files)
