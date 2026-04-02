@@ -380,6 +380,7 @@ const API = (() => {
   async function getContractCoverageCounts(contractKey) { return get('/Contract/GetAllContractCoverageCounts?plContractKey=' + contractKey); }
   async function getContractReportCard(contractKey) { return get('/Contract/GetContractReportCardDetails?plContractKey=' + contractKey); }
   async function getContractExpenseBreakdown(contractKey) { return get('/Contract/GetContractExpenseBreakdown?plContractKey=' + contractKey); }
+  async function getAllContractInstallments() { return get('/Contract/GetAllContractInstallments'); }
   async function getContractInvoices(data) { return post('/Contract/GetAllContractInvoice', data); }
   async function getContractClients(includeInactive) { return get('/Contract/GetAllContractClient?pbIncludeInactive=' + (includeInactive||false)); }
 
@@ -829,7 +830,7 @@ const API = (() => {
     getContractScopes,
     getContractRepairsList, getContractAmendments, getContractCoverageCounts,
     getContractReportCard, getContractExpenseBreakdown,
-    getContractInvoices, getContractClients,
+    getAllContractInstallments, getContractInvoices, getContractClients,
 
     // Pending Contracts
     getPendingContracts,

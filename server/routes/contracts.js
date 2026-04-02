@@ -399,6 +399,26 @@ router.post('/Contract/GetAllContractInvoice', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /Contract/GetAllContractInstallments — All scheduled installments across all contracts
+router.get('/Contract/GetAllContractInstallments', async (req, res, next) => {
+  try {
+    const rows = await db.query(`
+      SELECT TOP 500
+        ci.lInstallmentKey, ci.lContractKey, ci.dtDateDue, ci.dblAmount,
+        ci.sInvoiceNumber, ci.sInvoiced, ci.mInvoiceComments,
+        ci.dtCreateDate, ci.dtLastUpdate,
+        con.sContractNumber,
+        ISNULL(c.sClientName1, '') AS sClientName1,
+        cit.sInstallmentType
+      FROM tblContractInstallment ci
+        LEFT JOIN tblContract con ON con.lContractKey = ci.lContractKey
+        LEFT JOIN tblClient c ON c.lClientKey = con.lClientKey
+        LEFT JOIN tblContractInstallmentTypes cit ON cit.lInstallmentTypeID = con.lInstallmentTypeID
+      ORDER BY ci.dtDateDue DESC`);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
 // GET /Contract/GetAllContractClient — Clients that have at least one active contract
 router.get('/Contract/GetAllContractClient', async (req, res, next) => {
   try {

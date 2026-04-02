@@ -845,33 +845,57 @@
 
     <!-- ═══════════ MODULE: INVOICES ═══════════ -->
     <div class="module-view" id="mv-invoices">
-      <div class="toolbar">
-        <div class="seg-group">
-          <button class="seg-btn on">Create Invoices</button>
-          <button class="seg-btn">Prior Invoices</button>
-          <button class="seg-btn">Without Schedule</button>
+      <div class="stat-strip" id="invModuleKpis">
+        <div class="stat-chip active-chip" id="invKpiAll" onclick="invModuleFilter('all',this)">
+          <div class="s-icon si-navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div>
+          <div class="s-data"><div class="s-val" id="invKpiTotalVal">0</div><div class="s-lbl">TOTAL SCHEDULED</div></div>
+        </div>
+        <div class="stat-chip" id="invKpiOverdue" onclick="invModuleFilter('overdue',this)">
+          <div class="s-icon si-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M7.13 2.5L1.5 12.5a1 1 0 0 0 .87 1.5h11.26a1 1 0 0 0 .87-1.5L8.87 2.5a1 1 0 0 0-1.74 0z"/><line x1="8" y1="6" x2="8" y2="9"/><circle cx="8" cy="11.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
+          <div class="s-data"><div class="s-val s-red" id="invKpiOverdueVal">0</div><div class="s-lbl">OVERDUE</div></div>
+        </div>
+        <div class="stat-chip" id="invKpiDueSoon" onclick="invModuleFilter('due-soon',this)">
+          <div class="s-icon si-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="8 5 8 8 10.5 9.5"/></svg></div>
+          <div class="s-data"><div class="s-val s-amber" id="invKpiDueSoonVal">0</div><div class="s-lbl">DUE ≤30D</div></div>
+        </div>
+        <div class="stat-chip" id="invKpiInvoiced" onclick="invModuleFilter('invoiced',this)">
+          <div class="s-icon si-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><polyline points="5.5 8 7 10 10.5 6"/></svg></div>
+          <div class="s-data"><div class="s-val s-green" id="invKpiInvoicedVal">0</div><div class="s-lbl">INVOICED</div></div>
+        </div>
+        <div class="stat-chip" id="invKpiPending" onclick="invModuleFilter('pending',this)">
+          <div class="s-icon si-blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="8" cy="8" r="5.5"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="10.5" r=".5" fill="currentColor" stroke="none"/></svg></div>
+          <div class="s-data"><div class="s-val s-blue" id="invKpiPendingVal">0</div><div class="s-lbl">NOT INVOICED</div></div>
+        </div>
+        <div class="stat-chip" style="cursor:default">
+          <div class="s-icon si-navy"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><line x1="8" y1="1.5" x2="8" y2="14.5"/><path d="M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H5"/></svg></div>
+          <div class="s-data"><div class="s-val" id="invKpiAmtVal">$0</div><div class="s-lbl">TOTAL AMOUNT</div></div>
         </div>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:16px 20px">
-        <div class="panel" style="max-width:700px;margin:0 auto">
-          <div class="panel-head">Create Invoices</div>
-          <div class="panel-body">
-            <div style="margin-bottom:14px">
-              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Invoice Type</label>
-              <div class="seg-group">
-                <button class="seg-btn on">Overdue / Current</button>
-                <button class="seg-btn">Upcoming</button>
-                <button class="seg-btn">Future</button>
-                <button class="seg-btn">All Others</button>
-              </div>
-            </div>
-            <div class="toggle-row" style="margin-bottom:14px"><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Show Expired Contracts</span></div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-outline">Preview Invoices</button>
-              <button class="btn btn-navy">Create Invoices</button>
-            </div>
-          </div>
+      <div class="toolbar">
+        <button class="btn btn-navy" onclick="createInvoicesBatch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create Invoices</button>
+        <div class="divider"></div>
+        <input class="search-input" id="invModuleSearch" placeholder="Search invoices..." oninput="filterInvModule()" style="margin-left:auto"/>
+      </div>
+      <div style="flex:1;overflow-y:auto">
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th><span class="sort">Due Date</span></th>
+                <th><span class="sort">Client</span></th>
+                <th>Contract</th>
+                <th><span class="sort">Amount</span></th>
+                <th>Frequency</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="invModuleBody">
+              <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
         </div>
+        <div class="table-footer" id="pgFooter-invModule"></div>
       </div>
     </div>
 
@@ -2055,6 +2079,155 @@ async function loadInvoicesTab(contractKey) {
   }
 }
 
+// ── Invoices Module (All Contracts) ───────────────────
+let _allInstallments = [];
+let _invModuleFilter = 'all';
+
+async function loadAllInvoicesModule() {
+  const tbody = document.getElementById('invModuleBody');
+  if (!tbody) return;
+  try {
+    const data = await API.getAllContractInstallments();
+    _allInstallments = Array.isArray(data) ? data : (data && data.list) ? data.list : [];
+  } catch (err) {
+    console.warn('[Contracts] All installments load failed:', err.message);
+    // Fallback: generate demo installments from contracts array
+    _allInstallments = generateDemoInstallments();
+  }
+  updateInvModuleKPIs();
+  renderInvModule();
+}
+
+function generateDemoInstallments() {
+  const rows = [];
+  const now = new Date();
+  contracts.forEach(c => {
+    if (!c.dblAnnualValue) return;
+    const freq = (c.sInvoiceFrequency || 'Quarterly').toLowerCase();
+    const months = freq === 'monthly' ? 1 : freq === 'annual' ? 12 : 3;
+    const amt = c.dblAnnualValue / (12 / months);
+    const start = c.dtStartDate ? new Date(c.dtStartDate) : new Date(now.getFullYear(), 0, 1);
+    for (let i = 0; i < Math.ceil(12 / months); i++) {
+      const due = new Date(start);
+      due.setMonth(due.getMonth() + (months * i));
+      const invoiced = due < now ? 'Y' : '';
+      rows.push({
+        lInstallmentKey: c.lContractKey * 100 + i,
+        lContractKey: c.lContractKey,
+        dtDateDue: due.toISOString(),
+        dblAmount: amt,
+        sInvoiceNumber: invoiced ? 'INV-' + (30000 + c.lContractKey + i) : '',
+        sInvoiced: invoiced,
+        sContractNumber: c.sContractName || 'CNT-' + c.lContractKey,
+        sClientName1: c.sClientName1 || '',
+        sInstallmentType: c.sInvoiceFrequency || 'Quarterly'
+      });
+    }
+  });
+  return rows.sort((a, b) => new Date(b.dtDateDue) - new Date(a.dtDateDue));
+}
+
+function updateInvModuleKPIs() {
+  const now = new Date();
+  const thirtyDays = 30 * 86400000;
+  let total = _allInstallments.length;
+  let overdue = 0, dueSoon = 0, invoiced = 0, pending = 0, totalAmt = 0;
+
+  _allInstallments.forEach(r => {
+    const due = r.dtDateDue ? new Date(r.dtDateDue) : null;
+    const done = (r.sInvoiced || '').toUpperCase() === 'Y';
+    totalAmt += (r.dblAmount || 0);
+    if (done) { invoiced++; }
+    else {
+      pending++;
+      if (due && due < now) overdue++;
+      else if (due && (due - now) <= thirtyDays) dueSoon++;
+    }
+  });
+
+  document.getElementById('invKpiTotalVal').textContent = total;
+  document.getElementById('invKpiOverdueVal').textContent = overdue;
+  document.getElementById('invKpiDueSoonVal').textContent = dueSoon;
+  document.getElementById('invKpiInvoicedVal').textContent = invoiced;
+  document.getElementById('invKpiPendingVal').textContent = pending;
+  var amtLabel;
+  if (totalAmt >= 1000000) amtLabel = '$' + (totalAmt / 1000000).toFixed(1) + 'M';
+  else if (totalAmt >= 1000) amtLabel = '$' + Math.round(totalAmt / 1000) + 'K';
+  else amtLabel = '$' + Math.round(totalAmt);
+  document.getElementById('invKpiAmtVal').textContent = amtLabel;
+}
+
+function invModuleFilter(filter, el) {
+  _invModuleFilter = filter;
+  document.querySelectorAll('#invModuleKpis .stat-chip').forEach(c => c.classList.remove('active-chip'));
+  if (el) el.classList.add('active-chip');
+  renderInvModule();
+}
+
+function filterInvModule() {
+  renderInvModule();
+}
+
+function renderInvModule() {
+  const tbody = document.getElementById('invModuleBody');
+  if (!tbody) return;
+  const now = new Date();
+  const thirtyDays = 30 * 86400000;
+  const q = ((document.getElementById('invModuleSearch') || {}).value || '').toLowerCase();
+
+  let rows = _allInstallments;
+
+  // Status filter
+  if (_invModuleFilter !== 'all') {
+    rows = rows.filter(r => {
+      const due = r.dtDateDue ? new Date(r.dtDateDue) : null;
+      const done = (r.sInvoiced || '').toUpperCase() === 'Y';
+      if (_invModuleFilter === 'invoiced') return done;
+      if (_invModuleFilter === 'pending') return !done;
+      if (_invModuleFilter === 'overdue') return !done && due && due < now;
+      if (_invModuleFilter === 'due-soon') return !done && due && (due - now) <= thirtyDays && due >= now;
+      return true;
+    });
+  }
+
+  // Search filter
+  if (q) {
+    rows = rows.filter(r =>
+      (r.sInvoiceNumber || '').toLowerCase().includes(q) ||
+      (r.sClientName1 || '').toLowerCase().includes(q) ||
+      (r.sContractNumber || '').toLowerCase().includes(q) ||
+      (r.sInstallmentType || '').toLowerCase().includes(q)
+    );
+  }
+
+  const paged = _pgSlice('invModule', rows);
+
+  tbody.innerHTML = paged.length ? paged.map(r => {
+    const due = r.dtDateDue ? new Date(r.dtDateDue) : null;
+    const done = (r.sInvoiced || '').toUpperCase() === 'Y';
+    let statusLabel, statusColor;
+    if (done) { statusLabel = 'Invoiced'; statusColor = 'var(--green)'; }
+    else if (due && due < now) { statusLabel = 'Overdue'; statusColor = 'var(--red)'; }
+    else if (due && (due - now) <= thirtyDays) { statusLabel = 'Due Soon'; statusColor = 'var(--amber)'; }
+    else { statusLabel = 'Scheduled'; statusColor = 'var(--blue)'; }
+    return '<tr>' +
+      '<td style="font-weight:600;color:var(--blue)">' + (r.sInvoiceNumber || '—') + '</td>' +
+      '<td>' + fmtDate(r.dtDateDue) + '</td>' +
+      '<td>' + esc(r.sClientName1 || '—') + '</td>' +
+      '<td>' + esc(r.sContractNumber || '—') + '</td>' +
+      '<td>' + fmtCurrencyFull(r.dblAmount) + '</td>' +
+      '<td>' + esc(r.sInstallmentType || '—') + '</td>' +
+      '<td><span style="color:' + statusColor + ';font-weight:600">' + statusLabel + '</span></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="7" class="empty-state">No installments found</td></tr>';
+
+  _pgShow('invModule', rows.length);
+}
+
+function createInvoicesBatch() {
+  showToast('Invoice batch creation not yet implemented', 'info');
+}
+
 // ── Report Card Tab ───────────────────────────────────
 function populateReportCard(tab, data) {
   const kpis = tab.querySelectorAll('.kpi-val');
@@ -2342,7 +2515,12 @@ function switchModule(id, el) {
   const mv = document.getElementById('mv-' + id);
   if (mv) mv.classList.add('show');
 
-  // Lazy-load pending contracts when switching to that tab
+  // Breadcrumb only applies to Open (per-contract) view
+  const bc = document.getElementById('breadcrumb');
+  if (bc) bc.style.display = (id === 'open') ? '' : 'none';
+
+  // Lazy-load module data when switching tabs
+  if (id === 'invoices') loadAllInvoicesModule();
   if (id === 'pending') loadPendingContracts();
 }
 
@@ -3297,6 +3475,7 @@ window._cPgNav = function(key, dir) {
     amendments:  function() { loadAmendmentsTab(selectedContractKey); },
     invoices:    function() { loadInvoicesTab(selectedContractKey); },
     documents:   function() { loadDocumentsTab(selectedContractKey); },
+    invModule:   renderInvModule,
     items:       function() { renderAddScopeList(_cItemsCache || []); }
   };
   if (renderers[key]) renderers[key]();
