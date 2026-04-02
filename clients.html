@@ -977,6 +977,11 @@
 // ── Auth Guard ──
 if (!API.requireAuth()) throw new Error('redirect');
 
+// XSS-safe HTML escape for user-supplied data inserted into innerHTML
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
 // Close overflow menu on outside click
 document.addEventListener('click', () => {
   document.querySelectorAll('.toolbar-more-dropdown').forEach(d => d.style.display = 'none');
@@ -1429,9 +1434,9 @@ async function saveFlagMock() {
   const tr = document.createElement('tr');
   tr.style.cssText = bg;
   tr.innerHTML = `
-    <td style="padding:9px 14px;font-size:12.5px">${instrTypes.length ? instrTypes.join(', ') : '<span style="color:var(--muted)">All</span>'}</td>
-    <td style="padding:9px 14px;font-size:12.5px">${showAt.length ? showAt.join(', ') : '<span style="color:var(--muted)">—</span>'}</td>
-    <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${text}</td>
+    <td style="padding:9px 14px;font-size:12.5px">${instrTypes.length ? instrTypes.map(s => esc(s)).join(', ') : '<span style="color:var(--muted)">All</span>'}</td>
+    <td style="padding:9px 14px;font-size:12.5px">${showAt.length ? showAt.map(s => esc(s)).join(', ') : '<span style="color:var(--muted)">—</span>'}</td>
+    <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${esc(text)}</td>
     <td style="padding:9px 14px">
       <button onclick="if(!this._confirming){this._confirming=true;this.textContent='Sure?';this.classList.add('btn-danger');setTimeout(()=>{this._confirming=false;this.textContent='Remove'},2000);return}this.closest('tr').remove();if(!document.querySelector('#flags-tbody tr')){const r=document.createElement('tr');r.id='flags-empty-row';r.innerHTML='<td colspan=\\'4\\' style=\\'text-align:center;padding:40px;color:var(--muted)\\'><div style=\\'font-size:32px;margin-bottom:10px;opacity:.3\\'>🚩</div>No flags on record — click <strong>+ Add</strong> to create one</td>';document.getElementById('flags-tbody').appendChild(r)}"
         class="btn btn-danger btn-sm">Remove</button>
@@ -1485,12 +1490,12 @@ function renderFlagsFromAPI(flags) {
   }
   tbody.innerHTML = flags.map((f, i) => {
     const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
-    const instrTypes = f.sInstrumentTypes || '<span style="color:var(--muted)">All</span>';
-    const locations = f.sLocations || '<span style="color:var(--muted)">\u2014</span>';
+    const instrTypes = f.sInstrumentTypes ? esc(f.sInstrumentTypes) : '<span style="color:var(--muted)">All</span>';
+    const locations = f.sLocations ? esc(f.sLocations) : '<span style="color:var(--muted)">\u2014</span>';
     return `<tr${bg} data-flag-key="${f.lFlagKey}">
       <td style="padding:9px 14px;font-size:12.5px">${instrTypes}</td>
       <td style="padding:9px 14px;font-size:12.5px">${locations}</td>
-      <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${f.sFlag || ''}</td>
+      <td style="padding:9px 14px;font-size:12.5px;font-weight:500">${esc(f.sFlag || '')}</td>
       <td style="padding:9px 14px">
         <button onclick="deleteFlagAPI(this,${f.lFlagKey})" class="btn btn-danger btn-sm">Remove</button>
       </td>
@@ -1529,11 +1534,11 @@ function renderContacts(c) {
       ? '<span class="badge b-active">Active</span>'
       : '<span class="badge b-inactive">Inactive</span>';
     return `<tr${bg}>
-      <td style="font-weight:600">${ct.name}</td>
-      <td style="color:var(--muted)">${ct.title || '—'}</td>
-      <td>${ct.phone || '—'}</td>
-      <td>${ct.fax || '—'}</td>
-      <td>${ct.email || '—'}</td>
+      <td style="font-weight:600">${esc(ct.name)}</td>
+      <td style="color:var(--muted)">${esc(ct.title || '—')}</td>
+      <td>${esc(ct.phone || '—')}</td>
+      <td>${esc(ct.fax || '—')}</td>
+      <td>${esc(ct.email || '—')}</td>
       <td>${badge}</td>
       <td><button class="edit-btn" onclick="openEditContact(this)">&#9998; Edit</button></td>
     </tr>`;
@@ -1569,11 +1574,11 @@ function renderContactsFromAPI(contacts) {
     const badge = c.bActive !== false ? '<span class="badge b-active">Active</span>' : '<span class="badge b-inactive">Inactive</span>';
     const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
     return `<tr${bg} data-contact-key="${c.lContactKey}">
-      <td style="font-weight:600">${name}</td>
-      <td style="color:var(--muted)">${c.sContactTitle || c.sTitle || (c.bBillingContact ? 'Billing Contact' : '') || '—'}</td>
-      <td>${c.sContactPhoneVoice || '—'}</td>
-      <td>${c.sContactPhoneFAX || '—'}</td>
-      <td>${c.sContactEMail || '—'}</td>
+      <td style="font-weight:600">${esc(name)}</td>
+      <td style="color:var(--muted)">${esc(c.sContactTitle || c.sTitle || (c.bBillingContact ? 'Billing Contact' : '') || '—')}</td>
+      <td>${esc(c.sContactPhoneVoice || '—')}</td>
+      <td>${esc(c.sContactPhoneFAX || '—')}</td>
+      <td>${esc(c.sContactEMail || '—')}</td>
       <td>${badge}</td>
       <td><button class="edit-btn" onclick="openEditContactAPI(${c.lContactKey})">&#9998; Edit</button></td>
     </tr>`;

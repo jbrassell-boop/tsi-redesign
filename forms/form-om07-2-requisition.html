@@ -183,6 +183,7 @@
     ? 'http://localhost:4000/api'
     : window.location.origin + '/api';
   function fill(id,val){ var el=document.getElementById(id); if(el&&val!=null) el.textContent=val; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
   function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
 
   fill('f-date', today());
@@ -239,8 +240,8 @@
           items.forEach(function(item, i){
             var tr = document.createElement('tr');
             if(i%2===1) tr.style.background='#F9FAFB';
-            tr.innerHTML = '<td style="height:22px">'+(item.sItemDescription||item.sRepairItem||item.sItem||'')+'</td>'+
-              '<td>'+(item.sComments||item.sRepairDescription||item.sDescription||'')+'</td>'+
+            tr.innerHTML = '<td style="height:22px">'+esc(item.sItemDescription||item.sRepairItem||item.sItem||'')+'</td>'+
+              '<td>'+esc(item.sComments||item.sRepairDescription||item.sDescription||'')+'</td>'+
               '<td class="yn-cell"><span class="yn-box">Y</span><span class="yn-box">N</span></td>';
             tbody.appendChild(tr);
           });

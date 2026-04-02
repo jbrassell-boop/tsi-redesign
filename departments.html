@@ -1309,6 +1309,11 @@
 <script src="api.js"></script>
 <script src="js/export-utils.js"></script>
 <script>
+// XSS-safe HTML escape for user-supplied data inserted into innerHTML
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
 // ── Inline Validation ──────────────────────────────────
 function validateRequired(formContainer) {
   var valid = true;
@@ -2396,12 +2401,12 @@ function openContactModal(mode){
     }
     tbody.innerHTML = flags.map(function(f, i) {
       const bg = i % 2 !== 0 ? ' style="background:var(--row-alt)"' : '';
-      const flagType = f.sFlagType || '—';
-      const showAt = f.sLocations || f.sShowAt || '—';
+      const flagType = esc(f.sFlagType || '—');
+      const showAt = esc(f.sLocations || f.sShowAt || '—');
       return '<tr' + bg + ' data-flag-key="' + f.lFlagKey + '">' +
         '<td style="padding:8px 12px;font-size:12px">' + flagType + '</td>' +
         '<td style="padding:8px 12px;font-size:12px">' + showAt + '</td>' +
-        '<td style="padding:8px 12px;font-size:12.5px;font-weight:500">' + (f.sFlag || '') + '</td>' +
+        '<td style="padding:8px 12px;font-size:12.5px;font-weight:500">' + esc(f.sFlag || '') + '</td>' +
         '<td style="padding:8px 12px"><button class="btn btn-danger btn-sm" onclick="deleteDeptFlagAPI(this,' + f.lFlagKey + ')">Remove</button></td>' +
         '</tr>';
     }).join('');

@@ -193,6 +193,7 @@
   var CLOUD_URL = 'https://totalscopetestapi.mol-tech.com/api';
   function isLocal(){ return localStorage.getItem('tsi_api_mode')==='local'; }
   function fill(id,val){ var el=document.getElementById(id); if(el&&val!=null) el.textContent=val; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
   function fmt(n){ return '$'+parseFloat(n||0).toFixed(2); }
   function today(){ return new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
   function due30(){ var d=new Date(); d.setDate(d.getDate()+30); return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}); }
@@ -254,7 +255,7 @@
         subtotal += amount;
         var tr = document.createElement('tr');
         if(i%2===1) tr.style.background='#F9FAFB';
-        tr.innerHTML = '<td style="height:20px">'+(item.sDescription||item.sRepairItem||item.sItem||'')+'</td>'+
+        tr.innerHTML = '<td style="height:20px">'+esc(item.sDescription||item.sRepairItem||item.sItem||'')+'</td>'+
           '<td class="num">'+(qty||'')+'</td>'+
           '<td class="num">'+(price?fmt(price):'')+'</td>'+
           '<td class="num">'+(amount?fmt(amount):'')+'</td>';
