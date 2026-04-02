@@ -61,6 +61,10 @@ DELETE FROM dupes WHERE rn > 1;
 DECLARE @cnt1 INT = (SELECT COUNT(*) FROM _xwalk_InventorySize);
 PRINT '  _xwalk_InventorySize matched: ' + CAST(@cnt1 AS VARCHAR)
 
+-- Fix: widen MatchType column — SELECT INTO with CAST('MATCHED' AS VARCHAR(20))
+-- produces VARCHAR(7) from the literal length, not the CAST target
+ALTER TABLE _xwalk_InventorySize ALTER COLUMN MatchType VARCHAR(20) NOT NULL;
+
 -- Add South-only parts (no match in North)
 INSERT INTO _xwalk_InventorySize (SouthSizeKey, NorthSizeKey, sSupplierPartNo, MatchType)
 SELECT ss.lInventorySizeKey, ss.lInventorySizeKey + 100000, '', 'SOUTH_ONLY'
@@ -91,6 +95,9 @@ JOIN tblInventory ni ON RTRIM(ni.sItemDescription) = RTRIM(si.sItemDescription);
 DELETE FROM dupes WHERE rn > 1;
 DECLARE @cnt3 INT = (SELECT COUNT(*) FROM _xwalk_Inventory);
 PRINT '  _xwalk_Inventory matched: ' + CAST(@cnt3 AS VARCHAR)
+
+-- Fix: widen MatchType — same SELECT INTO literal-width bug
+ALTER TABLE _xwalk_Inventory ALTER COLUMN MatchType VARCHAR(20) NOT NULL;
 
 -- South-only categories
 INSERT INTO _xwalk_Inventory (SouthKey, NorthKey, SouthDesc, MatchType)
@@ -123,6 +130,9 @@ WHERE LEN(RTRIM(ISNULL(ss.sSupplierPartNo,''))) >= 3
 DELETE FROM dupes WHERE rn > 1;
 DECLARE @cnt4 INT = (SELECT COUNT(*) FROM _xwalk_SupplierSizes);
 PRINT '  _xwalk_SupplierSizes matched: ' + CAST(@cnt4 AS VARCHAR)
+
+-- Fix: widen MatchType — same SELECT INTO literal-width bug
+ALTER TABLE _xwalk_SupplierSizes ALTER COLUMN MatchType VARCHAR(20) NOT NULL;
 
 INSERT INTO _xwalk_SupplierSizes (SouthKey, NorthKey, sSupplierPartNo, MatchType)
 SELECT ss.lSupplierSizesKey, ss.lSupplierSizesKey + 100000, ISNULL(ss.sSupplierPartNo, ''), 'SOUTH_ONLY'

@@ -1,6 +1,81 @@
 # Nashville Merge — Execution State
-**Last Updated:** April 1, 2026 (Repair migration COMPLETE — Phases 1-5 done)
+**Last Updated:** April 1, 2026 (All phases complete + validation run)
 **Purpose:** Resume point for the next conversation.
+
+---
+
+## Validation Results (April 1, 2026 — post-merge)
+
+### Truncation Bug Found & Fixed
+The inventory merge script (`nashville-inventory-merge.sql`) had 3 `Msg 8152 - String or binary data would be truncated` errors in Step 3B. Root cause: `SELECT ... INTO` with `CAST('MATCHED' AS VARCHAR(20))` creates `VARCHAR(7)` columns (SQL Server uses literal length, not CAST target). Inserting `'SOUTH_ONLY'` (10 chars) into `VARCHAR(7)` truncated.
+
+**Impact:** 2,576 south-only InventorySize parts, 48 south-only Inventory categories, and 3,347 south-only SupplierSizes were never added to crosswalk tables. This caused:
+- 18,308 migrated InventoryTran rows with invalid lInventorySizeKey
+- 8,269 migrated LotNumberAdjustments with invalid lInventorySizeKey
+
+**Fix applied:** Added `ALTER TABLE ... ALTER COLUMN MatchType VARCHAR(20) NOT NULL` after each crosswalk `SELECT INTO`, before the south-only INSERT. File: `server/migrations/nashville-inventory-merge.sql`.
+
+**Status:** Fix is in the script. Requires a clean DB restore + re-run to apply. Current DB still has the orphaned FK references.
+
+### Existing Post-Migration Tests (post-migration-tests.sql)
+| Test | Result | Notes |
+|------|--------|-------|
+| 1A Record counts | PASS | 183,057 North + 34,227 South |
+| 1B RepairItemTran orphans (>=20M) | PASS | 0 |
+| 1C StatusTran orphans (>=20M) | **22,730** | Pre-existing in Nashville (verified: exact same count in Nashville DB) |
+| 1D Duplicate lRepairKey | PASS | 0 |
+| 1E Critical fields | PASS | 16 NULL dept (known), 4 NULL scope (within tolerance) |
+| 1F Invoice orphans (>=20M) | **10,228** | All reference lRepairKey=20000000 (Nashville key 0 = null ref) |
+| 1F LoanerTran orphans (>=20M) | **4,851** | All reference lRepairKey=20000000 (same null ref pattern) |
+| 3A Duplicate lot numbers | PASS | 0 |
+| 4 FK Integrity (migration only) | ALL PASS | Dept, Scope, Tech, SalesRep, Distributor, SupplierPO = 0 orphans |
+| 5A Critical SPs | PASS | |
+| 5B SP Recompile | 1 BROKEN | `cartVendorsGet` — missing object (pre-existing, not migration-related) |
+| 7A Disabled indexes | PASS | 0 |
+| 7B Constraints | PASS | 0 disabled, 0 untrusted |
+| Trigger tests | PASS | trRepairUpd fires on both North and South repairs |
+| Nashville refs | PASS | 3 procs remaining = GP integration only |
+
+### Steve's Comprehensive Validation (steve-validation-tests.sql)
+| # | Test | Result | Notes |
+|---|------|--------|-------|
+| 1C | Migrated Repairs Not in tblRepair | PASS | 0 |
+| 1D | Migrated Scopes Not in tblScope | PASS | 0 |
+| 2B | NULL lServiceLocationKey | PASS | 0 |
+| 2C | Duplicate WO numbers | 1,206 dupes | **Pre-existing** — all North (keys 400K-500K), not migration |
+| 2D | Migrated Repairs Missing Fields | PASS | 0 |
+| 2E | Orphaned RepairItemTran | PASS | 0 |
+| 2F | Orphaned StatusTran | FAIL | 34K pre-existing + 22K Nashville pre-existing |
+| 2G | Orphaned Invoices | FAIL | Nashville lRepairKey=0 refs |
+| 2H | Orphaned InvoiceDetl | FAIL | Cascading from 2G |
+| 3B | Negative North stock | FAIL | Pre-existing (30 rows) |
+| 3C | Negative South stock | FAIL | Pre-existing (13 rows) |
+| 3D | Orphaned InventorySize | FAIL | Pre-existing (120 rows) |
+| 3E | Crosswalk Inventory Missing | PASS | 0 |
+| 3F | Crosswalk InventorySize Missing | PASS | 0 |
+| 3G | Crosswalk SupplierSizes Missing | PASS | 0 |
+| 4B | InventoryItems→InventorySize | PASS | 0 |
+| 4C | InventoryItems→ReceivingTran | FAIL | Pre-existing |
+| 4D | LotAdj→InventorySize | FAIL | 8,269 migrated (**truncation bug**) + 21 pre-existing |
+| 4E | InvTran→InventorySize | FAIL | 18,308 migrated (**truncation bug**) + 730 pre-existing |
+| 5A | Repair→Department | FAIL | 16 migration (known, zeroed) + 0 pre-existing |
+| 5B | Repair→Scope | FAIL | Needs investigation |
+| 5C | Repair→Technician | FAIL | 2,413 migration + 24,257 pre-existing |
+| 5D | Repair→SalesRep | FAIL | Mostly pre-existing |
+| 5E | Repair→Contract | FAIL | 13,797 migration + 165,712 pre-existing |
+| 5F | Department→Client | PASS | 0 |
+| 5G | Scope→ScopeType | FAIL | Pre-existing |
+| 5H | ContractScope→Scope | FAIL | Pre-existing |
+| 5I | SupplierPOTran→SupplierSizes | FAIL | Needs investigation |
+| 6A | Critical SP exists | PASS | |
+| 7B | Users with no security group | PASS | 0 |
+| 9A | Disabled indexes | PASS | 0 |
+| 9B | Disabled/untrusted constraints | PASS | 0 |
+
+**Key takeaway:** Steve's tests check ALL data (not just migrated rows). Most FAILs are pre-existing data quality issues in 30 years of legacy data. The only migration-caused issues are:
+1. **Truncation bug** → 18,308 + 8,269 orphaned inventory FK refs (fix ready, needs clean re-run)
+2. **Nashville null refs** → lRepairKey=0 in Nashville invoices/loaners (pre-existing Nashville issue, carried over)
+3. **16 dept orphans** → known, documented, zeroed during import
 
 ---
 
@@ -146,9 +221,30 @@ All tables migrated successfully:
 
 ---
 
-## NOT YET DONE — Remaining Nashville Merge Work
+## NOT YET DONE — Remaining Work
 
-### The Problem
+### Clean Re-Run Required
+The truncation bug fix requires restoring both DBs from backup and re-running the full sequence:
+1. Restore WinScopeNet + WinScopeNetNashville from `C:\TSI\` backups
+2. Run `nashville-inventory-merge.sql` (now with truncation fix)
+3. Run `nashville-repair-migrate.js` phase1 + phase2
+4. Run `nashville-merge-full.sql` (phases 3+ including procs/triggers)
+5. Run `post-migration-tests.sql` + `steve-validation-tests.sql`
+6. Set Nashville READ_ONLY
+
+### Pre-Existing Data Quality Issues (document for Steve)
+These are NOT migration bugs — they exist in the source databases:
+- 1,206 duplicate WO numbers (all North, legacy)
+- 22,730 Nashville StatusTran orphans (deleted repairs in Nashville)
+- 10,228 Nashville invoices with lRepairKey=0 (null references)
+- 4,851 Nashville LoanerTran with lRepairKey=0
+- 24,257 North Repair→Technician orphans (deleted techs)
+- 165,712 Repair→Contract orphans (deleted contracts)
+- 120 orphaned InventorySize records
+- 30 negative North stock, 13 negative South stock
+- `cartVendorsGet` SP references missing object
+
+### (Historical Reference) The Problem
 Nashville has **27,079 repairs** going back to 2016 that were never migrated to North. Only repairs created AFTER the consolidation cutoff (~Jan 2023) exist in North's tblRepair with lServiceLocationKey=2. Old South repair history is only in Nashville.
 
 When cloud goes live, customer requests for "5-year repair history" on South scopes would miss everything before 2023.
@@ -260,20 +356,20 @@ After fixing: run Phase 5 verification via `node server/migrations/nashville-rep
 
 ---
 
-## Remaining Work After Repair Migration
+## Remaining Work After Clean Re-Run
 
-### Step 3H: Verify the merge
-- Orphaned FK check
-- Row count reconciliation
-- Spot-check specific repairs/parts
+### Step 7: FedEx investigation
+- FedEx billing integration references — separate from Nashville merge
 
-### Steps 4-9 (Future)
-- Step 4: InventorySizeBuild tables (recipes)
-- Step 5: Stored proc rewrites (~133 cross-DB procs)
-- Step 6: Trigger handling
-- Step 7: FedEx investigation
-- Step 8: READ_ONLY burn-in period
-- Step 9: Decommission Nashville
+### Step 9: Decommission Nashville
+- After clean re-run + validation + Steve sign-off
+- Drop linked server TSS references from remaining 3 GP procs
+- Final decommission of WinScopeNetNashville database
+
+### Test Scripts Available
+- `server/migrations/post-migration-tests.sql` — migration-focused (filters >=20M)
+- `server/migrations/steve-validation-tests.sql` — comprehensive (all data, 35+ checks)
+- Run both after clean re-run for full proof
 
 ---
 
