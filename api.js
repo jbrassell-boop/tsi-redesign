@@ -713,6 +713,7 @@ const API = (() => {
   async function getLoanerRequests() { return get('/Loaner/GetRequests'); }
   async function requestLoaner(data) { return post('/Loaner/Request', data); }
   async function fulfillLoaner(data) { return post('/Loaner/FulfillRequest', data); }
+  async function declineLoaner(data) { return post('/Loaner/DeclineRequest', data); }
   async function deleteLoanerTran(key) { return del('/Loaner/Delete?lLoanerTranKey=' + key); }
 
   // ── Product Sale Details ─────────────────────────────
@@ -865,7 +866,7 @@ const API = (() => {
 
     // Loaner Instruments
     getLoanerTrans, getLoanersByRepair, addLoanerTran, updateLoanerTran,
-    getLoanerRequests, requestLoaner, fulfillLoaner, deleteLoanerTran,
+    getLoanerRequests, requestLoaner, fulfillLoaner, declineLoaner, deleteLoanerTran,
 
     // Product Sale Details
     getProductSaleDetails,

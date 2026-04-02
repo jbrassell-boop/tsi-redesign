@@ -236,10 +236,11 @@
             <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
             <option value="Fulfilled">Fulfilled</option>
-            <option value="Denied">Denied</option>
+            <option value="Declined">Declined</option>
           </select>
         </div>
         <div class="toolbar-search"><input class="search-input" id="reqSearchInput" type="text" placeholder="Search requests…"/></div>
+        <button class="btn btn-sm btn-navy" onclick="openNewRequestDrawer()">+ New Request</button>
       </div>
 
       <div id="skLoaners" style="padding:4px 12px"></div>
@@ -342,6 +343,67 @@
   <div class="drawer-body" id="detailBody"></div>
   <div class="drawer-footer">
     <button class="btn btn-sm btn-navy" id="btnDetailEdit" onclick="openEditFromDetail()" style="display:none">Edit</button>
+  </div>
+</div>
+
+<!-- NEW REQUEST DRAWER -->
+<div class="drawer" id="newRequestDrawer">
+  <div class="drawer-header">
+    <h3>New Loaner Request</h3>
+    <button class="drawer-close" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Work Order # (optional)</label>
+      <input type="text" id="reqWO" placeholder="NR26006601…"/>
+    </div>
+    <div class="field">
+      <label>Department <span class="req">*</span></label>
+      <select id="reqDepartment"><option value="">Select department…</option></select>
+    </div>
+    <div class="field">
+      <label>Needed By Date <span class="req">*</span></label>
+      <input type="date" id="reqNeededBy"/>
+    </div>
+    <div class="field">
+      <label>PO / Contract (optional)</label>
+      <input type="text" id="reqPO" placeholder="Purchase order…"/>
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="reqNotes" rows="2" style="width:100%;font-family:inherit;font-size:12px;padding:6px;border:1px solid var(--border);border-radius:var(--radius-sm)"></textarea>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-sm btn-outline" onclick="closeDrawer()">Cancel</button>
+    <button class="btn btn-sm btn-navy" onclick="saveNewRequest()">Submit Request</button>
+  </div>
+</div>
+
+<!-- FULFILL REQUEST DRAWER -->
+<div class="drawer" id="fulfillDrawer">
+  <div class="drawer-header">
+    <h3 id="fulfillTitle">Fulfill Request</h3>
+    <button class="drawer-close" onclick="closeDrawer()">&times; Close</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="fulfillKey" value=""/>
+    <div class="field">
+      <label>Assign Loaner Scope <span class="req">*</span></label>
+      <select id="fulfillScope"><option value="">Loading available loaners…</option></select>
+    </div>
+    <div class="field">
+      <label>Ship Date <span class="req">*</span></label>
+      <input type="date" id="fulfillShipDate"/>
+    </div>
+    <div class="field">
+      <label>Tracking # (optional)</label>
+      <input type="text" id="fulfillTracking" placeholder="UPS/FedEx tracking…"/>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-sm btn-outline" onclick="closeDrawer()">Cancel</button>
+    <button class="btn btn-sm btn-navy" onclick="saveFulfillRequest()">Fulfill</button>
   </div>
 </div>
 
@@ -1154,6 +1216,8 @@ function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('open');
   document.getElementById('loanerDrawer').classList.remove('open');
   document.getElementById('detailDrawer').classList.remove('open');
+  document.getElementById('newRequestDrawer').classList.remove('open');
+  document.getElementById('fulfillDrawer').classList.remove('open');
 }
 
 function openDetailDrawer() {
@@ -1319,10 +1383,10 @@ var requestsDateTo = '';
 
 function requestStatusBadge(s) {
   var map = {
-    'Pending':   'badge-pending',
-    'Approved':  'badge-approved',
-    'Fulfilled': 'badge-fulfilled',
-    'Denied':    'badge-denied'
+    'Pending':   'ss-warn',
+    'Approved':  'ss-info',
+    'Fulfilled': 'ss-active',
+    'Declined':  'ss-danger'
   };
   return '<span class="badge ' + (map[s] || '') + '">' + esc(s) + '</span>';
 }
@@ -1368,6 +1432,7 @@ function filterRequests() {
     '<th style="width:100px" data-sort-col="neededBy" onclick="sortLoanerColumn(\'neededBy\')">Needed By <span class="sort"></span></th>' +
     '<th style="width:80px;text-align:center" data-sort-col="status" onclick="sortLoanerColumn(\'status\')">Status <span class="sort"></span></th>' +
     '<th style="width:110px">Assigned Loaner</th>' +
+    '<th style="width:90px;text-align:center">Actions</th>' +
   '</tr>';
 
   var filtered = applySortToRows(getFilteredRequests(), loanerSortCol, loanerSortDir);
@@ -1380,9 +1445,8 @@ function filterRequests() {
   var tbody = document.getElementById('tableBody');
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>' +
-      '<div>No requests found</div>' +
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' +
+      '<div>No loaner requests found for this period.</div>' +
     '</td></tr>';
   } else {
     tbody.innerHTML = filtered.map(function(r) {
@@ -1390,6 +1454,14 @@ function filterRequests() {
       var now = new Date();
       var urgent = (r.status === 'Pending' || r.status === 'Approved') && neededDate <= now;
       var neededStyle = urgent ? 'color:var(--red);font-weight:700' : '';
+      var actions = '';
+      if (r.status === 'Pending' || r.status === 'Approved') {
+        actions = '<button class="btn btn-sm btn-navy" onclick="openFulfillDrawer(' + r._key + ')">Fulfill</button>';
+      }
+      if (r.status === 'Pending') {
+        actions += ' <button class="btn btn-sm btn-danger" onclick="confirmDecline(this,' + r._key + ')">Decline</button>';
+      }
+      if (!actions) actions = '<span style="color:var(--muted)">\u2014</span>';
       return '<tr>' +
         '<td style="font-weight:600;color:var(--blue)">' + esc(r.requestNum) + '</td>' +
         '<td>' + esc(r.client) + '</td>' +
@@ -1399,6 +1471,7 @@ function filterRequests() {
         '<td style="' + neededStyle + '">' + fmtDate(r.neededBy) + '</td>' +
         '<td style="text-align:center">' + requestStatusBadge(r.status) + '</td>' +
         '<td style="font-family:monospace;font-size:11px">' + esc(r.assignedLoaner || '\u2014') + '</td>' +
+        '<td style="text-align:center">' + actions + '</td>' +
       '</tr>';
     }).join('');
   }
@@ -1409,6 +1482,124 @@ function filterRequests() {
     ' &nbsp;\u00b7&nbsp; <strong>' + pendingCount + '</strong> pending' +
     ' &nbsp;\u00b7&nbsp; <strong>' + fulfilledCount + '</strong> fulfilled';
 }
+
+// ═══════════════════════════════════════════════════════
+//  REQUEST ACTIONS — New, Fulfill, Decline
+// ═══════════════════════════════════════════════════════
+
+function openNewRequestDrawer() {
+  document.getElementById('reqWO').value = '';
+  document.getElementById('reqNeededBy').value = '';
+  document.getElementById('reqPO').value = '';
+  document.getElementById('reqNotes').value = '';
+  // Populate department dropdown from existing page data
+  var sel = document.getElementById('reqDepartment');
+  sel.innerHTML = '<option value="">Select department…</option>';
+  if (typeof _deptCache !== 'undefined' && _deptCache.length) {
+    _deptCache.forEach(function(d) {
+      sel.innerHTML += '<option value="' + d.lDepartmentKey + '">' + esc(d.sDepartmentName || '') + '</option>';
+    });
+  } else {
+    API.getAllDepartments().then(function(depts) {
+      _deptCache = depts || [];
+      _deptCache.forEach(function(d) {
+        sel.innerHTML += '<option value="' + d.lDepartmentKey + '">' + esc(d.sDepartmentName || '') + '</option>';
+      });
+    }).catch(function() {});
+  }
+  openDrawer('newRequestDrawer');
+}
+
+async function saveNewRequest() {
+  var deptKey = parseInt(document.getElementById('reqDepartment').value) || 0;
+  var neededBy = document.getElementById('reqNeededBy').value;
+  if (!deptKey) { showToast('Department is required', 'error'); return; }
+  if (!neededBy) { showToast('Needed By date is required', 'error'); return; }
+  try {
+    await API.requestLoaner({
+      lDepartmentKey: deptKey,
+      lRepairKey: 0,
+      lDeliveryMethodKey: 3,
+      sPurchaseOrder: document.getElementById('reqPO').value || '',
+      lContractKey: 0
+    });
+    closeDrawer();
+    showToast('Loaner request submitted');
+    _requestsLoaded = false;
+    renderRequests();
+  } catch (e) {
+    showToast('Failed to submit request: ' + e.message, 'error');
+  }
+}
+
+function openFulfillDrawer(loanerTranKey) {
+  document.getElementById('fulfillKey').value = loanerTranKey;
+  document.getElementById('fulfillShipDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fulfillTracking').value = '';
+  // Load available loaner scopes
+  var sel = document.getElementById('fulfillScope');
+  sel.innerHTML = '<option value="">Loading…</option>';
+  API.get('/Scope/GetAll').then(function(scopes) {
+    var available = (scopes || []).filter(function(s) {
+      return (s.sLoanerRackPosition || s.bOnSiteLoaner) && !s.sDateOut;
+    });
+    sel.innerHTML = '<option value="">Select a loaner scope…</option>';
+    available.forEach(function(s) {
+      sel.innerHTML += '<option value="' + s.lScopeKey + '">' +
+        esc(s.sScopeTypeDesc || s.sModelNumber || '') + ' — SN: ' + esc(s.sSerialNumber || '') +
+      '</option>';
+    });
+    if (!available.length) {
+      sel.innerHTML = '<option value="">No available loaners in pool</option>';
+    }
+  }).catch(function() {
+    sel.innerHTML = '<option value="">Could not load scopes</option>';
+  });
+  openDrawer('fulfillDrawer');
+}
+
+async function saveFulfillRequest() {
+  var loanerKey = parseInt(document.getElementById('fulfillKey').value) || 0;
+  var scopeKey = parseInt(document.getElementById('fulfillScope').value) || 0;
+  var shipDate = document.getElementById('fulfillShipDate').value;
+  if (!scopeKey) { showToast('Select a loaner scope', 'error'); return; }
+  if (!shipDate) { showToast('Ship date is required', 'error'); return; }
+  // Format date as YYYYMMDDhhmmss
+  var sDateOut = shipDate.replace(/-/g, '') + '120000';
+  try {
+    await API.fulfillLoaner({
+      lLoanerTranKey: loanerKey,
+      lScopeKey: scopeKey,
+      sDateOut: sDateOut,
+      sTrackingNumber: document.getElementById('fulfillTracking').value || ''
+    });
+    closeDrawer();
+    showToast('Request fulfilled — loaner assigned');
+    _requestsLoaded = false;
+    renderRequests();
+  } catch (e) {
+    showToast('Failed to fulfill: ' + e.message, 'error');
+  }
+}
+
+function confirmDecline(btn, loanerTranKey) {
+  if (btn._confirming) {
+    // Second click — actually decline
+    API.declineLoaner({ lLoanerTranKey: loanerTranKey }).then(function() {
+      showToast('Request declined');
+      _requestsLoaded = false;
+      renderRequests();
+    }).catch(function(e) {
+      showToast('Failed to decline: ' + e.message, 'error');
+    });
+    return;
+  }
+  btn._confirming = true;
+  btn.textContent = 'Sure?';
+  setTimeout(function() { btn._confirming = false; btn.textContent = 'Decline'; }, 3000);
+}
+
+var _deptCache = [];
 
 // ═══════════════════════════════════════════════════════
 //  SERVICE LOCATION FILTER

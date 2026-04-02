@@ -116,16 +116,17 @@ router.post('/Loaner/Update', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// GET /api/Loaner/GetRequests — Open/pending loaner requests
-// Requests = loaner records with no scope assigned (lScopeKey=0) or no ship date yet
-// Includes fulfilled requests (lScopeKey assigned) and open ones
+// GET /api/Loaner/GetRequests — Loaner requests with computed status
+// Returns pending, approved, fulfilled, and declined requests within date range
 router.get('/Loaner/GetRequests', async (req, res, next) => {
   try {
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
     const rows = await db.query(`
       SELECT lt.lLoanerTranKey, lt.lDepartmentKey, lt.lScopeKey,
         lt.lRepairKey, lt.lSalesRepKey,
         lt.sDateOut, lt.sDateIn, lt.sPurchaseOrder, lt.sRepairClosed,
-        lt.dtCreateDate, lt.sTrackingNumber,
+        lt.dtCreateDate, lt.sTrackingNumber, lt.lContractKey,
         ISNULL(s.sSerialNumber, '') AS sSerialNumber,
         ISNULL(st.sScopeTypeDesc, '') AS sScopeTypeDesc,
         ISNULL(d.sDepartmentName, '') AS sDepartmentName,
@@ -133,7 +134,7 @@ router.get('/Loaner/GetRequests', async (req, res, next) => {
         ISNULL(r.sWorkOrderNumber, '') AS sWorkOrderNumber,
         LTRIM(RTRIM(ISNULL(sr.sRepFirst,'') + ' ' + ISNULL(sr.sRepLast,''))) AS sSalesRepName,
         CASE
-          WHEN lt.sRepairClosed = '1' THEN 'Fulfilled'
+          WHEN lt.sRepairClosed = '1' AND lt.lScopeKey = 0 THEN 'Declined'
           WHEN lt.lScopeKey > 0 AND (lt.sDateOut IS NOT NULL AND lt.sDateOut <> '') THEN 'Fulfilled'
           WHEN lt.lScopeKey > 0 THEN 'Approved'
           ELSE 'Pending'
@@ -145,8 +146,10 @@ router.get('/Loaner/GetRequests', async (req, res, next) => {
         LEFT JOIN tblClient c ON c.lClientKey = d.lClientKey
         LEFT JOIN tblRepair r ON r.lRepairKey = lt.lRepairKey
         LEFT JOIN tblSalesRep sr ON sr.lSalesRepKey = lt.lSalesRepKey
-      WHERE lt.dtCreateDate >= DATEADD(MONTH, -3, GETDATE())
-      ORDER BY lt.lLoanerTranKey DESC`, {});
+      WHERE lt.dtCreateDate >= ISNULL(@startDate, DATEADD(DAY, -90, GETDATE()))
+        AND lt.dtCreateDate <= ISNULL(@endDate, GETDATE())
+      ORDER BY lt.lLoanerTranKey DESC`,
+      { startDate, endDate });
     res.json({ success: true, data: rows });
   } catch (e) { next(e); }
 });
@@ -191,13 +194,31 @@ router.post('/Loaner/FulfillRequest', async (req, res, next) => {
       UPDATE tblLoanerTran SET
         lScopeKey = @scopeKey,
         sDateOut = ISNULL(@dateOut, sDateOut),
+        sTrackingNumber = ISNULL(@tracking, sTrackingNumber),
         dtLastUpdate = GETDATE()
       WHERE lLoanerTranKey = @loanerKey`,
       {
         loanerKey,
         scopeKey,
-        dateOut: b.sDateOut || null
+        dateOut: b.sDateOut || null,
+        tracking: b.sTrackingNumber || null
       });
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+// POST /api/Loaner/DeclineRequest — Mark a pending request as declined
+router.post('/Loaner/DeclineRequest', async (req, res, next) => {
+  try {
+    const b = req.body || {};
+    const loanerKey = parseInt(b.lLoanerTranKey) || 0;
+    if (!loanerKey) return res.status(400).json({ success: false, error: 'lLoanerTranKey required' });
+    await db.query(`
+      UPDATE tblLoanerTran SET
+        sRepairClosed = '1',
+        dtLastUpdate = GETDATE()
+      WHERE lLoanerTranKey = @loanerKey AND lScopeKey = 0`,
+      { loanerKey });
     res.json({ success: true });
   } catch (e) { next(e); }
 });
