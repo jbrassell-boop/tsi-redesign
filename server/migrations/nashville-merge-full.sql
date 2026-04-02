@@ -116,17 +116,24 @@ BEGIN
   WHERE c1.TABLE_NAME = @tblName
     AND c1.COLUMN_NAME != ISNULL(@pkCol, '___none___');
 
-  -- INSERT
+  -- INSERT (capture @@ROWCOUNT before IDENTITY_INSERT OFF resets it)
+  DECLARE @rc INT = 0;
   IF @pkCol IS NOT NULL
+  BEGIN
     SET @sql = 'SET IDENTITY_INSERT ' + @tblName + ' ON; ' +
       'INSERT INTO ' + @tblName + ' (' + @pkCol + ', ' + @cols + ') ' +
       'SELECT _nk, ' + @cols + ' FROM ' + @stg + '; ' +
+      'SET @rc = @@ROWCOUNT; ' +
       'SET IDENTITY_INSERT ' + @tblName + ' OFF;';
+    EXEC sp_executesql @sql, N'@rc INT OUTPUT', @rc OUTPUT;
+  END
   ELSE
+  BEGIN
     SET @sql = 'INSERT INTO ' + @tblName + ' (' + @cols + ') SELECT ' + @cols + ' FROM ' + @stg + ';';
-
-  EXEC sp_executesql @sql;
-  PRINT '  ' + @tblName + ' inserted: ' + CAST(@@ROWCOUNT AS VARCHAR);
+    EXEC sp_executesql @sql;
+    SET @rc = @@ROWCOUNT;
+  END
+  PRINT '  ' + @tblName + ' inserted: ' + CAST(@rc AS VARCHAR);
 
   -- Re-enable
   BEGIN TRY
@@ -248,9 +255,10 @@ DECLARE @bc NVARCHAR(MAX);
 SELECT @bc = STRING_AGG(c1.COLUMN_NAME, ', ') FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_Build') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblInventorySizeBuild' AND c1.COLUMN_NAME != 'lInventorySizeBuildKey';
-DECLARE @bs NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySizeBuild ON; INSERT INTO tblInventorySizeBuild (lInventorySizeBuildKey, ' + @bc + ') SELECT _nk, ' + @bc + ' FROM _stg_Build; SET IDENTITY_INSERT tblInventorySizeBuild OFF;';
-EXEC sp_executesql @bs;
-PRINT '  tblInventorySizeBuild: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @bs NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySizeBuild ON; INSERT INTO tblInventorySizeBuild (lInventorySizeBuildKey, ' + @bc + ') SELECT _nk, ' + @bc + ' FROM _stg_Build; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblInventorySizeBuild OFF;';
+DECLARE @bsRC INT;
+EXEC sp_executesql @bs, N'@rc INT OUTPUT', @bsRC OUTPUT;
+PRINT '  tblInventorySizeBuild: ' + CAST(@bsRC AS VARCHAR)
 DROP TABLE _stg_Build;
 GO
 
@@ -266,9 +274,10 @@ DECLARE @ic NVARCHAR(MAX);
 SELECT @ic = STRING_AGG(c1.COLUMN_NAME, ', ') FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_Items') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblInventorySizeBuildItems' AND c1.COLUMN_NAME != 'lInventorySizeBuildItemKey';
-DECLARE @is NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySizeBuildItems ON; INSERT INTO tblInventorySizeBuildItems (lInventorySizeBuildItemKey, ' + @ic + ') SELECT _nk, ' + @ic + ' FROM _stg_Items; SET IDENTITY_INSERT tblInventorySizeBuildItems OFF;';
-EXEC sp_executesql @is;
-PRINT '  tblInventorySizeBuildItems: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @is NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySizeBuildItems ON; INSERT INTO tblInventorySizeBuildItems (lInventorySizeBuildItemKey, ' + @ic + ') SELECT _nk, ' + @ic + ' FROM _stg_Items; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblInventorySizeBuildItems OFF;';
+DECLARE @isRC INT;
+EXEC sp_executesql @is, N'@rc INT OUTPUT', @isRC OUTPUT;
+PRINT '  tblInventorySizeBuildItems: ' + CAST(@isRC AS VARCHAR)
 DROP TABLE _stg_Items;
 PRINT '  STEP 4 COMPLETE: ' + CONVERT(VARCHAR, GETDATE(), 120)
 GO

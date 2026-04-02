@@ -181,9 +181,10 @@ SELECT @sizeCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_InvSize') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblInventorySize' AND c1.COLUMN_NAME != 'lInventorySizeKey';
-DECLARE @sizeSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySize ON; INSERT INTO tblInventorySize (lInventorySizeKey, ' + @sizeCols + ') SELECT _nk, ' + @sizeCols + ' FROM _stg_InvSize; SET IDENTITY_INSERT tblInventorySize OFF;';
-EXEC sp_executesql @sizeSql;
-PRINT '  South-only parts imported: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @sizeSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventorySize ON; INSERT INTO tblInventorySize (lInventorySizeKey, ' + @sizeCols + ') SELECT _nk, ' + @sizeCols + ' FROM _stg_InvSize; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblInventorySize OFF;';
+DECLARE @sizeRC INT;
+EXEC sp_executesql @sizeSql, N'@rc INT OUTPUT', @sizeRC OUTPUT;
+PRINT '  South-only parts imported: ' + CAST(@sizeRC AS VARCHAR)
 DROP TABLE _stg_InvSize;
 PRINT '  STEP 3D COMPLETE'
 GO
@@ -225,9 +226,10 @@ SELECT @invCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_Inv') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblInventory' AND c1.COLUMN_NAME != 'lInventoryKey';
-DECLARE @invSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventory ON; INSERT INTO tblInventory (lInventoryKey, ' + @invCols + ') SELECT _nk, ' + @invCols + ' FROM _stg_Inv; SET IDENTITY_INSERT tblInventory OFF;';
-EXEC sp_executesql @invSql;
-PRINT '  South-only categories imported: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @invSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventory ON; INSERT INTO tblInventory (lInventoryKey, ' + @invCols + ') SELECT _nk, ' + @invCols + ' FROM _stg_Inv; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblInventory OFF;';
+DECLARE @invRC INT;
+EXEC sp_executesql @invSql, N'@rc INT OUTPUT', @invRC OUTPUT;
+PRINT '  South-only categories imported: ' + CAST(@invRC AS VARCHAR)
 DROP TABLE _stg_Inv;
 PRINT '  STEP 3F COMPLETE'
 GO
@@ -258,9 +260,10 @@ SELECT @spoCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_SPO') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblSupplierPO' AND c1.COLUMN_NAME != 'lSupplierPOKey';
-DECLARE @spoSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierPO ON; INSERT INTO tblSupplierPO (lSupplierPOKey, ' + @spoCols + ') SELECT _nk, ' + @spoCols + ' FROM _stg_SPO; SET IDENTITY_INSERT tblSupplierPO OFF;';
-EXEC sp_executesql @spoSql;
-PRINT '  tblSupplierPO: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @spoSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierPO ON; INSERT INTO tblSupplierPO (lSupplierPOKey, ' + @spoCols + ') SELECT _nk, ' + @spoCols + ' FROM _stg_SPO; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblSupplierPO OFF;';
+DECLARE @spoRC INT;
+EXEC sp_executesql @spoSql, N'@rc INT OUTPUT', @spoRC OUTPUT;
+PRINT '  tblSupplierPO: ' + CAST(@spoRC AS VARCHAR)
 DROP TABLE _stg_SPO;
 GO
 
@@ -283,9 +286,10 @@ SELECT @ssCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_SS') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblSupplierSizes' AND c1.COLUMN_NAME != 'lSupplierSizesKey';
-DECLARE @ssSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierSizes ON; INSERT INTO tblSupplierSizes (lSupplierSizesKey, ' + @ssCols + ') SELECT _nk, ' + @ssCols + ' FROM _stg_SS; SET IDENTITY_INSERT tblSupplierSizes OFF;';
-EXEC sp_executesql @ssSql;
-PRINT '  tblSupplierSizes: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @ssSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierSizes ON; INSERT INTO tblSupplierSizes (lSupplierSizesKey, ' + @ssCols + ') SELECT _nk, ' + @ssCols + ' FROM _stg_SS; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblSupplierSizes OFF;';
+DECLARE @ssRC INT;
+EXEC sp_executesql @ssSql, N'@rc INT OUTPUT', @ssRC OUTPUT;
+PRINT '  tblSupplierSizes: ' + CAST(@ssRC AS VARCHAR)
 DROP TABLE _stg_SS;
 GO
 
@@ -305,9 +309,10 @@ SELECT @spotCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_SPOT') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblSupplierPOTran' AND c1.COLUMN_NAME != 'lSupplierPOTranKey';
-DECLARE @spotSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierPOTran ON; INSERT INTO tblSupplierPOTran (lSupplierPOTranKey, ' + @spotCols + ') SELECT _nk, ' + @spotCols + ' FROM _stg_SPOT; SET IDENTITY_INSERT tblSupplierPOTran OFF;';
-EXEC sp_executesql @spotSql;
-PRINT '  tblSupplierPOTran: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @spotSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblSupplierPOTran ON; INSERT INTO tblSupplierPOTran (lSupplierPOTranKey, ' + @spotCols + ') SELECT _nk, ' + @spotCols + ' FROM _stg_SPOT; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblSupplierPOTran OFF;';
+DECLARE @spotRC INT;
+EXEC sp_executesql @spotSql, N'@rc INT OUTPUT', @spotRC OUTPUT;
+PRINT '  tblSupplierPOTran: ' + CAST(@spotRC AS VARCHAR)
 DROP TABLE _stg_SPOT;
 GO
 
@@ -328,9 +333,10 @@ SELECT @itCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_IT') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblInventoryTran' AND c1.COLUMN_NAME != 'lInventoryTranKey';
-DECLARE @itSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventoryTran ON; INSERT INTO tblInventoryTran (lInventoryTranKey, ' + @itCols + ') SELECT _nk, ' + @itCols + ' FROM _stg_IT; SET IDENTITY_INSERT tblInventoryTran OFF;';
-EXEC sp_executesql @itSql;
-PRINT '  tblInventoryTran: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @itSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblInventoryTran ON; INSERT INTO tblInventoryTran (lInventoryTranKey, ' + @itCols + ') SELECT _nk, ' + @itCols + ' FROM _stg_IT; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblInventoryTran OFF;';
+DECLARE @itRC INT;
+EXEC sp_executesql @itSql, N'@rc INT OUTPUT', @itRC OUTPUT;
+PRINT '  tblInventoryTran: ' + CAST(@itRC AS VARCHAR)
 DROP TABLE _stg_IT;
 GO
 
@@ -350,9 +356,10 @@ SELECT @lnaCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_LNA') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblLotNumberAdjustments' AND c1.COLUMN_NAME != 'lLotNumberAdjustmentKey';
-DECLARE @lnaSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblLotNumberAdjustments ON; INSERT INTO tblLotNumberAdjustments (lLotNumberAdjustmentKey, ' + @lnaCols + ') SELECT _nk, ' + @lnaCols + ' FROM _stg_LNA; SET IDENTITY_INSERT tblLotNumberAdjustments OFF;';
-EXEC sp_executesql @lnaSql;
-PRINT '  tblLotNumberAdjustments: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @lnaSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblLotNumberAdjustments ON; INSERT INTO tblLotNumberAdjustments (lLotNumberAdjustmentKey, ' + @lnaCols + ') SELECT _nk, ' + @lnaCols + ' FROM _stg_LNA; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblLotNumberAdjustments OFF;';
+DECLARE @lnaRC INT;
+EXEC sp_executesql @lnaSql, N'@rc INT OUTPUT', @lnaRC OUTPUT;
+PRINT '  tblLotNumberAdjustments: ' + CAST(@lnaRC AS VARCHAR)
 DROP TABLE _stg_LNA;
 GO
 
@@ -369,9 +376,10 @@ SELECT @riCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_RI') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblRepairInventory' AND c1.COLUMN_NAME != 'lRepairInventoryKey';
-DECLARE @riSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblRepairInventory ON; INSERT INTO tblRepairInventory (lRepairInventoryKey, ' + @riCols + ') SELECT _nk, ' + @riCols + ' FROM _stg_RI; SET IDENTITY_INSERT tblRepairInventory OFF;';
-EXEC sp_executesql @riSql;
-PRINT '  tblRepairInventory: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @riSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblRepairInventory ON; INSERT INTO tblRepairInventory (lRepairInventoryKey, ' + @riCols + ') SELECT _nk, ' + @riCols + ' FROM _stg_RI; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblRepairInventory OFF;';
+DECLARE @riRC INT;
+EXEC sp_executesql @riSql, N'@rc INT OUTPUT', @riRC OUTPUT;
+PRINT '  tblRepairInventory: ' + CAST(@riRC AS VARCHAR)
 DROP TABLE _stg_RI;
 GO
 
@@ -390,9 +398,10 @@ SELECT @rlnaCols = STRING_AGG(c1.COLUMN_NAME, ', ')
 FROM INFORMATION_SCHEMA.COLUMNS c1
 JOIN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '_stg_RLNA') c2 ON c2.COLUMN_NAME = c1.COLUMN_NAME
 WHERE c1.TABLE_NAME = 'tblRepairLotNumberAdjustments' AND c1.COLUMN_NAME != 'lInventoryAdjustmentKey';
-DECLARE @rlnaSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblRepairLotNumberAdjustments ON; INSERT INTO tblRepairLotNumberAdjustments (lInventoryAdjustmentKey, ' + @rlnaCols + ') SELECT _nk, ' + @rlnaCols + ' FROM _stg_RLNA; SET IDENTITY_INSERT tblRepairLotNumberAdjustments OFF;';
-EXEC sp_executesql @rlnaSql;
-PRINT '  tblRepairLotNumberAdjustments: ' + CAST(@@ROWCOUNT AS VARCHAR)
+DECLARE @rlnaSql NVARCHAR(MAX) = 'SET IDENTITY_INSERT tblRepairLotNumberAdjustments ON; INSERT INTO tblRepairLotNumberAdjustments (lInventoryAdjustmentKey, ' + @rlnaCols + ') SELECT _nk, ' + @rlnaCols + ' FROM _stg_RLNA; SET @rc = @@ROWCOUNT; SET IDENTITY_INSERT tblRepairLotNumberAdjustments OFF;';
+DECLARE @rlnaRC INT;
+EXEC sp_executesql @rlnaSql, N'@rc INT OUTPUT', @rlnaRC OUTPUT;
+PRINT '  tblRepairLotNumberAdjustments: ' + CAST(@rlnaRC AS VARCHAR)
 DROP TABLE _stg_RLNA;
 GO
 
