@@ -19,13 +19,13 @@
 | Nashville READ_ONLY | 21:58 | Confirmed |
 
 ### Truncation Bug — FIXED AND VERIFIED
-The inventory merge script (`nashville-inventory-merge.sql`) had 3 `Msg 8152 - String or binary data would be truncated` errors in Step 3B. Root cause: `SELECT ... INTO` with `CAST('MATCHED' AS VARCHAR(20))` creates `VARCHAR(7)` columns (SQL Server uses literal length, not CAST target). Inserting `'SOUTH_ONLY'` (10 chars) into `VARCHAR(7)` truncated.
+The inventory merge script (`step1-inventory-merge.sql`) had 3 `Msg 8152 - String or binary data would be truncated` errors in Step 3B. Root cause: `SELECT ... INTO` with `CAST('MATCHED' AS VARCHAR(20))` creates `VARCHAR(7)` columns (SQL Server uses literal length, not CAST target). Inserting `'SOUTH_ONLY'` (10 chars) into `VARCHAR(7)` truncated.
 
 **Impact:** 2,576 south-only InventorySize parts, 48 south-only Inventory categories, and 3,347 south-only SupplierSizes were never added to crosswalk tables. This caused:
 - 18,308 migrated InventoryTran rows with invalid lInventorySizeKey
 - 8,269 migrated LotNumberAdjustments with invalid lInventorySizeKey
 
-**Fix applied:** Added `ALTER TABLE ... ALTER COLUMN MatchType VARCHAR(20) NOT NULL` after each crosswalk `SELECT INTO`, before the south-only INSERT. File: `server/migrations/nashville-inventory-merge.sql`.
+**Fix applied:** Added `ALTER TABLE ... ALTER COLUMN MatchType VARCHAR(20) NOT NULL` after each crosswalk `SELECT INTO`, before the south-only INSERT. File: `server/migrations/step1-inventory-merge.sql`.
 
 **Status:** FIXED AND VERIFIED on clean run. Results:
 - _xwalk_InventorySize: 11,213 (was 8,637 — gained 2,576 south-only)
@@ -34,7 +34,7 @@ The inventory merge script (`nashville-inventory-merge.sql`) had 3 `Msg 8152 - S
 - InventoryTran orphans: 18,308 → **0** (completely fixed)
 - LotNumberAdjustments orphans: 8,269 → **3** (3 remaining have lInventorySizeKey=0 in Nashville source)
 
-### Post-Migration Tests — CLEAN RUN (post-migration-tests.sql)
+### Post-Migration Tests — CLEAN RUN (step4-validation-tests.sql)
 | Test | Result | Notes |
 |------|--------|-------|
 | 1A Record counts | PASS | 183,057 North + 34,227 South |
@@ -53,7 +53,7 @@ The inventory merge script (`nashville-inventory-merge.sql`) had 3 `Msg 8152 - S
 | Trigger tests | **PASS** | trRepairUpd fires on both North and South repairs |
 | Nashville refs | **PASS** | 3 procs remaining = GP integration only |
 
-### Steve's Comprehensive Validation — CLEAN RUN (steve-validation-tests.sql)
+### Steve's Comprehensive Validation — CLEAN RUN (step5-steve-validation.sql)
 | # | Test | Result | Notes |
 |---|------|--------|-------|
 | 1C | Migrated Repairs Not in tblRepair | **PASS** | 0 |
@@ -360,7 +360,7 @@ after INSERT reports @@ROWCOUNT from the IDENTITY_INSERT OFF, not the INSERT its
 **The inserts are actually succeeding for most tables** — the "Inserted: 0 rows" was a false alarm.
 The 6 tables above have real issues (PK collision or _newPK not in scope).
 
-After fixing: run Phase 5 verification via `node server/migrations/nashville-repair-migrate.js phase5`
+After fixing: run Phase 5 verification via `node server/migrations/step2-repair-migrate.js phase5`
 
 ---
 
@@ -375,8 +375,8 @@ After fixing: run Phase 5 verification via `node server/migrations/nashville-rep
 - Final decommission of WinScopeNetNashville database
 
 ### Test Scripts Available
-- `server/migrations/post-migration-tests.sql` — migration-focused (filters >=20M)
-- `server/migrations/steve-validation-tests.sql` — comprehensive (all data, 35+ checks)
+- `server/migrations/step4-validation-tests.sql` — migration-focused (filters >=20M)
+- `server/migrations/step5-steve-validation.sql` — comprehensive (all data, 35+ checks)
 - Run both after clean re-run for full proof
 
 ---
@@ -404,7 +404,7 @@ Batch size for 200K+ rows: 50,000
 - (Still needed: `_xwalk_Repair` — built by Phase 5)
 
 ## Migration Script
-- `server/migrations/nashville-repair-migrate.js` — 5-phase script
-- Run each phase independently: `node server/migrations/nashville-repair-migrate.js phase3`
+- `server/migrations/step2-repair-migrate.js` — 5-phase script
+- Run each phase independently: `node server/migrations/step2-repair-migrate.js phase3`
 - Uses staging table approach to avoid ODBC cross-DB ntext/identity issues
 - Key learnings: msnodesqlv8 requires `batch()` not `query()` for IDENTITY_INSERT; must disable triggers (trRepairUpd references linked server TSS)

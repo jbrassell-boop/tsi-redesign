@@ -37,20 +37,22 @@ Moves all Nashville (South) repair history into the North database so the cloud 
 cd C:/Projects/tsi-redesign
 
 # Step 1: Inventory merge (parts, suppliers, stock levels, transactions)
-sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/nashville-inventory-merge.sql
+sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/step1-inventory-merge.sql
 
-# Step 2: Phase 1 + 2 (crosswalks + repair import)
-node server/migrations/nashville-repair-migrate.js phase1
-node server/migrations/nashville-repair-migrate.js phase2
+# Step 2: Repair crosswalks + import (run phase1 then phase2)
+node server/migrations/step2-repair-migrate.js phase1
+node server/migrations/step2-repair-migrate.js phase2
 
-# Step 3: Phase 3 + Steps 4-6 (child tables, recipes, triggers, procs)
-sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/nashville-merge-full.sql
+# Step 3: Child tables, recipes, triggers, stored procedures
+sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/step3-child-tables-and-fixes.sql
 
-# Step 4: Validate
-sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/post-migration-tests.sql
-sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/steve-validation-tests.sql
+# Step 4: Migration-focused validation
+sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/step4-validation-tests.sql
 
-# Step 5: Set Nashville READ_ONLY
+# Step 5: Comprehensive validation (Steve's 35-check suite)
+sqlcmd -S localhost -d WinScopeNet -E -C -i server/migrations/step5-steve-validation.sql
+
+# Then: Set Nashville READ_ONLY
 sqlcmd -S localhost -d master -E -C -Q "ALTER DATABASE WinScopeNetNashville SET READ_ONLY"
 ```
 
@@ -176,10 +178,8 @@ FAILs are all pre-existing in 30 years of legacy data:
 ## Scripts
 | File | Purpose |
 |------|---------|
-| `nashville-inventory-merge.sql` | Inventory merge: Steps 3A-3G (crosswalks, stock, 680K+ transactions) |
-| `nashville-repair-migrate.js` | Phase 1 (crosswalks) + Phase 2 (repair import) + Phase 5 (verify) |
-| `nashville-merge-full.sql` | Phase 3 (child tables) + Steps 4-6 (recipes, triggers, procs) |
-| `post-migration-tests.sql` | Migration-focused validation (filters >=20M) |
-| `steve-validation-tests.sql` | Comprehensive 35-check validation (all data) |
-| `run-sql.js` | GO-aware SQL batch runner for Node.js |
-| `generate-phase3-sql.js` | Generates Phase 3 SQL from live column metadata |
+| `step1-inventory-merge.sql` | Inventory merge: crosswalks, stock levels, 680K+ transactions |
+| `step2-repair-migrate.js` | Repair crosswalks (phase1) + repair import (phase2) |
+| `step3-child-tables-and-fixes.sql` | 25 child tables + recipes + trigger fixes + stored proc fixes |
+| `step4-validation-tests.sql` | Migration-focused validation (filters migrated rows >=20M) |
+| `step5-steve-validation.sql` | Comprehensive 35-check validation (all data) |
