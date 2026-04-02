@@ -26,14 +26,15 @@
     .toggle input:checked+.toggle-slider::before{transform:translateX(15px)}
 
     /* INPUT OVERRIDES */
-    .inp{padding:0 6px}
+    .inp{padding:0 6px;height:40px}
     textarea.inp{height:60px;padding:6px 8px;line-height:1.4}
-    select.inp{cursor:pointer}
+    select.inp{cursor:pointer;height:40px;border-radius:6px}
     .ff label{font-size:10px}
     .fg{gap:4px 8px}
     .g4{grid-template-columns:1fr 1fr 1fr 1fr}
 
     /* TABLE OVERRIDES */
+    th{background:var(--neutral-50);position:sticky;top:0;text-transform:uppercase;padding:8px 12px;font-weight:600;font-size:11px}
     tbody tr:hover{cursor:default}
     .b-yes{background:var(--primary-light);color:var(--blue);font-size:9.5px;padding:1px 6px}
     .id-badge{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;font-size:11px;font-weight:700;color:var(--steel)}
@@ -46,12 +47,12 @@
     .split-left{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease}
     .split-left.collapsed{width:0;border-right:none}
     .split-left.collapsed .split-left-search,.split-left.collapsed .split-left-list,.split-left.collapsed .split-left-footer,.split-left.collapsed .split-left-head,.split-left.collapsed #skSuppliers,.split-left.collapsed #emptySuppliers{display:none}
-    .split-expand-btn{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:48px;background:var(--navy);color:#fff;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:13px;align-items:center;justify-content:center;z-index:10;transition:background .15s}
+    .split-expand-btn{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:48px;background:var(--navy);color:var(--card);border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:13px;align-items:center;justify-content:center;z-index:10;transition:background .15s}
     .split-expand-btn:hover{background:var(--primary)}
     .split-expand-btn.visible{display:flex}
     .split-left-head{background:var(--neutral-50);padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
     .split-collapse-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border-dk);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:11px;transition:all .12s;flex-shrink:0}
-    .split-collapse-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .split-collapse-btn:hover{background:var(--navy);color:var(--card);border-color:var(--navy)}
     .split-left-search{padding:4px 8px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
     .split-left-search .row{display:flex;gap:3px;align-items:center}
     .search-inp{flex:1;height:24px;border:1.5px solid var(--border-dk);border-radius:4px;padding:0 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
@@ -70,6 +71,7 @@
     .page-nav button{width:20px;height:20px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--label);transition:all .1s}
     .page-nav button:hover{border-color:var(--navy);background:var(--bg)}
     .page-nav input{width:24px;height:20px;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:10px;font-family:inherit}
+    .pg-input{width:28px}
 
     /* SPLIT RIGHT — detail */
     .split-right{flex:1;overflow:hidden;background:var(--card);display:flex;flex-direction:column}
@@ -80,7 +82,8 @@
     /* TAB OVERRIDES (denser for supplier detail) */
     .tab-bar{padding:0 10px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);overflow-x:auto}
     .tab{padding:5px 10px;font-size:11px;white-space:nowrap}
-    .tab-count{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:var(--radius-lg);margin-left:4px}
+    .tab.active{border-bottom:2px solid var(--primary);font-weight:600;color:var(--primary);margin-bottom:-1px}
+    .tab-count{background:var(--navy);color:var(--card);font-size:9px;font-weight:700;padding:1px 5px;border-radius:var(--radius-lg);margin-left:4px}
     .tab-content.show{flex:1;overflow:hidden}
 
     /* DETAIL BODY */
@@ -91,7 +94,7 @@
     .detail-col-left{width:280px;flex-shrink:0;overflow-y:auto;padding:8px 10px;border-right:1px solid var(--border)}
     .detail-col-right{flex:1;overflow-y:auto;padding:8px 10px}
     .field-section{margin-bottom:8px}
-    .field-section-title{font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;padding-bottom:3px;border-bottom:1px solid var(--border);margin-bottom:5px}
+    .field-section-title{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding-bottom:3px;border-bottom:1px solid var(--border);margin-bottom:5px}
 
     /* ROLE CHIPS */
     .role-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
@@ -169,7 +172,7 @@
       </div>
       <div style="flex:1"></div>
       <button class="btn btn-navy" style="gap:4px" onclick="document.getElementById('addSupplierModal').classList.add('open')">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Supplier
       </button>
     </div>
@@ -199,8 +202,8 @@
         <div class="split-left-search">
           <div class="row">
             <input class="search-inp" placeholder="Search suppliers..." id="suppSearch"/>
-            <button class="btn-xs btn-navy" style="background:var(--navy);color:#fff">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <button class="btn-xs btn-navy">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </button>
             <button class="btn-xs" style="background:var(--card);border:1px solid var(--border-dk);color:var(--label)">Clear</button>
           </div>
@@ -222,7 +225,7 @@
           <span>of <span id="totalCount">0</span></span>
           <div class="page-nav">
             <button title="Previous" onclick="prevPage()">&#9664;</button>
-            <input type="number" value="1" min="1" id="pageInput" onchange="goToPage(this.value)" style="width:28px"/>
+            <input type="number" value="1" min="1" id="pageInput" onchange="goToPage(this.value)" class="pg-input"/>
             <span style="font-size:9px;color:var(--muted)" id="totalPages">/1</span>
             <button title="Next" onclick="nextPage()">&#9654;</button>
           </div>
@@ -250,11 +253,11 @@
           </div>
           <div style="flex:1"></div>
           <span class="badge b-active" style="font-size:10px" id="detailStatusBadge">Active</span>
-          <button class="btn btn-navy" style="height:24px;font-size:10px;gap:3px" title="Save Supplier (Ctrl+S)" id="btnSave" onclick="saveSupplier()">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+          <button class="btn btn-navy btn-sm" title="Save Supplier (Ctrl+S)" id="btnSave" onclick="saveSupplier()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
             Save
           </button>
-          <button class="btn btn-danger" style="height:24px;font-size:10px;gap:3px;padding:0 8px" onclick="confirmDeleteSupplier()" title="Delete Supplier" id="btnDelete">
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteSupplier()" title="Delete Supplier" id="btnDelete">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -557,8 +560,8 @@
             <!-- Doc Header -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--neutral-50);border-bottom:1px solid var(--border)">
               <span style="font-size:10.5px;font-weight:700;color:var(--navy)">Uploaded Documents</span>
-              <button class="btn btn-navy" style="height:24px;font-size:10px;gap:3px" onclick="document.getElementById('addDocModal').classList.add('open')">
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <button class="btn btn-navy btn-sm" onclick="document.getElementById('addDocModal').classList.add('open')">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Document
               </button>
             </div>
@@ -691,7 +694,7 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
       <button class="btn btn-navy" onclick="addNewSupplier()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
         Save Supplier
       </button>
     </div>
@@ -729,7 +732,7 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('open')">Cancel</button>
       <button class="btn btn-navy" onclick="this.closest('.modal-overlay').classList.remove('open')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/></svg>
         Save Document
       </button>
     </div>
