@@ -1,0 +1,171 @@
+================================================================
+NASHVILLE MERGE — FULL MIGRATION v2
+Started: 2026-04-01 20:12:38
+Server: VPOPS  Database: WinScopeNet
+================================================================
+ 
+>>> PHASE 1: BUILD CROSSWALK TABLES
+    (Run via Node.js — see nashville-repair-migrate.js phase1)
+    SKIPPING — will be run separately before this script
+ 
+>>> PHASE 2: IMPORT NASHVILLE REPAIRS
+    (Run via Node.js — see nashville-repair-migrate.js phase2)
+    SKIPPING — will be run separately before this script
+ 
+>>> PHASE 3: MIGRATE CHILD TABLES
+    Started: 2026-04-01 20:12:38
+(14 rows affected)
+  Skipped repair keys: 14
+  tblStatusTran staged: 333458
+  tblStatusTran inserted: 0
+  tblRepairItemTran staged: 155551
+  tblRepairItemTran inserted: 0
+  tblRepairStatusLog staged: 85080
+  tblRepairStatusLog inserted: 0
+  tblShipExecInvoiceChargeRepairs staged: 276535
+  tblShipExecInvoiceChargeRepairs inserted: 276535
+  tblShippingChargeRepairs staged: 171672
+  tblShippingChargeRepairs inserted: 0
+  tblPointsOps staged: 47113
+  tblPointsOps inserted: 0
+  tblTasks staged: 0
+  tblTasks inserted: 0
+  tblPointsTechs staged: 37625
+  tblPointsTechs inserted: 0
+  tblInvoice staged: 36952
+  tblInvoice inserted: 0
+  tblBlankInspectionSignOffLog staged: 30942
+  tblBlankInspectionSignOffLog inserted: 0
+  tblRepairRevenueAndExpensesContract staged: 14115
+  tblRepairRevenueAndExpensesContract inserted: 14115
+  tblTrackingNumbersInAudit staged: 14909
+  tblTrackingNumbersInAudit inserted: 14909
+  tblDashScopesInSave staged: 13982
+  tblDashScopesInSave inserted: 13982
+  tblLoanerTran staged: 5361
+  tblLoanerTran inserted: 0
+  tblContractRepairsSaved staged: 3258
+  tblContractRepairsSaved inserted: 3258
+  tblRepairFailureCodes staged: 3348
+  tblRepairFailureCodes inserted: 3348
+  tblAmendRepairComments staged: 2979
+  tblAmendRepairComments inserted: 0
+  tblRepairUpdateSlips staged: 1998
+  tblRepairUpdateSlips inserted: 0
+  tblInvoiceVoid staged: 1675
+  tblInvoiceVoid inserted: 1675
+  tblRepairInspection staged: 1568
+  tblRepairInspection inserted: 0
+  tblRepairInstrumentModels staged: 1213
+  tblRepairInstrumentModels inserted: 0
+  tblRepairRevenueAndExpenses staged: 853
+  tblRepairRevenueAndExpenses inserted: 853
+  tblRepairDefectTracking staged: 480
+  tblRepairDefectTracking inserted: 480
+  tblRepairDeleteAudit staged: 194
+  tblRepairDeleteAudit inserted: 194
+  tblISOComplaint staged: 92
+  tblISOComplaint inserted: 0
+ 
+  PHASE 3 COMPLETE: 2026-04-01 20:14:11
+ 
+>>> PHASE 4: FIX INVENTORY REPAIR KEYS
+(226,313 rows affected)
+  tblInventoryTran: 226313
+(13 rows affected)
+  tblLotNumberAdjustments: 13
+  PHASE 4 COMPLETE: 2026-04-01 20:14:31
+ 
+>>> STEP 4: INVENTORYSIZEBUILD
+(2,825 rows affected)
+(2,825 rows affected)
+(1,449 rows affected)
+(2,205 rows affected)
+(2,825 rows affected)
+  tblInventorySizeBuild: 0
+(31,346 rows affected)
+(31,346 rows affected)
+(31,346 rows affected)
+(17,885 rows affected)
+(31,346 rows affected)
+  tblInventorySizeBuildItems: 0
+  STEP 4 COMPLETE: 2026-04-01 20:14:34
+ 
+>>> STEP 6: FIX TRIGGERS
+  trRepairUpd fixed
+  trInvoiceUpdateCustomerSince fixed
+  trPortalTrackingNumbersInsert fixed
+  STEP 6 COMPLETE: 2026-04-01 20:14:34
+ 
+>>> STEP 5: FIX STORED PROCEDURES
+  Procs fixed: 183, remaining: 14
+  STEP 5 COMPLETE: 2026-04-01 20:15:00
+ 
+>>> VERIFICATION
+(27,065 rows affected)
+  _xwalk_Repair: 27065 rows
+ 
+  --- Row Counts ---
+tbl       south       north      
+--------- ----------- -----------
+tblRepair       27079       27065
+
+(1 row affected)
+tbl           south       north      
+------------- ----------- -----------
+tblStatusTran      333458      333458
+
+(1 row affected)
+tbl               south       north      
+----------------- ----------- -----------
+tblRepairItemTran      155678      155551
+
+(1 row affected)
+tbl        south       north      
+---------- ----------- -----------
+tblInvoice       36966       36952
+
+(1 row affected)
+tbl                             south       north      
+------------------------------- ----------- -----------
+tblShipExecInvoiceChargeRepairs      276535      276535
+
+(1 row affected)
+tbl                      south       north      
+------------------------ ----------- -----------
+tblShippingChargeRepairs      171672      171672
+
+(1 row affected)
+ 
+  --- FK Integrity ---
+chk          cnt        
+------------ -----------
+Dept orphans           0
+
+(1 row affected)
+chk           cnt        
+------------- -----------
+Scope orphans           0
+
+(1 row affected)
+chk          cnt        
+------------ -----------
+Tech orphans           0
+
+(1 row affected)
+ 
+  --- Trigger Test ---
+(1 row affected)
+  trRepairUpd on South repair: PASS
+ 
+  --- Remaining Nashville References ---
+remaining_procs
+---------------
+              3
+
+(1 row affected)
+ 
+================================================================
+NASHVILLE MERGE COMPLETE
+Finished: 2026-04-01 20:15:11
+================================================================
