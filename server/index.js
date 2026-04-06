@@ -113,10 +113,41 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
+// ── One-time startup migrations ──────────────────────────
+async function runStartupMigrations() {
+  // Ensure tracking table exists
+  await db.query(`
+    IF OBJECT_ID('_migrations','U') IS NULL
+      CREATE TABLE _migrations (name NVARCHAR(200) PRIMARY KEY, dtRun DATETIME DEFAULT GETDATE())`);
+
+  const migrations = [
+    {
+      name: 'step6-fix-svc-location-mismatch',
+      sql: `
+        UPDATE tblRepair SET lServiceLocationKey = 2
+        WHERE sWorkOrderNumber LIKE 'S[RICKV]%' AND lServiceLocationKey = 1;
+        UPDATE tblRepair SET lServiceLocationKey = 1
+        WHERE sWorkOrderNumber LIKE 'N[RICKV]%' AND lServiceLocationKey = 2;`
+    }
+  ];
+
+  for (const m of migrations) {
+    const done = await db.queryOne(
+      `SELECT 1 AS ok FROM _migrations WHERE name = @name`, { name: m.name });
+    if (done) continue;
+    console.log(`[Migration] Running: ${m.name}`);
+    await db.query(m.sql);
+    await db.query(
+      `INSERT INTO _migrations (name) VALUES (@name)`, { name: m.name });
+    console.log(`[Migration] Done: ${m.name}`);
+  }
+}
+
 // Start
 (async () => {
   try {
     await db.connect();
+    await runStartupMigrations();
     app.listen(PORT, () => {
       console.log(`\n\x1b[36m[TSI Server]\x1b[0m http://localhost:${PORT}/api`);
       console.log(`\x1b[36m[TSI Server]\x1b[0m Add ?api=local to any page URL to use this server\n`);

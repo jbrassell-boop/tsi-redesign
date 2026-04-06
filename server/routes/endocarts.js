@@ -7,6 +7,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Derive service location from WO prefix: S-prefix → Nashville (2), N-prefix → PA (1)
+function svcKeyFromWO(wo) {
+  if (typeof wo === 'string' && /^S[RICKV]/i.test(wo)) return 2;
+  return 1;
+}
+
 // ── Shared SELECT for EndoCart list/detail ──
 // Simplified vs REPAIR_SELECT — carts have no scope/tech/contract/angles
 const CART_SELECT = `
@@ -70,7 +76,7 @@ router.post('/EndoCart/Add', async (req, res, next) => {
         deptKey:     parseInt(b.lDepartmentKey) || 0,
         wo:          b.sWorkOrderNumber || '',
         dateIn:      b.dtDateIn ? new Date(b.dtDateIn) : null,
-        svcKey:      parseInt(b.lServiceLocationKey) || 1,
+        svcKey:      parseInt(b.lServiceLocationKey) || svcKeyFromWO(b.sWorkOrderNumber),
         complaint:   b.sComplaintDesc || '',
         salesRepKey: parseInt(b.lSalesRepKey) || 0
       });

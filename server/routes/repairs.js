@@ -5,6 +5,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Derive service location from WO prefix: S-prefix → Nashville (2), N-prefix → PA (1)
+function svcKeyFromWO(wo) {
+  if (typeof wo === 'string' && /^S[RICKV]/i.test(wo)) return 2;
+  return 1;
+}
+
 // ── Shared SELECT for repair list/detail (JOIN) ──
 // Fixed columns vs actual DB schema:
 //   tblRepair: NO lRepairLevelKey, lClientKey, lPatientSafetyLevelKey, sRigidOrFlexible, dblAmtTax, sIncludesCapYN, sIncludesWaterResCapYN
@@ -145,7 +151,7 @@ router.post('/Repair/AddRepair', async (req, res, next) => {
         deptKey: b.plDepartmentKey || b.lDepartmentKey || 0,
         scopeKey: b.plScopeKey || b.lScopeKey || 0,
         wo: b.psWorkOrderNumber || b.sWorkOrderNumber || '',
-        svcKey: b.plServiceLocationKey || b.lServiceLocationKey || 1,
+        svcKey: b.plServiceLocationKey || b.lServiceLocationKey || svcKeyFromWO(b.psWorkOrderNumber || b.sWorkOrderNumber),
         complaint: b.psComplaintDesc || b.sComplaintDesc || '',
         repKey: b.plSalesRepKey || b.lSalesRepKey || 0,
         pricingKey: b.plPricingCategoryKey || b.lPricingCategoryKey || 0,
@@ -312,7 +318,7 @@ router.post('/InstrumentRepair/Add', async (req, res, next) => {
       {
         deptKey: b.lDepartmentKey || 0,
         wo: b.sWorkOrderNumber || '',
-        svcKey: b.lServiceLocationKey || 1,
+        svcKey: b.lServiceLocationKey || svcKeyFromWO(b.sWorkOrderNumber),
         po: b.sPurchaseOrder || '',
         notes: b.sComplaintDesc || ''
       });
