@@ -2533,6 +2533,11 @@ document.querySelectorAll('.wf-drawer').forEach(function(el) {
 
 function reloadRepairs() { initPage(); }
 
+/* ── Location switch — called by shell.js onchange ── */
+function changeServiceLocation() {
+  initPage();
+}
+
 // ── Repair List Panel — filter chips + compact table ──
 var _repairListData = [];
 
@@ -3374,11 +3379,15 @@ function wizSubmit() {
     (async () => {
       try {
         const payload = {
+          psWorkOrderNumber: _currentRepair.sWorkOrderNumber,
           plScopeKey: scopeKey,
           plDepartmentKey: parseInt(deptKey),
           plServiceLocationKey: parseInt(document.getElementById('svcLocation').value) || 1,
-          psComplaintDesc: '',
-          plRepairStatusID: 1
+          psComplaintDesc: complaint,
+          plRepairStatusID: 1,
+          plSalesRepKey: deptSalesRep,
+          plPricingCategoryKey: deptPricing,
+          plPaymentTermsKey: deptPayTerms
         };
         const result = await API.addRepair(payload);
         if (result && result.lRepairKey) {
